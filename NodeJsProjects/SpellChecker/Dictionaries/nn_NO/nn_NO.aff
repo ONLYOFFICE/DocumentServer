@@ -1,0 +1,511 @@
+﻿SET UTF-8
+
+# This is generated from
+# make words.nn; perl -ne 'print join "\n", split //' words.nn | \
+# sort | uniq -c | sort -rn | awk '{print $2}' | tr -d "\n";echo
+TRY earnstilkogdmupvfbjøyhåæcSzBéwêHATMKFGLNREVxôODòPèCJIUWqØÅóYQçZüäXÄþë
+
+COMPOUNDFLAG z
+
+COMPOUNDMIN 4
+
+
+PFX a Y 1
+PFX a   0     u           .
+
+PFX b Y 1
+PFX b   0     for         .
+
+PFX c Y 1
+PFX c   0     gjen        .
+
+PFX d Y 1
+PFX d   0     hovud       .
+
+PFX e Y 1
+PFX e   0     mis         .
+
+PFX f Y 1
+PFX f   0     sam         .
+
+PFX g Y 4
+PFX g   0     in          [^blmpr]
+PFX g   0     il          l
+PFX g   0     im          [bmp]
+PFX g   0     ir          r
+
+PFX h Y 1
+PFX h   0     etter       .
+
+PFX i Y 1
+PFX i   0     til         .
+
+PFX j Y 1
+PFX j   0     over        .
+
+PFX k Y 1
+PFX k   0     under       .
+
+PFX l Y 1
+PFX l   0     på          .
+
+PFX m Y 1
+PFX m   0     av          .
+
+PFX n Y 1
+PFX n   0     inn         .
+
+PFX o Y 1
+PFX o   0     ut          .
+
+PFX p Y 1
+PFX p   0     opp         .
+
+PFX q Y 1
+PFX q   0     ned         .
+
+PFX r Y 1
+PFX r   0     om          .
+
+PFX s Y 1
+PFX s   0     saman       .
+
+SFX t Y 4
+SFX t   e     ing         e
+SFX t   e     inga        e
+SFX t   0     ing         [aiouyøå]
+SFX t   0     inga        [aiouyøå]
+
+SFX u N 6
+SFX u   0     leg         [^lm]
+SFX u   0     lege        [^lm]
+SFX u   0     eg          l
+SFX u   0     ege         l
+SFX u   0     meleg       m
+SFX u   0     melege      m
+
+SFX x Y 2
+SFX x   0     skap        [^e]
+SFX x   e     skap        e
+
+SFX y Y 8
+SFX y   0     itet        [aeiouyø][dlmnrsv]
+SFX y   0     iteten      [aeiouyø][dlmnrsv]
+SFX y   ell   alitet      ell
+SFX y   ell   aliteten    ell
+SFX y   ær    aritet      ær
+SFX y   ær    ariteten    ær
+SFX y   e     ning        e
+SFX y   e     ningen      e
+
+SFX A Y 13
+SFX A   0     n           e
+SFX A   é     een         é
+SFX A   0     en          [^eém]
+SFX A   0     men         [^e][dk]am
+SFX A   0     en          [e][dk]am
+SFX A   0     men         [^k][lr]em
+SFX A   0     en          krem
+SFX A   0     en          [^r]em
+SFX A   0     en          [^aeouø]m
+SFX A   0     men         [bdgv]om
+SFX A   0     en          [^bglv]om
+SFX A   0     men         [skl]um
+SFX A   0     en          [^skl]um
+
+SFX B Y 17
+SFX B   0     t           e
+SFX B   é     eet         é
+SFX B   er    ret         [^drt][dt]er
+SFX B   el    let         [fgksv]el
+SFX B   el    let         mpel
+SFX B   tel   let         ttel
+SFX B   0     et          [^eém]
+SFX B   0     et          [^aeou]m
+SFX B   0     met         [^e]am
+SFX B   0     et          eam
+SFX B   0     met         [jv]em
+SFX B   0     et          [^jlv]em
+SFX B   0     et          lem
+SFX B   0     met         [rk]om
+SFX B   0     et          [^rk]om
+SFX B   0     et          [^ei]um
+SFX B   um    et          [ei]um
+
+SFX C Y 32
+SFX C   e     a           e
+SFX C   é     ea          é
+SFX C   0     a           [^eélmrt]
+SFX C   0     a           [^e]t
+SFX C   et    a           et
+SFX C   0     a           [^e][lr]
+SFX C   el    la          [^dfkmnpstj]el
+SFX C   0     a           jel
+SFX C   del   la          ddel
+SFX C   0     a           [^d]del
+SFX C   fel   la          ffel
+SFX C   kel   la          kkel
+SFX C   el    la          [^k]kel
+SFX C   mel   la          mmel
+SFX C   0     a           [^m]mel
+SFX C   0     a           nel
+SFX C   pel   la          ppel
+SFX C   0     a           [^p]pel
+SFX C   sel   la          ssel
+SFX C   el    la          [^s]sel
+SFX C   tel   la          ttel
+SFX C   el    la          [^t]tel
+SFX C   er    ra          [^fjm]er
+SFX C   0     a           [fjm]er
+SFX C   0     a           [^aeou]m
+SFX C   0     ma          am
+SFX C   0     ma          jem
+SFX C   0     a           [^j]em
+SFX C   0     ma          [rv]om
+SFX C   0     a           [^rv]om
+SFX C   0     a           [^eir]um
+SFX C   um    a           [eir]um
+
+SFX D Y 35
+SFX D   e     ar          e
+SFX D   é     ear         é
+SFX D   0     ar          [^eélmr]
+SFX D   0     ar          [^e][lr]
+SFX D   el    lar         [^dfkmnpstj]el
+SFX D   0     ar          jel
+SFX D   del   lar         ddel
+SFX D   0     ar          [^d]del
+SFX D   fel   lar         ffel
+SFX D   kel   lar         kkel
+SFX D   el    lar         [^k]kel
+SFX D   mel   lar         mmel
+SFX D   0     ar          [^m]mel
+SFX D   0     ar          nel
+SFX D   pel   lar         ppel
+SFX D   el    lar         [^p]pel
+SFX D   sel   lar         ssel
+SFX D   el    lar         [^s]sel
+SFX D   tel   lar         ttel
+SFX D   el    lar         [^t]tel
+SFX D   ar    rar         [^fmk]er
+SFX D   er    rar         ker
+SFX D   0     ar          [^aeouø]m
+SFX D   0     mar         dlem
+SFX D   0     ar          blem
+SFX D   0     ar          [^lr]em
+SFX D   0     mar         [^kbd][lr]em
+SFX D   0     ar          krem
+SFX D   0     mar         [aø]m
+SFX D   0     mar         [bdg]om
+SFX D   0     ar          [^s][bdgl]om
+SFX D   0     ar          [^bdgl]om
+SFX D   0     ar          [^eiks]um
+SFX D   0     mar         [ks]um
+SFX D   um    ar          [ei]um
+
+SFX E Y 37
+SFX E   0     r           e
+SFX E   é     eer         é
+SFX E   0     er          [^eélmr]
+SFX E   0     er          [^e][lr]
+SFX E   el    ler         [^dfkmnpstj]el
+SFX E   0     er          jel
+SFX E   del   ler         ddel
+SFX E   0     er          [^d]del
+SFX E   fel   ler         ffel
+SFX E   kel   ler         kkel
+SFX E   el    ler         [^k]kel
+SFX E   mel   ler         mmel
+SFX E   0     er          [^m]mel
+SFX E   0     er          nel
+SFX E   pel   ler         ppel
+SFX E   el    ler         [^p]pel
+SFX E   sel   ler         ssel
+SFX E   el    ler         [^s]sel
+SFX E   tel   ler         ttel
+SFX E   el    ler         [^t]tel
+SFX E   er    re          [^fmk]er
+SFX E   fer   re          fer
+SFX E   mer   re          mer
+SFX E   ker   re          ker
+SFX E   0     er          [^aeouø]m
+SFX E   0     mer         dlem
+SFX E   0     er          [bd]lem
+SFX E   0     er          [^lr]em
+SFX E   0     mer         [^kbd][lr]em
+SFX E   0     er          krem
+SFX E   0     mer         [aø]m
+SFX E   0     mer         [bdgl]om
+SFX E   0     er          [^s][bdgl]om
+SFX E   0     er          [^bdgl]om
+SFX E   0     er          [^eiks]um
+SFX E   0     mer         [ks]um
+SFX E   um    er          [ei]um
+
+SFX F Y 37
+SFX F   e     ane         e
+SFX F   é     eane        é
+SFX F   0     ane         [^eélmr]
+SFX F   0     ane         [^e][lr]
+SFX F   el    lane        [^dfkmnpstj]el
+SFX F   0     ane         jel
+SFX F   del   lane        ddel
+SFX F   0     ane         [^d]del
+SFX F   fel   lane        ffel
+SFX F   kel   lane        kkel
+SFX F   el    lane        [^k]kel
+SFX F   mel   lane        mmel
+SFX F   0     ane         [^m]mel
+SFX F   0     ane         nel
+SFX F   pel   lane        ppel
+SFX F   el    lane        [^p]pel
+SFX F   sel   lane        ssel
+SFX F   el    lane        [^s]sel
+SFX F   tel   lane        ttel
+SFX F   el    lane        [^t]tel
+SFX F   er    rane        [^fm]er
+SFX F   fer   rane        fer
+SFX F   mer   rane        mer
+SFX F   0     ane         [^aeouø]m
+SFX F   0     mane        [aø]m
+SFX F   0     mane        jem
+SFX F   0     mane        dlem
+SFX F   0     ane         blem
+SFX F   0     mane        [^kbd][lr]em
+SFX F   0     ane         krem
+SFX F   0     ane         [^jlr]em
+SFX F   0     mane        [bdgr]om
+SFX F   0     ane         [^s][bdgl]om
+SFX F   0     ane         [^bdglr]om
+SFX F   0     ane         [^eiks]um
+SFX F   0     mane        [ks]um
+SFX F   um    ane         [ei]um
+
+SFX G Y 37
+SFX G   0     ne          e
+SFX G   é     eene        é
+SFX G   0     ene         [^eélmr]
+SFX G   0     ene         [^e][lr]
+SFX G   el    lene        [^dfkmnpstj]el
+SFX G   0     ene         jel
+SFX G   del   lene        ddel
+SFX G   0     ene         [^d]del
+SFX G   fel   lene        ffel
+SFX G   kel   lene        kkel
+SFX G   el    lene        [^k]kel
+SFX G   mel   lene        mmel
+SFX G   0     ene         [^m]mel
+SFX G   0     ene         nel
+SFX G   pel   lene        ppel
+SFX G   el    lene        [^p]pel
+SFX G   sel   lene        ssel
+SFX G   el    lene        [^s]sel
+SFX G   tel   lene        ttel
+SFX G   el    lene        [^t]tel
+SFX G   er    rene        [^fm]er
+SFX G   fer   rene        fer
+SFX G   mer   rene        mer
+SFX G   0     ene         [^aeouø]m
+SFX G   0     mene        [aø]m
+SFX G   0     mene        jem
+SFX G   0     mene        dlem
+SFX G   0     ene         [bd]lem
+SFX G   0     mene        [^kbd][lr]em
+SFX G   0     ene         krem
+SFX G   0     ene         [^jlr]em
+SFX G   0     mene        [bdglr]om
+SFX G   0     ene         [^s][bdgl]om
+SFX G   0     ene         [^bdglr]om
+SFX G   0     ene         [^eiks]um
+SFX G   0     mene        [ks]um
+SFX G   um    ene         [ei]um
+
+SFX I Y 13
+SFX I   0     e           er
+SFX I   0     ne          er
+SFX I   0     ne          [æø]r
+SFX I   0     nes         [æø]r
+SFX I   en    na          en
+SFX I   e     ne          ye
+SFX I   e     nene        ye
+SFX I   ive   ev          ive
+SFX I   ive   evet        ive
+SFX I   ike   ek          ike
+SFX I   ike   eket        ike
+SFX I   0     et          um
+SFX I   0     ets         um
+
+SFX J Y 1
+SFX J   0     s           [^s]
+
+SFX K Y 1
+SFX K   e     ast         e
+
+SFX L Y 2
+SFX L   0     ar          er
+SFX L   0     ane         er
+
+SFX M Y 19
+SFX M   e     o           e
+SFX M   ok    øker        ok
+SFX M   ok    økene       ok
+SFX M   or    ødrer       or
+SFX M   or    ødrene      or
+SFX M   aft   efter       aft
+SFX M   aft   eftene      aft
+SFX M   ot    øter        [bn]ot
+SFX M   ot    øtene       [bn]ot
+SFX M   ot    øtter       [fr]ot
+SFX M   ot    øttene      [fr]ot
+SFX M   ann   enn         ann
+SFX M   ann   ennene      ann
+SFX M   ang   enger       ang
+SFX M   ang   engene      ang
+SFX M   er    ene         er
+SFX M   ar    ane         ar
+SFX M   å     od          å
+SFX M   a     ok          ta
+
+SFX O Y 9
+SFX O   e     te          [^t]e
+SFX O   e     t           [^t]e
+SFX O   0     a           atter
+SFX O   atter øtre        atter
+SFX O   atter øtrer       atter
+SFX O   atter øtrene      atter
+SFX O   a     og          a
+SFX O   0     dd          a
+SFX O   0     tt          a
+
+SFX P Y 2
+SFX P   0     dde         [aeiouyøå]
+SFX P   0     dd          [aeiouyøå]
+
+SFX Q Y 2
+SFX Q   e     de          e
+SFX Q   e     d           e
+
+SFX R Y 4
+SFX R   e     0           [^m]e
+SFX R   e     0           [^m]me
+SFX R   me    0           mme
+SFX R   ere   ér          ere
+
+SFX S Y 2
+SFX S   e     ande        e
+SFX S   0     ande        [aiouyæøå]
+
+SFX T Y 3
+SFX T   0     t           e
+SFX T   0     te          e
+SFX T   0     e           et
+
+SFX U Y 11
+SFX U   t     n           et
+SFX U   et    ne          [^m]et
+SFX U   met   ne          met
+SFX U   ele   al          ele
+SFX U   ele   ålet        ele
+SFX U   øre   orde        ere
+SFX U   øre   ort         ere
+SFX U   egge  agt         egge
+SFX U   egge  agte        egge
+SFX U   um    a           um
+SFX U   gi    av          gi
+
+SFX V Y 14
+SFX V   0     e           [^lmneo]
+SFX V   0     e           [^e][ln]
+SFX V   el    le          [^m]el
+SFX V   fen   ne          fen
+SFX V   mel   le          mel
+SFX V   en    ne          [^fkls]en
+SFX V   sen   ne          ssen
+SFX V   en    ne          [^s]sen
+SFX V   ken   ne          kken
+SFX V   en    ne          [^k]ken
+SFX V   len   ne          llen
+SFX V   en    ne          [^l]len
+SFX V   0     me          [aeiouø]m
+SFX V   0     e           [^aeiouø]m
+
+SFX W Y 13
+SFX W   0     t           [^fklntiaøå]
+SFX W   0     t           [^f]f
+SFX W   f     t           ff
+SFX W   0     t           [^k]k
+SFX W   k     t           kk
+SFX W   0     t           [^l]l
+SFX W   0     t           ull
+SFX W   l     t           [^u]ll
+SFX W   0     t           [^n]n
+SFX W   n     t           nn
+SFX W   0     t           ei
+SFX W   0     tt          [^e]i
+SFX W   0     tt          [aøå]
+
+SFX X Y 22
+SFX X   0     are         [^e][^me]
+SFX X   0     are         [eo][^lrnem]
+SFX X   el    lare        el
+SFX X   er    rare        er
+SFX X   en    nare        en
+SFX X   0     mare        [aou]m
+SFX X   0     ast         [^e][^mge]
+SFX X   0     aste        [^e][^mge]
+SFX X   0     ast         [^e][oi][mge]
+SFX X   0     aste        [^e][oi][mge]
+SFX X   0     ast         e[oi][mge]
+SFX X   0     aste        e[oi][mge]
+SFX X   0     ast         e[^lrne]
+SFX X   0     aste        e[^lrne]
+SFX X   el    last        el
+SFX X   el    laste       el
+SFX X   er    rast        er
+SFX X   er    raste       er
+SFX X   en    nast        en
+SFX X   en    naste       en
+SFX X   0     mast        [au]m
+SFX X   0     maste       [au]m
+
+SFX Y Y 4
+SFX Y   e     ingar       e
+SFX Y   e     ingane      e
+SFX Y   0     ingar       [aiouyøå]
+SFX Y   0     ingane      [aiouyøå]
+
+SFX Z N 5
+SFX Z   0     elig        [^e]
+SFX Z   0     elige       [^e]
+SFX Z   e     bar         e
+SFX Z   e     bart        e
+SFX Z   e     bare        e
+
+# SFX \[ N 2
+# SFX \[   0     messig      .
+# SFX \[   0     messige     .
+
+# SFX \] N 2
+# SFX \]   0     smessig     .
+# SFX \]   0     smessige    .
+
+# SFX \^ N 2
+# SFX \^   0     aktig       .
+# SFX \^   0     aktige      .
+
+# SFX ~\\ N 1
+# SFX ~\\   0     s           [^s]
+
+# SFX ~\_ N 7
+# SFX ~\_   e     ings        e
+# SFX ~\_   0     e           [dgknprstuv]
+# SFX ~\_   um    e           um
+# SFX ~\_   0     e           [lr]m
+# SFX ~\_   el    le          gel
+# SFX ~\_   0     e           [^g]el
+# SFX ~\_   0     e           [^e]l
+
+# SFX ~\` N 2
+# SFX ~\`   e     nings       e
+# SFX ~\`   zyzyzy 0           zyzyzy
+

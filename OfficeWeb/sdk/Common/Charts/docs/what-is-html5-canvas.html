@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>A short description of what HTML5 canvas is</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas charts what " />
+    <meta name="description" content="A short description of the HTML5 canvas tag" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: What is HTML5 canvas?" />
+    <meta property="og:description" content="A brief description and a few examples of HTML5 canvas " />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.tooltips.js" ></script>
+    <script src="../libraries/OfficeExcel.bar.js" ></script>
+    
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        What is HTML5 canvas?
+    </div>
+
+    <h1>What <span>is HTML5 canvas?</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+    
+    <ul>
+        <li><a href="#introduction">Introduction</a></li>
+        <li><a href="#history">History</a></li>
+        <li><a href="#example">Example</a></li>
+        <li><a href="#compare">Canvas compared to SVG</a></li>
+        <li><a href="#support">Browser support for HTML5 canvas</a></li>
+    </ul>
+    
+    <a name="introduction"></a>
+    <h2>Introduction</h2>
+    
+        <p>
+            HTML5 canvas is a new HTML tag (<i>&lt;canvas&gt;</i>) which is part of the forthcoming HTML5 standard. It allows bitmap
+            drawing which is controlled using Javascript, and is what the OfficeExcel libraries use to draw the charts. You could
+            liken it to a piece of paper which is part of your HTML page, on to which you can draw. Because you use Javascript to
+            draw on the canvas it becomes part of your page and allows interaction very easily.
+        </p>
+        
+        <p>
+            Canvas uses a "fire and forget" drawing methodology - there is no DOM that is maintained, so if you want to alter something
+            you will probably have to redraw the entire canvas. The lack of a DOM means that canvas is fast to draw on and very
+            responsive - important when you're providing iteractive charts to your users.
+        </p>
+    
+    <a name="history"></a>
+    <h2>History</h2>
+        <p>
+            HTML5 canvas was originally introduced by Apple for use in WebKit (which is used in their Safari browser and Google Chrome).
+            It is now part of the HTML5 specification and supported by all modern web browsers.
+        </p>
+
+    <a name="example"></a>
+    <h2>Example</h2>
+
+        <canvas id="cvs" width="350" height="250" style="border: 1px dashed gray; float: right">[No canvas support]</canvas>
+        <script>
+            window.onload = function ()
+            {
+                canvas  = document.getElementById("cvs");
+                context = canvas.getContext('2d');
+                
+                // Draw the red triangle
+                context.beginPath();
+                    context.strokeStyle = 'black';
+                    context.fillStyle = 'red';
+                    context.moveTo(100, 25);
+                    context.lineTo(150, 100);
+                    context.lineTo(50, 100);
+                    context.lineTo(100, 25);
+                context.stroke();
+                context.fill();
+                
+                // Draw the blue square
+                context.beginPath();
+                    context.fillStyle = 'rgba(0,0,255,0.5)';
+                    context.strokeRect(100, 75, 100,100);
+                    context.fillRect(100, 75, 100,100);
+                context.stroke();
+                context.fill();
+                
+                // Draw the yellow circle
+                context.beginPath();
+                    context.globalAlpha = 0.5;
+                    context.fillStyle = 'yellow';
+                    context.arc(200,175,50,0,2 * Math.PI, 0);
+                context.stroke();
+                context.fill();
+            }
+        </script>
+
+        <p>
+            The example to the right is a very simple case of drawing a few primitives on the canvas. The dotted border is
+            provided by CSS to illustrate the drawing area.
+        </p>
+        
+        <p>
+            The &lt;canvas&gt; tag itself is defined with just a width/height/id attribute. The one here also has a style attribute
+            to make it more evident in the page. The HTML used is shown below:
+        </p>
+        
+        <br clear="all" />
+        
+        <pre class="code">
+&lt;canvas id="cvs" width="375" height="250"&gt;[No canvas support]&lt;canvas&gt;
+</pre>
+
+    The content in between the tags is not shown if the browser supports canvas, and is if the browser doesn't. This provides
+    for fallback content if the users browser doesn't support canvas.
+
+    <a name="compare"></a>
+    <h2>HTML5 Canvas compared to SVG</h2>
+        <p>
+            HTML5 canvas can be compared (a bit) to SVG - which is a vector based alternative for drawing in HTML pages. SVG is
+            at a more abstract level than canvas and maintains a record of everything drawn, using a DOM. This is then converted
+            to a bitmap when shown. In the above example, if the blue squares coordinates are changed (eg in an animation),
+            then the whole canvas needs to be cleared and redrawn for each frame of that animation.
+        </p>
+        
+        <p>
+            As a result of not having to maintain a DOM though, &lt;canvas&gt; is fast to draw on and display to the browser.
+        </p>
+
+    <a name="support"></a>
+    <h2>Browser support for HTML5 canvas</h2>
+        <p>
+            Modern browsers supporting HTML5 support canvas, including IE9+. Earlier versions of MSIE have some support through
+            compatibility layers provided by Google and Mozilla. One such library - ExCanvas - is provided in the OfficeExcel archive
+            allowing IE7 and 8 to display the graphs, albeit without many of the dynamic features. You can read more on this
+            <a href="msie.html">here</a>.
+        </p>
+        
+    <p align="right">
+        <b>
+            <a href="index.html">Full documentation &raquo;</a>
+        </b>
+    </p>
+
+</body>
+</html>

@@ -1,0 +1,207 @@
+/**
+ * Responsive grid
+ * 
+ * @link http://foundation.zurb.com/docs/grid.php
+ *
+ * @author Zurb http://www.zurb.com/ Original concept
+ * @author David Kaneda http://www.davidkaneda.com/ Further abstraction
+ */
+
+// Note: This can/should be abstracted further, but will require new Sass version
+
+$grid-max-width: 960px !default;
+$grid-min-width: 600px !default;
+$grid-columns: 12 !default;
+$grid-mobile-columns: 4 !default;
+$grid-gutter: 4.4% !default;
+$support-block-grid-nth-child: true !default;
+
+.clearfix {
+  &:before, &:after {
+    content: "";
+    display: table;
+  }
+
+  &:after {
+    clear: both;
+  }
+}
+
+@mixin responsive-grid(
+  $columns: $grid-columns,
+  $gutter: $grid-gutter
+) {
+
+  img, object, embed {
+    max-width: 100%;
+    height: auto;
+  }
+
+  $single: (100% - ($columns - 1) * $gutter) / $columns;
+
+  .column {
+    margin-left: $gutter;
+    float: left;
+    min-height: 1px;
+    position: relative;
+
+    &:first-child {
+      margin-left: 0;
+    }
+    @include box-sizing(border-box);
+  }
+
+  .grid {
+    display: block;
+    overflow: hidden;
+    list-style-type: none;
+    padding: 0;
+
+    > li {
+      float: left;
+      background-color: rgba(#999, .3);
+    }
+  }
+
+  .row {
+      @extend .clearfix;
+      width: 100%;
+      max-width: $grid-max-width;
+      min-width: $grid-min-width;
+      margin: 0 auto;
+      @include box-sizing(border-box);
+
+      .row {
+        min-width: 0;
+      }
+
+  }
+
+  @for $i from 1 through $columns {
+    .columns-#{$i} {
+      @extend .column;
+      width: $single * $i + $gutter * ($i - 1);
+    }
+
+    .phone-#{$i} {
+      @extend .column;
+    }
+
+    // We don't need "offset-by-12"
+    @if $i < $columns {
+      .offset-by-#{$i} {
+        margin-left: $single * $i + $gutter * ($i + 1);
+
+        &:first-child {
+          margin-left: $single * $i + $gutter * $i;
+        }
+      }
+    }
+
+    .push-#{$i} {
+      left: $single * $i + $gutter * $i;
+    }
+
+    .pull-#{$i} {
+      right: $single * $i + $gutter * $i;
+    }
+
+    $flex-gutter: ($gutter * ($i - 1)) / $i;
+    .grid-#{$i} {
+      @extend .grid;
+      margin-left: - $flex-gutter;
+
+      > li {
+        margin-left: $flex-gutter;
+        width: (100% - $flex-gutter * $i) / $i;
+
+        @if $support-block-grid-nth-child {
+          &:nth-child(#{$i}n+1) {
+            clear: left;
+          }
+        }
+      }
+    }
+  } // End loop
+
+  .row .centered {
+    float: none;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+img {
+  -ms-interpolation-mode: bicubic;
+}
+
+#map_canvas img, .map_canvas img {
+  max-width: none !important;
+}
+
+@include responsive-grid;
+
+@media only screen and (max-width: 767px) {
+  .grid.mobile {
+    margin-left: 0%;
+
+    > li {
+      float: none;
+      width: 100%;
+      margin-left: 0%;
+    }
+  }
+  .row {
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
+    margin-right: 0;
+
+    .row .column {
+      padding: 0;
+    }
+  }
+
+  .column {
+    width: auto;
+    float: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  // Loop again for mobile
+
+  .no-margin-left {
+    margin-left: 0;
+  }
+  .no-left {
+    left: 0;
+  }
+  .no-right {
+    right: 0;
+  }
+
+  @for $i from 1 through $grid-columns {
+    .offset-by-#{$i}, .offset-by-#{$i}:first-child {
+      @extend .no-margin-left;
+    }
+    .push-#{$i} {
+      @extend .no-left;
+    }
+    .pull-#{$i} {
+      @extend .no-right;
+    }
+  }
+
+  $mobile-single: (100% - ($grid-mobile-columns - 1) * $grid-gutter) / $grid-mobile-columns;
+
+  @for $i from 1 through $grid-mobile-columns {
+    .phone-#{$i} {
+      float: left;
+      margin-left: $grid-gutter;
+      width: $mobile-single * $i + $grid-gutter * ($i - 1);
+    }
+
+    // @todo phone-push/pull
+  }
+}

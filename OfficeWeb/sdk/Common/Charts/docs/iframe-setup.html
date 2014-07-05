@@ -1,0 +1,65 @@
+<!DOCTYPE html >
+<html>
+<head>
+    <title>An example of using an IFRAME to cover the scrollbars</title>
+</head>
+<body>
+<!DOCTYPE html >
+<html>
+<head>
+    <style>
+        .ModalDialog_dialog {
+            font-family: Georgia, Verdana;
+        }
+    </style>
+</head>
+<body>
+
+    <iframe style="position: fixed; top: 0; left: 0; border: none" id="myIframe" src="iframe.html"></iframe>
+
+    <div id="myCover"></div>
+
+    <script>
+        
+        document.getElementById("myIframe").style.height = '100%';
+        document.getElementById("myIframe").style.width = '100%';
+    </script>
+    
+    <script src="../libraries/OfficeExcel.modaldialog.js" ></script>
+
+    <!-- This is the popup dialog-->
+
+        <div id="loginDialog" style="display: none">
+
+            <b>Please login</b>
+            <p>
+                <table border="0">
+                    <tr>
+                        <td align="right" style="padding-top: 4px">Email</td>
+                        <td><input type="text" size="20" name="email" style="width: 150px" /></td>
+                    </tr>
+
+                    <tr>
+                        <td align="right" style="padding-top: 4px">Password</td>
+                        <td><input type="password" size="20" name="password" style="width: 150px" /></td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="2" align="right">
+                            <input type="reset" value="Cancel" onclick="ModalDialog.Close()">
+                            <input type="submit" name="submit" value="Login &raquo;" onclick="alert('This is just an example'); event.stopPropagation()">
+                        </td>
+                    </tr>
+                </table>
+            </p>
+        </div>
+
+    <!-- End of dialog -->
+</body>
+</html>
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    

@@ -1,0 +1,144 @@
+/**
+ * Shape/Polygon/Star
+ *
+ * @todo check if setting a z-index by default is a good thing
+ * @author Maxime Thirouin maxime.thirouin@gmail.com @MoOx
+ */
+
+// Star (5-points)
+// @author Kit Macallister
+// @link http://kitmacallister.com/2011/css-only-5-point-star/
+@mixin star-5($width: $width, $background-color: transparent, $z-index: 0)
+{
+    margin-top: $width/2;
+    margin-bottom: $width/2;
+    position: relative;
+    display: block;
+    width: 0;
+    height: 0;
+
+    border-right:  $width solid transparent;
+    border-bottom: $width*0.7  solid $background-color;
+    border-left:   $width solid transparent;
+    @include transform(rotate(35deg));
+
+    &:before,
+    &:after
+    {
+        content: '';
+        position: absolute;
+        display: block;
+        width: 0;
+        height: 0;
+        z-index: $z-index - 1;
+    }
+
+    &:before
+    {
+        top: -$width*0.45;
+        left: -$width*0.65;
+        border-bottom: $width*0.8 solid $background-color;
+        border-left: $width*0.3 solid transparent;
+        border-right: $width*0.3 solid transparent;
+        @include transform(rotate(-35deg));
+    }
+
+    &:after
+    {
+        top: $width*0.03;
+        left: -$width*1.05;
+        border-right: $width solid transparent;
+        border-bottom: $width*0.7 solid $background-color;
+        border-left: $width solid transparent;
+        @include transform(rotate(-70deg));
+    }
+}
+
+// Star (6-points)
+@mixin star-6($width: $width, $background-color: transparent, $z-index: 0)
+{
+    width: 0;
+    height: 0;
+    border-left: $width/2 solid transparent;
+    border-right: $width/2 solid transparent;
+    border-bottom: $width solid $background-color;
+    position: relative;
+    z-index: $z-index;
+
+    &:after
+    {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 0;
+        z-index: $z-index - 1;
+
+        border-left: $width/2 solid transparent;
+        border-right: $width/2 solid transparent;
+        border-top: $width solid $background-color;
+        
+        top: $width*0.3;
+        left: - $width /2;
+    }
+}
+
+// @author Alan Johnson
+// @link http://commondream.net/post/8848553728/pure-css-badges
+// @todo maybe improve this to be able to include text without the transform()
+@mixin star-8($width: 8em, $color: #000, $z-index: 0)
+{
+    &,
+    &:before,
+    {
+        @include square($width, $color);
+    }
+
+    position: relative;
+    text-align: center;
+    @include transform(rotate(20deg));
+    z-index: $z-index;
+
+    &:before
+    {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        @include transform(rotate(135deg));
+        z-index: $z-index - 1;
+    }
+}
+
+@mixin star-12($width: 8em, $color: #000, $z-index: 0)
+{
+    &,
+    &:before,
+    &:after
+    {
+        @include square($width, $color);
+    }
+
+    position: relative;
+    text-align: center;
+    z-index: $z-index;
+
+    &:before,
+    &:after
+    {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: $z-index - 1;
+    }
+    
+    &:before
+    {
+        @include transform(rotate(30deg));
+    }
+
+    &:after
+    {
+        @include transform(rotate(60deg));
+    }
+}

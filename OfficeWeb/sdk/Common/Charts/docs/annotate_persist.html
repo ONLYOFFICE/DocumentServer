@@ -1,0 +1,282 @@
+<!DOCTYPE html >
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>Making your annotations shareable across different browsers</title>
+
+    <meta name="keywords" content="OfficeExcel html5 canvas chart docs annotating shareable cross browser" />
+    <meta name="description" content="Making annotations shareable across different browsers" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A chart library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.common.core.js"></script>
+    <script src="../libraries/OfficeExcel.common.annotate.js"></script>
+    <script src="../libraries/OfficeExcel.common.context.js"></script>
+    <script src="../libraries/OfficeExcel.line.js"></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+    
+    <script>
+        /**
+        * The function that loads the annotations from the server
+        */
+        function LoadAnnotations ()
+        {
+            var canvasPosition = OfficeExcel.getCanvasXY(g.canvas);
+            var div = document.createElement('DIV');
+
+            div.style.backgroundColor = 'white';
+            div.style.padding = '3px';
+            div.style.position = 'absolute';
+            div.style.left = canvasPosition[0] + 5 + 'px';
+            div.style.top  = canvasPosition[1] + 5 + 'px';
+            div.style.color = 'gray';
+            div.style.opacity = 1;
+            div.style.border = '2px solid black';
+            div.style.zIndex = 99;
+            div.innerHTML  = 'Loading annotations...';
+            document.body.appendChild(div);
+            
+            div2 = document.createElement('DIV');
+            div2.style.backgroundColor = 'gray';
+            div2.style.opacity = 0.5;
+            div2.style.position = 'absolute';
+            div2.style.left = canvasPosition[0] + 'px';
+            div2.style.top  = canvasPosition[1] + 'px';
+            div2.style.width = g.canvas.width + 'px';
+            div2.style.height = g.canvas.height + 'px';
+            //div2.style.zIndex = 98;
+            document.body.appendChild(div2);
+
+            window.localStorage['__OfficeExcel_annotations_cvs__'] = '';
+            AjaxGet('annotate_persist.html?getannotations=12',
+
+            function ()
+            {
+                if (this.readyState == 4 && this.status == 200) {
+                    window.localStorage['__OfficeExcel_annotations_cvs__'] = this.responseText;
+                    
+                    OfficeExcel.ReplayAnnotations(g);
+                    
+                    setTimeout(function () {div.style.opacity = 0.8; div2.style.opacity = 0.4;}, 50);
+                    setTimeout(function () {div.style.opacity = 0.6;div2.style.opacity = 0.3;}, 100);
+                    setTimeout(function () {div.style.opacity = 0.4;div2.style.opacity = 0.2;}, 150);
+                    setTimeout(function () {div.style.opacity = 0.2;div2.style.opacity = 0.1;}, 200);
+                    setTimeout(function () {div.style.opacity = 0;div2.style.opacity = 0;}, 250);
+                    setTimeout(function () {div.style.display = 'none';div2.style.display = 'none';}, 300);
+                }
+            }
+            );
+        }
+
+
+
+        /**
+        * The function that saves annotations to the server
+        */
+        function SaveAnnotations ()
+        {
+            var canvasPosition = OfficeExcel.getCanvasXY(g.canvas);
+            var div = document.createElement('DIV');
+
+            div.style.backgroundColor = 'white';
+            div.style.padding = '3px';
+            div.style.position = 'absolute';
+            div.style.left = canvasPosition[0] + 5 + 'px';
+            div.style.top  = canvasPosition[1] + 5 + 'px';
+            div.style.color = 'gray';
+            div.style.opacity = 1;
+            div.style.border = '2px solid black';
+            div.style.zIndex = 99;
+            div.innerHTML  = 'Saving annotations...';
+            document.body.appendChild(div);
+
+            AjaxPost('annotate_persist.html', 'data=' + window.localStorage['__OfficeExcel_annotations_cvs__']);
+            
+            setTimeout(function () {div.style.opacity = 0.8}, 50);
+            setTimeout(function () {div.style.opacity = 0.6}, 100);
+            setTimeout(function () {div.style.opacity = 0.4}, 150);
+            setTimeout(function () {div.style.opacity = 0.2}, 200);
+            setTimeout(function () {div.style.opacity = 0; div.style.display = 'none';}, 250);
+        }
+
+
+
+        /**
+        * Makes an AJAX POST.
+        */
+        function AjaxPost (url, data)
+        {
+            // Mozilla, Safari, ...
+            if (window.XMLHttpRequest) {
+                var httpRequest = new XMLHttpRequest();
+            
+            // MSIE
+            } else if (window.ActiveXObject) {
+                var httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            
+            //httpRequest.onreadystatechange = callback;
+            
+            httpRequest.open('POST', url, true);
+            httpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); 
+            httpRequest.send(data);
+        }
+
+        /**
+        * Makes an AJAX call. It calls the given callback (a function) when ready
+        * 
+        * @param string   url      The URL to retrieve
+        * @param function callback A function object that is called when the response is ready, there's an example below
+        *                          called "myCallback".
+        */
+        function AjaxGet (url, callback)
+        {
+            // Mozilla, Safari, ...
+            if (window.XMLHttpRequest) {
+                var httpRequest = new XMLHttpRequest();
+            
+            // MSIE
+            } else if (window.ActiveXObject) {
+                var httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            
+            httpRequest.onreadystatechange = callback;
+            
+            httpRequest.open('GET', url, true);
+            httpRequest.send();
+        }
+
+
+
+        window.onload = function (e)
+        {
+            /**
+            * This clears the locally stored annotations so that they can be loaded from server
+            */            
+            window.localStorage['__OfficeExcel_annotations_cvs__'] = '';
+
+            // Purposefully a global
+            g = new OfficeExcel.Line('cvs', [5,6,3,4,8,6,7,5,9]);
+            g.Set('chart.tickmarks', 'endcircle');
+            g.Set('chart.hmargin', 5);
+            g.Set('chart.annotatable', OfficeExcel.isOld() ? false : true);
+            g.Set('chart.labels', ['Ben','Olga','Jeff','Indigo','Kev','Pete','Lou','Fred','John']);
+            g.Set('chart.contextmenu', OfficeExcel.isOld() ? null : [['Show palette', OfficeExcel.Showpalette], ['Clear', function () {OfficeExcel.Clear(g.canvas);g.Draw();}]]);
+            g.Set('chart.shadow', true);
+            g.Set('chart.linewidth', 1.01);
+            g.Set('chart.ylabels.count', 10);
+            g.Draw();
+            
+            LoadAnnotations();
+            
+            OfficeExcel.AddCustomEventListener(g, 'onannotateend', function (obj) {SaveAnnotations();});
+            OfficeExcel.AddCustomEventListener(g, 'onannotateclear', function (obj) {SaveAnnotations();});
+        }
+    </script>
+
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        Cross-browser annotations
+    </div>
+
+    <h1>Making <span>annotations shareable cross browser</span></h1>
+
+    <div style="text-align: center">
+        <div class="warning" style="display: inline-block">
+            This example does not work offline - you must use a website. Annotations are removed every five minutes.
+        </div>
+    </div>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <canvas id="cvs" width="600" height="250" style="float: right">[No canvas support]</canvas>
+
+    <p>
+        Combining a little AJAX and some very simple server side scripting, you can easily make an annotation system that can persist
+        across different browsers and computers. You an either use Load/Save buttons to trigger the loading and saving, or like the
+        example to the right you can make use of the custom OfficeExcel onannotateend event to make it happen automatically.
+    </p>
+    
+    <p>
+        This simple example uses a small PHP server side script that loads and saves the annotation data to a file on the server, 
+        and that looks like this:
+    </p>
+
+    <br clear="all" />
+
+    <pre class="code">
+&lt;?php
+    $file = '/tmp/annotation_data';
+
+    /**
+    * Save the annotations to a tmp file
+    */
+    if (isset($_POST) && isset($_POST['data'])) {
+        file_put_contents($file, $_POST['data']);
+        exit;
+    }
+
+
+    /**
+    * Load the annotations
+    */
+    if (!empty($_GET['getannotations']) && $_GET['getannotations'] == 1) {
+        $contents = file_get_contents($file);
+        print($contents);
+        exit;
+    }
+?&gt;
+</pre>
+
+    <p>
+        By making the Javascript Save/Load functions repeat themselves every few seconds, you could easily make a presentation/demo system
+        that can be used when paticipants are in differing locations - in a similar fashion to Google Docs - or when you want one persons
+        annotations to be viewable by multiple PCs. On this page  though, the Save function is triggered by the custom OfficeExcel event
+        <i>onannotateend</i>.
+    </p>
+
+</body>
+</html>

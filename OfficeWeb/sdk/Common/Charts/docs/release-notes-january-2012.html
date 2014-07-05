@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html> 
+<head> 
+    <meta http-equiv="X-UA-Compatible" content="chrome=1"> 
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    --> 
+    <title>The January 2012 release notes</title> 
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas docs bar charts" />
+    <meta name="description" content="The release notes for the November 2011 release" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+ 
+    <link rel="stylesheet" href="../../css/website.css" type="text/css" media="screen" /> 
+    <link rel="icon" type="image/png" href="../../images/favicon.png">
+    
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+
+    <?php PrintAnalyticsCode() ?>
+</head> 
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb"> 
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        <a href="release-notes.html">Release notes</a>
+        >
+        January 2012
+    </div> 
+ 
+    <h1>January <span>2012 release notes</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+    <p>
+        The January 2012 release of OfficeExcel is now available and has these changes:
+    </p>
+    
+    <ul>
+        <li>
+            Relevant charts libraries now have  two new properties:
+            <ul>
+                <li><i>chart.events.click</i></li>
+                <li><i>chart.events.mousemove</i></li>
+            </ul>
+            These new properties make it much easier to add your own event listening functions. You can read more about these
+            new properties <a href="pseudo-standard-events.html"><b>here</b></a>.
+        </li>
+        <li>The Radar chart origin is now the "north" axis instead of the "east" axis.</li>
+        <li>The Radar chart now supports a stacked variant when all datasets have the same number of data points.</li>
+        <li>
+            Implemented the Wave2 animation, which uses the requestAnimationFrame() function. In some browsers the
+            difference is quite subtle.
+        </li>
+        <li>
+            In some charts, there is now a getValue() method which can be used in event listener functions
+            to get the appropriate value (if any) when the chart is clicked for example. This affects the Bar,
+            HBar, HProgress, Line, Scatter, Thermometer and VProgress charts.
+        </li>
+        <li>
+            Added a getBar() method to the Thermometer which can be used inside standard event listener functions
+            (not the OfficeExcel ones) to determine if the bar area was clicked (or mouseover'ed etc).
+        </li>
+        <li>Added Rose chart Explode/Implode animation effects.</li>
+        <li>Added Radar chart chart.radius property.</li>
+        <li>
+            Radar chart labels have been altered so that their placement is now not linked to the number of points on the chart.
+            They also now go around the edge of the chart.
+        </li>
+        <li>A Grow effect has been added for the Gantt chart.</li>
+        <li>The Gantt chart now has a <i>chart.tooltips.event</i> property.</li>
+        <li>Added the Gantt chart property <i>chart.labels.align</i></li>
+        <li>The Gantt chart background grid autofit option now defaults to <i>true</i> (ie enabled).</li>
+        <li>
+            Added new background image properties:
+            <ul>
+                <li><i>chart.background.image.stretch</i></li>
+                <li><i>chart.background.image.x</i></li>
+                <li><i>chart.background.image.y</i></li>
+                <li><i>chart.background.image.align</i></li>
+            </ul>
+            These are relevant to the Bar, Line and Scatter charts.
+        </li>
+        <li>Added new HOWTO guides for certain common tasks.</li>
+        <li>Added a new Conceal effect - the opposite of the Reveal effect.</li>
+        <li>
+            Added new properties to the Gauge chart:
+            <ul>
+                <li><i>chart.centerpin.radius</i></li>
+                <li><i>chart.tickmarks.small</i></li>
+                <li><i>chart.tickmarks.big</i></li>
+                <li><i>chart.title.top</i></li>
+                <li><i>chart.title.top.font</i></li>
+                <li><i>chart.title.top.size</i></li>
+                <li><i>chart.title.top.color</i></li>
+                <li><i>chart.title.top.bold</i></li>
+                <li><i>chart.title.bottom</i></li>
+                <li><i>chart.title.bottom.font</i></li>
+                <li><i>chart.title.bottom.size</i></li>
+                <li><i>chart.title.bottom.color</i></li>
+                <li><i>chart.title.bottom.bold</i></li>
+            </ul>
+        </li>
+        <li>
+            The two scale properties chart.scale.point and chart.scale.thousand have been synchronised across the majority of
+            chart libraries.
+        </li>
+    </ul>
+    
+    <p>
+        Download OfficeExcel here: <a href="http://www.OfficeExcel.net/downloads/OfficeExcel_2012-01-14-stable.zip"><b>OfficeExcel_2012-01-14-stable.zip</b></a>
+    </p>
+    
+</body> 
+</html>

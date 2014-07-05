@@ -1,0 +1,43 @@
+@import "tests";
+
+@import "compass/css3/border-radius";
+
+@import "recipes/effect/folded-corner";
+
+.wrapper
+{
+    background: #fff; //same color as the corner-folded background-color
+    padding: 1em;
+}
+
+.corner-folded-top-left,
+.corner-folded-top-right,
+.corner-folded-bottom-left,
+.corner-folded-bottom-right
+{
+    background: #ddd; // corner-folded near color
+    width: 400px;
+    height: 200px;
+    margin: auto;
+    @include border-radius(.3em);
+}
+
+.corner-folded-top-left
+{
+    @include folded-corner(top-left);
+}
+
+.corner-folded-top-right
+{
+    @include folded-corner(top-right);
+}
+
+.corner-folded-bottom-left
+{
+    @include folded-corner(bottom-left);
+}
+
+.corner-folded-bottom-right
+{
+    @include folded-corner(bottom-right);
+}

@@ -1,0 +1,5 @@
+* Interactive interface has some visualization problem with long lines
+
+* Experimental -U, -u options don't support Unicode.
+
+* Compound handling is not thread safe in Hungarian specific code.

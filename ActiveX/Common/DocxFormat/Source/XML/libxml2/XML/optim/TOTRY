@@ -1,0 +1,23 @@
+XML:
+====
+  - I/O avoid copies when parsing mmap'ed files, need to use
+    unmutable buffers except for the last 4K to make it 0 terminated
+    (or get rid of 0 termination check in the whole parser, hard !)
+  - recheck > 4Gb instances for parsing, and RNG validation.
+    
+
+XSLT:
+=====
+  - global variable access
+     for each expr in stylesheet : allocate index
+     for each transformation context
+       create an index table
+         cache values in the transformation
+	   - context evaluation
+	     - cache
+	     - constants at the XPAth level
+	   - provide more info on compiled expressions
+	     - dependances w.r.t. variables (which ones)
+	     - dependancy on the current node
+	     - dependancy on the current document
+  - do not use _private but other fields in the node structures.

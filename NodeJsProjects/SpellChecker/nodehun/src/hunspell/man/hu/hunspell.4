@@ -1,0 +1,550 @@
+.hla hu
+.TH hunspell 4 "2008. április 11."
+.LO 1
+.SH NÉV
+hunspell \- a Hunspell állományainak formátuma
+.SH LEÍRÁS
+A
+.IR Hunspell (1)
+két állományt igényel egy adott nyelven történő helyesírás\-ellenőrzéshez.
+Az első állomány egy szótárállomány, ami az adott nyelv szavait, és
+ezek kapcsolóit (attribútumait) tartalmazza. A második állomány
+egy ragozási (affixum) állomány, ami meghatározza az említett
+kapcsolók jelentését. 
+
+.SH SZÓTÁRÁLLOMÁNY
+Egy hunspell
+.B szótárállomány
+(*.dic) első sora a szótárállományban
+lévő szavak közelítő számát tartalmazza (az optimális méretű
+memóriaterület lefoglalásához). A többi sor soronként egy
+szót tartalmaz. Minden szó után nem kötelezően egy
+perjel, és egy, vagy több kapcsoló következhet. A
+kapcsolók egybetűsek, és meghatározzák, hogy milyen
+toldalékokat kaphat a tőszó, illetve milyen egyéb speciális
+tulajdonságokkal rendelkezik. Például a
+.PP
+.RS
+.nf
+1
+hunspellezik/EeX
+.fi
+.RE
+.PP
+szótár egy szót tartalmaz (hunspell), ami a magyar ragozási
+állomány alapján alanyi és tárgyas igeragozást is
+vonz (E és e kapcsolók), valamint igekötő prefixumokat is
+kaphat. A példa szótárállomány és a magyar ragozási
+állomány alapján a \fImeghunspelleztétek\fR helyes szóként
+kerülne felismerésre.
+
+A szótári szavak perjelet is tartalmazhatnak, ha
+az fordított perjellel van bevezetve: "\/". A kapcsolók
+alapértelmezésként egy karakteresek, de ha több ragozási
+osztályt szeretnénk használni, ez több karakteresre vagy számra is
+módosítható.
+
+A Hunspell szótárállományok sorai kiegészítő adatmezőket is tartalmazhatnak,
+amelyek szóközökkel vagy tabulátorokkal vannak elválasztva (l. kiegészítő
+adatmezők).
+
+A személyes szótárak egyszerű szólisták. Megadhatunk
+perjellel elválasztott példaszavakat is a toldalékolás engedélyezésére:
+
+.PP
+.RS
+.nf
+Obama/Tamara
+.fi
+.RE
+.PP
+
+A példában a Tamara szó toldalékolását a személyes szótár
+Obama szavára is alkalmazza az ellenőrző, elfogadva az Obamáról,
+Obamáékat stb. alakokat is.
+
+.SH RAGOZÁSI ÁLLOMÁNY
+A
+.B "ragozási állomány"
+rendszerint kisebb méretű. Különféle definíciókat és
+ragozási szabályokat ad meg meghatározott kulcsszóival. Például a
+.B SET
+a karakterkódolás, a
+.B TRY
+javaslattevésnél módosítot betűk, a
+.B REP
+a javaslattevésnél módosított szórészletek, a
+.B PFX
+és az
+.B SFX
+pedig a szó elejére és végére illesztendő toldalékok megadására szolgál.
+
+A következő példa egy UTF\-8-as kódolású szótár affixumállományának
+definíciója. A TRY felsorolja a magyar betűket gyakorisági sorrendjükben,
+a LANG beállítja a magyar nyelvet, a WORDCHARS megadja azokat a karaktereket,
+amelyeket a parancssori Hunspell a szavak részeként fog kezelni.
+
+.PP
+.RS
+.nf
+SET UTF\-8
+TRY íóúÍÓÚtaeslzánorhgkiédmyőpvöbucfjüűxwqTAESLZÁNORHGKIÉDMYŐPVÖBUCFJÜŰXWQ\-.
+LANG hu_HU
+WORDCHARS \-.§%‰°0123456789
+
+REP 2
+REP j ly
+REP ly j
+
+PFX X Y 3
+PFX X   0    meg          .
+PFX X   0    rá           .
+PFX X   0    össze        .
+
+SFX e Y 6
+SFX e   ik   tük          e[dz]ik
+SFX e   ik   tétek        e[dz]ik
+SFX e   ik   ték          e[dz]ik
+SFX e   0    tük          e[dzt]
+SFX e   0    tétek        e[dzt]
+SFX e   0    ték          e[dzt]
+
+SFX f Y 2
+SFX f   ik   het/e        e[dz]ik
+SFX f   ik   tet/e        e[dz]ik
+.fi
+.RE
+.PP
+
+A REP a j és ly felcserélése esetén ad jó és elöl rangsorolt
+javaslatokat. A PFX-ek pár igekötőt definiálnak, az SFX-ek
+pedig pár igeragot. Ezek nagyobb részénél a szó végi ik is levágásra
+kerül a toldalék illesztése előtt. Itt az illesztés feltétele, hogy az
+igék -edik vagy -ezik karaktersorozatra végződjenek, különben pedig
+az -ed, -ez vagy -et betűkre. Az f jelű toldalékolási osztály
+érdekessége, hogy a -het és -tet illesztése után még folytatódhat
+a toldalékolás az e jelű toldalékolási osztállyal (ezt a het/e
+ls tet/e határozza meg), így kaphat -hettük, -hettétek, -hették,
+-tettük, -tettétek, -tették toldalékokat a szótárban szereplő
+levelezik szó:
+
+.PP
+.RS
+.nf
+1
+levelezik/e
+.fi
+.RE
+.PP
+
+.SH "ÁLTALÁNOS PARAMÉTEREK"
+A Hunspell forrás több mint 80 példát tartalmaz a
+paraméterek használatára vonatkozóan. A következő leírás
+nem teljes, l. még az angol kézikönyvoldalt is.
+.IP "SET karakterkód"
+A szótár és affixumállomány karakterkódolásának beállítása.
+A lehetséges értékek: UTF-8, ISO8859\-1-től ISO8859\-10-ig, 
+ISO8859\-13\-ISO8859\-15, KOI8-R, KOI8-U, microsoft-cp1251, ISCII-DEVANAGARI.
+.IP "FLAG érték"
+A kapcsolók 1 karakteres alapbeállításának módosítása.
+(A ragozási osztályokat és egyéb tulajdonságokat jelölik a kapcsolók,
+amelyek alapértelmezés szerint 1 karakteresek, a pékdákban
+legtöbbször nagybetűvel szerepelnek). Az `UTF-8' értékkel
+Unicode karaktereket használhatunk kapcsolóként (UTF-8 kódolással és
+maximum 65 ezres karakterkódig), a `long' értékkel két karakteres
+kapcsolókat (több kapcsoló esetén sincs elválasztójel, a `num'
+értékkel vesszővel elválasztott decimális számokat 1-től
+65 ezerig.
+.IP "COMPLEXPREFIXES"
+Kétszeres prefixumillesztést állít be (de csak egyszeres szuffixumokat
+az alapértelmezett kettő helyett.) Jobbról balra író ragasztó nyelveknél hasznos.
+.IP "LANG nyelvkód"
+Nyelv megadása (nyelvfüggő programrészek bekapcsolásához) az
+ISO nyelv- és régiókóddal (pl. hu_HU).
+.IP "IGNORE karakterek"
+A felsorolt karaktereket törli a szótári szavakból és toldalékokból,
+valamint a bemeneti szavakból. Hasznos az opcionális írásjelek, mint
+az arab vagy a héber mellékjelek kezelésére.
+.IP "AF a_következő_AF_sorok_száma"
+.IP "AF kapcsolók"
+A Hunspell program képes a kapcsolóhalmazokat egy természetes
+számmal helyettesíteni a szótárállományban 
+és a többszörös toldalékásnál az affixumállományban (alias tömörítés),
+felgyorsítva ezzel a szótár betöltődését és csökkentve a program
+memóriaigényét. Egy rövid példa:
+.PP
+.RS
+.nf
+3
+hello
+try/1
+work/2
+.fi
+.RE
+.PP
+És a kapcsolódó AF definíciók az affixumállományban:
+.PP
+.RS
+.nf
+SET UTF-8
+TRY esianrtolcdugmphbyfvkwzESIANRTOLCDUGMPHBYFVKWZ'
+AF 2
+AF A
+AF AB
+...
+.fi
+.RE
+.PP
+
+Ami megfelel a következő szótárállománynak:
+
+.PP
+.RS
+.nf
+3
+hello
+try/A
+work/AB
+.fi
+.RE
+.PP
+Lásd még a tests/alias* példát a forrásban.
+
+Megjegyzés: az AF sorok nem előzhetik meg a FLAG paramétert.
+Alias tömörítésre szolgál a Hunspell makealias segédprogramja.
+
+.IP "AM a_következő_AM_sorok_száma"
+.IP "AM morfológiai_és_egyéb_adatmezők"
+A Hunspell program képes a kiegészítő adatmezőket
+egy természetes számmal helyettesíteni, az AF paraméterhez hasonlóan.
+Lásd még a tests/alias* példát a forrásban.
+
+.SH "JAVÍTÁSI PARAMÉTEREK"
+Az alapértelmezett n-gram, illetve betűcserén és -törlésen
+alapuló javaslatokat kiegészíthetjük a javítási paraméterekkel.
+A REP segít a tipikus hibák és javításuk megadásában.
+A PHONE a kiejtést kevésbé követő írásrendszereknél nyújt segítséget.
+.IP "KEY szomszédos_karakterek_opcionálisan_függőleges_vonallal_elválasztva"
+A nyelv alapértelmezett billentyűzetkiosztását adhatjuk meg a KEY
+paraméterrel, hogy a javaslatoknál a szomszédos betűk elütését
+felismerje a program. A nem szomszédos betűket függőleges vonallal
+választhatjuk el:
+.PP
+.RS
+.nf
+KEY öüó|qwertzuiopőú|asdfghjkléáű|íyxcvbnm
+.fi
+.RE
+.PP
+.IP "TRY karakterek"
+A javaslattevésnél az 1 karakteres próbálkozásoknál az itt felsorolt
+karakterekre cserél, illetve bővít. A paraméternél a kis- és nagybetűket
+külön kell megadni.
+.IP "NOSUGGEST kapcsoló"
+Az itt definiált kapcsolóval jelölt szavakat a program nem javasolja
+a hibajavításnál. Vulgáris és obszcén szavak esetében hasznos.
+.IP "MAXNGRAMSUGS"
+Az n-gram (n hosszú szórészletek megegyezősége alapján súlyozott)
+javaslatok maximális számának beállítása. Alapértelmezetten
+5. A 0 érték kikapcsolja az n-gram javaslatokat.
+.IP "NOSPLITSUGS"
+Nem javasol szófelbontást a Hunspell ezzel a beállítással.
+Hiányzó összetettszó-kezelés esetén hasznos a hibás különírási
+javaslatok tiltására.
+.IP "SUGSWITHDOTS"
+Ha a hibás szó pont(ok)ra végződik, ezeket a javaslatok esetében is
+feltünteti. Az OpenOffice.org szótárak számára nem szükséges ez a
+beállítás.
+.IP "REP szám"
+.IP "REP mit mire"
+A javítási cseretáblázat megadására szolgáló definíciók.
+Az első REP után adjuk meg a többi REP sor számát.
+Ezek a sorok már két paramétert várnak: először
+megadjuk a felismerendő mintát (hibás szórészletet),
+utána pedig azt a karaktersorozatot, amire a felismert
+mintát javítani szeretnénk. A helyesírás\-ellenőrző
+a cseretáblázat révén tud helyes javaslatot tenni
+többkarakteres eltérés (pl. j-ly) esetén.
+
+A szóköz aláhúzásjellel helyettesítendő a javaslatokban:
+
+.PP
+.RS
+.nf
+REP 1
+REP végülis végül_is
+.fi
+.RE
+.PP
+
+A szervíz, szintű és a hasonló hibás összetett szavak
+letiltásában szintén a REP táblázat segít a CHECKCOMPOUNDREP
+megadásával (l. ott).
+
+.IP "MAP a_MAP_definíciók_száma"
+.IP "MAP karakterek"
+Rokon karaktereket adhatunk meg több sorban. A javaslattevésnél
+több rokon karakter cseréje is lehetséges, így például ékezet
+nélküli szavakat is képes ékezetesíteni a Hunspell a következő
+definíció mellett:
+
+.PP
+.RS
+.nf
+MAP 5        
+MAP aá        
+MAP eé        
+MAP ií        
+MAP oóöő        
+MAP uúüű        
+.fi
+.RE
+.PP
+.IP "PHONE a_PHONE_definíciók_száma"
+.IP "PHONE karakterek"
+A PHONE egy táblázattal megadható fonetikus átírási algoritmust
+használ a kiejtési hasonlóság kiszámítására. Különösen
+hasznos azoknál a nyelveknél, ahol az írás nem tükrözi a kiejtést.
+A részletes dokumentáció az Aspell helyesírás-ellenőrző oldalán
+érhető el angol nyelven: http://aspell.net/man-html/Phonetic-Code.html.
+
+Megjegyzés: a szabályokban szereplő kapcsos zárójelek nem
+tartalmazhatnak még több byte-os UTF-8 karaktereket, ahogy
+a kötőjeles kifejezések is byte-ot jelölnek, nem karaktert Unicode
+szótár esetén is.
+.SH "SZÓ-ÖSSZETÉTELEZÉSI PARAMÉTEREK"
+.IP "BREAK a_BREAK_definíciók_száma"
+.IP "BREAK karakter_vagy_karaktersorozat"
+Ha a keresett szó nincs a szótárban, a felsorolt karaktereknél vagy
+karaktersorozatoknál felbontja és részenként ellenőrzi. Hasznos
+például a kis- és nagykötőjeles szavaknál a magyarban.
+.IP "COMPOUNDRULE"
+Reguláris kifejezésekhez hasonló összetételi szabályok megadása.
+.IP "COMPOUNDMIN szám"
+A legkisebb szóhossz, ami még összetett szóban szerepelhet.
+Alapértelmezés szerint 3 karakter.
+.IP "COMPOUNDFLAG kapcsoló"
+Itt adható meg a szóösszetételben való szereplést engedélyező
+kapcsoló.
+.IP "COMPOUNDBEGIN kapcsoló"
+A kapcsoló az összetett szavak első tagjaként engedélyezi
+a megjelölt szavakat.
+.IP "COMPOUNDLAST kapcsoló"
+A kapcsoló az összetett szavak utolsó tagjaként engedélyezi
+a megjelölt szavakat. Kombinálható az előző kapcsolóval.
+.IP "COMPOUNDMIDDLE kapcsoló"
+A kapcsoló az összetett szavak közbenső tagjaként engedélyezi
+a megjelölt szavakat. Kombinálható a két előző kapcsolóval.
+.IP "ONLYINCOMPOUND kapcsoló"
+Csak az összetett szavakban megjelenő ragozás jelölésére szolgáló
+kapcsoló (germán nyelvek esetében tipikus).
+.IP "CIRCUMFIX kapcsoló"
+Ezzel a kapcsolóval jelölt szuffixum csak ugyanilyen kapcsolóval
+jelölt prefixummal jelenhet meg egy tövön. (Pl. leg-édes-ebb).
+.IP "COMPOUNDPERMITFLAG kapcsoló"
+Alapértelmezés szerint a prefixumok és szuffixumok nem fordulhatnak
+elő az összetett szavak belsejében. A COMPOUNDPERMITFLAG
+kapcsolóval rendelkező affixumok viszont itt is megjelenhetnek.
+.IP "COMPOUNDFORBIDFLAG kapcsoló"
+Toldalékolt szavak szóösszetételben való szereplését tiltó
+kapcsoló. A tiltáshoz az adott SFX szabály folytatási
+osztályaként (l. később) adjuk meg ezt a kapcsolót.
+.IP "COMPOUNDROOT kapcsoló"
+A szótárba közvetlenül felvett összetett szavakat
+jelölő kapcsoló. A COMPOUNDWORDMAX, és így a magyar esetében
+a 6–3-as szabály működését befolyásolja azzal, hogy a COMPOUNDROOT
+kapcsolóval összetettnek jelölt
+szavak két szónak számítanak.
+.IP "COMPOUNDWORDMAX szám"
+A szóösszetételekben szereplő egyszerű tövek maximális száma.
+A magyar esetében 2 az érték, e fölötti szószámnál már életbe lép
+a 6–3-as szabály.
+.IP "COMPOUNDSYLLABLE szám karakterek"
+Két paramétert vár. Az első megadja az összetett szavak tövének
+maximális szótagszámát, ami a magyar helyesírás 6–3-as szabálya szerint 6.
+A második mező felsorolja a magánhangzókat,
+ami a szótagszám megállapításához szükséges.
+Ha hiányzik ez a definíció, akkor nincsen
+korlátozás az összetett szavak tövének szótagszámára
+vonatkozóan.
+.IP "SYLLABLENUM kapcsolók"
+Egy paramétert vár. A paraméterben megadhatóak azok a ragozási
+osztályok, amelyek ragozás esetén eggyel növelik az összetett
+szavak tövénél kiszámított szótagszámot. A magyarban ezek
+a melléknévképzők: kerékpárjavításainkról, de kerékpár\-javítási.
+A 
+.IP "FORBIDDENWORD kapcsoló"
+A tiltott szavakat jelölő kapcsoló. A tiltott szótövek
+toldalékolt alakjai is letiltásra kerülnek. A tiltott
+szavak akár toldalékolási, vagy szóösszetételi szinonimaként
+sem kerülnek elfogadásra.
+.IP "PSEUDOROOT kapcsoló"
+A kapcsolóval jelölt szavak toldalékolt alakjai kerülnek
+csak elfogadásra. Fiktív tövek megadására szolgáló
+kapcsoló. A tő lehet még helyes szó, ha
+érvényes szinonimaként előáll vagy szerepel a szótárban.
+.IP "WORDCHARS karakterek"
+Paramétere azok a karakterek, amelyek a beállított kódolás (pl.
+a magyar esetében az ISO-8859-2) betűi mellett még az adott
+nyelv szavaiban előfordulhatnak. Ilyen például a magyarban
+a kötőjel, pont, százalékjel, fokjel, paragrafusjel és a
+nagykötőjel. Az utóbbi csak UTF-8, vagy microsoft-cp1250
+karakterkészlet mellett lesz használható a magyar szótárban.
+.IP "PFX kapcsoló keresztkombinálódás szám"
+.IP "PFX kapcsoló levágás prefixum feltétel morfológia"
+Prefixum megadására szolgáló definíciók.
+A prefixumok egykarakteres névvel jelölt osztályokba
+vannak sorolva. A példában az X osztály
+definíciója látható. Az egyes osztályokra
+vonatkozó PFX fejléc tartalmazza a következőket:
+
+(1) az osztály betűjelét (a példában X)
+
+(2) a keresztbe való kombinálás engedélyezése, illetve
+tiltása (Y/N). Engedélyezés esetén az adott prefixum akkor is
+alkalmazható, ha a tőszó toldalékolt alakban fordul elő.
+Ehhez az is szükséges, hogy a toldalék (affixum) ragozási
+osztályában is legyen engedélyezve a kombinálás.
+
+(3) az osztályba tartozó bejegyzések számát
+
+A PFX fejlécet követő sorokban a PFX paraméterek jelentése
+a következő:
+
+(1) az osztály betűjele
+
+(2) a ragozásnál a szó elejéről leválasztandó karaktersorozat.
+Ha nem kell leválasztani, akkor 0.
+
+(3) a prefixum (például igekötő, vagy a leg\-, legesleg\-
+a mellékneveknél). Perjellel elválasztva kapcsolókat
+is megadhatunk (l. többszörös toldalékolás).
+
+(4) a minta, ami ha illeszkedik, alkalmazható a szabály.
+Például ha itt kutya szerepelne, akkor csak a kutya
+kezdetű szavak elé lehetne tenni az ebben a sorban
+megadott prefixumot. A minta megadásánál a pont (.)
+speciális jelentéssel bír: minden karakterre illeszkedik.
+Megadhatunk csak bizonyos karakterekre illeszkedő mintát
+is szögletes zárójelek segítségével. Például az [abcd] illeszkedik
+az a, b, c, illetve d karakterekre is.
+Ellentétben az Ispell\-lel, a kötőjel
+szerepe a szögletes zárójelek között nem speciális,
+vagyis kötőjelet jelent, és nem karaktertartományt.
+Ha a nyitó szögletes zárójel után kalap (^) karakter
+található, a karaktertartomány komplementerére
+illeszkedik a minta, hasonlóan a reguláris
+kifejezésekhez (l.
+.IR regex "(7))."
+
+(5) Morfológiai leírás. Szóközzel vagy tabulátorral
+elválasztott mezők. A mezőnevek és használatuk az
+angol kézikönyvoldalon található.
+
+.IP "SFX kapcsoló keresztkombinálódás szám"
+.IP "SFX kapcsoló szuffixum feltétel mofológiai_leírás"
+A PFX\-szel megegyező paramétereket kap, csak nem
+a szó eleji, hanem a szó végi toldalékok leírására
+szolgál. A példában szereplő definíciók jelentése:
+az \-edik, vagy \-ezik végű szavakra alkalmazható
+a három szabály. A rag illesztésénél levesszük
+a szó végi \-ik karaktersorozatot, és szabálytól függően
+illesztjük a \-tük, \-tétek, \-ték toldalékokat,
+végeredményben \-edtük, \-edtétek, \-edték, illetve
+-eztük, \-eztétek, \-ezték végű szavakat kapva.
+.IP "Többszörös toldalékolás"
+A PFX és az SFX szabályokban a toldalék perjellel elválasztva kapcsolókat is
+kaphat, hasonlóan a szótárállomány töveihez. A kapcsolók a
+következőek lehetnek:
+
+(1) SFX szabályban az SFX folytatás jelentése, hogy a toldalék még tovább
+ragozódhat a megadott kapcsolókkal (többszörös affixumleválasztás).
+A Hunspell esetében csak a kétszeres affixumleválasztás lett megvalósítva,
+tehát a folytatási osztály folytatását már nem veszi figyelembe a program.
+
+(2) SFX szabályban a PFX folytatás jelentése, hogy az adott prefixum is
+hozzájárulhat a tőhöz, feltéve, ha az SFX szabály is él.
+
+(3) PFX szabályban az SFX szabály jelentése, hogy a megjelölt SFX
+szabály a tőhöz járulhat, ha a PFX szabály is él.
+
+(4) ONLYINCOMPOUND kapcsoló megadásával az adott PFX vagy SFX toldalék csak
+szóösszetételben jelentkezhet.
+
+(5) CIRCUMFIX kapcsoló megadásával az adott SFX csak az ugyanilyen
+toldalékot kapó PFX-szel együtt fordulhat csak elő.
+
+(6) Az összetételi kapcsolók megadásával engedélyezhetjük
+vagy letilthatjuk (COMPOUNDFORBIDFLAG) az összetételben való
+szereplést. A összetett szavak utolsó tagja alapértelmezés szerint
+minden affixumot felvehet. A közbenső szavaknál viszont
+explixit módon engedélyezni kell ezt.
+
+.PP
+A ragozási állomány ezeken kívül még megjegyzéseket is tartalmazhat, ezért az adott
+szótár változatát, szerzőjét, felhasználási engedélyeit itt
+keressük.
+.SH SAJÁT SZÓTÁR
+A saját szótár formátuma közel megegyezik a szótárállomány
+formátumával. A különbségek a következőek:
+
+(1) Nem kell megadni az első sorban az állományban lévő szavak
+méretét.
+
+(2) A szóhoz nem kapcsolókat, hanem egy mintaszót
+adhatunk meg, ami alapján az ellenőrző a szó toldalékolt
+alakjait is felismeri. Például a Patyomkin/Ádám azt jelenti, hogy
+a Patyomkin szót az Ádáméval megegyező
+ragozással is el kell fogadni.
+
+(3) A csillag tiltást jelent: a csillaggal jelölt szavakat az ellenőrző
+akkor sem ismeri fel, ha az alapszótárban szerepelnek, pl. *kóricál.
+
+(4) Az állomány kézzel módosítható, és ezt időnként
+javasolt is megtenni, ha esetleg hibásan vettünk fel szavakat.
+.SH LÁSD MÉG
+.B angol nyelvű hunspell (4),
+.B hunspell (1),
+.B ispell (1),
+.B ispell (4),
+Magyar Ispell dokumentáció.
+.SH TÖRTÉNET
+A MySpell szótár\-, illetve ragozási állományának formátumát
+Kevin Hendricks készítette olyan céllal, hogy lehetővé
+tegye ezen állományok gyors, futás idejű feldolgozását.
+
+A COMPOUNDFLAG és a Hunspell formátumbővítést, valamint
+a REP többkarakteres cseretáblázatot Németh László
+készítette elsősorban a jobb magyar
+nyelvű helyesírás\-ellenőrzés céljából. A minimális
+összetettszó\-kezelést lehetővé tevő COMPOUNDMIN, COMPOUNDFLAG,
+és a REP többkarakteres cseretáblázat része a hivatalos
+MySpell függvénykönyvtárnak is.
+
+A Hunspell szótárállományának formátuma megegyezik
+a MySpell függvénykönyvtáréval, a ragozási táblázat pedig
+a fentiekben felsorolt bővítéseket tartalmazza.
+A bővített formátumú affixum állomány gond nélkül
+együttműködik az eredeti MySpell függvénykönyvtárral is,
+de a bővítések nem fognak működni. Sőt, mivel a
+hivatalos MySpell egy megengedőbb összetettszó\-kezelést
+valósít meg, mint a magyar változat, az
+összetett szavakon belüli toldalékolt alakok is elfogadásra
+kerülnek (ez különösen sok hibás összetétel
+elfogadását eredményezi a magyar nyelv esetében).
+
+Ebből fakad, hogy a hivatalos Magyar
+OpenOffice.org (http://office.fsf.hu) \- mivel a Magyar
+MySpell függvénykönyvtárat tartalmazza \- jobban támogatja
+a magyar nyelvet, mint más változatok. Egyszerűen
+meggyőződhetünk arról, hogy melyik változattal van dolgunk:
+írjuk be, hogy
+.I helyesírásellenőrző
+az OOo szövegszerkesztőjébe.
+Ha hibásnak jelzi, és
+.I helyesírás\-ellenőrzőt
+javasol helyette,
+a Hunspell\-lel van dolgunk. Ha helyesnek fogadja
+el, akkor pedig az eredeti MySpell\-lel.
+
+

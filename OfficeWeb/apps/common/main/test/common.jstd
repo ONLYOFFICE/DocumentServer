@@ -1,0 +1,8 @@
+load:
+- ../../../../3rdparty/extjs/ext-all-debug.js
+- ../lib/component/*.js
+- ../lib/component/util/*.js
+
+test:
+- unit/component/util/*.js
+#- unit/component/*.js

@@ -1,0 +1,24 @@
+/**
+ * Striped background pattern
+ * 
+ * @link http://lea.verou.me/css3patterns/
+ *
+ * @author Lea Verou http://lea.verou.me/ for the original pattern
+ * @author David Kaneda http://www.davidkaneda.com @davidkaneda for the sass mixin
+ */
+
+@import "compass/css3/images";
+
+@mixin background-striped(
+    $bgcolor: $base-color,
+    $stripe-color: darken($bgcolor, 5),
+    $minorsize: 20px,
+    $majorsize: 40px,
+    $angle: 45deg
+) {
+    background-color: $bgcolor;
+    @include background-image(
+        linear-gradient($angle, rgba($stripe-color, 0), rgba($stripe-color, 0) $minorsize, $stripe-color $minorsize, $stripe-color $majorsize)
+    );
+    background-size: $majorsize;
+}

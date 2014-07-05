@@ -1,0 +1,100 @@
+                   Notes on the libxml2 Documentation
+            Prepared by: William Brack <wbrack@mmm.com.hk>
+	    
+  After spending a  lot of time tracing through  Makefile.am, some Python
+scripts  and some xsl  scripts and xml files, I  thought it might be good
+to save others some time  by setting down the basic information about how
+the library documentation  is created.  I intend to enhance this process,
+but will keep this document up-to-date for  everyone's information.  Note
+that this document does not  apply to the subdirectory  "tutorial", which
+is separately maintained by John Fleck.
+
+  There are a relatively  small number of files  which form the "core" of
+the document directory.  All  the other files in the directory can be re-
+generated using  the information  present in these  core files,  plus the
+actual library  source files (*.[ch]) in the parent  directory  "../" and
+it's descendants include  and include/libxml.  These core files, together
+with a brief description of each, are as follows:-
+
+xml.html           The "main page", manually produced by Daniel Veillard
+news.html          The latest news, extracted from xml.html by site.xsl
+
+benchmark.gif      Illustrations used for the "main page" and subsidiaries
+gnome2.png                              -------
+Libxml2-Logo-180x168.gif                   |
+libxml.gif                                 |
+linus.gif                                  |
+redhat.gif                                 |
+structure.gif                             \ /
+w3c.png                                    -
+
+apibuild.py        Python script which generates the file libxml2-api.xml
+parsedecl.py       Python secipt which generates the file libxml2-refs.xml
+
+api.xsl            xslt script to generate API cross-references APIchunk*.html
+                     using information from libxml2-api.xml and libxml2-refs.xml
+news.xsl           xslt script to generate ../NEWS from news.html
+site.xsl           xslt script imported by api.xsl, generates most top-level
+                     pages from news.html
+xsa.xsl            xslt script to generate libxml.xsa from news.html
+
+xmlcatalog.1       Man page for xml catalogs, built from xmlcatalog_man.xml DocBook
+		   source with "make xmlcatalog.1" or "make all"
+xmllint.1          Man page for xmllint program, built from xmllint.xml DocBook
+		   source with "make xmllint.1" or "make all"
+
+libxml-doc.el      Control script for displaying docs under emacs
+
+
+  Given the above files, the generation of the complete documentation (as
+provided on the web by xmlsoft.org) can be created with the following steps:
+
+NOTE:  Steps 1 through 7 are performed with the command "make rebuild";
+       Steps 3 and 5 through 7 are performed with the command "make all"
+
+
+1) Generate libxml2-api.xml:
+       ./apibuild.py
+
+    This script is a more recent addition to the documentation generation.
+    Instead of using the information from the gtk-doc routines, it actually
+    re-processes all the the library source files, extracting information
+    about the api (exported procedures and symbols, together with information
+    from the source comments within these).  It produces an xml file which
+    contains all of this information, "libxml2-api.xml".
+
+2) Generate libxml2-refs.xml:
+       ./parsedecl.py
+
+    This script produces the summary
+    xml file "libxml2-refs.xml".  Historically, it also used to produce
+    information on the api's in the file "libxml2-api.xml", but that step is
+    now being done by a separate script.
+
+3) Generate the site's main pages:
+       xsltproc --nonet --html --output index.html site.xsl xml.html
+
+    All of the "top-level" pages (except xmlreader.html and guidelines.html)
+    which have navigation framing, are generated from this step
+
+4) Generate the contents and cross-referencing pages:
+       xsltproc --nonet --html api.xsl xml.html
+
+5) Generate the NEWS file in the top directory:
+       xsltproc --nonet --output ../NEWS news.xsl news.html
+
+6) Generate the XML Software Autoupdate file libxml2.xsa:
+       make libxml2.xsa, or,
+       xsltproc --nonet --output libxml2.xsa xsa.xsl news.html
+
+7) Manually generate xmlcatalog.1 and xmllint.1 using manpages/docbook.xsl
+   stylesheet in docbook stylesheets. "make all" also takes care of this.
+
+  After these steps have been done, the documentation is complete.
+The search engine is then set up using the script index.py, using
+libxml2-api.xml, the HTML web pages generated above, and the HTML
+mailing list archives at gnome.org.
+
+
+Last update:  30 November 2003
+

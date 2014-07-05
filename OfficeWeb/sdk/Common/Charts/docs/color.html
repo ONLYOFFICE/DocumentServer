@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>Information about HTML5 canvas color definitions</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas chart docs color" />
+    <meta name="description" content="Information about the different ways of specifying colors with HTML5 canvas" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A graph library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        About canvas color definitions
+    </div>
+
+    <h1>About <span>canvas color definitions</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <p>
+        You will probably want to know the different ways you can define a color. There are a few
+        ways which you can use, all of which are quite straight-forward.
+    </p>
+
+    <ul id="colors">
+        <li><a href="#named">Named colors</a></li>
+        <li><a href="#hex">Hex values</a></li>
+        <li><a href="#rgb">RGB values</a></li>
+        <li><a href="#rgba">RGBA values</a></li>
+        <li><a href="#hsl">HSL values</a></li>
+        <li><a href="#hsla">HSLA values</a></li>
+        <li><a href="#lgradients">Linear gradients</a></li>
+        <li><a href="#rgradients">Radial gradients</a></li>
+        <li><a href="#info">More information</a></li>
+    </ul>
+    
+    <a name="named"></a>
+    <br />&nbsp;<br />
+    <h2>Named colors</h2>
+    
+    <p>
+        The first, and easiest, is to use named colors. This gives you a range of color values that have been predefined for you. Eg:
+    </p>
+    
+    <pre class="code">myObject.Set('chart.colors', ['red', 'blue']);</pre>
+
+    <a name="hex"></a>
+    <br />&nbsp;<br />
+    <h2>Hex values</h2>
+    
+    <p>
+        The next, is straight forward hex values like you can use in normal CSS. These consist of a hash sign,
+        followed by three or six hexadecimal characters. Eg:
+    </p>
+
+    <pre class="code">myObject.Set('chart.colors', ['#f00', '#0000ff']);</pre>
+    
+    <a name="rgb"></a>
+    <br />&nbsp;<br />
+    <h2>RGB values</h2>
+    
+    <p>
+        Also as used in CSS, RGB values are the same as what you can use in CSS. Eg:
+    </p>
+    
+    <pre class="code">myObject.Set('chart.colors', ['rgb(255,0,0)', 'rgb(0,0,255)']);</pre>
+
+    <a name="rgba"></a>
+    <br />&nbsp;<br />
+    <h2>RGBA values</h2>
+    
+    <p>
+        Probably new to most people, is rgba(). Similar to regular rgb() values, but with a fourth value that allows you to specify the
+        alpha value, which stipulates how transparent the color is. An alpha value of 0 is totally transparent, and a value of 1, is
+        totally opaque (ie. you can't see through it). With a value of 1, rgba() acts exactly like rgb(). This example gives you red
+        and blue colors that are semi-transparent:
+    </p>
+    
+    <pre class="code">myObject.Set('chart.colors', ['rgba(255,0,0,0.5)', 'rgba(0,0,255,0.5)']);</pre>
+
+    <a name="hsl"></a>
+    <br />&nbsp;<br />
+    <h2>HSL() values</h2>
+    
+    <p>
+        Also probably quite new to you, are hsl() values. Much like rgb(), but instead of red green and blue, it allows you to specify
+        the Hue, Saturation and Light values instead. For example:
+    </p>
+    
+    <pre class="code">myObject.Set('chart.colors', ['hsl(255, 100%, 50%)', 'hsl(169, 100%, 50%)']);</pre>
+
+    <a name="hsla"></a>
+    <br />&nbsp;<br />
+    <h2>HSLA() values</h2>
+
+    <p>
+        Much like rgb() and rgba(), hsl() has a corresponding hsla() version, which allows you to specify an alpha (transparency) value.
+        Eg:
+    </p>
+    
+    <pre class="code">myObject.Set('chart.colors', ['hsla(255, 100%, 50%, 0.5)', 'hsla(169, 100%, 50%, 0.5)']);</pre>
+
+    <a name="lgradients"></a>
+    <br />&nbsp;<br />
+    <h2>Linear gradients</h2>
+    
+    <p>
+        Gradients can be used in place of color values. You can create a linear gradient like so:
+    </p>
+    
+    <pre class="code">myGradient = myObject.context.createLinearGradient(0,0,0,250);
+myGradient.addColorStop(0, 'red');
+myGradient.addColorStop(1, 'blue');</pre>
+
+    <p>
+        This creates a gradient that goes from red to blue. The gradient starts at 0,0, and finishes at 0,250. ie A vertical
+        gradient. You may not see the whole gradient - that depends on the extent of the shape you're filling. You can use the gradient
+        in place of a regular color definition. Eg:
+    </p>
+    
+    <pre class="code">myObject.Set('chart.colors', [myGradient]);</pre>
+
+    <a name="rgradients"></a>
+    <br />&nbsp;<br />
+    <h2>Radial gradients</h2>
+
+    <p>
+        Radial gradients are much like their linear counterparts, but circular, as the name suggests. Eg:
+    </p>
+    
+    <pre class="code">myGradient = myObject.context.createRadialGradient(0,0,0,0,0,100);
+myGradient.addColorStop(0, 'red');
+myGradient.addColorStop(1, 'blue');
+</pre>
+    
+    <p>
+        Instead of four arguments, it takes six - the coordinates of the start point along with the radius, and the coordinates
+        of the end point, along with the radius. After it has been created, you can treat as you would a linear gradient:
+    </p>
+
+    <pre class="code">myObject.Set('chart.colors', [myGradient]);</pre>
+
+    <a name="info"></a>
+    <br />&nbsp;<br />
+    <h2>More information</h2>
+    
+    <p>
+        You can read more about CSS3 color definitions  <a href="http://www.w3.org/TR/css3-color/" target="_blank" rel="nofollow">here</a>.
+    </p>
+</body>
+</html>

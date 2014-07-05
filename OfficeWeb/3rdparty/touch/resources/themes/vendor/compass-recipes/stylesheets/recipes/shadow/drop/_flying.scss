@@ -1,0 +1,34 @@
+/**
+ * Drop shadow flying
+ *
+ * @thanks Geoffrey Crofte @geoffrey_crofte
+ * @link http://www.creativejuiz.fr/trytotry/css3-box-shadow-after-before/
+ */
+@mixin drop-shadow-flying(
+    $box-shadow-radius: 30px,
+    $color: #000,
+    $distance: 1em,
+    $height: 2px
+)
+{
+    position: relative;
+
+    &:before,
+    &:after
+    {
+        content: " ";
+        position: absolute;
+        z-index: -2;
+        bottom: -$distance;
+    }
+
+    &:after
+    {
+        left: 8%;
+        width: 84%;
+        height: $height;
+        background: rgba(#000, .3);
+        @include border-radius(#{50%} / #{1px});
+        @include box-shadow(0 $height $box-shadow-radius/2 rgba(#000, .2), 0 $height $box-shadow-radius rgba(#000, .15));
+    }
+}

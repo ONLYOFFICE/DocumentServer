@@ -1,0 +1,646 @@
+2011-02-02: Hunspell 1.3.2 release:
+  - fix library versioning
+  - improved manual 
+
+2011-02-02: Hunspell 1.3.1 release:
+  - bug fixes
+
+2011-01-26: Hunspell 1.2.15/1.3 release:
+  - new features: MAXDIFF, ONLYMAXDIFF, MAXCPDSUGS, FORBIDWARN, see manual
+  - bug fixes
+
+2011-01-21:
+  - new features: FORCEUCASE and WARN, see manual
+  - new options: -r to filter potential mistakes (rare words
+    signed by flag WARN in the dictionary)
+  - limited and optimized suggestions
+
+2011-01-06: Hunspell 1.2.14 release:
+  - bug fix
+2011-01-03: Hunspell 1.2.13 release:
+  - bug fixes
+  - improved compound handling and
+    other improvements supported by OpenTaal Foundation, Netherlands
+2010-07-15: Hunspell 1.2.12 release
+2010-05-06: Hunspell 1.2.11 release:
+  - Maintenance release bug fixes
+2010-04-30: Hunspell 1.2.10 release:
+  - Maintenance release bug fixes
+2010-03-03: Hunspell 1.2.9 release:
+  - Maintenance release bug fixes and warnings
+  - MAP support for composed characters or character sequences
+2008-11-01: Hunspell 1.2.8 release:
+  - Default BREAK feature and better hyphenated word suggestion to accept
+    and fix (compound) words with hyphen characters by spell checker
+    instead of by work breaking code of OpenOffice.org. With this feature
+    it's possible to accept hyphenated compound words, such as "scot-free",
+    where "scot" is not a correct English word.
+
+  - ICONV & OCONV: input and output conversion tables for optional character
+    handling or using special inner format. Example:
+
+  # Accepting de facto replacements of the Romanian comma acuted letters
+  SET UTF-8
+  ICONV 4
+  ICONV ÅŸ È™
+  ICONV Å£ È›
+  ICONV Åž È˜
+  ICONV Å¢ Èš
+
+    Typical usage of ICONV/OCONV is to manage an inner format for a segmental
+    writing system, like the Ethiopic script of the Amharic language.
+
+  - Extended CHECKCOMPOUNDPATTERN to handle conpound word alternations, like
+    sandhi feature of Telugu and other writing systems.
+
+  - SIMPLIFIEDTRIPLE compound word feature: allow simplified Swedish and
+    Norwegian compound word forms, like tillÃ¥ta (till|lÃ¥ta) and
+    bussjÃ¥fÃ¸r (buss|sjÃ¥fÃ¸r)
+
+  - wordforms: word generator script for dictionary developers (Hunspell
+    version of unmunch).
+
+  - bug fixes
+
+2008-08-15: Hunspell 1.2.7 release:
+  - FULLSTRIP: new option for affix handling. With FULLSTRIP, affix rules can
+    strip full words, not only one less characters.
+  - COMPOUNDRULE works with all flag types. (COMPOUNDRULE is for pattern
+    matching. For example, en_US dictionary of OpenOffice.org uses COMPOUNDRULE
+    for ordinal number recognition: 1st, 2nd, 11th, 12th, 22nd, 112th, 1000122nd
+    etc.).
+  - optimized suggestions:
+    - modified 1-character distance suggestion algorithms: search a TRY character
+      in all position instead of all TRY characters in a character position
+      (it can give more readable suggestion order, also better suggestions
+      in the first positions, when TRY characters are sorted by frequency.)
+      For example, suggestions for "moze":
+      ooze, doze, Roze, maze, more etc. (Hunspell 1.2.6),
+      maze, more, mote, ooze, mole etc. (Hunspell 1.2.7).
+    - extended compound word checking for better COMPOUNDRULE related
+      suggestions, for example English ordinal numbers: 121323th -> 121323rd
+      (it needs also a th->rd REP definition).
+  - bug fixes
+
+2008-07-15: Hunspell 1.2.6 release:
+  - bug fix release (fix affix rule condition checking of sk_SK dictionary,
+    iconv support in stemming and morphological analysis of the Hunspell
+    utility, see also Changelog)
+
+2008-07-09: Hunspell 1.2.5 release:
+  - bug fix release (fix affix rule condition checking of en_GB dictionary,
+    also morphological analysis by dictionaries with two-level suffixes)
+
+2008-06-18: Hunspell 1.2.4-2 release:
+  - fix GCC compiler warnings
+
+2008-06-17: Hunspell 1.2.4 release:
+  - add free_list() for C, C++ interfaces to deallocate suggestion lists
+  
+  - bug fixes
+
+2008-06-17: Hunspell 1.2.3 release:
+  - extended XML interface to use morphological functions by standard
+    spell checking interface, spell() and suggest(). See hunspell.3 manual page.
+
+  - default dash suggestions for compound words: newword-> new word and new-word
+
+  - new manual pages: hunspell.3, hzip.1, hunzip.1.
+  
+  - bug fixes
+
+2008-04-12: Hunspell 1.2.2 release:
+  - extended dictionary (dic file) support to use multiple base and
+    special dictionaries.
+    
+  - new and improved options of command line hunspell:
+    -m: morphological analysis or flag debug mode (without affix
+        rule data it signs the flag of the affix rules)
+    -s: stemming mode
+    -D: list available dictionaries and search path
+    -d: support extra dictionaries by comma separated list. Example:
+    
+    hunspell -d en_US,en_med,de_DE,de_med,de_geo UNESCO.txt
+
+    - forbidding in personal dictionary (with asterisk, / signs affixation)
+
+  - optional compressed dictionary format "hzip" for aff and dic files
+    usage:
+    hzip example.aff example.dic
+    mv example.aff example.dic /tmp
+    hunspell -d example
+    hunzip example.aff.hz >example.aff
+    hunzip example.dic.hz >example.dic
+
+  - new affix compression tool "affixcompress": compression tool for
+    large (millions of words) dictionaries.
+
+  - support encrypted dictionaries for closed OpenOffice.org extensions or
+    other commercial programs
+
+  - improved manual
+
+  - bug fixes
+
+2007-11-01: Hunspell 1.2.1 release:
+  - new memory efficient condition checking algorithm for affix rules
+  
+  - new morphological functions:
+    - stem() for stemming
+    - analyze() for morphological analysis
+    - generate() for morphological generation
+
+  - new demos:
+    - analyze: stemming, morphological analysis and generation
+    - chmorph: morphological conversion of texts
+
+2007-09-05: Hunspell 1.1.12 release:
+  - dictionary based phonetic suggestion for words with
+    special or foreign pronounciation or alternative (bad) transliteration
+    (see Changelog, tests/phone.* and manual).
+
+  - improved data structure and memory optimization for dictionaries
+    with variable count fields
+
+  - bug fixes for Unicode encoding dictionaries and ngram suggestions
+  
+  - improved REP suggestions with space: it works without dictionary
+    modification
+
+  - updated and new project files for Windows API
+
+2007-08-27: Hunspell 1.1.11 release:
+  - portability fixes
+
+2007-08-23: Hunspell 1.1.10 release:
+  - pronounciation based suggestion using Björn Jacke's original Aspell
+    phonetic transcription algorithm (http://aspell.net), relicensed under
+    GPL/LGPL/MPL tri-license with the permission of the author
+
+  - keyboard base suggestion by KEY (see manual)
+
+  - better time limits for suggestion search
+
+  - test environment for suggestion based on Wikipedia data
+
+  - bug fixes for non standard Mozilla platforms etc.
+
+2007-07-25: Hunspell 1.1.9 release:
+  - better tokenization:
+    - for URLs, mail addresses and directory paths (default: skip these tokens)
+    - for colons in words (for Finnish and Swedish)
+  
+  - new examples:
+    - affixation of personal dictionary words
+    - digits in words
+
+  - bug fixes (see ChangeLog)
+
+2007-07-16: Hunspell 1.1.8 release:
+  - better Mac OS X/Cygwin and Windows compatibility
+
+  - fix Hunspell's Valgrind environment and memory handling errors
+    detected by Valgrind
+
+  - other bug fixes (see ChangeLog)
+
+2007-07-06: Hunspell 1.1.7 release:
+  - fix warning messages of OpenOffice.org build
+
+2007-06-29: Hunspell 1.1.6 release:
+  - check capitalization of the following word forms
+    - words with mixed capitalisation: OpenOffice.org - OPENOFFICE.ORG
+    - allcap words and suffixes: UNICEF's - UNICEF'S
+    - prefixes with apostrophe and proper names: Sant'Elia - SANT'ELIA
+
+  - suggestion for missing sentence spacing: something.The -> something. The
+
+  - Hunspell executable: improved locale support
+    - -i option: custom input encoding
+    - use locale data for default dictionary names. 
+    - tools/hunspell.cxx: fix 8-bit tokenization (letters without
+      casing, like ÃŸ or Hebrew characters now are handled well) 
+    - dictionary search path (automatic detection of OpenOffice.org directories)
+    - DICPATH environmental variable
+    - -D option: show directory path of loaded dictionary
+
+  - patches and bug fixes for Mozilla, OpenOffice.org.
+
+2007-03-19: Hunspell 1.1.5 release:
+  - optimizations: 10-100% speed up, smaller code size and memory footprint
+    (conditional experimental code and warning messages)
+
+  - extended Unicode support:
+    - non BMP Unicode characters in dictionary words and affixes (except
+      affix rules and conditions)
+    - support BOM sequence in aff and dic files
+
+  - IGNORE feature for Arabic diacritics and other optional characters
+
+  - New edit distance suggestion methods:
+    - capitalisation: nasa -> NASA
+    - long swap: permenant -> permanent
+    - long move: Ghandi -> Gandhi, greatful -> grateful
+    - double two characters: vacacation -> vacation
+    - spaces in REP sug.: REP alot a_lot (NOTE: "a lot" must be a dictionary word)
+
+  - patches and bug fixes for Mozilla, OpenOffice.org, Emacs, MinGW, Aqua,
+    German and Arabic language, etc.
+
+2006-02-01: Hunspell 1.1.4 release:
+  - Improved suggestion for typical OCR bugs (missing spaces between
+    capitalized words). For example: "aNew" -> "a New".
+    http://qa.openoffice.org/issues/show_bug.cgi?id=58202
+
+  - tokenization fixes (fix incomplete tokenization of input texts on big-endian
+    platforms, and locale-dependent tokenization of dictionary entries)
+
+2006-01-06: Hunspell 1.1.3.2 release:
+  - fix Visual C++ compiling errors
+
+2006-01-05: Hunspell 1.1.3 release:
+  - GPL/LGPL/MPL tri-license for Mozilla integration
+  
+  - Alias compression of flag sets and morphological descriptions.
+    (For example, 16 MB Arabic dic file can be compressed to 1 MB.)
+  
+  - Improved suggestion.
+  
+  - Improved, language independent German sharp s casing with CHECKSHARPS
+    declaration.
+
+  - Unicode tokenization in Hunspell program.
+  
+  - Bug fixes (at new and old compound word handling methods), etc.
+
+2005-11-11: Hunspell 1.1.2 release:
+
+  - Bug fixes (MAP Unicode, COMPOUND pattern matching, ONLYINCOMPOUND
+    suggestions)
+
+  - Checked with 51 regression tests in Valgrind debugging environment,
+    and tested with 52 OOo dictionaries on i686-pc-linux platform.
+
+2005-11-09: Hunspell 1.1.1 release:
+
+  - Compound word patterns for complex compound word handling and
+    simple word-level lexical scanning. Ideal for checking
+    Arabic and Roman numbers, ordinal numbers in English, affixed
+    numbers in agglutinative languages, etc.
+    http://qa.openoffice.org/issues/show_bug.cgi?id=53643
+
+  - Support ISO-8859-15 encoding for French (French oe ligatures are
+    missing from the latin-1 encoding).
+    http://qa.openoffice.org/issues/show_bug.cgi?id=54980
+    
+  - Implemented a flag to forbid obscene word suggestion:
+    http://qa.openoffice.org/issues/show_bug.cgi?id=55498
+
+  - Checked with 50 regression tests in Valgrind debugging environment,
+    and tested with 52 OOo dictionaries.
+
+  - other improvements and bug fixes (see ChangeLog)
+
+2005-09-19: Hunspell 1.1.0 release
+
+* complete comparison with MySpell 3.2 (from OpenOffice.org 2 beta)
+
+* improved ngram suggestion with swap character detection and
+  case insensitivity
+
+------ examples for ngram improvement (input word and suggestions) -----
+
+1. pernament (instead of permanent)
+
+MySpell 3.2: tournaments, tournament, ornaments, ornament's, ornamenting, ornamented,
+        ornament, ornamentals, ornamental, ornamentally
+
+Hunspell 1.0.9: ornamental, ornament, tournament
+
+Hunspell 1.1.0: permanent
+
+Note: swap character detection
+
+
+2. PERNAMENT (instead of PERMANENT)
+
+MySpell 3.2: -
+
+Hunspell 1.0.9: -
+
+Hunspell 1.1.0: PERMANENT
+
+
+3. Unesco (instead of UNESCO)
+
+MySpell 3.2: Genesco, Ionesco, Genesco's, Ionesco's, Frescoing, Fresco's,
+             Frescoed, Fresco, Escorts, Escorting
+
+Hunspell 1.0.9: Genesco, Ionesco, Fresco
+
+Hunspell 1.1.0: UNESCO
+
+
+4. siggraph's (instead of SIGGRAPH's)
+
+MySpell 3.2: serigraph's, photograph's, serigraphs, physiography's,
+             physiography, digraphs, serigraph, stratigraphy's, stratigraphy
+             epigraphs
+
+Hunspell 1.0.9: serigraph's, epigraph's, digraph's
+
+Hunspell 1.1.0: SIGGRAPH's
+
+--------------- end of examples --------------------
+
+* improved testing environment with suggestion checking and memory debugging
+
+  memory debugging of all tests with a simple command:
+  
+  VALGRIND=memcheck make check
+
+* lots of other improvements and bug fixes (see ChangeLog)
+
+
+2005-08-26: Hunspell 1.0.9 release
+
+* improved related character map suggestion
+
+* improved ngram suggestion
+
+------ examples for ngram improvement (O=old, N = new ngram suggestions) --
+
+1. Permenant (instead of Permanent)
+
+O: Endangerment, Ferment, Fermented, Deferment's, Empowerment,
+        Ferment's, Ferments, Fermenting, Countermen, Weathermen
+
+N: Permanent, Supermen, Preferment
+
+Note: Ngram suggestions was case sensitive.
+
+2. permenant (instead of permanent) 
+
+O: supermen, newspapermen, empowerment, endangerment, preferments,
+        preferment, permanent, preferment's, permanently, impermanent
+
+N: permanent, supermen, preferment
+
+Note: new suggestions are also weighted with longest common subsequence,
+first letter and common character positions
+
+3. pernemant (instead of permanent) 
+
+O: pimpernel's, pimpernel, pimpernels, permanently, permanents, permanent,
+        supernatant, impermanent, semipermanent, impermanently
+
+N: permanent, supernatant, pimpernel
+
+Note: new method also prefers root word instead of not
+relevant affixes ('s, s and ly)
+
+
+4. pernament (instead of permanent)
+
+O: tournaments, tournament, ornaments, ornament's, ornamenting, ornamented,
+        ornament, ornamentals, ornamental, ornamentally
+
+N: ornamental, ornament, tournament
+
+Note: Both ngram methods misses here.
+
+
+5. obvus (instad of obvious):
+
+O: obvious, Corvus, obverse, obviously, Jacobus, obtuser, obtuse,
+        obviates, obviate, Travus
+
+N: obvious, obtuse, obverse
+
+Note: new method also prefers common first letters.
+
+
+6. unambigus (instead of unambiguous) 
+
+O: unambiguous, unambiguity, unambiguously, ambiguously, ambiguous,
+        unambitious, ambiguities, ambiguousness
+
+N: unambiguous, unambiguity, unambitious
+
+
+
+7. consecvence (instead of consequence)
+
+O: consecutive, consecutively, consecutiveness, nonconsecutive, consequence,
+        consecutiveness's, convenience's, consistences, consistence
+
+N: consequence, consecutive, consecrates
+
+
+An example in a language with rich morphology:
+
+8. Misisipiben (instead of Mississippiben [`in Mississippi' in Hungarian]):
+
+O: Misikédéiben, Pisisedéiben, Misikéiéiben, Pisisekéiben, Misikéiben,
+        Misikéidéiben, Misikékéiben, Misikéikéiben, Misikéiméiben, Mississippiiben
+
+N: Mississippiben, Mississippiiben, Misiiben
+
+Note: Suggesting not relevant affixes was the biggest fault in ngram
+   suggestion for languages with a lot of affixes.
+
+--------------- end of examples --------------------
+
+* support twofold prefix cutting
+
+* lots of other improvements and bug fixes (see ChangeLog)
+
+* test Hunspell with 54 OpenOffice.org dictionaries:
+
+source: ftp://ftp.services.openoffice.org/pub/OpenOffice.org/contrib/dictionaries
+
+testing shell script:
+-------------------------------------------------------
+for i in `ls *zip | grep '^[a-z]*_[A-Z]*[.]'`
+do
+	dic=`basename $i .zip`
+	mkdir $dic
+	echo unzip $dic
+	unzip -d $dic $i 2>/dev/null
+	cd $dic
+	echo unmunch and test $dic
+	unmunch $dic.dic $dic.aff 2>/dev/null | awk '{print$0"\t"}' |
+	hunspell -d $dic -l -1 >$dic.result 2>$dic.err || rm -f $dic.result
+	cd ..
+done
+--------------------------------------------------------
+
+test result (0 size is o.k.):
+
+$ for i in *_*/*.result; do wc -c $i; done 
+0 af_ZA/af_ZA.result
+0 bg_BG/bg_BG.result
+0 ca_ES/ca_ES.result
+0 cy_GB/cy_GB.result
+0 cs_CZ/cs_CZ.result
+0 da_DK/da_DK.result
+0 de_AT/de_AT.result
+0 de_CH/de_CH.result
+0 de_DE/de_DE.result
+0 el_GR/el_GR.result
+6 en_AU/en_AU.result
+0 en_CA/en_CA.result
+0 en_GB/en_GB.result
+0 en_NZ/en_NZ.result
+0 en_US/en_US.result
+0 eo_EO/eo_EO.result
+0 es_ES/es_ES.result
+0 es_MX/es_MX.result
+0 es_NEW/es_NEW.result
+0 fo_FO/fo_FO.result
+0 fr_FR/fr_FR.result
+0 ga_IE/ga_IE.result
+0 gd_GB/gd_GB.result
+0 gl_ES/gl_ES.result
+0 he_IL/he_IL.result
+0 hr_HR/hr_HR.result
+200694989 hu_HU/hu_HU.result
+0 id_ID/id_ID.result
+0 it_IT/it_IT.result
+0 ku_TR/ku_TR.result
+0 lt_LT/lt_LT.result
+0 lv_LV/lv_LV.result
+0 mg_MG/mg_MG.result
+0 mi_NZ/mi_NZ.result
+0 ms_MY/ms_MY.result
+0 nb_NO/nb_NO.result
+0 nl_NL/nl_NL.result
+0 nn_NO/nn_NO.result
+0 ny_MW/ny_MW.result
+0 pl_PL/pl_PL.result
+0 pt_BR/pt_BR.result
+0 pt_PT/pt_PT.result
+0 ro_RO/ro_RO.result
+0 ru_RU/ru_RU.result
+0 rw_RW/rw_RW.result
+0 sk_SK/sk_SK.result
+0 sl_SI/sl_SI.result
+0 sv_SE/sv_SE.result
+0 sw_KE/sw_KE.result
+0 tet_ID/tet_ID.result
+0 tl_PH/tl_PH.result
+0 tn_ZA/tn_ZA.result
+0 uk_UA/uk_UA.result
+0 zu_ZA/zu_ZA.result
+
+In en_AU dictionary, there is an abbrevation with two dots (`eqn..'), but
+`eqn.' is missing. Presumably it is a dictionary bug. Myspell also
+haven't accepted it.
+
+Hungarian dictionary contains pseudoroots and forbidden words.
+Unmunch haven't supported these features yet, and generates bad words, too.
+
+* check affix rules and OOo dictionaries. Detected bugs in cs_CZ,
+es_ES, es_NEW, es_MX, lt_LT, nn_NO, pt_PT, ro_RO, sk_SK and sv_SE dictionaries).
+
+Details:
+--------------------------------------------------------
+cs_CZ
+warning - incompatible stripping characters and condition:
+SFX D   us          ech        [^ighk]os
+SFX D   us          y          [^i]os
+SFX Q   os          ech        [^ghk]es
+SFX M   o           ech        [^ghkei]a
+SFX J   ém          ej         ám
+SFX J   ém          ejme       ám
+SFX J   ém          ejte       ám
+SFX A   ou¾it       up         oupit
+SFX A   ou¾it       upme       oupit
+SFX A   ou¾it       upte       oupit
+SFX A   nout        l          [aeiouyáéíóúýùìr][^aeiouyáéíóúýùìrl][^aeiouy
+SFX A   nout        l          [aeiouyáéíóúýùìr][^aeiouyáéíóúýùìrl][^aeiouy
+
+es_ES
+warning - incompatible stripping characters and condition:
+SFX W umar úse [ae]husar
+SFX W emir iñáis eñir
+
+es_NEW
+warning - incompatible stripping characters and condition:
+SFX I unan únen unar
+
+es_MX
+warning - incompatible stripping characters and condition:
+SFX A a ote e
+SFX W umar úse [ae]husar
+SFX W emir iñáis eñir
+
+lt_LT
+warning - incompatible stripping characters and condition:
+SFX U ti      siuosi          tis       
+SFX U ti      siuosi          tis       
+SFX U ti      siesi           tis       
+SFX U ti      siesi           tis       
+SFX U ti      sis             tis       
+SFX U ti      sis             tis       
+SFX U ti      simës           tis       
+SFX U ti      simës           tis       
+SFX U ti      sitës           tis       
+SFX U ti      sitës           tis       
+
+nn_NO
+warning - incompatible stripping characters and condition:
+SFX D   ar  rar  [^fmk]er
+SFX U   Øre  orde  ere
+SFX U   Øre  ort  ere
+
+pt_PT
+warning - incompatible stripping characters and condition:
+SFX g   ãos        oas        ão
+SFX g   ãos        oas        ão
+
+ro_RO
+warning - bad field number:
+SFX L   0          le         [^cg] i
+SFX L   0          i          [cg] i
+SFX U   0          i          [^i] ii
+warning - incompatible stripping characters and condition:
+SFX P   l          i          l	[<- there is an unnecessary tabulator here)
+SFX I   a          ii         [gc] a
+warning - bad field number:
+SFX I   a          ii         [gc] a
+SFX I   a          ei         [^cg] a
+
+sk_SK
+warning - incompatible stripping characters and condition:
+SFX T   µa»         olú        kla»
+SFX T   µa»         olúc       kla»
+SFX T   sµa»        ¹lú        sla»
+SFX T   sµa»        ¹lúc       sla»
+SFX R   µc»         lèiem      åc»
+SFX R   iás»        ätie       mias»
+SFX R   iez»        iem        [^i]ez»
+SFX R   iez»        ie¹        [^i]ez»
+SFX R   iez»        ie         [^i]ez»
+SFX R   iez»        eme        [^i]ez»
+SFX R   iez»        ete        [^i]ez»
+SFX R   iez»        ú          [^i]ez»
+SFX R   iez»        úc         [^i]ez»
+SFX R   iez»        z          [^i]ez»
+SFX R   iez»        me         [^i]ez»
+SFX R   iez»        te         [^i]ez»
+
+sv_SE
+warning - bad field number:
+SFX  C  0  net  nets [^e]n
+--------------------------------------------------------
+
+2005-08-01: Hunspell 1.0.8 release
+
+- improved compound word support
+- fix German S handling
+- port MySpell files and MAP feature
+
+2005-07-22: Hunspell 1.0.7 release
+
+2005-07-21: new home page: http://hunspell.sourceforge.net

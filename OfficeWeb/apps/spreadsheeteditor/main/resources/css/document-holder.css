@@ -1,0 +1,38 @@
+.sse-documentholder {
+    background-color: #EAEAEB;
+}
+
+.sse-documentholder.left-border {
+    border-left:solid 1px #afafaf;
+}
+
+.sse-documentholder.top-border {
+    border-top:solid 1px #afafaf;
+}
+
+*:focus, *:active {
+    outline: none;
+    outline-offset:2px;
+}
+
+.username-tip {
+    background-color: #ee3525;
+    border: none;
+    border-radius: 0;
+    padding: 2px 10px;
+    color: #ffffff;
+    font-family: arial;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+/* safari 7.0 */
+.safari-7 .x-box-layout-ct {
+    overflow: inherit;
+}
+
+.safari-7 .x-box-inner::-webkit-scrollbar,
+.safari-7 .x-box-layout-ct::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}

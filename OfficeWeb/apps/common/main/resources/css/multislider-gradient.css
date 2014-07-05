@@ -1,0 +1,35 @@
+.asc-multi-slider-gradient {
+    height: 35px;
+}
+
+.asc-multi-slider-gradient .x-slider-horz, .asc-multi-slider-gradient .x-slider-horz .x-slider-end {
+    background: transparent no-repeat;
+}
+
+.asc-multi-slider-gradient .x-slider-horz .x-slider-inner {
+    background: #ededed; /* Old browsers */
+    background: -webkit-gradient(linear, left top, right top, color-stop(0%,#000000), color-stop(100%,#ffffff)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(left, #000000 0%,#ffffff 100%); /* Chrome10+,Safari5.1+ */
+    background: -moz-linear-gradient(left, #000000 0%,#ffffff 100%); /* FF3.6+ */
+    background: -o-linear-gradient(left,  #000000 0%,#ffffff 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(left,  #000000 0%,#ffffff 100%); /* IE10+ */
+    background: linear-gradient(to right,  #000000 0%,#ffffff 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#000000', endColorstr='#ffffff',GradientType=1 ); /* IE6-9 */
+
+    background-position: 0 0;
+    border: 1px solid rgba(162, 162, 162, 1);
+    height: 21px;
+}
+
+.asc-multi-slider-gradient .x-slider-thumb {
+    top: 18px;
+}
+
+.asc-multi-slider-gradient .x-slider-horz .x-slider-thumb {
+    background-image:  url("../img/controls/slider-thumb-multi.png");
+    background-image: -webkit-image-set(url("../img/controls/slider-thumb-multi.png") 1x, url("../img/controls/slider-thumb-multi@2x.png") 2x);
+}
+
+.asc-multi-slider-gradient .x-slider-thumb.active-thumb {
+    background-position: -28px -30px;
+}

@@ -1,0 +1,59 @@
+@import "tests";
+
+@import "recipes/color";
+
+
+// All of these colors have the same "lightness"
+$swatch1: #ea0d0d;
+$swatch2: #ea850d;
+$swatch3: #cbea0d;
+$swatch4: #0d65ea;
+$swatch5: #b90dea;
+
+.swatch {
+    min-width: 100px;
+    text-align: center;
+    padding: 10px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px;
+    font-size: 13px;
+    line-height: 16px;
+    font-weight: bold;
+    @include border-radius(5px);
+}
+
+@mixin color-swatch($color) {
+    @extend .swatch;
+    background-color: $color;
+    @include color-by-background($color, 40%);
+    border: 1px solid darken($color, 15%);
+
+    &:after {
+        content: "#{lightness($color)}";
+    }
+    &:hover:after {
+        content: "#{brightness($color)}%";
+    }
+
+    &:active {
+        background-color: darken($color, 5%);
+        @include color-by-background(darken($color, 5%), 50%);
+    }
+}
+
+.swatch1 {
+    @include color-swatch($swatch1);
+}
+.swatch2 {
+    @include color-swatch($swatch2);
+}
+.swatch3 {
+    @include color-swatch($swatch3);
+}
+.swatch4 {
+    @include color-swatch($swatch4);
+}
+.swatch4 {
+    @include color-swatch($swatch5);
+}

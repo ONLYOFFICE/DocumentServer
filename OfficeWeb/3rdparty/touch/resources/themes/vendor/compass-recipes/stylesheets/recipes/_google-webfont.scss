@@ -1,0 +1,15 @@
+$google-font-name: false !default;
+$google-font-weights: false !default;
+
+@if $google-font-name and $google-font-weights {
+    @include google-webfont($google-font-name, $google-font-weights);
+}
+
+@mixin google-webfont(
+    $font-name,
+    $font-weights: 500
+) {
+    // @debug join($font-name,'', '|');
+
+    @import url("//fonts.googleapis.com/css?family=#{$font-name}:#{$font-weights}");
+}

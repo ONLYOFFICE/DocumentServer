@@ -1,0 +1,337 @@
+<!DOCTYPE html >
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>Integrating OfficeExcel with external libraries</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas charts docs external libraries" />
+    <meta name="description" content="Documentation about integrating OfficeExcel with external libraries (such as the ModalDialog that now comes with OfficeExcel)" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.modaldialog.js" ></script>
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.context.js" ></script>
+    <script src="../libraries/OfficeExcel.line.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+    
+    <script>
+        window.onload = function ()
+        {
+            /**
+            * Draw the line chart
+            */
+            var line = new OfficeExcel.Line('myLine', [45,12,16,18,44,54,23,21,56,58,33,47]);
+            line.Set('chart.background.barcolor1', 'white');
+            line.Set('chart.background.barcolor2', 'white');
+            line.Set('chart.tickmarks', null);
+            line.Set('chart.hmargin', 10);
+            line.Set('chart.linewidth', 3);
+            line.Set('chart.shadow', true);
+            line.Set('chart.shadow.offset', 2);
+            line.Set('chart.labels', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
+            line.Set('chart.title', 'A line chart with context menu');
+
+            // This defines a context menu which shows the dialog. The commented out
+            // bit defines an onclick handler on the background, so that when you
+            // click it (the background), the dialog is hidden.
+            if (!OfficeExcel.isOld()) {
+                line.Set('chart.contextmenu', [
+                                               ['Login to admin area...', function () {ModalDialog.Show('myDialog', 300);/*ModalDialog.background.onclick = function () {ModalDialog.Close();};*/}],
+                                               null,
+                                               ['Cancel', function () {}]
+                                              ]);
+            }
+
+            line.Draw();
+        }
+    </script>
+
+
+    <style>
+        /*
+        * These are the CSS classes that you can use to customise the appearance of the ModalDialog. If you're trying to
+        * override something which the scripts set, then because of the ordering you may need to use the "! important"
+        * modifier.
+        */
+        .ModalDialog_background {
+        }
+
+        .ModalDialog_dialog {
+            -webkit-box-shadow: gray 0 0 15px ! important;
+            -moz-box-shadow: 0 0 15px gray ! important;
+            box-shadow: 0 0 15px gray ! important;
+        }
+
+        .ModalDialog_topbar {
+        }
+    </style>
+
+    <?php PrintAnalyticsCode() ?>
+
+</head>
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        OfficeExcel &amp; external libraries
+    </div>
+
+    <h1>Integrating <span>OfficeExcel with external libraries</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <ul>
+        <li><a href="#msie">Note about Microsoft Internet Explorer and the ModalDialog</a></li>
+        <li><a href="#hiding">Hiding the ModalDialog</a></li>
+        <li><a href="#customising">Customising the ModalDialog</a></li>
+        <li><a href="#integration">ModalDialog integration</a></li>
+        <li><a href="#covering">Covering the scroll bars</a></li>
+    </ul>
+
+    <canvas id="myLine" width="400" height="200" style="float: right">[No canvas support]</canvas>
+
+    <p>
+        This page shows you how you can easily integrate the charts with other external Javascript libraries. This particular example
+        adds a context menu to the chart, of which the only option is to show a login dialog. This could, for example, be used to
+        allow logging in to an admin area.
+    </p>
+    
+    <p>
+        The dialog doesn't need to require user input - it could just be a static "Please wait..." type dialog, which is shown while a
+        subsequent page loads that takes a few seconds.
+    </p>
+        
+    <p>
+        The ModalDialog was originally an external library, however it's now part of the OfficeExcel package. It's also covered by the
+        OfficeExcel license - so if you have an <a href="licensing.html">OfficeExcel license</a>, then the ModalDialog is part of that.
+    </p>
+
+    <br /><br />
+
+    <pre class="code">
+&lt;script src="OfficeExcel.common.core.js"&gt;
+&lt;script src="OfficeExcel.common.context.js"&gt;
+&lt;script src="OfficeExcel.line.js"&gt;
+&lt;script src="OfficeExcel.modaldialog.js"&gt;
+
+&lt;script&gt;
+    window.onload = function ()
+    {
+        /**
+        * Draw the line chart
+        */
+        var line = new OfficeExcel.Line('myLine', [45,12,16,18,44,54,23,21,56,58,33,47]);
+        line.Set('chart.background.barcolor1', 'white');
+        line.Set('chart.background.barcolor2', 'white');
+        line.Set('chart.tickmarks', null);
+        line.Set('chart.hmargin', 10);
+        line.Set('chart.linewidth', 3);
+        line.Set('chart.shadow', true);
+        line.Set('chart.shadow.offset', 2);
+        line.Set('chart.labels', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
+        line.Set('chart.title', 'A line chart with context menu');
+        <span style="color: green">
+        // This defines a context menu which calls the given function. This function in turn shows the dialog
+        line.Set('chart.contextmenu', [['Login to admin area...', function () {ModalDialog.Show('myDialog', 300);}}]]);
+        </span>
+        line.Draw();
+    }
+&lt;/script&gt;
+
+&lt;!-- This is the popup dialog--&gt;
+    &lt;div id="myDialog" class="modalDialog" style="display: none"&gt;
+        &lt;b&gt;Please login&lt;/b&gt;
+        &lt;p&gt;
+            &lt;table border="0"&gt;
+                &lt;tr&gt;
+                    &lt;td align="right" style="padding-top: 4px"&gt;Email&lt;/td&gt;
+                    &lt;td&gt;&lt;input type="text" size="20" name="email" style="width: 150px" />&lt;/td&gt;
+                &lt;/tr&gt;
+                &lt;tr&gt;
+                    &lt;td align="right" style="padding-top: 4px"&gt;Password&lt;/td&gt;
+                    &lt;td&gt;&lt;input type="password" size="20" name="password" style="width: 150px" /&gt;&lt;/td&gt;
+                &lt;/tr&gt;
+                &lt;tr&gt;
+                    &lt;td colspan="2" align="right"&gt;
+                        &lt;input type="reset" value="Cancel" onclick="ModalDialog.Close()"&gt;
+                        &lt;input type="submit"
+                                  name="submit"
+                                  value="Login &raquo;"
+                                  onclick="alert('This is just an example'); event.stopPropagation()"&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;/table&gt;
+        &lt;/p&gt;
+    &lt;/div&gt;
+&lt;!-- End of dialog --&gt;</pre>
+
+    <p>
+        If you're interested in using this modal dialog, then you'll probably also want the CSS that styles it. This can be found in the
+        &quot;css&quot; directory.
+    </p>
+
+    <a name="msie"></a>
+    <h3>Note about Microsoft Internet Explorer 8 and the ModalDialog</h3>
+    
+    <p>
+        Microsoft Internet Explorer 8 only supports fixed positioning in strict rendering mode, therefore you must specify a DTD
+        when using this browser. Eg:
+    </p>
+    
+    <pre class="code">
+&lt;!DOCTYPE html &gt;
+</pre>
+
+    <a name="hiding"></a>
+    <h3>Hiding the ModalDialog</h3>
+    <p>
+        To hide the ModalDialog (from a "Cancel" button for example), you can use the Close() method:
+    </p>
+    
+    <pre class="code">
+&lt;input type="reset" value="Cancel" onclick="ModalDialog.Close()"&gt;
+</pre>
+
+    <a name="customising"></a>
+    <h3>Customising the ModalDialog</h3>
+        <p>
+            You can customise the appearance of the ModalDialog by using three CSS classes, which are documented <a href="css.html">here</a>.
+            This page customises the dialog slightly by changing the shadow X/Y offsets:
+        </p>
+        
+        <pre class="code">
+&lt;style&gt;
+    /*
+    * These are the CSS classes that you can use to customise the appearance of the ModalDialog. If you're trying to
+    * override something which the scripts set, then because of the ordering you may need to use the "! important"
+    * modifier.
+    */
+    
+    /**
+    * This is the semi-opaque background
+    */
+    .ModalDialog_background {
+    }
+
+
+    /**
+    * This is the dialog itself
+    */
+    .ModalDialog_dialog {
+        -webkit-box-shadow: gray 0 0 15px ! important;
+        -moz-box-shadow: 0 0 15px gray ! important;
+        box-shadow: 0 0 15px gray ! important;
+    }
+
+
+    /**
+    * This is gray bar at the top of the dialog
+    */
+    .ModalDialog_topbar {
+    }
+&lt;/style&gt;
+</pre>
+
+    <a name="integration"></a>
+    <h3>ModalDialog integration</h3>
+        <p>
+            To integrate the ModalDialog look at the sample code above (the key line is where the context menu is defined). The method you should call is <b>ModalDialog.Show(id, width)</b>.
+            The <i>id</i> is the <i>id</i> of the layer to use. Only the <i>.innerHTML</i> is used, not the layer itself, so it can be hidden by
+            setting the display CSS <i>display</i> property to <i>none</i>. The <i>width</i> is a number which is used as the width of the dialog.
+        </p>
+        
+        <p>
+            The only library needed for the ModalDialog to work is <i>OfficeExcel.modaldialog.js</i> - you do not need to use
+            <i>OfficeExcel.common.js</i>. This makes for far smaller download requirements.
+        </p>
+
+    <a name="covering"></a>
+    <h3>Covering the scroll bars</h3>
+        <p>
+            Normally, a regular DIV lives inside the browser and cannot cover the scroll bars. There is however a way to achieve
+            this but it does mean that restructuring your website may be necessary, and it's done by using an IFRAME. The following
+            steps are involved:
+        </p>
+        
+        <ol>
+            <li style="margin-top: 0">The index page of your website creates an IFRAME and sets it to cover the entire window.</li>
+            <li style="margin-top: 0">This IFRAME then loads the website.</li>
+            <li style="margin-top: 0">The DIV then covers the top-most window.</li></li>
+        </ol>
+        
+        <p style="margin-bottom: 50px">
+            There is an example of this technique <a href="iframe-setup.html"><b>here</b></a>
+        </p>
+
+    <!-- This is the popup dialog-->
+
+        <div id="myDialog" class="modalDialog" style="display: none">
+
+            <b>Please login</b>
+            <p>
+                <table border="0">
+                    <tr>
+                        <td align="right" style="padding-top: 4px">Email</td>
+                        <td><input type="text" size="20" name="email" style="width: 150px" /></td>
+                    </tr>
+
+                    <tr>
+                        <td align="right" style="padding-top: 4px">Password</td>
+                        <td><input type="password" size="20" name="password" style="width: 150px" /></td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="2" align="right">
+                            <input type="reset" value="Cancel" onclick="ModalDialog.Close()">
+                            <input type="submit" name="submit" value="Login &raquo;" onclick="alert('This is just an example'); event.stopPropagation()">
+                        </td>
+                    </tr>
+                </table>
+            </p>
+        </div>
+
+    <!-- End of dialog -->
+
+</body>
+</html>

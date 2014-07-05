@@ -1,0 +1,67 @@
+html {
+  padding: 1em;
+  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dddddd), color-stop(100%, #ffffff)) no-repeat;
+  background: -webkit-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -moz-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -o-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -ms-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: linear-gradient(#dddddd, #ffffff) no-repeat;
+}
+
+h1 {
+  font-size: 2em;
+  margin-bottom: 1em;
+}
+
+h2 {
+  font-size: 1.4em;
+  margin-bottom: .6em;
+}
+
+.doc {
+  background: #fff;
+  border: #ddd;
+  padding: 1em;
+  color: #aaa;
+  margin: 1em;
+  font-style: italic;
+}
+.doc a {
+  color: #999;
+}
+
+.avatar, .avatar1, .avatar2 {
+  width: 100px;
+  height: 100px;
+  background-size: 100px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -o-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  border-radius: 5px;
+  display: inline-block;
+  background: none center center no-repeat;
+}
+
+.avatar1 {
+  background-image: url(http://a3.twimg.com/profile_images/1106236669/twitter_sharp.png);
+}
+
+.avatar2 {
+  background-image: url(https://twimg0-a.akamaihd.net/profile_images/1513955198/IMG_0853-cut.jpg);
+}
+
+.cutout {
+  -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 5px 5px rgba(0, 0, 0, 0.6), inset 0 1px 5px rgba(0, 0, 0, 0.6);
+  -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 5px 5px rgba(0, 0, 0, 0.6), inset 0 1px 5px rgba(0, 0, 0, 0.6);
+  -o-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 5px 5px rgba(0, 0, 0, 0.6), inset 0 1px 5px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 5px 5px rgba(0, 0, 0, 0.6), inset 0 1px 5px rgba(0, 0, 0, 0.6);
+}
+
+.cutout-deep {
+  -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 10px 20px rgba(0, 0, 0, 0.6), inset 0 1px 20px rgba(0, 0, 0, 0.6);
+  -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 10px 20px rgba(0, 0, 0, 0.6), inset 0 1px 20px rgba(0, 0, 0, 0.6);
+  -o-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 10px 20px rgba(0, 0, 0, 0.6), inset 0 1px 20px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 10px 20px rgba(0, 0, 0, 0.6), inset 0 1px 20px rgba(0, 0, 0, 0.6);
+}

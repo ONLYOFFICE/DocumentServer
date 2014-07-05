@@ -1,0 +1,18 @@
+COMPILATION (static Hunspell executable)
+
+1. download and install Cygwin environment for Windows with the following
+extra packages: 
+
+make
+gcc-g++ development package
+mingw development package (for cygwin.dll free native Windows compilation)
+ 
+2. open a Cygwin shell, cd into this directory and run make
+
+HUNSPELL DLL (not updated):
+
+hunspelldll.*: Hunspell API for Windows and Delphi
+Copyright (C) 2006 - Miha Vrhovnik (http://simail.sf.net, http://xcollect.sf.net)
+License: MPL 1.1/GPL 2.0/LGPL 2.1
+Usage: See Delphi example on Hunspell home page on Sourceforge.
+

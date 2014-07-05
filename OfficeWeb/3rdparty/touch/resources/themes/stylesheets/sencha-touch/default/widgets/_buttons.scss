@@ -1,0 +1,362 @@
+// Toolbar icons used with permission from Drew Wilson
+// http://pictos.drewwilson.com/
+// Pictos icons are (c) 2010 Drew Wilson
+
+@import '../global';
+
+/**
+ * @class Ext.Button
+ */
+
+/**
+ * @var {measurement} $button-height Default height for buttons.
+ */
+$button-height: 1.8em;
+
+/**
+ * @var {measurement} $button-radius Default border-radius for buttons.
+ */
+$button-radius: .4em !default;
+
+/**
+ * @var {measurement} $button-stroke-weight Default border width for buttons.
+ */
+$button-stroke-weight: .1em !default;
+
+/**
+ * @var {string} $button-gradient Default gradient for buttons.
+ */
+$button-gradient: $base-gradient !default;
+
+/**
+ * @var {string} $toolbar-icon-size Default size (width and height) for toolbar icons.
+ */
+$toolbar-icon-size: 1.4em !default;
+
+/**
+ * @var {boolean} $include-button-uis Optionally disable separate button UIs, including action, confirm, and decline.
+ */
+$include-button-uis: $include-default-uis !default;
+
+/**
+ * @var {boolean} $include-button-highlights Optionally disable special CSS3 effects on buttons including gradients, text-shadows, and box-shadows.
+ */
+$include-button-highlights: $include-highlights !default;
+
+
+/**
+ * Includes default button styles.
+ */
+@mixin sencha-buttons {
+  // Basic button style
+  .x-button {
+    @include background-clip(padding-box);
+    @if $include-border-radius { @include border-radius($button-radius); }
+    @include display-box;
+    @include box-align(center);
+    @include toolbar-button(#ccc, $button-gradient);
+    min-height: $button-height; // Why was this !important? Breaks small uis - DK
+    padding: .3em .6em;
+    position: relative;
+    overflow: hidden;
+    -webkit-user-select: none;
+    z-index: 1;
+
+    // Default icon style
+    .x-button-icon {
+      width: 2.1em;
+      height: 2.1em;
+      background-repeat: no-repeat;
+      background-position: center;
+      display: block;
+
+      &.x-icon-mask {
+        width: 1.1em;
+        height: 1.1em;
+        -webkit-mask-size: 1.1em;
+      }
+    }
+
+    &.x-item-disabled .x-button-label, &.x-item-disabled .x-button-icon {
+      opacity: .5;
+    }
+  }
+
+  @if $include-border-radius {
+    .x-button-round {
+      @include border-radius($button-height/2);
+    }
+  }
+
+  // Button icon alignment
+  .x-iconalign-left, .x-icon-align-right {
+    @include box-orient(horizontal);
+  }
+  .x-iconalign-top, .x-iconalign-bottom {
+    @include box-orient(vertical);
+  }
+  .x-iconalign-bottom, .x-iconalign-right {
+    @include box-direction(reverse);
+  }
+  .x-iconalign-center {
+    @include box-pack(center);
+  }
+  .x-iconalign-left .x-button-label {
+    margin-left: $toolbar-spacing * 1.5;
+  }
+  .x-iconalign-right .x-button-label {
+    margin-right: $toolbar-spacing * 1.5;
+  }
+  .x-iconalign-top .x-button-label {
+    margin-top: $toolbar-spacing * 1.5;
+  }
+  .x-iconalign-bottom .x-button-label {
+    margin-bottom: $toolbar-spacing * 1.5;
+  }
+
+  // Button labels
+  .x-button-label {
+    @include box-flex(1);
+    @include box-align(center);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-align: center;
+    font-weight: bold;
+    line-height: 1.2em;
+    display: block;
+    overflow: hidden;
+  }
+
+  // Toolbar button styling
+  .x-toolbar .x-button {
+    margin: 0 .2em;
+    padding: .3em .6em;
+
+    .x-button-label {
+      font-size: .7em;
+    }
+
+    .x-button-label, .x-hasbadge .x-badge {
+      line-height: 1.6em;
+    }
+  }
+
+  .x-button-small, .x-toolbar .x-button-small {
+    @if $include-border-radius { @include border-radius(.3em); }
+    padding: .2em .4em;
+    min-height: 0;
+
+    .x-button-label {
+      font-size: .6em;
+    }
+
+    .x-button-icon {
+      width: .75em;
+      height: .75em;
+
+      &.x-icon-mask {
+        -webkit-mask-size: .75em;
+      }
+    }
+  }
+
+  // Back/Forward buttons
+  $shadow-width: .045em; // Space between tip and its shadow
+  $overlap-width: .2em; // how far the mask is clipped
+
+  // $mask-height: $button-height + $button-stroke-weight * 2; // Ugh, this is non-specific... borders?
+  $mask-height: $button-height;
+  $mask-width: $mask-height/2.23;
+
+  $mask-offset: $button-radius - $overlap-width - $button-stroke-weight + $shadow-width - .02;
+
+  $tip-width: $mask-width - $mask-offset + $shadow-width;
+
+  .x-button-forward, .x-button-back {
+    position: relative;
+    overflow: visible;
+    height: $button-height - 0.1;
+    z-index: 1;
+    &:before, &:after {
+      @include insertion($mask-width, $mask-height, -$button-stroke-weight, auto);
+      z-index: 2;
+      -webkit-mask: $mask-offset 0 theme_image($theme-name, "tip2_left.png") no-repeat;
+      -webkit-mask-size: $mask-width $mask-height;
+      overflow: hidden;
+    }
+  }
+
+  .x-button-back,
+  .x-toolbar .x-button-back {
+    margin-left: $tip-width - $shadow-width + $toolbar-spacing  - 0.01;
+    padding-left: .4em;
+    &:before {
+      left: - $tip-width;
+    }
+    &:after {
+      left: - $tip-width + $shadow-width;
+    }
+  }
+
+  .x-button-forward,
+  .x-toolbar .x-button-forward {
+    margin-right: $tip-width - $shadow-width + $toolbar-spacing;
+    padding-right: .4em;
+    &:before, &:after {
+      -webkit-mask: -$mask-offset 0 theme_image($theme-name, "tip2_right.png") no-repeat;
+    }
+    &:before {
+      right: - $tip-width;
+    }
+    &:after {
+      right: - $tip-width + $shadow-width;
+    }
+  }
+
+  // Plain buttons automatically use a margin trick to have a
+  // wide gradial glow for pressed state.
+  .x-button.x-button-plain,
+  .x-toolbar .x-button.x-button-plain {
+    background: none;
+    border: 0 none;
+    @if $include-border-radius { @include border-radius(none); }
+    min-height: 0;
+    text-shadow: none;
+    line-height: auto;
+    height: 1.9em;
+    padding: 0em 0.5em;
+
+    & > * {
+      overflow: visible;
+    }
+
+    .x-button-icon {
+      -webkit-mask-size: $toolbar-icon-size;
+      width: $toolbar-icon-size;
+      height: $toolbar-icon-size;
+    }
+
+    &.x-button-pressing, &.x-button-pressed {
+      background: none;
+
+      $mask-radial-glow: lighten($active-color, 50%);
+      @include background-image(radial-gradient(fade-out($mask-radial-glow, .3), fade-out($mask-radial-glow, 1) 24px));
+      .x-button-icon.x-button-mask {
+        @include background-gradient(#fff, 'recessed');
+      }
+    }
+  }
+
+  // SegmentedButtons
+  .x-segmentedbutton .x-button {
+    margin: 0;
+
+    @if $include-border-radius {
+      @include border-radius(0);
+
+      &.x-first {
+        @include border-left-radius($button-radius);
+      }
+      &.x-last {
+        @include border-right-radius($button-radius);
+      }
+    }
+
+    &:not(.x-first) {
+      border-left: 0;
+    }
+  }
+
+  // Badges
+  $badge-size: 2em !default;
+  $badge-radius: .2em !default;
+  $badge-bg-color: darken($alert-color, 10%) !default;
+  $badge-bg-gradient: $base-gradient !default;
+
+  .x-hasbadge {
+    overflow: visible;
+    .x-badge {
+      @extend .x-button-label;
+      @include background-clip(padding-box);
+      @if $include-border-radius { @include border-radius($badge-radius); }
+      padding: .1em .3em;
+      z-index: 2;
+      @if $include-button-highlights {
+        @include bevel-by-background($badge-bg-color);
+        @include box-shadow(rgba(#000, .5) 0 .1em .1em);
+      }
+      overflow: hidden;
+      @include color-by-background($badge-bg-color, $contrast: 50%);
+      border: 1px solid darken($badge-bg-color, 10%);
+      position: absolute;
+      width: auto;
+      min-width: $badge-size;
+      line-height: 1.2em;
+      font-size: .6em;
+      right: 0px;
+      top: -.2em;
+      max-width: 95%;
+      @include background-gradient($badge-bg-color, $badge-bg-gradient);
+      display: inline-block;
+    }
+  }
+
+  @if $include-default-icons {
+    @include pictos-iconmask('action');
+    @include pictos-iconmask('add');
+    @include pictos-iconmask('arrow_down');
+    @include pictos-iconmask('arrow_left');
+    @include pictos-iconmask('arrow_right');
+    @include pictos-iconmask('arrow_up');
+    @include pictos-iconmask('compose');
+    @include pictos-iconmask('delete');
+    @include pictos-iconmask('organize');
+    @include pictos-iconmask('refresh');
+    @include pictos-iconmask('reply');
+    @include pictos-iconmask('search');
+    @include pictos-iconmask('settings');
+    @include pictos-iconmask('star');
+    @include pictos-iconmask('trash');
+    @include pictos-iconmask('maps');
+    @include pictos-iconmask('locate');
+    @include pictos-iconmask('home');
+  }
+
+  @if $include-button-uis {
+    @include sencha-button-ui('action', $active-color);
+    @include sencha-button-ui('confirm', desaturate(darken($confirm-color, 10%), 5%));
+    @include sencha-button-ui('decline', desaturate(darken($alert-color, 10%), 5%));
+  }
+}
+
+
+/**
+ * Creates a theme UI for buttons.
+ * Also automatically generates UIs for {ui-label}-round and {ui-label}-small.
+ *
+ *     // SCSS
+ *     @include sencha-button-ui('secondary', #99A4AE, 'glossy');
+ *
+ *     // JS
+ *     var cancelBtn = new Ext.Button({text: 'Cancel', ui: 'secondary'});
+ *
+ * @param {string} $ui-label The name of the UI being created.
+ *   Can not included spaces or special punctuation (used in class names)
+ * @param {color} $color Base color for the UI.
+ * @param {string} $gradient Default gradient for the UI.
+ */
+@mixin sencha-button-ui($ui-label, $color, $gradient: $button-gradient) {
+  .x-button.x-button-#{$ui-label}, .x-button.x-button-#{$ui-label}-round, .x-button.x-button-#{$ui-label}-small {
+    @include toolbar-button($color, $gradient);
+  }
+
+  @if $include-border-radius {
+    .x-button.x-button-#{$ui-label}-round {
+      @extend .x-button-round;
+    }
+  }
+
+  .x-button.x-button-#{$ui-label}-small {
+    @extend .x-button-small;
+  }
+}

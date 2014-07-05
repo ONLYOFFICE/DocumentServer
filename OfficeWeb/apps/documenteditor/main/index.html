@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ONLYOFFICE Document Editor</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8"/>
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <link rel="icon" href="resources/img/favicon.png" type="image/png" />
+
+    <link rel="stylesheet" type="text/css" href="../../../3rdparty/extjs/resources/css/ext-all.css">
+
+    <link rel="stylesheet" type="text/css" href="../../common/main/resources/css/header.css">
+    <link rel="stylesheet" type="text/css" href="../../common/main/resources/css/load-mask.css">
+    <link rel="stylesheet" type="text/css" href="../../common/main/resources/css/chat-panel.css">
+    <link rel="stylesheet" type="text/css" href="../../common/main/resources/css/jquery.jscrollpane.css">
+    <link rel="stylesheet" type="text/css" href="../../common/main/resources/css/asc.css">
+    <link rel="stylesheet" type="text/css" href="../../common/main/resources/css/searchfield.css">
+    <link rel="stylesheet" type="text/css" href="../../common/main/resources/css/searchdialog.css">
+
+    <link rel="stylesheet" type="text/css" href="resources/css/de-main-colors.css">
+    <link rel="stylesheet" type="text/css" href="resources/css/header.css">
+    <link rel="stylesheet" type="text/css" href="resources/css/document-holder.css">
+    <link rel="stylesheet" type="text/css" href="resources/css/document-statusinfo.css">
+    <link rel="stylesheet" type="text/css" href="resources/css/main-menu.css">
+    <link rel="stylesheet" type="text/css" href="resources/css/file.css">
+    <link rel="stylesheet" type="text/css" href="resources/css/file-create-new.css">
+    <link rel="stylesheet" type="text/css" href="resources/css/file-open-recent.css">
+
+    <!-- splash -->        
+
+    <style type="text/css">
+        .loadmask {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            border: none;
+            background-color: #f4f4f4;
+            z-index: 20002;
+        }
+
+        .loadmask-body {
+            font-weight: bold;
+            font-family: Arial;
+            position:relative;
+            top:44%;
+        }
+
+        .loadmask-logo {
+            display: inline-block;
+            min-width: 220px;
+            height: 62px;
+            vertical-align: top;
+            background-image: url('./resources/img/loading-logo.gif');
+            background-image: -webkit-image-set(url('./resources/img/loading-logo.gif') 1x, url('./resources/img/loading-logo@2x.gif') 2x);
+            background-repeat: no-repeat;
+        }
+
+        #loadmask-text {
+            color: #b2b2b2;
+            font-size: 10px;
+            height:14px;
+            margin-top:32px;
+            padding-left:44px;
+            text-align:left;
+            text-transform: uppercase;
+        }
+
+        #loadmask-tmlink {
+            border-top: 1px solid #d3d3d3;
+            margin-top: 15px;
+            padding-top: 11px;
+            width: 270px;
+            margin-left: -14px;
+            font-size: 18px;
+            color: #6e6e6e;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading-mask" class="loadmask">
+        <div class="loadmask-body" align="center">
+            <div class="loadmask-logo">
+                <!-- <div id="loadmask-text">LOADING APPLICATION</div> -->
+                <!--<div id="loadmask-tmlink">www.onlyoffice.com</div>-->
+            </div>
+        </div>
+    </div>
+
+    <!-- 3rdparty -->
+
+    <script type="text/javascript" src="../../../3rdparty/extjs/ext-debug.js"></script>
+    <script type="text/javascript" src="../../../3rdparty/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="../../../3rdparty/jquery/mousewheel/jquery.mousewheel.js"></script>
+    <script type="text/javascript" src="../../../3rdparty/jquery/jscrollpane/jquery.jscrollpane.js"></script>
+    <script type="text/javascript" src="../../../3rdparty/sockjs/sockjs-0.3.min.js"></script>
+    <script type="text/javascript" src="../../../3rdparty/xregexp/xregexp-all-min.js"></script> 
+    <script type="text/javascript" src="../../../3rdparty/underscore/underscore-min.js"></script>
+
+    <!-- application -->
+
+    <script type="text/javascript" src="../../api/documents/api.js"></script>
+    <script type="text/javascript" src="../../common/Analytics.js"></script>
+    <script type="text/javascript" src="../../common/Gateway.js"></script>
+    <script type="text/javascript" src="../../common/IrregularStack.js"></script>
+    <script type="text/javascript" src="../../common/main/loader.js"></script>
+    <script type="text/javascript" src="../../common/main/lib/component/util/MetricSettings.js"></script>
+    <script type="text/javascript" src="app.js"></script>
+    <script type="text/javascript" src="restrictions.js"></script>
+    <script type="text/javascript" src="environment.js"></script>
+    <script type="text/javascript" src="../../common/locale.js"></script>
+
+    <!-- sdk -->
+
+    <script type="text/javascript" src="../../../sdk/Common/AllFonts.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/browser.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/docscoapisettings.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/docscoapicommon.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/docscoapi.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/apiCommon.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/spellcheckapisettings.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/spellcheckapi.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/wordcopypaste.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/spellCheckLanguage.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/spellCheckLanguagesAll.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/downloaderfiles.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/commonDefines.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/editorscommon.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/NumFormat.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/Shapes/EditorSettings.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/Shapes/Serialize.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/Shapes/SerializeWriter.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/SerializeCommonWordExcel.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/trackFile.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/Charts/charts.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/Charts/DrawingObjects.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/FontsFreeType/font_engine.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/FontsFreeType/FontFile.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/FontsFreeType/FontManager.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/Externals.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/GlobalLoaders.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/translations.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/GraphicObjects.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/GraphicPage.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/States.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/Math.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/TrackGraphicObjects.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/WrapManager.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/Spline.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/PolyLine.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/ObjectTypes/WordShape.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/ObjectTypes/WordImage.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/ObjectTypes/WordGroupShapes.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/ObjectTypes/Format.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/ObjectTypes/Geometry.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/ObjectTypes/ShapeTracks.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/ObjectTypes/GroupTracks.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/ObjectTypes/CreateGeometry.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/ObjectTypes/Path.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/ObjectTypes/Chart.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/ObjectTypes/ChartLayout.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/ObjectTypes/ChartLegend.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/ObjectTypes/ChartTitle.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/ObjectTypes/TextBody.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/Metafile.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/CollaborativeEditing.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/Comments.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/History.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/Styles.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/DrawingObjects.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/FlowObjects.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/ParagraphContent.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/Paragraph.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/Sections.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/Numbering.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/HeaderFooter.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/Document.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/Common.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/DocumentContent.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/Table.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/Serialize2.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/Search.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/FontClassification.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/Spelling.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/Graphics.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/ArcTo.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/Hit.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/ColorArray.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/Overlay.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/HatchPattern.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/ShapeDrawer.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/DrawingDocument.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/GraphicsEvents.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/scrolls/iscroll.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/WorkEvents.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/Controls.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/Rulers.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/HtmlPage.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Drawing/documentrenderer.js"></script>
+    <script type="text/javascript" src="../../../sdk/Common/scroll.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/Editor/SerializeCommon.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/apiDefines.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/api.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/apiCommon.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/document/empty.js"></script>
+    <script type="text/javascript" src="../../../sdk/Excel/graphics/DrawingContextWord.js"></script>
+
+</body>
+</html>

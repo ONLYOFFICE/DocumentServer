@@ -1,0 +1,30 @@
+@import "tests";
+
+@import 'recipes/effect/cutout';
+
+.avatar {
+    width: 100px;
+    height: 100px;
+    background-size: 100px;
+    @include border-radius(5px);
+    display: inline-block;
+    background: none center center no-repeat;
+}
+
+.avatar1 {
+    @extend .avatar;
+    @include background-image(url(http://a3.twimg.com/profile_images/1106236669/twitter_sharp.png));
+}
+
+.avatar2 {
+    @extend .avatar;
+    @include background-image(url(https://twimg0-a.akamaihd.net/profile_images/1513955198/IMG_0853-cut.jpg));
+}
+
+.cutout {
+    @include cutout;
+}
+
+.cutout-deep {
+    @include cutout($size: 10px, $blur: 20px);
+}

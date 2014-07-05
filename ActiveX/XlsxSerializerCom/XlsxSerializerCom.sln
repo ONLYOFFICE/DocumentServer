@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual C++ Express 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XlsxSerializerCom", "XlsxSerializerCom.vcproj", "{87476A4D-6A42-44E9-A947-42B8E8613070}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A100103A-353E-45E8-A9B8-90B87CC5C0B0} = {A100103A-353E-45E8-A9B8-90B87CC5C0B0}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DocxFormat", "..\Common\DocxFormat\Projects\DocxFormat2005.vcproj", "{A100103A-353E-45E8-A9B8-90B87CC5C0B0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+		ReleaseOpenSource|Win32 = ReleaseOpenSource|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{87476A4D-6A42-44E9-A947-42B8E8613070}.Debug|Win32.ActiveCfg = Debug|Win32
+		{87476A4D-6A42-44E9-A947-42B8E8613070}.Debug|Win32.Build.0 = Debug|Win32
+		{87476A4D-6A42-44E9-A947-42B8E8613070}.Release|Win32.ActiveCfg = Release|Win32
+		{87476A4D-6A42-44E9-A947-42B8E8613070}.Release|Win32.Build.0 = Release|Win32
+		{87476A4D-6A42-44E9-A947-42B8E8613070}.ReleaseOpenSource|Win32.ActiveCfg = ReleaseOpenSource|Win32
+		{87476A4D-6A42-44E9-A947-42B8E8613070}.ReleaseOpenSource|Win32.Build.0 = ReleaseOpenSource|Win32
+		{A100103A-353E-45E8-A9B8-90B87CC5C0B0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A100103A-353E-45E8-A9B8-90B87CC5C0B0}.Debug|Win32.Build.0 = Debug|Win32
+		{A100103A-353E-45E8-A9B8-90B87CC5C0B0}.Release|Win32.ActiveCfg = Release|Win32
+		{A100103A-353E-45E8-A9B8-90B87CC5C0B0}.Release|Win32.Build.0 = Release|Win32
+		{A100103A-353E-45E8-A9B8-90B87CC5C0B0}.ReleaseOpenSource|Win32.ActiveCfg = ReleaseOpenSource|Win32
+		{A100103A-353E-45E8-A9B8-90B87CC5C0B0}.ReleaseOpenSource|Win32.Build.0 = ReleaseOpenSource|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(DPCodeReviewSolutionGUID) = preSolution
+		DPCodeReviewSolutionGUID = {00000000-0000-0000-0000-000000000000}
+	EndGlobalSection
+EndGlobal

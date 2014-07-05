@@ -1,0 +1,15 @@
+/**
+ * Shape/Polygon/Parallelogram
+ *
+ * @author Maxime Thirouin maxime.thirouin@gmail.com @MoOx
+ */
+
+@import "compass/css3/transform";
+
+@mixin parallelogram($width: 150px, $height: 100px, $skew: 20deg, $background: transparent)
+{
+    width: $width;
+    height: $height;
+    @include transform(skew($skew));
+    background: $background;
+}

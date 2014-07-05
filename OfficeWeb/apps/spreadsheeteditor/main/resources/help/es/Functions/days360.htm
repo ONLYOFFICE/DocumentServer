@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<title>Función DAYS360</title>
+		<meta charset="utf-8" />
+		<meta name="description" content="" />
+		<link type="text/css" rel="stylesheet" href="../editor.css" />
+	</head>
+	<body>
+		<div class="mainpart">
+			<h1>Función DAYS360</h1>
+			<p>La función <b>DAYS360</b> es una función de fecha y hora. Se usa para devolver el número de días entre dos fechas (fecha de inicio y fecha final) basadas en un año de 360 días usando uno de los métodos de cálculo (europeo o norteamericano).</p>
+			<p>La sintaxis de la función <b>DAYS360</b> es:</p> 
+			<p style="text-indent: 150px;"><b><em>DAYS360(start-date, end-date [,method-flag])</em></b></p> 
+			<p><em>donde</em></p> 
+			<p style="text-indent: 50px;"><b><em>start-date</em></b> (fecha de inicio) y <b><em>end-date</em></b> (fecha final) son dos fechas entre las cuales usted quiere calcular el número de días.</p>
+			<p style="text-indent: 50px;"><b><em>method-flag</em></b> es un valor lógico opcional: <b>TRUE</b> o <b>FALSE</b>. Si se establece en <b>TRUE</b>, se realizará el cálculo por el método europeo, según este método las fechas de inicio y final que caen en el 31 de un mes vuelven a ser iguales al 30 del mismo mes.<br />
+				Si es <b>FALSE</b> o se omite, se realizará el cálculo por el método norteamericano, según este método si la fecha de inicio es el último día de un mes, ella volverá a ser igual al 30 del mismo mes. Si la fecha final es el último día de un mes y la fecha de inicio es anterior al 30 de un mes, la fecha final volverá a ser igual al 1 del próximo mes. Si no la fecha final volverá a ser igual al 30 del mismo mes.
+			</p> 
+			<p>Para aplicar la función <b>DAYS360</b>,</p>
+			<ol>
+			<li>seleccione la celda donde usted quiere ver el resultado,</li>
+			<li>pulse el icono <b>Insertar función</b> <img alt="icono Insertar función" src="../images/insertfunction.png" /> que se sitúa en la barra de herramientas superior, 
+				<br />o pulse el icono <img alt="icono Función" src="../images/function.png" /> que se sitúa en la barra de fórmulas,
+			</li>
+			<li>seleccione el grupo de funciones <b>Fecha y hora</b> en la lista,</li>
+			<li>pulse la función <b>DATEVALUE</b>,</li>
+			<li>introduzca los argumentos requeridos separándolos por comas,</li>
+			<li>pulse la tecla <b>Enter</b>.</li>
+			</ol>
+			<p>El resultado se mostrará en la celda elegida.</p>
+			<p style="text-indent: 150px;"><img alt="DAYS360 Function" src="../images/days360.png" /></p>
+		</div>
+	</body>
+</html>

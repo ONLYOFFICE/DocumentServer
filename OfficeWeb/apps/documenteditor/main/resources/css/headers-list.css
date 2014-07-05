@@ -1,0 +1,190 @@
+.lm-style .de-headerslist {
+    border: 0 !important;
+}
+
+.de-headerslist-body {
+    border: 0;
+    padding: 18px 0 0 0
+}
+
+.de-headerslist-body .x-tree-panel {
+    overflow: hidden;
+    background-color: inherit;
+    border: 0 !important;
+}
+
+.de-headerslist .de-headerslist-header {
+    color       : #636363;
+    font-size   : 14px;
+    font-family : Arial;
+}
+
+.de-headerslist-body .x-panel .x-grid-body,
+.x-headerslist-panel-context .x-grid-view {
+    background-color: inherit;
+    border: 0;
+}
+
+.x-headerslist-panel-context .x-grid-view {
+    overflow: hidden;
+}
+
+.de-headerslist-body .x-tree-panel .x-scroller-vertical {
+    visibility: hidden;
+}
+
+.x-headerslist-panel-context tr.x-grid-row,
+.x-headerslist-panel-context td.x-grid-cell {
+    height: 23px;
+    vertical-align: middle;
+    text-align: left;
+    line-height: 23px;
+    background-color: inherit;
+    width: auto;
+    overflow: visible;
+    padding-left: 20px;
+}
+
+.x-headerslist-panel-context .x-grid-row .x-grid-cell-inner{
+    vertical-align: middle;
+    height: 23px;
+    line-height: 16px;
+    padding: 2px 0 0 0;
+    overflow: visible;
+}
+
+.x-headerslist-panel-context .x-grid-tree-node-expanded .x-tree-elbow-plus,
+.x-headerslist-panel-context .x-grid-tree-node-expanded .x-tree-elbow-end-plus,
+.x-headerslist-panel-context .x-tree-elbow-plus,
+.x-headerslist-panel-context .x-tree-elbow-end-plus,
+.x-headerslist-panel-context .x-tree-elbow-end,
+.x-headerslist-panel-context .x-tree-elbow,
+.x-headerslist-panel-context span.caption-right-border
+{
+    width:15px;
+    height:20px;
+    background-image: url('../img/headers-list-button.PNG');
+    /*background-image: -webkit-image-set(url("../img/headers-list-button.png") 1x, url("../img/headers-list-button@2x.png") 2x);*/
+}
+
+.x-headerslist-panel-context .x-grid-row-over .x-tree-elbow-plus,
+.x-headerslist-panel-context .x-grid-row-over .x-tree-elbow-end-plus,
+.x-headerslist-panel-context .x-grid-row-over .x-tree-elbow-end,
+.x-headerslist-panel-context .x-grid-row-over .x-tree-elbow,
+.x-headerslist-panel-context .x-grid-row-over span.caption-right-border
+{
+    width:15px;
+    height:20px;
+    background-image: url('../img/headers-list-button-hover.PNG');
+    /*background-image: -webkit-image-set(url("../img/headers-list-button-hover.png") 1x, url("../img/headers-list-button-hover@2x.png") 2x);*/
+}
+
+.x-headerslist-panel-context .x-grid-row-selected .x-tree-elbow-plus,
+.x-headerslist-panel-context .x-grid-row-selected .x-tree-elbow-end-plus,
+.x-headerslist-panel-context .x-grid-row-selected .x-tree-elbow-end,
+.x-headerslist-panel-context .x-grid-row-selected .x-tree-elbow,
+.x-headerslist-panel-context .x-grid-row-selected span.caption-right-border
+{
+    width:15px;
+    height:20px;
+    background-image: url('../img/headers-list-button-selected.PNG');
+    /*background-image: -webkit-image-set(url("../img/headers-list-button-selected.png") 1x, url("../img/headers-list-button-selected@2x.png") 2x);*/
+}
+
+.x-headerslist-panel-context .x-tree-elbow-line,
+.x-headerslist-panel-context .x-tree-elbow-empty {
+    width:10px;
+}
+
+.x-headerslist-panel-context .x-grid-tree-node-expanded .x-tree-elbow-plus,
+.x-headerslist-panel-context .x-grid-tree-node-expanded .x-tree-elbow-end-plus {
+    background-position:0 -40px;
+}
+
+.x-headerslist-panel-context .x-tree-elbow-plus,
+.x-headerslist-panel-context .x-tree-elbow-end-plus {
+    background-position:0 0;
+}
+
+.x-headerslist-panel-context .x-tree-elbow-end,
+.x-headerslist-panel-context .x-tree-elbow {
+    background-position:0 -20px;
+}
+
+.x-headerslist-panel-context span.caption-right-border {
+    display: inline-block;
+    background-position:0 -60px;
+    border: 0;
+    vertical-align: middle;
+    padding: 2px 0;
+    cursor: pointer;
+}
+
+.x-headerslist-panel-context span.caption-right-border-padding,
+.x-headerslist-panel-context span.caption-add-left-padding {
+    height:20px;
+    background-image: url('../img/headers-list-button.PNG');
+    /*background-image: -webkit-image-set(url("../img/headers-list-button.png") 1x, url("../img/headers-list-button@2x.png") 2x);*/
+    display: inline-block;
+    background-position:0 -100px;
+    border: 0;
+    vertical-align: middle;
+    padding: 2px 0;
+}
+
+.x-headerslist-panel-context span.caption-right-border-padding
+{ width:20px; }
+
+.x-headerslist-panel-context span.caption-add-left-padding
+{ width:10px; }
+
+.x-headerslist-panel-context span.caption-inner {
+    background-image: url("../img/headers-list-button.PNG");
+    /*background-image: -webkit-image-set(url("../img/headers-list-button.png") 1x, url("../img/headers-list-button@2x.png") 2x);*/
+    color: #797979;
+}
+
+.x-headerslist-panel-context .x-grid-row-over span.caption-inner {
+    /* selected items */
+    background-image: url("../img/headers-list-button-hover.PNG");
+    /*background-image: -webkit-image-set(url("../img/headers-list-button-hover.png") 1x, url("../img/headers-list-button-hover@2x.png") 2x);*/
+    color: #ffffff;
+}
+
+.x-headerslist-panel-context .x-grid-row-selected span.caption-inner {
+    /* selected items */
+    background-image: url("../img/headers-list-button-selected.PNG");
+    /*background-image: -webkit-image-set(url("../img/headers-list-button-selected.png") 1x, url("../img/headers-list-button-selected@2x.png") 2x);*/
+    color: #ffffff;
+}
+
+.x-headerslist-panel-context span.caption-inner,
+.x-headerslist-panel-context .x-grid-row-selected span.caption-inner,
+.x-headerslist-panel-context .x-grid-row-over span.caption-inner {
+    height:20px;
+    display: inline-block;
+    background-position:0 -80px;
+    background-repeat: repeat-x;
+    border: 0;
+    vertical-align: middle;
+    padding: 2px 1px 0 3px;
+    font-size: 11px;
+    font-family: Arial;
+    cursor: pointer;
+}
+
+.x-headerslist-panel-context .x-grid-row-selected .x-grid-cell,
+.x-headerslist-panel-context .x-grid-row-selected .x-grid-rowwrap-div {
+    background-color: transparent !important;
+}
+
+.de-headerslist-body .x-tree-panel .x-grid-row .x-grid-cell-inner img {
+    display: inline-block;
+}
+
+.de-headerslist-body .x-tree-panel .x-grid-row .x-grid-cell-inner .x-tree-icon-leaf,
+.de-headerslist-body .x-tree-panel .x-grid-row .x-grid-cell-inner .x-tree-icon-parent
+{
+    display: none;
+}
+

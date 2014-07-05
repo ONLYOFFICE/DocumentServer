@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>HOWTO: Add the ModalDialog to your charts using the new pseudo-events</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas chart docs links" />
+    <meta name="description" content="A HOWTO guide for adding the ModalDialog to your charts using the newOfficeExcel pseudo-events" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A chart library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.jpg"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <meta name="keywords" content="OfficeExcel chart html5 javascript canvas" />
+    <meta name="description" content="OfficeExcel: HTML5 Javascript charts library" />
+    
+    <script src="../libraries/OfficeExcel.bar.js" ></script>
+    <script src="../libraries/OfficeExcel.modaldialog.js" ></script>
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    
+    <style>
+        .ModalDialog_dialog {
+            box-shadow: 0 0 15px gray ! important;
+            -moz-box-shadow: 0 0 15px gray ! important;
+            -ms-box-shadow: 0 0 15px gray ! important;
+            -o-box-shadow: 0 0 15px gray ! important;
+        }
+    </style>
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+
+    <script>
+    
+        labels = ['Kev','Louise','Pete','Gary','Fliss', 'James'];
+
+        window.onload = function (e)
+        {
+            // -------------------------------------------------------------------------- //
+            var bar1 = new OfficeExcel.Bar('cvs1', [4,6,5,3,8,9]);
+            bar1.Set('chart.labels',labels);
+            bar1.Draw();
+            
+            
+            // -------------------------------------------------------------------------- //
+
+            
+            function ShowDialog (e, bar)
+            {
+                // Check this index if you want to show different dialogs based on the bar that was clicked.
+                var index = bar[5];
+
+                ModalDialog.Show('myDialog');
+            }
+
+            var bar2 = new OfficeExcel.Bar('cvs2', [4,6,5,3,8,9]);
+            bar2.Set('chart.labels',labels);
+            bar2.Set('chart.events.click',ShowDialog);
+            bar2.Set('chart.events.mousemove',function (e, bar) {e.target.style.cursor = 'pointer';});
+            bar2.Draw();
+            // -------------------------------------------------------------------------- //
+        }
+    </script>
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+
+<div id="breadcrumb">
+    <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+    >
+    <a href="./index.html">Documentation</a>
+    >
+    HOWTO: Use the ModalDialog with events
+</div>
+
+<h1>HOWTO: <span>Use the ModalDialog with events</span></h1>
+
+    <p>
+        This is a step-by-step guide to implementing and using the ModalDialog that comes with OfficeExcel. It can be used as a simple
+        "Please wait..." style dialog or, as below, it could be used as a user input request. To get it up and running is quite simple,
+        and you don't have to use it with OfficeExcel charts - it can be used standalone as there are no dependencies on OfficeExcel libraries.
+    </p>
+
+
+
+
+    <h4>1. The basic chart without the ModalDialog</h4>
+        <p>
+            The basic chart used is shown below. The chart does not have the ModalDialog added to it yet - it's just a simple Bar chart.
+        </p>
+
+        <canvas id="cvs1" width="600" height="250">[No canvas support]</canvas>
+        
+        <pre class="code">
+&lt;script src="OfficeExcel.bar.js" &gt;&lt;/script&gt;
+&lt;script src="OfficeExcel.modaldialog.js" &gt;&lt;/script&gt;
+&lt;script src="OfficeExcel.common.core.js" &gt;&lt;/script&gt;
+
+&lt;script&gt;
+    var bar = new OfficeExcel.Bar('cvs', [4,6,5,3,8,9]);
+    bar.Set('chart.labels', ['Kev','Louise','Pete','Gary','Fliss', 'James']);
+    bar.Draw();
+&lt;/script&gt;
+</pre>
+
+
+
+
+    <h4>2. The ModalDialog</h4>
+        <p>
+            This is the DIV whose content is used as the ModalDialog. It is important to remember that only the contents are used, not
+            the DIV itself. This means that you can hide the DIV with the <i>display:</i> CSS property.
+        </p>
+        
+        <pre class="code">
+&lt;script src="OfficeExcel.bar.js" &gt;&lt;/script&gt;
+&lt;script src="OfficeExcel.modaldialog.js" &gt;&lt;/script&gt;
+&lt;script src="OfficeExcel.common.core.js" &gt;&lt;/script&gt;
+
+&lt;script&gt;
+    var bar = new OfficeExcel.Bar('cvs', [4,6,5,3,8,9]);
+    bar.Set('chart.labels', ['Kev','Louise','Pete','Gary','Fliss', 'James']);
+    bar.Draw();
+&lt;/script&gt;
+
+<span style="color: green">&lt;!-- This is the popup dialog--&gt;
+    &lt;div id="myDialog" class="modalDialog" style="display: none"&gt;
+        &lt;b&gt;Please login&lt;/b&gt;
+        &lt;p&gt;
+            &lt;table border="0"&gt;
+                &lt;tr&gt;
+                    &lt;td align="right" style="padding-top: 4px"&gt;Email&lt;/td&gt;
+                    &lt;td&gt;&lt;input type="text" size="20" name="email" style="width: 150px" /&gt;&lt;/td&gt;
+                &lt;/tr&gt;
+                &lt;tr&gt;
+                    &lt;td align="right" style="padding-top: 4px"&gt;Password&lt;/td&gt;
+                    &lt;td&gt;&lt;input type="password" size="20" name="password" style="width: 150px" /&gt;&lt;/td&gt;
+                &lt;/tr&gt;
+                &lt;tr&gt;
+                    &lt;td colspan="2" align="right"&gt;
+                        &lt;input type="reset" value="Cancel" onclick="ModalDialog.Close()"&gt;
+                        &lt;input type="submit"
+                                  name="submit"
+                                  value="Login �"
+                                  onclick="alert('This is just an example'); event.stopPropagation()"&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;/table&gt;
+        &lt;/p&gt;
+    &lt;/div&gt;
+&lt;!-- End of dialog --&gt;</span>
+</pre>
+
+
+
+
+    <h4>3. Triggering the dialog with the new pseudo-events</h4>
+        <p>
+            This function is used to show the dialog. Here, it is triggered using the new OfficeExcel event functions. Doing this means
+            that you could also check the index of the bar that was clicked, which would allow you to show different dialogs
+            based on the bar that was clicked.
+        </p>
+        
+        <canvas id="cvs2" width="600" height="250">[No canvas support]</canvas>
+        
+        <pre class="code">
+&lt;script src="OfficeExcel.bar.js" &gt;&lt;/script&gt;
+&lt;script src="OfficeExcel.modaldialog.js" &gt;&lt;/script&gt;
+&lt;script src="OfficeExcel.common.core.js" &gt;&lt;/script&gt;
+
+&lt;script&gt;
+    <span style="color: green">function ShowDialog (e, bar)
+    {
+        // Check this index if you want to show different dialogs based on the bar that was clicked.
+        var index = bar[5];
+
+        ModalDialog.Show('myDialog');
+        
+    }</span>
+    var bar = new OfficeExcel.Bar('cvs', [4,6,5,3,8,9]);
+    bar.Set('chart.labels', ['Kev','Louise','Pete','Gary','Fliss', 'James']);
+    <span style="color: green">bar.Set('chart.events.click', ShowDialog);
+    bar.Set('chart.events.mousemove', function (e, bar) {e.atrget.style.cursor = 'pointer';});</span>
+    bar.Draw();
+&lt;/script&gt;
+
+&lt;!-- This is the popup dialog--&gt;
+    &lt;div id="myDialog" class="modalDialog" style="display: none"&gt;
+        &lt;b&gt;Please login&lt;/b&gt;
+        &lt;p&gt;
+            &lt;table border="0"&gt;
+                &lt;tr&gt;
+                    &lt;td align="right" style="padding-top: 4px"&gt;Email&lt;/td&gt;
+                    &lt;td&gt;&lt;input type="text" size="20" name="email" style="width: 150px" /&gt;&lt;/td&gt;
+                &lt;/tr&gt;
+                &lt;tr&gt;
+                    &lt;td align="right" style="padding-top: 4px"&gt;Password&lt;/td&gt;
+                    &lt;td&gt;&lt;input type="password" size="20" name="password" style="width: 150px" /&gt;&lt;/td&gt;
+                &lt;/tr&gt;
+                &lt;tr&gt;
+                    &lt;td colspan="2" align="right"&gt;
+                        &lt;input type="reset" value="Cancel" onclick="ModalDialog.Close()"&gt;
+                        &lt;input type="submit"
+                                  name="submit"
+                                  value="Login �"
+                                  onclick="alert('This is just an example'); event.stopPropagation()"&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;/table&gt;
+        &lt;/p&gt;
+    &lt;/div&gt;
+&lt;!-- End of dialog --&gt;
+</pre>
+
+
+
+
+    <!-- This is the popup dialog -->
+        <div id="myDialog" class="modalDialog" style="display: none">
+            <b>Please login</b>
+            <p>
+                <table border="0">
+                    <tr>
+                        <td align="right" style="padding-top: 4px">Email</td>
+                        <td><input type="text" size="20" name="email" style="width: 150px" /></td>
+                    </tr>
+                    <tr>
+                        <td align="right" style="padding-top: 4px">Password</td>
+                        <td><input type="password" size="20" name="password" style="width: 150px" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="right">
+                            <input type="reset" value="Cancel" onclick="ModalDialog.Close()">
+                            <input type="submit"
+                                      name="submit"
+                                      value="Login �"
+                                      onclick="alert('This is just an example'); event.stopPropagation()">
+                        </td>
+                    </tr>
+                </table>
+            </p>
+        </div>
+    <!-- End of dialog -->
+
+</body>
+</html>

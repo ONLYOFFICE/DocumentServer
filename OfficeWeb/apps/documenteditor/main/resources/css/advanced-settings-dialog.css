@@ -1,0 +1,174 @@
+.asc-advanced-settings-window .x-window-body,
+.asc-advanced-settings-window .x-form-item,
+.asc-advanced-settings-window .x-form-field {
+    font-size: 11px !important;
+}
+
+.advanced-settings-separator {
+    background: repeat-y left top url('../img/imgage-settings-advanced-separator.png');
+    background-image: -webkit-image-set(url("../img/imgage-settings-advanced-separator.png") 1x, url("../img/imgage-settings-advanced-separator@2x.png") 2x);
+}
+
+.image-advanced-container.x-item-disabled .x-mask{
+    opacity: 0;
+}
+
+.image-advanced-container.x-item-disabled {
+    opacity: 1;
+}
+
+.asc-advanced-settings-position-btn {
+    background-image: url('../img/right-panels/LargeBorders.png')  !important;
+    background-image: -webkit-image-set(url("../img/right-panels/LargeBorders.png") 1x, url("../img/right-panels/LargeBorders@2x.png") 2x)  !important;
+}
+
+.x-btn.btn-adv-paragraph-all                {    background-position:   0     0 !important;}
+.x-btn-over.btn-adv-paragraph-all           {    background-position:   -31px 0 !important;}
+.x-btn-pressed.btn-adv-paragraph-all,
+.x-btn-focus.btn-adv-paragraph-all          {    background-position:   -62px 0 !important;}
+.x-btn-disabled.btn-adv-paragraph-all       {    background-position:   -93px 0 !important;}
+
+.x-btn.btn-adv-paragraph-bottom             {    background-position:   0     -31px !important;}
+.x-btn-over.btn-adv-paragraph-bottom        {    background-position:   -31px -31px !important;}
+.x-btn-pressed.btn-adv-paragraph-bottom,
+.x-btn-focus.btn-adv-paragraph-bottom       {    background-position:   -62px -31px !important;}
+.x-btn-disabled.btn-adv-paragraph-bottom    {    background-position:   -93px -31px !important;}
+
+.x-btn.btn-adv-paragraph-left               {    background-position:   0     -62px !important;}
+.x-btn-over.btn-adv-paragraph-left          {    background-position:   -31px -62px !important;}
+.x-btn-pressed.btn-adv-paragraph-left,
+.x-btn-focus.btn-adv-paragraph-left         {    background-position:   -62px -62px !important;}
+.x-btn-disabled.btn-adv-paragraph-left      {    background-position:   -93px -62px !important;}
+
+.x-btn.btn-adv-paragraph-inner-hor           {    background-position:   0     -93px !important;}
+.x-btn-over.btn-adv-paragraph-inner-hor      {    background-position:   -31px -93px !important;}
+.x-btn-pressed.btn-adv-paragraph-inner-hor,
+.x-btn-focus.btn-adv-paragraph-inner-hor     {    background-position:   -62px -93px !important;}
+.x-btn-disabled.btn-adv-paragraph-inner-hor  {    background-position:   -93px -93px !important;}
+
+.x-btn.btn-adv-paragraph-none               {    background-position:   0     -124px !important;}
+.x-btn-over.btn-adv-paragraph-none          {    background-position:   -31px -124px !important;}
+.x-btn-pressed.btn-adv-paragraph-none,
+.x-btn-focus.btn-adv-paragraph-none         {    background-position:   -62px -124px !important;}
+.x-btn-disabled.btn-adv-paragraph-none      {    background-position:   -93px -124px !important;}
+
+.x-btn.btn-adv-paragraph-outer              {    background-position:   0     -155px !important;}
+.x-btn-over.btn-adv-paragraph-outer         {    background-position:   -31px -155px !important;}
+.x-btn-pressed.btn-adv-paragraph-outer,
+.x-btn-focus.btn-adv-paragraph-outer        {    background-position:   -62px -155px !important;}
+.x-btn-disabled.btn-adv-paragraph-outer     {    background-position:   -93px -155px !important;}
+
+.x-btn.btn-adv-paragraph-right              {    background-position:   0     -186px !important;}
+.x-btn-over.btn-adv-paragraph-right         {    background-position:   -31px -186px !important;}
+.x-btn-pressed.btn-adv-paragraph-right,
+.x-btn-focus.btn-adv-paragraph-right        {    background-position:   -62px -186px !important;}
+.x-btn-disabled.btn-adv-paragraph-right     {    background-position:   -93px -186px !important;}
+
+.x-btn.btn-adv-paragraph-top                {    background-position:   0     -217px !important;}
+.x-btn-over.btn-adv-paragraph-top           {    background-position:   -31px -217px !important;}
+.x-btn-pressed.btn-adv-paragraph-top,
+.x-btn-focus.btn-adv-paragraph-top          {    background-position:   -62px -217px !important;}
+.x-btn-disabled.btn-adv-paragraph-top       {    background-position:   -93px -217px !important;}
+
+.x-btn.btn-adv-position-all           {    background-position:   0     -310px !important;}
+.x-btn-over.btn-adv-position-all      {    background-position:   -31px -310px !important;}
+.x-btn-pressed.btn-adv-position-all,
+.x-btn-focus.btn-adv-position-all     {    background-position:   -62px -310px !important;}
+.x-btn-disabled.btn-adv-position-all  {    background-position:   -93px -310px !important;}
+
+.x-btn.btn-adv-position-inner           {    background-position:   0     -403px !important;}
+.x-btn-over.btn-adv-position-inner      {    background-position:   -31px -403px !important;}
+.x-btn-pressed.btn-adv-position-inner,
+.x-btn-focus.btn-adv-position-inner     {    background-position:   -62px -403px !important;}
+.x-btn-disabled.btn-adv-position-inner  {    background-position:   -93px -403px !important;}
+
+.x-btn.btn-adv-position-none           {    background-position:   0     -434px !important;}
+.x-btn-over.btn-adv-position-none      {    background-position:   -31px -434px !important;}
+.x-btn-pressed.btn-adv-position-none,
+.x-btn-focus.btn-adv-position-none     {    background-position:   -62px -434px !important;}
+.x-btn-disabled.btn-adv-position-none  {    background-position:   -93px -434px !important;}
+
+.x-btn.btn-adv-position-outer           {    background-position:   0     -589px !important;}
+.x-btn-over.btn-adv-position-outer      {    background-position:   -31px -589px !important;}
+.x-btn-pressed.btn-adv-position-outer,
+.x-btn-focus.btn-adv-position-outer     {    background-position:   -62px -589px !important;}
+.x-btn-disabled.btn-adv-position-outer  {    background-position:   -93px -589px !important;}
+
+.x-btn.btn-adv-position-inner-none           {    background-position:   0     -341px !important;}
+.x-btn-over.btn-adv-position-inner-none      {    background-position:   -31px -341px !important;}
+.x-btn-pressed.btn-adv-position-inner-none,
+.x-btn-focus.btn-adv-position-inner-none     {    background-position:   -62px -341px !important;}
+.x-btn-disabled.btn-adv-position-inner-none  {    background-position:   -93px -341px !important;}
+
+.x-btn.btn-adv-position-outer-none           {    background-position:   0     -527px !important;}
+.x-btn-over.btn-adv-position-outer-none      {    background-position:   -31px -527px !important;}
+.x-btn-pressed.btn-adv-position-outer-none,
+.x-btn-focus.btn-adv-position-outer-none     {    background-position:   -62px -527px !important;}
+.x-btn-disabled.btn-adv-position-outer-none  {    background-position:   -93px -527px !important;}
+
+.x-btn.btn-adv-position-all-none           {    background-position:   0     -248px !important;}
+.x-btn-over.btn-adv-position-all-none      {    background-position:   -31px -248px !important;}
+.x-btn-pressed.btn-adv-position-all-none,
+.x-btn-focus.btn-adv-position-all-none     {    background-position:   -62px -248px !important;}
+.x-btn-disabled.btn-adv-position-all-none  {    background-position:   -93px -248px !important;}
+
+.x-btn.btn-adv-position-none-none           {    background-position:   0     -496px !important;}
+.x-btn-over.btn-adv-position-none-none      {    background-position:   -31px -496px !important;}
+.x-btn-pressed.btn-adv-position-none-none,
+.x-btn-focus.btn-adv-position-none-none     {    background-position:   -62px -496px !important;}
+.x-btn-disabled.btn-adv-position-none-none  {    background-position:   -93px -496px !important;}
+
+.x-btn.btn-adv-position-inner-table           {    background-position:   0     -372px !important;}
+.x-btn-over.btn-adv-position-inner-table      {    background-position:   -31px -372px !important;}
+.x-btn-pressed.btn-adv-position-inner-table,
+.x-btn-focus.btn-adv-position-inner-table     {    background-position:   -62px -372px !important;}
+.x-btn-disabled.btn-adv-position-inner-table  {    background-position:   -93px -372px !important;}
+
+.x-btn.btn-adv-position-outer-table           {    background-position:   0     -558px !important;}
+.x-btn-over.btn-adv-position-outer-table      {    background-position:   -31px -558px !important;}
+.x-btn-pressed.btn-adv-position-outer-table,
+.x-btn-focus.btn-adv-position-outer-table     {    background-position:   -62px -558px !important;}
+.x-btn-disabled.btn-adv-position-outer-table  {    background-position:   -93px -558px !important;}
+
+.x-btn.btn-adv-position-all-table           {    background-position:   0     -279px !important;}
+.x-btn-over.btn-adv-position-all-table      {    background-position:   -31px -279px !important;}
+.x-btn-pressed.btn-adv-position-all-table,
+.x-btn-focus.btn-adv-position-all-table     {    background-position:   -62px -279px !important;}
+.x-btn-disabled.btn-adv-position-all-table  {    background-position:   -93px -279px !important;}
+
+.x-btn.btn-adv-position-none-table           {    background-position:   0     -465px !important;}
+.x-btn-over.btn-adv-position-none-table      {    background-position:   -31px -465px !important;}
+.x-btn-pressed.btn-adv-position-none-table,
+.x-btn-focus.btn-adv-position-none-table     {    background-position:   -62px -465px !important;}
+.x-btn-disabled.btn-adv-position-none-table  {    background-position:   -93px -465px !important;}
+
+.x-btn.asc-advanced-settings-position-btn button {
+    width: 31px !important;
+    height: 31px;
+    line-height: 31px;
+    padding: 0;
+	margin:0;
+}
+
+.x-btn.asc-advanced-settings-position-btn .x-btn-inner{
+    height: 31px;
+    line-height: 31px;
+}
+
+.x-btn.asc-advanced-settings-position-btn
+{
+    padding: 0;
+    border: 0 none;
+    border-radius: 0;
+    box-shadow: none;
+}
+.advanced-btn-ratio {
+    background-image: url('../img/button_ratio.png');
+    background-position: -2px -2px;
+    background-image: -webkit-image-set(url("../img/button_ratio.png") 1x, url("../img/button_ratio@2x.png") 2x);
+}
+.x-btn-over .advanced-btn-ratio    {background-position: -22px  -2px;}
+.x-btn-pressed .advanced-btn-ratio {background-position: -42px  -2px;}
+.x-btn-menu-active .advanced-btn-ratio {background-position: -42px  -2px;}
+.x-btn-disabled .advanced-btn-ratio {background-position: -62px  -2px;}
+.x-btn-disabled .advanced-btn-ratio {background-position: -62px  -2px;}

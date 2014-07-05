@@ -1,0 +1,46 @@
+/**
+ * Striped background patterns
+ *
+ * Before compass 0.11.5, you need to add
+ * Compass::BrowserSupport.add_support("repeating-linear-gradient", "webkit", "moz", "o", "ms")
+ * To your configuration (config.rb)
+ * @see https://github.com/chriseppstein/compass/issues/401
+ *
+ * @link http://lea.verou.me/css3patterns/#horizontal-stripes
+ * @link http://lea.verou.me/css3patterns/#vertical-stripes
+ *
+ * @author Lea Verou http://lea.verou.me/ for the original pattern
+ * @author Mason Wendell mason@canarypromo.com @canarymason for the sass mixin
+ */
+
+@import "compass/css3/images";
+
+@mixin background-stripes-straight($dir: left, $bg-color: gray, $stripe-color:  rgba(white, 0.5), $size: 50px) {
+    $transparent: rgba(black, 0);
+    background-color: $bg-color;
+    @include background-image(
+        linear-gradient(
+            $dir,
+            $transparent 50%,
+            $stripe-color 50%
+        )
+    );
+    background-size: $size $size;
+}
+
+
+@mixin background-diagonal-stripes($dir: 45deg, $bg-color: gray, $stripe-color: rgba(white, 0.5), $size: 50px) {
+    $transparent: rgba(black, 0);
+    background-color: $bg-color;
+    @include background-image(
+        repeating-linear-gradient(
+            $dir,
+            $transparent,
+            $transparent $size / 2,
+            $stripe-color $size / 2,
+            $stripe-color $size
+        )
+    );
+}
+
+

@@ -1,0 +1,41 @@
+/**
+ * Shape/Polygon/Octagon
+ *
+ * @author Maxime Thirouin maxime.thirouin@gmail.com @MoOx
+ */
+
+//Don't ask me when the coefficient cames from... I just compute then from original code by @chriscoyier
+@mixin octagon($width: 100px, $height: 100px, $background-color: transparent)
+{
+    width: $width;
+    height: $height*0.42;
+    background: $background-color;
+    position: relative;
+
+    &:before,
+    &:after
+    {
+        content: "";
+        position: absolute;
+        left: 0;
+
+        width: $width*0.42;
+        height: 0;
+        
+        border-left: $width*0.29 solid transparent;
+        border-right: $width*0.29 solid transparent;
+        
+    }
+
+        &:before
+        {
+            top: -$height*0.29;
+            border-bottom: $height*0.29 solid $background-color;
+        }
+
+        &:after
+        {
+            bottom: -$height*0.29;
+            border-top: $height*0.29 solid $background-color;
+        }
+}

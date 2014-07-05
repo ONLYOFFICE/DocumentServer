@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual C++ Express 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ASCOfficeDocxFile2", "ASCOfficeDocxFile2.vcproj", "{D02A88E6-5B2B-4A15-A4F6-C057F698FC53}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A100103A-353E-45E8-A9B8-90B87CC5C0B0} = {A100103A-353E-45E8-A9B8-90B87CC5C0B0}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DocxFormat", "..\Common\DocxFormat\Projects\DocxFormat2005.vcproj", "{A100103A-353E-45E8-A9B8-90B87CC5C0B0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+		ReleaseASC|Win32 = ReleaseASC|Win32
+		ReleaseOpenSource|Win32 = ReleaseOpenSource|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D02A88E6-5B2B-4A15-A4F6-C057F698FC53}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D02A88E6-5B2B-4A15-A4F6-C057F698FC53}.Debug|Win32.Build.0 = Debug|Win32
+		{D02A88E6-5B2B-4A15-A4F6-C057F698FC53}.Release|Win32.ActiveCfg = Release|Win32
+		{D02A88E6-5B2B-4A15-A4F6-C057F698FC53}.Release|Win32.Build.0 = Release|Win32
+		{D02A88E6-5B2B-4A15-A4F6-C057F698FC53}.ReleaseASC|Win32.ActiveCfg = ReleaseASC|Win32
+		{D02A88E6-5B2B-4A15-A4F6-C057F698FC53}.ReleaseASC|Win32.Build.0 = ReleaseASC|Win32
+		{D02A88E6-5B2B-4A15-A4F6-C057F698FC53}.ReleaseOpenSource|Win32.ActiveCfg = ReleaseOpenSource|Win32
+		{D02A88E6-5B2B-4A15-A4F6-C057F698FC53}.ReleaseOpenSource|Win32.Build.0 = ReleaseOpenSource|Win32
+		{A100103A-353E-45E8-A9B8-90B87CC5C0B0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A100103A-353E-45E8-A9B8-90B87CC5C0B0}.Release|Win32.ActiveCfg = Release|Win32
+		{A100103A-353E-45E8-A9B8-90B87CC5C0B0}.Release|Win32.Build.0 = Release|Win32
+		{A100103A-353E-45E8-A9B8-90B87CC5C0B0}.ReleaseASC|Win32.ActiveCfg = Release|Win32
+		{A100103A-353E-45E8-A9B8-90B87CC5C0B0}.ReleaseASC|Win32.Build.0 = Release|Win32
+		{A100103A-353E-45E8-A9B8-90B87CC5C0B0}.ReleaseOpenSource|Win32.ActiveCfg = ReleaseOpenSource|Win32
+		{A100103A-353E-45E8-A9B8-90B87CC5C0B0}.ReleaseOpenSource|Win32.Build.0 = ReleaseOpenSource|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(DPCodeReviewSolutionGUID) = preSolution
+		DPCodeReviewSolutionGUID = {00000000-0000-0000-0000-000000000000}
+	EndGlobalSection
+EndGlobal

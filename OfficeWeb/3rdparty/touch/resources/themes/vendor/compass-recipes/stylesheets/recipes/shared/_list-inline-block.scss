@@ -1,0 +1,12 @@
+@import "recipes/shared/block-inline-block";
+
+// use this for ul,ol (ex: nav menu)
+@mixin list-inline-block
+{
+    @include block-inline-block;
+    
+    li
+    {
+        @include block-inline-block;
+    }
+}

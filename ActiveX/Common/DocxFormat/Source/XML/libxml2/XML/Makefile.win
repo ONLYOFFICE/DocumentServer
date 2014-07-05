@@ -1,0 +1,34 @@
+# This is a makefile for win32 systems (VC 5.0).
+# Christopher Blizzard
+# http://odin.appliedtheory.com/
+
+CC = cl
+CFLAGS = /c /GB /Gi /nologo /I. /DWIN32 /MT /Zi
+
+LD = link
+LDFLAGS = /DEBUG /NODEFAULTLIB:libc
+
+AR = lib
+
+all: xml.lib
+
+test: tester.exe
+
+SHARED_OBJS = entities.obj parser.obj tree.obj SAX.obj
+
+xml.lib: $(SHARED_OBJS)
+	$(AR) /out:xml.lib $(SHARED_OBJS)
+
+tester.obj: $(SHARED_OBJS)
+	$(CC) $(CFLAGS) tester.c /out:tester.obj
+
+tester.exe: tester.obj xml.lib
+	$(LD) $(LDFLAGS) /out:tester.exe tester.obj xml.lib
+
+clean:
+	-del /f $(SHARED_OBJS) tester.obj
+	-del /f tester.exe
+	-del /f xml.lib
+	-del /f *.pdb
+	-del /f *.idb
+	-del /f *.ilk

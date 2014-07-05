@@ -1,0 +1,153 @@
+@import 'compass/css3';
+@import 'recipes/background';
+@import 'recipes/color';
+
+$default-gradient: $base-gradient;
+
+/**
+ * @class Global_CSS
+ */
+
+/**
+ * Includes a base64-encoded icon for use within tab bars and buttons (With the component parameter iconMask: true).
+ *
+ *     @include pictos-iconmask('attachment');
+ *
+ * @param {string} $name The name of the icon to be included. This is to match the name of the icon file (located at resources/themes/images/default/pictos) without its extention (.png).
+ */
+@mixin pictos-iconmask($name) {
+  .x-tab .x-button-icon.#{$name},
+  .x-button .x-button-icon.x-icon-mask.#{$name} {
+    -webkit-mask-image: theme_image('default', "pictos/" + $name + ".png");
+  }
+}
+
+/**
+ * Includes the default styles for toolbar buttons, mostly used as a helper function.
+ *
+ * @param {color} $bg-color Base color to be used for the button.
+ * @param {color} $type Gradient style for the button, will automatically use "recessed" when pressed.
+ */
+@mixin toolbar-button($bg-color, $type: $button-gradient){
+  &, .x-toolbar & {
+    border: 1px solid darken($bg-color, 20%);
+    border-top-color: darken($bg-color, 15%);
+    @include color-by-background($bg-color);
+
+    &.x-button-back:before, &.x-button-forward:before {
+      background: darken($bg-color, 20%);
+    }
+
+    &, &.x-button-back:after, &.x-button-forward:after {
+      @include background-gradient($bg-color, $type);
+    }
+
+    .x-button-icon.x-icon-mask {
+      @include mask-by-background($bg-color);
+    }
+
+    &.x-button-pressing, &.x-button-pressed, &.x-button-active {
+      &, &:after {
+        @include background-gradient(darken($bg-color, 3%), 'recessed');
+      }
+    }
+  }
+}
+
+/**
+ * Adds a small text shadow (or highlight) to give the impression of beveled text.
+ *
+ * @param {string} $type Either shadow or highlight, decides whether to apply a light shadow or dark.
+ */
+@mixin bevel-text($type: 'shadow') {
+  @if $include-highlights {
+    @if $type == shadow {
+      text-shadow: rgba(0,0,0,.5) 0 -.08em 0;
+    } @else {
+      text-shadow: rgba(255,255,255,.25) 0 .08em 0;
+    }
+  }
+}
+
+/**
+ * Adds a small box shadow (or highlight) to give the impression of being beveled.
+ *
+ * @param {string} $type Either shadow or highlight, decides whether to apply a light shadow or dark.
+ */
+@mixin bevel-box($type: 'light') {
+  @if $include-highlights {
+    @if $type == shadow {
+      @include box-shadow(rgba(#000, .5) 0 -.06em 0);
+    } @else {
+      @include box-shadow(rgba(#fff, .35) 0 .06em 0);
+    }
+  }
+}
+
+/**
+ * Adds basic styles to :before or :after pseudo-elements.
+ *
+ *     .my-element:after {
+ *       @include insertion(50px, 50px);
+ *     }
+ *
+ * @param {measurement} $width Height of pseudo-element.
+ * @param {measurement} $height Height of pseudo-element.
+ * @param {measurement} $top Top positioning of pseudo-element.
+ * @param {measurement} $left Left positioning of pseudo-element.
+ *
+ */
+@mixin insertion($width: 30px, $height: 30px, $top: 0, $left: 0) {
+  content: "";
+  position: absolute;
+  width: $width;
+  height: $height;
+  top: $top;
+  left: $left;
+}
+
+/**
+ * Makes an element stretch to its parent's bounds.
+ */
+@mixin stretch {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+/**
+ * Bevels the text based on its background.
+ *
+ * @param {color} $bg-color Background color of element.
+ * @see bevel-text
+ *
+ */
+@mixin bevel-by-background($bg-color) {
+  @if (lightness($bg-color) > 50) { @include bevel-text(light) }
+  @else { @include bevel-text; }
+}
+
+/**
+ * Creates a background gradient for masked elements, based on the lightness of their background.
+ *
+ * @param {color} $bg-color Background color of element.
+ * @param {percent} $percent Contrast of the new gradient to its background.
+ * @param {percent} $style Gradient style of the gradient.
+ * @see background-gradient
+ *
+ */
+@mixin mask-by-background($bg-color, $contrast: 100%, $style: $base-gradient) {
+  @if (lightness($bg-color) > 50) { @include background-gradient(darken($bg-color, $contrast), $style) }
+  @else { @include background-gradient(lighten($bg-color, $contrast), $style) }
+}
+
+/**
+ * Makes the element text overflow to use ellipsis.
+ */
+@mixin ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

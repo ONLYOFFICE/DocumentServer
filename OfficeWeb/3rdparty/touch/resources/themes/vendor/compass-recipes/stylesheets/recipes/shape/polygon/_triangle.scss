@@ -1,0 +1,73 @@
+/**
+ * Shape/Polygon/Triangle
+ *
+ * @author Maxime Thirouin maxime.thirouin@gmail.com @MoOx
+ */
+@mixin triangle($direction: top, $width: 1em, $height: 0, $color: #000)
+{
+    @if ($height == 0)
+    {
+        $height: $width;
+    }
+    
+    width: 0;
+    height: 0;
+    
+    @if ($direction == 'top')
+    {
+        border-left: $width solid transparent;
+        border-right: $width solid transparent;
+        border-bottom: $height solid $color;
+    }
+    @elseif ($direction == 'bottom')
+    {
+        border-left: $width solid transparent;
+        border-right: $width solid transparent;
+        border-top: $height solid $color;
+    }
+    @elseif ($direction == 'left')
+    {
+        border-top: $width solid transparent;
+        border-right: $height solid $color;
+        border-bottom: $width solid transparent;
+    }
+    @elseif ($direction == 'right')
+    {
+        border-top: $width solid transparent;
+        border-left: $height solid $color;
+        border-bottom: $width solid transparent;
+    }
+    @elseif ($direction == 'top-left')
+    {
+        border-top: $width solid $color;
+        border-bottom: $width solid transparent;
+        border-left: $width solid $color;
+        border-right: $width solid transparent;
+    }
+    @elseif ($direction == 'top-right')
+    {
+        border-top: $width solid $color;
+        border-bottom: $width solid transparent;
+        border-left: $width solid transparent;
+        border-right: $width solid $color;
+    }
+    @elseif ($direction == 'bottom-left')
+    {
+        border-top: $width solid transparent;
+        border-bottom: $width solid $color;
+        border-left: $width solid $color;
+        border-right: $width solid transparent;   
+    }
+    @elseif ($direction == 'bottom-right')
+    {
+        border-top: $width solid transparent;
+        border-left: $width solid transparent;
+        border-bottom: $width solid $color;
+        border-right: $width solid $color;
+    }
+    @else
+    {
+    	// @todo https://gist.github.com/1671259#comments
+        @warn 'The direction used does not exist';
+    }
+}

@@ -1,0 +1,26 @@
+@import "tests";
+@import "recipes/webfont-icon";
+
+
+@include include-font-websymbols;
+@include include-font-heydings;
+@include include-font-iconic;
+
+.smiley {
+    @include webfont-icon('\263a', $size: 500px, $color: #CFAB4F);
+    display: block;
+
+}
+
+.heydings {
+    @include webfont-icon($class: 'heydings', $size: 100px);
+
+}
+
+.websymbols {
+    @include webfont-icon($class: 'websymbols', $size: 100px);
+}
+
+.iconic {
+    @include webfont-icon($class: 'iconic', $size: 100px);
+}

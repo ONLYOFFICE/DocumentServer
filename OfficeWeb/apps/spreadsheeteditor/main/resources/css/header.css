@@ -1,0 +1,11 @@
+.common-header {
+    color: #dfe6cc;
+    background: #798d45;
+    background: -moz-linear-gradient(top, #a2bd5e 0%, #798d45 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#a2bd5e), color-stop(100%,#798d45));
+    background: -webkit-linear-gradient(top, #a2bd5e 0%,#798d45 100%);
+    background: -o-linear-gradient(top, #a2bd5e 0%,#798d45 100%);
+    background: -ms-linear-gradient(top, #a2bd5e 0%,#798d45 100%);
+    background: linear-gradient(to bottom, #a2bd5e 0%,#798d45 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a2bd5e', endColorstr='#798d45',GradientType=0 );
+}

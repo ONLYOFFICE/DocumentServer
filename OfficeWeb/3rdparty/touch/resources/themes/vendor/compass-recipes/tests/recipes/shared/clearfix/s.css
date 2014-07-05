@@ -1,0 +1,71 @@
+html {
+  padding: 1em;
+  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dddddd), color-stop(100%, #ffffff)) no-repeat;
+  background: -webkit-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -moz-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -o-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -ms-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: linear-gradient(#dddddd, #ffffff) no-repeat;
+}
+
+h1 {
+  font-size: 2em;
+  margin-bottom: 1em;
+}
+
+h2 {
+  font-size: 1.4em;
+  margin-bottom: .6em;
+}
+
+.doc {
+  background: #fff;
+  border: #ddd;
+  padding: 1em;
+  color: #aaa;
+  margin: 1em;
+  font-style: italic;
+}
+.doc a {
+  color: #999;
+}
+
+/**
+ * Micro clearfix hack
+ * 
+ * The clearfix hack is a popular way to clear floats without resorting to using presentational markup. This article presents an update to the clearfix method that further reduces the amount of CSS required.
+ * Known support: Firefox 2+, Safari 2+, Chrome, Opera 9.27+, IE 6+, IE Mac.
+ *
+ * @thanks Nicolas Gallagher @necolas
+ * @link http://nicolasgallagher.com/micro-clearfix-hack/
+ */
+.body {
+  width: 480px;
+  margin: 20px auto;
+}
+
+.container {
+  background: #DCE6BE;
+}
+.container:before, .container:after {
+  content: "";
+  display: block;
+  overflow: hidden;
+}
+.container:after {
+  clear: both;
+}
+.container {
+  zoom: 1;
+}
+
+.section {
+  float: left;
+  display: inline;
+  width: 220px;
+  height: 200px;
+  padding: 30px 0 0;
+  margin: 20px 10px;
+  text-align: center;
+  background: #A0C431;
+}

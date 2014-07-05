@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+
+    <title>A basic example of a combined Bar and Line chart</title>
+    
+    <meta name="keywords" content="OfficeExcel javascript charts html5 canvas basic example of a combined Bar/Line chart" />
+    <meta name="description" content=" A basic example of a combined Bar and Line chart" />
+    <meta name="googlebot" content="NOODP">
+
+    <!-- Include the OfficeExcel libraries -->
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.tooltips.js" ></script>
+    <script src="../libraries/OfficeExcel.bar.js" ></script>
+    <script src="../libraries/OfficeExcel.line.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+
+</head>
+
+<body>
+
+    <h1>A basic example of a combined Bar/Line chart</h1>
+
+    <!-- The canvas on to which the chart is drawn -->
+    <canvas id="cvs" width="1000" height="250" !style="border: 1px solid gray">[No canvas support]</canvas>
+
+    <!-- The Javascript code that creates the chart -->
+    <script>
+        window.onload = function ()
+        {
+            /**
+            * The order in which you create the charts is important - the Line chart must be last
+            */
+            var bar  = new OfficeExcel.Bar('cvs', [143,140,141,135,136,132,129,125,126,127,127,129]);
+            var line = new OfficeExcel.Line('cvs', [23,25,25,26,27,26,28,28,28,27,29,30]);
+
+            /**
+            * Some Line chart configuration
+            */
+            line.Set('chart.background.grid', false);
+            line.Set('chart.noaxes', true);
+            line.Set('chart.linewidth', 3);
+            line.Set('chart.tickmarks', 'endcircle');
+            line.Set('chart.yaxispos', 'right');
+            line.Set('chart.ymax', 50);
+            line.Set('chart.title', 'A combined Bar and Line chart');
+            if (!OfficeExcel.isIE8()) {
+                line.Set('chart.tooltips', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
+            }
+
+            /**
+            * Some Bar chart configuration
+            */
+            bar.Set('chart.background.grid.autofit', true);
+            bar.Set('chart.ymax', 250);
+            bar.Set('chart.gutter.left', 50);
+            bar.Set('chart.gutter.right', 5);
+            bar.Set('chart.colors', ['blue']);
+            bar.Set('chart.strokestyle', 'black');
+            bar.Set('chart.linewidth', 3);
+            bar.Set('chart.labels', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
+            if (!OfficeExcel.isIE8()) {
+                bar.Set('chart.tooltips', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
+            }
+            
+            /**
+            * Add the Line chart to the Bar chart
+            */
+            
+            if (!OfficeExcel.isOld()) {
+                bar.Set('chart.line', line);
+            } else {
+                alert("[OfficeExcel] Sorry, your browser doesn't support this");
+            }
+            
+            /**
+            * Now draw the Bar chart, which also causes the line chart to be drawn
+            */
+            bar.Draw();
+        }
+    </script>
+    
+    <p>
+        This is an example of a Bar chart combined with a Line chart. The source code is documented to make it easier
+        for you to copy and paste it if you wish.
+    </p>
+
+</body>
+</html>

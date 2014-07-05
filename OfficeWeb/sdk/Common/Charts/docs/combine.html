@@ -1,0 +1,438 @@
+<!DOCTYPE html >
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>Information about combining the Bar and Line charts</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas chart docs combining" />
+    <meta name="description" content="Documentation about combining charts - eg the Bar chart and the Line chart" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A chart library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.context.js" ></script>
+    <script src="../libraries/OfficeExcel.common.tooltips.js" ></script>
+    <script src="../libraries/OfficeExcel.common.effects.js" ></script>
+    <script src="../libraries/OfficeExcel.common.key.js" ></script>
+    <script src="../libraries/OfficeExcel.bar.js" ></script>
+    <script src="../libraries/OfficeExcel.line.js" ></script>
+    <script src="../libraries/OfficeExcel.pie.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+    
+    <style>
+        div.OfficeExcel_tooltip div {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            margin-right: 5px;
+        }
+
+        div.OfficeExcel_tooltip div#green {
+            background-color: green;
+        }
+
+        div.OfficeExcel_tooltip div#red {
+            background-color: red;
+        }
+
+        div.OfficeExcel_tooltip div#gray {
+            background-color: #ccc;
+        }
+    </style>
+
+
+    <script>
+        function enlarge_tooltip_graph (e, title)
+        {
+            var bg = document.createElement('DIV');
+                bg.style.opacity = 0;
+                bg.style.position = 'fixed';
+                bg.style.left = 0;
+                bg.style.top = 0;
+                bg.style.width = '2000px';
+                bg.style.height = '2000px';
+                bg.style.backgroundColor = 'rgba(0,0,0,0.2)';
+                bg.style.zIndex = 32568;
+                bg.style.textAlign = 'center';
+            document.body.appendChild(bg);
+            
+            var div = document.createElement('DIV');
+                div.style.position = 'relative';
+                div.style.backgroundColor = 'white';
+                div.style.top = '200px';
+                div.style.width = '300px'
+                div.style.height = '240px';
+                div.style.padding = '15px';
+                div.style.WebkitBorderRadius = '5px';
+                div.style.MozBorderRadius = '5px';
+                div.style.borderRadius = '5px';
+                div.style.left = ((document.body.clientWidth / 2) - 175) + 'px';
+                
+                // Add standard box-shadow and -moz-box-shadow                
+                div.style.WebkitBoxShadow = 'gray 0 0 25px';
+                div.style.MozBoxShadow = '0 0 25px gray';
+                div.style.boxShadow = '0 0 25px gray';
+
+                div.style.border = '1px black solid';
+
+            bg.appendChild(div);
+
+            var canvas = document.createElement('CANVAS');
+                canvas.width  = 300;
+                canvas.height = 240;
+                canvas.id     = 'big_pie';
+            div.appendChild(canvas);
+            
+            bg.onmousedown = function (e)
+            {
+                this.style.display = 'none';
+                document.body.removeChild(this);
+                
+                e.stopPropagation();
+            }
+            
+            div.onmousedown = function (e)
+            {
+                e.stopPropagation();
+            }
+
+            var data = e.target.__object__.data;
+
+            var pie = new OfficeExcel.Pie('big_pie', data);
+            pie.Set('chart.align', 'left');
+            pie.Set('chart.colors', ['red','#3F3','#ccc']);
+            pie.Set('chart.key', ['Jane', 'Fred', 'John']);
+            pie.Set('chart.key.shadow', true);
+            pie.Set('chart.key.shadow.blur', 15);
+            pie.Set('chart.key.shadow.offsetx', 0);
+            pie.Set('chart.key.shadow.offsety', 0);
+            pie.Set('chart.key.shadow.color', 'gray');
+            pie.Set('chart.key.rounded', true);
+            pie.Set('chart.gutter.top', 2);
+            pie.Set('chart.gutter.bottom', 2);
+            pie.Set('chart.gutter.left', 2);
+            pie.Set('chart.gutter.right', 2);
+            pie.Draw();
+
+            
+            setTimeout(function () {bg.style.opacity = 0.2;}, 50);
+            setTimeout(function () {bg.style.opacity = 0.4;}, 100);
+            setTimeout(function () {bg.style.opacity = 0.6;}, 150);
+            setTimeout(function () {bg.style.opacity = 0.8;}, 200);
+            setTimeout(function () {bg.style.opacity = 1;}, 250);
+        }
+    </script>
+
+
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        Combining charts
+    </div>
+
+    <h1>Combining <span>charts</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <ul>
+        <li><a href="#barandline">Combining bar and line charts</a></li>
+        <li><a href="#combiningline">Combining Line charts</a></li>
+    </ul>
+    
+    <a name="barandline"></a>
+    <h4>Combining bar and line charts</h4>
+
+    <canvas id="myCanvas" width="600" height="250" style="float: right">[No canvas support]</canvas>
+
+    <script>
+        var bar = new OfficeExcel.Bar('myCanvas', [4,5,3,4,1,2,6,5,8,4,9,4]);
+        bar.Set('chart.title', 'A bar/line/pie combination (tooltips)');
+        bar.Set('chart.ymax', 15);
+        bar.Set('chart.colors', ['#ccc', 'red', 'green']);
+        bar.Set('chart.labels', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
+        bar.Set('chart.tooltips', ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']);
+        bar.Set('chart.background.grid.autofit', true);
+        bar.Set('chart.key', ['John', 'Jane', 'Fred']);
+        bar.Set('chart.key.shadow', true);
+        bar.Set('chart.key.shadow.offsetx', 0);
+        bar.Set('chart.key.shadow.offsety', 0);
+        bar.Set('chart.key.shadow.blur', 10);
+        bar.Set('chart.key.shadow.color', 'rgba(128,128,128,0.5)');
+        bar.Set('chart.key.background', 'white');
+        bar.Set('chart.key.rounded', true);
+        bar.Set('chart.background.grid.autofit', true);
+        bar.Set('chart.background.grid.autofit.numvlines', 12);
+        bar.Set('chart.background.grid.autofit.numhlines', 5);
+        bar.Set('chart.gutter.bottom', 30);
+        bar.Set('chart.gutter.right', 5);
+
+        // Define the line first so that it can be added to the bar chart
+        var line = new OfficeExcel.Line('myCanvas', [1,3,4,3,2,1,4,5,2,3,8,8], [5,6,7,9,7,5,6,3,5,2,5,1]);
+        line.Set('chart.background.grid', false);
+        line.Set('chart.linewidth', 2);
+        line.Set('chart.colors', ['red', 'green']);
+        line.Set('chart.tickmarks', 'circle');
+        line.Set('chart.labels.ingraph', ['January',11,,'February']);
+        line.Set('chart.highlight.fill', 'black');
+        line.Set('chart.noaxes', true);
+        line.Set('chart.ylabels', false);
+        
+        line.Set('chart.animation.unfold.x', true);
+
+        // This would all be done programmatically normally, and linked to the key, so that if you change a name in the key,
+        // it changes in all of the tooltips too
+        line.Set('chart.tooltips', [
+                                    '<b>January</b><br />   <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'January\')"></canvas>   <div id="red"></div>Jane: 1<br /><div id="green"></div>Fred: 5<br /><div id="gray"></div>John: 4',
+                                    '<b>February</b><br />  <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'February\')"></canvas>  <div id="red"></div>Jane: 6<br /><div id="green"></div>Fred: 6<br /><div id="gray"></div>John: 5',
+                                    '<b>March</b><br />     <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'March\')"></canvas>     <div id="red"></div>Jane: 4<br /><div id="green"></div>Fred: 7<br /><div id="gray"></div>John: 3',
+                                    '<b>April</b><br />     <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'April\')"></canvas>     <div id="red"></div>Jane: 3<br /><div id="green"></div>Fred: 9<br /><div id="gray"></div>John: 4',
+                                    '<b>May</b><br />       <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'May\')"></canvas>       <div id="red"></div>Jane: 2<br /><div id="green"></div>Fred: 7<br /><div id="gray"></div>John: 1',
+                                    '<b>June</b><br />      <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'June\')"></canvas>      <div id="red"></div>Jane: 1<br /><div id="green"></div>Fred: 5<br /><div id="gray"></div>John: 2',
+                                    '<b>July</b><br />      <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'July\')"></canvas>      <div id="red"></div>Jane: 4<br /><div id="green"></div>Fred: 6<br /><div id="gray"></div>John: 6',
+                                    '<b>Aug</b><br />       <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'August\')"></canvas>    <div id="red"></div>Jane: 5<br /><div id="green"></div>Fred: 3<br /><div id="gray"></div>John: 5',
+                                    '<b>September</b><br /> <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'September\')"></canvas> <div id="red"></div>Jane: 2<br /><div id="green"></div>Fred: 5<br /><div id="gray"></div>John: 8',
+                                    '<b>October</b><br />   <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'October\')"></canvas>   <div id="red"></div>Jane: 3<br /><div id="green"></div>Fred: 2<br /><div id="gray"></div>John: 4',
+                                    '<b>November</b><br />  <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'November\')"></canvas>  <div id="red"></div>Jane: 8<br /><div id="green"></div>Fred: 5<br /><div id="gray"></div>John: 9',
+                                    '<b>December</b><br />  <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'December\')"></canvas>  <div id="red"></div>Jane: 8<br /><div id="green"></div>Fred: 1<br /><div id="gray"></div>John: 4',
+
+                                    '<b>January</b><br />   <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'January\')"></canvas>   <div id="red"></div>Jane: 1<br /><div id="green"></div>Fred: 5<br /><div id="gray"></div>John: 4',
+                                    '<b>February</b><br />  <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'February\')"></canvas>  <div id="red"></div>Jane: 6<br /><div id="green"></div>Fred: 6<br /><div id="gray"></div>John: 5',
+                                    '<b>March</b><br />     <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'March\')"></canvas>     <div id="red"></div>Jane: 4<br /><div id="green"></div>Fred: 7<br /><div id="gray"></div>John: 3',
+                                    '<b>April</b><br />     <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'April\')"></canvas>     <div id="red"></div>Jane: 3<br /><div id="green"></div>Fred: 9<br /><div id="gray"></div>John: 4',
+                                    '<b>May</b><br />       <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'May\')"></canvas>       <div id="red"></div>Jane: 2<br /><div id="green"></div>Fred: 7<br /><div id="gray"></div>John: 1',
+                                    '<b>June</b><br />      <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'June\')"></canvas>      <div id="red"></div>Jane: 1<br /><div id="green"></div>Fred: 5<br /><div id="gray"></div>John: 2',
+                                    '<b>July</b><br />      <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'July\')"></canvas>      <div id="red"></div>Jane: 4<br /><div id="green"></div>Fred: 6<br /><div id="gray"></div>John: 6',
+                                    '<b>August</b><br />    <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'August\')"></canvas>    <div id="red"></div>Jane: 5<br /><div id="green"></div>Fred: 3<br /><div id="gray"></div>John: 5',
+                                    '<b>September</b><br /> <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'September\')"></canvas> <div id="red"></div>Jane: 2<br /><div id="green"></div>Fred: 5<br /><div id="gray"></div>John: 8',
+                                    '<b>October</b><br />   <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'October\')"></canvas>   <div id="red"></div>Jane: 3<br /><div id="green"></div>Fred: 2<br /><div id="gray"></div>John: 4',
+                                    '<b>November</b><br />  <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'November\')"></canvas>  <div id="red"></div>Jane: 8<br /><div id="green"></div>Fred: 5<br /><div id="gray"></div>John: 9',
+                                    '<b>December</b><br />  <canvas width="50" height="50" id="__tooltip_canvas__" style="float: right" onclick="enlarge_tooltip_graph(event, \'December\')"></canvas>  <div id="red"></div>Jane: 8<br /><div id="green"></div>Fred: 1<br /><div id="gray"></div>John: 4'
+                                   ]);
+        //line.Set('chart.tooltips.highlight', false);
+        // No need to call Draw() - the bar chart will do it
+
+        // Add a Line chart tooltip event that draws the tooltip Pie charts
+        OfficeExcel.AddCustomEventListener(line, 'ontooltip', CreateTooltipGraph);
+        
+        
+        // Add the line chart to the bar chart
+
+        bar.Set('chart.line', line);
+        
+        // Now use effects
+        bar.Draw();
+        //OfficeExcel.Effects.Fade.In(bar);
+        //OfficeExcel.Effects.Bar.Grow(bar);
+        //OfficeExcel.Effects.Line.Unfold(bar.Get('chart.line'));
+            
+        /**
+        * This is the function that creates the tooltip charts
+        */
+        function CreateTooltipGraph (obj)
+        {
+            // If the tooltip canvas doesn't exist, don't try to create the
+            // tooltip pie chart
+            if (!document.getElementById("__tooltip_canvas__")) {
+                return;
+            }
+
+            var index  = OfficeExcel.Registry.Get('chart.tooltip').__index__;
+            var tooltip = obj.Get('chart.tooltips')[index];
+            var canvas  = document.getElementById("__tooltip_canvas__");
+
+            // Extract the data for the obj.Get('chart.tooltips')[index]ie chart froim the tooltip
+            var jane_data = Number(tooltip.replace(/.*Jane: (\d+).*/, '$1'));
+            var fred_data = Number(tooltip.replace(/.*Fred: (\d+).*/, '$1'));
+            var john_data = Number(tooltip.replace(/.*John: (\d+).*/, '$1'));
+            
+            var pie_data = [jane_data,fred_data,john_data];
+
+            // This data could be dynamic
+            var pie  = new OfficeExcel.Pie('__tooltip_canvas__', [4,5,6]);
+            pie.Set('chart.gutter.top', 2);
+            pie.Set('chart.gutter.bottom', 2);
+            pie.Set('chart.gutter.left', 2);
+            pie.Set('chart.gutter.right', 2);
+            pie.Set('chart.colors', ['red','#3F3','#ccc']);
+            //pie.Draw();
+            OfficeExcel.Effects.Pie.Grow(pie);
+
+            document.getElementById("__tooltip_canvas__").style.cursor = 'pointer';
+        }
+    </script>
+
+    <p>
+        This is an example of combining Bar and Line charts. It's quite straight-forward, and the code here shows you how it can be achieved.
+    </p>
+    
+    <p>
+        If the values for the line and bar result in different Y scales you may need to specify the <i>chart.ymax</i> property for each chart
+        so that the scales are the same. The line turns off Y labels so as not to overwrite the Bars labels.
+    </p>
+    
+    <b>Tooltips</b>
+    
+    <p>
+        You can have tooltips on the Line and Bar chart and you can now also have highlighting, as shown on the example.
+        The order in which you create the charts is also important, you must define the Bar chart first, and subsequently the Line
+        chart.
+    </p>
+    
+    <h4>Update - 28th August 2011</h4>
+        <p>
+            You can now have tooltips on both the Line chart <b>and</b> the Bar chart, as is shown in the chart here. Keep in mind
+            that you will need to have highlighting turned off on both chart types - <i>chart.tooltips.highlight</i>.
+        </p>
+    
+<pre class="code">
+&lt;script&gt;
+    line.Set('chart.tooltips.highlight', false);
+    bar.Set('chart.tooltips.highlight', false);
+&lt;/script&gt;
+</pre>
+    
+    <p>
+        Because the tooltips are only triggered by the Line chart, you should put all of the information, for both the Line and the
+        Bar chart, in the tooltips.
+    </p>
+
+    <a name="combiningline"></a>
+    <h4>Combining Line charts</h4>
+
+    <!-- This is the canvas that both the line charts use -->
+    <canvas id="myCanvas2" width="600" height="250" style="float: right">[No canvas support]</canvas>
+    <script>
+        line2 = new OfficeExcel.Line('myCanvas2', [51,22,23,33,35,23,32,45]);
+        line2.Set('chart.hmargin', 10);
+        line2.Set('chart.labels', ['Kiff', 'Wayne', 'Pete', 'Lou', 'Jake', 'Jo', 'Fred', 'Bob']);
+        line2.Set('chart.linewidth', 3);
+        line2.Set('chart.shadow', true);
+        line2.Set('chart.shadow.offsetx', 2);
+        line2.Set('chart.shadow.offsety', 2);
+        line2.Set('chart.ymax', 65);
+        line2.Set('chart.units.post', 'l');
+        line2.Set('chart.noendxtick', true);
+        line2.Set('chart.title', 'An example of axes both sides');
+        line2.Set('chart.gutter.left', 55);
+        line2.Set('chart.gutter.right', 55);
+        line2.Set('chart.background.grid.autofit', true);
+        line2.Draw();
+
+        line3 = new OfficeExcel.Line('myCanvas2', [42,50,51,23,46,48,65,11]);
+        line3.Set('chart.hmargin', 10);
+        line3.Set('chart.linewidth', 3);
+        line3.Set('chart.shadow', true);
+        line3.Set('chart.shadow.offsetx', 2);
+        line3.Set('chart.shadow.offsety', 2);
+        line3.Set('chart.yaxispos', 'right');
+        line3.Set('chart.gutter.left', 55);
+        line3.Set('chart.gutter.right', 55);
+        line3.Set('chart.noendxtick', true);
+        line3.Set('chart.background.grid', false);
+        line3.Set('chart.ymax', 100);
+        line3.Set('chart.colors', ['blue', 'red']);
+        line3.Set('chart.units.pre', '$');
+        line3.Set('chart.key', ['Cost', 'Volume']);
+        line3.Set('chart.key.background', 'rgba(255,255,255,0.8)');
+        line3.Draw();
+    </script>
+
+    <p>
+        Another type of chart you may want is a line chart with Y axes on both sides, as illustrated on the right. You should
+        be careful with this chart type as it can easily lead to confusion.
+    </p>
+    
+    <p>
+        This chart is made up from two line charts, one with the Y axis on the left and one on the right. The code that makes up
+        this chart is below.
+    </p>
+    
+    <p>
+         The only reason to combine line charts is to get Y axes on the left and right. If you simply want mutiple lines,
+         you can do this without combining any charts. <a href="../examples/line.html">See the line chart example page</a>
+    </p>
+
+    <br clear="all" />
+
+    <pre class="code">
+&lt;script&gt;
+    window.onload = function
+    {
+        line2 = new OfficeExcel.Line('myCanvas2', [51,22,23,33,35,23,32,45]);
+        line2.Set('chart.hmargin', 10);
+        line2.Set('chart.labels', ['Kiff', 'Wayne', 'Pete', 'Lou', 'Jake', 'Jo', 'Fred', 'Bob']);
+        line2.Set('chart.linewidth', 3);
+        line2.Set('chart.shadow', true);
+        line2.Set('chart.shadow.offsetx', 2);
+        line2.Set('chart.shadow.offsety', 2);
+        line2.Set('chart.ymax', 65);
+        line2.Set('chart.units.post', 'l');
+        line2.Set('chart.noxaxis', true);
+        line2.Set('chart.noendxtick', true);
+        line2.Set('chart.title', 'An example of axes both sides');
+        line2.Draw();
+
+        line3 = new OfficeExcel.Line('myCanvas2', [42,50,51,23,46,48,65,11]);
+        line3.Set('chart.hmargin', 10);
+        line3.Set('chart.linewidth', 3);
+        line3.Set('chart.shadow', true);
+        line3.Set('chart.shadow.offsetx', 2);
+        line3.Set('chart.shadow.offsety', 2);
+        line3.Set('chart.yaxispos', 'right');
+        line3.Set('chart.noendxtick', true);
+        line3.Set('chart.background.grid', false);
+        line3.Set('chart.ymax', 65);
+        line3.Set('chart.colors', ['blue', 'red']);
+        line3.Set('chart.units.pre', '$');
+        line3.Set('chart.key', ['Cost', 'Volume']);
+        line3.Set('chart.key.background', 'rgba(255,255,255,0.5)');
+        line3.Draw();
+    }
+&lt;/script&gt;
+</pre>
+
+</body>
+</html>

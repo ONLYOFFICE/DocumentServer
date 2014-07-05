@@ -1,0 +1,98 @@
+@import '../global';
+
+$panel-border-radius: .3em;
+
+@mixin sencha-panel($include-floating: $include-floating-panels) {
+  .x-panel,
+  .x-msgbox,
+  .x-panel-body {
+    position: relative;
+  }
+
+  @if $include-floating {
+    .x-panel.x-floating,
+    .x-msgbox,
+    .x-form.x-floating {
+      padding: 6px;
+      @if $include-border-radius { @include border-radius($panel-border-radius); }
+      @include box-shadow(rgba(0,0,0,.8) 0 .2em .6em);
+      @include background-gradient(darken($base-color, 40%), 'flat');
+
+      &.x-floating-light {
+        @include background-gradient($base-color, 'flat');
+      }
+
+      .x-panel-inner,
+      > .x-body {
+        z-index: 1;
+        background-color: #fff;
+        @if $include-border-radius { @include border_radius($panel-border-radius); }
+      }
+    }
+
+    .x-panel.x-floating > .x-dock,
+    .x-msgbox > .x-dock,
+    .x-form.x-floating > .x-dock {
+      z-index: 1;
+    }
+
+    .x-panel.x-floating > .x-dock.x-sized,
+    .x-msgbox > .x-dock.x-sized,
+    .x-form.x-floating > .x-dock.x-sized {
+      margin: 6px;
+    }
+
+    $anchor-height: .7em;
+    $anchor-width: $anchor-height*2.33;
+
+    .x-anchor {
+      position: absolute;
+      overflow: hidden;
+      //z-index: 1;
+
+      &.x-anchor-top {
+        margin-top: -$anchor-height + 0.02em;
+        margin-left: -$anchor-width / 2;
+        width: $anchor-width;
+        height: $anchor-height;
+        -webkit-mask: 0 0 theme_image($theme-name, "tip_top.png") no-repeat;
+        -webkit-mask-size: $anchor-width $anchor-height;
+        background-color: darken($base-color, 40%);
+      }
+
+      &.x-anchor-bottom {
+        margin-left: -$anchor-width / 2;
+        width: $anchor-width;
+        height: $anchor-height;
+        -webkit-mask: 0 0 theme_image($theme-name, "tip_bottom.png") no-repeat;
+        -webkit-mask-size: $anchor-width $anchor-height;
+        background-color: darken($base-color, 40%);
+      }
+
+      &.x-anchor-left {
+        margin-left: -$anchor-width / 2 + 0.15em;
+        margin-top: -$anchor-height / 2;
+        height: $anchor-width;
+        width: $anchor-height;
+        -webkit-mask: 0 0 theme_image($theme-name, "tip_left.png") no-repeat;
+        -webkit-mask-size: $anchor-height $anchor-width;
+        background-color: darken($base-color, 40%);
+      }
+
+      &.x-anchor-right {
+        margin-top: -$anchor-height / 2;
+        height: $anchor-width;
+        width: $anchor-height;
+        -webkit-mask: 0 0 theme_image($theme-name, "tip_right.png") no-repeat;
+        -webkit-mask-size: $anchor-height $anchor-width;
+        background-color: darken($base-color, 40%);
+      }
+
+    }
+    .x-floating.x-panel-light {
+      &:after {
+        background-color: $base-color;
+      }
+    }
+  }
+}

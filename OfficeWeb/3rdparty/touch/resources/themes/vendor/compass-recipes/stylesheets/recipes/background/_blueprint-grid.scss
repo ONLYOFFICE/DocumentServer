@@ -1,0 +1,52 @@
+/**
+ * Blueprint grid background pattern
+ * 
+ * @link http://lea.verou.me/css3patterns/#blueprint-grid
+ *
+ * @author Lea Verou http://lea.verou.me/ for the original pattern
+ * @author Maxime Thirouin maxime.thirouin@gmail.com @MoOx for the sass mixin
+ */
+
+@import "compass/css3/images";
+
+@mixin background-blueprint-grid(
+    $background-color: #4285C9,
+    $foreground-color: rgba(#fff, .2),
+    $foreground-color-alt: rgba(#fff, .1),
+    $width: 100px,
+    $width-alt: 20px,
+    $border-width: 2px,
+    $border-width-alt: 1px)
+{
+    background-color: $background-color;
+
+    $transparent: transparentize($foreground-color, 1);
+    
+    // cannot use 0 (sass_extensions error) for horizontal linear-gradient, so we use keyword 'left'
+    @include background-image(
+        // big square
+        linear-gradient($foreground-color $border-width, $transparent $border-width),
+        linear-gradient(left, $foreground-color $border-width, $transparent $border-width),
+
+        // tiny square
+        linear-gradient($foreground-color-alt $border-width-alt, $transparent $border-width-alt),
+        linear-gradient(left, $foreground-color-alt $border-width-alt, $transparent $border-width-alt)
+    );
+
+    background-size:
+        // big square
+        $width $width,
+        $width $width,
+        // tiny square
+        $width-alt $width-alt,
+        $width-alt $width-alt
+    ;
+
+    // to replace the grid correctly
+    background-position:
+        -#{$border-width} -#{$border-width},
+        -#{$border-width} -#{$border-width},
+        -#{$border-width-alt} -#{$border-width-alt},
+        -#{$border-width-alt} -#{$border-width-alt}
+    ;
+}

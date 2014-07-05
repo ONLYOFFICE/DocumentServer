@@ -1,0 +1,210 @@
+<!DOCTYPE html >
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>How you can configure different top, bottom, left and right gutter sizes</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas chart docs variable gutter sizes" />
+    <meta name="description" content="Information on variable gutter sizes that you can now configure" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.jpg"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+    
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.tooltips.js" ></script>
+    <script src="../libraries/OfficeExcel.common.context.js" ></script>
+    <script src="../libraries/OfficeExcel.common.zoom.js" ></script>
+    <script src="../libraries/OfficeExcel.bar.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+    
+    <script>
+        window.onload = function (e)
+        {
+            var bar = new OfficeExcel.Bar('cvs', [0.2,0.2,0.5,0.6,0.5,0.3,0.5,0.1,0.2,0.7,4.2,3.5]);
+            bar.Set('chart.ymax', 5);
+            bar.Set('chart.labels', ['January', '\r\nFebruary', 'March', '\r\nApril', 'May', '\r\nJune', 'July', '\r\nAugust', 'September', '\r\nOctober', 'November', '\r\nDecember']);
+            
+            if (!OfficeExcel.isOld()) {
+                bar.Set('chart.tooltips', ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']);
+            }
+
+            bar.Set('chart.contextmenu', [['Zoom in', OfficeExcel.Zoom]]);
+            bar.Set('chart.zoom.hdir', 'left');
+            bar.Set('chart.title', '2010 statistics');
+            bar.Set('chart.ylabels.specific', ['100,000','10,000','1,000','100','10']);
+            bar.Set('chart.background.grid.autofit', true);
+            bar.Set('chart.background.grid.autofit.align', true);
+            bar.Set('chart.title.vpos', 0.5);
+
+            bar.Set('chart.gutter.left', 65);
+            bar.Set('chart.gutter.right', 15);
+            bar.Set('chart.gutter.bottom', 35);
+
+            bar.Draw();
+        }
+    </script>
+
+    <?php PrintAnalyticsCode() ?>
+    
+    <style>
+        ol li {
+            margin-top: 0;
+        }
+    </style>
+
+</head>
+<body>
+
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        Variable gutter sizes
+    </div>
+
+    <h1>Variable <span>gutter sizes</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <ul>
+        <li>
+            <a href="#upgrading">Upgrading from a previous version of OfficeExcel</a>
+        </li>
+    </ul>
+
+    <canvas id="cvs" width="620" height="300" style="float: right">[No canvas support]</canvas>
+    
+    <p>
+        New in June 2011 is the much requested feature of seperate gutter sizing. As the chart to the right shows, this means
+        that you can now easily set the left/right/top/bottom gutters independently. This makes it easy to give
+        yourself the space that you need for labels, which will be most noticeable with the Bar chart, the Line chart
+        and similar chart types. There is another example on the <a href="../examples/hbar.html#gutter-example">HBar example page</a>.
+    </p>
+    
+    <p>
+        Because of the fundamental nature of this change (every chart type has been affected) 
+        you should rigorously test your charts if you choose to upgrade.
+    </p>
+    
+    <p>
+        The new properties are:
+    </p>
+    
+    <ul>
+        <li>chart.gutter.left</li>
+        <li>chart.gutter.right</li>
+        <li>chart.gutter.top</li>
+        <li>chart.gutter.bottom</li>
+    </ul>
+    
+    <p>
+         They all default to 25 pixels (with a few exceptions) and each can be set independently.
+    </p>
+    
+    <p>
+        These new properties eliminate the need for certain others. So starting immediately the following properties are no longer
+        used:
+    </p>
+    
+    <ul>
+        <li>chart.gutter</li>
+        <li>chart.width</li>
+        <li>chart.height</li>
+        <li>chart.tooltips.coords.adjust</li>
+        <li>chart.resize.handle.adjust</li>
+    </ul>
+    
+    <p>
+        The <i>chart.gutter</i> property has been completely removed, so you will need to start using the new properties immediately.
+        The <i>chart.width</i> and <i>chart.height</i> properties are completely unused from this point and the last two
+        will be phased out starting immediately.
+    </p>
+
+        <br clear="all" />
+
+        <pre class="code">
+&lt;script&gt;
+        window.onload = function (e)
+        {
+            var bar = new OfficeExcel.Bar('cvs', [0.2,0.2,0.5,0.6,0.5,0.3,0.5,0.1,0.2,0.7,4.2,3.5]);
+            bar.Set('chart.ymax', 5);
+            bar.Set('chart.labels', ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']);
+            bar.Set('chart.tooltips', ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']);
+            bar.Set('chart.text.angle', 45);
+            bar.Set('chart.contextmenu', [['Zoom in', OfficeExcel.Zoom]]);
+            bar.Set('chart.zoom.hdir', 'left');
+            bar.Set('chart.title', '2010 statistics (tooltips)');
+            bar.Set('chart.ylabels.specific', ['100,000','10,000','1,000','100','10']);
+            bar.Set('chart.background.grid.autofit', true);
+            bar.Set('chart.background.grid.autofit.align', true);
+            bar.Set('chart.title.vpos', 0.5);
+
+            <span style="color: green">bar.Set('chart.gutter.left', 65);
+            bar.Set('chart.gutter.right', 5);
+            bar.Set('chart.gutter.bottom', 60);</span>
+
+            bar.Draw();
+        }
+&lt;/script&gt;
+</pre>
+
+    <a name="upgrading"></a>
+    <h2>Upgrading from a previous version of OfficeExcel</h2>
+    
+    <p>
+        If you're upgrading from a previous version of OfficeExcel then there are a few points you should bear in mind:
+    </p>
+    
+    <ol>
+        <li>
+            Remove any calls to .translate().
+            If you use the .translate() method to give yourself extra space, this should be converted to the new gutter properties.
+        </li>
+        
+        <li>
+            If you use <i>chart.tooltips.coords.adjust</i> or <i>chart.resize.handle.adjust</i> then you should remove them. These
+            properties will cease to have any effect eventually, but not immediately.
+        </li>
+        
+        <li>
+            If you use caching, then you may need to use a CTRL/SHIFT+Refresh on your page to bypass any cached copy of the OfficeExcel
+            libraries.
+        </li>
+    </ol>
+</body>
+</html>

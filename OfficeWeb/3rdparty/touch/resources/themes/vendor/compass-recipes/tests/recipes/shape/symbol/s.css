@@ -1,0 +1,414 @@
+html {
+  padding: 1em;
+  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dddddd), color-stop(100%, #ffffff)) no-repeat;
+  background: -webkit-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -moz-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -o-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -ms-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: linear-gradient(#dddddd, #ffffff) no-repeat;
+}
+
+h1 {
+  font-size: 2em;
+  margin-bottom: 1em;
+}
+
+h2 {
+  font-size: 1.4em;
+  margin-bottom: .6em;
+}
+
+.doc {
+  background: #fff;
+  border: #ddd;
+  padding: 1em;
+  color: #aaa;
+  margin: 1em;
+  font-style: italic;
+}
+.doc a {
+  color: #999;
+}
+
+/**
+ * Shape/Symbol
+ *
+ * @author Maxime Thirouin maxime.thirouin@gmail.com @MoOx
+ */
+/**
+ * Shape/Symbol/Diamond
+ *
+ * @todo add height support
+ * 
+ * @author Alexander Futekov
+ * @author Maxime Thirouin maxime.thirouin@gmail.com @MoOx
+ */
+/**
+ * Shape/Symbol/Egg
+ *
+ * @author Maxime Thirouin maxime.thirouin@gmail.com @MoOx
+ */
+/**
+ * Shape/Symbol/Heart
+ * 
+ * @author Nicolas Gallagher @necolas
+ * @author Maxime Thirouin maxime.thirouin@gmail.com @MoOx
+ */
+/**
+ * Shape/Symbol/Infinity
+ * 
+ * @author Nicolas Gallagher @necolas
+ * @author Maxime Thirouin maxime.thirouin@gmail.com @MoOx
+ */
+/**
+ * Shape/Symbol/Pacman
+ *
+ * @author Maxime Thirouin maxime.thirouin@gmail.com @MoOx
+ */
+/**
+ * Shape/Symbol/Yin-yang
+ *
+ * @author Alexander Futekov
+ * @author Maxime Thirouin maxime.thirouin@gmail.com @MoOx
+ */
+.diamond {
+  border-style: solid;
+  border-color: transparent transparent black transparent;
+  border-width: 0 2.5em 2.5em 2.5em;
+  height: 0;
+  width: 5em;
+  position: relative;
+  margin: 1em 0 5em 0;
+}
+.diamond:after {
+  content: "";
+  position: absolute;
+  top: 2.5em;
+  left: -2.5em;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+  border-width: 3.5em 5em 0 5em;
+}
+
+.diamond2 {
+  border-style: solid;
+  border-color: transparent transparent black transparent;
+  border-width: 0 4em 4em 4em;
+  height: 0;
+  width: 8em;
+  position: relative;
+  margin: 1.6em 0 8em 0;
+}
+.diamond2:after {
+  content: "";
+  position: absolute;
+  top: 4em;
+  left: -4em;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+  border-width: 5.6em 8em 0 8em;
+}
+
+.egg {
+  display: block;
+  width: 5em;
+  height: 8em;
+  background-color: black;
+  -moz-border-radius: 50% 50% 50% 50%/60% 60% 40% 40%;
+  -webkit-border-radius: 50% 50% 50% 50%/60% 60% 40% 40%;
+  -o-border-radius: 50% 50% 50% 50%/60% 60% 40% 40%;
+  -ms-border-radius: 50% 50% 50% 50%/60% 60% 40% 40%;
+  -khtml-border-radius: 50% 50% 50% 50%/60% 60% 40% 40%;
+  border-radius: 50% 50% 50% 50%/60% 60% 40% 40%;
+}
+
+.egg2 {
+  display: block;
+  width: 8em;
+  height: 10em;
+  background-color: black;
+  -moz-border-radius: 50% 50% 50% 50%/60% 60% 40% 40%;
+  -webkit-border-radius: 50% 50% 50% 50%/60% 60% 40% 40%;
+  -o-border-radius: 50% 50% 50% 50%/60% 60% 40% 40%;
+  -ms-border-radius: 50% 50% 50% 50%/60% 60% 40% 40%;
+  -khtml-border-radius: 50% 50% 50% 50%/60% 60% 40% 40%;
+  border-radius: 50% 50% 50% 50%/60% 60% 40% 40%;
+}
+
+.heart {
+  position: relative;
+  width: 5em;
+  height: 4em;
+}
+.heart:before, .heart:after {
+  position: absolute;
+  content: "";
+  top: 0;
+  width: 2.5em;
+  height: 4em;
+  background: black;
+  -moz-border-radius: 2em 2em 0 0;
+  -webkit-border-radius: 2em 2em 0 0;
+  -o-border-radius: 2em 2em 0 0;
+  -ms-border-radius: 2em 2em 0 0;
+  -khtml-border-radius: 2em 2em 0 0;
+  border-radius: 2em 2em 0 0;
+}
+.heart:before {
+  left: 2.5em;
+  -moz-transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+  -moz-transform-origin: 0% 100%;
+  -webkit-transform-origin: 0% 100%;
+  -o-transform-origin: 0% 100%;
+  -ms-transform-origin: 0% 100%;
+  transform-origin: 0% 100%;
+}
+.heart:after {
+  left: 0;
+  -moz-transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+  -moz-transform-origin: 100% 100%;
+  -webkit-transform-origin: 100% 100%;
+  -o-transform-origin: 100% 100%;
+  -ms-transform-origin: 100% 100%;
+  transform-origin: 100% 100%;
+}
+
+.heart2 {
+  position: relative;
+  width: 10em;
+  height: 8em;
+}
+.heart2:before, .heart2:after {
+  position: absolute;
+  content: "";
+  top: 0;
+  width: 5em;
+  height: 8em;
+  background: black;
+  -moz-border-radius: 4em 4em 0 0;
+  -webkit-border-radius: 4em 4em 0 0;
+  -o-border-radius: 4em 4em 0 0;
+  -ms-border-radius: 4em 4em 0 0;
+  -khtml-border-radius: 4em 4em 0 0;
+  border-radius: 4em 4em 0 0;
+}
+.heart2:before {
+  left: 5em;
+  -moz-transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+  -moz-transform-origin: 0% 100%;
+  -webkit-transform-origin: 0% 100%;
+  -o-transform-origin: 0% 100%;
+  -ms-transform-origin: 0% 100%;
+  transform-origin: 0% 100%;
+}
+.heart2:after {
+  left: 0;
+  -moz-transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+  -moz-transform-origin: 100% 100%;
+  -webkit-transform-origin: 100% 100%;
+  -o-transform-origin: 100% 100%;
+  -ms-transform-origin: 100% 100%;
+  transform-origin: 100% 100%;
+}
+
+.infinity {
+  position: relative;
+  width: 5em;
+  height: 2.358em;
+}
+.infinity:before, .infinity:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 1.415em;
+  height: 1.415em;
+  border: 0.472em solid black;
+}
+.infinity:before {
+  left: 0;
+  -moz-border-radius: 1.179em 1.179em 0 1.179em;
+  -webkit-border-radius: 1.179em 1.179em 0 1.179em;
+  -o-border-radius: 1.179em 1.179em 0 1.179em;
+  -ms-border-radius: 1.179em 1.179em 0 1.179em;
+  -khtml-border-radius: 1.179em 1.179em 0 1.179em;
+  border-radius: 1.179em 1.179em 0 1.179em;
+  -moz-transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+.infinity:after {
+  right: 0;
+  -moz-border-radius: 1.179em 1.179em 1.179em 0;
+  -webkit-border-radius: 1.179em 1.179em 1.179em 0;
+  -o-border-radius: 1.179em 1.179em 1.179em 0;
+  -ms-border-radius: 1.179em 1.179em 1.179em 0;
+  -khtml-border-radius: 1.179em 1.179em 1.179em 0;
+  border-radius: 1.179em 1.179em 1.179em 0;
+  -moz-transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.infinity2 {
+  position: relative;
+  width: 10.6em;
+  height: 5em;
+}
+.infinity2:before, .infinity2:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 3em;
+  height: 3em;
+  border: 1em solid black;
+}
+.infinity2:before {
+  left: 0;
+  -moz-border-radius: 2.5em 2.5em 0 2.5em;
+  -webkit-border-radius: 2.5em 2.5em 0 2.5em;
+  -o-border-radius: 2.5em 2.5em 0 2.5em;
+  -ms-border-radius: 2.5em 2.5em 0 2.5em;
+  -khtml-border-radius: 2.5em 2.5em 0 2.5em;
+  border-radius: 2.5em 2.5em 0 2.5em;
+  -moz-transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+.infinity2:after {
+  right: 0;
+  -moz-border-radius: 2.5em 2.5em 2.5em 0;
+  -webkit-border-radius: 2.5em 2.5em 2.5em 0;
+  -o-border-radius: 2.5em 2.5em 2.5em 0;
+  -ms-border-radius: 2.5em 2.5em 2.5em 0;
+  -khtml-border-radius: 2.5em 2.5em 2.5em 0;
+  border-radius: 2.5em 2.5em 2.5em 0;
+  -moz-transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.pacman {
+  width: 0;
+  height: 0;
+  border-right: 5em solid transparent;
+  border-top: 5em solid black;
+  border-left: 5em solid black;
+  border-bottom: 5em solid black;
+  border-top-left-radius: 5em;
+  border-top-right-radius: 5em;
+  border-bottom-left-radius: 5em;
+  border-bottom-right-radius: 5em;
+}
+
+.pacman2 {
+  width: 0;
+  height: 0;
+  border-right: 8em solid transparent;
+  border-top: 8em solid black;
+  border-left: 8em solid black;
+  border-bottom: 8em solid black;
+  border-top-left-radius: 8em;
+  border-top-right-radius: 8em;
+  border-bottom-left-radius: 8em;
+  border-bottom-right-radius: 8em;
+}
+
+.yin-yang {
+  width: 4.8em;
+  height: 2.4em;
+  background: white;
+  border-color: black;
+  border-style: solid;
+  border-width: 0.1em 0.1em 2.5em 0.1em;
+  position: relative;
+}
+.yin-yang, .yin-yang:before, .yin-yang:after {
+  -moz-border-radius: 100%;
+  -webkit-border-radius: 100%;
+  -o-border-radius: 100%;
+  -ms-border-radius: 100%;
+  -khtml-border-radius: 100%;
+  border-radius: 100%;
+}
+.yin-yang:before, .yin-yang:after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  border: 0.9em solid;
+  width: 0.6em;
+  height: 0.6em;
+}
+.yin-yang:before {
+  left: 0;
+  background: white;
+  border-color: black;
+}
+.yin-yang:after {
+  left: 50%;
+  background: black;
+  border-color: white;
+}
+
+.yin-yang2 {
+  width: 7.68em;
+  height: 3.84em;
+  background: red;
+  border-color: lime;
+  border-style: solid;
+  border-width: 0.16em 0.16em 4em 0.16em;
+  position: relative;
+}
+.yin-yang2, .yin-yang2:before, .yin-yang2:after {
+  -moz-border-radius: 100%;
+  -webkit-border-radius: 100%;
+  -o-border-radius: 100%;
+  -ms-border-radius: 100%;
+  -khtml-border-radius: 100%;
+  border-radius: 100%;
+}
+.yin-yang2:before, .yin-yang2:after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  border: 1.44em solid;
+  width: 0.96em;
+  height: 0.96em;
+}
+.yin-yang2:before {
+  left: 0;
+  background: red;
+  border-color: lime;
+}
+.yin-yang2:after {
+  left: 50%;
+  background: lime;
+  border-color: red;
+}

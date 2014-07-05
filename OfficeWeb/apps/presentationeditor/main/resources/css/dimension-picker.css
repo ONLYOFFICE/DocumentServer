@@ -1,0 +1,43 @@
+.x-dimension-picker {
+    font-size: 18px;
+}
+
+.x-dimension-picker div {
+    position: relative;
+}
+
+.x-dimension-picker div.x-dimension-picker-mousecatcher {
+    left: 0;
+    top: 0;
+    position: absolute !important;
+}
+
+.x-dimension-picker div.x-dimension-picker-highlighted {
+    left: 0;
+    top: 0;
+    overflow: hidden;
+    position: absolute;
+}
+
+.x-dimension-picker-unhighlighted {
+    background: url("../img/controls/dimension-picker/dimension-unhighlighted.png") repeat scroll 0 0 transparent;
+    background-image: -webkit-image-set(url("../img/controls/dimension-picker/dimension-unhighlighted.png") 1x, url("../img/controls/dimension-picker/dimension-unhighlighted@2x.png") 2x);
+}
+
+.x-dimension-picker div.x-dimension-picker-highlighted {
+    background: url("../img/controls/dimension-picker/dimension-highlighted.png") repeat scroll 0 0 transparent;
+    background-image: -webkit-image-set(url("../img/controls/dimension-picker/dimension-highlighted.png") 1x, url("../img/controls/dimension-picker/dimension-highlighted@2x.png") 2x);
+}
+
+.x-dimension-picker-status {
+    font-size: 12px;
+    text-align: center;
+}
+
+/* dimension-picker-menu setup mousecatcher visible */
+.dimension-picker-menu,
+.dimension-picker-menu .x-menu-body,
+.dimension-picker-menu .x-box-inner,
+.dimension-picker-menu .x-menu-item {
+    overflow: visible;
+}

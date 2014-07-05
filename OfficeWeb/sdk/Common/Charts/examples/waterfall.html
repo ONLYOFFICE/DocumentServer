@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>An example of the Waterfall chart</title>
+
+    <meta name="keywords" content="html5 canvas example waterfall charts" />
+    <meta name="description" content="An example of the type of Waterfall chart that OfficeExcel can produce" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.common.core.js"></script>
+    <script src="../libraries/OfficeExcel.common.tooltips.js" ></script>
+    <script src="../libraries/OfficeExcel.common.effects.js" ></script>
+    <script src="../libraries/OfficeExcel.waterfall.js"></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+
+    <script>
+        window.onload = function ()
+        {
+            var waterfall1 = new OfficeExcel.Waterfall('waterfall1', [50,12,-50,-19, -130, 230])
+            waterfall1.Set('chart.background.grid.autofit', true);
+            waterfall1.Set('chart.background.grid.autofit.numhlines', 10);
+            waterfall1.Set('chart.background.grid.autofit.numvlines', 25);
+            waterfall1.Set('chart.title', 'A chart showing income/expenditure');
+            waterfall1.Set('chart.colors', ['black','red','blue']);
+            waterfall1.Set('chart.strokestyle', 'rgba(0,0,0,0)');
+            waterfall1.Set('chart.units.pre', '$');
+            waterfall1.Set('chart.units.post', 'k');
+            waterfall1.Set('chart.total', true);
+            waterfall1.Set('chart.labels', ['Sales',
+                                            'Misc income',
+                                            'Salaries',
+                                            'Running costs',
+                                            'Snacks',
+                                            'Bake sales',
+                                            'Gross']);
+            waterfall1.Set('chart.tooltips', ['Traditional sales from the shops',
+                                              'Miscellaneous income from neer-do-wells',
+                                              'Salaries of the henchmen',
+                                              'Running costs including fuel for the cars',
+                                              'Sweets and snacks for the office',
+                                              'Bake sales',
+                                              'Gross before "tax"']);
+            waterfall1.Set('chart.highlight.stroke', 'rgba(0,0,0,0)');
+            waterfall1.Set('chart.shadow', navigator.userAgent.indexOf('Firefox') == -1); // In Firefox this seriously slows down the Grow animation
+            waterfall1.Set('chart.shadow.color', '#aaa');
+            waterfall1.Set('chart.shadow.blur', 5);
+            waterfall1.Set('chart.shadow.offsetx', 0);
+            waterfall1.Set('chart.shadow.offsety', 0);
+            waterfall1.Set('chart.gutter.left', 50);
+            waterfall1.Set('chart.xaxispos', 'center');
+
+            waterfall1.Draw();
+        }
+    </script>
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+
+
+<div id="breadcrumb">
+    <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+    >
+    <a href="./index.html">Examples</a>
+    >
+    Waterfall charts example
+</div>
+
+    <h1>Waterfall <span>charts</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <div>
+        <p>
+            Waterfall charts can be used to represent sales and expenditure for an entity. More information can be found here:
+            <a href="http://en.wikipedia.org/wiki/Waterfall_chart" target="_blank">http://en.wikipedia.org/wiki/Waterfall_chart</a>
+        </p>
+
+        <ul>
+            <li><a href="../docs/waterfall.html">Waterfall charts API documentation</a></li>
+        </ul>
+    </div>
+
+    <div>
+        <canvas width="900" height="300" id="waterfall1">[No canvas support]</canvas>
+    </div>
+
+</body>
+</html>

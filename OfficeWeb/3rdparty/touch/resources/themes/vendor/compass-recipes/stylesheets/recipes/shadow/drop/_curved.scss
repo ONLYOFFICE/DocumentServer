@@ -1,0 +1,74 @@
+/**
+ * Drop shadow curved
+ *
+ * @thanks Nicolas Gallagher @necolas
+ * @link http://nicolasgallagher.com/css-drop-shadows-without-images/demo/
+ */
+@mixin drop-shadow-curved($side: 'vertical', $distance: 10px, $box-shadow: 0 0 15px rgba(#000, .6), $radius-1: 10px, $radius-2: 100px)
+{
+    position: relative;
+    // vertical by default
+
+    //@if ($side == 'vertical')
+    //{
+        $top: $distance;
+        $bottom: $distance;
+        $left: 0;
+        $right: 0;
+        $border-radius-1: $radius-1;
+        $border-radius-2: $radius-2;
+    //}
+
+
+    @if ($side == 'left')
+    {
+        $right: 50%;
+
+    }
+    @elseif($side == 'right')
+    {
+        $left: 50%;
+    }
+
+    @elseif ($side == 'horizontal')
+    {
+        $top:0;
+        $bottom:0;
+        $left: $distance;
+        $right: $distance;
+        $border-radius-1: $radius-2;
+        $border-radius-2: $radius-1;
+    }
+    @elseif ($side == 'top')
+    {
+        $top: 0;
+        $bottom: 50%;
+        $left: $distance;
+        $right: $distance;
+        $border-radius-1: $radius-2;
+        $border-radius-2: $radius-1;
+    }
+    @elseif ($side == 'bottom')
+    {
+        $top: 50%;
+        $bottom: 0;
+        $left: $distance;
+        $right: $distance;
+        $border-radius-1: $radius-2;
+        $border-radius-2: $radius-1;
+    }
+
+    &:before
+    {
+        content: "";
+        position: absolute;
+        z-index: -1;
+
+        top: $top;
+        bottom: $bottom;
+        left: $left;
+        right: $right;
+        @include box-shadow($box-shadow);
+        @include border-radius($border-radius-1 / $border-radius-2);
+    }
+}

@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ASCOfficeUtils", "ASCOfficeUtils\ASCOfficeUtils.vcproj", "{6215E3BF-2D42-40FB-B951-B8C448A596D2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DD328E05-26BE-4C81-A13E-489D15321212} = {DD328E05-26BE-4C81-A13E-489D15321212}
+		{56BDD4BE-4F4B-458C-BAA4-5E058BE94E60} = {56BDD4BE-4F4B-458C-BAA4-5E058BE94E60}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GOCR", "GOCR\GOCR.vcproj", "{DD328E05-26BE-4C81-A13E-489D15321212}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PNM", "PNM\PNM.vcproj", "{56BDD4BE-4F4B-458C-BAA4-5E058BE94E60}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6215E3BF-2D42-40FB-B951-B8C448A596D2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6215E3BF-2D42-40FB-B951-B8C448A596D2}.Debug|Win32.Build.0 = Debug|Win32
+		{6215E3BF-2D42-40FB-B951-B8C448A596D2}.Release|Win32.ActiveCfg = Release|Win32
+		{6215E3BF-2D42-40FB-B951-B8C448A596D2}.Release|Win32.Build.0 = Release|Win32
+		{DD328E05-26BE-4C81-A13E-489D15321212}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DD328E05-26BE-4C81-A13E-489D15321212}.Debug|Win32.Build.0 = Debug|Win32
+		{DD328E05-26BE-4C81-A13E-489D15321212}.Release|Win32.ActiveCfg = Release|Win32
+		{DD328E05-26BE-4C81-A13E-489D15321212}.Release|Win32.Build.0 = Release|Win32
+		{56BDD4BE-4F4B-458C-BAA4-5E058BE94E60}.Debug|Win32.ActiveCfg = Debug|Win32
+		{56BDD4BE-4F4B-458C-BAA4-5E058BE94E60}.Debug|Win32.Build.0 = Debug|Win32
+		{56BDD4BE-4F4B-458C-BAA4-5E058BE94E60}.Release|Win32.ActiveCfg = Release|Win32
+		{56BDD4BE-4F4B-458C-BAA4-5E058BE94E60}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

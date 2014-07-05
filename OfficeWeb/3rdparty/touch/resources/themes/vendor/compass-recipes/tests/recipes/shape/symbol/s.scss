@@ -1,0 +1,16 @@
+@import "tests";
+
+@import "recipes/shape/symbol";
+
+.diamond { @include diamond(5em, #000) }
+.diamond2 { @include diamond(8em, #000) }
+.egg { @include egg(5em, 8em, #000) }
+.egg2 { @include egg(8em, 10em, #000) }
+.heart { @include heart(5em, 4em, #000) }
+.heart2 { @include heart(10em, 8em, #000) }
+.infinity { @include infinity(5em, false, #000) }
+.infinity2 { @include infinity(false, 5em, #000) }
+.pacman { @include pacman(5em, #000) }
+.pacman2 { @include pacman(8em, #000) }
+.yin-yang { @include yin-yang(5em, #000) }
+.yin-yang2 { @include yin-yang(8em, #0f0, #f00) }

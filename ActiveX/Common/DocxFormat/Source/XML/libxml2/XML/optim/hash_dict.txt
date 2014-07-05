@@ -1,0 +1,11 @@
+Reuses a dictionnary for the hash table to reduce the string compare
+costs. Not worth it unless validating big DTDs
+
+		without		with
+db10000  tree	175/79		179/81
+db100000 stream	1222		1217
+dba100000stream	593		601
+REC validation	1986		2098
+Docbook valid	10808		10649
+
+Tue Feb 24 19:09:49 CET 2004

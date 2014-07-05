@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>An example of the Scatter chart</title>
+    
+    <meta name="keywords" content="html5 canvas example scatter chart" />
+    <meta name="description" content="An example of the type of Scatter chart that OfficeExcel can produce" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.tooltips.js" ></script>
+
+    <script src="../libraries/OfficeExcel.chartProperties.js" ></script>
+    <script src="../libraries/OfficeExcel.scatter.js" ></script>
+    <script src="../libraries/OfficeExcel.common.key.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+
+    <script>
+        var original_data =   [
+                               [0.5,[0,3,4,5,7, 'red', 'red'], 'black'],
+                               [1.5,[2,3,5,6,9, 'red', 'red'], 'black'],
+                               [2.5,[0,2,5.6,6.2,9, 'red', 'red'], 'black'],
+                               [3.5,[2,4.8,6.1,6.5,9, 'red', 'red'], 'black'],
+                               [4.5,[1.1,5.2,5.9,6.5,7.6, 'red', 'red'], 'black'],
+                               [5.5,[0.8,3.9,7,7.5,7.99, 'red', 'red'], 'black'],
+                               [6.5,[2,2.9,4,4.5,5.3, 'red', 'red'], 'black'],
+                               [7.5,[2.5,3.0,4,4.9,5.5, 'red', 'red'], 'black'],
+                               [8.5,[3,3.3,5,6.5,6.9, 'red', 'red'], 'black'],
+                               [9.5,[1.1,3.3,6,6.5,6.9, 'red', 'red'], 'black'],
+                               [10.5,[0.7,3.1,5,5.9,6.9, 'red', 'red'], 'black'],
+                               [11.5,[0.3,2.5,3,4.5,4.9, 'red', 'red'], 'black'],
+                               [12.5,[0.9,2.7,4.9,5.5,6.3, 'red', 'red'], 'black'],
+                               [13.5,[0.7,3.0,3.8,4.2,4.9, 'red', 'red'], 'black'],
+                               [14.5,[0.8,2.1,5.2,6.1,7.2, 'red', 'red'], 'black'],
+                               [15.5,[0.9,2.2,3.8,5.5,6.2, 'red', 'red'], 'black'],
+                               [16.5,[1.2,2.3,3.9,5.2,6, 'red', 'red'], 'black'],
+                               [17.5,[0.8,2.2,4.1,5.2,5.9, 'red', 'red'], 'black'],
+                               [18.5,[0.9,3.1,4.2,5.5,6.1, 'red', 'red'], 'black'],
+                               [19.5,[0.9,2.9,4.9,5.5,6.2, 'red', 'red'], 'black'],
+                               [20.5,[0.9,2.9,4.9,5.22,6.3, 'red', 'red'], 'black'],
+                               [21.5,[1.7,2.9,5,5.4,6.3, 'red', 'red'], 'black'],
+                               [22.5,[1.7,3.1,5.1,6.1,6.8, 'red', 'red'], 'black'],
+                               [23.5,[1.9,2.5,4.3,5.5,6.6, 'red', 'red'], 'black'],
+                               [24.5,[0.7,1.6,2.1,3.4,4.2, 'red', 'red'], 'black'],
+                               [25.5,[0.8,1.5,2,3.6,4.2, 'red', 'red'], 'black'],
+                               [26.5,[0.9,2,3,4.2,5.1, 'red', 'red'], 'black'],
+                               [27.5,[0.6,2,2.7,3.6,5.5, 'red', 'red'], 'black'],
+                               [28.5,[0.9,2,3,4.5,9, 'red', 'red'], 'black'],
+                               [29.5,[1.1,3,4.5,5.1,10, 'red', 'red'], 'black'],
+                               [30.5,[1.8,3,4.4,5.5,9, 'red', 'red'], 'black']
+                              ];
+
+        window.onload = function ()
+        {
+            var data = [
+                     [10,15,'red'],[13,16,'red'],[12,11,'red'],[15,16,'red'],[20,19,'red'],[19,16,'red'],[13,15,'red'],[11,12,'red'],[13,16,'red'],[5,19,'red'],[16,15,'red'],[13,15,'red'],[14,14,'red'],[12,12,'red'],
+                     [5,4,'green'],[6,14,'green'],[19,12,'green'],[3,5,'green'],[1,16,'green'],[13,5,'green'],[15,15,'green'],[13,5,'green'],[4,9,'green'],[16,6,'green'],[13,18,'green'],[18,12,'green'],[19,18,'green'],[13,16,'green'],[15,14,'green'],
+                     [12,4,'blue'],[4,23,'blue'],[13,8,'blue'],[12,12,'blue'],[18,4,'blue'],[4,18,'blue'],[11,2,'blue'],[4,3,'blue'],[5,8,'blue'],[1,9,'blue'],[4,6,'blue'],[16,8,'blue'],[17,8,'blue'],[19,9,'blue'],[13,5,'blue'],[16,21,'blue'],
+                     [12,4],[13,12],[11,16],[4,19],[4,3],[5,6],[1,9],[4,12],[6,12],[8,8],[16,6],[13,5],[15,13],[23,23,'red'], [1,1, 'gray'],
+                     [1,4,'gray'], [2,3,'gray'], [1,6,'gray'], [2,3,'gray'], [2,5,'gray'], [3,7,'gray'], [1,4,'gray'], [2,7,'gray']
+                    ];
+            
+            ShowBoxplot();
+        }
+            
+        /**
+        * This facilitates the selector changing
+        */
+        function SelectorChange()
+        {
+            var selector = document.getElementById("chartSelector");
+            var canvas   = document.getElementById("scatter2");
+
+            OfficeExcel.Clear(canvas);
+
+            if (selector.options[selector.selectedIndex].value == 'high/low') {
+                ShowBoxplot();
+            } else {
+                ShowAverage();
+            }
+        }
+
+
+        /**
+        * This shows the box plot of stock prices
+        */
+        function ShowBoxplot ()
+        {
+            var scatter = new OfficeExcel.Scatter('scatter2', OfficeExcel.array_clone(original_data));
+            scatter._chartTitle._text = 'High/low  daily stock prices';
+            scatter._otherProps._boxplot_width = 0.5;
+            scatter._otherProps._boxplot.capped = false;
+            scatter._otherProps._labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+            scatter._otherProps._xmax = 31;
+            scatter._otherProps._ymax = 10;
+            scatter._otherProps._scale_decimals = 1;
+            scatter._otherProps._units_post = 'p';
+            scatter._chartGutter._left = 40;
+            scatter.Draw();
+        }
+        
+        /**
+        * This shows the average line of stock prices
+        */
+        function ShowAverage ()
+        {
+            var data = OfficeExcel.array_clone(original_data);
+
+            for (var i=0; i<data.length; ++i) {
+                data[i][1] = data[i][1][3];
+            }
+
+            var scatter = new OfficeExcel.Scatter('scatter2', data);
+            scatter.Set('chart.title', 'Average daily stock prices');
+            scatter.Set('chart.labels', ['Week 1', 'Week 2', 'Week 3', 'Week 4']);
+            scatter.Set('chart.xmax', 31);
+            scatter.Set('chart.ymax', 10);
+            scatter.Set('chart.scale.decimals', 1);
+            scatter.Set('chart.units.post', 'p');
+            scatter.Set('chart.gutter.left', 40);
+            scatter.Set('chart.line', true);
+            scatter.Set('chart.line.colors', ['red']);
+            scatter.Set('chart.tickmarks', null);
+            scatter.Draw();
+        }
+    </script>
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+
+
+<div id="breadcrumb">
+    <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+    >
+    <a href="./index.html">Examples</a>
+    >
+    Scatter charts example
+</div>
+
+<h1>Scatter <span>charts</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+    
+    <p>
+        Scatter charts use two variables to plot points and makes it clear where there are congregations. The data points
+        make up the X and Y coordinates. The labels on the X axis are separate from the X units, allowing you to to have
+        lots of points, but only a few labels. The Scatter is a good chart to use if you want to show stock prices and
+        it also supports high/low charts - as shown below.
+    </p>
+
+    <div>
+        <ul>
+            <li><a href="../docs/scatter.html">Scatter charts API documentation</a></li>
+        </ul>
+    </div>
+
+    <div style="text-align: center">
+
+        <canvas id="scatter2" width="850" height="200">[No canvas support]</canvas><br />
+    
+        Chart type:
+        <select id="chartSelector" onchange="SelectorChange()">
+            <option value="high/low">High/low</option>
+            <option value="average">Average</option>
+        </select>
+    </div>   
+    
+</body>
+</html>

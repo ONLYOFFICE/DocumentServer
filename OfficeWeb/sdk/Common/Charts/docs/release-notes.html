@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html> 
+<head> 
+    <meta http-equiv="X-UA-Compatible" content="chrome=1"> 
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    --> 
+    <title>OfficeExcel release notes</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas docs bar charts" />
+    <meta name="description" content="The OfficeExcel release notes index" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+ 
+    <link rel="stylesheet" href="../../css/website.css" type="text/css" media="screen" /> 
+    <link rel="icon" type="image/png" href="../../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <?php PrintAnalyticsCode() ?>
+</head> 
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb"> 
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a> 
+        >
+        OfficeExcel release notes
+    </div> 
+ 
+    <h1>OfficeExcel <span>release notes</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <p>
+        Listed below are the current and previous release notes.
+    </p>
+    
+    <p>
+        <b>2012</b>
+    </p>
+    
+    <ul>
+        <li><a href="release-notes-january-2012.html">January 2012</a></li>
+    </ul>
+    
+    <p>
+        <b>2011</b>
+    </p>
+    <ul>
+        <li><a href="release-notes-november-2011.html">November 2011</a></li>
+        <li><a href="release-notes-october-2011.html">October 2011</a></li>
+    </ul>
+    
+    <p>
+        Past release notes are not available.
+    </p>
+    
+</body> 
+</html>

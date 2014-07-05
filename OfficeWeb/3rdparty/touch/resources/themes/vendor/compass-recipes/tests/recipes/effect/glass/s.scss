@@ -1,0 +1,26 @@
+@import "tests";
+@import "recipes/effect/glass";
+
+.body
+{
+    
+}
+
+.glass,
+.glass-blue
+{
+    width: 400px;
+    height: 400px;
+    margin: 20px auto;
+    background: #000;
+}
+
+.glass
+{
+    @include effect-glass;
+}
+
+.glass-blue
+{
+    @include effect-glass(#ddf, -20deg, 1em);
+}

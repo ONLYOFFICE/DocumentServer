@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>Adjusting your charts interactively</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas charts adjusting docs " />
+    <meta name="description" content="Information about adjusting your charts interactively" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        Adjusting charts interactively
+    </div>
+
+    <h1>Adjusting <span>your charts interactively</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <div style="float: left"></div>
+        <p>
+            Since 24th May 2010 you have had the ability to adjust your so if you want to see the charts interactively. Currently the Bar chart, Line chart,
+            Progress Bar and the Radar have this facility. Some chart types use multiple event handlers and as such
+            are unlikely to work well with other dynamic features. The Line chart is an example of this, and whilst it does work
+            with the context menu (and so the full canvas zoom), it is unlikely to work with other dynamic features.
+        </p>
+    
+    
+        <p>
+            At the current time this feature on the Bar and Line charts doesn't work with X axis in the center.
+        </p>
+    
+    
+        <p>
+            If your intention is to make some sort of interactive console, new HTML5 input types may also be of interest (for example the new <i>range</i> input type
+            which gives you a "slider bar"). Eg (Chrome/Safari/Opera):
+        </p>
+    
+        <p style="text-align: center">
+            <input type="range" min="0" max="100" value="76" onchange="document.getElementById('range_result').value = this.value"/>
+            <input type="text" id="range_result" size="3" value="76" />
+        </p>
+        
+        <h4>Note</h4>
+        
+        <p>
+            Since interactivly adjusting a chart involves completely redrawing it, having a lot of them on one page can cause
+            slower updates. For this reason each example chart is on its own page:
+        </p>
+        
+        <ul>
+            <li><a href="adjusting_bar.html">Bar chart</a></li>
+            <li><a href="adjusting_gantt.html">Gantt chart</a></li>
+            <li><a href="adjusting_hprogress.html">HProgress bar</a></li>
+            <li><a href="adjusting_line.html">Line chart</a></li>
+            <li><a href="adjusting_radar.html">Radar chart</a></li>
+            <li><a href="adjusting_thermometer.html">Thermometer chart</a></li>
+            <li><a href="adjusting_vprogress.html">VProgress bar</a></li>
+        </ul>
+        
+        <h4>DOM2 event handlers</h4>
+        
+        <p>
+            In January 2011 all adjusting was converted to DOM2 event handling. This makes adjusting work much better with other
+            dynamic features.
+        </p>
+    </div>
+
+</body>
+</html>

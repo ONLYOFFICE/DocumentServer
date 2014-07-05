@@ -1,0 +1,494 @@
+// Bootstrap core variables and mixins
+@import "../../../../../3rdparty/bootstrap/src/less/variables.less";
+@import "../../../../../3rdparty/bootstrap/src/less/mixins.less";
+
+@toolbarBorderColor:            #929292;
+@toolbarBorderShadowColor:      #FAFAFA;
+@toolbarTopColor:               #EBEBEB;
+@toolbarBottomColor:            #CCCCCC;
+@toolbarHoverColor:             #7698DE;
+@toolbarFontSize:               12px;
+@controlBtnHoverTopColor:       #6180C4;
+@controlBtnHoverBottomColor:    #8AACF1;
+@iconSpriteCommonPath:          "../img/glyphicons.png";
+
+// Global overwrite
+// -------------------------
+
+.btn-mini {
+    font-weight: bold;
+}
+
+.btn-primary {
+    .buttonBackground(@controlBtnHoverBottomColor, @controlBtnHoverTopColor);
+}
+
+.embed-body {
+        -moz-user-select: -moz-none;
+      -khtml-user-select: none;
+     -webkit-user-select: none;
+         -ms-user-select: none;
+             user-select: none;
+
+    font-size: 12px;
+    overflow: hidden;
+}
+
+// Fix popover
+// -------------------------
+.popover.top {
+    margin-top: -10px;
+}
+
+// Document Viewer
+// -------------------------
+.viewer {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    left: 0;
+    right: 0;
+
+    &.top {
+        top: 32px;
+        bottom: 0;
+    }
+
+    &.bottom {
+        top: 0;
+        bottom: 30px;
+    }
+}
+
+// Toolbar
+// -------------------------
+.toolbar {
+    position: fixed;
+    font-size: @toolbarFontSize;
+    min-width: 340px;
+    #gradient > .vertical(@toolbarTopColor, @toolbarBottomColor);
+
+    &.top {
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 32px;
+
+     -webkit-box-shadow: inset 0 -1px 0 @toolbarBorderColor, inset 0 1px 0 @toolbarBorderShadowColor;
+        -moz-box-shadow: inset 0 -1px 0 @toolbarBorderColor, inset 0 1px 0 @toolbarBorderShadowColor;
+             box-shadow: inset 0 -1px 0 @toolbarBorderColor, inset 0 1px 0 @toolbarBorderShadowColor;
+    }
+
+    &.bottom {
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 30px;
+
+     -webkit-box-shadow: inset 0 1px 0 @toolbarBorderColor, inset 0 2px 0 @toolbarBorderShadowColor;
+        -moz-box-shadow: inset 0 1px 0 @toolbarBorderColor, inset 0 2px 0 @toolbarBorderShadowColor;
+             box-shadow: inset 0 1px 0 @toolbarBorderColor, inset 0 2px 0 @toolbarBorderShadowColor;
+    }
+
+    ul {
+        position: absolute;
+        list-style-type: none;
+        margin: 0;
+
+        li {
+            input {
+                height: 14px;
+                font-size: @toolbarFontSize;
+                margin: 4px 3px 5px;
+                padding: 4px 0;
+                text-align: center;
+            }
+
+            .text {
+                cursor: default;
+            }
+        }
+
+        &.left {
+            left: 0;
+
+            li {
+                float: left;
+            }
+        }
+
+        &.right {
+            right: 0;
+
+            li {
+                float: left;
+            }
+        }
+
+        .separator {
+            height: 24px;
+            margin: 4px 9px;
+            border-right: 1px solid @toolbarBorderShadowColor;
+            border-left: 1px solid @toolbarBorderColor;
+        }
+    }
+}
+
+// Logo
+// -------------------------
+a.brand-logo {
+    display: block;
+    background-image: url("@{iconSpriteCommonPath}");
+    width: 127px;
+    height: 20px;
+    margin: 5px 0 0 10px;
+    background-position: 0 -100px;
+}
+
+// Sprite icons path
+// -------------------------
+[class^="control-icon-"],
+[class*=" control-icon-"] {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  vertical-align: text-top;
+  background-image: url("@{iconSpriteCommonPath}");
+  background-repeat: no-repeat;
+  margin-top: -2px;
+}
+
+[class^="overlay-icon-"],
+[class*=" overlay-icon-"] {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    vertical-align: text-top;
+    background-image: url("@{iconSpriteCommonPath}");
+    background-repeat: no-repeat;
+    opacity: .3;
+}
+
+.control-icon-share         { background-position: 0             0; }
+.control-icon-embed         { background-position: 0         -20px; }
+.control-icon-fullscreen    { background-position: 0         -40px; }
+.control-icon-close         { background-position: 0         -60px; }
+.control-icon-save          { background-position: 0         -80px; }
+
+.overlay-icon-zoom-in       { background-position: 0        -120px; }
+.overlay-icon-zoom-out      { background-position: -32px    -120px; }
+
+
+// Control buttons
+// -------------------------
+.control-btn {
+    display: inline-block;
+    padding: 1px 5px;
+    font-size: @toolbarFontSize;
+    line-height: 20px;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    background-color: transparent;
+    background-image: none;
+    border: 1px solid transparent;
+    .border-radius(2px);
+    margin: 4px 5px 0 0;
+
+    i {
+        margin-right: 5px;
+    }
+
+    &.no-caption {
+        padding: 1px 2px;
+
+        i {
+            margin-right: 0;
+        }
+    }
+
+// Hover state
+    &:hover {
+        color: @toolbarHoverColor;
+        text-decoration: none;
+        text-shadow: 0 1px 0 @toolbarBorderShadowColor;
+
+        .control-icon-share         { background-position: -20px         0; }
+        .control-icon-embed         { background-position: -20px     -20px; }
+        .control-icon-fullscreen    { background-position: -20px     -40px; }
+        .control-icon-close         { background-position: -20px     -60px; }
+        .control-icon-save          { background-position: -20px     -80px; }
+    }
+
+// Focus state for keyboard and accessibility
+    &:focus {
+        .tab-focus();
+    }
+
+// Active state
+    &.active,
+    &:active {
+        color: #ffffff;
+        outline: 0;
+        border: 1px solid darken(@controlBtnHoverTopColor, 5%);
+        #gradient > .vertical(@controlBtnHoverTopColor, @controlBtnHoverBottomColor);
+        text-shadow: 0 1px 0 darken(@toolbarBorderColor, 20%);
+
+        .control-icon-share         { background-position: -40px         0; }
+        .control-icon-embed         { background-position: -40px     -20px; }
+        .control-icon-fullscreen    { background-position: -40px     -40px; }
+        .control-icon-close         { background-position: -40px     -60px; }
+        .control-icon-save          { background-position: -40px     -80px; }
+    }
+}
+
+// Overlay control
+// -------------------------
+.overlay-controls {
+    position: absolute;
+    bottom: 55px;
+    z-index: 10;
+    left: 50%;
+
+    ul {
+        list-style-type: none;
+        margin: 0 auto;
+
+        li {
+            display: inline-block;
+        }
+    }
+
+    .overlay {
+        width: 32px;
+        height: 32px;
+
+        display: inline-block;
+        text-align: center;
+        vertical-align: middle;
+        cursor: pointer;
+        background-color: transparent;
+        background-image: none;
+        border: none;
+        padding: 0;
+        line-height: 0;
+
+        &:hover {
+            [class^="overlay-icon-"],
+            [class*=" overlay-icon-"] {
+                opacity: .6;
+            }
+        }
+
+        &.active,
+        &:active {
+            [class^="overlay-icon-"],
+            [class*=" overlay-icon-"] {
+                opacity: .8;
+            }
+        }
+    }
+}
+
+// Error mask
+// -------------------------
+.errormask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    border: none;
+    background-color: #f4f4f4;
+    z-index: 30002;
+
+    .error-body {
+        position: relative;
+        top: 40%;
+        width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #FFFFFF;
+        border: 1px solid #C0C0C0;
+
+        .title {
+            font-weight: bold;
+            font-size: 1.6em;
+            padding-bottom: 10px;
+        }
+    }
+}
+
+// Share popover
+// -------------------------
+.popover{
+    .popover-content {
+        padding: 14px;
+    }
+
+    .btn {
+        .border-radius(2px);
+    }
+
+    &.hyperlink {
+        .popover-content {
+            padding: 5px 10px;
+
+            p {
+                display: block;
+                word-wrap: break-word;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+        }
+    }
+
+    &.share {
+        width: 280px;
+
+        .share-link {
+            .caption {
+                margin-right: 8px;
+                float: left;
+            }
+
+            .uneditable-input {
+                font-size: 1em;
+                padding: 0 4px;
+                margin-right: 5px;
+                .border-radius(0);
+                cursor: auto;
+                    -moz-user-select: text;
+                  -khtml-user-select: text;
+                 -webkit-user-select: text;
+                     -ms-user-select: text;
+                         user-select: text;
+            }
+
+            .input-medium {
+                width: 130px;
+            }
+
+            .btn {
+                float: right;
+            }
+        }
+
+        .share-buttons {
+            ul {
+                height: 25px;
+                list-style-type: none;
+                margin: 5px 0 0;
+                overflow: hidden;
+
+                li {
+                    display: inline-block;
+                    float: left;
+                    margin: 1px 5px 0 0;
+                    vertical-align: middle;
+
+                    &.share-mail {
+                        float: right;
+                        margin: 0;
+                        a {
+                            padding: 2px 8px;
+                        }
+                        i {
+                            margin-right: 5px;
+                        }
+                    }
+
+                    &.share-twitter {
+                        max-width: 100px;
+                    }
+                }
+            }
+        }
+    }
+
+    &.embed {
+        width: 270px;
+
+        .size-manual {
+            margin-bottom: 10px;
+        }
+
+        .right {
+            float: right;
+        }
+
+        .caption {
+            margin-right: 8px;
+        }
+
+        input {
+            font-size: 1em;
+            padding: 0 4px;
+            .border-radius(0);
+            margin: 0;
+            margin-top: -1px;
+
+            &.input-mini {
+                width: 40px;
+            }
+        }
+
+        textarea {
+            width: 228px;
+            resize: none;
+            cursor: auto;
+            font-size: 1em;
+            .border-radius(0);
+        }
+
+        button {
+            float: right;
+            margin: 5px 0 15px;
+            width: 86px;
+        }
+    }
+}
+
+
+// Modal dialog
+// -------------------------
+.modal.error {
+    .modal-footer {
+        text-align: center;
+    }
+}
+
+
+// Loader
+// -------------------------
+.cmd-loader-body {
+    z-index: 20001;
+    width: 300px;
+    padding: 16px;
+    margin: -71px 0 0 -166px;
+    border: none;
+    background-image: none;
+    background-color: #787C80;
+    opacity: 0.8;
+    -webkit-border-radius: 10px;
+       -moz-border-radius: 10px;
+            border-radius: 10px;
+
+    .cmd-loader-image {
+        background-image: url("../img/loading.gif");
+        background-repeat: no-repeat;
+        background-position: top center;
+        height: 74px;
+        width: 100%;
+    }
+
+    .cmd-loader-title {
+        font-size: 18px;
+        font-weight: lighter;
+        color: #FFF;
+        text-align: center;
+        margin: 16px 24px 0 24px;
+    }
+}

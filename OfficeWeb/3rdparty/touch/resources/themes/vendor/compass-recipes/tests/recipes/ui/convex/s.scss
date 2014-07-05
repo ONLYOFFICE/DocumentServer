@@ -1,0 +1,22 @@
+@import "tests";
+
+@import "recipes/ui/convex";
+
+.ui-convex,
+.ui-convex-hover,
+{
+    width: 10em;
+    height: 2em;
+    
+    margin: 1em auto;
+}
+
+.ui-convex
+{
+    @include ui-convex(#ddd, false)
+}
+
+.ui-convex-hover
+{
+    @include ui-convex;
+}

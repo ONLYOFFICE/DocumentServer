@@ -1,0 +1,102 @@
+$shadow-width: .065em; // Space between tip and its shadow
+
+/**
+ *    // SCSS
+ *    @include application-toolbar-ui('edit', $base-color);
+ */
+@mixin common-toolbar-ui($ui-label, $color) {
+
+  $toolbar-border-color: darken($color, 50%);
+  $toolbar-button-color: darken($color, 5%);
+
+  .x-toolbar-#{$ui-label} {
+    @if $ui-label == search {
+      @include background-gradient($color, color_stops($color, lighten($color, 11%) 20%, lighten($color, 11%)));
+    }
+    @else {
+      @include background-gradient($color, color_stops(lighten($color, 100%), lighten($color, 13%) 3%, $color));
+    }
+    border-color: $toolbar-border-color;
+
+    .x-title {
+      @include color-by-background($color);
+      @include bevel-by-background($color);
+    }
+
+    &.x-docked-top {
+      border-bottom: 1px solid darken($color, 22%);
+    }
+
+    .x-button,
+    .x-field-select .x-component-outer,
+    .x-field-select .x-component-outer:before {
+      @include toolbar-button($toolbar-button-color, matte);
+    }
+
+    .x-label,
+    .x-form-label {
+      font-weight: normal;
+      color: darken($color, 50%);
+      text-shadow: 0 1px 0 lighten($color, 100%);
+    }
+  }
+}
+
+@mixin common-shadow-iconmask($name, $url) {
+  .x-tab .x-button-icon.#{$name},
+  .x-button .x-button-icon.x-icon-mask.#{$name},
+  .x-list-item .x-icon-mask.#{$name} {
+    background-image: none;
+    background-color: transparent;
+
+    &:before, &:after {
+      -webkit-mask-image: inline-image($url);
+    }
+  }
+}
+
+/**
+ *    // SCSS
+ *    @include application-toolbar-iconmask('code3', '../../img/toolbar/code3.png');
+ */
+@mixin common-toolbar-iconmask($name) {
+  .x-tab .x-button-icon.#{$name},
+  .x-button .x-button-icon.x-icon-mask.#{$name} {
+    //background-image: none;
+    //background-color: transparent;
+    $default-mask-offset: 0.15em;
+
+    &:before, &:after {
+      @include insertion($toolbar-icon-size, $toolbar-icon-size, $button-stroke-weight, auto);
+      z-index: 2;
+      //-webkit-mask: 0 0 inline-image($url) no-repeat;
+      -webkit-mask-size: $toolbar-icon-size;
+    };
+
+    &:before {
+      top: $default-mask-offset + $shadow-width;
+    }
+    &:after {
+      top: $default-mask-offset;
+    }
+  }
+
+  .x-tab .x-button-icon.#{$name},
+  .x-button .x-button-icon.x-icon-mask.#{$name} {
+    &:before {
+      @include background-image(linear-gradient(color_stops(#ffffff, #f3f3f3)));
+    }
+    &:after {
+      @include background-image(linear-gradient(color_stops(#292929, #646464)));
+    }
+  }
+
+  .x-button.x-button-pressing .x-button-icon.x-icon-mask.#{$name} {
+    &:before {
+      @include background-image(linear-gradient(color-stops(black, black)));
+    }
+    &:after {
+      @include background-image(linear-gradient(color-stops(white, white)));
+    }
+  }
+}

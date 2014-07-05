@@ -1,0 +1,52 @@
+/**
+ * Menu dropdown helper
+ *
+ * @author Maxime Thirouin @MoOx maxime.thirouin@gmail.com
+*/
+
+// this mixin have to be used with a js for dropdown menu behavior
+// (display onhover with a timeout like 500ms for better UX)
+
+// sometimes we don't use nesting all the time to optimize some selector
+
+@import "recipes/shared/block-inline-block";
+
+@mixin ui-menu-dropdown($z-index: 3)
+{
+    z-index: $z-index;
+
+    ul
+    {
+        z-index: $z-index + 1;
+        list-style-position: outside; // ie fix
+
+        li
+        {
+            position: relative;
+            @include block-inline-block;
+        }
+
+        a
+        {
+            display: inline-block;
+        }
+    }
+
+        // sub menu
+        ul ul
+        {
+            position: absolute;
+            z-index: $z-index + 2;
+
+            // default behavior
+            display: none;
+        }
+
+            // we use a selector with a parent class like this to do not override
+            // eventual js added behavior (see comment a the top of this file)
+            .no-js & li:hover > ul
+            {
+                    display: block;
+            }
+}
+

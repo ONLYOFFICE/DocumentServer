@@ -1,0 +1,7 @@
+# List of source files containing translatable strings.
+# Copyright (C) 1995, 1996 Free Software Foundation, Inc.
+
+# Package source files
+src/tools/hunspell.cxx
+
+# end of file POTFILE.in

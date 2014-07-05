@@ -1,0 +1,21 @@
+
+.asc-btn-search {
+    background-image: url('../img/btns-search.png');
+    background-image: -webkit-image-set(url("../img/btns-search.png") 1x, url("../img/btns-search@2x.png") 2x);
+}
+
+.asc-btn-search.previous                        {background-position: 0 0;}
+.x-btn-over .asc-btn-search.previous            {background-position: -16px  0;}
+.x-btn-pressed .asc-btn-search.previous         {background-position: -32px  0;}
+.x-btn-menu-active .asc-btn-search.previous     {background-position: -32px  0;}
+.x-btn-disabled .asc-btn-search.previous        {background-position: -48px  0;}
+
+.asc-btn-search.next                            {background-position: 0 -16px;}
+.x-btn-over .asc-btn-search.next                {background-position: -16px  -16px;}
+.x-btn-pressed .asc-btn-search.next             {background-position: -32px  -16px;}
+.x-btn-menu-active .asc-btn-search.next         {background-position: -32px  -16px;}
+.x-btn-disabled .asc-btn-search.next            {background-position: -48px  -16px;}
+
+.dlg-search.x-btn-menu-active .btn-settings {
+    background-position: -20px -1088px;
+}

@@ -1,0 +1,158 @@
+<!DOCTYPE html >
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>The pseudo-standard events available in OfficeExcel</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas chart docs async asynchronous" />
+    <meta name="description" content="Documentation about the pseudo-standard events that are available in OfficeExcel" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A chart library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.common.core.js"></script>
+    <script src="../libraries/OfficeExcel.common.effects.js"></script>
+    <script src="../libraries/OfficeExcel.bar.js"></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        Pseudo-standard events
+    </div>
+
+    <h1>Pseudo-standard <span>events</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+
+    <canvas id="cvs" width="600" height="300" style="float: right">[No canvas support]</canvas>
+    
+    <script>
+        function myClick (e, bar)
+        {
+            var obj = bar[0];
+            var x   = bar[1];
+            var y   = bar[2];
+            var w   = bar[3];
+            var h   = bar[4];
+            var idx = bar[5];
+            
+            alert('The onclick listener just fired...!');
+        }
+
+
+        window.onload = function ()
+        {
+            var myBar = new OfficeExcel.Bar('cvs', [4,5,8,4,6,8,5]);
+            myBar.Set('chart.labels', ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
+            myBar.Set('chart.colors', ['blue']);
+            myBar.Set('chart.events.mousemove', function (e, bar) {e.target.style.cursor = 'pointer';});
+            myBar.Set('chart.events.click', myClick);
+            OfficeExcel.Effects.Bar.Wave2(myBar);
+        }
+    </script>
+    
+    <p>
+        Normally, if you apply an <i>onclick</i> listener to the canvas it will apply to the <b>whole</b> canvas. OfficeExcel provides a way
+        to add event listeners to your chart so that the event listeners apply only to the appropriate areas. In the case of the Bar
+        chart on the right this means the actual bars themselves. You can see the effect here when you click on a bar - you get an
+        alert. And when you click on a non-bar area - nothing happens.
+    </p>
+    
+    <p>
+        You can use the properties:
+        
+        <ul>
+            <li>chart.events.click</li>
+            <li>chart.events.mousemove</li>
+        </ul>
+        
+        To add your listeners to the chart.
+        The listener is simply a function that is called when the event fires. Only one function can be specified, so you need to
+        check the index to see if the bar is the one you want.
+    </p>
+    
+    <br clear="all" />
+    
+    <pre class="code">
+&lt;script&gt;
+    <span style="color: green">/**
+    * This is the function that is run when the event fires.
+    */
+    function myClick (e, bar)
+    {
+        var obj = bar[0];
+        var x   = bar[1];
+        var y   = bar[2];
+        var w   = bar[3];
+        var h   = bar[4];
+        var idx = bar[5];
+        
+        alert('The onclick listener just fired...!');
+    }</span>
+
+    var myBar = new OfficeExcel.Bar('cvs', [4,5,8,4,6,8,5]);
+    myBar.Set('chart.labels', ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
+    myBar.Set('chart.colors', ['blue']);
+    <span style="color: green">myBar.Set('chart.events.mousemove', function (e, bar) {e.target.style.cursor = 'pointer';});
+    myBar.Set('chart.events.click', myClick); // The myClick function is the one above</span>
+    OfficeExcel.Effects.Bar.Wave2(myBar);
+&lt;/script&gt;
+</pre>
+
+    <h4>Note</h4>
+        <p>
+            If you want the mouse pointer to change to the hand when you move the mouse over a bar you need to do
+            as shown below in the <i>chart.events.mousemove</i> event with the CSS <i>cursor</i> property. When you move the
+            mouse away from the bar the pointer will be restored to its previous state. Like this:
+        </p>
+        
+        <pre class="code">
+obj.Set('chart.events.mousemove', function (e, bar) {e.target.style.cursor = 'pointer';});
+</pre>
+
+</body>
+</html>

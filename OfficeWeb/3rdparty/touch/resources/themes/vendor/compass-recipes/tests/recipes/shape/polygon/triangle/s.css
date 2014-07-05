@@ -1,0 +1,104 @@
+html {
+  padding: 1em;
+  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dddddd), color-stop(100%, #ffffff)) no-repeat;
+  background: -webkit-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -moz-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -o-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -ms-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: linear-gradient(#dddddd, #ffffff) no-repeat;
+}
+
+h1 {
+  font-size: 2em;
+  margin-bottom: 1em;
+}
+
+h2 {
+  font-size: 1.4em;
+  margin-bottom: .6em;
+}
+
+.doc {
+  background: #fff;
+  border: #ddd;
+  padding: 1em;
+  color: #aaa;
+  margin: 1em;
+  font-style: italic;
+}
+.doc a {
+  color: #999;
+}
+
+/**
+ * Shape/Polygon/Triangle
+ *
+ * @author Maxime Thirouin maxime.thirouin@gmail.com @MoOx
+ */
+.triangle-top {
+  width: 0;
+  height: 0;
+  border-left: 1em solid transparent;
+  border-right: 1em solid transparent;
+  border-bottom: 1em solid black;
+}
+
+.triangle-bottom {
+  width: 0;
+  height: 0;
+  border-left: 1em solid transparent;
+  border-right: 1em solid transparent;
+  border-top: 1em solid black;
+}
+
+.triangle-left {
+  width: 0;
+  height: 0;
+  border-top: 1em solid transparent;
+  border-right: 1em solid black;
+  border-bottom: 1em solid transparent;
+}
+
+.triangle-right {
+  width: 0;
+  height: 0;
+  border-top: 1em solid transparent;
+  border-left: 1em solid black;
+  border-bottom: 1em solid transparent;
+}
+
+.triangle-top-left {
+  width: 0;
+  height: 0;
+  border-top: 1em solid black;
+  border-bottom: 1em solid transparent;
+  border-left: 1em solid black;
+  border-right: 1em solid transparent;
+}
+
+.triangle-top-right {
+  width: 0;
+  height: 0;
+  border-top: 1em solid black;
+  border-bottom: 1em solid transparent;
+  border-left: 1em solid transparent;
+  border-right: 1em solid black;
+}
+
+.triangle-bottom-left {
+  width: 0;
+  height: 0;
+  border-top: 1em solid transparent;
+  border-bottom: 1em solid black;
+  border-left: 1em solid black;
+  border-right: 1em solid transparent;
+}
+
+.triangle-bottom-right {
+  width: 0;
+  height: 0;
+  border-top: 1em solid transparent;
+  border-left: 1em solid transparent;
+  border-bottom: 1em solid black;
+  border-right: 1em solid black;
+}

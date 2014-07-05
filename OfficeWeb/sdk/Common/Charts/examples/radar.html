@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>An example of the Radar chart</title>
+    
+    <meta name="keywords" content="html5 canvas example radar charts" />
+    <meta name="description" content="An example of the type of Radar chart that OfficeExcel can produce" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.context.js" ></script>
+    <script src="../libraries/OfficeExcel.common.annotate.js" ></script>
+    <script src="../libraries/OfficeExcel.common.tooltips.js" ></script>
+    <script src="../libraries/OfficeExcel.common.zoom.js" ></script>
+    <script src="../libraries/OfficeExcel.radar.js" ></script>
+    <script src="../libraries/OfficeExcel.common.key.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+
+    <script>
+        window.onload = function ()
+        {
+            var radar = new OfficeExcel.Radar('radar1', [7,6,6,7,8,6,7,7,6,6], [4,5,6,10,4,3,5,4,6,5], [4,3,5,7,6,5,3,2,4,5]);
+            radar.Set('chart.strokestyle', 'black');
+            radar.Set('chart.colors.alpha', 0.3);
+            radar.Set('chart.colors', ['red', 'green', 'yellow']);
+            radar.Set('chart.tooltips.effect', 'snap');
+            
+            if (!OfficeExcel.isOld()) {
+                radar.Set('chart.tooltips', [
+                                              'Pete','Lou','Jim','Jack','Fred','Jo','Lou','Freda','Pete','Rick',
+                                              'Pete','Lou','Jim','Jack','Fred','Jo','Lou','Freda','Pete','Rick',
+                                              'Pete','Lou','Jim','Jack','Fred','Jo','Lou','Freda','Pete','Rick'
+                                             ]);
+            }
+
+            radar.Set('chart.key', ['2000','2001','2002']);
+            radar.Set('chart.key.position', 'graph');
+            radar.Set('chart.labels', ['Pete','Lou','Jim','Jack','Fred','Jo','Lou','Freda','Pete','Rick']);
+            radar.Set('chart.gutter.top', 35);
+            radar.Set('chart.accumulative', true);
+            radar.Draw();
+        }
+    </script>
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+
+
+<div id="breadcrumb">
+    <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+    >
+    <a href="./index.html">Examples</a>
+    >
+    Radar charts example
+</div>
+
+<h1>Radar <span>charts</span></h1>
+
+    <div style="background-color: #ffb; border: 2px dashed #000; padding: 3px">
+        This chart used to be called the Tradar chart (T standing for "Traditional" - there used to be two Radar charts in OfficeExcel),
+        however now (July 2011), it has been renamed to the "Radar" chart to make it easier for people to identify. If you use it
+        you will need to update your code accordingly. Keep in mind that if you use the .type property - this has been updated too
+        (to <i>radar</i>).
+    </div>
+ 
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <div style="float: right; width: 450px">
+    </div>
+    
+    <p>
+        Radar charts, that are similar to Rose charts. Each of the data points is
+        arranged equally in terms of angle, whilst the magnitude of each point is shown by the distance from the centre. Thus,
+        data points of a higher magnitude can be seen as they are more distant from the centre.
+    </p>
+    
+    <p>
+        Suitable for many datasets, but not all. If not, then Rose charts may be more apt.
+    </p>
+    
+    <p>
+        The circle, as can be seen in the second example, could be used to indicate a threshold of sorts. In the example,
+        it could be minimum sales required for a particular month. Months that fall below this threshold can be clearly seen.
+    </p>
+
+    <div>
+        <ul>
+            <li><a href="../docs/radar.html">Radar charts API documentation</a></li>
+            <li><a href="rose.html">Rose charts examples</a></li>
+        </ul>
+    </div>
+
+    <div style="text-align: center">
+        <canvas id="radar1" width="450" height="300">[No canvas support]</canvas>
+    </div>
+    
+</body>
+</html>

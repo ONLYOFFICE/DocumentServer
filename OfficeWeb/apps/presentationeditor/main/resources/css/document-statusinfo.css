@@ -1,0 +1,117 @@
+.pe-documentstatusinfo {
+    background: #e4e4e4; /* Old browsers */
+    background: -moz-linear-gradient(top,  #e4e4e4 0%, #e4e4e4 3%, #d9d9d9 4%, #ababab 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e4e4e4), color-stop(3%,#e4e4e4), color-stop(4%,#d9d9d9), color-stop(100%,#ababab)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #e4e4e4 0%,#e4e4e4 3%,#d9d9d9 4%,#ababab 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #e4e4e4 0%,#e4e4e4 3%,#d9d9d9 4%,#ababab 100%); /* Opera 11.10+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e4e4e4', endColorstr='#ababab',GradientType=0 ); /* IE6-9 */
+    background: -ms-linear-gradient(top,  #e4e4e4 0%,#e4e4e4 3%,#d9d9d9 4%,#ababab 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #e4e4e4 0%,#e4e4e4 3%,#d9d9d9 4%,#ababab 100%); /* W3C */
+
+    border:0;
+    border-top: 1px solid #afafaf;
+}
+
+.statusinfo-pages, .statusinfo-caption {
+    font: bold 11px Helvetica, Arial, Verdana, sans-serif;
+    color: #666666;
+    text-shadow: #d3d3d3 0 1px 0;
+}
+
+.pe-documentstatusinfo .x-btn-default-small{
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0);
+    background: transparent;
+    filter: none;
+    box-shadow: none;
+    -moz-box-shadow: none;
+}
+
+
+.pe-documentstatusinfo .asc-statusbar-icon-btn.x-btn-default-small-pressed{
+    border: 1px solid rgba(0, 0, 0, 0.2)!important;
+    background: #E68656 !important; /* Old browsers */
+    background: -moz-linear-gradient(top,  #BC5C2E 0%, #E68656 80%) !important; /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#BC5C2E), color-stop(80%,#E68656)) !important; /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #BC5C2E 0%,#E68656 80%) !important; /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #BC5C2E 0%,#E68656 80%) !important; /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #BC5C2E 0%,#E68656 80%) !important; /* IE10+ */
+    background: linear-gradient(to bottom,  #BC5C2E 0%,#E68656 80%) !important; /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#BC5C2E', endColorstr='#E68656',GradientType=0 ) !important; /* IE6-9 */
+
+    background-origin:  border-box !important;
+    -moz-background-origin: border !important;
+}
+.pe-documentstatusinfo .asc-statusbar-icon-btn button {
+    width: 20px !important;
+    height: 20px !important;
+    line-height: 20px !important;
+}
+
+.pe-documentstatusinfo .asc-btn-zoom.x-btn-default-small-pressed {
+    border: 1px solid rgba(0, 0, 0, 0)!important;
+    background: none !important;
+    box-shadow: none !important;
+}
+
+.pe-documentstatusinfo .x-btn-default-small-icon .asc-statusbar-btn{
+    width: 20px !important;
+    height: 20px !important;
+}
+
+.pe-documentstatusinfo-menu-inner{
+    border-radius: 5px;
+    -moz-border-radius:5px;
+    -webkit-border-radius:5px;
+    -o-border-radius:5px;
+    -ms-border-radius:5px;
+    -khtml-border-radius:5px;
+}
+
+.status-zoom-menu .x-menu-item-link{
+    padding: 6px 2px 3px 6px;
+}
+
+.status-zoom-menu .x-menu-item{
+    text-align: center;
+}
+
+/* icons */
+
+.asc-statusbar-btn,
+.pe-icon-statusinfo-users {
+    background-image: url('../img/toolbar-menu.png');
+    background-image: -webkit-image-set(url("../img/toolbar-menu.png") 1x, url("../img/toolbar-menu@2x.png") 2x);
+}
+
+/* fittopage */
+.btn-fittopage                      {background-position: 0      -1200px;}
+.x-btn-over .btn-fittopage          {background-position: -20px  -1200px;}
+.x-btn-pressed .btn-fittopage       {background-position: -40px  -1200px;}
+.x-btn-menu-active .btn-fittopage   {background-position: -40px  -1200px;}
+.x-btn-disabled .btn-fittopage      {background-position: -60px  -1200px;}
+
+/* fittowidth */
+.btn-fittowidth                     {background-position: 0      -1220px;}
+.x-btn-over .btn-fittowidth         {background-position: -20px  -1220px;}
+.x-btn-pressed .btn-fittowidth      {background-position: -40px  -1220px;}
+.x-btn-menu-active .btn-fittowidth  {background-position: -40px  -1220px;}
+.x-btn-disabled .btn-fittowidth     {background-position: -60px  -1220px;}
+
+/* zoomin */
+.btn-zoomin                         {background-position: 0      -1240px;}
+.x-btn-over .btn-zoomin             {background-position: -20px  -1240px;}
+.x-btn-pressed .btn-zoomin          {background-position: -40px  -1240px;}
+.x-btn-menu-active .btn-zoomin      {background-position: -40px  -1240px;}
+.x-btn-disabled .btn-zoomin         {background-position: -60px  -1240px;}
+
+/* zoomout */
+.btn-zoomout                        {background-position: 0      -1260px;}
+.x-btn-over .btn-zoomout            {background-position: -20px  -1260px;}
+.x-btn-pressed .btn-zoomout         {background-position: -40px  -1260px;}
+.x-btn-menu-active .btn-zoomout     {background-position: -40px  -1260px;}
+.x-btn-disabled .btn-zoomout        {background-position: -60px  -1260px;}
+
+.pe-icon-statusinfo-users.x-btn-icon {
+    background-position: 0      -1280px;
+}

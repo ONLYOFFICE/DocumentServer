@@ -1,0 +1,23 @@
+.asc-statusinfo-text-btn button {
+    width: auto !important;
+}
+
+.asc-statusinfo-text-btn span.x-btn-inner {
+    font-weight: bold;
+    font-size: 11px;
+    font-family: Helvetica, Arial, Verdana, sans-serif;
+    color: #666666 !important;
+    text-shadow: #d3d3d3 0 1px 0;
+}
+
+.asc-statusinfo-text-btn.x-btn-default-small-pressed{
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0) !important;
+    background: transparent !important;
+    box-shadow: none;
+    -moz-box-shadow: none;
+}
+
+.icon-statusinfo-users {
+    background-image: url(../img/participantspanel/users.png);
+}

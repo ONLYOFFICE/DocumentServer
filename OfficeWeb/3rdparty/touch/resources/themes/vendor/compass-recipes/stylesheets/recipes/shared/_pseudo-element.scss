@@ -1,0 +1,27 @@
+/**
+ * Note IE7/6 doesn't understand pseudo element as ::before and ::after
+ * IE8 need to have :before and not ::before
+ * So use only : and not :: if you want to support IE8
+ * IE9 Webkit Firefox Opera understand ::
+ */
+@mixin pseudo-element($width: 0, $height: auto, $content: "", $display: block, $position: absolute)
+{
+    content: $content;
+    @if ($position != default)
+    {
+        position: $position;
+    }
+    @if ($display != default)
+    {
+        display: $display;
+    }
+
+    @if ($width != auto) {
+        width: $width; // Default 0 is for FF3 positioning
+    }
+    
+    @if ($height != auto)
+    {
+        height: $height;
+    }
+}

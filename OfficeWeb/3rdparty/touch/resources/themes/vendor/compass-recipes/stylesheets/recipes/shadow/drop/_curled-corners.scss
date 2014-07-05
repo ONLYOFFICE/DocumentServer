@@ -1,0 +1,37 @@
+/**
+ * Drop shadow curled
+ *
+ * @thanks Nicolas Gallagher @necolas
+ * @link http://nicolasgallagher.com/css-drop-shadows-without-images/demo/
+ */
+@mixin drop-shadow-curled-corners($border-radius: 0 0 120px 120px / 0 0 6px 6px, $box-shadow: 0 8px 12px rgba(#000, .5), $skew: 8deg, $rotate: 3deg, $distance: 10px)
+{
+    position: relative;
+    @include border-radius($border-radius);
+
+    &:before,
+    &:after
+    {
+        content: "";
+        position: absolute;
+        z-index: -2;
+
+        bottom: $distance*1.2;
+        
+        width: 50%;
+        height: 55%;
+        @include box-shadow($box-shadow);
+    }
+
+    &:before
+    {
+        left: $distance;
+        @include transform(skew(-$skew) rotate(-$rotate));
+    }
+
+    &:after
+    {
+        right: $distance;
+        @include transform(skew($skew) rotate($rotate));
+    }
+}

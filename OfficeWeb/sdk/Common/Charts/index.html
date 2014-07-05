@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:fb="http://ogp.me/ns/fb#">
+<head>
+
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <title>Homepage for OfficeExcel: HTML5 Javascript charts library</title>
+    <link rel="stylesheet" href="css/website.css" type="text/css" media="screen" />
+
+    <RELEASE_SCRIPT_REMOVE id="scripts">
+        <!-- These get replaced by a single combined JS file -->
+        <script src="libraries/OfficeExcel.common.effects.js" ></script>
+        <script src="libraries/OfficeExcel.common.core.js" ></script>
+        <script src="libraries/OfficeExcel.common.tooltips.js" ></script>
+        <script src="libraries/OfficeExcel.common.key.js" ></script>
+        <script src="libraries/OfficeExcel.line.js" ></script>
+    </RELEASE_SCRIPT_REMOVE>
+
+    <script src="libraries/jquery.min.js" ></script>
+    <!--[if lt IE 9]><script src="excanvas/excanvas.original.js"></script><![endif]-->
+
+    <link rel="icon" type="image/png" href="images/favicon.png">
+
+    <meta name="verify-v1" content="5y8rHGO/NPFDYU8jBgyT3qI7CSiEoPaeB+4x2TXan+4=" />
+    <meta name="msvalidate.01" content="4BB112FD663081BFCC94B1622BCF7222" />
+
+    <meta name="keywords" content="html5 javascript charts canvas graph OfficeExcel line bar pie" />
+    <meta name="description" content="Home of OfficeExcel: HTML5 Javascript charts library - a HTML5 canvas based Javascript charts library" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A javascript charts library based on the HTML5 canvas tag" />
+    <meta property="fb:admins" content="825417645" />
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+    
+    <script>
+        window.onload = function (e)
+        {
+            var myLine = new OfficeExcel.Line('cvs',[4,6,12,16,18,19,19.25,19,18,16,14,12], [2,4,8,4,2,6,6,12,8,10,6,8]);
+            myLine.Set('chart.labels', ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']);
+            myLine.Set('chart.gutter.left', 40);
+            myLine.Set('chart.gutter.top', 35);
+            myLine.Set('chart.gutter.right', 15);
+            myLine.Set('chart.gutter.bottom', 20);
+            myLine.Set('chart.colors', ['red', 'black']);
+            myLine.Set('chart.units.post', '%');
+            myLine.Set('chart.linewidth', 7);
+            myLine.Set('chart.hmargin', 10);
+            myLine.Set('chart.title', 'Robert and Daniels stats');
+            myLine.Set('chart.title.vpos', 0.5);
+            myLine.Set('chart.text.color', '#333');
+            myLine.Set('chart.text.font', 'Arial');
+            myLine.Set('chart.key', ['Robert', 'Daniel']);
+            myLine.Set('chart.key.colors', ['red', 'black']);
+            myLine.Set('chart.key.background', 'white');
+            myLine.Set('chart.key.position.x', myLine.Get('chart.gutter.left') + 10);
+            myLine.Set('chart.shadow', true);
+            myLine.Set('chart.shadow.offsetx', 0);
+            myLine.Set('chart.shadow.offsety', 0);
+            myLine.Set('chart.shadow.blur', 25);
+            myLine.Set('chart.background.grid.autofit', true);
+            myLine.Set('chart.background.grid.autofit.numvlines', 11);
+
+
+            /**
+            * Use the Trace animation to show the chart
+            */
+            if (OfficeExcel.isOld()) {
+                myLine.Draw();
+            } else {
+                //myLine.Set('chart.tooltips.effect', 'snap');
+                myLine.Set('chart.tooltips', [
+                                              '<b>January</b><br />Started off the year quite averagely',
+                                              '<b>February</b><br />Better than January, rising quite nicely',
+                                              '<b>March</b><br />March was quite a spike',
+                                              '<b>April</b><br />Rising very impressively',
+                                              '<b>May</b><br />Not rising as fast as April, but still rising well',
+                                              '<b>June</b><br />Still rsing, and the rise is still abating',
+                                              '<b>July</b><br />Roughly the same as last month.',
+                                              '<b>August</b><br />Not as good as last month, but still good',
+                                              '<b>September</b><br />Ever so slightly up from last month',
+                                              '<b>October</b><br />The peak is now subsiding',
+                                              '<b>November</b><br />Still subsiding',
+                                              '<b>December</b><br />Still on the downward slide',
+    
+    
+                                              '<b>January</b><br />Started off the year quite averagely as with Robert',
+                                              '<b>February</b><br />Rising as with Robert',
+                                              '<b>March</b><br />Not as good as Robert, but OK',
+                                              '<b>April</b><br />Dropping after the peak',
+                                              '<b>May</b><br />The low point as with last year',
+                                            '<b>June</b><br />Climbing after the last two month dip',
+                                              '<b>July</b><br />Consistent with last month',
+                                              '<b>August</b><br />A nice high point',
+                                              '<b>September</b><br />A low point',
+                                              '<b>October</b><br />A nice rise',
+                                              '<b>November</b><br />Falling for fall...',
+                                              '<b>December</b><br />Rising again for Christmas',
+    
+    
+                                              '<b>January</b><br />Started off the year witha low score',
+                                              '<b>February</b><br />Rising gradually',
+                                              '<b>March</b><br />Not as good as Robert, but reasonable',
+                                              '<b>April</b><br />Dropping off',
+                                              '<b>May</b><br />The low point as with last year',
+                                              '<b>June</b><br />Rising, but not as good as Robert',
+                                              '<b>July</b><br />Not too bad',
+                                              '<b>August</b><br />Again - good',
+                                              '<b>September</b><br />Levelling off',
+                                              '<b>October</b><br />Still reasonably level',
+                                              '<b>November</b><br />Dropping off',
+                                              '<b>December</b><br />Rising for the Christmas sales'
+                                             ]);
+                OfficeExcel.Effects.Line.jQuery.Trace(myLine);
+            }
+        }        
+    </script>
+
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+
+
+    <div id="title">
+        <div id="image">
+            <br />
+            <img src="images/logo.png" align="absmiddle" alt="OfficeExcel: HTML5 Javascript charts library" width="64" height="64" style="position: relative; top: 15px" />
+        </div>
+        
+        <div id="text">
+            <h1 id="title">OfficeExcel: <span>HTML5 Javascript charts library</span></h1>
+            <h4 style="font-weight: normal; position: relative; top: -15px; left: 10px; color: #444">
+                <i>Interactive javascript charts using the HTML5 canvas tag</i>
+            </h4>
+        </div>
+
+        <div style="position: relative; left: 75px; top: -30px">
+            <a href="#download">
+                <img src="images/download-stable-sml.png" width="32" height="32" alt="Download the beta version" border="0" align="absmiddle" /> 
+                <b>Download the stable version</b>
+            </a>
+    
+            <a href="#download">
+                <img src="images/download-beta-sml.png" width="32" height="32" alt="Download the beta version" border="0" align="absmiddle" /> 
+                <b>Download the beta version</b> 
+            </a>
+        </div>
+    </div>
+    <!-- END HEADER -->
+
+
+    <!-- TESTIMONIAL -->
+    <?php require_once('testimonial.html') ?>
+    <!-- TESTIMONIAL -->
+        
+        <canvas id="cvs" width="480" height="250" style="background-color: white; float: right">
+            <span style="color: red">[IE7+ is required to view the charts.]</span>
+        </canvas>
+
+        <h2>Faster <span>websites with OfficeExcel charts</span></h2>
+        <p id="intro">
+            OfficeExcel is a HTML5 Javascript charts library that supports over 20 different types of charts. Using the new HTML5 canvas tag,
+            OfficeExcel creates these Javascript charts in the web browser, meaning quicker pages and less web server load. Using OfficeExcel is
+            an easy way of speeding up your website.
+
+            <div>
+            
+                <div style="text-align: center; margin-top: 25px; margin-bottom: 25px">
+                    <div style="border: 3px solid #696; display: inline; border-radius: 15px; padding: 5px; background-color: #efe">
+                        <a href="examples/index.html" id="read-more"><b>Examples of charts</b></a>
+                    </div>
+                    
+                    &nbsp;
+                    
+                    <div style="border: 3px solid #696; display: inline; border-radius: 15px; padding: 5px; background-color: #efe">
+                        <a href="docs/index.html" id="read-more">Documentation and HTML5 examples</a>
+                    </div>
+                </div>
+            </div>
+        </p>
+
+        <h2>Free <span>to use!</span></h2>
+        <p>
+            OfficeExcel is <b>free to use</b> on non-commercial websites such as personal blogs, educational,
+            charity or government websites - you don't need a license.
+            <a href="docs/licensing.html">Go here for details about a commercial license.</a>
+        </p>
+    
+    <br clear="all" />
+
+    <a name="download"></a>
+    <h2>Download <span>OfficeExcel</span></h2>
+
+    
+    <script>
+            var downloadlinks = document.getElementById("downloadlinks");
+
+            if (downloadlinks) {
+                document.getElementById("downloadlinks").style.display = 'none';
+            }
+    </script>
+
+
+
+    <br clear="all" />
+
+</script>
+</body>
+</html><!-- 2012-01-13 -->

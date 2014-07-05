@@ -1,0 +1,40 @@
+@import "tests";
+
+@import "recipes/shape/polygon";
+
+div
+{
+    color: #fff;
+    text-shadow: 0 -.1em .2em #000;
+    margin: 4em auto;
+    text-align: center;
+}
+
+.hexagon { @include hexagon(5em, 5em, #000) }
+.hexagon2 { @include hexagon(8em, 5em, #000) }
+.hexagon3 { @include hexagon(5em, 8em, #000) }
+
+.octagon { @include octagon(5em, 5em, #000) }
+.octagon2 { @include octagon(5em, 8em, #000) }
+.octagon3 { @include octagon(8em, 5em, #000) }
+
+.parallelogram { @include parallelogram(8em, 5em, 30deg, #000) }
+.parallelogram2 { @include parallelogram(5em, 8em, -10deg, #000) }
+
+.pentagon { @include pentagon(5em, 5em, #000) }
+.pentagon2 { @include pentagon(8em, 5em, #000) }
+.pentagon3 { @include pentagon(5em, 8em, #000) }
+
+.rectangle { @include rectangle(8em, 5em, #000) }
+.rectangle2 { @include rectangle(5em, 8em, #000)  }
+
+.rhombus { @include rhombus(5em, #000) }
+.rhombus2 { @include rhombus(8em, #000, -10deg) }
+.rhombus3 { @include rhombus(5em, #000, 20deg) }
+
+.square { @include square(5em, #000) }
+.square2 { @include square(8em, #000) }
+
+.trapezoid { @include trapezoid(5em, 5em, #000) }
+.trapezoid2 { @include trapezoid(8em, 5em, #000) }
+.trapezoid3 { @include trapezoid(5em, 8em, #000) }

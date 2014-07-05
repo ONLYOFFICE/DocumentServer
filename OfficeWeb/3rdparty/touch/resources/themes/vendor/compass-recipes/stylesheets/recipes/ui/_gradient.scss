@@ -1,0 +1,30 @@
+/**
+ * UI simple gradient from one color
+ *
+ * @todo merge with ui-button ?
+ *
+ * @author Maxime Thirouin maxime.thirouin@gmail.com @MoOx
+ * @deprecated See background/gradients
+ */
+@mixin ui-gradient($color: #ddd, $lighten-top: 10%, $darken-bottom: 10%)
+{
+    @include ui-gradient-from-middle($color, $lighten-top, $darken-bottom);
+}
+
+@mixin ui-gradient-from-middle($color: #ddd, $lighten-top: 10%, $darken-bottom: 10%)
+{
+    background: $color;
+    @include background(linear-gradient(lighten($color, $lighten-top), darken($color, $darken-bottom)));
+}
+
+@mixin ui-gradient-from-top($color: #ddd, $darken-bottom: 20%)
+{
+    background: $color;
+    @include background(linear-gradient($color, darken($color, $darken-bottom)));
+}
+
+@mixin ui-gradient-from-bottom($color: #ddd, $lighten-top: 20%)
+{
+    background: $color;
+    @include background(linear-gradient(lighten($color, $lighten-top), $color));
+}

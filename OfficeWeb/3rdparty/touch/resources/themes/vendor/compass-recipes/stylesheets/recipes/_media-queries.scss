@@ -1,0 +1,102 @@
+/**
+ * Media Queries Mixins
+ * 
+ * @todo Do we have to take care of print ?
+ * 
+ * @require sass-3.2 (you need eventually to do "sudo gem install sass --pre")
+ * @author Maxime Thirouin <maxime.thirouin@gmail.com>
+ */
+
+// differentes screen width definition: 3 limits allow 4 configurations
+/*
+$media-query-width-big: 1280px;
+$media-query-width-medium: 960px;
+$media-query-width-small: 480px;
+*/
+// recent desktop & big screen
+@mixin media-big
+{
+    //@media (min-width: $media-query-width-big)
+    @media (min-width: 1280px)
+    {
+        @content;
+    }
+}
+
+// average desktop
+@mixin media-medium
+{
+    //@media (max-width: $media-query-width-big - 1px)
+    @media (max-width: 1279px)
+    {
+        @content;
+    }
+}
+    @mixin media-medium-only
+    {
+        //@media (min-width: $media-query-width-medium) and (max-width: $media-query-width-big - 1px)
+        @media (min-width: 960px) and (max-width: 1279px)
+        {
+            @content;
+        }
+    }
+
+// old computer & tablet
+@mixin media-small
+{
+    //@media (max-width: $media-query-width-medium - 1px)
+    @media (max-width: 959px)
+    {
+        @content;
+    }
+}
+
+    @mixin media-small-only
+    {
+        //@media (min-width: $media-query-width-small) and (max-width: $media-query-width-medium - 1px)
+        @media (min-width: 480px) and (max-width: 959px)
+        {
+            @content;
+        }
+    }
+
+
+// mobile
+@mixin media-tiny
+{
+    //@media (max-width: $media-query-width-small - 1px)
+    @media (max-width: 479px)
+    {
+        @content;
+    }
+}
+
+// orientation
+@mixin media-portrait
+{
+    @media (orientation:portrait)
+    {
+        @content;
+    }
+}
+
+@mixin media-landscape
+{
+    @media (orientation:landscape)
+    {
+        @content;
+    }
+}
+
+// media for high resolution screen
+@mixin media-highres
+{
+
+    @media
+        (-webkit-min-device-pixel-ratio: 2),
+        (-o-min-device-pixel-ratio: 3/2),
+        (min-device-pixel-ratio: 2)
+    {
+        @content;
+    }
+}

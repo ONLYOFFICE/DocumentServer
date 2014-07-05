@@ -1,0 +1,20 @@
+2002-05-22  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* gettext.m4: Upgrade to gettext-0.11.2.
+	* isc-posix.m4: Upgrade to gettext-0.11.2.
+	* lib-link.m4: Upgrade to gettext-0.11.2.
+
+2002-01-25  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* codeset.m4: New file, from gettext-0.11-pre5++.
+	* gettext.m4: New file, from gettext-0.11-pre5++.
+	* glibc21.m4: New file, from gettext-0.11-pre5++.
+	* iconv.m4: New file, from gettext-0.11-pre5++.
+	* isc-posix.m4: New file, from gettext-0.11-pre5++.
+	* lcmessage.m4: New file, from gettext-0.11-pre5++.
+	* lib-ld.m4: New file, from gettext-0.11-pre5++.
+	* lib-link.m4: New file, from gettext-0.11-pre5++.
+	* lib-prefix.m4: New file, from gettext-0.11-pre5++.
+	* progtest.m4: New file, from gettext-0.11-pre5++.
+	* Makefile.am: New file.
+

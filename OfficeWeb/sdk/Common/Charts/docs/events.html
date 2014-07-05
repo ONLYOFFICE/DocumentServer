@@ -1,0 +1,566 @@
+<!DOCTYPE html >
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>Custom OfficeExcel events that are available to you</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas chart docs custom events" />
+    <meta name="description" content="Documentation about the custom OfficeExcel events that are available for you to use" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.adjusting.js" ></script>
+    <script src="../libraries/OfficeExcel.common.annotate.js" ></script>
+    <script src="../libraries/OfficeExcel.common.context.js" ></script>
+    <script src="../libraries/OfficeExcel.common.resizing.js" ></script>
+    <script src="../libraries/OfficeExcel.common.tooltips.js" ></script>
+    <script src="../libraries/OfficeExcel.common.zoom.js" ></script>
+    <script src="../libraries/OfficeExcel.modaldialog.js" ></script>
+    <script src="../libraries/OfficeExcel.bar.js" ></script>
+    <script src="../libraries/OfficeExcel.scatter.js" ></script>
+    
+    <script>
+        window.onload = function (e)
+        {
+            var bar1 = new OfficeExcel.Bar('bar1', [1,2,3,5,9,7,8]);
+            bar1.Set('chart.labels', ['January','February','March','April','May','June','July']);
+            bar1.Set('chart.tooltips', ['January','February','March','April','May','June','July']);
+            bar1.Set('chart.title', 'An example of the ontooltip event');
+            bar1.Draw();
+            OfficeExcel.AddCustomEventListener(bar1, 'ontooltip', function (obj) {alert('ontooltip event, showing tooltip with index: ' + OfficeExcel.Registry.Get('chart.tooltip').__index__);});
+
+
+            var bar2 = new OfficeExcel.Bar('bar2', [1,2,3,5,9,7,8]);
+            bar2.Set('chart.labels', ['January','February','March','April','May','June','July']);
+            bar2.Set('chart.contextmenu', [['Cancel', function () {}]]);
+            bar2.Set('chart.title', 'An example of the oncontextmenu event');
+            bar2.Draw();
+            OfficeExcel.AddCustomEventListener(bar2, 'oncontextmenu', function (obj) {alert('oncontextmenu event fired');});
+
+
+            // Intentionally a global
+            bar3 = new OfficeExcel.Bar('bar3', [1,2,3,5,9,7,8]);
+            bar3.Set('chart.labels', ['January','February','March','April','May','June','July']);
+            bar3.Set('chart.title', 'An example of the onbeforedraw event');
+            // Drawn when the button is clicked            
+            OfficeExcel.AddCustomEventListener(bar3, 'onbeforedraw', function (obj) {alert('onbeforedraw event fired');});
+
+
+            // Intentionally a global
+            bar4 = new OfficeExcel.Bar('bar4', [1,2,3,5,9,7,8]);
+            bar4.Set('chart.labels', ['January','February','March','April','May','June','July']);
+            bar4.Set('chart.title', 'An example of the ondraw event');
+            // Drawn when the button is clicked
+            OfficeExcel.AddCustomEventListener(bar4, 'ondraw', function (obj) {alert('ondraw event fired');});
+
+
+            var bar5 = new OfficeExcel.Bar('bar5', [1,2,3,5,9,7,8]);
+            bar5.Set('chart.labels', ['January','February','March','April','May','June','July']);
+            bar5.Set('chart.title', 'An example of the onzoom event');
+            bar5.Set('chart.contextmenu', [['Zoom', OfficeExcel.Zoom]]);
+            bar5.Set('chart.zoom.vdir', 'center');
+            bar5.Draw();
+            OfficeExcel.AddCustomEventListener(bar5, 'onzoom', function (obj) {alert('onzoom event fired');});
+
+
+            var bar6 = new OfficeExcel.Bar('bar6', [1,2,3,5,9,7,8]);
+            bar6.Set('chart.labels', ['January','February','March','April','May','June','July']);
+            bar6.Set('chart.title', 'An example of the onmodaldialog event');
+            bar6.Set('chart.contextmenu', [['Show dialog', function () {ModalDialog.Show('modaldialog_login', 300);}]]);
+            bar6.Draw();
+            ModalDialog.AddCustomEventListener('onmodaldialog', function (obj) {alert('onmodaldialog event fired');});
+
+
+            var bar7 = new OfficeExcel.Bar('bar7', [1,2,3,5,9,7,8]);
+            bar7.Set('chart.labels', ['January','February','March','April','May','June','July']);
+            bar7.Set('chart.title', 'The onresizebeforedraw event');
+            bar7.Set('chart.text.angle', 45);
+            bar7.Set('chart.resizable', true);
+            bar7.Set('chart.gutter.bottom', 60);
+            bar7.Draw();
+            OfficeExcel.AddCustomEventListener(bar7, 'onresizebeforedraw', function (obj)
+            {
+                alert('onresizebeforedraw event fired');
+            });
+
+
+            var bar8 = new OfficeExcel.Bar('bar8', [1,2,3,5,9,7,8]);
+            bar8.Set('chart.labels', ['January','February','March','April','May','June','July']);
+            bar8.Set('chart.title', 'An example of the onresize event');
+            bar8.Set('chart.resizable', true);
+            bar8.Draw();
+            
+            OfficeExcel.AddCustomEventListener(bar8, 'onresizebegin', function (obj){cl('onresizebegin event fired');});
+            OfficeExcel.AddCustomEventListener(bar8, 'onresize', function (obj){cl('onresize event fired');});
+            OfficeExcel.AddCustomEventListener(bar8, 'onresizeend', function (obj){cl('onresizeend event fired');});
+
+
+            var bar9 = new OfficeExcel.Bar('bar9', [1,2,3,5,9,7,8]);
+            bar9.Set('chart.labels', ['January','February','March','April','May','June','July']);
+            bar9.Set('chart.title', 'An example of the onadjust event');
+            bar9.Set('chart.adjustable', true);
+            bar9.Draw();
+            
+            OfficeExcel.AddCustomEventListener(bar9, 'onadjustbegin', function (obj){cl('The onadjuststart event fired');});
+            OfficeExcel.AddCustomEventListener(bar9, 'onadjust', function (obj){cl('The onadjust event fired');});
+            OfficeExcel.AddCustomEventListener(bar9, 'onadjustend', function (obj){cl('The onadjustend event fired');});
+
+
+            // Global on purpose
+            bar10 = new OfficeExcel.Bar('bar10', [1,2,3,5,9,7,8]);
+            bar10.Set('chart.labels', ['January','February','March','April','May','June','July']);
+            bar10.Set('chart.title', 'An example of the onannotate event');
+            bar10.Set('chart.annotatable', true);
+            bar10.Set('chart.contextmenu', [['ShowPalette', OfficeExcel.Showpalette], ['Clear', function () {OfficeExcel.Clear(bar10.canvas); bar10.Draw();}]]);
+            bar10.Draw();
+            
+            OfficeExcel.AddCustomEventListener(bar10, 'onannotatebegin', function (obj){cl('onannotatebegin event fired');});
+            OfficeExcel.AddCustomEventListener(bar10, 'onannotate', function (obj){cl('onannotate event fired');});
+            OfficeExcel.AddCustomEventListener(bar10, 'onannotateend', function (obj){cl('onannotateend event fired');});
+            OfficeExcel.AddCustomEventListener(bar10, 'onannotatecolor', function (obj) {cl('Changed annotate color: ' + obj.Get('chart.annotate.color'));});
+            OfficeExcel.AddCustomEventListener(bar10, 'onannotateclear', function (obj) {cl('Fired the annotation clear event');});
+
+
+            // Global on purpose
+            var bar11 = new OfficeExcel.Bar('bar11', [1,2,3,5,9,7,8]);
+            bar11.Set('chart.labels', ['January','February','March','April','May','June','July']);
+            bar11.Set('chart.title', 'The onbeforecontextmenu event');
+            bar11.Set('chart.contextmenu', [['A sample context menu item', null]]);
+            bar11.Draw();
+            
+            OfficeExcel.AddCustomEventListener(bar11, 'onbeforecontextmenu', function (obj) {p('Fired the onbeforecontextmenu event)');});
+            
+            //
+            // The oncrosshairs event
+            data = [[45,32]]
+            var scatter1 = new OfficeExcel.Scatter('scatter1', data);
+            scatter1.Set('chart.xmax', 90);
+            scatter1.Set('chart.labels', ['January','February','March']);
+            scatter1.Set('chart.crosshairs', true);
+            scatter1.Set('chart.crosshairs.coords', true);
+            scatter1.Set('chart.crosshairs.coords.labels.x', 'Day');
+            scatter1.Set('chart.crosshairs.coords.labels.y', 'Amount');
+            scatter1.Draw();
+            
+            function myFunc (obj)
+            {
+                document.getElementById("crosshairs.out").value = obj.canvas.__crosshairs_x__ + ', ' + obj.canvas.__crosshairs_y__;
+            }
+            OfficeExcel.AddCustomEventListener(scatter1, 'oncrosshairs', myFunc);
+        }
+    </script>
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        Custom OfficeExcel events
+    </div>
+
+    <h1>Custom <span>OfficeExcel events</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+    
+    <ul>
+        <li><a href="#introduction">Introduction</a></li>
+        <li>
+            <a href="#available.events">Available events</a>
+            <ul>
+                <li><a href="#event.ontooltip">ontooltip</a></li>
+                <li><a href="#event.onbeforecontextmenu">onbeforecontextmenu</a></li>
+                <li><a href="#event.oncontextmenu">oncontextmenu</a></li>
+                <li><a href="#event.onbeforedraw">onbeforedraw</a></li>
+                <li><a href="#event.ondraw">ondraw</a></li>
+                <li><a href="#event.onzoom">onzoom</a></li>
+                <li><a href="#event.onmodaldialog">onmodaldialog</a></li>
+                <li><a href="#event.onresizebeforedraw">onresizebeforedraw</a></li>
+                <li><a href="#event.onresize">onresizebegin</a></li>
+                <li><a href="#event.onresize">onresize</a></li>
+                <li><a href="#event.onresize">onresizeend</a></li>
+                <li><a href="#event.onadjustbegin">onadjustbegin</a></li>
+                <li><a href="#event.onadjustbegin">onadjust</a></li>
+                <li><a href="#event.onadjustbegin">onadjustend</a></li>
+                <li><a href="#event.onannotatebegin">onannotatebegin</a></li>
+                <li><a href="#event.onannotatebegin">onannotate</a></li>
+                <li><a href="#event.onannotatebegin">onannotateend</a></li>
+                <li><a href="#event.onannotatebegin">onannotatecolor</a></li>
+                <li><a href="#event.onannotatebegin">onannotateclear</a></li>
+                <li><a href="#event.onclear">onclear</a></li>
+                <li><a href="#event.oncrosshairs">oncrosshairs</a></li>
+            </ul>
+        </li>
+        <li><a href="#removing.events">Removing events</a></li>
+    </ul>
+    
+    <a name="introduction"></a>
+    <h4>Introduction</h4>
+    
+    <p>
+        Custom events allow you to easily interact with and extend OfficeExcel for your own purposes. The list of available events is below,
+        as is an example of how to make use of them with the <i>OfficeExcel.AddCustomEventListener()</i> function. Event handler functions (ie your
+        functions) are passed a single parameter - the chart object. With this you can get references to the canvas and context. There's
+        an example of this below.
+    </p>
+
+<pre class="code">&lt;script&gt;
+    window.onload = function ()
+    {
+        var line = new OfficeExcel.Line('myLine', [45,12,16,18,44,54,23,21,56]);
+        line.Set('chart.tooltips', ['Fred', 'Barney', 'Jay', 'Pete', 'Frank', 'Bob', 'Ted', 'Lou', 'Kev']);
+        line.Set('chart.labels', ['Fred', 'Barney', 'Jay', 'Pete', 'Frank', 'Bob', 'Ted', 'Lou', 'Kev']);
+        line.Set('chart.hmargin', 5);
+        line.Set('chart.tickmarks', 'dot');
+        line.Draw();
+
+        <span style="color: green">/**
+        * This is the call to the OfficeExcel function that registers the event listener
+        * 
+        *      line: The chart object
+        * ontooltip: The name of the event
+        *    myFunc: The function that handles the event
+        */</span>
+        OfficeExcel.AddCustomEventListener(line, 'ontooltip', myFunc);
+    }
+
+    <span style="color: green">/**
+    * The function that is called when the ontooltip event fires. It is  passed a single parameter - the chart object.
+    * With this you can get the ID and references to the canvas and context:
+    *  o obj.id
+    *  o obj.canvas
+    *  o obj.context
+    */</span>
+    function myFunc(obj)
+    {
+        var id      = obj.id;
+        var canvas  = obj.canvas;
+        var context = obj.context;
+
+        alert('This alert was triggered by the custom ontooltip event');
+    }
+&lt;/script&gt;
+</pre>
+    
+    <a name="available.events"></a>
+    <h4>Available events</h4>
+
+    <p>
+        <a name="event.ontooltip"></a>
+        <canvas id="bar1" width="400" height="150" style="float: left">[No canvas support]</canvas>
+        <b>ontooltip</b><br />
+        This event fires immediately after a tooltip has been created. This event allows you to easily show charts in your tooltips (tooltip
+        effects that involve moving the tooltip, eg. <i>contract</i>, <i>expand</i> &amp; <i>snap</i>, will not function). You
+        can find the tooltip object in the OfficeExcel registry - <i>OfficeExcel.Registry.Get('chart.tooltip')</i>. Note that if you're testing and
+        using a function that pauses execution (eg alert()), this will also pause any timers (for animation effects etc). If you want to
+        avoid this you should use a function that doesn't block execution, eg the Firebug/WebKit function, <i>console.log()</i> (you can use the
+        <i>cl()</i> shortcut in OfficeExcel).
+    </p>
+    
+    <br clear="all" />
+    
+    <p>
+        <a name="event.onbeforecontextmenu"></a>
+        <canvas id="bar11" width="400" height="200" style="float: left">[No canvas support]</canvas>
+        <b>onbeforecontextmenu</b><br />
+        The onbeforecontextmenu event fires before the context menu is shown.
+    </p>
+
+    <br clear="all" />
+
+    <p>
+        <a name="event.oncontextmenu"></a>
+        <canvas id="bar2" width="400" height="150" style="float: left">[No canvas support]</canvas>
+        <b>oncontextmenu</b><br />
+        This event fires immediately after the OfficeExcel context menu is shown. If you want it, you can get at the context menu in the
+        OfficeExcel registry: <i>OfficeExcel.Registry.Get('chart.contextmenu')</i>
+
+        <br /><br />
+
+        <b>Important:</b> Like the <i>ontooltip</i> event, using <i>alert()</i> can
+        pause the fade in timers, so you might consider using the Firebug/Webkit <i>console.log</i> functions instead.
+    </p>
+
+    <br clear="all" />
+
+    <p>
+        <a name="event.onbeforedraw"></a>
+        <div style="float: left">
+            <canvas id="bar3" width="400" height="150" style="left">[No canvas support]</canvas><br />
+            <button onmousedown="bar3.Draw()" style="width: 400px">Draw chart</button>
+        </div>
+        
+        <b>onbeforedraw</b><br />
+        Much like the ondraw event, however this fires at the start of the .Draw() method, in effect "before" the method. Keep in mind
+        that since other charts may trigger the .Draw() method, this event can also be triggered by other charts.
+    </p>
+
+    <br clear="all" />
+
+    <p>
+        <a name="event.ondraw"></a>
+        <div style="float: left">
+            <canvas id="bar4" width="400" height="150" style="left">[No canvas support]</canvas><br />
+            <button onmousedown="bar4.Draw()" style="width: 400px">Draw chart</button>
+        </div>
+        <b>ondraw</b><br />
+        The ondraw event fires <i>after</i> the .Draw() method has run. Note that the interactive features of OfficeExcel may call the .Draw()
+        method multiple times - the zoom in area mode is a prime example.
+        A chart with tooltips is also an example. In this case it would demonstrate that the .Draw() method is called twice (and
+        hence the ondraw event), whereas the ontooltip event only fires once.
+        
+        <br /><br />
+
+        <b>Note:</b> The <i>ondraw</i> event is not only fired by its own chart,
+        but (if you're using tooltips for example), can also be fired by other charts on the page.
+    </p>
+    
+    <br clear="all" />
+
+    <p>
+        <a name="event.onzoom"></a>
+        <canvas id="bar5" width="400" height="150" style="float: left">[No canvas support]</canvas>
+        <b>onzoom</b><br />
+        The onzoom event fires whenever the canvas is zoomed. When the zoom is in <i>area</i> and <i>canvas</i> modes this fires once,
+        but when in <i>thumbnail</i> mode this event is like the onmousemove event in that it fires whenever the mouse is moved.
+    </p>
+
+    <br clear="all" />
+
+    <p>
+        <a name="event.onmodaldialog"></a>
+        <canvas id="bar6" width="400" height="150" style="float: left">[No canvas support]</canvas>
+        <b>onmodaldialog</b><br />
+        The onmodaldialog event fires when the ModalDialog is shown. This event is easily replicated yourself, though using this event
+        may help you to keep your code tidy. This event is utilised slightly differently to the other events:
+        
+        <br clear="all" />
+
+        <pre class="code">ModalDialog.AddCustomEventListener('onmodaldialog', function () {alert('Hello world!');});</pre>
+    </p>
+    
+    <br clear="all" />
+
+    <p>
+        <a name="event.onresizebeforedraw"></a>
+        <canvas id="bar7" width="400" height="200" style="float: left">[No canvas support]</canvas>
+        <b>onresizebeforedraw</b><br />
+        The onresizebeforedraw event was added when translating was necessary to reclaim wasted space, before the introduction
+        of independent gutters. This event is now no longer necessary to reposition the resize handle. It will still have an
+        effect though, so if you choose to upgrade then you should remove this from your configuration. The event isn't
+        planned to be removed, so if you wish to use it, you can.
+    </p>
+    
+    <br clear="all" />
+    
+    <p style="background-color: #ffa; border: 2px dashed #990; padding: 4px">
+        <b>Note:</b>
+        The annotation events send notifications to the console because using alert() would cause them to lock the window.
+    </p>
+
+    <p>
+        <a name="event.onresize"></a>
+        <canvas id="bar8" width="400" height="150" style="float: left">[No canvas support]</canvas>
+        <b>onresizebegin</b><br />
+        The onresizebegin event fires when a canvas is starting to be resized. It also fires when the canvas is reset to the original
+        size.<br /><br />
+        
+        <b>onresize</b><br />
+        The onresize event fires when a canvas is resized. It also fires when the canvas is reset to the original size.<br /><br />
+        
+        <b>onresizeend</b><br />
+        The onresizeend event fires when a canvas is ended resizing. It also fires when the canvas is reset to the original size.
+    </p>
+    
+    <br clear="all" />
+
+    <p style="background-color: #ffa; border: 2px dashed #990; padding: 4px">
+        <b>Note:</b>
+        The adjusting events send notifications to the console because using alert() would cause them to lock the window.
+    </p>
+    
+    <p>
+        <a name="event.onadjustbegin"></a>
+        <canvas id="bar9" width="400" height="200" style="float: left">[No canvas support]</canvas>
+        <b>onadjustbegin</b><br />
+        The onadjustbegin event fires once at the start of an adjusting process. It can be thought of as similar to
+        the onmousedown event as that's when it usually fires.
+    </p>
+    
+    <br />
+
+    <p>
+        <a name="event.onadjust"></a>
+        <b>onadjust</b><br />
+        The onadjust event fires whenever one of the supported chart types is adjusted. It usually fires in conjunction with the
+        onmousemove event, and can be blocked by alert(). You therefore may need to use a different function (eg console.log())
+        whilst debugging.
+    </p>
+    
+    <br />
+    
+    <p>
+        <a name="event.onadjustend"></a>
+        <b>onadjustend</b><br />
+        The onadjustend event fires once at the end of an adjusting process. It can be thought of as similar to
+        the onmouseup event as that's when it usually fires.
+    </p>
+
+    <br clear="all" />
+    
+    <p style="background-color: #ffa; border: 2px dashed #990; padding: 4px">
+        <b>Note:</b>
+        The annotation events send notifications to the console because using alert() would cause them to lock the window.
+    </p>
+
+    <p>
+        <a name="event.onannotatebegin"></a>
+        <canvas id="bar10" width="400" height="350" style="float: left">[No canvas support]</canvas>
+        <b>onannotatebegin</b><br />
+        The onannotatebegin event fires at the beginning of the annotating procedure (ie in a similar vein to the onmousedown event).
+    </p>
+
+    <p>
+        <a name="event.onannotate"></a>
+        <b>onannotate</b><br />
+        The onannotate event fires when the chart has been annotated. It fires during the annotate procedure.
+    </p>
+
+    <p>
+        <a name="event.onannotateend"></a>
+        <b>onannotateend</b><br />
+        The onannotateend event fires at the end of the annotating procedure (ie in a similar vein to the onmouseup event).
+    </p>
+
+    <p>
+        <a name="event.onannotatecolor"></a>
+        <b>onannotatecolor</b><br />
+        The onannotatecolor event fires when the annotation color has been changed using the OfficeExcel palette.
+    </p>
+
+    <p>
+        <a name="event.onannotateclear"></a>
+        <b>onannotateclear</b><br />
+        The onannotateclear event fires when the OfficeExcel annotation data has been cleared using the OfficeExcel.ClearAnnotations() API
+        function.
+    </p>
+
+    <p>
+        <a name="event.onclear"></a>
+        <b>onclear</b><br />
+        The onclear event fires when the function <i>OfficeExcel.Clear()</i> is called. If you use the <i>.Clear()</i>function inside the onclear event
+        handler, it will create a loop. Instead, you could use this function:
+    </p>
+
+    <pre class="code">
+/**
+* This function clears the canvas
+* 
+* @param object obj The chart object
+*/
+function myClear(obj)
+{
+    obj.context.beginPath();
+    obj.context.fillStyle = 'white';
+    obj.context.fillRect(-10,-10,obj.canvas.width + 20, obj.canvas.height + 20);
+    obj.context.fill();
+}
+</pre>
+
+        <a name="event.oncrosshairs"></a>
+        
+        <p>
+            <b>oncrosshairs</b><br />
+            The oncrosshairs event fires when the crosshairs are moved. This event is very similar to the onmousemove event, but you can
+            guarantee that this event fires after the crosshairs have been repainted.
+        </p>
+        <div style="width: 400px; float: left">
+            <canvas id="scatter1" width="400" height="200">[No canvas support]</canvas>
+            <input type="text" id="crosshairs.out" style="width: 400px"/>
+        </div>
+    
+    <br clear="all" />
+    
+    
+    <a name="removing.events"></a>
+    <h4>Removing events</h4>
+        <p>
+            In the case that you need to remove OfficeExcel event listeners, there are a few ways that you can do it. The API function
+            <i>OfficeExcel.RemoveCustomEventListener(obj, id)</i> can be used to remove a single event listener. This function
+            takes the chart object and the numerical ID (returned by <i>OfficeExcel.AddCustomEventListener()</i>) as its arguments.
+            
+            <p />
+
+            There's
+            also the <i>OfficeExcel.RemoveAllCustomEventListeners()</i>, for easily removing all of the pertinent event listeners. This
+            function can either take no arguments at all, in which case ALL event listeners for ALL objects are removed. Or it can
+            also take an objects ID (the same id that you pass to the constructor), in which case the removal will be limited to
+            that object.
+        </p>
+
+    <!-- Login dialog -->
+    <div style="display: none" class="ModalDialog" id="modaldialog_login">
+        
+        <b>Login to admin area</b><br /><br />
+
+        <table border="0">
+            <tr>
+                <td align="right">Email:</td>
+                <td><input type="text" name="email" /></td>
+            </tr>
+            <tr>
+                <td align="right">Password:</td>
+                <td><input type="password" name="password" /></td>
+            </tr>
+            
+            <tr>
+                <td>&nbsp;</td>
+                <td align="right"><input type="submit" value="Login &raquo;" /></td>
+            </tr>
+        </table>
+
+        <div style="font-size: 8pt; float: right"><a href="" onclick="ModalDialog.Hide(); return false">Dismiss</a></div>
+    </div>
+
+</body>
+</html>

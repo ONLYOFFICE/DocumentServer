@@ -1,0 +1,49 @@
+/**
+ * Shape/Symbol/Yin-yang
+ *
+ * @author Alexander Futekov
+ * @author Maxime Thirouin maxime.thirouin@gmail.com @MoOx
+ */
+@mixin yin-yang($width: 10em, $color: #000, $color-alt: #fff)
+{
+    width: $width*96/100;
+    height: $width*48/100;
+    background: $color-alt;
+    border-color: $color;
+    border-style: solid;
+    $twopercente: $width*2/100;
+    border-width: $twopercente $twopercente $width*5/10 $twopercente;
+    position: relative;
+
+    &,
+    &:before,
+    &:after
+    {
+        @include border-radius(100%);
+    }
+
+    &:before,
+    &:after
+    {
+        content: "";
+        position: absolute;
+        top: 50%;
+        border: $width*18/100 solid;
+        width: $width*12/100;
+        height: $width*12/100;
+    }
+
+    &:before
+    {
+        left: 0;
+        background: $color-alt;
+        border-color: $color;
+    }
+
+    &:after
+    {
+        left: 50%;
+        background: $color;
+        border-color: $color-alt;
+    }
+}

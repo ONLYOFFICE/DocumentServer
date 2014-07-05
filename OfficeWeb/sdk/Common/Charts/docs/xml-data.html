@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>An example of using XML data</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas chart docs xml example" />
+    <meta name="description" content="An example of using XML data as a source of  your chart data" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A chart library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.jpg"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <meta name="keywords" content="OfficeExcel chart html5 javascript canvas" />
+    <meta name="description" content="OfficeExcel: HTML5 Javascript charts library - Getting data from an XML file" />
+    
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.key.js" ></script>
+    <script src="../libraries/OfficeExcel.line.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+
+    <?php PrintAnalyticsCode() ?>
+
+
+    <script>
+        /**
+        * Makes an AJAX call. It calls the given callback (a function) when ready.
+        * It's the same AjaxCall() function as that in the AJAX documentation.
+        * 
+        * @param string   url      The URL to retrieve
+        * @param function callback A function object that is called when the response is ready, there's an example below
+        *                          called "myCallback".
+        */
+        function AjaxCall (url, callback)
+        {
+            // Mozilla, Safari, ...
+            if (window.XMLHttpRequest) {
+                var httpRequest = new XMLHttpRequest();
+            
+            // MSIE
+            } else if (window.ActiveXObject) {
+                var httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            
+            httpRequest.onreadystatechange = callback;
+            
+            httpRequest.open('GET', url, true);
+            httpRequest.send();
+        }
+
+
+
+        /**
+        * This sample callback function is called when the data is ready (readyState=4). It is where
+        * the XML response is parsed, the data pulled out and finally the chart is created.
+        */
+        function myXMLProcessor ()
+        {
+            // Check the XMLHttpRequest object readystate
+            if (this.readyState == 4 && this.status == 200) {
+
+                /**
+                * Create an xmlDoc parse. MSIE has a slightly different syntax to other browsers
+                */
+                if (window.DOMParser) {
+                    var parser = new DOMParser();
+                    var xmlDoc = parser.parseFromString(this.responseText,"text/xml");
+                } else {
+                    var xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+                    xmlDoc.async = "false";
+                    xmlDoc.loadXML(this.responseText); 
+                }
+                
+                /**
+                * Initialise the arrays that we will populate with data
+                */
+                var john = [];
+                var fred = [];
+                var lucy = [];
+
+                var days = xmlDoc.getElementsByTagName("stats");
+
+                for (var i=0; i<days[0].childNodes.length; ++i) {
+                    
+                    var node = days[0].childNodes[i]
+                    
+                    if (node.nodeName == 'day') {
+                        var john_tag = node.getElementsByTagName('john');
+                        var fred_tag = node.getElementsByTagName('fred');
+                        var lucy_tag = node.getElementsByTagName('lucy');
+                        
+                        john.push(Number(john_tag[0].childNodes[0].nodeValue));
+                        fred.push(Number(fred_tag[0].childNodes[0].nodeValue));
+                        lucy.push(Number(lucy_tag[0].childNodes[0].nodeValue));
+                    }
+                }
+                
+                /**
+                * Now we have the information, create and show the chart
+                */
+                var myLine = new OfficeExcel.Line('cvs', john, fred, lucy);
+                myLine.Set('chart.title', 'A chart of Johns, Freds and Lucys weekly statistics');
+                myLine.Set('chart.linewidth', 2);
+                myLine.Set('chart.hmargin', 5);
+                myLine.Set('chart.tickmarks', 'endcircle');
+                myLine.Set('chart.labels', ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']);
+                myLine.Set('chart.key', ['John', 'Fred', 'Lucy']);
+                myLine.Draw();
+            }
+        }
+
+
+
+
+        /**
+        * The window.onload function initiates fetching the data from the server. It makes use of the
+        * AjaxCall() which is detailed in the documentation here: http://www.OfficeExcel.net/docs/index.html#ajax
+        */
+        window.onload = function ()
+        {
+            var url = 'http://' + location.host + '/sample.xml';
+            AjaxCall(url, myXMLProcessor);
+        }
+    </script>
+
+</head>
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        Getting data from an XML file
+    </div>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <h1>Fetching <span>data from an XML file (AJAX)</span></h1>
+    
+    <div class="warning">
+        <b>Warning:</b>
+        Because of the XMLHttpRequest security restrictions this example does not work offline. You can view the online version
+        <a href="http://www.OfficeExcel.net/docs/xml-data.html" target="_blank">here</a>.
+    </div>
+
+    <canvas id="cvs" width="600" height="250" style="float: right">[No canvas support]</canvas>
+    
+    <p>
+        This is an example of fetching data from an XML file that is located on the server. The page uses the XMLHttpRequest (Javascript)
+        object to fetch the XML file (<a href="http://www.OfficeExcel.net/sample.xml">sample.xml</a>) then parses it in Javascript and creates the chart. The function that parses the XML response
+        and then uses the data to create the chart is shown below and called <i>myXMLProcessor()</i> (it's the XMLHttpRequest callback function).
+    </p>
+    
+    <p>
+        This example has been tested in modern browsers and also MSIE 7/8 (via MSIE9 compatibility modes).
+    </p>
+    
+    <br clear="all" />
+    
+    <pre class="code">
+&lt;script&gt;
+    
+    // This is the same AJAX function that is defined in the documentation here:
+    // <a href="http://www.OfficeExcel.net/docs/#ajax">http://www.OfficeExcel.net/docs/#ajax</a>
+    AjaxCall('/sample.xml', myXMLProcessor);
+
+    /**
+    * This sample callback function is called when the data is ready (readyState=4). It is where
+    * the XML response is parsed, the data pulled out and finally the chart is created.
+    */
+    function myXMLProcessor ()
+    {
+        // Check the readystate to see if the XMLHttpRequest object is ready
+        if (this.readyState == 4 && this.status == 200) {
+
+            /**
+            * This gets an xmlDoc object, accounting for differences in MSIE and
+            * other browsers
+            */
+            if (window.DOMParser) {
+                var parser = new DOMParser();
+                var xmlDoc = parser.parseFromString(this.responseText,"text/xml");
+            } else {
+                var xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+                xmlDoc.async = "false";
+                xmlDoc.loadXML(this.responseText); 
+            }
+            
+            /**
+            * Initialise the arrays that we will populate with data
+            */
+            var john = [];
+            var fred = [];
+            var lucy = [];
+
+            /**
+            * Now the main loop that goes through the XML extracting the data
+            */
+            var days = xmlDoc.getElementsByTagName("stats");
+
+            for (var i=0; i&lt;days[0].childNodes.length; ++i) {
+                
+                var node = days[0].childNodes[i]
+                
+                if (node.nodeName == 'day') {
+                    var john_tag = node.getElementsByTagName('john');
+                    var fred_tag = node.getElementsByTagName('fred');
+                    var lucy_tag = node.getElementsByTagName('lucy');
+                    
+                    john.push(Number(john_tag[0].childNodes[0].nodeValue));
+                    fred.push(Number(fred_tag[0].childNodes[0].nodeValue));
+                    lucy.push(Number(lucy_tag[0].childNodes[0].nodeValue));
+                }
+            }
+
+            /**
+            * Now we have the information, use it to create and show the chart
+            */
+            var myLine = new OfficeExcel.Line('cvs', john, fred, lucy);
+            myLine.Set('chart.title', 'A chart of Johns, Freds and Lucys weekly statistics');
+            myLine.Set('chart.linewidth', 2);
+            myLine.Set('chart.hmargin', 5);
+            myLine.Set('chart.tickmarks', 'endcircle');
+            myLine.Set('chart.labels', ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']);
+            myLine.Set('chart.key', ['John', 'Fred', 'Lucy']);
+            myLine.Draw();
+        }
+    }
+&lt;/script&gt;
+</pre>
+
+</body>
+</html>

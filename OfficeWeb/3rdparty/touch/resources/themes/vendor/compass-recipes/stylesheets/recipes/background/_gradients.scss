@@ -1,0 +1,94 @@
+/**
+ *
+ * @class Gradients
+ * @author David Kaneda http://www.davidkaneda.com/
+ *
+ */
+
+/**
+ * Adds a background gradient into a specified selector.
+ *
+ *     @include background-gradient(#444, 'glossy');
+ *
+ * You can also use color-stops if you want full control of the gradient:
+ *
+ *     @include background-gradient(#444, color-stops(#333, #222, #111));
+ *
+ * @param {color} $bg-color
+ * The base color of the gradient.
+ *
+ * @param {string/list} $type
+ * The style of the gradient, one of five pre-defined options: matte, bevel, glossy, recessed, or linear:
+ *
+ *     @include background-gradient(red, 'glossy');
+ *
+ * It can also accept a list of color-stop values:;
+ *
+ *     @include background-gradient(black, color-stops(#333, #111, #000));
+ *
+ * @param {string} $direction
+ * The direction of the gradient.
+ */
+
+@import "compass/css3/images";
+
+$default-gradient: matte !default;
+
+@mixin background-gradient($bg-color, $type: $default-gradient, $direction: top, $contrast: 1) {
+    background-image: none;
+    background-color: $bg-color;
+
+    @if $type != null and $bg-color != transparent {
+        // Color stops provided
+        @if type-of($type) == "list" {
+            @include background-image(linear-gradient($direction, $type));
+        }
+
+        // Default gradients
+        @else if $type == bevel {
+            @include background-image(bevel-gradient($bg-color, $direction, $contrast));
+        } @else if $type == glossy {
+            @include background-image(glossy-gradient($bg-color, $direction, $contrast));
+        } @else if $type == recessed {
+            @include background-image(recessed-gradient($bg-color, $direction, $contrast));
+        } @else if $type == linear {
+            @include background-image(linear-gradient($direction, color_stops(lighten($bg-color, 5%), darken($bg-color, 10%))));
+        } @else if $type == matte {
+            @include background-image(matte-gradient($bg-color, $direction, $contrast));
+        }
+    }
+}
+
+// These are functions so they can be combined together with background-image()// ie. @include background-image(background_noise(), glossy-gradient());
+
+@function bevel-gradient($bg-color: $base-color, $direction: top, $contrast: 1) {
+    @return linear-gradient($direction, color_stops(
+        lighten($bg-color, 15%),
+        lighten($bg-color, 8%) 30%,
+        $bg-color 65%,
+        darken($bg-color, 6%)
+    ));
+}
+
+@function glossy-gradient($bg-color: $base-color, $direction: top, $contrast: 1) {
+    @return linear-gradient($direction, color_stops(lighten($bg-color, 15% * $contrast), lighten($bg-color, 5% * $contrast) 50%, $bg-color 51%, darken($bg-color, 5% * $contrast)));
+}
+
+@function recessed-gradient($bg-color: $base-color, $direction: top, $contrast: 1) {
+    @return linear-gradient($direction, color_stops(darken($bg-color, 10% * $contrast), darken($bg-color, 5% * $contrast) 10%, $bg-color 65%, lighten($bg-color, .5% * $contrast)));
+}
+
+@function matte-gradient (
+    $bg-color: $base-color,
+    $direction: top,
+    $contrast: 1
+) {
+    @return linear-gradient(
+        $direction,
+        color_stops(
+            lighten($bg-color, 15% * $contrast),
+            lighten($bg-color, 5% * $contrast) 3%,
+            darken($bg-color, 5% * $contrast)
+        )
+    );
+}

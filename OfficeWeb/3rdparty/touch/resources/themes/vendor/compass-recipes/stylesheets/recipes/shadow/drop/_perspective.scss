@@ -1,0 +1,26 @@
+/**
+ * Drop shadow w/ perspective
+ *
+ * @thanks Nicolas Gallagher @necolas
+ * @link http://nicolasgallagher.com/css-drop-shadows-without-images/demo/
+ */
+@mixin drop-shadow-perspective($skew: 50deg, $distance-x: 80px, $distance-y: 5px, $box-shadow-radius: 8px, $color: rgba(#000, .4))
+{
+    position: relative;
+
+    &:before
+    {
+        content:"";
+        position:absolute;
+        z-index:-2;
+
+        left: $distance-x;
+        bottom: $distance-y;
+        width: 50%;
+        height: 35%;
+
+        @include box-shadow(-$distance-x 0 $box-shadow-radius $color);
+        @include transform(skew($skew));
+        @include transform-origin(0 100%);
+    }
+}

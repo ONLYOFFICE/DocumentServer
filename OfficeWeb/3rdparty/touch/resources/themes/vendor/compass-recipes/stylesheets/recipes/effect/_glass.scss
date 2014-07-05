@@ -1,0 +1,39 @@
+/**
+ * Glass effect
+ * Use this on image for better effect render
+ * 
+ * Inspired from Simurai's IMDB redisign
+ *
+ * @link http://lab.simurai.com/redesign/imdb
+ * @thanks Simurai @simurai
+ */
+
+@import '../shared/pseudo-element';
+
+@mixin effect-glass(
+    $color: #fff,
+    $reflectDegree: -45deg,
+    $border-radius: 4px
+)
+{
+    position: relative;
+    @include border-radius($border-radius);
+
+    &:after
+    {
+        @include pseudo-element($width: auto);
+        overflow: hidden;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        border: transparent solid 1px;
+        @include border-radius($border-radius);
+        @include box-shadow(
+            inset $color 0 0 2px,
+            inset rgba($color,.4) 0 5px 10px
+        );
+        @include background(
+            linear-gradient($reflectDegree, rgba($color,.12) 50%, rgba($color, 0) 50.5% ));
+    }
+}

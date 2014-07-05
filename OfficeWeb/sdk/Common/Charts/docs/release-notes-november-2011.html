@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html> 
+<head> 
+    <meta http-equiv="X-UA-Compatible" content="chrome=1"> 
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    --> 
+    <title>The November 2011 release notes</title> 
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas docs bar charts" />
+    <meta name="description" content="The release notes for the November 2011 release" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+ 
+    <link rel="stylesheet" href="../../css/website.css" type="text/css" media="screen" /> 
+    <link rel="icon" type="image/png" href="../../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+
+    <?php PrintAnalyticsCode() ?>
+</head> 
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb"> 
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        <a href="release-notes.html">Release notes</a>
+        >
+        November 2011
+    </div> 
+ 
+    <h1>November <span>2011 release notes</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <div style="text-align: center; margin-bottom: 5px; position: relative; top: -15px">
+        <div class="warning" style="display: inline; display: inline-block">
+            <b>Important:</b>
+            The stable OfficeExcel has been updated (30th November 2011) because of a bug with the Pie chart. The bug affects you if you use
+            tooltips and the
+            effect is set to <i>explode</i>. You can either update the <i>OfficeExcel.pie.js</i> file to the one in the current archive,
+            or simply change the effect (to <i>3d</i> or <i>2d</i>). If you downloaded OfficeExcel after this date you won't be affected by this.
+        </div>
+    </div>
+
+    <p>
+        The November 2011 release of OfficeExcel is now available and has these changes:
+    </p>
+    
+    <ul>
+        <li>Added new animation effects: Bar chart Wave, Pie chart Wave, HProgress bar Grow, VProgress bar Grow</li>
+        <li>The Fuel chart Grow effect has been rewritten - it now "Grows" from the last position instead of from zero all the time</li>
+        <li>
+            The way the Donut chart is drawn has been altered so that the center can be transparent and shadows are drawn correctly.
+            There's an example here: <a href="http://www.OfficeExcel.net/examples/donut.html">http://www.OfficeExcel.net/examples/donut.html</a>
+        </li>
+        <li>
+            Added four new properties to the Gauge chart for controlling color: chart.border.inner, chart.border.outer,
+            chart.centerpin.color and chart.needle.color.
+        </li>
+        <li>IE7 is now supported with ExCanvas.</li>
+        <li>
+            IMPORTANT: The Pie chart .getSegment(e) method now returns angles measured in radians, not in degrees.
+            Roughly, 1 radian is equal to 57.29 degrees (or 180/Math.PI ).
+        </li>
+        <li>
+            IMPORTANT: The Rose chart .getSegment(e) method now returns angles measured in radians, not in degrees.
+            Roughly, 1 radian is equal to  57.29 degrees (or 180/Math.PI ).
+        </li>
+        <li>There's now an example of the Pie chart RoundRobin and Implode effect on the front page of the website</li>
+        <li>
+            The key has been separated out into it's own file. This saves roughly 30k if you don't use it. If you do use it
+            you will need to include this file in your page</li>
+        <li>
+            The chart libraries have a new technique that avoids you getting blurry lines that appear to be thicker than a
+           single pixel. This affects roughly 12 of the libraries.
+        </li>
+        <li>Added the chart.zoom.thumbnail.fixed option.</li>
+        <li>The Rose chart adjusting has been removed.</li>
+        <li>Added an example of financial data represented using the Scatter chart: <a href="http://www.OfficeExcel.net/docs/financial.html">http://www.OfficeExcel.net/docs/financial.html</a></li>
+        <li>Added an example of getting data from an XML file on the server: <a href="http://www.OfficeExcel.net/docs/xml-data.html">http://www.OfficeExcel.net/docs/xml-data.html</a></li>
+        <li>
+            The slide in and slideout have each had the argument used to stipulate the direction renamed:
+              <ul>
+                <li>OfficeExcel.Effects.jQuery.Slide.In(obj, {'from': 'right'});</li>
+                <li>OfficeExcel.Effects.jQuery.Slide.Out(obj, {'to': left'});</li>
+            </ul>
+        </li>
+        <li>Added more punctuation characters to the LED chart.</li>
+        <li>
+            The Scatter chart option chart.boxplot.width is now a SCALE value, not a PIXEL value. Therefore, if your chart.xmax
+            value is 28 (for four weeks) 1 week would be represented by a value of 7, whereas before that would simply be 7
+            pixels.
+        </li>
+    </ul>
+    
+    <p>
+        Download OfficeExcel here: <a href="http://www.OfficeExcel.net/downloads/OfficeExcel_2011-11-26-stable.zip"><b>OfficeExcel_2011-10-26-stable.zip</b></a>
+    </p>
+    
+</body> 
+</html>

@@ -1,0 +1,42 @@
+/**
+ * Cicada background pattern
+ *
+ * @link http://lea.verou.me/css3patterns/#cicada-stripes
+ *
+ * @author Randy Merril http://forthedeveloper.com/ for the original pattern
+ * @author Mason Wendell mason@canarypromo.com @canarymason for the sass mixin
+ */
+
+@import "compass/css3/images";
+
+@mixin background-stripes-cicada($bg-color: gray, $stripe-color: white, $dir: left) {
+    $transparent: rgba(black, 0);
+    $stripe-color1: rgba($stripe-color, 0.07);
+    $stripe-color2: rgba($stripe-color, 0.13);
+    $stripe-color3: rgba($stripe-color, 0.17);
+    $stripe-color4: rgba($stripe-color, 0.19);
+    background-color: $bg-color;
+    @include background-image(
+        linear-gradient(
+            $dir,
+            $stripe-color1 50%,
+            $transparent 50%
+        ),
+        linear-gradient(
+            $dir,
+            $stripe-color2 50%,
+            $transparent 50%
+        ),
+        linear-gradient(
+            $dir,
+            $transparent 50%,
+            $stripe-color3 50%
+        ),
+        linear-gradient(
+            $dir,
+            $transparent 50%,
+            $stripe-color4 50%
+        )
+    );
+    background-size: 13px, 29px, 37px, 53px;
+}

@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for personal,    |
+        * | charity and educational purposes it is free to use. You can read the full    |
+        * | license here:                                                                |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+
+    <title>Documentation about Scatter charts</title>
+
+    <meta name="keywords" content="OfficeExcel html5 canvas javascript charts docs scatter chart" />
+    <meta name="description" content="Documentation about Scatter charts including information on all the options available to you" />
+    <meta name="googlebot" content="NOODP">
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+    <meta property="og:title" content="Scatter charts documentation" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.jpg"/>
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <?php PrintAnalyticsCode() ?>
+
+</head>
+<body>
+    <a name="top"></a>
+
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        Scatter charts
+    </div>
+
+    <h1>Scatter <span>charts documentation</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <ul>
+        <li><a href="#example">Example</a></li>
+        <li><a href="#properties">Properties</a></li>
+        <li><a href="#methods">Methods</a></li>
+        <li><a href="#boxplots">Box plots</a></li>
+        <li><a href="#labelpoints">Specific points for labels on the X axis</a></li>
+        <li><a href="#custom.tickmarks">Custom tickmarks</a></li>
+        <li><a href="#colors">Note about colors and the key</a></li>
+        <li><a href="#oncrosshairs">Note about the on crosshairs event</a></li>
+    </ul>
+    
+    <a name="example"></a>
+    <p>&nbsp;</p>
+    <h2>Example</h2>
+
+    <pre class="code">
+&lt;script&gt;
+    window.onload = function ()
+    {
+        <span class="javascript-comment">// The data as shown on the chart. Each point is an array, described below.</span>
+        var data = [
+                    [67,78,null, 'The winner!'],
+                    [67,40,'red']
+                   ];
+        
+        <span class="javascript-comment">// Create the Scatter chart. The arguments are: the canvas ID and the data to be represented on the chart.</span>
+        var sg = new OfficeExcel.Scatter('myScatter', data);
+        
+        <span class="javascript-comment">// Configure the chart to look as you want it to.</span>
+        sg.Set('chart.background.barcolor1','white');
+        sg.Set('chart.background.barcolor2', 'white');
+        sg.Set('chart.grid.color', 'rgba(238,238,238,1)');
+        sg.Set('chart.gutter.left', 30);
+        sg.Set('chart.labels', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
+        sg.Set('chart.xmax', 365); // Important!
+        
+        <span class="javascript-comment">// Now call the .Draw() method to draw the chart.</span>
+        sg.Draw();
+    }
+&lt;/script&gt;
+</pre>
+    
+    <p>
+        The example file is <a href="../examples/scatter.html">here</a>.
+    </p>
+    
+
+
+    <p>
+        Each point on the Scatter chart is made by supplying an array of up to 4 elements:
+    </p>
+    
+    <ul>
+        <li>The X value (required)</li>
+        <li>The Y value (required)</li>
+        <li>The color (optional)</li>
+        <li>The tooltip for this mark (optional)</li>
+    </ul>
+
+    <p>
+        If you wish to specify a tooltip, but not a color (ie use the default color instead), you can pass null instead of a color.
+    </p>
+
+
+    <a name="properties"></a>
+    <p>&nbsp;</p>
+    <h2>Properties</h2>
+    
+    <p>
+        You can use these properties to control how the Scatter apears. You can set them by using the Set() method. Eg:
+    </p>
+    
+    <p>
+        <b>myScatter.Set('chart.xmax', 365);</b>
+    </p>
+    
+    <ul>
+        <li><a href="#background">Background</a></li>
+        <li><a href="#labels and text">Labels and text</a></li>
+        <li><a href="#margins">Margins</a></li>
+        <li><a href="#axis properties">Axis properties</a></li>
+        <li><a href="#titles">Titles</a></li>
+        <li><a href="#scale">Scale</a></li>
+        <li><a href="#interactive features">Interactive features</a></li>
+        <li><a href="#line properties">Line properties</a></li>
+        <li><a href="#key">Key</a></li>
+        <li><a href="#zoom">Zoom</a></li>
+        <li><a href="#events">Events</a></li>
+        <li><a href="#miscellaneous">Miscellaneous</a></li>
+    </ul>
+
+
+<a name="background"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Background</h3>            <a name="chart.background.barcolor1"></a>
+<b>chart.background.barcolor1</b><br />
+            The color of the background bars. <br /><i>Default: rgba(0,0,0,0)</i><br /><br />
+            <a name="chart.background.barcolor2"></a>
+<b>chart.background.barcolor2</b><br />
+            The color of the background bars. <br /><i>Default: rgba(0,0,0,0)</i><br /><br />
+            <a name="chart.background.grid"></a>
+<b>chart.background.grid</b><br />
+            Whether to show the background grid or not. <br /><i>Default: true</i><br /><br />
+            <a name="chart.background.grid.color"></a>
+<b>chart.background.grid.color</b><br />
+            The color of the background grid. <br /><i>Default: #eee</i><br /><br />
+            
+            <a name="chart.background.hbars"></a>
+            <b>chart.background.hbars</b><br />
+            An array of information stipulating horizontal coloured bars. You can use these to indicate limits. Eg: 
+            
+            <pre class="code">myScatter.Set('chart.background.hbars', [[75, 10, 'yellow'], [85, 15, 'red']]);</pre>
+            
+            This would give you two bars, one red and a lower yellow bar. The units correspond to your scale, and are the
+            starting point and the height.<br />
+            <i>Default: null</i><br /><br />
+            
+            <b>chart.background.vbars</b><br />
+            An array of vertical bar information. They're specified like his:
+            <pre class="code">myScatter.Set('chart.background.vbars', [[0, 181, 'rgba(0,255,0,0.5)']]);</pre>           
+            <i>Default: null</i><br /><br />
+
+            <a name="chart.background.grid.border"></a>
+<b>chart.background.grid.border</b><br />
+            Determines whether a border line is drawn around the grid.<br /><i>Default: true</i><br /><br />
+            <a name="chart.background.grid.hlines"></a>
+<b>chart.background.grid.hlines</b><br />
+            Determines whether to draw the horizontal grid lines.<br /><i>Default: true</i><br /><br />
+            <a name="chart.background.grid.vlines"></a>
+<b>chart.background.grid.vlines</b><br />
+            Determines whether to draw the vertical grid lines.<br /><i>Default: true</i><br /><br />
+            
+            <a name="chart.background.grid.autofit"></a>
+            <b>chart.background.grid.autofit</b><br />
+            Instead of specifying a pixel width/height for the background grid, you can use autofit and specify how many horizontal and vertical lines you want.<br />
+            <i>Default: true</i><br /><br />
+
+            <a name="chart.background.grid.autofit.numhlines"></a>
+<b>chart.background.grid.autofit.numhlines</b><br />
+            When using autofit this allows you to specify how many horizontal grid lines you want. <br /><i>Default: 5</i><br /><br />
+            
+            <a name="chart.background.grid.autofit.numvlines"></a>
+            <b>chart.background.grid.autofit.numvlines</b><br />
+            When using autofit this allows you to specify how many vertical grid lines you want. <br />
+            <i>Default: 20</i><br /><br />
+
+            <a name="chart.background.grid.autofit.align"></a>
+            <b>chart.background.grid.autofit.align</b><br />
+            If you want to have your grid lines line up with the labels (both X and Y axes), you can set this to true and OfficeExcel will
+            attempt to make the grid lines line up. If you have a <i>chart.hmargin</i> set then the alignment will be thrown out.<br />
+            <i>Default: false</i><br /><br />
+            
+            <a name="chart.background.image"></a>
+            <b>chart.background.image</b><br />
+            If you want to specify a background image to use on your chart, specify it with this property.<br />
+            <i>Default: null</i><br /><br />
+            
+            <a name="chart.background.image.stretch"></a>
+            <b>chart.background.image.stretch</b><br />
+            By default your background image is stretched (if necessary) to cover the whole chart area (gutters not included).
+            If this is not what you want then set this property to false.<br />
+            <i>Default: true</i><br /><br />
+            
+            <a name="chart.background.image.x"></a>
+            <b>chart.background.image.x</b><br />
+            The X position of the image. The coordinates are the top left corner of the image.<br />
+            <i>Default: null</i><br /><br />
+            
+            <a name="chart.background.image.y"></a>
+            <b>chart.background.image.y</b><br />
+            The Y position of the image. The coordinates are the top left corner of the image.<br />
+            <i>Default: null</i><br /><br />
+            
+            <a name="chart.background.image.align"></a>
+            <b>chart.background.image.align</b><br />
+            Instead of specifying the coordinates of the image, you can instead simply align it top, bottom, left or right.
+            Examples are:<br />
+            <ul>
+                <li>top left</li>
+                <li>bottom right</li>
+                <li>bottom</li>
+                <li>right</li>
+            </ul>
+            <i>Default: null</i><br /><br />
+
+<a name="labels and text"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Labels and text</h3>
+    
+    <a name="chart.labels"></a>
+    <b>chart.labels</b><br />
+    An array of the X labels for the chart. <br />
+    <i>Default: [] (An empty array)</i><br /><br />
+    
+    <a name="chart.labels.above"></a>
+    <b>chart.labels.above</b><br />
+    If true this will show the values of the points above them.<br />
+    <i>Default: false</i><br /><br />
+    
+    <a name="chart.labels.above.size"></a>
+    <b>chart.labels.above.size</b><br />
+    If you're showing the labels above the points, this controls their size.<br />
+    <i>Default: 8</i><br /><br />
+    
+    <a name="chart.labels.avove.decimals"></a>
+    <b>chart.labels.above.decimals</b><br />
+    If your points have lots of decimals, you use this option to curtail them.<br />
+    <i>Default: 0</i><br /><br />
+    
+    <a name="chart.ylabels"></a>
+<b>chart.ylabels</b><br />
+            A boolean (<i>true</i> or <i>false</i>) that controls whether the chart has Y labels. <br /><i>Default: true</i><br /><br />
+            
+            <a name="chart.ylabels.count"></a>
+            <b>chart.ylabels.count</b><br />
+            A value (<i>1, 3, 5 or 10</i>) that controls how many Y labels there are. <br />
+            <i>Default: 5</i><br /><br />
+            
+            <a name="chart.ylabels.invert"></a>
+            <b>chart.ylabels.invert</b><br />
+            Reverses the Y axis so that 0 is at the top, instead of the bottom.<br />
+            <i>Default: false</i><br /><br />
+
+            <a name="chart.ylabels.specific"></a>
+            <b>chart.ylabels.specific</b><br />
+            You can use this option to give your own Y labels (eg ['Low', 'Medium', 'High'].<br />
+            <i>Default: null</i><br /><br />
+
+            <a name="chart.text.font"></a>
+<b>chart.text.font</b><br />
+            The font used to render the text.<br /><i>Default: Verdana</i><br /><br />
+            
+            <a name="chart.text.color"></a>
+            <b>chart.text.color</b><br />
+            The color of the labels. <br />
+            <i>Default: black</i><br /><br />
+            
+            <a name="chart.text.size"></a>
+            <b>chart.text.size</b><br />
+            The size of the text (in points).<br />
+            <i>Default: 10</i><br /><br />
+
+            <a name="chart.text.angle"></a>
+            <b>chart.text.angle</b><br />
+            The angle of the horizontal text labels (at the bottom of the chart). This can be from 0-90 (degrees)<br />
+            <i>Default: 0 (Horizontal)</i><br /><br />
+
+            <a name="chart.labels.specific.align"></a>
+            <b>chart.labels.specific.align</b><br />
+            If you are using specific points for X labels, by default the labels are left aligned within its section. With this setting
+            you can center the labels within its section.<br />
+            <i>Default: left</i><br /><br />
+<!--
+            <a name="chart.text.halign"></a>
+            <b>chart.text.halign</b><br />
+            This only affects X labels when you're using specific X points, and controls the alignment in the labels
+            individual "section".<br />
+            <i>Default: left</i><br /><br />
+-->
+<a name="margins"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Margins</h3>
+
+
+
+            <a name="chart.gutter.left"></a>
+            <b>chart.gutter.left</b><br />
+            The left gutter of the chart, (the gutter is where the labels and title are)).<br />
+            <i>Default: 25</i><br /><br />
+
+            <a name="chart.gutter.right"></a>
+            <b>chart.gutter.right</b><br />
+            The right gutter of the chart, (the gutter is where the labels and title are).<br />
+            <i>Default: 25</i><br /><br />
+
+            <a name="chart.gutter.top"></a>
+            <b>chart.gutter.top</b><br />
+            The top gutter of the chart, (the gutter is where the labels and title are).<br />
+            <i>Default: 25</i><br /><br />
+
+            <a name="chart.gutter.bottom"></a>
+            <b>chart.gutter.bottom</b><br />
+            The bottom gutter of the chart, (the gutter is where the labels and title are).<br />
+            <i>Default: 25</i><br /><br />
+
+<a name="axis properties"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Axis properties</h3>
+
+    <a name="chart.xmin"></a>
+    <b>chart.xmin</b><br />
+    The minimum X axis value you wish to set.<br />
+    <i>Default: 0</i><br /><br />
+
+    <a name="chart.xmax"></a>
+    <b>chart.xmax</b><br />
+    The maximum X axis value you wish to set. For example if you're displaying products sold in a year, you might use 365. <br />
+    <i>Default: none - must be supplied</i><br /><br />
+    
+    <a name="chart.ymax"></a>
+<b>chart.ymax</b><br />
+            The optional maximum Y scale value. If not specified then it will be calculated.<br /><i>Default: null (It's calculated)</i><br /><br />
+            <a name="chart.ymin"></a>
+<b>chart.ymin</b><br />
+            The optional minimum Y scale value. If not specified it will be zero.<br /><i>Default: null</i><br /><br />
+            <a name="chart.ticksize"></a>
+<b>chart.ticksize</b><br />
+            The size of the tickmarks. <br /><i>Default: 3</i><br /><br />
+            <a name="chart.tickmarks"></a>
+<b>chart.tickmarks</b><br />
+            The style of the tickmarks. Can be: <i>cross</i>, <i>plus</i>, <i>circle</i>, <i>diamond</i>, <i>square</i> or <i>null</i> (no tickmarks). <br /><i>Default: cross</i><br /><br />
+            <a name="chart.xticks"></a>
+<b>chart.xticks</b><br />
+            This controls whether the X axis tickmarks are drawn.<br /><i>Default: true</i><br /><br />
+            
+            <a name="chart.noendxtick"></a>
+            <b>chart.noendxtick</b><br />
+            Whether to draw an end X tick. Usually used when combining Scatter charts<br />
+            <i>Default: false</i><br /><br />
+            
+            <a name="chart.noendytick"></a>
+            <b>chart.noendytick</b><br />
+            Whether to draw an end Y tick. Usually used when combining Scatter charts<br />
+            <i>Default: true</i><br /><br />
+            
+            <a name="chart.xaxispos"></a>
+<b>chart.xaxis</b><br />
+            This controls whether the X axis is drawn.<br /><i>Default: true</i><br /><br />
+            <a name="chart.xaxispos"></a>
+<b>chart.xaxispos</b><br />
+            Where the X axis should be drawn. Can be either <i>center</i> or <i>bottom</i>.<br /><i>Default: bottom</i><br /><br />
+            <a name="chart.yaxispos"></a>
+<b>chart.yaxispos</b><br />
+            Where the Y axis should be drawn. Can be either <i>left</i> or <i>right</i>.<br /><i>Default: left</i><br /><br />
+            <a name="chart.axis.color"></a>
+<b>chart.axis.color</b><br />
+            The color of the axes.<br /><i>Default: black</i><br /><br />
+            <a name="chart.noaxes"></a>
+<b>chart.noaxes</b><br />
+            If this is set to true, no axes will be drawn. <br /><i>Default: false</i><br /><br />
+            
+            <a name="chart.xscale"></a>
+            <b>chart.xscale</b><br />
+            If true then an X scale is drawn instead of X labels.<br />
+            <i>Default: false</i><br /><br />
+            
+            <a name="chart.xscale.units.pre"></a>
+            <b>chart.xscale.units.pre</b><br />
+            These are units that are prepended to the number.<br />
+            <i>Default: none</i><br /><br />
+            
+            <a name="chart.xscale.units.post"></a>
+            <b>chart.xscale.units.post</b><br />
+            These are units that are appended to the number.<br />
+            <i>Default: none</i><br /><br />
+            
+            <a name="chart.xscale.formatter"></a>
+            <b>chart.xscale.formatter</b><br />
+            This can be a function, which is passed the object and the number and should return a formatted number (formatted as you wish).<br />
+            <i>Default: null</i><br /><br />
+            
+            <a name="chart.xscale.numlabels"></a>
+            <b>chart.xscale.numlabels</b><br />
+            This is a number representing how many X labels there should be when you're using the X scale.<br />
+            <i>Default: 10</i><br /><br />
+
+<a name="titles"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Titles</h3>
+
+<a name="chart.title"></a>
+<b>chart.title</b><br />
+            The title of the scatter chart. <br /><i>Default: none</i><br /><br />
+
+
+
+<a name="chart.title.font"></a>
+<b>chart.title.font</b><br />
+The font that the title is rendered in. If not specified the chart.text.font setting is used (usually Verdana)<br />
+<i>Default: null</i><br /><br />
+
+<a name="chart.title.size"></a>
+<b>chart.title.size</b><br />
+The size of the title. If not specified the size is usually 2pt bigger than the chart.text.size setting.<br />
+<i>Default: null</i><br /><br />
+
+<a name="chart.title.bold"></a>
+<b>chart.title.bold</b><br />
+Whather the title is bold or not.<br />
+<i>Default: true</i><br /><br />
+
+<a name="chart.title.background"></a>
+<b>chart.title.background</b><br />
+The background color (if any) for the title.<br />
+<i>Default: null</i><br /><br />
+
+            <a name="chart.title.hpos"></a>
+<b>chart.title.hpos</b><br />
+            This allows you to completely override the horizontal positioning of the title. It should be a number between 0 and 1, and is multiplied with the whole width of the canvas and then used as the horizontal position. <br /><i>Default: null</i><br /><br />
+            <a name="chart.title.vpos"></a>
+<b>chart.title.vpos</b><br />
+            This allows you to completely override the vertical positioning of the title. It should be a number between 0 and 1, and is multiplied with the gutter and then used as the vertical position. It can be useful if you need to have a large gutter.<br /><i>Default: null</i><br /><br />
+            <a name="chart.title.color"></a>
+<b>chart.title.color</b><br />
+            The color of the title.<br /> <i>Default: black</i><br /><br />
+            
+            <a name="chart.title.xaxis"></a>
+            <b>chart.title.xaxis</b><br />
+            This allows to specify a title for the X axis.<br />
+            <i>Default: none</i><br /><br />
+
+            <a name="chart.title.xaxis.size"></a>
+            <b>chart.title.xaxis.size</b><br />
+            This allows you to specify a size for the X axis title.<br />
+            <i>Default: null</i><br /><br />
+
+            <a name="chart.title.xaxis.font"></a>
+            <b>chart.title.xaxis.font</b><br />
+            This allows to specify a font for the X axis title.<br />
+            <i>Default: null</i><br /><br />
+
+            <a name="chart.title.xaxis.bold"></a>
+            <b>chart.title.xaxis.bold</b><br />
+            This controls whether the X axis title is bold or not.<br />
+            <i>Default: true</i><br /><br />
+
+            <a name="chart.title.yaxis"></a>
+            <b>chart.title.yaxis</b><br />
+            This allows to specify a title for the Y axis.<br />
+            <i>Default: none</i><br /><br />
+
+            <a name="chart.title.yaxis.size"></a>
+            <b>chart.title.yaxis.size</b><br />
+            This allows you to specify a size for the Y axis title.<br />
+            <i>Default: null</i><br /><br />
+
+            <a name="chart.title.yaxis.font"></a>
+            <b>chart.title.yaxis.font</b><br />
+            This allows to specify a font for the Y axis title.<br />
+            <i>Default: null</i><br /><br />
+
+            <a name="chart.title.yaxis.bold"></a>
+            <b>chart.title.yaxis.bold</b><br />
+            This controls whether the Y axis title is bold or not.<br />
+            <i>Default: true</i><br /><br />
+
+            <a name="chart.title.xaxis.pos"></a>
+<b>chart.title.xaxis.pos</b><br />
+            This is multiplied with the gutter to give the position of the X axis title.<br /><i>Default: 0.25</i><br /><br />
+            <a name="chart.title.yaxis.pos"></a>
+<b>chart.title.yaxis.pos</b><br />
+            This is multiplied with the gutter to give the position of the Y axis title.<br /><i>Default: 0.25</i><br /><br />
+
+            <a name="chart.title.yaxis.position"></a>
+            <b>chart.title.yaxis.position</b><br />
+            Instead of using the option above you can instead use this option, specifying <i>left</i> or <i>right</i>.<br />
+            <i>Default: left</i><br /><br />
+
+<a name="scale"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Scale</h3>
+
+<a name="chart.scale.formatter"></a>
+            <b>chart.scale.formatter</b><br />
+            To allow thoroughly custom formats of numbers in the scale, you can use this option to
+            specify a function that is used by OfficeExcel to format numbers. This function should
+            handle ALL of the formatting. Eg:<br /><br />
+            <pre class="code">
+function myFormatter(obj, num)
+{
+    return num + 'F'; // An example of formatting
+}
+myGraph.Set('chart.scale.formatter', myFormatter);
+</pre>
+            <br /><i>Default: null</i><br /><br />
+
+<a name="chart.scale.decimals"></a>
+<b>chart.scale.decimals</b><br />
+            The number of decimal places to display for the Y scale.<br /><i>Default: 0</i><br /><br />
+            
+            <a name="chart.scale.point"></a>
+            <b>chart.scale.point</b><br />
+            The character used as the decimal point.<br />
+            <i>Default: .</i><br /><br />
+            
+            <a name="chart.scale.thousand"></a>
+            <b>chart.scale.thousand</b><br />
+            The character used as the thousand separator<br />
+            <i>Default: ,</i><br /><br />
+
+            <a name="chart.scale.round"></a>
+            <b>chart.scale.round</b><br />
+            Whether to round the maximum scale value up or not. This will produce slightly better scales in some instances.<br />
+            <i>Default: null</i><br /><br />
+
+            <a name="chart.units.pre"></a>
+<b>chart.units.pre</b><br />
+            The units (if any) that the Y axis is measured in (these are preppended to the number).<br /><i>Default: none</i><br /><br />
+            <a name="chart.units.post"></a>
+<b>chart.units.post</b><br />
+            The units (if any) that the Y axis is measured in (these are appended to the number).<br /><i>Default: none</i><br /><br />
+
+<a name="interactive features"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Interactive features</h3>
+
+    <p style="background-color: #ffe; padding: 3px; border: 1px black solid; border-radius: 5px">
+        <b>Note:</b> Unlike other charts, the Scatter chart tooltips are specified as part of the data array. See <a href="#top">above</a>.
+    </p>
+
+    <a name="chart.tooltips.effect"></a>
+    <b>chart.tooltips.effect</b><br />
+    The animated effect used for showing tooltips.<br />
+    <i>Default: fade</i><br /><br />
+    
+            <a name="chart.tooltips.hotspot"></a>
+            <b>chart.tooltips.hotspot</b><br />
+            This controls the size of the hotspot on the chart for tooltips.<br /><i>Default: 3</i><br /><br />
+            <a name="chart.tooltips.css.class"></a>
+            
+            <a name="chart.tooltips.highlight"></a>
+            <b>chart.tooltips.highlight</b><br />
+            This controls whether points are highlighted when a tooltip is shown. If you're combining the Scatter with another chart
+            you may need to set this to <i>false</i>.<br />
+            <i>Default: true</i><br /><br />
+            
+            <a name="chart.tooltips.css.class"></a>
+            <b>chart.tooltips.css.class</b><br />
+            This is the name of the CSS class the chart uses.<br /><i>Default: OfficeExcel_tooltip</i><br /><br />
+            
+            <a name="chart.tooltips.override"></a>
+            <b>chart.tooltips.override</b><br />
+            If you wish to handle showing tooltips yourself, this should be a function object which does just that. There's more
+            information on the <a href="tooltips.html">tooltips documentation page</a><br />
+            <i>Default: null</i><br /><br />
+
+            <a name="chart.crosshairs"></a>
+<b>chart.crosshairs</b><br />
+            If true, you will get a crosshair centering on the current mouse position.<br /><i>Default: false</i><br /><br />
+            <a name="chart.crosshairs.linewidth"></a>
+<b>chart.crosshairs.linewidth</b><br />
+            This controls the linewidth of the crosshairs.<br /><i>Default: 1</i><br /><br />
+            <a name="chart.crosshairs.color"></a>
+<b>chart.crosshairs.color</b><br />
+            The color of the crosshairs.<br /><i>Default: #333</i><br /><br />
+            
+            <a name="chart.crosshairs.coords"></a>
+            <b>chart.crosshairs.coords</b><br />
+            If true, this will show the coordinates that the crosshairs are currently over.<br />
+            <i>Default: false</i><br /><br />
+
+            <a name="chart.crosshairs.coords.fixed"></a>
+            <b>chart.crosshairs.coords.fixed</b><br />
+            If true, this makes the coordinates static (attached), instead of following the pointer around.<br />
+            <i>Default: false</i><br /><br />
+
+            <a name="chart.crosshairs.fadeout"></a>
+<b>chart.crosshairs.fadeout</b><br />
+            If true, when you move your mouse off of the canvas the coordinates will fade out.<br /><i>Default: false</i><br /><br />
+            
+            <a name="chart.crosshairs.coords.labels.x"></a>
+            <b>chart.crosshairs.coords.labels.x</b><br />
+            Instead ox X and Y, you can specify more meaningful labels.<br />
+            <i>Default: X</i><br /><br />
+
+            <a name="chart.crosshairs.coords.labels.y"></a>
+            <b>chart.crosshairs.labels.y</b><br />
+            Instead ox X and Y, you can specify more meaningful labels.<br />
+            <i>Default: Y</i><br /><br />
+            
+            <a name="chart.crosshairs.hline"></a>
+            <b>chart.crosshairs.hline</b><br />
+            This determines whether the horizontal crosshair line is shown.<br />
+            <i>Default: true</i><br /><br />
+            
+            <a name="chart.crosshairs.vline"></a>
+            <b>chart.crosshairs.vline</b><br />
+            This determines whether the vertical crosshair line is shown.<br />
+            <i>Default: true</i><br /><br />
+
+
+            <a name="chart.contextmenu"></a>
+<b>chart.contextmenu</b><br />
+            An array of context menu items. More information on context menus is <a href="context.html">here</a>.<br /><i>Default: null</i><br /><br />
+            <a name="chart.annotatable"></a>
+<b>chart.annotatable</b><br />
+            Whether annotations are enabled for the chart (ie you can draw on the chart interactively.<br /><i>Default: false</i><br /><br />
+            <a name="chart.annotate.color"></a>
+<b>chart.annotate.color</b><br />
+            If you do not allow the use of the palette, then this will be the only colour allowed for annotations.<br /><i>Default: #000</i><br /><br />
+
+
+            <a name="chart.resizable"></a>
+            <b>chart.resizable</b><br />
+            Defaulting to false, this determines whether your chart will be resizable. Because of the numerous event handlers this has to install code on, This feature is unlikely to work with other dynamic features (the context menu is fine however).<br />
+            <i>Default: false</i><br /><br />
+
+
+            <a name="chart.resize.handle.background"></a>
+            <b>chart.resize.handle.background</b><br />
+            With this you can specify the background color for the resize handle. If you're adjusting the position of the
+            handle then you may need this to make the handle stand out more.<br />
+            <i>Default: null</i><br /><br />
+
+<a name="line properties"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Line properties</h3>
+
+            <a name="chart.line"></a>
+            <b>chart.line</b><br />
+            Whether to show a connecting line (like in the sixth example). <br />
+            <i>Default: false</i><br /><br />
+
+            <a name="chart.line.colors"></a>
+            <b>chart.line.colors</b><br />
+            The colors of the lines connecting the tick marks. <br />
+            <i>Default: ['green', 'red']</i><br /><br />
+
+            <a name="chart.line.shadow.color"></a>
+            <b>chart.line.shadow.color</b><br />
+            The color of the lines shadow (if any). <br />
+            <i>Default: rgba(0,0,0,0) (invisible)</i><br /><br />
+
+            <a name="chart.line.shadow.offsetx"></a>
+            <b>chart.line.shadow.offsetx</b><br />
+            The X offset of the lines shadow. <br />
+            <i>Default: 3</i><br /><br />
+
+            <a name="chart.line.shadow.offsety"></a>
+            <b>chart.line.shadow.offsety</b><br />
+            The Y offset of the lines shadow. <br />
+            <i>Default: 3</i><br /><br />
+
+            <a name="chart.line.shadow.blur"></a>
+            <b>chart.line.shadow.blur</b><br />
+            The severity of the line shadows blurring effect. <br />
+            <i>Default: 2</i><br /><br />
+
+            <a name="chart.line.stepped"></a>
+            <b>chart.line.stepped</b><br />
+            Like the line chart, Scatter chart lines can be stepped by setting this to true <br />
+            <i>Default: false</i><br /><br />
+
+            <a name="chart.line.linewidth"></a>
+            <b>chart.line.linewidth</b><br />
+            This can be either a number or an array of numbers (for multiple lines) and controls the
+            linewidth that is used for the lines.<br />
+            <i>Default: 1</i><br /><br />
+
+
+
+
+            <a name="key"></a>
+            <h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Key</h3>
+            
+            <a name="chart.key"></a>
+            <b>chart.key</b><br />
+            An array of key information. <br />
+            <i>Default: [] (An empty array)</i><br /><br />
+
+            <a name="chart.key.background"></a>
+            <b>chart.key.background</b><br />
+            The color of the key background. Typically white, you could set this to something like rgba(255,255,255,0.7) to allow people to see things behind it.<br>
+            <i>Default: white</i><br /><br />
+            
+            <a name="chart.key.halign"></a>
+            <b>chart.key.halign</b><br />
+            Instead of specifying the exact x/y coordinates, you can use this property to simply specify whether the key hould be
+            aligned <i>left</i> or <i>right</i>.<br />
+            <i>Default: right</i><br /><br />
+            
+            <a name="chart.key.position"></a>
+            <b>chart.key.position</b><br />
+            Determines the position of the key.Either <b>graph</b> (default), or <b>gutter</b>.<br />
+            <i>Default: graph</i><br /><br />
+            
+            <b>chart.key.position.x</b><br />
+            This allows you to specify a specific X coordinate for the key.<br />
+            <i>Default: null</i><br /><br />
+            
+            <b>chart.key.position.y</b><br />
+            This allows you to specify a specific Y coordinate for the key.<br />
+            <i>Default: null</i><br /><br />
+            
+            <b>chart.key.position.gutter.boxed</b><br />
+            If you have the key in gutter mode (ie horizontal), this allows you to give a background color.<br />
+            <i>Default: true</i><br /><br />
+            
+            <a name="chart.key.shadow"></a>
+            <b>chart.key.shadow</b><br />
+            Whether a small drop shadow is applied to the key.<br />
+            <i>Default: false</i><br /><br />
+
+            <a name="chart.key.shadow.color"></a>
+            <b>chart.key.shadow.color</b><br />
+            The color of the shadow.<br />
+            <i>Default: #666</i><br /><br />
+
+            <a name="chart.key.shadow.blur"></a>
+            <b>chart.key.shadow.blur</b><br />
+            The extent of the blurring effect used on the shadow.<br />
+            <i>Default: 3</i><br /><br />
+
+            <a name="chart.key.shadow.offsetx"></a>
+            <b>chart.key.shadow.offsetx</b><br />
+            The X offset of the shadow.<br />
+            <i>Default: 2</i><br /><br />
+
+            <a name="chart.key.shadow.offsety"></a>
+            <b>chart.key.shadow.offsety</b><br />
+            The Y offset of the shadow.<br />
+            <i>Default: 2</i><br /><br />
+
+            <b>chart.key.rounded</b><br />
+            This controls whether the corners of the key (in graph mode) are curved. If the key is gutter mode, this has no effect.<br />
+            <i>Default: false</i><br /><br />
+            
+            <b>chart.key.color.shape</b><br />
+            This can be <i>square</i>, <i>circle</i> or <i>line</i> and controls how the color indicators in the key appear.<br />
+            <i>Default: square</i><br /><br />
+            
+            <b>chart.key.linewidth</b><br />
+            The line width of the surrounding border on the key.<br />
+            <i>Default: 1</i><br /><br />
+
+
+
+
+
+<a name="zoom"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Zoom</h3>            <a name="chart.zoom.mode"></a>
+<b>chart.zoom.mode</b><br />
+            Can be used to control whether the zoom is in thumbnail or canvas mode. Possible values are: <i>thumbnail</i> and <i>canvas</i>.<br /><i>Default: canvas</i><br /><br />
+            <a name="chart.zoom.factor"></a>
+<b>chart.zoom.factor</b><br />
+            This is the factor that the chart will be zoomed by (bigger values means more zoom)<br /><i>Default: 1.5</i><br /><br />
+            <a name="chart.zoom.fade.in"></a>
+<b>chart.zoom.fade.in</b><br />
+            Whether the zoomed canvas fades in or not. This also can be used to control the fade in for the zoom in thumbnail mode.<br /><i>Default: true</i><br /><br />
+            <a name="chart.zoom.fade.out"></a>
+<b>chart.zoom.fade.out</b><br />
+            Whether the zoomed canvas fades out or not. This also can be used to control the fade in for the zoom in thumbnail mode.<br /><i>Default: true</i><br /><br />
+            <a name="chart.zoom.hdir"></a>
+<b>chart.zoom.hdir</b><br />
+            The horizontal direction of the zoom. Possible values are: <i>left</i>, <i>center</i>, <i>right</i><br /><i>Default: right</i><br /><br />
+            <a name="chart.zoom.vdir"></a>
+<b>chart.zoom.vdir</b><br />
+            The vertical direction of the zoom. Possible values are: <i>up</i>, <i>center</i>, <i>down</i><br /><i>Default: down</i><br /><br />
+            <a name="chart.zoom.delay"></a>
+<b>chart.zoom.delay</b><br />
+            The delay (in milliseconds) between frames.<br /><i>Default: 50</i><br /><br />
+            <a name="chart.zoom.frames"></a>
+<b>chart.zoom.frames</b><br />
+            The number of frames in the zoom animation.<br /><i>Default: 10</i><br /><br />
+            <a name="chart.zoom.shadow"></a>
+<b>chart.zoom.shadow</b><br />
+            Whether or not the zoomed canvas has a shadow or not.<br /><i>Default: true</i><br /><br />
+            <a name="chart.zoom.thumbnail.width"></a>
+<b>chart.zoom.thumbnail.width</b><br />
+            When the zoom is in thumbnail mode, this is the width (in pixels) of the thumbnail.<br /><i>Default: 75</i><br /><br />
+            <a name="chart.zoom.thumbnail.height"></a>
+<b>chart.zoom.thumbnail.height</b><br />
+            When the zoom is in thumbnail mode, this is the height (in pixels) of the thumbnail.<br /><i>Default: 75</i><br /><br />
+
+            <a name="chart.zoom.thumbnail.fixed"></a>
+            <b>chart.zoom.thumbnail.fixed</b><br />
+            When the zoom is in thumbnail mode, you can use this property to fix the zoom in the top left corner instead
+            of it following the cursor around.<br />
+            <i>Default: false</i><br /><br />
+
+            <a name="chart.zoom.background"></a>
+<b>chart.zoom.background</b><br />
+            Defaulting to true, this determines whether the zoom has a dark, semi-opaque background that covers the entire web page.<br /><i>Default: true</i><br /><br />
+
+    <a name="events"></a>
+    <h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Events</h3>
+        
+        <a name="chart.events.click"></a>
+        <b>chart.events.click</b><br />
+        If you want to add your own <i>onclick</i> function you can do so by assigning it to this property. See
+        <a href="pseudo-standard-events.html">here</a> for details.
+        <br /><i>Default: null</i><br /><br />
+
+        <a name="chart.events.mousemove"></a>
+        <b>chart.events.mousemove</b><br />
+        If you want to add your own <i>onmousemove</i> function you can do so by assigning it to this property. See
+        <a href="pseudo-standard-events.html">here</a> for details.
+        <br /><i>Default: null</i><br /><br />
+
+<a name="miscellaneous"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Miscellaneous</h3>
+
+            <a name="chart.defaultcolor"></a>
+            <b>chart.defaultcolor</b><br />
+            This is the default color of tick marks, which is used if a color isn't given.<br />
+            <i>Default: #000</i><br /><br />
+            
+            <a name="chart.boxplot.width"></a>
+            <b>chart.boxplot.width</b><br />
+            This stipulates the default width of boxes. For more on boxplots, see <a href="#boxplots">here</a>.<br />
+            <i>Default: 8</i><br /><br />
+            
+            <a name="chart.boxplot.capped"></a>
+            <b>chart.boxplot.capped</b><br />
+            This stipulates whether the boxplot will have caps on the end of whickers. This could be useful if you're
+            creating a stock chart for example.</a>For more on boxplots, see <a href="#boxplots">here</a>.<br />
+            <i>Default: true</i><br /><br />
+
+</div><!-- /DOCS --><br /><br />
+
+    <a name="methods"></a>
+    <p>&nbsp;</p>
+    <h2>Methods</h2>
+    
+    <b>obj.getPoint(event)</b>
+    
+    <p>
+        This method makes it easier to get hold of which point on the Scatter chart has been hovered over. It returns an array of:
+    </p>
+    
+    <ul>
+        <li>The X coordinate of the point</li>
+        <li>The Y coordinate of the point</li>
+        <li>The data set. This corresponds to the appropriate dataset (since mutiple datasets can be given to the constructor)</li>
+        <li>The index of the appropriate data point in the set</li>
+        <li>The tooltip (if any) for that particular point</li>
+    </ul>
+    
+    (If the return value is null, then no point is being hovered over.) An example usage is:
+    
+    <pre class="code">
+&lt;script src="OfficeExcel.common.core.js"&gt;&lt;/script&gt;
+&lt;script src="OfficeExcel.line.js"&gt;&lt;/script&gt;
+
+&lt;canvas id="cvs" width="600" height="250" style="border: 1px gray dashed"&gt;[No canvas support]&lt;/canvas&gt;
+
+&lt;script&gt;
+    scatter = new OfficeExcel.Scatter('cvs', [[5,1, 'red', 'A'],[4,2,, 'B'],[3,9,,'C'],[10,12,,'D'],[300,2,,'E']],
+                                        [[5,6, 'red', 'F'],[2,9,,'G'],[13,19,,'H'],[18,17,,'I'],[340,12,,'J']]);
+    scatter.Set('chart.xmax', 365);
+    scatter.Set('chart.line', true);
+    scatter.Set('chart.labels', ['Q1', 'Q2', 'Q3', 'Q4']);
+    scatter.Draw();
+
+    scatter.canvas.onmousemove = function (e)
+    {
+        var canvas  = e.target;
+        var context = canvas.getContext('2d');
+        var obj     = canvas.__object__;
+        var point   = obj.getPoint(e);
+
+        if (point) {
+            p('\r\nX Coordinate: ' + point[0] + '\r\n' +
+              'Y Coordinate: ' + point[1] + '\r\n' +
+              'Dataset: ' + point[2] + '\r\n' +
+              'Datapoint: ' + point[3] + '\r\n' +
+              'Tooltip: ' + point[4] + '\r\n');
+        }
+    }
+&lt;/script&gt;
+</pre>
+
+    <a name="getShape"></a>
+    <b>obj.getShape(event)</b>
+        <p>
+            This method is an alternate name for the above method but has a generic name that is the same acoss the various libraries.
+        </p>
+
+    <a name="getValue"></a>
+    <b>obj.getValue(mixed)</b>
+    <p>
+        This method can be used to get the value at a particular point or at the mouse coordinates, based on the scale that is in use.
+        Not simply the coordinates of the mouse. The argument can either be an event object (for use in event listener functions) OR a two element
+        array consisting of the X and Y coordinates (ie when you're not necessarily in an event listener). It returns null if the mouse
+        or coordinates are in the gutter areas. An example:
+    </p>
+    
+    <pre class="code">
+myChart.canvas.onclick = function (e)
+{
+    var obj   = e.target.__object__;
+    var value = obj.getValue(e);
+    
+    // ...
+}
+</pre>
+
+
+    <a name="boxplots"></a>
+    <p>&nbsp;</p>
+    <h2>Box plots</h2>
+    
+    <p>
+        Instead of a single Y value, you have the ability to specify an array of 5, 6, 7 or 8 values, which will be used to make a box plot.
+        The <a href="../examples/scatter.html#boxplots">example page shows a box plot</a>. These values are (in order):
+
+        <ul>
+            <li>Lower whisker</li>
+            <li>Bottom of box</li>
+            <li>Middle value (which isn't necessarily in the center of the box - this depends on your data)</li>
+            <li>Top of box</li>
+            <li>Upper whisker</li>
+            <li>Upper color (optional)</li>
+            <li>Lower color (optional)</li>
+            <li>Width (optional)</li>
+        </ul>
+
+        <pre class="code">
+&lt;script&gt;
+    scatter8 = new OfficeExcel.Scatter('scatter8', [
+                                               [10,<span style="color: green">[1,1,16,24,24, 'red', 'green']</span>],
+                                               [105,<span style="color: green">[5,10,15,25,25, 'red', 'green']</span>],
+                                               [125,<span style="color: green">[10,15,25,35,45, 'red', 'green']</span>],
+                                               [325,<span style="color: green">[10,15,25,35,45, 'red', 'green', 30]</span>]
+                                              ]);
+    scatter8.Set('chart.title', 'An example of a boxplot');
+    scatter8.Set('chart.labels', ['Q1', 'Q2', 'Q3', 'Q4']);
+    scatter8.Set('chart.xmax', 365);
+    scatter8.Set('chart.ymax', 50);
+    scatter8.Set('chart.boxplot.width', 12); // The default width
+    scatter8.Draw();
+&lt;/script&gt;
+</pre>
+    </p>
+    
+    <h4>Capped ends</h4>
+        <p>
+            For better compatibility with stock charts, you can now specify that the horizontal lines at the ends of the box plot
+            are not shown with <i>chart.boxplot.capped</i>.
+        </p>
+
+
+    <a name="labelpoints"></a>
+    <p>&nbsp;</p>
+    <h2>Specific points for labels on the X axis</h2>
+    
+    <p>
+        Instead of a simple string which is used as the label, each entry of the chart.labels array can be a two element array
+        consisting of the label, and the X value that the label should be placed at. For example:
+    </p>
+
+    <pre class="code">
+scatter.Set('chart.labels', [
+                             ['Quarter 1', 0],
+                             ['Quarter 2', 90],
+                             ['Quarter 3', 181],
+                             ['Quarter 4', 273]
+                            ]);
+</pre>
+
+
+
+    <a name="custom.tickmarks"></a>
+    <p>&nbsp;</p>
+    <h2>Custom tickmarks</h2>
+
+    <p>
+        If none of the available tickmark styles are suitable, you can instead specify a function object that draws the tickmark,
+        enabling you to draw the tickmark yourself. For example:
+    </p>
+
+    <pre class="code">
+&lt;script&gt;
+    line.Set('chart.tickmarks', myTick);
+
+    /**
+    * The function that is called once per tickmark, to draw it
+    * 
+    * @param object obj   The chart object
+    * @param object data  The chart data
+    * @param number x     The X coordinate
+    * @param number y     The Y coordinate
+    * @param number xVal  The X value
+    * @param number yVal  The Y value
+    * @param number xMax  The maximum X scale value
+    * @param number xMax  The maximum Y scale value
+    * @param string color The color of the tickmark
+    */
+    function myTick (obj, data, x, y, xVal, yVal, xMax, yMax, color)
+    {
+        // Draw your custom tick here
+    }
+&lt;/script&gt;
+</pre>
+
+    <a name="colors"></a>
+    <p>&nbsp;</p>
+    <h2>Note about colors and the key</h2>    
+        <p>
+            If you're using a key you may need to set <i>chart.line.colors</i> to allow it to use the correct colors. For example:
+        </p>
+    
+        <pre class="code">myObj.Set('chart.line.colors', ['red','green','blue']);</pre>
+    
+    <a name="oncrosshairs"></a>
+    <p>&nbsp;</p>
+    <h2>Note about the oncrosshairs event</h2>
+        <p>
+            With the Scatter chart you can use the <i>oncrosshairs</i> custom event to pull out the crosshair coordinates, like this:
+            The coordinates are only available if you have them displayed.
+        </p>
+        
+        <pre class="code">
+function myFunc (obj)
+{
+    var xCoord = obj.canvas.__crosshairs_x__;
+    var yCoord = obj.canvas.__crosshairs_y__;
+}
+OfficeExcel.AddCustomEventListener(myScatter, 'oncrosshairs', myFunc);
+</pre>
+</body>
+</html>

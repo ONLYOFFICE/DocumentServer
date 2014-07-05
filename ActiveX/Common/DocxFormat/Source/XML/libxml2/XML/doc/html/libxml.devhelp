@@ -1,0 +1,618 @@
+<?xml version="1.0" encoding="utf-8"?>
+<book xmlns="http://www.devhelp.net/book" title="Gnome XML Library Reference Manual " link="index.html" author="" name="libxml">
+  <chapters>
+    <sub name="Libxml Programming Notes" link="ch01.html">
+      <sub name="testOOMlib" link="libxml-testOOMlib.html"/>
+      <sub name="wincecompat" link="libxml-wincecompat.html"/>
+      <sub name="wsockcompat" link="libxml-wsockcompat.html"/>
+      <sub name="encoding" link="libxml-encoding.html"/>
+      <sub name="xmlregexp" link="libxml-xmlregexp.html"/>
+      <sub name="xmlmemory" link="libxml-xmlmemory.html"/>
+      <sub name="xmlIO" link="libxml-xmlIO.html"/>
+      <sub name="xpath" link="libxml-xpath.html"/>
+      <sub name="chvalid" link="libxml-chvalid.html"/>
+      <sub name="uri" link="libxml-uri.html"/>
+      <sub name="nanoftp" link="libxml-nanoftp.html"/>
+      <sub name="schemasInternals" link="libxml-schemasInternals.html"/>
+      <sub name="threads" link="libxml-threads.html"/>
+      <sub name="parser" link="libxml-parser.html"/>
+      <sub name="c14n" link="libxml-c14n.html"/>
+      <sub name="xmlerror" link="libxml-xmlerror.html"/>
+      <sub name="xmlwin32version" link="libxml-xmlwin32version.html"/>
+      <sub name="DOCBparser" link="libxml-DOCBparser.html"/>
+      <sub name="dict" link="libxml-dict.html"/>
+      <sub name="xmlautomata" link="libxml-xmlautomata.html"/>
+      <sub name="xpointer" link="libxml-xpointer.html"/>
+      <sub name="hash" link="libxml-hash.html"/>
+      <sub name="relaxng" link="libxml-relaxng.html"/>
+      <sub name="xpathInternals" link="libxml-xpathInternals.html"/>
+      <sub name="xmlversion" link="libxml-xmlversion.html"/>
+      <sub name="list" link="libxml-list.html"/>
+      <sub name="HTMLtree" link="libxml-HTMLtree.html"/>
+      <sub name="parserInternals" link="libxml-parserInternals.html"/>
+      <sub name="entities" link="libxml-entities.html"/>
+      <sub name="HTMLparser" link="libxml-HTMLparser.html"/>
+      <sub name="valid" link="libxml-valid.html"/>
+      <sub name="catalog" link="libxml-catalog.html"/>
+      <sub name="tree" link="libxml-tree.html"/>
+      <sub name="globals" link="libxml-globals.html"/>
+      <sub name="xmlexports" link="libxml-xmlexports.html"/>
+      <sub name="xinclude" link="libxml-xinclude.html"/>
+      <sub name="xmlreader" link="libxml-xmlreader.html"/>
+      <sub name="debugXML" link="libxml-debugXML.html"/>
+      <sub name="xmlwriter" link="libxml-xmlwriter.html"/>
+      <sub name="xmlschemas" link="libxml-xmlschemas.html"/>
+    </sub>
+  </chapters>
+  <functions>
+    <function name="test_malloc ()" link="libxml-testOOMlib.html#test-malloc"/>
+    <function name="test_realloc ()" link="libxml-testOOMlib.html#test-realloc"/>
+    <function name="test_free ()" link="libxml-testOOMlib.html#test-free"/>
+    <function name="test_strdup ()" link="libxml-testOOMlib.html#test-strdup"/>
+    <function name="TestMemoryFunction ()" link="libxml-testOOMlib.html#TestMemoryFunction"/>
+    <function name="test_oom_handling ()" link="libxml-testOOMlib.html#test-oom-handling"/>
+    <function name="test_get_malloc_blocks_outstanding ()" link="libxml-testOOMlib.html#test-get-malloc-blocks-outstanding"/>
+    <function name="MAX_STRERROR" link="libxml-wincecompat.html#MAX-STRERROR-CAPS"/>
+    <function name="O_RDONLY" link="libxml-wincecompat.html#O-RDONLY-CAPS"/>
+    <function name="O_WRONLY" link="libxml-wincecompat.html#O-WRONLY-CAPS"/>
+    <function name="O_RDWR" link="libxml-wincecompat.html#O-RDWR-CAPS"/>
+    <function name="O_APPEND" link="libxml-wincecompat.html#O-APPEND-CAPS"/>
+    <function name="O_CREAT" link="libxml-wincecompat.html#O-CREAT-CAPS"/>
+    <function name="O_TRUNC" link="libxml-wincecompat.html#O-TRUNC-CAPS"/>
+    <function name="O_EXCL" link="libxml-wincecompat.html#O-EXCL-CAPS"/>
+    <function name="errno" link="libxml-wincecompat.html#errno"/>
+    <function name="read ()" link="libxml-wincecompat.html#read"/>
+    <function name="write ()" link="libxml-wincecompat.html#write"/>
+    <function name="open ()" link="libxml-wincecompat.html#open"/>
+    <function name="close ()" link="libxml-wincecompat.html#close"/>
+    <function name="getenv ()" link="libxml-wincecompat.html#getenv"/>
+    <function name="strerror ()" link="libxml-wincecompat.html#strerror"/>
+    <function name="snprintf" link="libxml-wincecompat.html#snprintf"/>
+    <function name="vsnprintf()" link="libxml-wincecompat.html#vsnprintf"/>
+    <function name="perror()" link="libxml-wincecompat.html#perror"/>
+    <function name="SOCKLEN_T" link="libxml-wsockcompat.html#SOCKLEN-T-CAPS"/>
+    <function name="EWOULDBLOCK" link="libxml-wsockcompat.html#EWOULDBLOCK-CAPS"/>
+    <function name="EINPROGRESS" link="libxml-wsockcompat.html#EINPROGRESS-CAPS"/>
+    <function name="EALREADY" link="libxml-wsockcompat.html#EALREADY-CAPS"/>
+    <function name="ENOTSOCK" link="libxml-wsockcompat.html#ENOTSOCK-CAPS"/>
+    <function name="EDESTADDRREQ" link="libxml-wsockcompat.html#EDESTADDRREQ-CAPS"/>
+    <function name="EMSGSIZE" link="libxml-wsockcompat.html#EMSGSIZE-CAPS"/>
+    <function name="EPROTOTYPE" link="libxml-wsockcompat.html#EPROTOTYPE-CAPS"/>
+    <function name="ENOPROTOOPT" link="libxml-wsockcompat.html#ENOPROTOOPT-CAPS"/>
+    <function name="EPROTONOSUPPORT" link="libxml-wsockcompat.html#EPROTONOSUPPORT-CAPS"/>
+    <function name="ESOCKTNOSUPPORT" link="libxml-wsockcompat.html#ESOCKTNOSUPPORT-CAPS"/>
+    <function name="EOPNOTSUPP" link="libxml-wsockcompat.html#EOPNOTSUPP-CAPS"/>
+    <function name="EPFNOSUPPORT" link="libxml-wsockcompat.html#EPFNOSUPPORT-CAPS"/>
+    <function name="EAFNOSUPPORT" link="libxml-wsockcompat.html#EAFNOSUPPORT-CAPS"/>
+    <function name="EADDRINUSE" link="libxml-wsockcompat.html#EADDRINUSE-CAPS"/>
+    <function name="EADDRNOTAVAIL" link="libxml-wsockcompat.html#EADDRNOTAVAIL-CAPS"/>
+    <function name="ENETDOWN" link="libxml-wsockcompat.html#ENETDOWN-CAPS"/>
+    <function name="ENETUNREACH" link="libxml-wsockcompat.html#ENETUNREACH-CAPS"/>
+    <function name="ENETRESET" link="libxml-wsockcompat.html#ENETRESET-CAPS"/>
+    <function name="ECONNABORTED" link="libxml-wsockcompat.html#ECONNABORTED-CAPS"/>
+    <function name="ECONNRESET" link="libxml-wsockcompat.html#ECONNRESET-CAPS"/>
+    <function name="ENOBUFS" link="libxml-wsockcompat.html#ENOBUFS-CAPS"/>
+    <function name="EISCONN" link="libxml-wsockcompat.html#EISCONN-CAPS"/>
+    <function name="ENOTCONN" link="libxml-wsockcompat.html#ENOTCONN-CAPS"/>
+    <function name="ESHUTDOWN" link="libxml-wsockcompat.html#ESHUTDOWN-CAPS"/>
+    <function name="ETOOMANYREFS" link="libxml-wsockcompat.html#ETOOMANYREFS-CAPS"/>
+    <function name="ETIMEDOUT" link="libxml-wsockcompat.html#ETIMEDOUT-CAPS"/>
+    <function name="ECONNREFUSED" link="libxml-wsockcompat.html#ECONNREFUSED-CAPS"/>
+    <function name="ELOOP" link="libxml-wsockcompat.html#ELOOP-CAPS"/>
+    <function name="EHOSTDOWN" link="libxml-wsockcompat.html#EHOSTDOWN-CAPS"/>
+    <function name="EHOSTUNREACH" link="libxml-wsockcompat.html#EHOSTUNREACH-CAPS"/>
+    <function name="EPROCLIM" link="libxml-wsockcompat.html#EPROCLIM-CAPS"/>
+    <function name="EUSERS" link="libxml-wsockcompat.html#EUSERS-CAPS"/>
+    <function name="EDQUOT" link="libxml-wsockcompat.html#EDQUOT-CAPS"/>
+    <function name="ESTALE" link="libxml-wsockcompat.html#ESTALE-CAPS"/>
+    <function name="EREMOTE" link="libxml-wsockcompat.html#EREMOTE-CAPS"/>
+    <function name="enum xmlCharEncoding" link="libxml-encoding.html#xmlCharEncoding"/>
+    <function name="xmlCharEncodingInputFunc ()" link="libxml-encoding.html#xmlCharEncodingInputFunc"/>
+    <function name="xmlCharEncodingOutputFunc ()" link="libxml-encoding.html#xmlCharEncodingOutputFunc"/>
+    <function name="struct xmlCharEncodingHandler" link="libxml-encoding.html#xmlCharEncodingHandler"/>
+    <function name="xmlCharEncodingHandlerPtr" link="libxml-encoding.html#xmlCharEncodingHandlerPtr"/>
+    <function name="struct xmlRegexp" link="libxml-xmlregexp.html#xmlRegexp"/>
+    <function name="xmlRegexpPtr" link="libxml-xmlregexp.html#xmlRegexpPtr"/>
+    <function name="struct xmlRegExecCtxt" link="libxml-xmlregexp.html#xmlRegExecCtxt"/>
+    <function name="xmlRegExecCtxtPtr" link="libxml-xmlregexp.html#xmlRegExecCtxtPtr"/>
+    <function name="xmlRegExecCallbacks ()" link="libxml-xmlregexp.html#xmlRegExecCallbacks"/>
+    <function name="DEBUG_MEMORY" link="libxml-xmlmemory.html#DEBUG-MEMORY-CAPS"/>
+    <function name="xmlFreeFunc ()" link="libxml-xmlmemory.html#xmlFreeFunc"/>
+    <function name="xmlMallocFunc ()" link="libxml-xmlmemory.html#xmlMallocFunc"/>
+    <function name="xmlReallocFunc ()" link="libxml-xmlmemory.html#xmlReallocFunc"/>
+    <function name="xmlStrdupFunc ()" link="libxml-xmlmemory.html#xmlStrdupFunc"/>
+    <function name="xmlMalloc()" link="libxml-xmlmemory.html#xmlMalloc"/>
+    <function name="xmlMallocAtomic()" link="libxml-xmlmemory.html#xmlMallocAtomic"/>
+    <function name="xmlRealloc()" link="libxml-xmlmemory.html#xmlRealloc"/>
+    <function name="xmlMemStrdup()" link="libxml-xmlmemory.html#xmlMemStrdup"/>
+    <function name="xmlInputMatchCallback ()" link="libxml-xmlIO.html#xmlInputMatchCallback"/>
+    <function name="xmlInputOpenCallback ()" link="libxml-xmlIO.html#xmlInputOpenCallback"/>
+    <function name="xmlInputReadCallback ()" link="libxml-xmlIO.html#xmlInputReadCallback"/>
+    <function name="xmlInputCloseCallback ()" link="libxml-xmlIO.html#xmlInputCloseCallback"/>
+    <function name="xmlOutputMatchCallback ()" link="libxml-xmlIO.html#xmlOutputMatchCallback"/>
+    <function name="xmlOutputOpenCallback ()" link="libxml-xmlIO.html#xmlOutputOpenCallback"/>
+    <function name="xmlOutputWriteCallback ()" link="libxml-xmlIO.html#xmlOutputWriteCallback"/>
+    <function name="xmlOutputCloseCallback ()" link="libxml-xmlIO.html#xmlOutputCloseCallback"/>
+    <function name="struct xmlParserInputBuffer" link="libxml-xmlIO.html#xmlParserInputBuffer"/>
+    <function name="struct xmlOutputBuffer" link="libxml-xmlIO.html#xmlOutputBuffer"/>
+    <function name="struct xmlXPathContext" link="libxml-xpath.html#xmlXPathContext"/>
+    <function name="xmlXPathContextPtr" link="libxml-xpath.html#xmlXPathContextPtr"/>
+    <function name="struct xmlXPathParserContext" link="libxml-xpath.html#xmlXPathParserContext"/>
+    <function name="xmlXPathParserContextPtr" link="libxml-xpath.html#xmlXPathParserContextPtr"/>
+    <function name="enum xmlXPathError" link="libxml-xpath.html#xmlXPathError"/>
+    <function name="struct xmlNodeSet" link="libxml-xpath.html#xmlNodeSet"/>
+    <function name="xmlNodeSetPtr" link="libxml-xpath.html#xmlNodeSetPtr"/>
+    <function name="enum xmlXPathObjectType" link="libxml-xpath.html#xmlXPathObjectType"/>
+    <function name="struct xmlXPathObject" link="libxml-xpath.html#xmlXPathObject"/>
+    <function name="xmlXPathObjectPtr" link="libxml-xpath.html#xmlXPathObjectPtr"/>
+    <function name="xmlXPathConvertFunc ()" link="libxml-xpath.html#xmlXPathConvertFunc"/>
+    <function name="struct xmlXPathType" link="libxml-xpath.html#xmlXPathType"/>
+    <function name="xmlXPathTypePtr" link="libxml-xpath.html#xmlXPathTypePtr"/>
+    <function name="struct xmlXPathVariable" link="libxml-xpath.html#xmlXPathVariable"/>
+    <function name="xmlXPathVariablePtr" link="libxml-xpath.html#xmlXPathVariablePtr"/>
+    <function name="xmlXPathEvalFunc ()" link="libxml-xpath.html#xmlXPathEvalFunc"/>
+    <function name="struct xmlXPathFunct" link="libxml-xpath.html#xmlXPathFunct"/>
+    <function name="xmlXPathFuncPtr" link="libxml-xpath.html#xmlXPathFuncPtr"/>
+    <function name="xmlXPathAxisFunc ()" link="libxml-xpath.html#xmlXPathAxisFunc"/>
+    <function name="struct xmlXPathAxis" link="libxml-xpath.html#xmlXPathAxis"/>
+    <function name="xmlXPathAxisPtr" link="libxml-xpath.html#xmlXPathAxisPtr"/>
+    <function name="struct xmlXPathCompExpr" link="libxml-xpath.html#xmlXPathCompExpr"/>
+    <function name="xmlXPathCompExprPtr" link="libxml-xpath.html#xmlXPathCompExprPtr"/>
+    <function name="xmlXPathFunction ()" link="libxml-xpath.html#xmlXPathFunction"/>
+    <function name="xmlXPathNAN" link="libxml-xpath.html#xmlXPathNAN"/>
+    <function name="xmlXPathPINF" link="libxml-xpath.html#xmlXPathPINF"/>
+    <function name="xmlXPathNINF" link="libxml-xpath.html#xmlXPathNINF"/>
+    <function name="xmlXPathNodeSetGetLength()" link="libxml-xpath.html#xmlXPathNodeSetGetLength"/>
+    <function name="xmlXPathNodeSetItem()" link="libxml-xpath.html#xmlXPathNodeSetItem"/>
+    <function name="xmlXPathNodeSetIsEmpty()" link="libxml-xpath.html#xmlXPathNodeSetIsEmpty"/>
+    <function name="struct xmlChSRange" link="libxml-chvalid.html#xmlChSRange"/>
+    <function name="xmlChSRangePtr" link="libxml-chvalid.html#xmlChSRangePtr"/>
+    <function name="struct xmlChLRange" link="libxml-chvalid.html#xmlChLRange"/>
+    <function name="xmlChLRangePtr" link="libxml-chvalid.html#xmlChLRangePtr"/>
+    <function name="struct xmlChRangeGroup" link="libxml-chvalid.html#xmlChRangeGroup"/>
+    <function name="xmlChRangeGroupPtr" link="libxml-chvalid.html#xmlChRangeGroupPtr"/>
+    <function name="xmlIsBaseChar_ch()" link="libxml-chvalid.html#xmlIsBaseChar-ch"/>
+    <function name="xmlIsBaseCharQ()" link="libxml-chvalid.html#xmlIsBaseCharQ"/>
+    <function name="xmlIsBaseCharGroup" link="libxml-chvalid.html#xmlIsBaseCharGroup"/>
+    <function name="xmlIsBlank_ch()" link="libxml-chvalid.html#xmlIsBlank-ch"/>
+    <function name="xmlIsBlankQ()" link="libxml-chvalid.html#xmlIsBlankQ"/>
+    <function name="xmlIsChar_ch()" link="libxml-chvalid.html#xmlIsChar-ch"/>
+    <function name="xmlIsCharQ()" link="libxml-chvalid.html#xmlIsCharQ"/>
+    <function name="xmlIsCharGroup" link="libxml-chvalid.html#xmlIsCharGroup"/>
+    <function name="xmlIsCombiningQ()" link="libxml-chvalid.html#xmlIsCombiningQ"/>
+    <function name="xmlIsCombiningGroup" link="libxml-chvalid.html#xmlIsCombiningGroup"/>
+    <function name="xmlIsDigit_ch()" link="libxml-chvalid.html#xmlIsDigit-ch"/>
+    <function name="xmlIsDigitQ()" link="libxml-chvalid.html#xmlIsDigitQ"/>
+    <function name="xmlIsDigitGroup" link="libxml-chvalid.html#xmlIsDigitGroup"/>
+    <function name="xmlIsExtender_ch()" link="libxml-chvalid.html#xmlIsExtender-ch"/>
+    <function name="xmlIsExtenderQ()" link="libxml-chvalid.html#xmlIsExtenderQ"/>
+    <function name="xmlIsExtenderGroup" link="libxml-chvalid.html#xmlIsExtenderGroup"/>
+    <function name="xmlIsIdeographicQ()" link="libxml-chvalid.html#xmlIsIdeographicQ"/>
+    <function name="xmlIsIdeographicGroup" link="libxml-chvalid.html#xmlIsIdeographicGroup"/>
+    <function name="xmlIsPubidChar_ch()" link="libxml-chvalid.html#xmlIsPubidChar-ch"/>
+    <function name="xmlIsPubidCharQ()" link="libxml-chvalid.html#xmlIsPubidCharQ"/>
+    <function name="struct xmlURI" link="libxml-uri.html#xmlURI"/>
+    <function name="xmlURIPtr" link="libxml-uri.html#xmlURIPtr"/>
+    <function name="ftpListCallback ()" link="libxml-nanoftp.html#ftpListCallback"/>
+    <function name="ftpDataCallback ()" link="libxml-nanoftp.html#ftpDataCallback"/>
+    <function name="enum xmlSchemaTypeType" link="libxml-schemasInternals.html#xmlSchemaTypeType"/>
+    <function name="enum xmlSchemaContentType" link="libxml-schemasInternals.html#xmlSchemaContentType"/>
+    <function name="struct xmlSchemaVal" link="libxml-schemasInternals.html#xmlSchemaVal"/>
+    <function name="xmlSchemaValPtr" link="libxml-schemasInternals.html#xmlSchemaValPtr"/>
+    <function name="struct xmlSchemaType" link="libxml-schemasInternals.html#xmlSchemaType"/>
+    <function name="xmlSchemaTypePtr" link="libxml-schemasInternals.html#xmlSchemaTypePtr"/>
+    <function name="struct xmlSchemaFacet" link="libxml-schemasInternals.html#xmlSchemaFacet"/>
+    <function name="xmlSchemaFacetPtr" link="libxml-schemasInternals.html#xmlSchemaFacetPtr"/>
+    <function name="struct xmlSchemaAnnot" link="libxml-schemasInternals.html#xmlSchemaAnnot"/>
+    <function name="xmlSchemaAnnotPtr" link="libxml-schemasInternals.html#xmlSchemaAnnotPtr"/>
+    <function name="XML_SCHEMAS_ANYATTR_SKIP" link="libxml-schemasInternals.html#XML-SCHEMAS-ANYATTR-SKIP-CAPS"/>
+    <function name="XML_SCHEMAS_ANYATTR_LAX" link="libxml-schemasInternals.html#XML-SCHEMAS-ANYATTR-LAX-CAPS"/>
+    <function name="XML_SCHEMAS_ANYATTR_STRICT" link="libxml-schemasInternals.html#XML-SCHEMAS-ANYATTR-STRICT-CAPS"/>
+    <function name="struct xmlSchemaAttribute" link="libxml-schemasInternals.html#xmlSchemaAttribute"/>
+    <function name="xmlSchemaAttributePtr" link="libxml-schemasInternals.html#xmlSchemaAttributePtr"/>
+    <function name="struct xmlSchemaAttributeGroup" link="libxml-schemasInternals.html#xmlSchemaAttributeGroup"/>
+    <function name="xmlSchemaAttributeGroupPtr" link="libxml-schemasInternals.html#xmlSchemaAttributeGroupPtr"/>
+    <function name="XML_SCHEMAS_TYPE_MIXED" link="libxml-schemasInternals.html#XML-SCHEMAS-TYPE-MIXED-CAPS"/>
+    <function name="XML_SCHEMAS_ELEM_NILLABLE" link="libxml-schemasInternals.html#XML-SCHEMAS-ELEM-NILLABLE-CAPS"/>
+    <function name="XML_SCHEMAS_ELEM_GLOBAL" link="libxml-schemasInternals.html#XML-SCHEMAS-ELEM-GLOBAL-CAPS"/>
+    <function name="XML_SCHEMAS_ELEM_DEFAULT" link="libxml-schemasInternals.html#XML-SCHEMAS-ELEM-DEFAULT-CAPS"/>
+    <function name="XML_SCHEMAS_ELEM_FIXED" link="libxml-schemasInternals.html#XML-SCHEMAS-ELEM-FIXED-CAPS"/>
+    <function name="XML_SCHEMAS_ELEM_ABSTRACT" link="libxml-schemasInternals.html#XML-SCHEMAS-ELEM-ABSTRACT-CAPS"/>
+    <function name="XML_SCHEMAS_ELEM_TOPLEVEL" link="libxml-schemasInternals.html#XML-SCHEMAS-ELEM-TOPLEVEL-CAPS"/>
+    <function name="XML_SCHEMAS_ELEM_REF" link="libxml-schemasInternals.html#XML-SCHEMAS-ELEM-REF-CAPS"/>
+    <function name="struct xmlSchemaElement" link="libxml-schemasInternals.html#xmlSchemaElement"/>
+    <function name="xmlSchemaElementPtr" link="libxml-schemasInternals.html#xmlSchemaElementPtr"/>
+    <function name="XML_SCHEMAS_FACET_UNKNOWN" link="libxml-schemasInternals.html#XML-SCHEMAS-FACET-UNKNOWN-CAPS"/>
+    <function name="XML_SCHEMAS_FACET_PRESERVE" link="libxml-schemasInternals.html#XML-SCHEMAS-FACET-PRESERVE-CAPS"/>
+    <function name="XML_SCHEMAS_FACET_REPLACE" link="libxml-schemasInternals.html#XML-SCHEMAS-FACET-REPLACE-CAPS"/>
+    <function name="XML_SCHEMAS_FACET_COLLAPSE" link="libxml-schemasInternals.html#XML-SCHEMAS-FACET-COLLAPSE-CAPS"/>
+    <function name="struct xmlSchemaNotation" link="libxml-schemasInternals.html#xmlSchemaNotation"/>
+    <function name="xmlSchemaNotationPtr" link="libxml-schemasInternals.html#xmlSchemaNotationPtr"/>
+    <function name="XML_SCHEMAS_QUALIF_ELEM" link="libxml-schemasInternals.html#XML-SCHEMAS-QUALIF-ELEM-CAPS"/>
+    <function name="XML_SCHEMAS_QUALIF_ATTR" link="libxml-schemasInternals.html#XML-SCHEMAS-QUALIF-ATTR-CAPS"/>
+    <function name="struct xmlSchema" link="libxml-schemasInternals.html#xmlSchema"/>
+    <function name="struct xmlMutex" link="libxml-threads.html#xmlMutex"/>
+    <function name="xmlMutexPtr" link="libxml-threads.html#xmlMutexPtr"/>
+    <function name="struct xmlRMutex" link="libxml-threads.html#xmlRMutex"/>
+    <function name="xmlRMutexPtr" link="libxml-threads.html#xmlRMutexPtr"/>
+    <function name="XML_DEFAULT_VERSION" link="libxml-parser.html#XML-DEFAULT-VERSION-CAPS"/>
+    <function name="xmlParserInputDeallocate ()" link="libxml-parser.html#xmlParserInputDeallocate"/>
+    <function name="struct xmlParserInput" link="libxml-parser.html#xmlParserInput"/>
+    <function name="struct xmlParserNodeInfo" link="libxml-parser.html#xmlParserNodeInfo"/>
+    <function name="xmlParserNodeInfoPtr" link="libxml-parser.html#xmlParserNodeInfoPtr"/>
+    <function name="struct xmlParserNodeInfoSeq" link="libxml-parser.html#xmlParserNodeInfoSeq"/>
+    <function name="xmlParserNodeInfoSeqPtr" link="libxml-parser.html#xmlParserNodeInfoSeqPtr"/>
+    <function name="enum xmlParserInputState" link="libxml-parser.html#xmlParserInputState"/>
+    <function name="XML_DETECT_IDS" link="libxml-parser.html#XML-DETECT-IDS-CAPS"/>
+    <function name="XML_COMPLETE_ATTRS" link="libxml-parser.html#XML-COMPLETE-ATTRS-CAPS"/>
+    <function name="XML_SKIP_IDS" link="libxml-parser.html#XML-SKIP-IDS-CAPS"/>
+    <function name="struct xmlParserCtxt" link="libxml-parser.html#xmlParserCtxt"/>
+    <function name="struct xmlSAXLocator" link="libxml-parser.html#xmlSAXLocator"/>
+    <function name="resolveEntitySAXFunc ()" link="libxml-parser.html#resolveEntitySAXFunc"/>
+    <function name="internalSubsetSAXFunc ()" link="libxml-parser.html#internalSubsetSAXFunc"/>
+    <function name="externalSubsetSAXFunc ()" link="libxml-parser.html#externalSubsetSAXFunc"/>
+    <function name="getEntitySAXFunc ()" link="libxml-parser.html#getEntitySAXFunc"/>
+    <function name="getParameterEntitySAXFunc ()" link="libxml-parser.html#getParameterEntitySAXFunc"/>
+    <function name="entityDeclSAXFunc ()" link="libxml-parser.html#entityDeclSAXFunc"/>
+    <function name="notationDeclSAXFunc ()" link="libxml-parser.html#notationDeclSAXFunc"/>
+    <function name="attributeDeclSAXFunc ()" link="libxml-parser.html#attributeDeclSAXFunc"/>
+    <function name="elementDeclSAXFunc ()" link="libxml-parser.html#elementDeclSAXFunc"/>
+    <function name="unparsedEntityDeclSAXFunc ()" link="libxml-parser.html#unparsedEntityDeclSAXFunc"/>
+    <function name="setDocumentLocatorSAXFunc ()" link="libxml-parser.html#setDocumentLocatorSAXFunc"/>
+    <function name="startDocumentSAXFunc ()" link="libxml-parser.html#startDocumentSAXFunc"/>
+    <function name="endDocumentSAXFunc ()" link="libxml-parser.html#endDocumentSAXFunc"/>
+    <function name="startElementSAXFunc ()" link="libxml-parser.html#startElementSAXFunc"/>
+    <function name="endElementSAXFunc ()" link="libxml-parser.html#endElementSAXFunc"/>
+    <function name="attributeSAXFunc ()" link="libxml-parser.html#attributeSAXFunc"/>
+    <function name="referenceSAXFunc ()" link="libxml-parser.html#referenceSAXFunc"/>
+    <function name="charactersSAXFunc ()" link="libxml-parser.html#charactersSAXFunc"/>
+    <function name="ignorableWhitespaceSAXFunc ()" link="libxml-parser.html#ignorableWhitespaceSAXFunc"/>
+    <function name="processingInstructionSAXFunc ()" link="libxml-parser.html#processingInstructionSAXFunc"/>
+    <function name="commentSAXFunc ()" link="libxml-parser.html#commentSAXFunc"/>
+    <function name="cdataBlockSAXFunc ()" link="libxml-parser.html#cdataBlockSAXFunc"/>
+    <function name="warningSAXFunc ()" link="libxml-parser.html#warningSAXFunc"/>
+    <function name="errorSAXFunc ()" link="libxml-parser.html#errorSAXFunc"/>
+    <function name="fatalErrorSAXFunc ()" link="libxml-parser.html#fatalErrorSAXFunc"/>
+    <function name="isStandaloneSAXFunc ()" link="libxml-parser.html#isStandaloneSAXFunc"/>
+    <function name="hasInternalSubsetSAXFunc ()" link="libxml-parser.html#hasInternalSubsetSAXFunc"/>
+    <function name="hasExternalSubsetSAXFunc ()" link="libxml-parser.html#hasExternalSubsetSAXFunc"/>
+    <function name="XML_SAX2_MAGIC" link="libxml-parser.html#XML-SAX2-MAGIC-CAPS"/>
+    <function name="startElementNsSAX2Func ()" link="libxml-parser.html#startElementNsSAX2Func"/>
+    <function name="endElementNsSAX2Func ()" link="libxml-parser.html#endElementNsSAX2Func"/>
+    <function name="struct xmlSAXHandler" link="libxml-parser.html#xmlSAXHandler"/>
+    <function name="struct xmlSAXHandlerV1" link="libxml-parser.html#xmlSAXHandlerV1"/>
+    <function name="xmlSAXHandlerV1Ptr" link="libxml-parser.html#xmlSAXHandlerV1Ptr"/>
+    <function name="xmlExternalEntityLoader ()" link="libxml-parser.html#xmlExternalEntityLoader"/>
+    <function name="enum xmlParserOption" link="libxml-parser.html#xmlParserOption"/>
+    <function name="xmlC14NIsVisibleCallback ()" link="libxml-c14n.html#xmlC14NIsVisibleCallback"/>
+    <function name="enum xmlErrorLevel" link="libxml-xmlerror.html#xmlErrorLevel"/>
+    <function name="enum xmlErrorDomain" link="libxml-xmlerror.html#xmlErrorDomain"/>
+    <function name="struct xmlError" link="libxml-xmlerror.html#xmlError"/>
+    <function name="xmlErrorPtr" link="libxml-xmlerror.html#xmlErrorPtr"/>
+    <function name="enum xmlParserErrors" link="libxml-xmlerror.html#xmlParserErrors"/>
+    <function name="xmlGenericErrorFunc ()" link="libxml-xmlerror.html#xmlGenericErrorFunc"/>
+    <function name="xmlStructuredErrorFunc ()" link="libxml-xmlerror.html#xmlStructuredErrorFunc"/>
+    <function name="xmlCheckVersion ()" link="libxml-xmlwin32version.html#xmlCheckVersion"/>
+    <function name="LIBXML_DOTTED_VERSION" link="libxml-xmlwin32version.html#LIBXML-DOTTED-VERSION-CAPS"/>
+    <function name="LIBXML_VERSION" link="libxml-xmlwin32version.html#LIBXML-VERSION-CAPS"/>
+    <function name="LIBXML_VERSION_STRING" link="libxml-xmlwin32version.html#LIBXML-VERSION-STRING-CAPS"/>
+    <function name="LIBXML_TEST_VERSION" link="libxml-xmlwin32version.html#LIBXML-TEST-VERSION-CAPS"/>
+    <function name="WITH_TRIO" link="libxml-xmlwin32version.html#WITH-TRIO-CAPS"/>
+    <function name="WITHOUT_TRIO" link="libxml-xmlwin32version.html#WITHOUT-TRIO-CAPS"/>
+    <function name="LIBXML_THREAD_ENABLED" link="libxml-xmlwin32version.html#LIBXML-THREAD-ENABLED-CAPS"/>
+    <function name="LIBXML_FTP_ENABLED" link="libxml-xmlwin32version.html#LIBXML-FTP-ENABLED-CAPS"/>
+    <function name="LIBXML_HTTP_ENABLED" link="libxml-xmlwin32version.html#LIBXML-HTTP-ENABLED-CAPS"/>
+    <function name="LIBXML_HTML_ENABLED" link="libxml-xmlwin32version.html#LIBXML-HTML-ENABLED-CAPS"/>
+    <function name="LIBXML_CATALOG_ENABLED" link="libxml-xmlwin32version.html#LIBXML-CATALOG-ENABLED-CAPS"/>
+    <function name="LIBXML_DOCB_ENABLED" link="libxml-xmlwin32version.html#LIBXML-DOCB-ENABLED-CAPS"/>
+    <function name="LIBXML_XPATH_ENABLED" link="libxml-xmlwin32version.html#LIBXML-XPATH-ENABLED-CAPS"/>
+    <function name="LIBXML_XPTR_ENABLED" link="libxml-xmlwin32version.html#LIBXML-XPTR-ENABLED-CAPS"/>
+    <function name="LIBXML_C14N_ENABLED" link="libxml-xmlwin32version.html#LIBXML-C14N-ENABLED-CAPS"/>
+    <function name="LIBXML_XINCLUDE_ENABLED" link="libxml-xmlwin32version.html#LIBXML-XINCLUDE-ENABLED-CAPS"/>
+    <function name="LIBXML_ICONV_ENABLED" link="libxml-xmlwin32version.html#LIBXML-ICONV-ENABLED-CAPS"/>
+    <function name="LIBXML_DEBUG_ENABLED" link="libxml-xmlwin32version.html#LIBXML-DEBUG-ENABLED-CAPS"/>
+    <function name="DEBUG_MEMORY_LOCATION" link="libxml-xmlwin32version.html#DEBUG-MEMORY-LOCATION-CAPS"/>
+    <function name="LIBXML_DLL_IMPORT" link="libxml-xmlwin32version.html#LIBXML-DLL-IMPORT-CAPS"/>
+    <function name="ATTRIBUTE_UNUSED" link="libxml-xmlwin32version.html#ATTRIBUTE-UNUSED-CAPS"/>
+    <function name="docbParserCtxt" link="libxml-DOCBparser.html#docbParserCtxt"/>
+    <function name="docbParserCtxtPtr" link="libxml-DOCBparser.html#docbParserCtxtPtr"/>
+    <function name="docbSAXHandler" link="libxml-DOCBparser.html#docbSAXHandler"/>
+    <function name="docbSAXHandlerPtr" link="libxml-DOCBparser.html#docbSAXHandlerPtr"/>
+    <function name="docbParserInput" link="libxml-DOCBparser.html#docbParserInput"/>
+    <function name="docbParserInputPtr" link="libxml-DOCBparser.html#docbParserInputPtr"/>
+    <function name="docbDocPtr" link="libxml-DOCBparser.html#docbDocPtr"/>
+    <function name="struct xmlDict" link="libxml-dict.html#xmlDict"/>
+    <function name="xmlDictPtr" link="libxml-dict.html#xmlDictPtr"/>
+    <function name="struct xmlAutomata" link="libxml-xmlautomata.html#xmlAutomata"/>
+    <function name="xmlAutomataPtr" link="libxml-xmlautomata.html#xmlAutomataPtr"/>
+    <function name="struct xmlAutomataState" link="libxml-xmlautomata.html#xmlAutomataState"/>
+    <function name="xmlAutomataStatePtr" link="libxml-xmlautomata.html#xmlAutomataStatePtr"/>
+    <function name="struct xmlLocationSet" link="libxml-xpointer.html#xmlLocationSet"/>
+    <function name="xmlLocationSetPtr" link="libxml-xpointer.html#xmlLocationSetPtr"/>
+    <function name="struct xmlHashTable" link="libxml-hash.html#xmlHashTable"/>
+    <function name="xmlHashTablePtr" link="libxml-hash.html#xmlHashTablePtr"/>
+    <function name="xmlHashDeallocator ()" link="libxml-hash.html#xmlHashDeallocator"/>
+    <function name="xmlHashCopier ()" link="libxml-hash.html#xmlHashCopier"/>
+    <function name="xmlHashScanner ()" link="libxml-hash.html#xmlHashScanner"/>
+    <function name="xmlHashScannerFull ()" link="libxml-hash.html#xmlHashScannerFull"/>
+    <function name="struct xmlRelaxNG" link="libxml-relaxng.html#xmlRelaxNG"/>
+    <function name="xmlRelaxNGPtr" link="libxml-relaxng.html#xmlRelaxNGPtr"/>
+    <function name="xmlRelaxNGValidityErrorFunc ()" link="libxml-relaxng.html#xmlRelaxNGValidityErrorFunc"/>
+    <function name="xmlRelaxNGValidityWarningFunc ()" link="libxml-relaxng.html#xmlRelaxNGValidityWarningFunc"/>
+    <function name="struct xmlRelaxNGParserCtxt" link="libxml-relaxng.html#xmlRelaxNGParserCtxt"/>
+    <function name="xmlRelaxNGParserCtxtPtr" link="libxml-relaxng.html#xmlRelaxNGParserCtxtPtr"/>
+    <function name="struct xmlRelaxNGValidCtxt" link="libxml-relaxng.html#xmlRelaxNGValidCtxt"/>
+    <function name="xmlRelaxNGValidCtxtPtr" link="libxml-relaxng.html#xmlRelaxNGValidCtxtPtr"/>
+    <function name="enum xmlRelaxNGValidErr" link="libxml-relaxng.html#xmlRelaxNGValidErr"/>
+    <function name="xmlXPathSetError()" link="libxml-xpathInternals.html#xmlXPathSetError"/>
+    <function name="xmlXPathSetArityError()" link="libxml-xpathInternals.html#xmlXPathSetArityError"/>
+    <function name="xmlXPathSetTypeError()" link="libxml-xpathInternals.html#xmlXPathSetTypeError"/>
+    <function name="xmlXPathGetError()" link="libxml-xpathInternals.html#xmlXPathGetError"/>
+    <function name="xmlXPathCheckError()" link="libxml-xpathInternals.html#xmlXPathCheckError"/>
+    <function name="xmlXPathGetDocument()" link="libxml-xpathInternals.html#xmlXPathGetDocument"/>
+    <function name="xmlXPathGetContextNode()" link="libxml-xpathInternals.html#xmlXPathGetContextNode"/>
+    <function name="xmlXPathReturnBoolean()" link="libxml-xpathInternals.html#xmlXPathReturnBoolean"/>
+    <function name="xmlXPathReturnTrue()" link="libxml-xpathInternals.html#xmlXPathReturnTrue"/>
+    <function name="xmlXPathReturnFalse()" link="libxml-xpathInternals.html#xmlXPathReturnFalse"/>
+    <function name="xmlXPathReturnNumber()" link="libxml-xpathInternals.html#xmlXPathReturnNumber"/>
+    <function name="xmlXPathReturnString()" link="libxml-xpathInternals.html#xmlXPathReturnString"/>
+    <function name="xmlXPathReturnEmptyString()" link="libxml-xpathInternals.html#xmlXPathReturnEmptyString"/>
+    <function name="xmlXPathReturnNodeSet()" link="libxml-xpathInternals.html#xmlXPathReturnNodeSet"/>
+    <function name="xmlXPathReturnEmptyNodeSet()" link="libxml-xpathInternals.html#xmlXPathReturnEmptyNodeSet"/>
+    <function name="xmlXPathReturnExternal()" link="libxml-xpathInternals.html#xmlXPathReturnExternal"/>
+    <function name="xmlXPathStackIsNodeSet()" link="libxml-xpathInternals.html#xmlXPathStackIsNodeSet"/>
+    <function name="xmlXPathStackIsExternal()" link="libxml-xpathInternals.html#xmlXPathStackIsExternal"/>
+    <function name="xmlXPathEmptyNodeSet()" link="libxml-xpathInternals.html#xmlXPathEmptyNodeSet"/>
+    <function name="CHECK_ERROR" link="libxml-xpathInternals.html#CHECK-ERROR-CAPS"/>
+    <function name="CHECK_ERROR0" link="libxml-xpathInternals.html#CHECK-ERROR0-CAPS"/>
+    <function name="XP_ERROR()" link="libxml-xpathInternals.html#XP-ERROR-CAPS"/>
+    <function name="XP_ERROR0()" link="libxml-xpathInternals.html#XP-ERROR0-CAPS"/>
+    <function name="CHECK_TYPE()" link="libxml-xpathInternals.html#CHECK-TYPE-CAPS"/>
+    <function name="CHECK_TYPE0()" link="libxml-xpathInternals.html#CHECK-TYPE0-CAPS"/>
+    <function name="CHECK_ARITY()" link="libxml-xpathInternals.html#CHECK-ARITY-CAPS"/>
+    <function name="CAST_TO_STRING" link="libxml-xpathInternals.html#CAST-TO-STRING-CAPS"/>
+    <function name="CAST_TO_NUMBER" link="libxml-xpathInternals.html#CAST-TO-NUMBER-CAPS"/>
+    <function name="CAST_TO_BOOLEAN" link="libxml-xpathInternals.html#CAST-TO-BOOLEAN-CAPS"/>
+    <function name="xmlXPathVariableLookupFunc ()" link="libxml-xpathInternals.html#xmlXPathVariableLookupFunc"/>
+    <function name="xmlXPathFuncLookupFunc ()" link="libxml-xpathInternals.html#xmlXPathFuncLookupFunc"/>
+    <function name="LIBXML_DOTTED_VERSION" link="libxml-xmlversion.html#LIBXML-DOTTED-VERSION-CAPS"/>
+    <function name="LIBXML_VERSION" link="libxml-xmlversion.html#LIBXML-VERSION-CAPS"/>
+    <function name="LIBXML_VERSION_STRING" link="libxml-xmlversion.html#LIBXML-VERSION-STRING-CAPS"/>
+    <function name="LIBXML_TEST_VERSION" link="libxml-xmlversion.html#LIBXML-TEST-VERSION-CAPS"/>
+    <function name="WITH_TRIO" link="libxml-xmlversion.html#WITH-TRIO-CAPS"/>
+    <function name="WITHOUT_TRIO" link="libxml-xmlversion.html#WITHOUT-TRIO-CAPS"/>
+    <function name="LIBXML_THREAD_ENABLED" link="libxml-xmlversion.html#LIBXML-THREAD-ENABLED-CAPS"/>
+    <function name="LIBXML_TREE_ENABLED" link="libxml-xmlversion.html#LIBXML-TREE-ENABLED-CAPS"/>
+    <function name="LIBXML_OUTPUT_ENABLED" link="libxml-xmlversion.html#LIBXML-OUTPUT-ENABLED-CAPS"/>
+    <function name="LIBXML_PUSH_ENABLED" link="libxml-xmlversion.html#LIBXML-PUSH-ENABLED-CAPS"/>
+    <function name="LIBXML_READER_ENABLED" link="libxml-xmlversion.html#LIBXML-READER-ENABLED-CAPS"/>
+    <function name="LIBXML_WRITER_ENABLED" link="libxml-xmlversion.html#LIBXML-WRITER-ENABLED-CAPS"/>
+    <function name="LIBXML_SAX1_ENABLED" link="libxml-xmlversion.html#LIBXML-SAX1-ENABLED-CAPS"/>
+    <function name="LIBXML_FTP_ENABLED" link="libxml-xmlversion.html#LIBXML-FTP-ENABLED-CAPS"/>
+    <function name="LIBXML_HTTP_ENABLED" link="libxml-xmlversion.html#LIBXML-HTTP-ENABLED-CAPS"/>
+    <function name="LIBXML_VALID_ENABLED" link="libxml-xmlversion.html#LIBXML-VALID-ENABLED-CAPS"/>
+    <function name="LIBXML_HTML_ENABLED" link="libxml-xmlversion.html#LIBXML-HTML-ENABLED-CAPS"/>
+    <function name="LIBXML_LEGACY_ENABLED" link="libxml-xmlversion.html#LIBXML-LEGACY-ENABLED-CAPS"/>
+    <function name="LIBXML_C14N_ENABLED" link="libxml-xmlversion.html#LIBXML-C14N-ENABLED-CAPS"/>
+    <function name="LIBXML_CATALOG_ENABLED" link="libxml-xmlversion.html#LIBXML-CATALOG-ENABLED-CAPS"/>
+    <function name="LIBXML_DOCB_ENABLED" link="libxml-xmlversion.html#LIBXML-DOCB-ENABLED-CAPS"/>
+    <function name="LIBXML_XPATH_ENABLED" link="libxml-xmlversion.html#LIBXML-XPATH-ENABLED-CAPS"/>
+    <function name="LIBXML_XPTR_ENABLED" link="libxml-xmlversion.html#LIBXML-XPTR-ENABLED-CAPS"/>
+    <function name="LIBXML_XINCLUDE_ENABLED" link="libxml-xmlversion.html#LIBXML-XINCLUDE-ENABLED-CAPS"/>
+    <function name="LIBXML_ICONV_ENABLED" link="libxml-xmlversion.html#LIBXML-ICONV-ENABLED-CAPS"/>
+    <function name="LIBXML_ISO8859X_ENABLED" link="libxml-xmlversion.html#LIBXML-ISO8859X-ENABLED-CAPS"/>
+    <function name="LIBXML_DEBUG_ENABLED" link="libxml-xmlversion.html#LIBXML-DEBUG-ENABLED-CAPS"/>
+    <function name="DEBUG_MEMORY_LOCATION" link="libxml-xmlversion.html#DEBUG-MEMORY-LOCATION-CAPS"/>
+    <function name="LIBXML_UNICODE_ENABLED" link="libxml-xmlversion.html#LIBXML-UNICODE-ENABLED-CAPS"/>
+    <function name="LIBXML_REGEXP_ENABLED" link="libxml-xmlversion.html#LIBXML-REGEXP-ENABLED-CAPS"/>
+    <function name="LIBXML_AUTOMATA_ENABLED" link="libxml-xmlversion.html#LIBXML-AUTOMATA-ENABLED-CAPS"/>
+    <function name="LIBXML_SCHEMAS_ENABLED" link="libxml-xmlversion.html#LIBXML-SCHEMAS-ENABLED-CAPS"/>
+    <function name="ATTRIBUTE_UNUSED" link="libxml-xmlversion.html#ATTRIBUTE-UNUSED-CAPS"/>
+    <function name="struct xmlLink" link="libxml-list.html#xmlLink"/>
+    <function name="xmlLinkPtr" link="libxml-list.html#xmlLinkPtr"/>
+    <function name="struct xmlList" link="libxml-list.html#xmlList"/>
+    <function name="xmlListPtr" link="libxml-list.html#xmlListPtr"/>
+    <function name="xmlListDeallocator ()" link="libxml-list.html#xmlListDeallocator"/>
+    <function name="xmlListDataCompare ()" link="libxml-list.html#xmlListDataCompare"/>
+    <function name="xmlListWalker ()" link="libxml-list.html#xmlListWalker"/>
+    <function name="HTML_TEXT_NODE" link="libxml-HTMLtree.html#HTML-TEXT-NODE-CAPS"/>
+    <function name="HTML_ENTITY_REF_NODE" link="libxml-HTMLtree.html#HTML-ENTITY-REF-NODE-CAPS"/>
+    <function name="HTML_COMMENT_NODE" link="libxml-HTMLtree.html#HTML-COMMENT-NODE-CAPS"/>
+    <function name="HTML_PRESERVE_NODE" link="libxml-HTMLtree.html#HTML-PRESERVE-NODE-CAPS"/>
+    <function name="HTML_PI_NODE" link="libxml-HTMLtree.html#HTML-PI-NODE-CAPS"/>
+    <function name="xmlParserMaxDepth" link="libxml-parserInternals.html#xmlParserMaxDepth"/>
+    <function name="XML_MAX_NAMELEN" link="libxml-parserInternals.html#XML-MAX-NAMELEN-CAPS"/>
+    <function name="INPUT_CHUNK" link="libxml-parserInternals.html#INPUT-CHUNK-CAPS"/>
+    <function name="IS_BYTE_CHAR()" link="libxml-parserInternals.html#IS-BYTE-CHAR-CAPS"/>
+    <function name="IS_CHAR()" link="libxml-parserInternals.html#IS-CHAR-CAPS"/>
+    <function name="IS_CHAR_CH()" link="libxml-parserInternals.html#IS-CHAR-CH-CAPS"/>
+    <function name="IS_BLANK()" link="libxml-parserInternals.html#IS-BLANK-CAPS"/>
+    <function name="IS_BLANK_CH()" link="libxml-parserInternals.html#IS-BLANK-CH-CAPS"/>
+    <function name="IS_BASECHAR()" link="libxml-parserInternals.html#IS-BASECHAR-CAPS"/>
+    <function name="IS_DIGIT()" link="libxml-parserInternals.html#IS-DIGIT-CAPS"/>
+    <function name="IS_DIGIT_CH()" link="libxml-parserInternals.html#IS-DIGIT-CH-CAPS"/>
+    <function name="IS_COMBINING()" link="libxml-parserInternals.html#IS-COMBINING-CAPS"/>
+    <function name="IS_COMBINING_CH()" link="libxml-parserInternals.html#IS-COMBINING-CH-CAPS"/>
+    <function name="IS_EXTENDER()" link="libxml-parserInternals.html#IS-EXTENDER-CAPS"/>
+    <function name="IS_EXTENDER_CH()" link="libxml-parserInternals.html#IS-EXTENDER-CH-CAPS"/>
+    <function name="IS_IDEOGRAPHIC()" link="libxml-parserInternals.html#IS-IDEOGRAPHIC-CAPS"/>
+    <function name="IS_LETTER()" link="libxml-parserInternals.html#IS-LETTER-CAPS"/>
+    <function name="IS_LETTER_CH()" link="libxml-parserInternals.html#IS-LETTER-CH-CAPS"/>
+    <function name="IS_PUBIDCHAR()" link="libxml-parserInternals.html#IS-PUBIDCHAR-CAPS"/>
+    <function name="IS_PUBIDCHAR_CH()" link="libxml-parserInternals.html#IS-PUBIDCHAR-CH-CAPS"/>
+    <function name="SKIP_EOL()" link="libxml-parserInternals.html#SKIP-EOL-CAPS"/>
+    <function name="MOVETO_ENDTAG()" link="libxml-parserInternals.html#MOVETO-ENDTAG-CAPS"/>
+    <function name="MOVETO_STARTTAG()" link="libxml-parserInternals.html#MOVETO-STARTTAG-CAPS"/>
+    <function name="XML_SUBSTITUTE_NONE" link="libxml-parserInternals.html#XML-SUBSTITUTE-NONE-CAPS"/>
+    <function name="XML_SUBSTITUTE_REF" link="libxml-parserInternals.html#XML-SUBSTITUTE-REF-CAPS"/>
+    <function name="XML_SUBSTITUTE_PEREF" link="libxml-parserInternals.html#XML-SUBSTITUTE-PEREF-CAPS"/>
+    <function name="XML_SUBSTITUTE_BOTH" link="libxml-parserInternals.html#XML-SUBSTITUTE-BOTH-CAPS"/>
+    <function name="xmlEntityReferenceFunc ()" link="libxml-parserInternals.html#xmlEntityReferenceFunc"/>
+    <function name="enum xmlEntityType" link="libxml-entities.html#xmlEntityType"/>
+    <function name="struct xmlEntity" link="libxml-entities.html#xmlEntity"/>
+    <function name="xmlEntitiesTablePtr" link="libxml-entities.html#xmlEntitiesTablePtr"/>
+    <function name="htmlParserCtxt" link="libxml-HTMLparser.html#htmlParserCtxt"/>
+    <function name="htmlParserCtxtPtr" link="libxml-HTMLparser.html#htmlParserCtxtPtr"/>
+    <function name="htmlParserNodeInfo" link="libxml-HTMLparser.html#htmlParserNodeInfo"/>
+    <function name="htmlSAXHandler" link="libxml-HTMLparser.html#htmlSAXHandler"/>
+    <function name="htmlSAXHandlerPtr" link="libxml-HTMLparser.html#htmlSAXHandlerPtr"/>
+    <function name="htmlParserInput" link="libxml-HTMLparser.html#htmlParserInput"/>
+    <function name="htmlParserInputPtr" link="libxml-HTMLparser.html#htmlParserInputPtr"/>
+    <function name="htmlDocPtr" link="libxml-HTMLparser.html#htmlDocPtr"/>
+    <function name="htmlNodePtr" link="libxml-HTMLparser.html#htmlNodePtr"/>
+    <function name="struct htmlElemDesc" link="libxml-HTMLparser.html#htmlElemDesc"/>
+    <function name="htmlElemDescPtr" link="libxml-HTMLparser.html#htmlElemDescPtr"/>
+    <function name="struct htmlEntityDesc" link="libxml-HTMLparser.html#htmlEntityDesc"/>
+    <function name="htmlEntityDescPtr" link="libxml-HTMLparser.html#htmlEntityDescPtr"/>
+    <function name="enum htmlParserOption" link="libxml-HTMLparser.html#htmlParserOption"/>
+    <function name="struct xmlValidState" link="libxml-valid.html#xmlValidState"/>
+    <function name="xmlValidStatePtr" link="libxml-valid.html#xmlValidStatePtr"/>
+    <function name="xmlValidityErrorFunc ()" link="libxml-valid.html#xmlValidityErrorFunc"/>
+    <function name="xmlValidityWarningFunc ()" link="libxml-valid.html#xmlValidityWarningFunc"/>
+    <function name="struct xmlValidCtxt" link="libxml-valid.html#xmlValidCtxt"/>
+    <function name="xmlValidCtxtPtr" link="libxml-valid.html#xmlValidCtxtPtr"/>
+    <function name="xmlNotationTablePtr" link="libxml-valid.html#xmlNotationTablePtr"/>
+    <function name="xmlElementTablePtr" link="libxml-valid.html#xmlElementTablePtr"/>
+    <function name="xmlAttributeTablePtr" link="libxml-valid.html#xmlAttributeTablePtr"/>
+    <function name="xmlIDTablePtr" link="libxml-valid.html#xmlIDTablePtr"/>
+    <function name="xmlRefTablePtr" link="libxml-valid.html#xmlRefTablePtr"/>
+    <function name="XML_CATALOGS_NAMESPACE" link="libxml-catalog.html#XML-CATALOGS-NAMESPACE-CAPS"/>
+    <function name="XML_CATALOG_PI" link="libxml-catalog.html#XML-CATALOG-PI-CAPS"/>
+    <function name="enum xmlCatalogPrefer" link="libxml-catalog.html#xmlCatalogPrefer"/>
+    <function name="enum xmlCatalogAllow" link="libxml-catalog.html#xmlCatalogAllow"/>
+    <function name="struct xmlCatalog" link="libxml-catalog.html#xmlCatalog"/>
+    <function name="xmlCatalogPtr" link="libxml-catalog.html#xmlCatalogPtr"/>
+    <function name="struct xmlParserInputBuffer" link="libxml-tree.html#xmlParserInputBuffer"/>
+    <function name="xmlParserInputBufferPtr" link="libxml-tree.html#xmlParserInputBufferPtr"/>
+    <function name="struct xmlOutputBuffer" link="libxml-tree.html#xmlOutputBuffer"/>
+    <function name="xmlOutputBufferPtr" link="libxml-tree.html#xmlOutputBufferPtr"/>
+    <function name="struct xmlParserInput" link="libxml-tree.html#xmlParserInput"/>
+    <function name="xmlParserInputPtr" link="libxml-tree.html#xmlParserInputPtr"/>
+    <function name="struct xmlParserCtxt" link="libxml-tree.html#xmlParserCtxt"/>
+    <function name="xmlParserCtxtPtr" link="libxml-tree.html#xmlParserCtxtPtr"/>
+    <function name="struct xmlSAXLocator" link="libxml-tree.html#xmlSAXLocator"/>
+    <function name="xmlSAXLocatorPtr" link="libxml-tree.html#xmlSAXLocatorPtr"/>
+    <function name="struct xmlSAXHandler" link="libxml-tree.html#xmlSAXHandler"/>
+    <function name="xmlSAXHandlerPtr" link="libxml-tree.html#xmlSAXHandlerPtr"/>
+    <function name="struct xmlEntity" link="libxml-tree.html#xmlEntity"/>
+    <function name="xmlEntityPtr" link="libxml-tree.html#xmlEntityPtr"/>
+    <function name="BASE_BUFFER_SIZE" link="libxml-tree.html#BASE-BUFFER-SIZE-CAPS"/>
+    <function name="XML_XML_NAMESPACE" link="libxml-tree.html#XML-XML-NAMESPACE-CAPS"/>
+    <function name="enum xmlElementType" link="libxml-tree.html#xmlElementType"/>
+    <function name="xmlChar" link="libxml-tree.html#xmlChar"/>
+    <function name="BAD_CAST" link="libxml-tree.html#BAD-CAST-CAPS"/>
+    <function name="struct xmlNotation" link="libxml-tree.html#xmlNotation"/>
+    <function name="xmlNotationPtr" link="libxml-tree.html#xmlNotationPtr"/>
+    <function name="enum xmlAttributeType" link="libxml-tree.html#xmlAttributeType"/>
+    <function name="enum xmlAttributeDefault" link="libxml-tree.html#xmlAttributeDefault"/>
+    <function name="struct xmlEnumeration" link="libxml-tree.html#xmlEnumeration"/>
+    <function name="xmlEnumerationPtr" link="libxml-tree.html#xmlEnumerationPtr"/>
+    <function name="struct xmlAttribute" link="libxml-tree.html#xmlAttribute"/>
+    <function name="xmlAttributePtr" link="libxml-tree.html#xmlAttributePtr"/>
+    <function name="enum xmlElementContentType" link="libxml-tree.html#xmlElementContentType"/>
+    <function name="enum xmlElementContentOccur" link="libxml-tree.html#xmlElementContentOccur"/>
+    <function name="struct xmlElementContent" link="libxml-tree.html#xmlElementContent"/>
+    <function name="xmlElementContentPtr" link="libxml-tree.html#xmlElementContentPtr"/>
+    <function name="enum xmlElementTypeVal" link="libxml-tree.html#xmlElementTypeVal"/>
+    <function name="struct xmlElement" link="libxml-tree.html#xmlElement"/>
+    <function name="xmlElementPtr" link="libxml-tree.html#xmlElementPtr"/>
+    <function name="XML_LOCAL_NAMESPACE" link="libxml-tree.html#XML-LOCAL-NAMESPACE-CAPS"/>
+    <function name="xmlNsType" link="libxml-tree.html#xmlNsType"/>
+    <function name="struct xmlNs" link="libxml-tree.html#xmlNs"/>
+    <function name="xmlNsPtr" link="libxml-tree.html#xmlNsPtr"/>
+    <function name="struct xmlDtd" link="libxml-tree.html#xmlDtd"/>
+    <function name="xmlDtdPtr" link="libxml-tree.html#xmlDtdPtr"/>
+    <function name="struct xmlAttr" link="libxml-tree.html#xmlAttr"/>
+    <function name="xmlAttrPtr" link="libxml-tree.html#xmlAttrPtr"/>
+    <function name="struct xmlID" link="libxml-tree.html#xmlID"/>
+    <function name="xmlIDPtr" link="libxml-tree.html#xmlIDPtr"/>
+    <function name="struct xmlRef" link="libxml-tree.html#xmlRef"/>
+    <function name="xmlRefPtr" link="libxml-tree.html#xmlRefPtr"/>
+    <function name="enum xmlBufferAllocationScheme" link="libxml-tree.html#xmlBufferAllocationScheme"/>
+    <function name="struct xmlBuffer" link="libxml-tree.html#xmlBuffer"/>
+    <function name="xmlBufferPtr" link="libxml-tree.html#xmlBufferPtr"/>
+    <function name="struct xmlNode" link="libxml-tree.html#xmlNode"/>
+    <function name="xmlNodePtr" link="libxml-tree.html#xmlNodePtr"/>
+    <function name="XML_GET_CONTENT()" link="libxml-tree.html#XML-GET-CONTENT-CAPS"/>
+    <function name="XML_GET_LINE()" link="libxml-tree.html#XML-GET-LINE-CAPS"/>
+    <function name="struct xmlDoc" link="libxml-tree.html#xmlDoc"/>
+    <function name="xmlDocPtr" link="libxml-tree.html#xmlDocPtr"/>
+    <function name="xmlChildrenNode" link="libxml-tree.html#xmlChildrenNode"/>
+    <function name="xmlRootNode" link="libxml-tree.html#xmlRootNode"/>
+    <function name="xmlRegisterNodeFunc ()" link="libxml-globals.html#xmlRegisterNodeFunc"/>
+    <function name="xmlDeregisterNodeFunc ()" link="libxml-globals.html#xmlDeregisterNodeFunc"/>
+    <function name="struct xmlGlobalState" link="libxml-globals.html#xmlGlobalState"/>
+    <function name="xmlGlobalStatePtr" link="libxml-globals.html#xmlGlobalStatePtr"/>
+    <function name="xmlMalloc()" link="libxml-globals.html#xmlMalloc"/>
+    <function name="xmlMallocAtomic()" link="libxml-globals.html#xmlMallocAtomic"/>
+    <function name="xmlRealloc()" link="libxml-globals.html#xmlRealloc"/>
+    <function name="xmlFree" link="libxml-globals.html#xmlFree"/>
+    <function name="xmlMemStrdup()" link="libxml-globals.html#xmlMemStrdup"/>
+    <function name="docbDefaultSAXHandler" link="libxml-globals.html#docbDefaultSAXHandler"/>
+    <function name="htmlDefaultSAXHandler" link="libxml-globals.html#htmlDefaultSAXHandler"/>
+    <function name="xmlLastError" link="libxml-globals.html#xmlLastError"/>
+    <function name="oldXMLWDcompatibility" link="libxml-globals.html#oldXMLWDcompatibility"/>
+    <function name="xmlBufferAllocScheme" link="libxml-globals.html#xmlBufferAllocScheme"/>
+    <function name="xmlDefaultBufferSize" link="libxml-globals.html#xmlDefaultBufferSize"/>
+    <function name="xmlDefaultSAXHandler" link="libxml-globals.html#xmlDefaultSAXHandler"/>
+    <function name="xmlDefaultSAXLocator" link="libxml-globals.html#xmlDefaultSAXLocator"/>
+    <function name="xmlDoValidityCheckingDefaultValue" link="libxml-globals.html#xmlDoValidityCheckingDefaultValue"/>
+    <function name="xmlGenericError" link="libxml-globals.html#xmlGenericError"/>
+    <function name="xmlStructuredError" link="libxml-globals.html#xmlStructuredError"/>
+    <function name="xmlGenericErrorContext" link="libxml-globals.html#xmlGenericErrorContext"/>
+    <function name="xmlGetWarningsDefaultValue" link="libxml-globals.html#xmlGetWarningsDefaultValue"/>
+    <function name="xmlIndentTreeOutput" link="libxml-globals.html#xmlIndentTreeOutput"/>
+    <function name="xmlTreeIndentString" link="libxml-globals.html#xmlTreeIndentString"/>
+    <function name="xmlKeepBlanksDefaultValue" link="libxml-globals.html#xmlKeepBlanksDefaultValue"/>
+    <function name="xmlLineNumbersDefaultValue" link="libxml-globals.html#xmlLineNumbersDefaultValue"/>
+    <function name="xmlLoadExtDtdDefaultValue" link="libxml-globals.html#xmlLoadExtDtdDefaultValue"/>
+    <function name="xmlParserDebugEntities" link="libxml-globals.html#xmlParserDebugEntities"/>
+    <function name="xmlParserVersion" link="libxml-globals.html#xmlParserVersion"/>
+    <function name="xmlPedanticParserDefaultValue" link="libxml-globals.html#xmlPedanticParserDefaultValue"/>
+    <function name="xmlSaveNoEmptyTags" link="libxml-globals.html#xmlSaveNoEmptyTags"/>
+    <function name="xmlSubstituteEntitiesDefaultValue" link="libxml-globals.html#xmlSubstituteEntitiesDefaultValue"/>
+    <function name="xmlRegisterNodeDefaultValue" link="libxml-globals.html#xmlRegisterNodeDefaultValue"/>
+    <function name="xmlDeregisterNodeDefaultValue" link="libxml-globals.html#xmlDeregisterNodeDefaultValue"/>
+    <function name="XMLPUBFUN" link="libxml-xmlexports.html#XMLPUBFUN-CAPS"/>
+    <function name="XMLPUBVAR" link="libxml-xmlexports.html#XMLPUBVAR-CAPS"/>
+    <function name="XMLCALL" link="libxml-xmlexports.html#XMLCALL-CAPS"/>
+    <function name="LIBXML_DLL_IMPORT" link="libxml-xmlexports.html#LIBXML-DLL-IMPORT-CAPS"/>
+    <function name="XINCLUDE_NS" link="libxml-xinclude.html#XINCLUDE-NS-CAPS"/>
+    <function name="XINCLUDE_NODE" link="libxml-xinclude.html#XINCLUDE-NODE-CAPS"/>
+    <function name="XINCLUDE_FALLBACK" link="libxml-xinclude.html#XINCLUDE-FALLBACK-CAPS"/>
+    <function name="XINCLUDE_HREF" link="libxml-xinclude.html#XINCLUDE-HREF-CAPS"/>
+    <function name="XINCLUDE_PARSE" link="libxml-xinclude.html#XINCLUDE-PARSE-CAPS"/>
+    <function name="XINCLUDE_PARSE_XML" link="libxml-xinclude.html#XINCLUDE-PARSE-XML-CAPS"/>
+    <function name="XINCLUDE_PARSE_TEXT" link="libxml-xinclude.html#XINCLUDE-PARSE-TEXT-CAPS"/>
+    <function name="XINCLUDE_PARSE_ENCODING" link="libxml-xinclude.html#XINCLUDE-PARSE-ENCODING-CAPS"/>
+    <function name="struct xmlXIncludeCtxt" link="libxml-xinclude.html#xmlXIncludeCtxt"/>
+    <function name="xmlXIncludeCtxtPtr" link="libxml-xinclude.html#xmlXIncludeCtxtPtr"/>
+    <function name="enum xmlParserProperties" link="libxml-xmlreader.html#xmlParserProperties"/>
+    <function name="enum xmlParserSeverities" link="libxml-xmlreader.html#xmlParserSeverities"/>
+    <function name="enum xmlReaderTypes" link="libxml-xmlreader.html#xmlReaderTypes"/>
+    <function name="struct xmlTextReader" link="libxml-xmlreader.html#xmlTextReader"/>
+    <function name="xmlTextReaderPtr" link="libxml-xmlreader.html#xmlTextReaderPtr"/>
+    <function name="xmlTextReaderLocatorPtr" link="libxml-xmlreader.html#xmlTextReaderLocatorPtr"/>
+    <function name="xmlTextReaderErrorFunc ()" link="libxml-xmlreader.html#xmlTextReaderErrorFunc"/>
+    <function name="xmlShellReadlineFunc ()" link="libxml-debugXML.html#xmlShellReadlineFunc"/>
+    <function name="struct xmlShellCtxt" link="libxml-debugXML.html#xmlShellCtxt"/>
+    <function name="xmlShellCtxtPtr" link="libxml-debugXML.html#xmlShellCtxtPtr"/>
+    <function name="xmlShellCmd ()" link="libxml-debugXML.html#xmlShellCmd"/>
+    <function name="struct xmlTextWriter" link="libxml-xmlwriter.html#xmlTextWriter"/>
+    <function name="xmlTextWriterPtr" link="libxml-xmlwriter.html#xmlTextWriterPtr"/>
+    <function name="xmlTextWriterWriteProcessingInstruction" link="libxml-xmlwriter.html#xmlTextWriterWriteProcessingInstruction"/>
+    <function name="xmlTextWriterWriteDocType" link="libxml-xmlwriter.html#xmlTextWriterWriteDocType"/>
+    <function name="xmlTextWriterEndDTDElement" link="libxml-xmlwriter.html#xmlTextWriterEndDTDElement"/>
+    <function name="xmlTextWriterEndDTDAttlist" link="libxml-xmlwriter.html#xmlTextWriterEndDTDAttlist"/>
+    <function name="xmlTextWriterEndDTDEntity" link="libxml-xmlwriter.html#xmlTextWriterEndDTDEntity"/>
+    <function name="enum xmlSchemaValidError" link="libxml-xmlschemas.html#xmlSchemaValidError"/>
+    <function name="struct xmlSchema" link="libxml-xmlschemas.html#xmlSchema"/>
+    <function name="xmlSchemaPtr" link="libxml-xmlschemas.html#xmlSchemaPtr"/>
+    <function name="xmlSchemaValidityErrorFunc ()" link="libxml-xmlschemas.html#xmlSchemaValidityErrorFunc"/>
+    <function name="xmlSchemaValidityWarningFunc ()" link="libxml-xmlschemas.html#xmlSchemaValidityWarningFunc"/>
+    <function name="struct xmlSchemaParserCtxt" link="libxml-xmlschemas.html#xmlSchemaParserCtxt"/>
+    <function name="xmlSchemaParserCtxtPtr" link="libxml-xmlschemas.html#xmlSchemaParserCtxtPtr"/>
+    <function name="struct xmlSchemaValidCtxt" link="libxml-xmlschemas.html#xmlSchemaValidCtxt"/>
+    <function name="xmlSchemaValidCtxtPtr" link="libxml-xmlschemas.html#xmlSchemaValidCtxtPtr"/>
+  </functions>
+</book>

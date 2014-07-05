@@ -1,0 +1,21 @@
+@import "tests";
+
+@import "recipes/ui/menu/dropdown";
+
+nav
+{
+    @include ui-menu-dropdown;
+
+    // minimal style
+    ul
+    {
+        padding: 0;
+        background: #ccc;
+        border: 1px solid #ddd;
+
+        li
+        {
+            border: 1px solid #aaa;
+        }
+    }
+}

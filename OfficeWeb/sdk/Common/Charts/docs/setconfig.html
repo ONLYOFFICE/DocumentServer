@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>Information about the SetConfig() function</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas chart docs setconfig" />
+    <meta name="description" content="Information about the SetConfig() function" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.jpg"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+    
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.bar.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+
+    <?php PrintAnalyticsCode() ?>
+
+</head>
+<body>
+
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        The OfficeExcel.SetConfig() function
+    </div>
+
+    <h1>The <span>OfficeExcel.SetConfig() function</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+
+    <div style="text-align: center; float: right; font-family: Verdana">
+        <canvas id="cvs" width="600" height="250">[No canvas support]</canvas>
+    </div>
+
+    <script>
+        window.onload = function ()
+        {
+            var grad = document.getElementById("cvs").getContext('2d').createLinearGradient(0, 0, 0, 250);
+            grad.addColorStop(0, 'red');
+            grad.addColorStop(1, 'white');
+            
+            var config = {
+                          'chart.colors':                   [grad],
+                          'chart.labels':                   ['John','Fred','June','Charles','Lou', 'Olga'],
+                          'chart.title.yaxis':               'Amount',
+                          'chart.title.yaxis.pos':           0.2,
+                          'chart.title.xaxis':               'Person',
+                          'chart.gutter.left':               45,
+                          'chart.gutter.bottom':               35,
+                          'chart.gutter.right':                5,
+                          'chart.background.grid.autofit':  true,
+                          'chart.strokestyle': 'rgba(0,0,0,0)',
+                          'chart.title': 'A chart showing OfficeExcel.SetConfig()'
+                         }
+            var bar = new OfficeExcel.Bar('cvs', [48,56,52,49,43,51]);
+            OfficeExcel.SetConfig(bar, config);
+            bar.Draw();
+        }
+    </script>
+    
+    <p>
+        Instead of using a number of .Set() calls, you may find that using the <i>OfficeExcel.SetConfig()</i> method more to your tastes. The
+        method is an alternative to setting the configuration of your chart. It doesn't offer any speed benefits, but it can facilitate reuse better, so that the
+        appearance  of your websites charts is the same. There's an example of its use below:
+    </p>
+
+    <br clear="all" />
+
+    <pre class="code">
+&lt;script&gt;
+    window.onload = function ()
+    {
+        /**
+        * This configuration could be stored in a central configuration file, making its reuse easier. You could also have
+        * several different configurations that you pick and choose from depending on the requirements. Values in
+        * subsequent calls to .SetConfig() will overwrite previous ones.
+        */
+        var config = {
+                      'chart.colors':                  ['red', 'green'],
+                      'chart.labels':                  ['John','Fred','June','Charles','Lou', 'Olga'],
+                      'chart.title.yaxis':             'Amount',
+                      'chart.title.yaxis.pos':         -0.2,
+                      'chart.title.xaxis':             'Person',
+                      'chart.background.grid.autofit': true,
+                      'chart.title': 'A chart showing OfficeExcel.SetConfig()'
+                     }
+        var bar = new OfficeExcel.Bar('cvs', [48,56,52,49,43,51]);
+        OfficeExcel.SetConfig(bar, config);
+        bar.Draw();
+    }
+&lt;/script&gt;
+</pre>
+
+</body>
+</html>

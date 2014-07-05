@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>Adjusting the Line chart interactively</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas chart adjusting docs " />
+    <meta name="description" content="Information about adjusting the Line chart interactively" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A chart library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+    
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.adjusting.js" ></script>
+    <script src="../libraries/OfficeExcel.line.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+
+    <script>
+        window.onload = function (e)
+        {
+            var line = new OfficeExcel.Line('myc', [45,74,84,85,45,35,65,68,87,97,45,34,12], [15,14,12,16,18,19,14,12,74,84,95,65,35]);
+            line.Set('chart.labels', ['Kev','Matt','Rich','Dave','Iggy','Polly','Fiona','Fred','Pete','Lou','Fred','Bob']);
+            line.Set('chart.ylabels.inside', true);
+            line.Set('chart.linewidth', 2);
+            line.Set('chart.hmargin', 10);
+            line.Set('chart.shadow', true);
+            
+            if (!OfficeExcel.isOld()) {
+                line.Set('chart.adjustable', true);
+            }
+
+            line.Set('chart.title', 'An adjustable line chart');
+            line.Set('chart.title.vpos', 0.5);
+            line.Draw();
+        }
+    </script>
+
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        <a href="adjusting.html">Adjusting charts interactively</a>
+        >
+        Line chart
+    </div>
+
+    <h1>Adjusting <span>your charts interactively - Line chart</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+    
+    <p>
+        The Line chart can be adjusted by dragging the line(s) up and down. By using the OfficeExcel registry -
+        <i>OfficeExcel.Registry.Get('chart.adjusting.line.myc')</i> - you can get the details of the adjustment
+        (replace <i>myc</i> with the ID of your canvas). This is an array consisting of:
+        
+        <ul>
+            <li>The chart object</li>
+            <li>The index of the point in the data series</li>
+            <li>A two element array consisting of the original coordinates of the point that is being adjusted</li>
+            <li>The index of the data series that contains the point being adjusted</li>
+        </ul>
+    </p>
+
+    <canvas id="myc" width="1000" height="250">[No canvas support]</canvas>
+
+    <pre class="code">
+&lt;script&gt;
+    window.onload = function (e)
+    {
+        var line = new OfficeExcel.Line('myc', [45,74,84,85,45,35,65,68,87,97,45,34,12], [15,14,12,16,18,19,14,12,74,84,95,65,35]);
+        line.Set('chart.labels', ['Kev','Matt','Rich','Dave','Iggy','Polly','Fiona','Fred','Pete','Lou','Fred','Bob']);
+        line.Set('chart.ylabels.inside', true);
+        line.Set('chart.linewidth', 2);
+        line.Set('chart.hmargin', 10);
+        line.Set('chart.shadow', true);
+        line.Set('chart.adjustable', true);
+        line.Set('chart.title', 'An adjustable line chart');
+        line.Set('chart.outofbounds', true);
+        line.Draw();
+        
+        OfficeExcel.AddCustomEventListener(line, 'onadjustend', function (obj) {p(OfficeExcel.Registry.Get('chart.adjusting.line.myc'));});
+    }
+&lt;/script&gt;
+</pre>
+    
+
+</body>
+</html>

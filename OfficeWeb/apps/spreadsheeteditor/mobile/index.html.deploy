@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ONLYOFFICE Spreadsheet</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+
+        <!-- splash -->        
+    
+        <style type="text/css">
+            .loadmask {
+                position: absolute;
+                left: 0;
+                top: 0;
+                height: 100%;
+                width: 100%;
+                overflow: hidden;
+                border: none;
+                background-color: #f4f4f4;
+                z-index: 20002;
+            }
+
+            .loadmask-body {
+                position:relative;
+                top:44%;
+            }
+
+            .loadmask-logo {
+                display:inline-block;
+                min-width:220px;
+                height: 62px;
+                vertical-align:top;
+                background-image:url('./resources/img/loading-logo.gif');
+                background-repeat:no-repeat;
+            }
+
+            #loadmask-text {
+                color: #b2b2b2;
+                font-size: 10px;
+                font-weight: bold;
+                font-family: Arial;
+                height:14px;
+                margin-top:32px;
+                padding-left:40px;
+                text-align:left;
+                text-transform: uppercase;
+            }
+        </style>
+
+        <!-- 3rdparty -->
+
+        <link rel="stylesheet" type="text/css" href="../../../sdk/Excel/css/main-mobile.css"/>
+
+        <script type="text/javascript" src="../../../3rdparty/touch/sencha-touch-all.js"></script>
+        <script type="text/javascript" src="../../../3rdparty/jquery/jquery-1.7.1.min.js"></script>
+        <script type="text/javascript" src="../../../3rdparty/xregexp/xregexp-all-min.js"></script>
+        <script type="text/javascript" src="../../../3rdparty/sockjs/sockjs-0.3.min.js"></script> 
+        
+        <!-- SDK -->
+
+        <script type="text/javascript" src="../../../sdk/Common/AllFonts.js"></script>
+        <script type="text/javascript" src="../../../sdk/Excel/sdk-all.js"></script>
+
+        <!-- Application -->
+
+        <link rel="stylesheet" href="../../../apps/spreadsheeteditor/mobile/resources/css/application-normal.css" type="text/css"/>
+        <script type="text/javascript" src="../../../apps/spreadsheeteditor/mobile/app-all.js"></script>
+
+
+    </head>
+    <body>
+        <script type="text/javascript">
+            if (!(Ext.browser.is.WebKit && (Ext.os.is.iOS || Ext.os.is.Android || Ext.os.is.Desktop))) {
+                document.write(
+                    '<div id="unsuported-view-id" class="unsuported-view"></div>'
+                );
+            } else {
+                var injectStyleElement = function(url) {
+                    var style = document.createElement('link'),
+                        documentHead = typeof document != 'undefined' && (document.head || document.getElementsByTagName('head')[0]);
+
+                    style.rel = 'stylesheet';
+                    style.href = url;
+                    style.type = 'text/css';
+
+                    if (documentHead) {
+                        documentHead.appendChild(style);
+                        return true;
+                    }
+
+                    return false;
+                };
+
+
+                document.write(
+                    '<div id="loading-mask" class="loadmask">' +
+                        '<div class="loadmask-body" align="center">' +
+                            '<div class="loadmask-logo">' +
+                                // '<div id="loadmask-text">LOADING APPLICATION</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>');
+
+                injectStyleElement(
+                        (window.devicePixelRatio > 1)
+                                ? 'resources/css/application-retina.css'
+                                : 'resources/css/application-normal.css'
+                );
+            }
+        </script>
+    </body>
+</html>

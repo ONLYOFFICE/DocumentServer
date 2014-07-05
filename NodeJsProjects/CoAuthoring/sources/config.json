@@ -1,0 +1,11 @@
+﻿{
+	"server": {
+		"port": 8000,
+		"mode": "development"
+	},
+	"no_mongodb": {
+		"host": "localhost",
+		"port": 8000,
+		"database": "coAuthoring"
+	}
+}

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Documents</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- splash -->
+
+    <style type="text/css">
+        .loadmask {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            border: none;
+            background-color: #f4f4f4;
+            z-index: 20002;
+        }
+
+        .loadmask-body {
+            position:relative;
+            top:44%;
+        }
+
+        .loadmask-logo {
+            display:inline-block;
+            min-width:220px;
+            height: 62px;
+            vertical-align:top;
+            background-image:url('./resources/img/loading-logo.gif');
+            background-repeat:no-repeat;
+        }
+
+        #loadmask-text {
+            color: #b2b2b2;
+            font-size: 10px;
+            font-weight: bold;
+            font-family: Arial;
+            height:14px;
+            margin-top:32px;
+            padding-left:40px;
+            text-align:left;
+            text-transform: uppercase;
+        }
+    </style>
+
+    <link href="../../../3rdparty/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+
+  <body class="embed-body">
+
+      <!--facebook button-->
+      <div id="fb-root"></div>
+      <script>(function(d, s, id) {
+          var js, fjs = d.getElementsByTagName(s)[0];
+          if (d.getElementById(id)) return;
+          js = d.createElement(s); js.id = id;
+          js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+          fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));</script>
+
+
+      <!--twitter button-->
+      <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+
+      <div id="loading-mask" class="loadmask">
+          <div class="loadmask-body" align="center">
+              <div class="loadmask-logo">
+                  <!-- <div id="loadmask-text">LOADING APPLICATION</div> -->
+              </div>
+          </div>
+      </div>
+
+      <div id="editor_sdk" class="viewer" style="overflow: hidden;"></div>
+
+      <div class="overlay-controls" style="margin-left: -32px">
+          <ul class="left" style="width: 90px;">
+              <li id="id-btn-zoom-in"><button class="overlay"><i class="overlay-icon-zoom-in"></i></button></li>
+              <li style="width: 10px"></li>
+              <li id="id-btn-zoom-out"><button class="overlay"><i class="overlay-icon-zoom-out"></i></button></li>
+          </ul>
+      </div>
+
+      <div class="toolbar" id="toolbar">
+          <ul class="left">
+              <li><a class="brand-logo" href="http://www.onlyoffice.com/" target="_blank"></a></li>
+              <li class="separator"></li>
+              <li id="id-btn-copy"><button class="control-btn"><i class="control-icon-save"></i><span>Save Copy</span></button></li>
+              <li id="id-btn-share"><button class="control-btn"><i class="control-icon-share"></i><span>Share</span></button></li>
+              <li id="id-btn-embed"><button class="control-btn"><i class="control-icon-embed"></i><span>Embed</span></button></li>
+          </ul>
+          <ul class="right">
+              <li><input id="page-number" style="width: 25px" type="text" value="0"><span class="text" id="pages">of 0</span></li>
+              <li class="separator"></li>
+              <li><button id="id-btn-fullscreen" class="control-btn no-caption"><i class="control-icon-fullscreen"></i></button></li>
+              <li><button id="id-btn-close" class="control-btn no-caption"><i class="control-icon-close"></i></button></li>
+          </ul>
+      </div>
+
+      <div class="error modal hide" id="id-critical-error-dialog" tabindex="-1" role="dialog">
+          <div class="modal-header">
+              <h3 id="id-critical-error-title"></h3>
+          </div>
+          <div class="modal-body">
+              <p id="id-critical-error-message"></p>
+          </div>
+          <div class="modal-footer">
+              <button id="id-critical-error-close" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
+          </div>
+      </div>
+
+      <div id="id-loadmask" class="hide modal cmd-loader-body">
+          <div class="cmd-loader-image"></div>
+          <div class="cmd-loader-title">Please wait...</div>
+      </div>
+
+      <!--3td party-->
+      <script type="text/javascript" src="../../../3rdparty/jquery/jquery-1.8.1.min.js"></script>
+      <script type="text/javascript" src="../../../3rdparty/jquery/mousewheel/jquery.mousewheel.js"></script>
+      <script type="text/javascript" src="../../../3rdparty/bootstrap/js/bootstrap.min.js"></script>
+      <script type="text/javascript" src="../../../3rdparty/ZeroClipboard/ZeroClipboard.min.js"></script>
+      <script type="text/javascript" src="../../../3rdparty/xregexp/xregexp-all-min.js"></script>
+      <script type="text/javascript" src="../../../3rdparty/sockjs/sockjs-0.3.min.js"></script>
+      <script type="text/javascript" src="../../../3rdparty/underscore/underscore-min.js"></script>
+
+
+      <!--sdk-->
+      <link rel="stylesheet" type="text/css" href="../../../sdk/Excel/css/main.css"/>
+      <script type="text/javascript" src="../../../sdk/Common/AllFonts.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/sdk-all.js"></script>
+
+      <!--application-->
+      <link href="../../../apps/spreadsheeteditor/embed/resources/css/app-all.css" rel="stylesheet">
+      <script type="text/javascript" src="../../../apps/spreadsheeteditor/embed/app-all.js"></script>
+      <script type="text/javascript">
+          var isBrowserSupported = function() {
+              return  ($.browser.msie     && parseFloat($.browser.version) > 8)     ||
+                      ($.browser.chrome   && parseFloat($.browser.version) > 7)     ||
+                      ($.browser.safari   && parseFloat($.browser.version) > 4)     ||
+                      ($.browser.opera    && parseFloat($.browser.version) > 10.4)  ||
+                      ($.browser.mozilla  && parseFloat($.browser.version) > 3.9);
+          };
+
+          if (!isBrowserSupported()){
+              document.write(
+                  '<div id="id-error-mask" class="errormask">',
+                      '<div class="error-body" align="center">',
+                          '<div id="id-error-mask-title" class="title">Your browser is not supported.</div>',
+                          '<div id="id-error-mask-text">Sorry, ONLYOFFICE Document is currently only supported in the latest versions of the Chrome, Firefox, Safari or Internet Explorer web browsers.</div>',
+                      '</div>',
+                  '</div>'
+              );
+          }
+      </script>
+  </body>
+</html>

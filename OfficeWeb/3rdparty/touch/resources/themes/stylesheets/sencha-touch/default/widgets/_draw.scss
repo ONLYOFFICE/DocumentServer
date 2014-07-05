@@ -1,0 +1,34 @@
+@import '../global';
+
+@mixin sencha-draw {
+  .x-android-3 .x-surface-wrap, .x-android-3 .x-surface-wrap > * {
+    -webkit-perspective: 1;
+  }
+
+  .x-draw-component {
+    position: relative;
+    .x-inner {
+      overflow: hidden;
+    }
+  }
+
+  .x-surface {
+    position: absolute;
+  }
+  
+  .x-chart-watermark {
+    opacity: 0.5;
+    z-index: 9;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 4px 6px;
+    font-family: "Helvetica";
+    font-size: 12px;
+    position: absolute;
+    border-top-left-radius: 4px;
+    white-space:nowrap;
+    -webkit-border-top-left-radius: 4px;
+  }
+}

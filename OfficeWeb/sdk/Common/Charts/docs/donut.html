@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>Donut charts documentation - the Donut chart is now a variant of the Pie chart</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas charts docs donut charts" />
+    <meta name="description" content="The Donut chart is now a variant of the Pie chart" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        Donut charts
+    </div>
+
+    <h1>Donut <span>charts documentation</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <p>
+        Donut charts were formerly separate charts, however it's now simply a variant of the Pie chart.
+    </p>
+    
+    
+    <h2>Example</h2>
+
+    <pre class="code">
+&lt;script&gt;
+    window.onload = function ()
+    {
+        <span class="javascript-comment">// The data to be shown on the Donut chart</span>
+        var data = [45,57,48,32];
+    
+        <span class="javascript-comment">// Create the Donut chart (which is really a Pie chart).</span>
+        var donut = new OfficeExcel.Pie('myDonut', data);
+        
+        <span class="javascript-comment">// Configure the Donut chart to look as wanted.</span>
+        donut.Set('chart.labels', ['Jan', 'Ben', 'Mark', 'Lucy']);
+        donut.Set('chart.linewidth', 5);
+        donut.Set('chart.strokestyle', 'white');
+        donut.Set('chart.tooltips', ['Jan', 'Ben', 'Mark', 'Lucy']);
+        
+        <span class="javascript-comment">// Specify the variant, which turns the Pie chart into a Donut chart.</span>
+        donut.Set('chart.variant', 'donut');
+        
+        <span class="javascript-comment">// Call the .Draw() method to draw the Donut chart</span>
+        donut.Draw();
+    }
+&lt;/script&gt;
+</pre>
+
+    <ul>
+        <li><a href="../examples/donut.html">Donut chart examples</a></li>
+        <li><a href="pie.html">Pie chart documentation</a></li>
+    </ul>
+
+</body>
+</html>

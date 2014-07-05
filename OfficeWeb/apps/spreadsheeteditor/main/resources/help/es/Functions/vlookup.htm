@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<title>Función VLOOKUP</title>
+		<meta charset="utf-8" />
+		<meta name="description" content="" />
+		<link type="text/css" rel="stylesheet" href="../editor.css" />
+	</head>
+	<body>
+		<div class="mainpart">
+			<h1>Función VLOOKUP</h1>
+			<p>La función <b>VLOOKUP</b> es una función de búsqueda y referencia. Se usa para realizar la búsqueda vertical de un valor en la columna del extremo izquierdo de una tabla o selección y devolver el valor en la misma fila. Este valor está basado en el número de índice de la columna especificada.</p>
+			<p>La síntaxis de la función <b>VLOOKUP</b> es:</p> 
+			<p style="text-indent: 150px;"><b><em>VLOOKUP (lookup-value, table-array, col-index-num[, [range-lookup-flag]])</em></b></p> 
+			<p>donde <b><em>lookup-value</em></b> es un valor para buscar, <b><em>table-array</em></b> es dos o más columnas que contienen datos arreglados en orden ascendente, <b><em>col-index-num</em></b> es un número de columna en <b><em>table-array</em></b>, <b><em>range-lookup-flag</em></b> es un valor lógico TRUE o FALSE,</p>
+			<p><b><em>range-lookup-flag</em></b> es un argumento opcional. Introduzca FALSE para encontrar una coincidencia exacta. Introduzca TRUE para encontrar una coincidencia aproximada, en este caso si no hay un valor que coincide con <b><em>lookup-value</em></b>, la función elegirá el próximo valor más grande y menor que <b><em>lookup-value</em></b>. Si este argumento está ausente, la función encontrará una coincidencia aproximada.</p>
+			<p class="note"><b>Nota</b>: si <b>col-index-num</b> es menor que 1, la función devolverá el error <b>#VALUE!</b>. Si <b>col-index-num</b> es más que el número de columnas en <b>table-array</b>, la función devolverá el error <b>#REF!</b>. Si <b><em>range-lookup-flag</em></b> tiene el valor FALSE, pero la coincidencia exacta no se encuentra, la función devolverá el error <b>#N/A</b>.</p>
+			<p>Para aplicar la función <b>VLOOKUP</b>,</p>
+			<ol>
+			<li>seleccione la celda donde quiere que se muestre el resultado,</li>
+			<li>pulse el icono <b>Insertar función</b> <img alt="Insertar función icono" src="../images/insertfunction.png" /> que se sitúa en la barra de herramientas superior,
+				<br />o haga clic con el botón derecho en la celda elegida y seleccione la opción <b>Insertar función</b> en el menú,
+				<br />o pulse el icono <img alt="icono función" src="../images/function.png" /> que se sitúa en la barra de fórmulas,
+			</li>
+			<li>seleccione el grupo de funciones <b>Búsqueda y referencia</b> en la lista,</li>
+			<li>elija la función <b>VLOOKUP</b>,</li>
+			<li>introduzca los argumentos necesarios separándolos por comas</li>
+			<li>pulse el botón <b>Enter</b>.</li>
+			</ol>
+			<p>El resultado se mostrará en la celda elegida.</p>
+			<p style="text-indent: 150px;"><img alt="VLOOKUP Function" src="../images/vlookup.png" /></p>
+		</div>
+	</body>
+</html>

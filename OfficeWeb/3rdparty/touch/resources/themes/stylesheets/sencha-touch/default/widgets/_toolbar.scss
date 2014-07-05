@@ -1,0 +1,166 @@
+@import '../global';
+
+/**
+ * @class Ext.Toolbar
+ */
+
+/**
+ * @var {color} $toolbar-base-color
+ * The primary color variable from which toolbars derive their light and dark UIs.
+ */
+$toolbar-base-color: $base-color !default;
+
+/**
+ * @var {measurement} $toolbar-spacing
+ * Space between items in a toolbar (like buttons and fields)
+ */
+$toolbar-spacing: .2em !default;
+
+/**
+ * @var {string} $toolbar-gradient
+ * Background gradient style for toolbars.
+ */
+$toolbar-gradient: $base-gradient !default;
+
+/**
+ * @var {boolean} $include-toolbar-uis
+ * Optionally disable separate toolbar UIs (light and dark).
+ */
+$include-toolbar-uis: $include-default-uis !default;
+
+/**
+ * Includes default toolbar styles.
+ */
+@mixin sencha-toolbar {
+
+  .x-toolbar {
+    padding: 0 $toolbar-spacing;
+    //overflow: hidden;
+    position: relative;
+    //height: $global-row-height;
+
+    //& > * {
+    //  z-index: 1;
+    //}
+
+    &.x-docked-top {
+      border-bottom: .1em solid;
+    }
+
+    &.x-docked-bottom {
+      border-top: .1em solid;
+    }
+
+    &.x-docked-left {
+      width: 7em;
+      height: auto;
+      padding: $toolbar-spacing;
+      border-right: .1em solid;
+    }
+
+    &.x-docked-right {
+      width: 7em;
+      height: auto;
+      padding: $toolbar-spacing;
+      border-left: .1em solid;
+    }
+  }
+
+  .x-title {
+    line-height: $global-row-height - .5em;
+    font-size: 1.2em;
+    text-align: center;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0 0.3em;
+    padding: 0 .3em;
+    max-width: 100%;
+
+    .x-innerhtml {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  @if $include-toolbar-uis {
+    @include sencha-toolbar-ui('dark', darken($toolbar-base-color, 10%));
+    @include sencha-toolbar-ui('light', $toolbar-base-color);
+    @include sencha-toolbar-ui('neutral', $neutral-color);
+
+    .x-toolbar.x-toolbar-neutral .x-toolbar-inner .x-button.x-button-pressing {
+      $mask-radial-glow: lighten($base-color, 25);
+      @include background-image(radial-gradient(fade-out($mask-radial-glow, .3), fade-out($mask-radial-glow, 1) 24px));
+      .x-button-icon.x-button-mask {
+        @include background-gradient(#fff, 'recessed');
+      }
+    }
+  }
+
+  .x-navigation-bar {
+    .x-container {
+      overflow: visible;
+    }
+  }
+}
+
+/**
+ * Creates a theme UI for toolbars.
+ *
+ *     // SCSS
+ *     @include sencha-toolbar-ui('sub', #58710D, 'glossy');
+ *
+ *     // JS
+ *     var myTb = new Ext.Toolbar({title: 'My Green Glossy Toolbar', ui: 'sub'})
+ *
+ * @param {string} $ui-label The name of the UI being created.
+ *   Can not included spaces or special punctuation (used in class names)
+ * @param {color} $color Base color for the UI.
+ * @param {string} $gradient: $toolbar-gradien Background gradient style for the UI.
+ */
+@mixin sencha-toolbar-ui($ui-label, $color, $gradient: $toolbar-gradient) {
+
+  $toolbar-border-color: darken($color, 50%);
+  $toolbar-button-color: darken($color, 5%);
+
+  .x-toolbar-#{$ui-label} {
+    @include background-gradient($color, $gradient);
+    border-color: $toolbar-border-color;
+
+    .x-title {
+      @include color-by-background($color);
+      @include bevel-by-background($color);
+    }
+
+    &.x-docked-top {
+      border-bottom-color: $toolbar-border-color;
+    }
+
+    &.x-docked-bottom {
+      border-top-color: $toolbar-border-color;
+    }
+
+    &.x-docked-left {
+      border-right-color: $toolbar-border-color;
+    }
+
+    &.x-docked-right {
+      border-left-color: $toolbar-border-color;
+    }
+
+    .x-button,
+    .x-field-select .x-component-outer,
+    .x-field-select .x-component-outer:before {
+      @include toolbar-button($toolbar-button-color, $gradient);
+    }
+
+    .x-label,
+    .x-form-label {
+      font-weight: bold;
+      @include color-by-background($color);
+      @include bevel-by-background($color);
+    }
+  }
+}

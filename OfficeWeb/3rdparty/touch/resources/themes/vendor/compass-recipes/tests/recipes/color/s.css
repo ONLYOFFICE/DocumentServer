@@ -1,0 +1,161 @@
+html {
+  padding: 1em;
+  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dddddd), color-stop(100%, #ffffff)) no-repeat;
+  background: -webkit-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -moz-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -o-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -ms-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: linear-gradient(#dddddd, #ffffff) no-repeat;
+}
+
+h1 {
+  font-size: 2em;
+  margin-bottom: 1em;
+}
+
+h2 {
+  font-size: 1.4em;
+  margin-bottom: .6em;
+}
+
+.doc {
+  background: #fff;
+  border: #ddd;
+  padding: 1em;
+  color: #aaa;
+  margin: 1em;
+  font-style: italic;
+}
+.doc a {
+  color: #999;
+}
+
+/**
+ *
+ * @class Color
+ * @author David Kaneda - http://www.davidkaneda.com
+ *
+ */
+/**
+ * Returns the brightness (out of 100) of a specified color.
+ * @todo explain why this is useful
+ * @param {color} $color The color you want the brightness value of
+ * @return {measurement}
+ */
+/**
+ * Returns the luminosity for a specified color
+ * @param {color} The color to check
+ * @return {measurement}
+ */
+/**
+ * Returns the contrast ratio between two colors
+ * @param {color1} The color to check
+ * @return {measurement}
+ */
+.swatch, .swatch1, .swatch2, .swatch3, .swatch4 {
+  min-width: 100px;
+  text-align: center;
+  padding: 10px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 10px;
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: bold;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -o-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.swatch1 {
+  background-color: #ea0d0d;
+  color: #fcc7c7;
+  text-shadow: #ba0a0a 0 -1px 0;
+  border: 1px solid #a20909;
+}
+.swatch1:after {
+  content: "48.431%";
+}
+.swatch1:hover:after {
+  content: "31.011%";
+}
+.swatch1:active {
+  background-color: #d20c0c;
+  color: #fddfdf;
+  text-shadow: #a20909 0 -1px 0;
+}
+
+.swatch2 {
+  background-color: #ea850d;
+  color: #291702;
+  text-shadow: #f49d36 0 1px 0;
+  border: 1px solid #a25c09;
+}
+.swatch2:after {
+  content: "48.431%";
+}
+.swatch2:hover:after {
+  content: "58.635%";
+}
+.swatch2:active {
+  background-color: #d2770c;
+  color: black;
+  text-shadow: #f3911e 0 1px 0;
+}
+
+.swatch3 {
+  background-color: #cbea0d;
+  color: #232902;
+  text-shadow: #d9f436 0 1px 0;
+  border: 1px solid #8ca209;
+}
+.swatch3:after {
+  content: "48.431%";
+}
+.swatch3:hover:after {
+  content: "78.25%";
+}
+.swatch3:active {
+  background-color: #b6d20c;
+  color: black;
+  text-shadow: #d5f31e 0 1px 0;
+}
+
+.swatch4 {
+  background-color: #0d65ea;
+  color: #c7dcfc;
+  text-shadow: #0a50ba 0 -1px 0;
+  border: 1px solid #0946a2;
+}
+.swatch4:after {
+  content: "48.431%";
+}
+.swatch4:hover:after {
+  content: "35.235%";
+}
+.swatch4:active {
+  background-color: #0c5bd2;
+  color: #dfebfd;
+  text-shadow: #0946a2 0 -1px 0;
+}
+
+.swatch4 {
+  background-color: #b90dea;
+  color: #f0c7fc;
+  text-shadow: #930aba 0 -1px 0;
+  border: 1px solid #8009a2;
+}
+.swatch4:after {
+  content: "48.431%";
+}
+.swatch4:hover:after {
+  content: "35.146%";
+}
+.swatch4:active {
+  background-color: #a60cd2;
+  color: #f7dffd;
+  text-shadow: #8009a2 0 -1px 0;
+}

@@ -1,0 +1,21 @@
+
+.splitter-document-area {
+    background-color: #e9e9e9;
+}
+
+.splitter-document-area .x-mask {
+    background-color: #e9e9e9;
+    opacity: 1;
+}
+
+.splitter-document-area.x-item-disabled{
+    opacity: 1;
+}
+
+.infobox-container-border {
+    border-bottom: solid 1px #afafaf;
+}
+
+.infobox-container-border.left-border {
+    border-left: solid 1px #afafaf;
+}

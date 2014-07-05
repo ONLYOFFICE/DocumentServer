@@ -1,0 +1,43 @@
+@import "tests";
+
+@import "recipes/shape/polygon/triangle";
+
+.triangle-top
+{
+    @include triangle;
+}
+
+.triangle-bottom
+{
+    @include triangle(bottom);
+}
+
+.triangle-left
+{
+    @include triangle(left);
+}
+
+.triangle-right
+{
+    @include triangle(right);
+}
+
+.triangle-top-left
+{
+    @include triangle(top-left);
+}
+
+.triangle-top-right
+{
+    @include triangle(top-right);
+}
+
+.triangle-bottom-left
+{
+    @include triangle(bottom-left);
+}
+
+.triangle-bottom-right
+{
+    @include triangle(bottom-right);
+}

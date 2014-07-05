@@ -1,0 +1,28 @@
+/**
+ * Shadow along the top edge of the browser viewport
+ * 
+ * @link http://playground.genelocklin.com/depth/
+ */
+
+@mixin top-shadow($height: 1em, $color: rgba(0,0,0,.8), $z-index: 100, $position: fixed)
+{
+    content: "";
+    
+    position: $position;
+    left: 0%;
+    width: 100%;
+    
+    top: -$height;
+    height: $height;
+    @include box-shadow(0 0 $height $color);
+    
+    z-index: $z-index;
+}
+
+/*
+// Usage
+body:before
+{
+    @include top-shadow;
+}
+*/

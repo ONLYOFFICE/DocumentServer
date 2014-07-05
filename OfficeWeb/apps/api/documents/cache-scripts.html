@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ONLYOFFICE Documents</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <style type="text/css"></style>
+</head>
+<body>
+    <script type="text/javascript" src="../../../3rdparty/extjs/ext-all.js"></script>
+    <script type="text/javascript" src="../../../3rdparty/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="../../../3rdparty/jquery/mousewheel/jquery.mousewheel.js"></script>
+    <script type="text/javascript" src="../../../3rdparty/jquery/jscrollpane/jquery.jscrollpane.min.js"></script>
+    <script type="text/javascript" src="../../../3rdparty/sockjs/sockjs-0.3.min.js"></script>
+    <script type="text/javascript" src="../../../3rdparty/underscore/underscore-min.js"></script>
+    <script type="text/javascript" src="../../../3rdparty/xregexp/xregexp-all-min.js"></script>
+	<script type="text/javascript" src="../../../sdk/Common/AllFonts.js"></script>
+    <script type="text/javascript" src="../../../sdk/Word/sdk-all.js"></script>
+    <div id="editor_sdk">
+    <script type="text/javascript">
+        var editor = new asc_docs_api("editor_sdk");
+        editor.SetFontsPath("../../../sdk/Fonts/");
+        editor.LoadFontsFromServer();
+    </script>
+</body>
+</html>

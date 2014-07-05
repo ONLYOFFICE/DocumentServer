@@ -1,0 +1,229 @@
+<!DOCTYPE html >
+<html>
+<head>
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>Documentation about Microsoft Internet Explorer support</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas docs msie" />
+    <meta name="description" content="Documentation about Microsoft Internet Explorer (MSIE) support" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.jpg"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.context.js" ></script>
+    <script src="../libraries/OfficeExcel.common.key.js" ></script>
+    <script src="../libraries/OfficeExcel.line.js" ></script>
+    <script src="../libraries/OfficeExcel.modaldialog.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+    
+    <style>
+        div#msie9 {
+            background-color: #dfd;
+            padding: 5px;
+            border: 2px dashed green;
+        }
+    </style>
+
+    <?php PrintAnalyticsCode() ?>
+
+
+</head>
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        MSIE support
+    </div>
+
+    <h1>Microsoft <span>Internet Explorer (MSIE) support</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+    
+    <p />
+
+    <div id="msie9">
+        <b>Microsoft Internet Explorer 9</b>
+        
+        <p>
+            Starting from preview 3, Internet Explorer 9 has support for canvas, including the text and shadow APIs. It also
+            benefits from hardware acceleration, and quick rendering times.
+        </p>
+    </div>
+    
+    <br />
+
+    <div style="border: 3px dashed #cc0; background-color: #ffd; padding: 5px">
+        <b>Microsoft Internet Explorer 7 and 8</b>
+        
+        <p>
+            Microsoft Internet Explorer 7 and 8 are supported using ExCanvas. This is an extra Javascript file that
+            is sent to the user if it's required. Nothing is required to be configured on the server.
+        </p>
+    </div>
+    
+    <br />
+
+    <canvas id="myLine" width="600" height="250" style="float: right">[No canvas support]</canvas>
+
+    <script>
+
+        window.onload = function ()
+        {
+            var data1 = [4,3,6,8,4,2,1,4,9,8,7,8];
+            var data2 = [1,2,4,2,1,3,5,6,6,5,3,5];
+    
+            // No "var" as the variable has to be global
+            line = new OfficeExcel.Line('myLine', data1, data2);
+            line.Set('chart.title', 'Sales for Acme Inc. (context menu)');
+            line.Set('chart.title.vpos', 0.5);
+            line.Set('chart.colors', ['red', 'black']);
+            line.Set('chart.linewidth', 5);
+
+            // Odd, but this seems to fix an strange MSIE bug where the text is truncated
+            line.Set('chart.units.post', '%                         .');
+
+            line.Set('chart.yaxispos', 'right');
+            line.Set('chart.key', ['2007', '2008']);
+            line.Set('chart.key.background', 'white');
+            line.Set('chart.noaxes', true);
+            line.Set('chart.gutter.left', 5);
+            line.Set('chart.gutter.right', 35);
+            line.Set('chart.hmargin', 10);
+            line.Set('chart.background.barcolor1', 'white');
+            line.Set('chart.background.barcolor2', 'white');
+            line.Set('chart.shadow', true);
+            line.Set('chart.background.grid.autofit', true);
+            line.Set('chart.contextmenu', [['Show dialog', function () {ModalDialog.Show('myDialog', 300);}], ['Cancel', function () {}]]);
+            line.Draw();
+        }
+    </script>
+    
+    <ul>
+        <li><a href="#introduction">Introduction</a></li>
+        <li><a href="#getting">Getting hold of ExCanvas</a></li>
+        <li><a href="#caveats">Caveats</a></li>
+        <li><a href="#frame">Google Chrome Frame</a></li>
+        <li><a href="#dynamic.canvas">Using a dynamically created canvas</a></li>
+    </ul>
+
+    <a name="introduction"></a>
+    <h4>Introduction</h4>
+    
+    <p>
+        As of December 2009 OfficeExcel now works partially with Internet Explorer without Google Chrome Frame.
+        Charts are rendered as VML. You are still recommended to use
+        <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a> to get the best results.
+        The interactive features are unlikely to work correctly.
+    </p>
+    
+    <p>
+        Thanks go to everyone involved with the <a href="http://code.google.com/p/explorercanvas/" target="_blank" rel="nofollow">ExCanvas project</a> for providing the ExCanvas library.
+    </p>
+    
+    <a name="getting"></a>
+    <h4>Getting hold of ExCanvas</h4>
+    
+    <p>
+        Google ExCanvas is distributed with OfficeExcel in the "excanvas" directory. There is a minified gzip compressed version, along
+        with the original.
+    </p>
+
+    <a name="caveats"></a>
+    <h4>Caveats</h4>
+    
+    <ul>
+        <li>The interactive features of OfficeExcel are unlikely to work correctly with MSIE.</li>
+        <li>Shadows are now available (on some chart types), albeit without blurring.</li>
+        <li>You must reference the Javascript libraries in the documents &lt;head&gt;.</li>
+        <li>You must use the window.onload event to create your chart.</li>
+        <li>In the window.onload function, you must use the <i>var</i> keyword when declaring the variable.</li>
+        <li>If your page is large, there may be a slight pause before the window.onload event fires and thus creates the chart.</li>
+        <li>Changing the font that text is shown in is not available.</li>
+    </ul>
+    
+    <a name="frame"></a>
+    <h4>Google Chrome Frame</h4>
+        <p>
+            Instead of ExCanvas you can also use Google Chrome Frame. This basically turns Internet Explorer into Google Chrome, and fully
+            supports OfficeExcel. Since it involves a plugin installation, this is a better option if you can fully influence the users PC. If you
+            can fully influence the users PC however, a better option might be to simply use one of the browsers with native
+            support.
+        </p>
+
+
+    <br />
+
+
+    <a name="dynamic.canvas"></a>
+    <h4>Using a dynamically created canvas</h4>
+        <p>
+            If you're creating your canvas dynamically there is an extra step that you must perform to allow it to be recognised by
+            ExCanvas:
+        </p>
+        
+        <pre class="code">
+var canvas = document.createElement('CANVAS');
+    canvas.id = 'cvs';
+    canvas.width = 600;
+    canvas.height = 250;
+    canvas.style.border = '1px dashed black';
+document.body.appendChild(canvas);
+
+<span style="color: green">G_vmlCanvasManager.initElement(canvas);</span>
+</pre>
+    
+
+    
+    <br />
+    <br />
+    <br />
+
+    <!-- This is the ModdalDialog -->
+    <div id="myDialog" style="display: none">
+        <div style="text-align: center; font-family: Arial">
+            <h4>Please wait...</h4>
+            <span style="font-size: 8pt">(Nothing is going to happen, this is simply an example <a href="" onclick="ModalDialog.Close(); return false">Close</a>)</span>
+        </div>
+    </div>
+
+
+</body>
+</html>

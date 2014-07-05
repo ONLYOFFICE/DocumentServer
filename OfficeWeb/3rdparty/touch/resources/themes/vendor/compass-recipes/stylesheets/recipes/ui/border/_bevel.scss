@@ -1,0 +1,9 @@
+// @todo Remove in .4
+
+@mixin ui-border-bevel($width, $color, $variation: 15%)
+{
+    @warn 'ui-border-bevel has been deprecated. Please use effects/bevel mixins instead';
+    border: $width solid $color;
+    border-top-color: lighten($color, $variation);
+    border-bottom-color: darken($color, $variation);
+}

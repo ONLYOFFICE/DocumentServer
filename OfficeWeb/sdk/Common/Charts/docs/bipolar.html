@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>Documentation about the OfficeExcel Bi-polar chart</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas chart docs bipolar charts" />
+    <meta name="description" content="Documentation about the Bi-polar chart including details about all the available options" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A chart library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        Bi-polar charts
+    </div>
+
+    <h1>Bi-polar <span>charts documentation</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+    
+    <ul>
+        <li><a href="#example">Example</a></li>
+        <li><a href="#properties">Properties</a></li>
+        <li><a href="#methods">Methods</a></li>
+    </ul>
+    
+    <a name="example"></a>
+    <p>&nbsp;</p>
+    <h2>Example</h2>
+
+    <pre class="code">
+&lt;script&gt;
+    window.onload = function ()
+    {
+        <span class="javascript-comment">// The Bipolar chart takes two arrays of data - one for the left side and one for the right.</span>
+        var left  = [5,6,8,9,12,13,4,9];
+        var right = [5,8,4,11,15,26,13,16];
+        
+        <span class="javascript-comment">// Create the Bi-polar object. Give the constructor the ID of the canvas tag along with
+        // the left sides data and the right sides data.</span>
+        var bipolar = new OfficeExcel.Bipolar('myBipolar', left, right);
+        
+        <span class="javascript-comment">// Configure the Bipolar chart to appear as wished.</span>
+        bipolar.Set('chart.colors', ['#fff', '#eef', '#ddf', '#ccf', '#bbf', '#bbf', '#aaf', '#99f']);
+        bipolar.Set('chart.margin', 3);
+        bipolar.Set('chart.labels', ['Barry', 'John', 'Fred', 'George', 'Rich', 'Larry', 'John', 'Mike']);
+        bipolar.Set('chart.title.left', '2007');
+        bipolar.Set('chart.title.right', '2008');
+        bipolar.Set('chart.gutter.bottom', 45);
+        
+        <span class="javascript-comment">// Now call the .Draw() method to draw the chart</span>
+        bipolar.Draw();
+    }
+&lt;/script&gt;
+</pre>
+    
+    <p> 
+        The example file is <a href="../examples/bipolar.html">here</a>.
+    </p>
+
+
+    <a name="properties"></a>
+    <p>&nbsp;</p>
+    <h2>Properties</h2>
+    
+    <p>
+        You can use these properties to control how the chart apears. You can set them by using the Set() method. Eg:
+    </p>
+    
+    <p>
+        <b>myBipolar.Set('name', 'value');</b>
+    </p>
+    
+    <ul>
+        <li><a href="#margins">Margins</a></li>
+        <li><a href="#titles">Titles</a></li>
+        <li><a href="#colors">Colors</a></li>
+        <li><a href="#labels, text and axes">Labels, text and axes</a></li>
+        <li><a href="#scale">Scale</a></li>
+        <li><a href="#interactive features">Interactive features</a></li>
+        <li><a href="#shadow">Shadow</a></li>
+        <li><a href="#zoom">Zoom</a></li>
+        <li><a href="#events">Events</a></li>
+        <li><a href="#miscellaneous">Miscellaneous</a></li>
+    </ul>
+
+<a name="margins"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Margins</h3>
+
+
+
+            <a name="chart.gutter.left"></a>
+            <b>chart.gutter.left</b><br />
+            The left gutter of the chart, (the gutter is where the labels and title are)).<br />
+            <i>Default: 25</i><br /><br />
+
+            <a name="chart.gutter.right"></a>
+            <b>chart.gutter.right</b><br />
+            The right gutter of the chart, (the gutter is where the labels and title are).<br />
+            <i>Default: 25</i><br /><br />
+
+            <a name="chart.gutter.top"></a>
+            <b>chart.gutter.top</b><br />
+            The top gutter of the chart, (the gutter is where the labels and title are).<br />
+            <i>Default: 25</i><br /><br />
+
+            <a name="chart.gutter.bottom"></a>
+            <b>chart.gutter.bottom</b><br />
+            The bottom gutter of the chart, (the gutter is where the labels and title are).<br />
+            <i>Default: 25</i><br /><br />
+
+            <a name="chart.gutter.center"></a>
+            <b>chart.gutter.center</b><br />
+            The center area of the chart that the labels sit in. If your labels are large then you may need to increase this.<br />
+            <i>Default: 60</i><br /><br />
+
+            <a name="chart.margin"></a>
+            <b>chart.margin</b><br />
+            The space above and below each bar. <br /><i>Default: 2</i><br /><br />
+
+<a name="titles"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Titles</h3>
+
+<b>chart.title</b><br />
+The main title of the chart.<br />
+<i>Default: (An empty string)</i><br /><br />
+
+<a name="chart.title.background"></a>
+<b>chart.title.background</b><br />
+The background color (if any) for the title.<br />
+<i>Default: null</i><br /><br />
+
+<a name="chart.title.hpos"></a>
+<b>chart.title.hpos</b><br />
+            This allows you to completely override the horizontal positioning of the title. It should be a number between 0 and 1, and is multiplied with the whole width of the canvas and then used as the horizontal position. <br /><i>Default: null</i><br /><br />
+            <a name="chart.title.vpos"></a>
+<b>chart.title.vpos</b><br />
+            This allows you to completely override the vertical positioning of the title. It should be a number between 0 and 1, and is multiplied with the gutter and then used as the vertical position. It can be useful if you need to have a large gutter.<br /><i>Default: null</i><br /><br />
+            <a name="chart.title.color"></a>
+<b>chart.title.color</b><br />
+            The color of the title.<br /> <i>Default: black</i><br /><br />
+            <a name="chart.title"></a>
+
+<a name="chart.title.font"></a>
+<b>chart.title.font</b><br />
+The font that the title is rendered in. If not specified the chart.text.font setting is used (usually Verdana)<br />
+<i>Default: null</i><br /><br />
+
+<a name="chart.title.size"></a>
+<b>chart.title.size</b><br />
+The size of the title. If not specified the size is usually 2pt bigger than the chart.text.size setting.<br />
+<i>Default: null</i><br /><br />
+
+<a name="chart.title.bold"></a>
+<b>chart.title.bold</b><br />
+Whather the title is bold or not.<br />
+<i>Default: true</i><br /><br />
+
+            <a name="chart.title.left"></a>
+<b>chart.title.left</b><br />
+            The left title. <br /><i>Default: An empty string</i><br /><br />
+            <a name="chart.title.right"></a>
+<b>chart.title.right</b><br />
+            The right title. <br /><i>Default: An empty string</i><br /><br />
+<a name="colors"></a>
+
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Colors</h3>
+
+    <a name="chart.colors"></a>
+    <b>chart.colors</b><br />
+    An array of colors. These too can be gradients that you make if you wish. <br />
+    <i>Default: ['#fcf', '#00f', '#f00', '#0f0', '#ff0', '#0ff', '#f0f', '#ff6101', '#b401ff', '#e4ff01', '#fb8195', '#ccc']</i><br /><br />
+    
+    <a name="chart.strokestyle"></a>
+    <b>chart.strokestyle</b><br />
+    This is the color used as the stroke style. If you didn't want it, you could set this to <i>rgba(0,0,0,0)</i><br />
+    <i>Default: #333</i><br /><br />
+
+<a name="labels, text and axes"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Labels, text and axes</h3>            <a name="chart.xtickinterval"></a>
+            <b>chart.xtickinterval</b><br />
+            The X tick mark interval. <br /><i>Default: null</i><br /><br />
+            <a name="chart.axis.color"></a>
+
+            <b>chart.axis.color</b><br />
+            The color of the axes. <br /><i>Default: black</i><br /><br />
+            <a name="chart.xmax"></a>
+
+            <b>chart.xmax</b><br />
+            This allows you to set the maximum X value that the chart uses, instead of it being auto-generated.<br>
+            <i>Default: null</i></br><br /><br />
+
+
+
+            <a name="chart.labels"></a>
+<b>chart.labels</b><br />
+            An array of the charts labels (they go in the middle). <br /><i>Default: null</i><br /><br />
+            <a name="chart.text.size"></a>
+<b>chart.text.size</b><br />
+            The size of the text used (in points). <br /><i>Default: 10</i><br /><br />
+            <a name="chart.text.font"></a>
+<b>chart.text.font</b><br />
+            The font used to render the text.<br /><i>Default: Verdana</i><br /><br />
+            <a name="chart.text.color"></a>
+<b>chart.text.color</b><br />
+            The color of the labels. <br /><i>Default: black</i><br /><br />
+<a name="scale"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Scale</h3>            <a name="chart.units.pre"></a>
+
+            <a name="chart.scale.formatter"></a>
+            <b>chart.scale.formatter</b><br />
+            To allow thoroughly custom formats of numbers in the scale, you can use this option to
+            specify a function that is used by OfficeExcel to format numbers. This function should
+            handle ALL of the formatting. Eg:<br /><br />
+            <pre class="code">
+function myFormatter(obj, num)
+{
+    return num + 'F'; // An example of formatting
+}
+myGraph.Set('chart.scale.formatter', myFormatter);
+</pre>
+            <br /><i>Default: null</i><br /><br />
+
+            <a name="chart.scale.decimals"></a>
+            <b>chart.scale.decimals</b><br />
+            The number of decimal places to display for the Y scale.
+            <br /><i>Default: 0</i><br /><br />
+            
+            <a name="chart.scale.point"></a>
+            <b>chart.scale.point</b><br />
+            The character used as the decimal point.<br />
+            <i>Default: .</i><br /><br />
+            
+            <a name="chart.scale.thousand"></a>
+            <b>chart.scale.thousand</b><br />
+            The character used as the thousand separator<br />
+            <i>Default: ,</i><br /><br />
+            <a name="chart.scale.round"></a>
+            <b>chart.scale.round</b><br />
+            Whether to round the maximum scale value up or not. This will produce slightly better scales in some instances.<br />
+            <i>Default: null</i><br /><br />
+
+<b>chart.units.pre</b><br />
+            The units that are applied to the X axis labels (these are pre-pended to the number).<br /><i>Default: none</i><br /><br />
+            <a name="chart.units.post"></a>
+<b>chart.units.post</b><br />
+            The units that are applied to the X axis labels (these are appended to the number).<br /><i>Default: none</i><br /><br />
+<a name="interactive features"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Interactive features</h3>            <a name="chart.tooltips"></a>
+<b>chart.tooltips</b><br />
+            A numerically indexed array of tooltips that are shown when a bar is clicked. These can contain HTML.<br /><i>Default: An empty array</i><br /><br />
+            <a name="chart.tooltips.effect"></a>
+<b>chart.tooltips.effect</b><br />
+            The animated effect used for showing tooltips. Can be either <i>fade</i> or <i>expand</i>.<br /><i>Default: fade</i><br /><br />
+            <a name="chart.tooltips.css.class"></a>
+<b>chart.tooltips.css.class</b><br />
+            This is the name of the CSS class the chart uses.<br /><i>Default: OfficeExcel_tooltip</i><br /><br />
+            <a name="chart.tooltips.override"></a>
+<b>chart.tooltips.override</b><br />
+            If you wish to handle showing tooltips yourself, this should be a function object which does just that. There's more information on the <a href="tooltips.html">tooltips documentation page</a><br /><i>Default: null</i><br /><br />
+            <a name="chart.contextmenu"></a>
+<b>chart.contextmenu</b><br />
+            An array of context menu items. Cannot be used in conjunction with tooltips.<br /><i>Default: [] (An empty array)</i><br /><br />
+            <a name="chart.annotatable"></a>
+<b>chart.annotatable</b><br />
+            Whether annotations are enabled for the chart (ie you can draw on the chart interactively.<br /><i>Default: false</i><br /><br />
+            <a name="chart.annotate.color"></a>
+<b>chart.annotate.color</b><br />
+            If you do not allow the use of the palette, then this will be the only colour allowed for annotations.<br /><i>Default: black</i><br /><br />
+
+
+            <a name="chart.resizable"></a>
+            <b>chart.resizable</b><br />
+            Defaulting to false, this determines whether your chart will be resizable. Because of the numerous event handlers this has to install code on, This feature is unlikely to work with other dynamic features (the context menu is fine however).<br />
+            <i>Default: false</i><br /><br />
+
+            <a name="chart.resize.handle.background"></a>
+            <b>chart.resize.handle.background</b><br />
+            With this you can specify the background color for the resize handle. If you're adjusting the position of the
+            handle then you may need this to make the handle stand out more.<br />
+            <i>Default: null</i><br /><br />
+
+
+<a name="shadow"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Shadow</h3>            <a name="chart.shadow"></a>
+<b>chart.shadow</b><br />
+            Turns the shadow on or off.<br /> <i>Default: false</i><br /><br />
+            <a name="chart.shadow.color"></a>
+<b>chart.shadow.color</b><br />
+            The color of the shadow.<br /> <i>Default: #666</i><br /><br />
+            <a name="chart.shadow.offsetx"></a>
+<b>chart.shadow.offsetx</b><br />
+            The horizontal offset of the shadow.<br /> <i>Default: 3</i><br /><br />
+            <a name="chart.shadow.offsety"></a>
+<b>chart.shadow.offsety</b><br />
+            The vertical offset of the shadow. <br /> <i>Default: 3</i><br /><br />
+            <a name="chart.shadow.blur"></a>
+<b>chart.shadow.blur</b><br />
+            How severe the blurring effect is for the shadow.<br /> <i>Default: 3</i><br /><br />
+<a name="zoom"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Zoom</h3>            <a name="chart.zoom.mode"></a>
+<b>chart.zoom.mode</b><br />
+            Can be used to control whether the zoom is in thumbnail or canvas mode. Possible values are: <i>thumbnail</i> and <i>canvas</i>.<br /><i>Default: canvas</i><br /><br />
+            <a name="chart.zoom.factor"></a>
+<b>chart.zoom.factor</b><br />
+            This is the factor that the chart will be zoomed by (bigger values means more zoom)<br /><i>Default: 1.5</i><br /><br />
+            <a name="chart.zoom.fade.in"></a>
+<b>chart.zoom.fade.in</b><br />
+            Whether the zoomed canvas fades in or not. This also can be used to control the fade in for the zoom in thumbnail mode.<br /><i>Default: true</i><br /><br />
+            <a name="chart.zoom.fade.out"></a>
+<b>chart.zoom.fade.out</b><br />
+            Whether the zoomed canvas fades out or not. This also can be used to control the fade in for the zoom in thumbnail mode.<br /><i>Default: true</i><br /><br />
+            <a name="chart.zoom.hdir"></a>
+<b>chart.zoom.hdir</b><br />
+            The horizontal direction of the zoom. Possible values are: <i>left</i>, <i>center</i>, <i>right</i><br /><i>Default: right</i><br /><br />
+            <a name="chart.zoom.vdir"></a>
+<b>chart.zoom.vdir</b><br />
+            The vertical direction of the zoom. Possible values are: <i>up</i>, <i>center</i>, <i>down</i><br /><i>Default: down</i><br /><br />
+            <a name="chart.zoom.delay"></a>
+<b>chart.zoom.delay</b><br />
+            The delay (in milliseconds) between frames.<br /><i>Default: 50</i><br /><br />
+            <a name="chart.zoom.frames"></a>
+<b>chart.zoom.frames</b><br />
+            The number of frames in the zoom animation.<br /><i>Default: 10</i><br /><br />
+            <a name="chart.zoom.shadow"></a>
+<b>chart.zoom.shadow</b><br />
+            Whether or not the zoomed canvas has a shadow or not.<br /><i>Default: true</i><br /><br />
+            <a name="chart.zoom.thumbnail.width"></a>
+<b>chart.zoom.thumbnail.width</b><br />
+            When the zoom is in thumbnail mode, this is the width (in pixels) of the thumbnail.<br /><i>Default: 75</i><br /><br />
+            <a name="chart.zoom.thumbnail.height"></a>
+<b>chart.zoom.thumbnail.height</b><br />
+            When the zoom is in thumbnail mode, this is the height (in pixels) of the thumbnail.<br /><i>Default: 75</i><br /><br />
+            <a name="chart.zoom.background"></a>
+
+            <a name="chart.zoom.thumbnail.fixed"></a>
+            <b>chart.zoom.thumbnail.fixed</b><br />
+            When the zoom is in thumbnail mode, you can use this property to fix the zoom in the top left corner instead
+            of it following the cursor around.<br />
+            <i>Default: false</i><br /><br />
+
+<b>chart.zoom.background</b><br />
+            Defaulting to true, this determines whether the zoom has a dark, semi-opaque background that covers the entire web page.<br /><i>Default: true</i><br /><br />
+
+
+    <a name="events"></a>
+    <h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Events</h3>
+        
+        <a name="chart.events.click"></a>
+        <b>chart.events.click</b><br />
+        If you want to add your own <i>onclick</i> function you can do so by assigning it to this property. See
+        <a href="pseudo-standard-events.html">here</a> for details.
+        <br /><i>Default: null</i><br /><br />
+
+        <a name="chart.events.mousemove"></a>
+        <b>chart.events.mousemove</b><br />
+        If you want to add your own <i>onmousemove</i> function you can do so by assigning it to this property. See
+        <a href="pseudo-standard-events.html">here</a> for details.
+        <br /><i>Default: null</i><br /><br />
+        
+    <a name="miscellaneous"></a>
+    <h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Miscellaneous</h3>
+
+        <a name="chart.highlight.stroke"></a>
+        <b>chart.highlight.stroke</b><br />
+        If you use tooltips, this controls the colour of the highlight stroke.
+        <br /><i>Default: black</i><br /><br />
+
+        <a name="chart.highlight.fill"></a>
+        <b>chart.highlight.fill</b><br />
+        If you use tooltips, this controls the colour of the highlight fill.
+        <br /><i>Default: rgba(255,255,255,0.5)</i><br /><br />
+
+</div><!-- /DOCS --><br /><br />
+
+
+    <a name="methods"></a>
+    <p>&nbsp;</p>
+    <h2>Methods</h2>
+    
+    <a name="getbar"></a>
+    <b>obj.getBar(event)</b><br /><br />
+        <p>
+            This method when used in an event will return the details of the bar that was clicked on moused over (if any). It returns:
+        </p>
+        
+        <ul>
+            <li>The X coordinate</li>
+            <li>The Y coordinate</li>
+            <li>The width</li>
+            <li>The height</li>
+            <li>The index of the bar (starting at 0)</li>
+        </ul>
+
+    <a name="getShape"></a>
+    <b>obj.getShape(event)</b>
+        <p>
+            This method is an alternate name for the above method but has a generic name that is the same acoss the various libraries.
+        </p>
+
+</body>
+</html>

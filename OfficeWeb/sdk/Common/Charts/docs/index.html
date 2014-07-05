@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>The OfficeExcel documentation and other HTML5 examples</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas chart docs examples" />
+    <meta name="description" content="The OfficeExcel documentation along with other HTML5 examples" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A chart library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.jpg"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <meta name="keywords" content="OfficeExcel chart html5 javascript canvas" />
+    <meta name="description" content="OfficeExcel: HTML5 Javascript charts library Javascript charts & HTML5 canvas charts library" />
+    
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+
+    <?php PrintAnalyticsCode() ?>
+
+</head>
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+
+<div id="breadcrumb">
+    <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+    >
+    Documentation and HTML5 examples
+</div>
+
+<h1>Documentation <span>and HTML5 examples</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <div style="text-align: center">
+        <div class="warning" style="display: inline; display: inline-block">
+            Need something that OfficeExcel doesn't currently support? OfficeExcel license holders can usually be accomodated - please
+            <a href="mailto:support@OfficeExcel.net"><b>contact support</b></a> to discuss your requirements.
+        </div>
+    </div>
+
+    <div>
+        <h4>Introduction</h4>
+
+        <ul>
+            <li>
+                <a href="../index.html#intro" title="A short description of OfficeExcel: HTML5 Javascript charts library">Introduction to OfficeExcel: HTML5 Javascript charts library</a>
+                <ul>
+                    <li><a href="what-is-html5-canvas.html" title="A brief description of what HTML5 canvas is">What is HTML5 canvas?</a></li>
+                </ul>
+            </li>
+        </ul>
+        
+        <ul>
+            <li><a href="../examples/index.html"><b>Example charts</b></a></li>
+            <li><a href="licensing.html">The OfficeExcel license</a></li>
+            <li><a href="release-notes.html">Release notes</a></li>
+        </ul>
+    </div>
+
+
+    <div style="float: left; width: 202px">
+        <h4>Chart types</h4>
+        <ul>
+            <li><a href="bar.html">Bar charts</a></li>
+            <li><a href="bipolar.html">Bi-polar charts</a></li>
+            <li><a href="donut.html">Donut charts</a></li>
+            <li><a href="fuel.html">Fuel charts</a></li>
+            <li><a href="funnel.html">Funnel charts</a></li>
+            <li><a href="gauge.html">Gauge charts</a></li>
+            <li><a href="gantt.html">Gantt charts</a></li>
+            <li><a href="hbar.html">Horizontal bar charts</a></li>
+            <li><a href="hprogress.html">Horizontal progress bar</a></li>
+            <li><a href="led.html">LED Grid</a></li>
+            <li><a href="line.html">Line charts</a></li>
+            <li><a href="meter.html">Meter charts</a></li>
+            <li><a href="odo.html">Odometer charts</a></li>
+            <li><a href="pie.html">Pie charts</a></li>
+            <li><a href="radar.html">Radar charts</a></li>
+            <li><a href="rose.html">Rose charts</a></li>
+            <li><a href="rscatter.html">Radial scatter charts</a></li>
+            <li><a href="scatter.html">Scatter charts</a></li>
+            <li><a href="thermometer.html">Thermometer charts</a></li>
+            <li><a href="vprogress.html">Vertical progress bar</a></li>
+            <li><a href="waterfall.html">Waterfall charts</a></li>
+        </ul>
+        
+        <h4>Basic examples</h4>
+        
+        <ul>
+            <li><a href="basic.html">A basic example</a></li>
+            <li><a href="basic_events.html">A basic example of the OfficeExcel pseudo-events</a></li>
+            <li><a href="basic_tooltips.html">A basic example of a charts in tooltips</a></li>
+            <li><a href="basic_combined.html">A basic example of a combined Bar/Line chart</a></li>
+        </ul>
+    </div>
+    
+    <div style="float: left; width: 435px">
+
+        <h4>HOWTO Guides</h4>
+        <ul>
+            <li><a href="howto-make-a-transition-effect.html">Make a transition effect</a><img src="../images/new.png" alt="New!" width="31" height="12" /></li>
+            <li><a href="howto-events.html">Add events to your charts</a><img src="../images/new.png" alt="New!" width="31" height="12" /></li>
+            <li><a href="howto-images.html">Add images to your charts</a><img src="../images/new.png" alt="New!" width="31" height="12" /></li>
+            <li><a href="howto-linking.html">Add links to your charts</a><img src="../images/new.png" alt="New!" width="31" height="12" /></li>
+            <li><a href="howto-events-modaldialog.html">Use the ModalDialog with events</a><img src="../images/new.png" alt="New!" width="31" height="12" /></li>
+        </ul>
+
+        <h4>Features and examples</h4>
+        <ul>
+            <li><a href="pseudo-standard-events.html">Pseudo-standard events</a><img src="../images/new.png" alt="New!" width="31" height="12" /></li>
+            <li><a href="financial.html">Displaying financial data</a></li>
+            <li><a href="xml-data.html">Fetching data from an XML file (AJAX)</a></li>
+            <li><a href="effects.html">Animation and visual effects</a></li>
+            <li><a href="gutters.html">Variable gutter sizes</a></li>
+            <li><a href="setconfig.html">The OfficeExcel.SetConfig() function</a></li>
+            <li><a href="keys.html">Examples of keys in charts</a></li>
+            <li><a href="dynamic.html">Updating your charts dynamically</a></li>
+            <li><a href="png.html">Retrieving a PNG of your charts</a></li>
+            <li><a href="domcontentloaded.html">DOMContentLoaded example</a></li>
+            <li><a href="events.html">Custom OfficeExcel events</a></li>
+            <li><a href="adjusting.html">Adjusting your charts interactively</a></li>
+            <li><a href="tooltips.html">Using tooltips in your charts</a></li>
+            <li><a href="resizing.html">Resizing your charts</a></li>
+            <li><a href="msie.html">Microsoft Internet Explorer support</a></li>
+            <li><a href="async.html">Asynchronous processing</a></li>
+            <li><a href="zoom.html">Zooming your charts</a></li>
+            <li>
+                <a href="annotating.html">Annotating your charts</a>
+                <ul>
+                    <li><a href="annotate_persist.html">Making your annotations shareable across browsers/computers</a></li>
+                </ul>
+            </li>
+            <li><a href="combine.html">Combining charts</a></li>
+            <li><a href="external.html">Integrating OfficeExcel with external libraries (ModalDialog)</a></li>
+            <li><a href="css.html">Available CSS classes</a></li>
+            <li><a href="color.html">About canvas color definitions</a></li>
+            <li><a href="context.html">Context menus</a></li>
+        </ul>
+    </div>
+    
+    <div style="float: left; width: 338px">
+        <h4>Miscellaneous</h4>
+        <ul>
+            <li><a href="#support" title="Need support? Get it here"><b>Support</b></a></li>
+        </ul>
+
+        <ul>
+            <li><a href="misc.html">Miscellaneous documentation</a></li>
+            <li><a href="issues.html">Common issues</a></li>
+            <li>
+                <a href="api.html">API Documentation</a>
+                <p />
+            </li>
+            <li><a href=".CHANGELOG.txt">The changelog</a></li>
+            <li><a href=".BC.txt">Backwards compatibility breaks</a></li>
+        </ul>
+
+        <h4>On this page:</h4>
+
+        <ul>
+            <li><a href="#benefits" title="Benefits of OfficeExcel: HTML5 Javascript charts library">Benefits of OfficeExcel: HTML5 Javascript charts library</a></li>
+            <li><a href="#browser" title="Information about browser support">Browser support</a></li>
+            <li><a href="#performance" title="Things you may want to look at concerning performance">Improving the performance of your charts</a></li>
+            <li><a href="#implementation" title="Implementing OfficeExcel on your website">Implementing OfficeExcel</a></li>
+            <li><a href="#structure" title="Suggested structure for OfficeExcel">Suggested structure for OfficeExcel</a></li>
+            <li>
+                <a href="#integration" title="Information on integrating OfficeExcel with server side scripting">Integration with server side scripting</a>
+                <ul>
+                    <li><a href="#mysql" title="Integration with PHP &amp; MySQL">Integration with PHP &amp; MySQL</a></li>
+                    <li><a href="#ajax" title="Making AJAX requests">Making AJAX requests</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+
+
+<!------------------------------------------------------------------------------------------------------------------------>
+
+
+
+    <br clear="all" />
+    <hr />
+
+
+
+    <a name="benefits"></a>
+    <br />&nbsp;<br />&nbsp;<br />
+    <h2>Benefits of OfficeExcel: HTML5 Javascript charts library</h2>
+    
+    <p>
+        The HTML5 canvas tag is a new tag for HTML5. It allows for two dimensional drawing easily using Javascript.
+        This makes it perfect for producing charts. Because Javascript runs on your users' computer, none of the load on your web server
+        normally associated with producing charts is incurred. Not only that but because
+        of the greater processing power that is typically available on users' computers, they will be much faster. And,
+        because the code can be both compressed (for example if you're using Apache, mod_gzip will do this automatically for you) and
+        cached, bandwidth usage can be massively reduced. This makes it economically attractive to employ at the same time as
+        benefiting your website, ie:
+    </p>
+    
+    <ul>
+        <li><b>It can save you money by reducing the load on your web server(s)</b><br /><br /></li>
+        <li><b>It can speed up your web pages</b></li>
+    </ul>
+
+    <p>
+        Imagine, you are creating 10,000 charts a day and the data is such that the resulting charts cannot be cached. With the OfficeExcel
+        library you can reduce that figure to zero. All the processing is done by each individual web browser, much like
+        showing the HTML that you send to them. So you don't have to send any images, you simply send them the Javascript charts libraries
+        once. So, much lower bandwidth bills and less strain on your webserver.
+    </p>
+    
+    <p>
+        And if that wasn't enough, because the charts are created using Javascript, they will work offline if you view a .html page
+        on your own PC. Download the archive and see! Useful if you need to do a presentation (for example) and want to use the same
+        charts as your website.
+    </p>
+    
+    <div>
+        <div style="width: 45%; background-color: #fff; display: inline; display: inline-block">
+            <ul>
+                <li>Cross browser support.</li>
+                <li>20+ Different base chart types (<a href="../examples/index.html">Examples</a>).</li>
+                <li>Charts work on and off-line.</li>
+                <li>Interactive features.</li>
+            </ul>
+        </div>
+
+        <div style="width: 45%; display: inline; display: inline-block">
+            <ul>
+                <li>Charts are created on the client - no server overhead.</li>
+                <li>Very easy setup (see <a href="#implementation">Implementing OfficeExcel</a>).</li>
+                <li>Fully documented.</a></li>
+                <li>Very easy to learn.</li>
+            </ul>
+        </div>
+    </div>
+
+
+    <a name="browser"></a>
+    <br />&nbsp;<br />&nbsp;<br />
+    <h2>Browser support</h2>
+    
+    <p>
+        Since the charts are produced using HTML5 features (the new <b>canvas</b> tag), client support includes:
+    </p>
+    
+    <ul>
+        <li>Mozilla Firefox 3.0+</li>
+        <li>Google Chrome 1+</li>
+        <li>Apple Safari 3+</li>
+        <li>Opera 9.5+</li>
+        <li>Microsoft Internet Explorer 7+ (see note)</li>
+        <li>iPhone (text support from iOS v4+)</li>
+        <li>iPad (text support from iOS v4.2+)</li>
+    </ul>
+    
+    <p>
+        The HTML5 canvas tag is part of the <a href="http://www.w3.org/html/wg/html5/" target="_blank">HTML5 specification</a>,
+        and all of the above browsers have some sort of support for it.
+    </p>
+    
+    <p>
+        <b>HTML5 canvas &amp; Microsoft Internet Explorer (MSIE)</b><br />
+        Microsoft Internet Explorer 6/7/8 don't natively support the HTML5 canvas tag. To support
+        MSIE 7 and 8 you will need to use either
+        <a href="http://code.google.com/chrome/chromeframe/" target="_blank">Google Chrome Frame</a> or
+        <a href="http://code.google.com/p/explorercanvas/" target="_blank">ExCanvas from Google</a>
+        (which is included in the OfficeExcel archive). Read more about Internet Explorer compatibility
+        <a href="msie.html">here</a>.
+        
+        <p />
+        
+        <span style="color: #090">
+            Starting from the developer preview 3, <b style="color: black">Microsoft Internet Explorer 9</b> has full support for
+            HTML5 canvas.
+        </span>
+        
+        <p>
+            MSIE 6 is supported using Google Chrome Frame.
+        </p>
+    </p>
+
+    <p>
+        <b>OfficeExcel and older browsers</b><br />
+        Older browsers (eg Chrome 1, Firefox 3, Safari 3, Opera 9.5) are supported, however if they don't support the canvas shadow or
+        text APIs, these will naturally be unavailable. Earlier versions of these browsers may work, but are untested.
+    </p>
+    
+    <p>
+        <b>Other devices</b><br />
+        Other devices (eg mobile devices) may support or may be intending to support the HTML5 canvas tag as part of their HTML5 support. Typically
+        the newer a device or its OS the higher the likelyhood is that it has support for HTML5 canvas.
+    </p>
+
+    <a name="performance"></a>
+    <br />&nbsp;<br />&nbsp;<br />
+    <h2>Improving the performance of your charts</h2>
+    
+    <p>
+        Although performance is excellent, (eg compared to server based charts libraries), you may still want to tune
+        OfficeExcel further. The biggest thing you can do is use HTTP compression, which reduces the initial download time of the libraries,
+        but there are a number of things you can do:
+    </p>
+    
+    <ul>
+        <li>
+            <b>Compression</b><br />HTTP compression can dramatically reduce your bandwidth bills and increase the speed
+            of your website. The OfficeExcel.common.core.js file for example used to be over 100k, but with compression this was reduced
+            to around 17k. Less than a fifth of the original size! <span style="color: red">If you do only one thing to aid performance,
+            then it should be this.</span>
+            
+            <p>
+                To achieve this with Apache you have a few options:
+            </p>
+            
+            <ul style="list-style-type: disc">
+                <li>You can use the Apache module mod_gzip which compresses the libraries on the fly.</li>
+                <li>
+                    You can compress the libraries manually using the Unix gzip command, rename them to remove the .gz suffix
+                    and add the header using an Apache directive
+                    (eg <span style="background-color: #C5FFC5; padding: 1px">AddEncoding gzip .js</span>). If you have some sort of
+                    release process/script, it would make sense to add this to it to automate the procedure.
+                </li>
+            </ul>
+            <p>
+        </li>
+
+        <li>
+            <b>Minification</b><br />
+            Minification reduces the size of the library before compression takes effect, removing unnecessary spaces and comments etc.
+            A combination of minification and compression will give superb results. For example, before being split up into seperate files,
+            minification combined with compression reduced the common library from over 100k to roughly 10k (!). There is a PHP shell
+            script that you can use to minify the libraries in the scripts directory.
+
+            <p>
+                You can get pre-minified versions of the libraries <a href="http://www.OfficeExcel.net/OfficeExcel.minified.zip">here</a>.
+            </p>
+        </li>
+        
+        <p>
+
+        <li>
+            <b>Pre-emptive caching</b><br />
+            Slightly different to caching itself, is pre-emptive caching. This involves downloading the libraries before the page that requires
+            them is shown. This way, they're already in the users browser cache and the chart will subsequently appear to be much much
+            quicker. An example of this would be having the library included at the bottom of your index page of your website (optionally
+            with the <b>defer="defer"</b> attribute). The script can be downloaded at will because the page doesn't actually use it, but
+            for subsequent pages it will already be in the users browser cache.
+            
+            <p>
+        </li>
+
+        <li>
+            <b>Caching</b><br />
+            Since the libraries you're using won't change that often, you can set distant Expires: headers on them, or appropriate
+            Cache-Control: headers, and the client will not even have to contact your server for it. When you want to make sure
+            the library is re-downloaded (eg. you update the library), then simply change the filename.
+            
+            <p>
+        </li>
+
+        <li>
+            <b>Script tag placement</b><br />
+            According to <a href="http://developer.yahoo.com/performance/" target="_blank">Yahoo! guidelines</a> placing the &lt;SCRIPT&gt;
+            tag at the bottom of the page can increase the percieved load time. If you do this, then your charts should be
+            created in the window.onload event, otherwise the browser may try to create them without the library
+            having been loaded, and will therefore subsequently fail.
+
+            <p>
+
+            You should also consider the effect that this has when your page is rather weighty. If the page is weighty there
+            will be a small delay before the onload event fires, and therefore creates the chart. This might not be so bad if the
+            chart is not immediately visible, however if it is then you should carefully consider using the onload event. You
+            may wish to load the library in the page header, define the canvas tag and then immediately define the javascript
+            that creates the chart. This way
+            the chart will be created and shown, and then the rest of the page loads. The end result is that your chart
+            appears to be faster.
+            
+            <p />
+            
+            Between the onload event, asychronous Javascript and careful tag placement, you will need to experiment to get the right result
+            for you.
+        </li>
+        
+        <li>
+            <b>Document structure</b><br />
+            The structure of your document can have a significant impact on how fast your charts are displayed. If, for example, you use
+            tables for layout, this can delay the display of elements that are affected by the size of the table. Where possible, you
+            should consider trying to convert your layout to DIVs. An example of this is the front page of this website. The charts
+            were right aligned using a table as a container. This caused a visible delay when showing them. In this case it was a
+            simple matter to convert the page to use DIVs, and the page subsequently displays much faster.
+            <p />
+        </li>
+        
+        <li>
+            <b>Creating your charts asynchronously</b><br />
+            Where possible, you may wish to create your charts asynchronously. This allows the browser to continue rendering the page
+            immediately after getting to the code that creates the chart. This might not be perceptible if you don't have a lot of
+            charts, or your page is small. You can read a little more about this and see example code <a href="async.html">here</a>.
+
+            <p />
+            
+            Note that recent releases of Google Chrome (from a dev release of version 4) have had an issue with creating charts
+            asynchronously, which presents itself by not drawing text sometimes (it's not consistent). Simply not using
+            asynchronous chart production in this case resolves the issue.
+        </li>
+        
+        <li>
+            <b>DOMContentLoaded event</b><br />
+            Using this event can speed up the display of your charts signifcantly compared to the more well known <i>onload</i> event.
+            It is supported by Chrome, Gecko based browsers (ie Firefox), Safari, Opera and Internet Explorer 9. This event fires when
+            the structure of the page is loaded, but not necessarily the images or CSS. This means that if your page is laden with
+            images, this event will fire before the onload event, thus creating your charts quicker. The effect can be very noticeable.
+            
+            <pre class="code">
+function addListener(func)
+{
+    if(window.addEventListener) {
+        window.addEventListener('DOMContentLoaded', func, false);
+    } else {
+        document.attachEvent("onDOMContentLoaded", func);
+    }
+}
+</pre>
+            You can read more about the <i>DOMContentLoaded</i> event on the Mozilla site, <a href="https://developer.mozilla.org/en/Gecko-Specific_DOM_Events" target="_blank">here</a>,
+            and the Microsoft site <a href="http://ie.microsoft.com/testdrive/HTML5/87DOMContent-Loaded/Default.html" target="_blank">here</a>.
+            There's an example <a href="domcontentloaded.html">here</a>.
+            <p />
+        </li>
+        
+        <li>
+            <b>AJAX requests</b><br />
+            If you can take advantage of AJAX, you can use this method to retrieve data from your server. If, for example, you have a chart that
+            shows ongoing information, instead of simply refreshing the entire page, you could use an AJAX request to just retrieve the
+            data that you want and update the chart that way. This reduces the amount of data needed to be transferred, thus reducing the
+            bandwidth used, and will be quicker than a full page refresh, particularly if your page is weighty. There's a simple AJAX
+            function that you can use <a href="#ajax">below</a>.
+            <p />
+        </li>
+        
+        <li>
+            <b>Combining libraries</b><br />
+            You may wish to consider combining the OfficeExcel libraries into a single file.
+            This won't save on the size of the individual libraries, but will save on the headers that are sent as part of the response.
+            If a typical response sends 500 bytes worth of headers, and you send four chart libraries, then combining the libraries
+            would save 1500 bytes. Multiple factors need to be considered though, including things like caching, which can circumvent
+            the unneccessary repeated downloading of the libraries.
+            
+            <p>
+                To make your life straight-forward, you may want to make this a part of your release script/process. This way you
+                can make changes to the scripts in your development environment as you would normally.
+            </p>
+            
+            <p>
+                Another effect of combining libraries is reducing the amount of HTTP connections needed to retrieve them. Most browsers
+                have a limit on how many connections they can create simultaneously, so if they're not being used to retrieve your
+                chart libraries, they can be used for something else.
+            </p>
+        </li>
+        
+        <li>
+            <b>Avoiding shadow blur with animations</b><br />
+            If you're using animations then you may wish to avoid or reduce the shadow blur that you're using. With HTML5 canvas shadow
+            blur is a drain on performance - so if you're looking to get the most out of your charts or are using animations
+            which require redrawing the chart, turning off the shadow blur can reduce the time it takes to draw the charts leading to
+            smoother charts.
+        </li>
+    </ul>
+    
+    <b>A reasonable performance strategy</b>
+    
+    <p>
+        Although there's a lot you can do in regards to performance, a few of the points here will suffice for most
+        websites:
+        
+        <ul>
+            <li>Compression</li>
+            <li>Minification</li>
+            <li>Pre-emptive caching</li>
+            <li>Caching</li>
+        </ul>
+        
+        The number one thing you should do is compress your libraries. This has multiple benefits and provides by far the most gain,
+        effectively for free. Secondly, use the minified libraries. Since you can download them <a href="../OfficeExcel.minified.zip">here</a>,
+        you might as well use them. Then we have pre-emptive caching. Since most websites won't show charts on the front page or will
+        have a login page that is shown before any charts, this effectively eliminates the charts library download. And lastly caching
+        should be done as a matter of course. There's no reason to keep downloading the same library so even caching for only 30 minutes
+        (or the duration of an average visit to your website) will produce results.
+    </p>
+    
+    <p>
+        <b>General website performance tools</b><br /><br />
+        
+        If your aim is to improve your websites performance as a whole then you may be interested in these tools:
+    </p>
+    
+    <ul>
+        <li>
+            <a href="http://www.webpagetest.org/" target="_blank">http://www.webpagetest.org/</a><br />
+            This site can provide a wealth of information about how to improve the permance of your website, specific to your site.<br /><br />
+        </li>
+
+        <li>
+            <a href="http://code.google.com/speed/page-speed/docs/using_chrome.html" target="_blank">Page Speed for Google Chrome</a><br />
+            <a href="http://code.google.com/speed/page-speed/docs/using_firefox.html" target="_blank">Page Speed for Mozilla Firefox</a><br />
+            <a href="http://pagespeed.googlelabs.com/" target="_blank">Page Speed online</a><br />
+            The Page Speed plugins and the online tool also provide a great deal of information about how to speed up your website.<br /><br />
+        </li>
+        
+        <li>
+            <a href="image2url.html">Convert images to <i>data:</i> URLs</a><br />
+            A tool which converts images to <i>data:</i> URLs. Using <i>data:</i> URLs can reduce the number of HTTP requests used.
+        </li>
+    </ul>
+    
+    <a name="implementation"></a>
+    <br />&nbsp;<br />&nbsp;<br />
+    <h2>Implementing OfficeExcel</h2>
+    
+    <p>
+        Getting OfficeExcel up and running is very easy and consists of three steps. If you're having trouble I suggest you get hold of a copy of
+        <a href="http://www.mozilla.com" target="_blank">Firefox</a> along with <a href="http://www.getfirebug.com" target="_blank">Firebug</a> - its
+        Javascript error console will make debugging your issue much easier. Many problems are down to a library not having been included or
+        not using the onload event when you need to. You might also benefit from using the <a href="https://addons.mozilla.org/en-US/firefox/addon/60" target="_blank">Web Developer toolbar</a>
+        for Firefox. This allows you to easily disable caching, thus eliminating any problems that that causes. You could equally use
+        the Chrome developer tools (CTRL+SHIFT+J), optionally in docked mode, which also provides a good quality Javascript console.
+    </p>
+
+    <ol>
+        <li>
+            Include the libraries (put this in your documents &lt;HEAD&gt;):
+<pre class="code">
+&lt;script src="OfficeExcel.common.core.js"&gt;&lt;/script&gt;
+
+&lt;script src="OfficeExcel.common.adjusting.js"&gt;&lt;/script&gt; &lt;!-- Just needed for adjusting --&gt;
+&lt;script src="OfficeExcel.common.annotate.js"&gt;&lt;/script&gt;  &lt;!-- Just needed for annotating --&gt;
+&lt;script src="OfficeExcel.common.context.js"&gt;&lt;/script&gt;   &lt;!-- Just needed for context menus --&gt;
+&lt;script src="OfficeExcel.common.effects.js"&gt;&lt;/script&gt;   &lt;!-- Just needed for visual effects --&gt;
+&lt;script src="OfficeExcel.common.resizing.js"&gt;&lt;/script&gt;  &lt;!-- Just needed for resizing --&gt;
+&lt;script src="OfficeExcel.common.tooltips.js"&gt;&lt;/script&gt;  &lt;!-- Just needed for tooltips --&gt;
+&lt;script src="OfficeExcel.common.zoom.js"&gt;&lt;/script&gt;      &lt;!-- Just needed for zoom --&gt;
+
+&lt;script src="OfficeExcel.bar.js"&gt;&lt;/script&gt;              &lt;!-- Just needed for bar charts --&gt;
+&lt;script src="OfficeExcel.bipolar.js"&gt;&lt;/script&gt;          &lt;!-- Just needed for bi-polar charts --&gt;
+&lt;script src="OfficeExcel.fuel.js"&gt;&lt;/script&gt;             &lt;!-- Just needed for fuel charts --&gt;
+&lt;script src="OfficeExcel.funnel.js"&gt;&lt;/script&gt;           &lt;!-- Just needed for funnel charts --&gt;
+&lt;script src="OfficeExcel.gantt.js"&gt;&lt;/script&gt;            &lt;!-- Just needed for gantt charts --&gt;
+&lt;script src="OfficeExcel.gauge.js"&gt;&lt;/script&gt;            &lt;!-- Just needed for gauge charts --&gt;
+&lt;script src="OfficeExcel.hbar.js"&gt;&lt;/script&gt;             &lt;!-- Just needed for horizontal bar charts --&gt;
+&lt;script src="OfficeExcel.hprogress.js"&gt;&lt;/script&gt;        &lt;!-- Just needed for horizontal progress bars --&gt;
+&lt;script src="OfficeExcel.led.js"&gt;&lt;/script&gt;              &lt;!-- Just needed for LED charts --&gt;
+&lt;script src="OfficeExcel.line.js"&gt;&lt;/script&gt;             &lt;!-- Just needed for line charts --&gt;
+&lt;script src="OfficeExcel.meter.js"&gt;&lt;/script&gt;            &lt;!-- Just needed for meter charts --&gt;
+&lt;script src="OfficeExcel.odo.js"&gt;&lt;/script&gt;              &lt;!-- Just needed for odometers --&gt;
+&lt;script src="OfficeExcel.pie.js"&gt;&lt;/script&gt;              &lt;!-- Just needed for pie AND donut charts --&gt;
+&lt;script src="OfficeExcel.radar.js"&gt;&lt;/script&gt;            &lt;!-- Just needed for radar charts --&gt;
+&lt;script src="OfficeExcel.rose.js"&gt;&lt;/script&gt;             &lt;!-- Just needed for rose charts --&gt;
+&lt;script src="OfficeExcel.rscatter.js"&gt;&lt;/script&gt;         &lt;!-- Just needed for rscatter charts --&gt;
+&lt;script src="OfficeExcel.scatter.js"&gt;&lt;/script&gt;          &lt;!-- Just needed for scatter charts --&gt;
+&lt;script src="OfficeExcel.thermometer.js"&gt;&lt;/script&gt;      &lt;!-- Just needed for thermometer charts --&gt;
+&lt;script src="OfficeExcel.vprogress.js"&gt;&lt;/script&gt;        &lt;!-- Just needed for vertical progress bars --&gt;
+&lt;script src="OfficeExcel.waterfall.js"&gt;&lt;/script&gt;        &lt;!-- Just needed for waterfall charts  --&gt;
+</pre>
+        </li>
+
+        <li>
+            Add the canvas tag (put it where you want the chart to appear):
+<pre class="code">
+&lt;canvas id="myCanvas" width="600" height="250"&gt;[No canvas support]&lt;/canvas&gt;
+</pre>
+        </li>
+
+        <li>
+            Create the chart (since it is using the onload event, you can put this anywhere):
+            
+<pre class="code">
+&lt;script&gt;
+    window.onload = function ()
+    {
+        var data = [280, 45, 133, 166, 84, 259, 266, 960, 219, 311, 67, 89];
+
+        var bar = new OfficeExcel.Bar('myCanvas', data);
+        bar.Set('chart.labels', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
+        bar.Set('chart.gutter.left', 35);
+        bar.Draw();
+    }
+&lt;/script&gt;
+</pre>
+        </li>
+    </ol>
+
+    <p>
+        There's also a very <a href="../examples/basic.html">basic example</a> of using OfficeExcel, that does very little. It can be helpful to
+        illustrate how you can get OfficeExcel up and running.
+    </p>
+    
+    <a name="structure"></a>
+    <br />&nbsp;<br />&nbsp;<br />
+    <h2>Suggested structure for OfficeExcel</h2>
+    
+    <img src="../images/structure.png" width="175" height="205" alt="Suggested structure for OfficeExcel" style="float: right" />
+    
+    <p>
+        The suggested layout structure for the OfficeExcel libraries is shown on the right. The <b>www.example.com</b> folder represents
+        the root/top level of your website with the <b>javascript</b> directory beneath that. The <b>css</b> and <b>images</b>
+        folders are shown for
+        illustrative purposes only. If you follow this layout then your URLs to the OfficeExcel libraries would be:
+    </p>
+    
+    <p>
+        <b>http://www.example.com/javascript/OfficeExcel/OfficeExcel.common.core.js</b><br />
+        <b>http://www.example.com/javascript/OfficeExcel/OfficeExcel.bar.js</b><br />
+        etc
+    </p>
+    
+    <p>
+        By using this structure you make OfficeExcel easy to update should you need to, and also keep all the OfficeExcel libraries in
+        one, easy to find, place.
+    </p>
+
+    <br clear="all" />
+
+    <a name="integration"></a>
+    <br />&nbsp;<br />&nbsp;<br />
+    <h2>Integration with server side scripting</h2>
+    
+    <p>
+        This is a very easy process, as easy as sending content to the browser. All you need to do is make the <i>data</i> variable
+        (as in the example below) contain the data you want to be displayed. Eg:
+    </p>
+
+    <pre class="code">
+&lt;script src="OfficeExcel.common.core.js"&gt;&lt;/script&gt;
+&lt;script src="OfficeExcel.line.js"&gt;&lt;/script&gt;
+
+&lt;canvas id="myCanvasTag" width="600" height="200"&gt;[No canvas support]&lt;/canvas&gt;
+
+&lt;script&gt;
+    data = [78,16,26,23,25,51,34,64,84,84];
+
+    line = new OfficeExcel.Line("myCanvasTag", data);
+    line.Set("chart.labels", ["Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov"]);
+    line.Draw();
+&lt;/script&gt;
+</pre>
+    
+    <p>
+        To get the above using PHP you could do this:
+    </p>
+    
+    <pre class="code">&lt;?php
+    // This simply makes a string out of the array of data
+    $myData = join(',', array(78,16,26,23,25,51,34,64,84,84));
+
+    // This prints out the required HTML markup
+    print('&lt;script src="OfficeExcel.common.core.js"&gt;&lt;/script&gt;' . "\n");
+    print('&lt;script src="OfficeExcel.line.js"&gt;&lt;/script&gt;' . "\n\n");
+    print('&lt;canvas id="myCanvasTag" width="600" height="200"&gt;[No canvas support]&lt;/canvas&gt;' . "\n\n");
+    print('&lt;script&gt;' . "\n");
+    print('    var data = [' . $myData . '];' . "\n\n");
+    print('    var line = new OfficeExcel.Line("myCanvasTag", data);' . "\n");
+    print('    line.Set("chart.labels", ["Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov"]);' . "\n");
+    print('    line.Draw();' . "\n");
+    print('&lt;/script&gt;');
+?&gt;
+</pre>
+
+    <p>
+        Strictly speaking the <span style="font-family: Monospace">var</span> isn't necessary, however if you put the code inside a
+        function (like window.onload), it's probably best to do so as using <span style="font-family: Monospace">var</span> will
+        make the variable local, and not global. So doing so will help prevent naming clashes.
+    </p>
+
+
+    <a name="mysql"></a>
+    <br />&nbsp;<br />&nbsp;<br />
+    <h4>Integration with PHP &amp;  MySQL</h4>
+    
+        <p>
+            This is a simple matter of formatting what you get back from MySQL into a string, as the MySQL dump and PHP code
+            below shows (it's based on a database called OfficeExcel_example):
+        </p>
+        
+        <pre class="code">
+#
+# Table structure for table `daily_statistics`
+#
+
+CREATE TABLE `daily_statistics` (
+  `st_day` char(9) NOT NULL,
+  `st_statistics` tinyint(4) NOT NULL,
+  UNIQUE KEY `st_day` (`st_day`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+#
+# Dumping data for table `daily_statistics`
+#
+
+INSERT INTO `daily_statistics` VALUES ('Mon', 124);
+INSERT INTO `daily_statistics` VALUES ('Tue', 95);
+INSERT INTO `daily_statistics` VALUES ('Wed', 64);
+INSERT INTO `daily_statistics` VALUES ('Thu', 94);
+INSERT INTO `daily_statistics` VALUES ('Fri', 75);
+INSERT INTO `daily_statistics` VALUES ('Sat', 98);
+INSERT INTO `daily_statistics` VALUES ('Sun', 84);
+</pre>
+
+        <pre class="code">
+&lt;?php
+    /**
+    * Change these to your own credentials
+    */
+    $hostname = "localhost";
+    $username = "root";
+    $password = "PASSWORD";
+    $database = "OfficeExcel_example";
+    
+    $connection = mysql_connect($hostname, $username, $password) OR die('Could not connect to MySQL: ' . mysql_error());
+    mysql_select_db($database);
+    
+    $result = mysql_query("SELECT st_day, st_statistics FROM daily_statistics");
+    if ($result) {
+    
+        $labels = array();
+        $data   = array();
+    
+        while ($row = mysql_fetch_assoc($result)) {
+            $labels[] = $row["st_day"];
+            $data[]   = $row["st_statistics"];
+        }
+
+        // Now you can aggregate all the data into one string
+        $data_string = "[" . join(", ", $data) . "]";
+        $labels_string = "['" . join("', '", $labels) . "']";
+    } else {
+        print('MySQL query failed with error: ' . mysql_error());
+    }
+?&gt;
+&lt;html&gt;
+&lt;head&gt;
+
+    &lt;!-- Don't forget to update these paths --&gt;
+
+    &lt;script src="libraries/OfficeExcel.common.core.js" &gt;&lt;/script&gt;
+    &lt;script src="libraries/OfficeExcel.line.js" &gt;&lt;/script&gt;
+
+&lt;/head&gt;
+&lt;body&gt;
+    
+    &lt;canvas id="cvs" width="600" height="250"&gt;[No canvas support]&lt;/canvas&gt;
+    &lt;script&gt;
+        chart = new OfficeExcel.Line('cvs', &lt;?php print($data_string) ?&gt;);
+        chart.Set('chart.background.grid.autofit', true);
+        chart.Set('chart.gutter.left', 35);
+        chart.Set('chart.gutter.right', 5);
+        chart.Set('chart.hmargin', 10);
+        chart.Set('chart.tickmarks', 'endcircle');
+        chart.Set('chart.labels', &lt;?php print($labels_string) ?&gt;);        
+        chart.Draw();
+    &lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+    <p>
+        This PHP code provides the data in two strings - <i>$labels_string</i> and <i>$data_string</i>. These variables are then used
+        in the OfficeExcel code to provide the data and the labels.
+    </p>
+    
+    <p><b>Remember:</b></p>
+    
+    <ul>
+        <li>Change the database hostname/username/password/database to match your own.</li>
+        <li>Ensure you have the correct paths to the OfficeExcel libraries.</li>
+    </ul>
+
+    <a name="ajax"></a>
+    <br />&nbsp;<br />&nbsp;<br />
+    <h4>Making AJAX requests</h4>
+
+        <p style="background-color: #ffa; padding: 3px; border: 1px dashed black">
+            <b>Note:</b>
+            It is important that you're careful with types when making AJAX requests. Since the response is initially a string,
+            and your AJAX function/library may not do conversions for you, you may need to convert these strings to numbers. To
+            do this you can use the <i>Number()</i> or <i>parseInt()</i> functions. For example:
+        </p>
+
+        <pre class="code">
+&lt;script&gt;
+    num = Number('23');
+    num = parseInt('43');
+&lt;/script&gt;
+</pre>
+
+        <p>
+            Here is a simple function that you could use to get data from your server using AJAX:
+        </p>
+
+    <pre class="code">
+&lt;script&gt;
+    /**
+    * Makes an AJAX call. It calls the given callback (a function) when ready
+    * 
+    * @param string   url      The URL to retrieve
+    * @param function callback A function object that is called when the response is ready, there's an example below
+    *                          called "myCallback".
+    */
+    function AjaxCall (url, callback)
+    {
+        // Mozilla, Safari, ...
+        if (window.XMLHttpRequest) {
+            var httpRequest = new XMLHttpRequest();
+        
+        // MSIE
+        } else if (window.ActiveXObject) {
+            var httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        
+        httpRequest.onreadystatechange = callback;
+        
+        httpRequest.open('GET', url, true);
+        httpRequest.send();
+    }
+
+
+    /**
+    * This sample callback function is called when the data is ready (readyState=4)
+    */
+    function myCallback ()
+    {
+        if (this.readyState == 4 && this.status == 200) {
+            // Everything is good, the response is received
+            alert(this.responseText);
+        }
+    }
+&lt;/script&gt;
+</pre>
+
+    <p>And you would use it like this:</p>
+    
+    <pre class="code">
+&lt;script&gt;
+    AjaxCall('http://www.example.com/getSomething.php', myCallback);
+&lt;/script&gt;
+</pre>
+
+    <p>
+        There's an example <a href="dynamic.html">here</a> that shows updating your chart dynamically and a fuller example
+        of fetching data with AJAX <a href="xml-data.html">here</a>.
+    </p>
+
+
+    <a name="support"></a>
+    <br />&nbsp;<br />&nbsp;<br />
+    <h2>Support</h2>
+    
+    <p>
+        If you have a support issue you can send it to the support email address:
+        <a href="mailto:support@OfficeExcel.net"><b>support@OfficeExcel.net</b></a>. You can also follow
+        <a href="http://www.twitter.com/_OfficeExcel" target="_blank">@_OfficeExcel on twitter</a> to get notifications of new releases and
+        notable updates.
+    </p>
+    
+    <p>
+        If you have a chart that you would like added to the <a href="http://dev.OfficeExcel.net/tests">test suite</a> of charts, then feel free to email it to the
+        support address above. The chart should be totally self-contained (ie not rely on external libraries like jQuery).
+        You can think of it this way - free testing! Thanks.
+    </p>
+
+    <br />
+    <br />
+
+</body>
+</html>

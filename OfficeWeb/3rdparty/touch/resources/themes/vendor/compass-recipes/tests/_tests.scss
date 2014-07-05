@@ -1,0 +1,34 @@
+@import "compass/css3";
+
+html
+{
+    padding: 1em;
+    @include background(linear-gradient(#ddd, #fff) no-repeat);
+}
+
+h1
+{
+    font-size: 2em;
+    margin-bottom: 1em;
+}
+
+h2
+{
+    font-size: 1.4em;
+    margin-bottom: .6em;
+}
+
+.doc
+{
+    background: #fff;
+    border: #ddd;
+    padding: 1em;
+    color: #aaa;
+    margin: 1em;
+    font-style: italic;
+
+    a
+    {
+        color: #999;
+    }
+}

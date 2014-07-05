@@ -1,0 +1,91 @@
+<!DOCTYPE html >
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>An example of the Radial Scatter chart</title>
+    
+    <meta name="keywords" content="html5 canvas example radial scatter chart" />
+    <meta name="description" content="An example of the type of Radial Scatter chart that OfficeExcel can produce" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.tooltips.js" ></script>
+    <script src="../libraries/OfficeExcel.rscatter.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+
+    <script>
+        window.onload = function ()
+        {
+            function myFunc ()
+            {            
+                return 'In function';
+            }
+
+            // Create the data
+            var data = [];
+            for (var i=0; i<75; i++) {
+                data.push([OfficeExcel.random(0, 360), i * OfficeExcel.random(0, 10), null, 'id:mydiv']);
+            }
+
+            var rscatter1 = new OfficeExcel.Rscatter('cvs', data);
+            rscatter1.Set('chart.labels.axes', 'n');
+            rscatter1.Set('chart.labels.position', 'edge');
+            rscatter1.Set('chart.labels', ['NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', '']);
+            rscatter1.Set('chart.tickmarks', 'plus');
+            rscatter1.Set('chart.tooltips.effect', 'contract');
+            rscatter1.Set('chart.title', 'Direction and magnitude');
+            rscatter1.Set('chart.title.color', 'black');
+            rscatter1.Set('chart.title.vpos', 0.3);
+            rscatter1.Draw();
+        }
+    </script>
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+
+
+<div id="breadcrumb">
+    <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+    >
+    <a href="./index.html">Examples</a>
+    >
+    Radial scatter charts example
+</div>
+
+<h1>Radial <span>scatter charts</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+    
+    <p>
+        Radial scatter charts are a circular variant of regular Scatter charts, and as the name suggests, circular. They
+        may be more suited to your dataset than regular scatter charts.
+    </p>
+
+    <div>
+        <ul>
+            <li><a href="../docs/rscatter.html">Radial scatter charts API documentation</a></li>
+        </ul>
+    </div>
+
+    <div style="text-align: center">
+        <canvas id="cvs" width="350" height="350">[No canvas support]</canvas>
+    </div>
+    
+    <div id="mydiv" style="display: none">Fred</div>
+
+</body>
+</html>

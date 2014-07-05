@@ -1,0 +1,33 @@
+/**
+ * Carbon Fiber background pattern
+ *
+ * @author Lea Verou http://lea.verou.me/ for the original pattern
+ * @author David Kaneda http://www.davidkaneda.com/ for the Sass mixin
+ *
+ * @link http://lea.verou.me/css3patterns/
+ *
+ */
+
+@import "compass/css3/images";
+
+$base-color: #222 !default;
+
+@mixin background-carbon-fiber(
+    $background-color: $base-color,
+    $dot-color: scale-lightness($background-color, -50),
+    $highlight-color: rgba(#fff, .1),
+    $spacing-size: 16px,
+    $dot-size: 12.5%
+) {
+    @include background-image(
+        radial-gradient($dot-color $dot-size, rgba(darken($dot-color, 5), 0) $dot-size),
+        radial-gradient($dot-color $dot-size, rgba(darken($dot-color, 5), 0) $dot-size),
+        radial-gradient($highlight-color $dot-size, rgba(#fff, 0) $dot-size),
+        radial-gradient($highlight-color $dot-size, rgba(#fff, 0) $dot-size)
+    );
+
+    background-repeat: repeat;
+    background-position: 0 0, $spacing-size/2 $spacing-size/2, 0 1px, $spacing-size/2 $spacing-size/2 + 1px;
+    background-color: $background-color;
+    background-size: $spacing-size $spacing-size;
+}

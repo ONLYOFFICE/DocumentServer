@@ -1,0 +1,271 @@
+html {
+  padding: 1em;
+  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dddddd), color-stop(100%, #ffffff)) no-repeat;
+  background: -webkit-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -moz-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -o-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -ms-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: linear-gradient(#dddddd, #ffffff) no-repeat;
+}
+
+h1 {
+  font-size: 2em;
+  margin-bottom: 1em;
+}
+
+h2 {
+  font-size: 1.4em;
+  margin-bottom: .6em;
+}
+
+.doc {
+  background: #fff;
+  border: #ddd;
+  padding: 1em;
+  color: #aaa;
+  margin: 1em;
+  font-style: italic;
+}
+.doc a {
+  color: #999;
+}
+
+/**
+ * Drop shadow mixins from Nicolas Gallagher demo
+ * 
+ * @thanks Nicolas Gallagher @necolas, @simurai, @cameronmoll, @matthamm
+ * 
+ * @link http://nicolasgallagher.com/css-drop-shadows-without-images/demo/
+ */
+/**
+ * Drop shadow curled
+ *
+ * @thanks Nicolas Gallagher @necolas
+ * @link http://nicolasgallagher.com/css-drop-shadows-without-images/demo/
+ */
+/**
+ * Drop shadow curved
+ *
+ * @thanks Nicolas Gallagher @necolas
+ * @link http://nicolasgallagher.com/css-drop-shadows-without-images/demo/
+ */
+/**
+ * Drop shadow flying
+ *
+ * @thanks Geoffrey Crofte @geoffrey_crofte
+ * @link http://www.creativejuiz.fr/trytotry/css3-box-shadow-after-before/
+ */
+/**
+ * Drop shadow w/ lifted corners
+ *
+ * @thanks Nicolas Gallagher @necolas
+ * @link http://nicolasgallagher.com/css-drop-shadows-without-images/demo/
+ */
+/**
+ * Drop shadow w/ perspective
+ *
+ * @thanks Nicolas Gallagher @necolas
+ * @link http://nicolasgallagher.com/css-drop-shadows-without-images/demo/
+ */
+/**
+ * Drop shadow raised
+ *
+ * @thanks Nicolas Gallagher @necolas
+ * @link http://nicolasgallagher.com/css-drop-shadows-without-images/demo/
+ */
+/**
+ * Drop shadow rules required for transform on drop shadow
+ * 
+ * /!\ This is required if you want to apply some transform on the element using drop shadow
+ *
+ * @thanks Nicolas Gallagher @necolas
+ * @link http://nicolasgallagher.com/css-drop-shadows-without-images/demo/
+ */
+/**
+ * Shadow along the top edge of the browser viewport
+ * 
+ * @link http://playground.genelocklin.com/depth/
+ */
+div {
+  width: 18em;
+  height: 10em;
+  margin: 5em auto;
+  background: #eeeeee;
+  border: 1px solid #ccc;
+}
+div p {
+  padding: 3em 0;
+  text-align: center;
+}
+div:hover {
+  -moz-transform: rotate(3deg);
+  -webkit-transform: rotate(3deg);
+  -o-transform: rotate(3deg);
+  -ms-transform: rotate(3deg);
+  transform: rotate(3deg);
+}
+
+/*
+ * This is required is you want to apply some transform on the element using drop shadow
+ */
+.drop-shadow-curved-vt-1,
+.drop-shadow-curved-vt-2,
+.drop-shadow-curved-vt,
+.drop-shadow-curved-hz-1,
+.drop-shadow-curved-hz-2,
+.drop-shadow-curved-hz {
+  position: relative;
+}
+.drop-shadow-curved-vt-1 > :last-child::before,
+.drop-shadow-curved-vt-2 > :last-child::before,
+.drop-shadow-curved-vt > :last-child::before,
+.drop-shadow-curved-hz-1 > :last-child::before,
+.drop-shadow-curved-hz-2 > :last-child::before,
+.drop-shadow-curved-hz > :last-child::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #eeeeee;
+}
+
+.drop-shadow-curved-vt-1 {
+  position: relative;
+}
+.drop-shadow-curved-vt-1:before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 10px;
+  bottom: 10px;
+  left: 0;
+  right: 50%;
+  -moz-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -o-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -moz-border-radius: 0.1;
+  -webkit-border-radius: 0.1;
+  -o-border-radius: 0.1;
+  -ms-border-radius: 0.1;
+  -khtml-border-radius: 0.1;
+  border-radius: 0.1;
+}
+
+.drop-shadow-curved-vt-2 {
+  position: relative;
+}
+.drop-shadow-curved-vt-2:before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 10px;
+  bottom: 10px;
+  left: 50%;
+  right: 0;
+  -moz-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -o-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -moz-border-radius: 0.1;
+  -webkit-border-radius: 0.1;
+  -o-border-radius: 0.1;
+  -ms-border-radius: 0.1;
+  -khtml-border-radius: 0.1;
+  border-radius: 0.1;
+}
+
+.drop-shadow-curved-vt {
+  position: relative;
+}
+.drop-shadow-curved-vt:before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 10px;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  -moz-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -o-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -moz-border-radius: 0.1;
+  -webkit-border-radius: 0.1;
+  -o-border-radius: 0.1;
+  -ms-border-radius: 0.1;
+  -khtml-border-radius: 0.1;
+  border-radius: 0.1;
+}
+
+.drop-shadow-curved-hz-1 {
+  position: relative;
+}
+.drop-shadow-curved-hz-1:before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 50%;
+  left: 10px;
+  right: 10px;
+  -moz-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -o-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -moz-border-radius: 10;
+  -webkit-border-radius: 10;
+  -o-border-radius: 10;
+  -ms-border-radius: 10;
+  -khtml-border-radius: 10;
+  border-radius: 10;
+}
+
+.drop-shadow-curved-hz-2 {
+  position: relative;
+}
+.drop-shadow-curved-hz-2:before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  bottom: 0;
+  left: 10px;
+  right: 10px;
+  -moz-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -o-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -moz-border-radius: 10;
+  -webkit-border-radius: 10;
+  -o-border-radius: 10;
+  -ms-border-radius: 10;
+  -khtml-border-radius: 10;
+  border-radius: 10;
+}
+
+.drop-shadow-curved-hz {
+  position: relative;
+}
+.drop-shadow-curved-hz:before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: 10px;
+  right: 10px;
+  -moz-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -o-box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  -moz-border-radius: 10;
+  -webkit-border-radius: 10;
+  -o-border-radius: 10;
+  -ms-border-radius: 10;
+  -khtml-border-radius: 10;
+  border-radius: 10;
+}

@@ -1,0 +1,248 @@
+<!DOCTYPE html >
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>Information about the CSS classes that are available in OfficeExcel</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas charts docs css classes" />
+    <meta name="description" content="Documentation about the CSS classes that are available to you" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A graph library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+    
+    <style type="text/css">
+        li {
+            margin: 0 ! important;
+        }
+        
+        li a {
+            text-decoration: none;
+        }
+    </style>
+
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        Available CSS classes
+    </div>
+
+    <h1>Available <span>CSS classes</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <p>
+        This is information about the CSS classes available to you to allow you to customise the appearance of tooltips and
+        context menus.
+    </p>
+    
+    <ul>
+        <li><a href="#OfficeExcel_png">OfficeExcel_png</a></li>
+        <li><a href="#OfficeExcel_palette">OfficeExcel_palette</a></li>
+        <li><a href="#OfficeExcel_tooltip">OfficeExcel_tooltip</a></li>
+        <li><a href="#OfficeExcel_contextmenu">OfficeExcel_contextmenu</a></li>
+        <li><a href="#OfficeExcel_contextmenu_item">OfficeExcel_contextmenu_item</a></li>
+        <li><a href="#OfficeExcel_contextmenu_background">OfficeExcel_contextmenu_background</a></li>
+        <li><a href="#OfficeExcel_zoom_window">OfficeExcel_zoom_window</a></li>
+        <li><a href="#OfficeExcel_zoomed_canvas">OfficeExcel_zoomed_canvas</a></li>
+        <li><a href="#OfficeExcel_zoomed_area">OfficeExcel_zoomed_area</a></li>
+        <li><a href="#ModalDialog_background">ModalDialog_background</a></li>
+        <li><a href="#ModalDialog_dialog">ModalDialog_dialog</a></li>
+        <li><a href="#ModalDialog_topbar">ModalDialog_topbar</a></li>
+        <li><a href="#example">An example usage</a></li>
+        <li><a href="#important">! important</a></li>
+    </ul>
+    
+    <a name="OfficeExcel_png"></a>
+    <br />&nbsp;<br />
+    <h2>OfficeExcel_png</h2>
+        <p>
+            This controls the appearance of the PNG image which is shown when you use the context menu option <i>OfficeExcel.showPNG()</i>.
+        </p>
+    
+    <a name="OfficeExcel_palette"></a>
+    <br />&nbsp;<br />
+    <h2>OfficeExcel_palette</h2>
+        <p>
+            This controls the appearance of the mini-palette that can be used with annotating.
+        </p>
+    
+    <a name="OfficeExcel_tooltip"></a>
+    <br />&nbsp;<br />
+    <h2>OfficeExcel_tooltip</h2>
+        <p>
+            This controls the appearance of tooltips. The default is to have them look like Windows tooltips.
+        </p>
+
+    <a name="OfficeExcel_contextmenu"></a>
+    <br />&nbsp;<br />
+    <h2>OfficeExcel_contextmenu</h2>
+        <p>
+            This controls how context menus appear. The default is similar to the look that Windows XP has.
+        </p>
+
+    <a name="OfficeExcel_contextmenu_item"></a>
+    <br />&nbsp;<br />
+    <h2>OfficeExcel_contextmenu_item</h2>
+        <p>
+            This controls how individual items on the context menu will appear, for example the default has roughly 25px padding-left
+            to accomodate the left bar.
+        </p>
+
+    <a name="OfficeExcel_contextmenu_background"></a>
+    <br />&nbsp;<br />
+    <h2>OfficeExcel_contextmenu_background</h2>
+        <p>
+            This is the Windows XP style left vertical bar. By default this is light grey.
+        </p>
+    
+    <a name="OfficeExcel_zoom_window"></a>
+    <br />&nbsp;<br />
+    <h2>OfficeExcel_zoom_window</h2>
+        <p>
+            This is the class to use if you want to customise the mini-zoom window.
+        </p>
+    
+    <a name="OfficeExcel_zoomed_canvas"></a>
+    <br />&nbsp;<br />
+    <h2>OfficeExcel_zoomed_canvas</h2>
+        <p>
+            This is the class to use if you want to customise the full canvas zoom.
+        </p>
+    
+    <a name="OfficeExcel_zoomed_area"></a>
+    <br />&nbsp;<br />
+    <h2>OfficeExcel_zoomed_area</h2>
+        <p>
+            This is the class to use if you want to customise the zoomed area.
+        </p>
+    
+    <a name="ModalDialog_background"></a>
+    <br />&nbsp;<br />
+    <h2>ModalDialog_background</h2>
+        <p>
+            This class controls the dark semi-opaque background for the ModalDialog.
+        </p>
+    
+    <a name="ModalDialog_dialog"></a>
+    <br />&nbsp;<br />
+    <h2>ModalDialog_dialog</h2>
+        <p>
+            This class controls the ModalDialog itself.
+        </p>
+    
+    <a name="ModalDialog_topbar"></a>
+    <br />&nbsp;<br />
+    <h2>ModalDialog_topbar</h2>
+        <p>
+            This class controls the top bar for the ModalDialog. You could, for example, use the <i>display</i> CSS property to
+            hide this if you don't want it.
+        </p>
+    
+    <a name="example"></a>
+    <br />&nbsp;<br />
+    <h2>Example usage</h2>
+        <p>
+            Here is an example of using the CSS classes. At the time of writing, some of the items here were only implemented in newer
+            web browsers:
+        </p>
+
+        <pre class="code">
+&lt;style&gt;
+    .OfficeExcel_png {
+    }
+
+    .OfficeExcel_palette {
+    }
+
+    .OfficeExcel_tooltip {
+    }
+    
+    .OfficeExcel_contextmenu {
+    }
+    
+    .OfficeExcel_contextmenu_background {
+    }
+    
+    .OfficeExcel_contextmenu_item {
+    }
+    
+    .OfficeExcel_zoom_window {
+    }
+    
+    .OfficeExcel_zoomed_canvas {
+    }
+    
+    .OfficeExcel_zoomed_area {
+    }
+    
+    .ModalDialog_background {
+    }
+    
+    .ModalDialog_dialog {
+    }
+    
+    .ModalDialog_topbar {
+    }
+&lt;/style&gt;
+</pre>
+
+<a name="important"></a>
+<br />&nbsp;<br />
+<h2>! important</h2>
+    
+    <p>
+        If you're attempting to override default styles, then because of the ordering (ie the script is setting the style  AFTER
+        your own CSS) you may need to use the "! important" modifier, for example:
+    </p>
+
+    <pre class="code">
+&lt;style&gt;
+    .OfficeExcel_tooltip {
+        background-color: white ! important;
+    }
+&lt;/style&gt;
+</pre>
+</body>
+</html>

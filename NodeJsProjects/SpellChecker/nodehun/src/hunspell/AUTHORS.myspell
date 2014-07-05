@@ -1,0 +1,67 @@
+Developer Credits:
+
+Special credit and thanks go to ispell's creator Geoff Kuenning.  
+Ispell affix compression code was used as the basis for the 
+affix code used in MySpell. Specifically Geoff's use of a 
+conds[] array that makes it easy to check if the conditions 
+required for a particular affix are present was very 
+ingenious! Kudos to Geoff.  Very nicely done.  
+BTW: ispell is available under a BSD style license 
+from Geoff Kuennings ispell website:
+http://www.cs.ucla.edu/ficus-members/geoff/ispell.html 
+
+
+Kevin Hendricks <kevin.hendricks@sympatico.ca> is the original 
+author and now maintainer of the MySpell codebase.  Recent 
+additions include ngram support, and related character maps 
+to help improve and create suggestions for very poorly 
+spelled words. 
+
+Please send any and all contributions or improvements
+to him or to dev@lingucomponent.openoffice.org.
+
+
+David Einstein (Deinst@world.std.com) developed an almost
+complete rewrite of MySpell for use by the Mozilla project.
+David and I are now working on parallel development tracks 
+to help our respective projects (Mozilla and OpenOffice.org) 
+and we will maintain full affix file and dictionary file 
+compatibility and work on merging our versions of MySpell 
+back into a single tree. David has been a significant help 
+in improving MySpell.
+
+
+Németh László <nemethl@gyorsposta.hu> is the author of 
+the Hungarian dictionary and he developed and contributed
+extensive changes to MySpell including ... 
+  * code to support compound words in MySpell
+  * fixed numerous problems with encoding case conversion tables. 
+  * designed/developed replacement tables to improve suggestions
+  * changed affix file parsing to trees to greatly speed loading
+  * removed the need for malloc/free pairs in suffix_check which
+      speeds up spell checking in suffix rich languages by 20%
+
+Davide Prina <davideprina@uahoo.com>, Giuseppe Modugno 
+<gppe.modugno@libero.it>, Gianluca Turconi <luctur@comeg.it> 
+all from the it_IT OpenOffice.org team performed an 
+extremely  detailed code review of MySpell and generated
+fixes for bugs, leaks, and speedup improvements. 
+
+Simon Brouwer <simon.oo.o@xs4all.nl> for fixes and enhancements
+that have greatly improved MySpell auggestions
+  * n-gram suggestions for an initcap word have an init. cap. 
+  * fix for too many n-gram suggestions from specialized dictionary,
+  * fix for long suggestions rather than close ones in case of 
+      dictionaries with many compound words (kompuuter)
+  * optionally disabling split-word suggestions (controlled 
+      by NOSPLITSUGS line in affix file)
+
+
+Special Thanks to all others who have either contributed ideas or
+testing for MySpell
+
+
+Thanks,
+
+Kevin Hendricks
+kevin.hendricks@sympatico.ca

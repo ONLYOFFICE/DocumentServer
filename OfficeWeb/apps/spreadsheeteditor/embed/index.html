@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Documents</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- splash -->
+
+    <style type="text/css">
+        .loadmask {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            border: none;
+            background-color: #f4f4f4;
+            z-index: 20002;
+        }
+
+        .loadmask-body {
+            position:relative;
+            top:44%;
+        }
+
+        .loadmask-logo {
+            display:inline-block;
+            min-width:220px;
+            height: 62px;
+            vertical-align:top;
+            background-image:url('./resources/img/loading-logo.gif');
+            background-repeat:no-repeat;
+        }
+
+        #loadmask-text {
+            color: #b2b2b2;
+            font-size: 10px;
+            font-weight: bold;
+            font-family: Arial;
+            height:14px;
+            margin-top:32px;
+            padding-left:40px;
+            text-align:left;
+            text-transform: uppercase;
+        }
+    </style>
+
+    <link href="../../../3rdparty/bootstrap/css/bootstrap.css" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+
+  <body class="embed-body">
+
+      <!--facebook button-->
+      <div id="fb-root"></div>
+      <script>(function(d, s, id) {
+          var js, fjs = d.getElementsByTagName(s)[0];
+          if (d.getElementById(id)) return;
+          js = d.createElement(s); js.id = id;
+          js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+          fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));</script>
+
+
+      <!--twitter button-->
+      <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+
+      <div id="loading-mask" class="loadmask">
+          <div class="loadmask-body" align="center">
+              <div class="loadmask-logo">
+                  <!-- <div id="loadmask-text">LOADING APPLICATION</div> -->
+              </div>
+          </div>
+      </div>
+
+      <div class="viewer">
+          <div id="editor_sdk" class="sdk-view" style="overflow: hidden;"></div>
+          <ul id="worksheets" class="worksheet-list"></ul>
+      </div>
+
+      <div class="overlay-controls" style="margin-left: -32px">
+          <ul class="left" style="width: 90px;">
+              <li id="id-btn-zoom-in"><button class="overlay"><i class="overlay-icon-zoom-in"></i></button></li>
+              <li style="width: 10px"></li>
+              <li id="id-btn-zoom-out"><button class="overlay"><i class="overlay-icon-zoom-out"></i></button></li>
+          </ul>
+      </div>
+
+      <div class="toolbar" id="toolbar">
+          <ul class="left">
+              <li><a class="brand-logo" href="http://www.onlyoffice.com/" target="_blank"></a></li>
+              <li class="separator"></li>
+              <li id="id-btn-copy"><button class="control-btn"><i class="control-icon-save"></i><span>Save Copy</span></button></li>
+              <li id="id-btn-share"><button class="control-btn"><i class="control-icon-share"></i><span>Share</span></button></li>
+              <li id="id-btn-embed"><button class="control-btn"><i class="control-icon-embed"></i><span>Embed</span></button></li>
+          </ul>
+          <ul class="right">
+              <li><button id="id-btn-fullscreen" class="control-btn no-caption"><i class="control-icon-fullscreen"></i></button></li>
+              <li><button id="id-btn-close" class="control-btn no-caption"><i class="control-icon-close"></i></button></li>
+          </ul>
+      </div>
+
+      <div class="error modal hide" id="id-critical-error-dialog" tabindex="-1" role="dialog">
+          <div class="modal-header">
+              <h3 id="id-critical-error-title"></h3>
+          </div>
+          <div class="modal-body">
+              <p id="id-critical-error-message"></p>
+          </div>
+          <div class="modal-footer">
+              <button id="id-critical-error-close" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
+          </div>
+      </div>
+
+      <div id="id-loadmask" class="hide modal cmd-loader-body">
+          <div class="cmd-loader-image"></div>
+          <div class="cmd-loader-title">Please wait...</div>
+      </div>
+
+      <!--3td party-->
+      <script type="text/javascript" src="../../../3rdparty/jquery/jquery-1.8.1.min.js"></script>
+      <script type="text/javascript" src="../../../3rdparty/jquery/mousewheel/jquery.mousewheel.js"></script>
+      <script type="text/javascript" src="../../../3rdparty/bootstrap/js/bootstrap.js"></script>
+      <script type="text/javascript" src="../../../3rdparty/ZeroClipboard/ZeroClipboard.min.js"></script>
+      <script type="text/javascript" src="../../../3rdparty/xregexp/xregexp-all-min.js"></script>
+      <script type="text/javascript" src="../../../3rdparty/sockjs/sockjs-0.3.min.js"></script>
+      <script type="text/javascript" src="../../../3rdparty/underscore/underscore-min.js"></script>
+
+      <!--sdk-->
+      <link rel="stylesheet" type="text/css" href="../../../sdk/Excel/css/main.css"/>
+      <script type="text/javascript" src="../../../sdk/Common/docscoapisettings.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/AllFonts.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/browser.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/docscoapisettings.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/docscoapicommon.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/docscoapi.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/downloaderfiles.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/apiCommon.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/commonDefines.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/editorscommon.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/NumFormat.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/Charts/charts.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/Charts/DrawingObjects.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/FontsFreeType/font_engine.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/FontsFreeType/FontFile.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/FontsFreeType/FontManager.js"></script>
+      <script type="text/javascript" src="../../../sdk/Word/Drawing/HatchPattern.js"></script>
+      <script type="text/javascript" src="../../../sdk/Word/Drawing/Externals.js"></script>
+      <script type="text/javascript" src="../../../sdk/Word/Drawing/Graphics.js"></script>
+      <script type="text/javascript" src="../../../sdk/Word/Drawing/Metafile.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/GlobalLoaders.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/trackFile.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/apiDefines.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/offlinedocs/test-workbook9/Editor.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/offlinedocs/empty-workbook.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/utils/utils.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/clipboard.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/autofilters.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/graphics/DrawingContext.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/graphics/pdfprinter.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/CollaborativeEditing.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/ConditionalFormatting.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/FormulaObjects/parserFormula.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/FormulaObjects/dateandtimeFunctions.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/FormulaObjects/engineeringFunctions.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/FormulaObjects/cubeFunctions.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/FormulaObjects/databaseFunctions.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/FormulaObjects/textanddataFunctions.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/FormulaObjects/statisticalFunctions.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/FormulaObjects/financialFunctions.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/FormulaObjects/mathematicFunctions.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/FormulaObjects/lookupandreferenceFunctions.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/FormulaObjects/informationFunctions.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/FormulaObjects/logicalFunctions.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/Serialize.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/WorkbookElems.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/Workbook.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/CellInfo.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/AdvancedOptions.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/History.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/UndoRedo.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/CellComment.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/view/StringRender.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/view/CellTextRender.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/view/CellEditorView.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/view/WorksheetView.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/view/HandlerList.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/view/EventsController.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/view/WorkbookView.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/scroll.js"></script>
+      <script type="text/javascript" src="../../../sdk/Word/Drawing/ColorArray.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/Shapes/EditorSettings.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/Shapes/Serialize.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/Shapes/SerializeWriter.js"></script>
+      <script type="text/javascript" src="../../../sdk/Word/Editor/SerializeCommon.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/Format.js"></script>
+      <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/ObjectTypes/CreateGeometry.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/Geometry.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/Path.js"></script>
+      <script type="text/javascript" src="../../../sdk/Word/Editor/GraphicObjects/Math.js"></script>
+      <script type="text/javascript" src="../../../sdk/Word/Drawing/ArcTo.js"></script>
+      <script type="text/javascript" src="../../../sdk/Common/SerializeCommonWordExcel.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/DrawingObjectsController.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/States.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/GroupShape.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/Image.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/Shape.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/TextBody.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/Styles.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/Numbering.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/ParagraphContent.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/Paragraph.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/DocumentContent.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/FontClassification.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/Chart.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/ChartLayout.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/ChartLegend.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Format/ChartTitle.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Tracks/AdjustmentTracks.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Tracks/ResizeTracks.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Tracks/RotateTracks.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Tracks/NewShapeTracks.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Tracks/PolyLine.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Tracks/Spline.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Tracks/MoveTracks.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Hit.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Controls.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Graphics.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/Overlay.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/GlobalCounters.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/DrawingDocument.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/model/DrawingObjects/ShapeDrawer.js"></script>
+      <script type="text/javascript" src="../../../sdk/Word/apiCommon.js"></script>
+      <script type="text/javascript" src="../../../sdk/Excel/api.js"></script>
+
+      <!--application-->
+      <link href="resources/css/application.css" rel="stylesheet">
+      <script type="text/javascript" src="../../common/Gateway.js"></script>
+      <script type="text/javascript" src="../../common/Analytics.js"></script>
+      <script type="text/javascript" src="js/ApplicationView.js"></script>
+      <script type="text/javascript" src="js/ApplicationController.js"></script>
+      <script type="text/javascript" src="js/application.js"></script>
+      <script type="text/javascript">
+          var isBrowserSupported = function() {
+              return  ($.browser.msie     && parseFloat($.browser.version) > 8)     ||
+                      ($.browser.chrome   && parseFloat($.browser.version) > 7)     ||
+                      ($.browser.safari   && parseFloat($.browser.version) > 4)     ||
+                      ($.browser.opera    && parseFloat($.browser.version) > 10.4)  ||
+                      ($.browser.mozilla  && parseFloat($.browser.version) > 3.9);
+          };
+
+          if (!isBrowserSupported()){
+              document.write(
+                  '<div id="id-error-mask" class="errormask">',
+                      '<div class="error-body" align="center">',
+                          '<div id="id-error-mask-title" class="title">Your browser is not supported.</div>',
+                          '<div id="id-error-mask-text">Sorry, ONLYOFFICE Document is currently only supported in the latest versions of the Chrome, Firefox, Safari or Internet Explorer web browsers.</div>',
+                      '</div>',
+                  '</div>'
+              );
+          }
+      </script>
+  </body>
+</html>

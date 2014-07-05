@@ -1,0 +1,23 @@
+@import "tests";
+
+@import "recipes/shape/polygon";
+
+div
+{
+    color: #fff;
+    text-shadow: 0 -.1em .2em #000;
+    margin: 4em auto;
+    text-align: center;
+}
+
+.star-5 { @include star-5(5em, #000) }
+.star-5-2 { @include star-5(8em, #000) }
+
+.star-6 { @include star-6(5em, #000) }
+.star-6-2 { @include star-6(8em, #000) }
+
+.star-8 { @include star-8(5em, #000) }
+.star-8-2 { @include star-8(8em, #000) }
+
+.star-12 { @include star-12(5em, #000) }
+.star-12-2 { @include star-12(8em, #000) }

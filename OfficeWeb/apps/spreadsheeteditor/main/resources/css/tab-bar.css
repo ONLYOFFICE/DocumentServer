@@ -1,0 +1,105 @@
+/* bottom tabs spreadsheeteditor */
+
+
+.x-nlg .x-tab-default-bottom, .x-tab-default-bottom{
+
+box-sizing: border-box;
+/*  border-left: 1px solid rgba(0, 0, 0, 0.4);
+*/
+border: 0;
+border-top: 1px solid #9e9e9e !important;
+background-image: none;
+background: #a7a7a7; /* Old browsers */
+background-image:url(../img/controls/tabs-bg.gif);
+    background-image: -webkit-image-set(url("../img/controls/tabs-bg.png") 1x, url("../img/controls/tabs-bg@2x.png") 2x);
+
+background: -moz-linear-gradient(top,  #a7a7a7 0%, #7e7e7e 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#a7a7a7), color-stop(100%,#7e7e7e)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top,  #a7a7a7 0%,#7e7e7e 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top,  #a7a7a7 0%,#7e7e7e 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top,  #a7a7a7 0%,#7e7e7e 100%); /* IE10+ */
+background: linear-gradient(to bottom,  #a7a7a7 0%,#7e7e7e 100%); /* W3C */
+/*filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a7a7a7', endColorstr='#7e7e7e',GradientType=0 ); /* IE6-9 */
+
+margin-bottom: 1px;
+
+box-shadow:   0 1px 0 0 #b0b0b0 inset;
+
+/*box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3),  0 1px 0 0 #b0b0b0 inset;
+*/
+color: #FFFFFF;
+
+}
+
+.x-nlg .x-tab-default-bottom-active, .x-tab-default-bottom-active {
+    border-top-color: #eeeeee !important;
+	box-shadow: none;
+	
+background-image: none;
+box-shadow:  0 1px 0 0 #f7f7f7 inset;
+background: #eeeeee; /* Old browsers */
+background: -moz-linear-gradient(top,  #eeeeee 0%, #dbdbdb 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(100%,#dbdbdb)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top,  #eeeeee 0%,#dbdbdb 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top,  #eeeeee 0%,#dbdbdb 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top,  #eeeeee 0%,#dbdbdb 100%); /* IE10+ */
+background: linear-gradient(to bottom,  #eeeeee 0%,#dbdbdb 100%); /* W3C */
+/*filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#dbdbdb',GradientType=0 ); /* IE6-9 */
+
+
+}
+
+.x-tab-default-bottom button{
+color: #ffffff;
+font-weight: normal;
+}
+
+.x-tab-default-bottom-active button{
+
+color: #000000;
+font-weight: normal;
+}
+
+
+
+.x-tab-bar-strip-default, .x-tab-bar-strip-default-plain {
+    background-color: #d9d9d9;
+    border-color: #afafaf;
+    border-style: solid;
+}
+.x-border-box .x-tab-bar-bottom .x-tab-bar-strip-default-plain{
+
+	height: 0;
+}
+.x-tab-bar-bottom .x-tab-bar-body-default-plain {
+    padding: 1px 0 0 0;
+}
+/*.x-tab-bar-bottom .x-tab-bar-body-default-plain .x-box-inner{
+
+	margin: 2px;
+	}*/
+/* end bottom tabs spreadsheeteditor */
+.asc-page-scroller .x-box-scroller-right,
+.asc-page-scroller .x-box-scroller-left {
+    width: 0 !important;
+}
+
+.csv-open-dialog .x-window-body,
+.csv-open-dialog .x-form-field {
+    font-size: 11px !important;
+}
+
+.x-tab-bar.coauth-locked .x-tab-default-bottom,
+.x-tab-default-bottom.coauth-locked {
+    background: none repeat scroll 0 0 #a4a4a4;
+    color:#494949;
+    border: 2px dotted #ff9000;
+    padding: 0 1px 1px 1px;
+}
+
+.x-tab-bar.coauth-locked .x-tab-default-bottom-active,
+.x-tab-default-bottom-active.coauth-locked{
+    background: none repeat scroll 0 0 #FBFBFB;
+    border: 2px dotted #ff9000;
+    padding: 0 1px 1px 1px;
+}

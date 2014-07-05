@@ -1,0 +1,107 @@
+<!DOCTYPE html >
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <title>An example of an OfficeExcel Bar chart</title>
+    
+    <meta name="keywords" content="html5 canvas example bar charts" />
+    <meta name="description" content="An example of the type of Bar chart that OfficeExcel can produce" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A javascript charts library based on the HTML5 canvas tag" />
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.effects.js" ></script>
+    <script src="../libraries/OfficeExcel.common.tooltips.js" ></script>
+    <script src="../libraries/OfficeExcel.common.key.js" ></script>
+
+    <script src="../libraries/OfficeExcel.chartProperties.js" ></script>
+    <script src="../libraries/OfficeExcel.bar.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+
+    <script>
+        /**
+        * The onload function creates the graph
+        */
+        window.onload = function ()
+        {
+
+            //var bar1 = new OfficeExcel.Bar('bar1', [[50,75],[32, 44],[61, 56],[91, 81],[92, 8],[34, 57],[56, 62],[55, 45],[36, 12],[44, 56],[51, 66],[68, 88]]);
+            var bar1 = new OfficeExcel.Bar('bar1', [280, 45, 133, 166, 84, 259, 266, 960, 219, 311, 67, 89]);
+            bar1._otherProps._variant = 'bar';
+            /*bar1.Set('chart.background.barcolor1', 'white');
+            bar1.Set('chart.background.barcolor2', 'white');
+            bar1.Set('chart.labels', ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']);
+            bar1.Set('chart.key', ['John', 'Bob']);
+            bar1.Set('chart.key.position.y', 35);
+            bar1.Set('chart.key.position', 'gutter');
+            bar1.Set('chart.key.background', 'rgb(255,255,255)');
+            bar1.Set('chart.colors', ['#77f', '#7f7']);
+            bar1.Set('chart.shadow', true);
+            bar1.Set('chart.shadow.blur', 15);
+            bar1.Set('chart.shadow.offsetx', 0);
+            bar1.Set('chart.shadow.offsety', 0);
+            bar1.Set('chart.shadow.color', '#aaa');
+            bar1.Set('chart.strokestyle', 'rgba(0,0,0,0)');
+            bar1.Set('chart.gutter.left', 55);
+            bar1.Set('chart.gutter.right', 5);*/
+            bar1.Draw();
+        }
+    </script>
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Examples</a>
+        >
+        Bar charts example
+    </div>
+
+    <h1>Bar <span>charts</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <div>
+    
+        <div>
+            <p>
+                Bar charts are probably one of the most widely used of charts, and also one of the most versatile.
+                It's defined as a chart with rectangular bars with lengths proportional to the values they represent.
+                The bar chart can be used to represent two or more values. With grouped and stacked bar charts, you
+                can visualise two or more sets of data. For example two years worth of sales figures. Doing this you
+                will be able to easily see trends, for example a better year when it comes to sales. You can
+                also show negative values by having the X axis in the center, like the examples shown. If you use
+                a grouped or stacked bar chart, a key may be helpful to your users.
+            </p>
+            
+            <p>
+                By using the tooltips feature, you can provide more detail about what a particular bar represents. The
+                tooltips in OfficeExcel can contain wide range of HTML, so you can use them to show photos or movies for example.
+            </p>
+            <ul>
+                <li><a href="../docs/bar.html">Bar chart API documentation</a></li>
+            </ul>
+        </div>
+
+        <div style="text-align: center">
+            <canvas id="bar1" width="900" height="200">[No canvas support]</canvas>
+        </div>
+    </div>
+
+</body>
+</html>

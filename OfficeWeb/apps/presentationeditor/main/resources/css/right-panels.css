@@ -1,0 +1,362 @@
+.asc-right-panel-container {
+    background-color:#F4F4F4;
+}
+
+.asc-right-panel-container.x-item-disabled{
+    opacity: 0.5;
+}
+
+.asc-right-panel-small-btn {
+    background-image: url('../img/right-panels/SmallBorders.png')  !important;
+    background-image: -webkit-image-set(url("../img/right-panels/SmallBorders.png") 1x, url("../img/right-panels/SmallBorders@2x.png") 2x)  !important;
+}
+
+/* Borders for Tables */
+.x-btn.btn-position-left                    {    background-position: 0         -147px  !important;}
+.x-btn-over.btn-position-left               {    background-position: -21px     -147px  !important;}
+.x-btn-pressed.btn-position-left,
+.x-btn-focus.btn-position-left              {    background-position:  -42px    -147px !important;}
+.x-btn-disabled.btn-position-left           {    background-position:  -63px    -147px !important;}
+
+.x-btn.btn-position-inner-vert              {    background-position: 0         -168px  !important;}
+.x-btn-over.btn-position-inner-vert         {    background-position: -21px     -168px  !important;}
+.x-btn-pressed.btn-position-inner-vert,
+.x-btn-focus.btn-position-inner-vert        {    background-position:  -42px    -168px !important;}
+.x-btn-disabled.btn-position-inner-vert     {    background-position:  -63px    -168px !important;}
+
+.x-btn.btn-position-right                   {    background-position: 0         -189px  !important;}
+.x-btn-over.btn-position-right              {    background-position: -21px     -189px  !important;}
+.x-btn-pressed.btn-position-right,
+.x-btn-focus.btn-position-right             {    background-position:  -42px    -189px !important;}
+.x-btn-disabled.btn-position-right          {    background-position:  -63px    -189px !important;}
+
+.x-btn.btn-position-top                     {    background-position: 0         -84px  !important;}
+.x-btn-over.btn-position-top                {    background-position: -21px     -84px  !important;}
+.x-btn-pressed.btn-position-top,
+.x-btn-focus.btn-position-top               {    background-position:  -42px    -84px !important;}
+.x-btn-disabled.btn-position-top            {    background-position:  -63px    -84px !important;}
+
+.x-btn.btn-position-inner-hor               {    background-position: 0         -63px  !important;}
+.x-btn-over.btn-position-inner-hor          {    background-position: -21px     -63px  !important;}
+.x-btn-pressed.btn-position-inner-hor,
+.x-btn-focus.btn-position-inner-hor         {    background-position:  -42px    -63px !important;}
+.x-btn-disabled.btn-position-inner-hor      {    background-position:  -63px    -63px !important;}
+
+.x-btn.btn-position-bottom                  {    background-position: 0         -42px  !important;}
+.x-btn-over.btn-position-bottom             {    background-position: -21px     -42px  !important;}
+.x-btn-pressed.btn-position-bottom,
+.x-btn-focus.btn-position-bottom            {    background-position:  -42px    -42px !important;}
+.x-btn-disabled.btn-position-bottom         {    background-position:  -63px    -42px !important;}
+
+.x-btn.btn-position-inner                   {    background-position: 0         -21px  !important;}
+.x-btn-over.btn-position-inner              {    background-position: -21px     -21px  !important;}
+.x-btn-pressed.btn-position-inner,
+.x-btn-focus.btn-position-inner             {    background-position:  -42px    -21px !important;}
+.x-btn-disabled.btn-position-inner          {    background-position:  -63px    -21px !important;}
+
+.x-btn.btn-position-outer                   {    background-position: 0         -126px  !important;}
+.x-btn-over.btn-position-outer              {    background-position: -21px     -126px  !important;}
+.x-btn-pressed.btn-position-outer,
+.x-btn-focus.btn-position-outer             {    background-position:  -42px    -126px !important;}
+.x-btn-disabled.btn-position-outer          {    background-position:  -63px    -126px !important;}
+
+.x-btn.btn-position-all                     {    background-position: 0         0  !important;}
+.x-btn-over.btn-position-all                {    background-position: -21px     0  !important;}
+.x-btn-pressed.btn-position-all,
+.x-btn-focus.btn-position-all               {    background-position:  -42px    0 !important;}
+.x-btn-disabled.btn-position-all            {    background-position:  -63px    0 !important;}
+
+.x-btn.btn-position-none                    {    background-position: 0         -105px  !important;}
+.x-btn-over.btn-position-none               {    background-position: -21px     -105px  !important;}
+.x-btn-pressed.btn-position-none,
+.x-btn-focus.btn-position-none              {    background-position:  -42px    -105px !important;}
+.x-btn-disabled.btn-position-none           {    background-position:  -63px    -105px !important;}
+
+.x-btn.asc-right-panel-small-btn {
+   margin-right: 4px;
+}
+
+.x-btn.asc-right-panel-small-btn button {
+    width: 21px !important;
+    height: 21px;
+    line-height: 21px;
+    padding: 0;
+	margin:0;
+}
+
+.x-btn-disabled.asc-right-panel-small-btn {
+    background-position:  -63px 0 !important;
+}
+
+.x-btn.asc-right-panel-small-btn .x-btn-inner{
+    height: 21px;
+    line-height: 21px;
+}
+
+.x-btn.asc-right-panel-small-btn
+{
+    padding: 0;
+    border: 0 none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.btn-icon-edit-table,
+.btn-icon-template-table,
+.btn-icon-arrange-shape,
+.btn-icon-align-shape,
+.btn-icon-change-shape {
+    background-image: url('../img/right-panels/TableShapeSettings.png')  !important;
+    background-image: -webkit-image-set(url("../img/right-panels/TableShapeSettings.png") 1x, url("../img/right-panels/TableShapeSettings@2x.png") 2x)  !important;
+    width: 28px !important;
+    margin-left: 3px;
+    margin-top: 2px;
+}
+
+.btn-icon-align-shape                   {background-position: 0       0;}
+.x-btn-over .btn-icon-align-shape       {background-position: -28px   0;}
+.x-btn-pressed .btn-icon-align-shape    {background-position: -56px   0;}
+
+.btn-icon-arrange-shape                 {background-position: 0       -16px;}
+.x-btn-over .btn-icon-arrange-shape     {background-position: -28px   -16px;}
+.x-btn-pressed .btn-icon-arrange-shape  {background-position: -56px   -16px;}
+
+.btn-icon-template-table                {background-position: 0      -32px;}
+.x-btn-over .btn-icon-template-table    {background-position: -28px  -32px;}
+.x-btn-pressed .btn-icon-template-table {background-position: -56px  -32px;}
+
+.btn-icon-edit-table                    {background-position: 0      -48px;}
+.x-btn-over .btn-icon-edit-table        {background-position: -28px  -48px;}
+.x-btn-pressed .btn-icon-edit-table     {background-position: -56px  -48px;}
+
+.btn-icon-change-shape                    {background-position: 0      -64px;}
+.x-btn-over .btn-icon-change-shape        {background-position: -28px  -64px;}
+.x-btn-pressed .btn-icon-change-shape     {background-position: -56px  -64px;}
+
+.x-btn.asc-right-panel-edit-btn {
+    padding: 0 !important;
+}
+
+.x-btn-default-small-icon.asc-right-panel-edit-btn button {
+    width: 31px !important;
+}
+
+.asc-right-tabpanel .x-panel-header {
+    padding: 0 4px 0 0;
+}
+
+.asc-right-tabpanel-small-btn {
+    height: 25px;
+    width: 26px;
+}
+
+.asc-right-tabpanel-small-btn button {
+    width: 24px !important;
+}
+
+.asc-right-tabpanel-small-btn.x-btn-default-small {
+    background: none repeat scroll 0 0 transparent !important;
+    border-color: transparent  !important;
+    padding: 0;
+    border-radius: 0;
+    border-shadow: none;
+}
+
+.asc-right-tabpanel-small-btn.x-btn-default-small-pressed,
+.asc-right-tabpanel-small-btn.x-btn-default-small-menu-active {
+    background: none repeat scroll 0 0 #f5f5f5 !important;
+    border-color: transparent  !important;
+}
+
+.texture-view .storage-data-view .thumb-wrap,
+.arrow-view .storage-data-view .thumb-wrap {
+    border: 1px solid rgba(0, 0, 0, 0);
+    margin-bottom: 0;
+    padding: 1px;
+}
+
+.texture-view .storage-data-view .thumb-wrap {
+    height: 54px;
+}
+
+.texture-view .storage-data-view .x-item-over,
+.arrow-view .storage-data-view .x-item-over {
+    border:2px solid #D76936;
+    padding: 0;
+}
+
+.texture-view .storage-data-view .x-item-selected,
+.arrow-view .storage-data-view .x-item-selected {
+    border:2px solid #D76936;
+    padding: 0;
+}
+
+.texture-img-container {
+    border: 1px solid #AFAFAF;
+    border-radius: 2px;
+    background: #ffffff;
+    padding: 14px 20px;
+}
+
+.btn-combo-style
+{
+    background: repeat-x scroll 0 0 white !important;
+    background-image: url("../img/controls/text-bg.gif") !important;
+    background-image: -webkit-image-set(url("../img/controls/text-bg.gif") 1x, url("../img/controls/text-bg@2x.png") 2x) !important;
+    height: 22px;
+    padding: 1px;
+}
+
+.btn-combo-style em {
+    background-image : url("../img/controls/trigger-btn.png");
+    background-image: -webkit-image-set(url("../img/controls/trigger-btn.png") 1x, url("../img/controls/trigger-btn@2x.png") 2x);
+}
+
+.btn-combo-style.x-btn-menu-active.x-btn-over em {
+    background-image : url("../img/controls/trigger-btn.png");
+    background-image: -webkit-image-set(url("../img/controls/trigger-btn.png") 1x, url("../img/controls/trigger-btn@2x.png") 2x);
+}
+
+.btn-combo-style.x-item-disabled em {
+    background-image : url("../img/controls/trigger-btn-inactive.png");
+    background-image: -webkit-image-set(url("../img/controls/trigger-btn-inactive.png") 1x, url("../img/controls/trigger-btn-inactive@2x.png") 2x);
+}
+
+.btn-combo-style.x-btn-default-small button,
+.btn-combo-style.x-btn-default-small button span
+{
+    height: 18px !important;
+    line-height: 18px !important;
+}
+
+.asc-advanced-link {
+    border-bottom: 1px solid #aaa;
+    color: #000;
+    cursor: pointer;
+}
+
+.asc-right-panel.x-item-disabled{
+    opacity: 0.5;
+}
+
+.asc-right-panel.x-item-disabled .x-item-disabled,
+.asc-right-panel .x-item-disabled .x-item-disabled {
+    opacity: 1;
+}
+
+.asc-right-panel.x-item-disabled .x-mask{
+    opacity: 0;
+}
+
+.asc-right-panel.x-item-disabled a{
+    color: #929292;
+}
+
+.asc-right-panel .asc-slider .x-slider-focus {
+    top: -10px;
+}
+
+/* settings for wrap */
+.wrap-view .thumb-wrap {
+    margin-right: 4px;
+}
+
+.btn-wrap-types {
+    background-color: #ffffff !important;
+}
+
+.btn-wrap-types .x-btn-icon {
+    height: 50px;
+    width: 50px;
+}
+
+.btn-wrap-types.x-btn-default-small,
+.btn-wrap-types.x-btn-default-small-pressed
+{
+    background-image: none;
+}
+
+.btn-wrap-types button {
+    width: 52px !important;
+    height: 52px !important;
+    border: 1px solid rgba(172, 172, 172, 0.5);
+}
+
+.gradient-view .thumb-wrap {
+    margin-right: 4px;
+    border: 1px solid rgba(0, 0, 0, 0);
+    height: 54px;
+}
+
+.gradient-view .gradient-separator {
+    background-color: white;
+    display: inline-block;
+    float: left;
+    margin: 6px;
+    width: 50px;
+    height: 50px;
+}
+
+.gradient-view .item-gradient,
+.gradient-subtype {
+    background-image: url(../img/right-panels/gradients.png) !important;
+    background-image: -webkit-image-set(url("../img/right-panels/gradients.png") 1x, url("../img/right-panels/gradients@2x.png") 2x) !important;
+    width: 50px;
+    height: 50px;
+}
+
+.gradient-left-top {
+    background-position: 0 0;
+}
+
+.gradient-top {
+    background-position: -50px 0;
+}
+
+.gradient-right-top {
+    background-position: -100px 0;
+}
+
+.gradient-left {
+    background-position: 0 -50px;
+}
+
+.gradient-right {
+    background-position: -100px -50px;
+}
+
+.gradient-left-bottom {
+    background-position: 0 -100px;
+}
+
+.gradient-bottom {
+    background-position: -50px -100px;
+}
+
+.gradient-right-bottom {
+    background-position: -100px -100px;
+}
+
+.gradient-radial-center {
+    background-position: -100px -150px;
+}
+
+.shape-pattern.storage-combodataview .emptyText {
+    padding-top: 7px;
+}
+
+.shape-pattern.storage-combodataview .thumb-wrap {
+    margin-right: 1px !important;
+}
+
+.safari-7 .shape-pattern.storage-combodataview .thumb-wrap {
+    margin-right: 0px !important;
+}
+
+.shape-pattern .item-combo-pattern,
+.storage-data-view .item-combo-pattern {
+    background-image: url(../img/right-panels/patterns.png) !important;
+    background-image: -webkit-image-set(url("../img/right-panels/patterns.png") 1x, url("../img/right-panels/patterns@2x.png") 2x) !important;
+    width: 28px;
+    height: 28px;
+}

@@ -1,0 +1,151 @@
+# COMPILATION
+#
+# 1. download and install Cygwin environment for Windows with the following
+# extra packages: 
+#
+# make
+# gcc-g++ development package
+# mingw development package (for cygwin.dll free native Windows compilation)
+#  
+# 2. open a Cygwin shell, cd into this directory and run make
+#
+#
+# NOTE: newer MINGW libraries may have a compilation error, where the solution
+# is removing the "using ::swprintf" and "using ::vswprintf" lines from 
+# /usr/lib/gcc/i686-pc-mingw32/3.4.x/include/c++/cwchar
+#
+
+#CC=gcc 
+#CXX=g++
+CC=gcc -mno-cygwin -DHUNSPELL_STATIC
+CXX=g++ -mno-cygwin -DHUNSPELL_STATIC
+
+CXXFLAGS= -O2 -ansi -pedantic -I.
+#CXXFLAGS= -O2 -Wall -ansi -pedantic -I.
+
+LDFLAGS=-L.  -lhunspell
+LD2FLAGS=-L.  -lhunspell -lparser
+
+LIBS=libhunspell.a
+LIBS2=libparser.a
+
+AR=ar rc
+RANLIB=ranlib
+
+OBJ=../hunspell/
+OBJ2=../parsers/
+OBJ3=../tools/
+
+OBJS = \
+affentry.o \
+affixmgr.o \
+hashmgr.o \
+suggestmgr.o \
+csutil.o \
+phonet.o \
+hunspell.o \
+filemgr.o \
+hunzip.o \
+replist.o
+
+OBJS2 = \
+textparser.o \
+firstparser.o \
+htmlparser.o \
+latexparser.o \
+manparser.o
+
+all: hunspell example hzip hunzip 
+
+libhunspell.a: $(OBJS)
+	$(AR) $@ $(OBJS)
+	-@ ($(RANLIB) $@ || true) >/dev/null 2>&1
+
+libparser.a: $(OBJS2)
+	$(AR) $@ $(OBJS2)
+	-@ ($(RANLIB) $@ || true) >/dev/null 2>&1
+
+example: $(LIBS) example.o
+	$(CXX) $(CXXFLAGS) -o $@ example.o $(LDFLAGS)
+
+hunspell: hunspellprg.o $(LIBS) $(LIBS2)
+	$(CXX) $(CXXFLAGS) -o $@ hunspellprg.o $(LDFLAGS) $(LD2FLAGS)
+
+hunzip: hunzipprg.o $(LIBS)
+	$(CXX) $(CXXFLAGS) -o $@ hunzipprg.o $(LDFLAGS)
+
+hzip: hzip.o
+	$(CXX) $(CXXFLAGS) -o $@ hzip.o $(LDFLAGS)
+
+%.o: %.cxx 
+	$(CXX) $(CXXFLAGS) -c $<
+
+clean:
+	rm -f *.exe *xx license* license* hunspell.h hzip.c *prg.cxx \
+	*.o *~ example hunspell hzip hunzip libhunspell.a libparser.a
+
+distclean:	clean
+
+hunspell.hxx:
+	ln -s $(OBJ)/*xx $(OBJ)/hunspell.h $(OBJ)/license* $(OBJ2)/*xx ./
+	ln -s $(OBJ)/hunvisapi.h ./
+	ln -s  $(OBJ3)/hunspell.cxx ./hunspellprg.cxx
+	ln -s  $(OBJ3)/hunzip.cxx ./hunzipprg.cxx
+	ln -s  $(OBJ3)/example.cxx $(OBJ3)/hzip.c ./
+	make -f Makefile.cygwin
+
+depend:
+	makedepend -- $(CXXFLAGS) -- *.[ch]xx
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+affentry.o: license.hunspell config.h license.myspell affentry.hxx atypes.hxx
+affentry.o: hashmgr.hxx htypes.hxx filemgr.hxx hunzip.hxx w_char.hxx
+affentry.o: baseaffix.hxx affixmgr.hxx phonet.hxx csutil.hxx
+affentry.o: atypes.hxx hashmgr.hxx htypes.hxx filemgr.hxx hunzip.hxx
+affentry.o: w_char.hxx baseaffix.hxx affixmgr.hxx phonet.hxx
+affixmgr.o: license.hunspell config.h license.myspell affixmgr.hxx atypes.hxx
+affixmgr.o: hashmgr.hxx htypes.hxx filemgr.hxx hunzip.hxx w_char.hxx
+affixmgr.o: baseaffix.hxx phonet.hxx affentry.hxx langnum.hxx csutil.hxx
+affixmgr.o: atypes.hxx hashmgr.hxx htypes.hxx filemgr.hxx hunzip.hxx
+affixmgr.o: w_char.hxx baseaffix.hxx phonet.hxx
+atypes.o: hashmgr.hxx htypes.hxx filemgr.hxx hunzip.hxx w_char.hxx
+csutil.o: license.hunspell config.h license.myspell csutil.hxx w_char.hxx
+csutil.o: atypes.hxx hashmgr.hxx htypes.hxx filemgr.hxx hunzip.hxx
+csutil.o: langnum.hxx utf_info.cxx
+csutil.o: w_char.hxx
+dictmgr.o: dictmgr.hxx
+example.o: hunspell.hxx hashmgr.hxx htypes.hxx filemgr.hxx hunzip.hxx
+example.o: affixmgr.hxx atypes.hxx w_char.hxx baseaffix.hxx phonet.hxx
+filemgr.o: hunzip.hxx
+firstparser.o: ../hunspell/csutil.hxx w_char.hxx firstparser.hxx
+firstparser.o: textparser.hxx
+firstparser.o: textparser.hxx
+hashmgr.o: license.hunspell config.h license.myspell hashmgr.hxx htypes.hxx
+hashmgr.o: filemgr.hxx hunzip.hxx csutil.hxx w_char.hxx atypes.hxx
+hashmgr.o: htypes.hxx filemgr.hxx hunzip.hxx
+htmlparser.o: ../hunspell/csutil.hxx w_char.hxx htmlparser.hxx textparser.hxx
+htmlparser.o: textparser.hxx
+hunspell.o: license.hunspell config.h license.myspell hunspell.hxx
+hunspell.o: hashmgr.hxx htypes.hxx filemgr.hxx hunzip.hxx affixmgr.hxx
+hunspell.o: atypes.hxx w_char.hxx baseaffix.hxx phonet.hxx suggestmgr.hxx
+hunspell.o: hashmgr.hxx htypes.hxx filemgr.hxx hunzip.hxx affixmgr.hxx
+hunspell.o: atypes.hxx w_char.hxx baseaffix.hxx phonet.hxx suggestmgr.hxx
+hunspellprg.o: config.h hunspell.hxx hashmgr.hxx htypes.hxx filemgr.hxx
+hunspellprg.o: hunzip.hxx affixmgr.hxx atypes.hxx w_char.hxx baseaffix.hxx
+hunspellprg.o: latexparser.hxx manparser.hxx firstparser.hxx
+hunzip.o: hunzip.hxx
+latexparser.o: ../hunspell/csutil.hxx w_char.hxx latexparser.hxx
+latexparser.o: textparser.hxx
+latexparser.o: textparser.hxx
+manparser.o: ../hunspell/csutil.hxx w_char.hxx manparser.hxx textparser.hxx
+manparser.o: textparser.hxx
+phonet.o: csutil.hxx w_char.hxx phonet.hxx
+suggestmgr.o: license.hunspell config.h license.myspell suggestmgr.hxx
+suggestmgr.o: atypes.hxx hashmgr.hxx htypes.hxx filemgr.hxx hunzip.hxx
+suggestmgr.o: w_char.hxx affixmgr.hxx baseaffix.hxx phonet.hxx langnum.hxx
+suggestmgr.o: atypes.hxx hashmgr.hxx htypes.hxx filemgr.hxx hunzip.hxx
+suggestmgr.o: w_char.hxx affixmgr.hxx baseaffix.hxx phonet.hxx langnum.hxx
+testparser.o: textparser.hxx htmlparser.hxx latexparser.hxx
+textparser.o: ../hunspell/csutil.hxx w_char.hxx textparser.hxx
+utf_info.o: csutil.hxx w_char.hxx

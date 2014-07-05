@@ -1,0 +1,19 @@
+@mixin application-icon-normal($name, $index) {
+  .x-button-icon.#{$name},
+  .list-icon.#{$name} {
+    background-image: url($icons-default-path);
+    background-color: transparent;
+    background-position: 0 -1 * $index * $icons-default-size;
+    background-size: $icons-default-image-width $icons-default-image-height;
+  }
+
+  .x-button-pressing,
+  .x-button-pressed,
+  .x-button-active,
+  .x-item-pressed {
+    .x-button-icon.#{$name},
+    .list-icon.#{$name} {
+      background-position: -1 * $icons-default-size -1 * $index * $icons-default-size;
+    }
+  }
+}

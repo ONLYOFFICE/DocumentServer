@@ -1,0 +1,4 @@
+* shared dictionaries for multi-user environment
+* improve compound handling
+* Unicode unmunch (munch)
+* forbiddenword and pseudoword support in unmunch 

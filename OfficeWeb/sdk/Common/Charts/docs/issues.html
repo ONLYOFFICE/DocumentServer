@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>Common issues that you may come across</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas chart docs common issues" />
+    <meta name="description" content="Documentation about common issues that you may come across when using OfficeExcel" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.jpg"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+
+    <?php PrintAnalyticsCode() ?>
+
+</head>
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        Common issues
+    </div>
+
+    <h1>Common <span>issues</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <p>
+        These are some common issues that you should be aware of. If you're having trouble, you may want to look through these to see
+        if any apply to you or may be the source of your problem.
+    </p>
+
+
+    <a name="requestAnnotationFrame"></a>
+    <h4>Low animation frame rate in Chrome 15</h4>
+        <p>
+            In Chrome 15 the experimental function <i>requestAnimationFrame()</i> has a lower frame-rate than it does in Chrome 14.
+            Not all animations are affected and animations that animate CSS properties using jQuery (eg the Line chart Trace
+            animation) shouldn't be affected. The Odometer is particularly affected if you use tickmarks. In this you can turn off
+            tickmarks and use the tickmark highlighting instead.
+        </p>
+        
+        <p>
+            <b>Note:</b>
+            A second release of Chrome 15 seems to have rectified the issue so you may not experience this.
+        </p>
+
+    <a name="annotations"></a>
+    <h4>Annotations aren't saved when running locally in Mozilla Firefox</h4>
+
+    <p>
+        The solution here is to run the charts using a web server. At this time (March 2010) only Safari, Chrome and Opera
+        support saving annotations when running locally.
+    </p>
+
+
+    <h4>Shadows in Google Chrome and the line chart</h4>
+
+    <p>
+        Shadows in recent versions of Google Chrome are somewhat broken. Firefox, MSIE, Opera and Safari are fine. The reason for this
+        error is a combination of factors it seems - shadow blurring and line width. Fixes have been added to allow shadow blurring and
+        a 1 pixel linewidth, though some chart types may still be affected.
+    </p>
+
+<!--
+
+    <p>
+        <b></b><br />
+    </p>
+-->
+
+</body>
+</html>

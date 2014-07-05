@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>Adjusting the Thermometer chart interactively</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas chart adjusting docs" />
+    <meta name="description" content="Information about adjusting the Thermometer chart interactively" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A chart library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.png"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+    
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.adjusting.js" ></script>
+    <script src="../libraries/OfficeExcel.thermometer.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+
+    <script>
+        window.onload = function (e)
+        {
+            var thermometer = new OfficeExcel.Thermometer('myc', 0, 100, 78);
+            
+            var grad = thermometer.context.createLinearGradient(0,50,0,350);
+            grad.addColorStop(0, 'orange');
+            grad.addColorStop(1, 'white');
+
+            thermometer.Set('chart.colors', [grad]);
+            thermometer.Set('chart.title.side', 'An adjustable thermometer');
+            thermometer.Set('chart.adjustable', OfficeExcel.isOld() ? false : true);
+            thermometer.Draw();
+
+            OfficeExcel.AddCustomEventListener(thermometer, 'onadjustbegin', function (obj) {document.getElementById("output").value += 'Value before adjustment: ' + obj.value + '\n';});
+            OfficeExcel.AddCustomEventListener(thermometer, 'onadjust', function (obj) {document.getElementById("output").value += 'Value during adjustment: ' + obj.value + '\n';});
+            OfficeExcel.AddCustomEventListener(thermometer, 'onadjustend', function (obj) {document.getElementById("output").value += 'Value after adjustment: ' + obj.value + '\n';});
+        }
+    </script>
+
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+
+<body>
+
+    
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        <a href="adjusting.html">Adjusting charts interactively</a>
+        >
+        Thermometer chart
+    </div>
+
+    <h1>Adjusting <span>your charts interactively - Thermometer chart</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <canvas id="myc" width="100" height="400" style="float: left">[No canvas support]</canvas>
+    
+    <p>
+        Nothing pertinent is kept in the registry. If you wish to get the new value of the thermometer you can check <i>obj.value</i>.
+        If you want the value before the adjustment, you can check the value with the onadjustbegin event (instead of the
+        onadjustend event).
+    </p>
+    
+    <p>
+        <textarea id="output" style="width: 600px; height: 200px;"></textarea>
+    </p>
+
+    <br clear="all" />
+
+    <pre class="code">
+&lt;script&gt;
+    window.onload = function (e)
+    {
+        var thermometer = new OfficeExcel.Thermometer('myc', 0, 100, 78);
+        
+        var grad = thermometer.context.createLinearGradient(0,50,0,350);
+        grad.addColorStop(0, 'orange');
+        grad.addColorStop(1, 'white');
+
+        thermometer.Set('chart.colors', [grad]);
+        thermometer.Set('chart.title.side', 'An adjustable thermometer');
+        thermometer.Set('chart.adjustable', true);
+        thermometer.Draw();
+
+        OfficeExcel.AddCustomEventListener(thermometer, 'onadjustbegin', function (obj) {document.getElementById("output").value += 'Value before adjustment: ' + obj.value + '\n';});
+        OfficeExcel.AddCustomEventListener(thermometer, 'onadjust', function (obj) {document.getElementById("output").value += 'Value during adjustment: ' + obj.value + '\n';});
+        OfficeExcel.AddCustomEventListener(thermometer, 'onadjustend', function (obj) {document.getElementById("output").value += 'Value after adjustment: ' + obj.value + '\n';});
+    }
+&lt;/script&gt;
+</pre>
+</body>
+</html>

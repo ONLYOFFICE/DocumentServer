@@ -1,0 +1,385 @@
+{
+    "version": "1.0",
+    "build": 0,
+    "homepage": "http://www.onlyoffice.com",
+    "sdk": {
+        "clean": [
+            "../../deploy/sdk/Common",
+            "../../deploy/sdk/PowerPoint"
+        ],
+        "copy": {
+            "../../deploy/sdk/Common/": "../../sdk/Common/AllFonts.js",
+            "../../deploy/sdk/PowerPoint/themes/": "../../sdk/PowerPoint/themes/**",
+            "../../deploy/sdk/PowerPoint/": [
+                "../../sdk/PowerPoint/sdk-all.js"
+            ]
+        }
+    },
+    "api": {
+        "clean": [
+            "../../deploy/apps/api"
+        ],
+        "copy": {
+            "../../deploy/apps/api/documents/": "../../apps/api/**"
+        }
+    },
+    "main": {
+        "clean": [
+            "../../deploy/apps/presentationeditor/main"
+        ],
+        "js": {
+            "srcview": [
+                "../../apps/common/Gateway.js",
+                "../../apps/common/Analytics.js",
+                "../../apps/common/IrregularStack.js",
+                "../../apps/common/main/loader.js",
+                "../../apps/common/main/lib/plugin/ScrollPane.js",
+                "../../apps/common/main/lib/plugin/DataViewScrollPane.js",
+                "../../apps/common/main/lib/plugin/TextAreaAutoHeight.js",
+                "../../apps/common/main/lib/plugin/MenuExpand.js",
+                "../../apps/common/main/lib/component/LoadMask.js",
+                "../../apps/common/main/lib/component/SplitColorButton.js",
+                "../../apps/common/main/lib/component/MetricSpinner.js",
+                "../../apps/common/main/lib/component/IndeterminateCheckBox.js",
+                "../../apps/common/main/lib/component/SearchField.js",
+                "../../apps/common/main/lib/component/util/MetricSettings.js",
+                "../../apps/common/main/lib/model/User.js",
+                "../../apps/common/main/lib/model/ChatMessage.js",
+                "../../apps/common/main/lib/model/Comment.js",
+                "../../apps/common/main/lib/model/Reply.js",
+                "../../apps/common/main/lib/store/ChatMessages.js",
+                "../../apps/common/main/lib/store/Comments.js",
+                "../../apps/common/main/lib/store/Users.js",
+                "../../apps/common/main/lib/view/About.js",
+                "../../apps/common/main/lib/view/Header.js",
+                "../../apps/common/main/lib/view/ChatPanel.js",
+                "../../apps/common/main/lib/view/CommentsEditForm.js",
+                "../../apps/common/main/lib/view/CommentsPanel.js",
+                "../../apps/common/main/lib/view/CommentsPopover.js",
+                "../../apps/common/main/lib/view/DocumentAccessDialog.js",
+                "../../apps/common/main/lib/view/SearchDialog.js",
+                "../../apps/common/main/lib/view/Participants.js",
+                "../../apps/common/main/lib/controller/Chat.js",
+                "../../apps/common/main/lib/controller/CommentsBase.js",
+                "../../apps/common/main/lib/controller/CommentsList.js",
+                "../../apps/common/main/lib/controller/CommentsPopover.js",
+                "../../apps/common/main/lib/view/ComboFonts.js",
+                "../../apps/common/main/lib/model/Font.js",
+                "../../apps/common/main/lib/store/Fonts.js",
+                "../../apps/common/main/lib/controller/Fonts.js",
+                "../../apps/presentationeditor/main/app/view/DocumentHelp.js",
+                "../../apps/presentationeditor/main/app/view/DocumentInfo.js",
+                "../../apps/presentationeditor/main/app/view/DocumentSettings.js",
+                "../../apps/presentationeditor/main/app/view/File.js",
+                "../../apps/presentationeditor/main/app/view/CreateFile.js",
+                "../../apps/presentationeditor/main/app/view/RecentFiles.js",
+                "../../apps/presentationeditor/main/app/view/DocumentStatusInfo.js",
+                "../../apps/presentationeditor/main/app/view/DocumentHolder.js",
+                "../../apps/presentationeditor/main/app/view/DocumentPreview.js",
+                "../../apps/presentationeditor/main/app/view/MainMenu.js",
+                "../../apps/presentationeditor/main/app/view/Viewport.js",
+                "../../apps/presentationeditor/main/app/model/FileTemplate.js",
+                "../../apps/presentationeditor/main/app/model/RecentFile.js",
+                "../../apps/presentationeditor/main/app/store/FileTemplates.js",
+                "../../apps/presentationeditor/main/app/store/RecentFiles.js",
+                "../../apps/presentationeditor/main/app/controller/CreateFile.js",
+                "../../apps/presentationeditor/main/app/controller/RecentFiles.js",
+                "../../apps/presentationeditor/main/app/controller/Search.js",
+                "../../apps/presentationeditor/main/app/controller/DocumentHolder.js",
+                "../../apps/presentationeditor/main/app/controller/Main.js",
+                "../../apps/common/locale.js",
+                "../../apps/presentationeditor/main/app.js",
+                "../../apps/presentationeditor/main/restrictions.js",
+                "../../apps/presentationeditor/main/environment.js.deploy"
+            ],
+            "destview": "../../deploy/apps/presentationeditor/main/app-view.js",
+            "srcedit": [
+                "../../apps/common/main/lib/plugin/GridScrollPane.js",
+                "../../apps/common/main/lib/plugin/ComboBoxScrollPane.js",
+                "../../apps/common/main/lib/component/util/RGBColor.js",
+                "../../apps/common/main/lib/component/DataViewPicker.js",
+                "../../apps/common/main/lib/component/MenuDataViewPicker.js",
+                "../../apps/common/main/lib/component/HSBColorPicker.js",
+                "../../apps/common/main/lib/component/MultiSliderGradient.js",
+                "../../apps/common/main/lib/component/SynchronizeTip.js",
+                "../../apps/common/main/lib/component/ComboDataView.js",
+                "../../apps/common/main/lib/view/ExtendedColorDialog.js",
+                "../../apps/common/main/lib/view/ImageFromUrlDialog.js",
+                "../../apps/common/main/lib/view/CopyWarning.js",
+                "../../apps/common/main/lib/view/AbstractSettingsPanel.js",
+                "../../apps/common/main/lib/component/ThemeColorPalette.js",
+                "../../apps/common/main/lib/model/Group.js",
+                "../../apps/common/main/lib/model/GroupItem.js",
+                "../../apps/common/main/lib/component/GroupedDataView.js",
+                "../../apps/presentationeditor/main/app/model/ShapeGroup.js",
+                "../../apps/presentationeditor/main/app/model/SlideLayout.js",
+                "../../apps/presentationeditor/main/app/store/ShapeGroups.js",
+                "../../apps/presentationeditor/main/app/store/SlideLayouts.js",
+                "../../apps/presentationeditor/main/app/component/DimensionPicker.js",
+                "../../apps/presentationeditor/main/app/component/MenuDimensionPicker.js",
+                "../../apps/presentationeditor/main/app/view/InsertTableDialog.js",
+                "../../apps/presentationeditor/main/app/view/HyperlinkSettings.js",
+                "../../apps/presentationeditor/main/app/view/ImageSettingsAdvanced.js",
+                "../../apps/presentationeditor/main/app/view/ShapeSettingsAdvanced.js",
+                "../../apps/presentationeditor/main/app/view/TableSettingsAdvanced.js",
+                "../../apps/presentationeditor/main/app/view/ParagraphSettingsAdvanced.js",
+                "../../apps/presentationeditor/main/app/view/ImageSettings.js",
+                "../../apps/presentationeditor/main/app/view/ShapeSettings.js",
+                "../../apps/presentationeditor/main/app/view/SlideSettings.js",
+                "../../apps/presentationeditor/main/app/view/ParagraphSettings.js",
+                "../../apps/presentationeditor/main/app/view/SlideSizeSettings.js",
+                "../../apps/presentationeditor/main/app/view/TableSettings.js",
+                "../../apps/presentationeditor/main/app/view/RightPanel.js",
+                "../../apps/presentationeditor/main/app/view/RightMenu.js",
+                "../../apps/presentationeditor/main/app/view/Toolbar.js",
+                "../../apps/presentationeditor/main/app/controller/Toolbar.js"
+            ],
+            "destedit": "../../deploy/apps/presentationeditor/main/app-edit.js"
+        },
+        "css": {
+            "srcedit": [
+                "../../apps/common/main/resources/css/dataview-picker.css",
+                "../../apps/common/main/resources/css/hsb-colorpicker.css",
+                "../../apps/common/main/resources/css/themecolorpalette.css",
+                "../../apps/common/main/resources/css/comments-panel.css",
+                "../../apps/common/main/resources/css/comments-popover.css",
+                "../../apps/common/main/resources/css/grouped-data-view.css",
+                "../../apps/common/main/resources/css/dataview-combo.css",
+                "../../apps/common/main/resources/css/synchronize-tip.css",
+                "../../apps/common/main/resources/css/multislider-gradient.css",
+                "../../apps/presentationeditor/main/resources/css/right-panels.css",
+                "../../apps/presentationeditor/main/resources/css/toolbar.css",
+                "../../apps/presentationeditor/main/resources/css/dimension-picker.css",
+                "../../apps/presentationeditor/main/resources/css/advanced-settings-dialog.css"
+            ],
+            "destedit": "../../deploy/apps/presentationeditor/main/resources/css/app-edit.css",
+            "srcview": [
+                "../../apps/common/main/resources/css/load-mask.css",
+                "../../apps/common/main/resources/css/jquery.jscrollpane.css",
+                "../../apps/common/main/resources/css/chat-panel.css",
+                "../../apps/common/main/resources/css/header.css",
+                "../../apps/common/main/resources/css/asc.css",
+                "../../apps/common/main/resources/css/about.css",
+                "../../apps/common/main/resources/css/searchfield.css",
+                "../../apps/common/main/resources/css/searchdialog.css",
+                "../../apps/common/main/resources/css/participantspanel.css",
+                "../../apps/presentationeditor/main/resources/css/pres-main-colors.css",
+                "../../apps/presentationeditor/main/resources/css/header.css",
+                "../../apps/presentationeditor/main/resources/css/document-holder.css",
+                "../../apps/presentationeditor/main/resources/css/document-statusinfo.css",
+                "../../apps/presentationeditor/main/resources/css/document-preview.css",
+                "../../apps/presentationeditor/main/resources/css/main-menu.css",
+                "../../apps/presentationeditor/main/resources/css/file.css",
+                "../../apps/presentationeditor/main/resources/css/file-create-new.css",
+                "../../apps/presentationeditor/main/resources/css/file-open-recent.css"
+            ],
+            "destview": "../../deploy/apps/presentationeditor/main/resources/css/app-view.css"
+        },
+        "copy": {
+            "localization": {
+                "../../deploy/apps/presentationeditor/main/locale/": "../../apps/presentationeditor/main/locale/*"
+            },
+            "help": {
+                "../../deploy/apps/presentationeditor/main/resources/help/en/": "../../apps/presentationeditor/main/resources/help/en/**",
+                "../../deploy/apps/presentationeditor/main/resources/help/de/": "../../apps/presentationeditor/main/resources/help/de/**",
+                "../../deploy/apps/presentationeditor/main/resources/help/es/": "../../apps/presentationeditor/main/resources/help/es/**",
+                "../../deploy/apps/presentationeditor/main/resources/help/it/": "../../apps/presentationeditor/main/resources/help/it/**",
+                "../../deploy/apps/presentationeditor/main/resources/help/ru/": "../../apps/presentationeditor/main/resources/help/ru/**"
+            },
+            "index-page": {
+                "../../deploy/apps/presentationeditor/main/index.html": "../../apps/presentationeditor/main/index.html.deploy"
+            },
+            "images-app": {
+                "../../deploy/apps/presentationeditor/main/resources/img/": "../../apps/presentationeditor/main/resources/img/**"
+            },
+            "images-common": {
+                "../../deploy/apps/presentationeditor/main/Images/": "../../sdk/PowerPoint/Images/*.cur",
+                "../../deploy/apps/presentationeditor/main/resources/img/": "../../apps/common/main/resources/img/**"
+            }
+        }
+    },
+    "mobile": {
+        "clean": [
+            "../../deploy/apps/presentationeditor/mobile"
+        ],
+        "js": {
+            "src": [
+                "../../apps/common/Gateway.js",
+                "../../apps/common/Analytics.js",
+                "../../apps/common/mobile/loader.js",
+                "../../apps/presentationeditor/mobile/app/view/Main.js",
+                "../../apps/presentationeditor/mobile/app/view/phone/toolbar/View.js",
+                "../../apps/presentationeditor/mobile/app/view/phone/Main.js",
+                "../../apps/presentationeditor/mobile/app/view/tablet/toolbar/View.js",
+                "../../apps/presentationeditor/mobile/app/view/tablet/Main.js",
+                "../../apps/presentationeditor/mobile/app/controller/Presentation.js",
+                "../../apps/presentationeditor/mobile/app/controller/Main.js",
+                "../../apps/presentationeditor/mobile/app/controller/phone/Main.js",
+                "../../apps/presentationeditor/mobile/app/controller/tablet/Main.js",
+                "../../apps/presentationeditor/mobile/app/controller/toolbar/View.js",
+                "../../apps/presentationeditor/mobile/app/profile/Phone.js",
+                "../../apps/presentationeditor/mobile/app/profile/Tablet.js",
+                "../../apps/common/locale.js",
+                "../../apps/presentationeditor/mobile/app.js"
+            ],
+            "dist": "../../deploy/apps/presentationeditor/mobile/app-all.js"
+        },
+        "css": {
+            "normal": {
+                "src": [
+                    "../../apps/presentationeditor/mobile/resources/css/application-normal.css"
+                ],
+                "dist": "../../deploy/apps/presentationeditor/mobile/resources/css/application-normal.css"
+            },
+            "retina": {
+                "src": [
+                    "../../apps/presentationeditor/mobile/resources/css/application-retina.css"
+                ],
+                "dist": "../../deploy/apps/presentationeditor/mobile/resources/css/application-retina.css"
+            }
+        },
+        "copy": {
+            "index-page": {
+                "../../deploy/apps/presentationeditor/mobile/index.html": "../../apps/presentationeditor/mobile/index.html.deploy"
+            },
+            "localization": {
+                "../../deploy/apps/presentationeditor/mobile/locale/": "../../apps/presentationeditor/mobile/locale/*"
+            },
+            "images-app": {
+                "../../deploy/apps/presentationeditor/mobile/resources/img/": "../../apps/presentationeditor/mobile/resources/img/**"
+            }
+        }
+    },
+    "embed": {
+        "clean": [
+            "../../deploy/apps/presentationeditor/embed"
+        ],
+        "js": {
+            "src": [
+                "../../apps/common/Gateway.js",
+                "../../apps/common/Analytics.js",
+                "../../apps/presentationeditor/embed/js/ApplicationView.js",
+                "../../apps/presentationeditor/embed/js/ApplicationController.js",
+                "../../apps/presentationeditor/embed/js/application.js"
+            ],
+            "dist": "../../deploy/apps/presentationeditor/embed/app-all.js"
+        },
+        "css": {
+            "src": [
+                "../../apps/presentationeditor/embed/resources/css/application.css"
+            ],
+            "dist": "../../deploy/apps/presentationeditor/embed/resources/css/app-all.css"
+        },
+        "copy": {
+            "index-page": {
+                "../../deploy/apps/presentationeditor/embed/index.html": "../../apps/presentationeditor/embed/index.html.deploy"
+            },
+            "images-app": {
+                "../../deploy/apps/presentationeditor/embed/resources/img/": "../../apps/presentationeditor/embed/resources/img/**"
+            }
+        }
+    },
+    "extjs": {
+        "clean": [
+            "../../deploy/3rdparty/extjs"
+        ],
+        "copy": {
+            "script": {
+                "../../deploy/3rdparty/extjs/": "../../3rdparty/extjs/ext-all.js"
+            },
+            "css": {
+                "../../deploy/3rdparty/extjs/resources/css/": "../../3rdparty/extjs/resources/css/ext-all.css"
+            },
+            "images": {
+                "../../deploy/3rdparty/extjs/resources/themes/images/default/": "../../3rdparty/extjs/resources/themes/images/default/**"
+            }
+        }
+    },
+    "touch": {
+        "clean": [
+            "../../deploy/3rdparty/touch"
+        ],
+        "copy": {
+            "script": {
+                "../../deploy/3rdparty/touch/": "../../3rdparty/touch/sencha-touch-all.js"
+            }
+        }
+    },
+    "bootstrap": {
+        "clean": [
+            "../../deploy/3rdparty/bootstrap"
+        ],
+        "copy": {
+            "script": {
+                "../../deploy/3rdparty/bootstrap/js/": "../../3rdparty/bootstrap/js/bootstrap.min.js"
+            },
+            "css": {
+                "../../deploy/3rdparty/bootstrap/css/": "../../3rdparty/bootstrap/css/bootstrap.min.css"
+            },
+            "images": {
+                "../../deploy/3rdparty/bootstrap/img/": "../../3rdparty/bootstrap/img/*"
+            }
+        }
+    },
+    "jquery": {
+        "clean": [
+            "../../deploy/3rdparty/jquery"
+        ],
+        "copy": {
+            "script": {
+                "../../deploy/3rdparty/jquery/": [
+                    "../../3rdparty/jquery/jquery-1.7.1.min.js",
+                    "../../3rdparty/jquery/jquery-1.8.1.min.js"
+                ],
+                "../../deploy/3rdparty/jquery/mousewheel/": "../../3rdparty/jquery/mousewheel/jquery.mousewheel.js",
+                "../../deploy/3rdparty/jquery/jscrollpane/": "../../3rdparty/jquery/jscrollpane/jquery.jscrollpane.min.js"
+            }
+        }
+    },
+    "sockjs": {
+        "clean": [
+            "../../deploy/3rdparty/sockjs"
+        ],
+        "copy": {
+            "script": {
+                "../../deploy/3rdparty/sockjs/": "../../3rdparty/sockjs/sockjs-0.3.min.js"
+            }
+        }
+    },
+    "xregexp": {
+        "clean": [
+            "../../deploy/3rdparty/xregexp"
+        ],
+        "copy": {
+            "script": {
+                "../../deploy/3rdparty/xregexp/": "../../3rdparty/xregexp/xregexp-all-min.js"
+            }
+        }
+    },
+    "underscore": {
+        "clean": [
+            "../../deploy/3rdparty/underscore"
+        ],
+        "copy": {
+            "script": {
+                "../../deploy/3rdparty/underscore/": "../../3rdparty/underscore/underscore-min.js"
+            }
+        }
+    },
+    "zeroclipboard": {
+        "clean": [
+            "../../deploy/3rdparty/ZeroClipboard"
+        ],
+        "copy": {
+            "script": {
+                "../../deploy/3rdparty/ZeroClipboard/": [
+                    "../../3rdparty/ZeroClipboard/ZeroClipboard.min.js",
+                    "../../3rdparty/ZeroClipboard/ZeroClipboard*.swf"
+                ]
+            }
+        }
+    },
+    "tasks": {
+        "deploy": "increment-build deploy-api deploy-sdk deploy-3rdparty-bootstrap deploy-3rdparty-extjs deploy-3rdparty-touch deploy-3rdparty-jquery deploy-3rdparty-sockjs deploy-3rdparty-xregexp deploy-3rdparty-underscore deploy-3rdparty-zeroclipboard deploy-app-main deploy-app-mobile deploy-app-embed"
+    }
+}

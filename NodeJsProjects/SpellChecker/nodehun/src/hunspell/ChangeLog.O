@@ -1,0 +1,524 @@
+Myspell has a lot of parallel development, that is not documented here.
+
+2005-01-11: Németh László <nemethl@gyorsposta.hu>
+	* hunspell.cxx:
+	- interaktív javításnál hiányzó új sor karakterek pótlása.
+	  A hibát Gefferth András és Khiraly jelezte.
+	* csutil.cxx:
+	- pontosvesszõk törlése a GCC 3.4-es fordító igényeinek megfelelõen
+	  A hibát Dvornik László jelezte.
+	- i változó ismételt deklarásának törlése, ami helyenként hibás
+	  fordítást eredményez.
+	  A hibát Lódoktor és Bencsáth Boldizsár jelezte.
+	* OLVASS.EL:
+	- Windows alatti fordításnál Langid.cxx módosítandó. A hibát
+	  Lódoktor jelezte.
+
+2004-12-15  Németh László <nemethl@gyorsposta.hu>
+	* src/morphbase/*:
+	- handling K&R morphological encoding (remove plus signs from output)
+	- LEMMA_PRESENT: put only morphological description to output
+	- LANG parameter, langnum variable in source for writing language-dependent codes
+	- remove HU_KOTOHANGZO
+	- etc.
+	* doc/hunspell.4:
+	- adding some 
+
+2004-09-29  Halácsy Péter  <peter@halacsy.com>
+
+	* doc/ : bemásoltam a hunspell.1 hunspell.4 man oldalakat
+	* doc/hunspell.1: Kivettem a -s -m kapcsolókról szóló részt
+
+2004-09-28  Halácsy Péter  <peter@halacsy.com>
+
+	* src/hunspell/hunspell.cxx (indexing_interface): Ezt kiszedtem a
+	HunSpell-bol, mert nem ide valo. Ez egy kulon program lehet.
+	(main): a hunstem üzemmódot is kidobtam, ez se ide való
+	(main): meg a hunmorph üzemmódot is
+
+	* src/morphbase/morphbase.cxx (MorphBase): Átneveztem a MySpell
+	osztályt MorphBase-re
+	(stems): Átnevezten a suggest_stems metódust stem -re (mint to stem)
+
+2004-08-25  Németh László <nemethl@gyorsposta.hu>
+	* src/hunbase/suggestmgr.cxx: tövezés visszaállítása, nem
+	mûködik még az igekötõk hozzátoldása a tõhöz, továbbá a
+	kivételek kezelése (ehhez a 0.99.4-es szótár szükséges még).
+	* src/hunbase/myspell.cxx: -s vissza a tövezéshez
+	* src/hunbase/atypes.hxx: HUNSTEM makró definiálása itt az
+	affixmgr.cxx feltételes kódjához
+
+2004-08-12  Halacsy Peter
+	* src/misc/lexfilter.cxx : uj program, ami a szotar szureshez hasznalhato
+	lecserelheti a mostani hunmorph, hunspell -G -1 funkciokat
+	
+	* src/hunbase/myspell.cxx (analyzer) : Uj metodust vettem fel, ami mar
+	karaktertombben adja vissza az elemzes eredmenyet
+
+2004-08-03  Halácsy Péter  <peter@halacsy.com>
+
+	* src/hunspell/hunspell.cxx (HUNSPELL_VERSION): Áttettem ide ennek definiálását
+
+2004-07-31  Halácsy Péter  <peter@halacsy.com>
+
+	* src/hunbase/suggestmgr.cxx (fixstems): A fixstems miért itt van
+	és miért így hívják. Ez mehetne egy külön osztályba.
+
+2004-07-31  Halácsy Péter  <peter@halacsy.com>
+
+	* src/huntoken/htmlparser.cxx: Egyebkent az include-ok kezelese
+	eleg zavaros. Peldaul itt minek a textparser.hxx includolasa?
+
+	* src/huntoken/textparser.hxx (MAXLNLEN): Áthoztam ide a MAXLNLEN makrót
+	az atypes.hxx-bol, hogy a fuggoseget megszuntessem
+
+	* src/hunbase/myspell.cxx (suggest): Kivettem azt a részt, ami visszaadja a HUNSPELL_VERSION stringet
+	ha a VERSION_KEYWORD a bemeneti string. Csúnya gányolásnak tartottam
+
+2004-07-27  Halácsy Péter  <peter@halacsy.com>
+
+	* src/hunbase/myspell.cxx (morph_with_correction): 
+
+	* src/hunbase/baseaffix.hxx (class AffEntry): Allandora felvettem a morphcode mezot (last htypes.hxx)
+
+	* src/hunbase/affentry.hxx: Kivettem a hunmorph felteteleket (last htypes.hxx)
+
+	* src/hunbase/htypes.hxx (struct hentry): Kivettem a HUNMORPH feltetelt a char* description korul. Ertem,
+	hogy hatekonyabb egy folosleges mutato nelkul, ha nincs morf info, de szerintem felesleges
+
+	* src/hunbase/myspell.hxx: HUNSPELL_VERSION es VERSION_KEYWORD makrokat kivettem. Valamiert a 
+	hunspellnek kell majd
+
+	* src/hunbase/config.hxx (FLAG): config.hxx torolve, helyet atveszi a kozponti config.h; FLAG 
+	definicioja az atypes.hxx-be ment
+
+	* src/hunbase/atypes.hxx (FLAG): config.hxx megszuntetese erdekeben attettem ide a FLAG makro
+	definialasat, ami az EXT_CLASS-tol fugg
+
+	config.hxx include kicserelve a configure altal kezelt config.h-ra
+
+2004-06-29: Németh László <nemethl@gyorsposta.hu>
+	* affixmgr.cxx:
+	- csak utolsó tagként megengedett szavak (compound3) toldalék
+	nélküli elõfordulásának engedélyezése (pl. macskapár)
+	- többszörösen összetett szavak toldalékolt alakjainak morfológiai
+	elemzése
+	* myspell.cxx:
+	- rövidítések, számok, kötõjeles összetett szavak és a
+	-e határozószót tartalmazó szavak morfológiai elemzése
+	* suggestmgr.cxx: suggest_morph_for_spelling_error() optimalizálása
+	(csak a felhasznált egy javaslatot keresi meg, többet nem).
+	* csutil.cxx: kimenetben szereplõ üres sorok törlése
+
+2004-06-10: Németh László <nemethl@gyorsposta.hu>
+	* suggestmgr.cxx: összetett szavak elemzésének korlátozása
+	- a tövezés még nincs megvalósítva a 0.9.9-es változatban
+	  (helyette a Hunspell 0.9.7 használandó a Magyar Ispell 0.99.4-es
+	  változatával)
+
+2004-05-19: Németh László <nemethl@gyorsposta.hu>
+	* 0.9.9f-alpha
+
+	- morf. leírás sztringkezelése jav.
+	- EXT_CLASS: config.cxx-ben
+	- nagybetûs alakok is elemezve (a hibát Tron Viktor jelezte)
+	- szebb kimenet
+	- rule119 törölve
+	- firstparser.cxx javítva
+
+2004-02-13: Németh László <nemethl@gyorsposta.hu>
+        * 0.9.8a:
+        - MAXUSERWORD helyett USERWORD, nincs korlát
+        - description \t-vel dic fájlba
+        - homonimák kezelése
+        - aff formátumbõvítés
+        - konfixumok
+        - _morpho függvények
+        - kettõs szuffixum
+        - hunmorph
+        - lásd tests/hunmorph
+
+2004-01-29: Németh László <nemethl@gyorsposta.hu>
+        * 0.9.7-sztaki:
+        - memóriakezelési hibák javítása
+
+2003-12-17: Németh László <nemethl@gyorsposta.hu>
+	* 0.9.7-es változat:
+        * affixmgr.cxx:
+        - suffix_check() javítás (tmpword kiváltása isRevSubSet()
+          függvénnyel
+        - betöltés optimalizálása, build_pfxlist() helyett:
+          - build_pfxtree()
+          - process_sfx_tree_to_list(), process_sfx_inorder()
+
+        * csutil.cxx:
+        - isSubSet() gyorsabb változata
+        - isRevSubSet()
+
+        * langid.cxx, hunp.cxx:
+        - nyelvfelismerõ osztály és program (l. man hunp)
+        * man/hunp.1:
+        - nyelvfelismerõ program leírása
+
+        * firstparser.cxx:
+        - csak a tabulátorjelet tartalmazó sorokból a tabulátorjel
+        elõtti részt adja vissza (l. man Hunspell, -1 kapcsoló)
+
+        * hunspell.cxx:
+        - -u, -U, -u2 kapcsolók: tipikus hibák kijelzése;
+        automatikus, illetve lektorált javítása. L. man hunspell.
+
+        - -w kapcsoló teljes sor vizsgálatához
+
+        * hunspell.cxx:
+        - spell(): javítás (Valgrind hibajelzés alapján)
+
+        * hunspell.cxx: sprintf()-ek elé strlen() feltételvizsgálat
+                
+        * suggestmgr.cxx:
+        - 0.99.4-es Hunspell szótárral bekerült tövezési hiba
+        javítása (nem produktív ragozású, összetett szóbam szereplõ
+        fõneveknél lépett fel ez a probléma).
+
+        * OLVASS.EL:
+        - bõvítés
+
+2003-11-03: Németh László <nemethl@gyorsposta.hu>
+	* SuggestMgr::permute_accent():
+        - illegális memóriaolvasási hiba javítása.
+        * example.cxx::
+        - dupla free() a "" karakterlánc tövezése után
+
+        A hibákat Sarlós Tamás <stamas@csillag.ilab.sztaki.hu>
+        fedezte fel a figyelemre méltó Valgrind nyomkövetõ
+        programmal (http://developer.kde.org/~sewardj/)
+
+2003-10-22: Bencsáth Boldizsár <boldi@datacontact.hu>
+        * affixmgr.[ch]xx, csutil.[ch]xx: Az eredeti
+        MySpell foltjainak alkalmazása az OpenOffice.org 1.1
+        kompatibilitás érdekében. Itt karakterkezelõ
+        segédfüggvények lettek áthelyezve elérhetõbb helyre.
+
+        * dictmgr.[ch]xx: Itt etype paraméter hozzáadása.
+
+        * makefile.mk: Itt angol szótárak megjegyzésbe tétele.
+
+2003-10-04: Németh László <nemethl@gyorsposta.hu>
+	* 0.9.6.3-as változat:
+	* myspell.cxx: suggest() függvényben hibás
+	memóriafoglalás javítása. A hiba a pontra végzõdõ
+	helytelen szavakra adott javaslattevés során
+	jelentkezett. A hibás mûködést Khiraly
+	<khiraly@gmx.net> jelezte.
+
+2003-09-15: Németh László <nemethl@gyorsposta.hu>
+	* 0.9.6.2-es változat:
+	* latexparser.cxx: TeX elemzõ javítása:
+	- elemzési hiba ({{}}})
+	- verb+ +, \verb stb. kezelése
+
+2003-09-01: Németh László <nemethl@gyorsposta.hu>
+	* 0.9.6-os változat:
+	
+	* affentry.cxx: check2 törlése, lehetséges
+	tövek tárolása
+	* suggestmgr.cxx, myspell.cxx: suggest_pos_stems()
+	az ismeretlen szavak névszóragjainak és
+	jeleinek leválasztására.
+
+	* affixmgr.cxx, suggestmgr.cxx: suggest_stems()
+	szálkezeléshez módosított és javított függvény
+
+	* myspell.cxx: számok tövezése (teszt: 5-nek)
+	
+	* myspell.cxx: egy karakter + szó javaslatok
+	törlése (például cápak->cápa k)
+
+	* affixmgr.cxx, myspell.cxx, hunspell.cxx: szótár
+	verziószámának kiírása
+	
+	* hunspell.cxx: \r karaktert tartalmazó sorok
+	helyes megjelenítése
+
+	* myspell.cxx, hunspell.cxx: rövidítés végi pontok
+	hozzáadása függvénykönyvtár szinten
+
+	* hunspell.cxx: pipe_interface(): standard bemenet
+	tövezésénél hiányzó memóriafelszabadítás pótlása
+	
+	* Makefile: install javítása, több feltételvizsgálat
+	deinstall szakasz
+
+2003-07-22: Németh László <nemethl@gyorsposta.hu>
+	* 0.9.5-ös változat
+	* suggestmgr.cxx: marhalevél->lelevél tövezés javítása
+	* myspell.cxx: nagy kezdõbetûs rövidítések vizsgálata (Bp., Btk.)
+	- pontot tartalmazó számok helyesnek való elfogadása, ha:
+	  - az elsõ pontot legalább egy,
+	  - de legfeljebb három számjegy elõzi meg,
+	  - a pontok nem egymás mellett helyezkednek el,
+	  - az utolsó pont után legfeljebb két számjegy van.
+	Ezzel elfogadjuk az idõpontokat (12.00-kor), a pontozásokat
+	(1.1.2-ben), de kizárjuk a szóköz nélküli hibás dátummegadásokat
+	(2003.7.22.), valamint a tizedesvesszõ helyett ponttal írt
+	tizedestörteket (3.456, 4563.34).
+	- Javítás a tiltott szavakra adott kötõjeles javaslatoknál:
+	Straussal->Strauss-szal, és nem ,,Strauss szal''.
+	* hunspell.cxx: csak a -a kapcsoló megadásával élnek a
+	csõfelületi parancsok. Ezért most már nincsenek figyelmen
+	kívül hagyva például a kötõjellel kezdõdõ sorok, ha a -l
+	kapcsolóval hibás szavakat keresünk egy állományban.
+	* man/hunspell.1: a -a kapcsoló leírásának kiegészítése.
+
+2003-06-13: Németh László <nemethl@gyorsposta.hu>
+	* 0.9.4-es változat
+	* bin/*: makedb, lookdb segédprogramok az indexeléshez
+	* man/*: hunstem, makedb, lookdb
+	* hunspell.cxx: pipe_interface: nyomkövetõ kiírás törlése
+	- LOG #ifdef-be
+
+2003-06-11: Németh László <nemethl@gyorsposta.hu>
+	* 0.9.3-es változat
+	* suggestmgr.cxx: nagybetûs javaslat tulajdonneveknél
+	* hunspell.cxx: pipe_interface: hiba javítása
+
+2003-06-05: Németh László <nemethl@gyorsposta.hu>
+	* 0.9.2-es változat
+	* hunspell.cxx: -s kapcsoló
+	* suggestmgr.cxx: suggest_stems()
+	Szótövek elõállítása
+	* example.cxx: példa a szótövek elõállítására
+
+2003-05-13: Németh László <nemethl@gyorsposta.hu>
+	* 0.9.1-es változat
+	* hunspell.cxx:
+	- rl_escape(), stb.: a readline sorban ki lett kapcsolva
+	a fájlnév-kiegészítés, és helyette a két Escape lenyomás
+	megszakítja a szövegbevitelt. A Csere mûveletnél is a
+	readline() hívás található most már.
+	- egy hibás sprintf() sor javítva lett
+	* Makefile.unix:
+	- beállítások elkülönítve az állomány elején
+	- Makefile most már szimbólikus kötés
+	* ooomagyarispellteszt.txt: tesztállomány
+
+2003-04-28: Németh László <nemethl@gyorsposta.hu>
+	* affixmgr.cxx:
+	- y végû szavak kezelése: bõvebb leírás a
+	Magyar Ispell Changelog állományában.
+
+	* *parser.cxx:
+	ISO-8859-1 HTML karakterentitások közül a betûértékûek
+	(csak az ISO-8859-2-ben nem szereplõk) felismerése
+	és kezelése.
+
+2003-04-21: Goldman Elenonóra <eleonora46@gmx.net>
+	* *.dll függvénykönyvtár elõállítása Windows alatt:
+	- StdAfx.h
+	- libmyspell.def
+	- dlltest.cpp
+
+2003-04-16: Németh László <nemethl@gyorsposta.hu>
+	* Hunspell.cxx, stb: a Mispell átnevezése Hunspell-lé.
+	A nevet Kornai András <andras@kornai.com> javasolta.
+	Könyvtárak: /usr/share/mispell -> /usr/share/myspell
+	(korábban is ez volt).
+	A /usr/share/hunmorph szótár a helye a speciális
+	morfológiai információkat tartalmazó Hunmorph (bõvített
+	Myspell szótárformátumú) szótárállományoknak.
+	* Licenc: LGPL
+	* config.hxx: SZOSZABLYA_POSSIBLE_ROOTS
+	Ha a makrót bekapcsoljuk, akkor kiírásra kerülnek
+	a lehetséges tövek is, az alkalmazott ragozási szabály
+	osztályának betûjelével, illetve az alapszóval együtt.
+
+2003-04-10: Németh László <nemethl@gyorsposta.hu>:
+	* affixmgr.cxx:
+	- kötõhangzók helyes kezelése (hu_kotohangzo kapcsolóval),
+	l. még Magyar Ispell Changelog
+
+2003-03-24: Németh László <nemethl@gyorsposta.hu>
+	* mispell.cxx: pipe_interface(): az adatfájl szûrésnél fellépõ
+	memóriaszivárgás megszüntetése a kimaradt free(token) pótlásával
+	* affixmgr.cxx: prefix_check(): leg-, legesleg- confixum ellenõrzés
+	- onlyroot kapcsoló a csak tõszót érintõ tiltáshoz. L. Magyar Ispell
+	Az affixum állományban új kapcsolót adhatunk meg az
+	ONLYROOT paranccsal bevezetve. A kapcsoló módosítja a tiltókapcsoló
+	mûködését. L. man 4 mispell
+	* myspell.cxx:
+	- spell(): nagybetûs tulajdonnevek ellenõrzése (pl. BALATON)
+	- onlyroot vizsgálat forbiddenword mellett -> mangrove kezelése
+
+2003-03-17: Goldman Elenonóra <eleonora46@gmx.net>
+	* Windows port
+	* makefile.Windows:
+
+2003-03-04: Németh László <nemethl@gyorsposta.hu>
+	* firstparser.[ch]xx: adatfájlok szûréséhez (l. -1 kapcsoló)
+	* mispell.cxx: -L, -1, -G kapcsolók
+	* man/mispell.1: -L, -1, -G kapcsolók
+
+2003-03-03: Németh László <nemethl@gyorsposta.hu>
+	* mispell.cxx: -l, -p, WORDLIST
+	* man/mispell.1: -l, -p, WORDLIST
+
+2003-02-26: Németh László <nemethl@gyorsposta.hu>
+	* mispell.cxx: dialog_screen():
+	TILTOTT! (FORBIDDEN!) megjelenítése a tiltott szóösszetételek
+	esetén.
+	* suggestmgr.cxx: 
+	- check(): -ó, -õ képzõs igeneveket érintõ kód törlése
+	- check_forbidden(): a 6 szótagnál hosszabb, tiltott szótövekre
+	vonatkozó javaslatok nem kötõjellel, hanem szóközzel elválasztva
+	tartalmazzák a szavakat, ehhez szükséges a check_forbidden().
+	* man/*: új kézikönyv oldal az állományok formátumáról (mispell(4)),
+	a mispell(1) bõvítése.
+	* Makefile, mispell.mo: Bíró Árpád <biro_arpad@yahoo.com> javításai
+
+2003-02-18: Németh László <nemethl@gyorsposta.hu>
+	* mispell.cxx: interactive_interface()
+	- nem nyeli el a MAXLNLEN-t meghaladó méretû sorokban a MAXLNLEN
+	méretû részek határán lévõ karaktereket, és a nem újsor karakterre
+	végzõdõ állományok utolsó karakterét. (Hibát viszont még mindig
+	jelez, ha a MAXLNLEN határ feldarabol egy amúgy helyes szót.)
+	A MAXLNLEN 8192 karakter jelenleg.
+	- readline függvénykönyvtár használata a bevitelnél
+	- tõfelvételnél egy lehetséges tõ elõállítása, és a beviteli
+	sorban való feltüntetése. Az így megjelenõ szó javítható.
+	- --help kapcsoló
+	* Makefile: Javítások az install szakaszban.
+	A hibákat Bíró Árpád <biro_arpad@yahoo.com> jelezte.
+
+2003-02-07: Németh László <nemethl@gyorsposta.hu>
+	* mispell.cxx: put_dots_to_suggestions()
+	- realloc() cseréje malloc()-ra ismeretlen eredetû lefagyás miatt.
+	- lehetséges az Ispellhez hasonlóan a kapcsolókat kézzel megadni a
+	  saját szótárban a szavak után egy perjelet követõen: például a
+	  valamicsúnyaszó/w
+	  sor megadása után a valamicsúnyaszó és toldalékolt változatai hibásak
+	  lesznek az ellenõrzés alatt. (További kapcsolók leírásáért lásd a
+	  Magyar Ispell forrásában az aff/aff.fej állományt.)
+	* affixmgr.cxx: compound_check()
+	- repl_chars() hívása a megfelelõ helyre lett téve, ezzel a
+	  javaslattevés sebessége kétszeresére nõtt.
+	- A dinamikus memóriakezelés lecserelése veremmemóriára nem járt
+	  lényeges sebességnövekedéssel, de a közeljövõben ezzel elkerülhetõ
+	  az a memóriaszivárgás, ami például itt a tiltott szavak kezelésénél
+	  volt az elõzõ változatban (javítva).
+	* affentry.cxx, affixmgr.cxx: szótõ-elõállító kód megalapozása:
+	get_possible_root() metódus az utolsó toldalék-leválasztás
+	eredményével tér vissza.
+
+2003-02-05: Németh László <nemethl@gyorsposta.hu>
+	* mispell.cxx: put_dots_to_suggestions(): amennyiben
+	a felismert szó pontra, vagy pontokra végzõdik, a
+	javaslatokat is bõvíti ezzel.
+	- @, valamint 1-nél több pontot magába foglaló (de nem arra végzõdõ)
+	szavak ellenõrzésének tiltása (e-mail, fájlnevek, még nem opcionális).
+	- Hosszú sorok helyes megjelenítése.
+	- Tabulátorjelet tartalmazó sorok helyes megjelenítése.
+	- Mozaikszavak tõfelvételénél kötõjeles alak automatikus rögzítése
+	Pl.: BKV//URH mellett BKV-//URH- is bekerül a saját szótárba 
+	(a ragozott mozaikszavak felismerése tehát automatikus lesz, kivéve a
+	nem triviális -val/-vel toldalékos alakoké, amit külön kell felvenni.)
+	- PuT törlése (helyette MySpell::put_word(), put_word_suffix(),
+	put_word_pattern() eljárások a saját szótár bõvítésére)
+	- dupla szavak ellenõrzésének törlése a MySpell kódból (áthelyezés majd a
+	Mispell felületbe), hogy a MySpell meghívható maradjon párhuzamosan
+	futó szálakból.
+
+2002-12-30: Németh László <nemethl@gyorsposta.hu>
+	* *parser.cxx, *parser.hxx: elemzõ osztályok a régi és csúnya kód helyett
+
+2002-12-10: Németh László <nemethl@gyorsposta.hu>
+	* myspell.cxx: 35°-os, 20%-kal kezelése
+	* man/mispell.1: kézikönyv
+
+2002-12-04: Noll János <johnzero@johnzero.hu>
+	* spdaemon/: kiszolgáló felület, ld. README.spdaemon
+
+2002-12-04: Németh László <nemethl@gyorsposta.hu>
+	* mispell.cxx: Emacs kompatibilitáshoz hibák javítása (pl. többszörös -d)
+	* mispell.cxx: CURSES makróval kikapcsolható az interaktív felület + locale
+	(Windows, Macintosh)
+
+2002-11-30: Németh László <nemethl@gyorsposta.hu>
+	* affixmgr.cxx: get_checkdoublewords()
+
+2002-11-25:  Németh László <nemethl@gyorsposta.hu>
+	* affixmgr.cxx: mozgószabály (hu_mov_rule)
+	* myspell.cxx: mozgószabály
+	* affixmgr.cxx: kiötlõjénekmacskát (affix is összetettben, ha prefix)
+
+2002-11-08  Németh László <nemethl@gyorsposta.hu>
+	* myspell.cxx: balatonnak->Balatonnak, balatoninak
+
+2002-11-07  Németh László <nemethl@gyorsposta.hu>
+	* myspell: 0.6-os változat
+
+2002-10-31  Németh László <nemethl@gyorsposta.hu>
+	* Egyszerûbb név: Magyar MySpell 0.5 után -> MIspell 0.6
+	* mispell.cxx: többnyelvû interaktív felület (ncurses, locale)
+	* Makefile: make install
+
+2002-09-22  Németh László <nemethl@gyorsposta.hu>
+	* affixmgr.cxx: compound_check() macskaugom->macskaugrom, stb. javítása
+	* affixmgr.cxx: compound_check() szóismétlés (pl. macskamacska) tiltása
+	* myspell.cxx: szóismétlõdés tiltása (pl. kutya kutya) második rossz
+	* suggestmgr.cxx: macskaírat->macska írat mellett ->macskairat
+
+2002-07-29  Németh László <nemethl@gyorsposta.hu>
+	* mispell Windowsra, teszt Emacs-szel (vagy Emacs-csal)
+	* tiltott szavakat nem javasol, és összetett szóban sem fogad el
+	* fonev_morfo, fonev_morfo2 álszótövek elutasítása (házakmacska)
+	* kötõjeles szavak kezelése
+	* számok kezelése, kötõjeles alakjaikkal együtt, CHECKNUM kapcsoló
+
+2002-07-17  Németh László <nemethl@gyorsposta.hu>
+	* mispell.cxx: MySpell Ispell csõ interfész
+
+2002-07-04  Németh László <nemethl@gyorsposta.hu>
+	* mispell.cxx: MySpell Ispell csõ interfész
+	* affxmgr.cxx: szszerû kiszûrése, 
+	* új funkciók:
+	COMPOUNDFIRST: szó szerepelhet elsõ tagként a szóöszetételekben
+	COMPOUNDLAST: szó szerepelhet utolsó tagként a szóöszetételekben
+	FORBIDDENWORD: tiltott szavak kapcsolója (utú, uta, stb.)
+
+2002-06-25  Németh László <nemethl@gyorsposta.hu>
+	* myspell.cxx, suggestmgr.cxx: get_compound() char* helyett char
+	* affxmgr.cxx: check_repl() a helyesnek tûnõ, de hibás összetett
+	szavak kiszûrésére (pl. tejles, szervíz)
+	A szóösszetétel elfogadása elõtt még megnézzük, hogy a szó
+	nem-e a cseretáblázatban felvett hibát tartalmaz,
+	ha igen, akkor a szó hibásnak minõsül, hiába helyes szóösszetétel.
+	* affxmgr.cxx, suggestmgr.xx: accent: ékezetesítõ.
+	Leírás: README.accent
+	További optimalizáció: az ékezet nélküli betû ékezetes
+	változatai számának függvényében
+
+2002-06-05  Noll János <johnzero@johnzero.hu>
+	* myspell.cxx, suggestmgr.cxx: mem. szivárgás javítása
+	(a get_compound() felszabadítás nélkül lett meghíva).
+	A hiba a GNU mtrace segítségével lett detektálva.
+
+2002-06-03  Németh László <nemethl@gyorsposta.hu>
+	* Licenc: GPL
+	* Lásd MYSPELL.HU
+	* compound_check: 6-3 szabály, stb.
+
+MySpell:
+
+2002-xx-xx  Kevin Hendricks <kevin.hendricks@sympatico.ca>
+	* REP: ismétlések kiszûrése a javaslatokból
+	* COMPOUNDMIN
+
+2002-xx-xx  Németh László <nemethl@gyorsposta.hu>
+	* REP cseretáblázat
+	* COMPOUND, szóösszetételképzés
+
+2002-xx-xx  David Einstein <Deinst@world.std.com>
+	* optimalizált MySpell algoritmus
+
+2001-xx-xx  Kevin Hendricks <kevin.hendricks@sympatico.ca>
+	* Mûködõ ellenõrzõ, Ispell toldaléktömörítési algoritmussal

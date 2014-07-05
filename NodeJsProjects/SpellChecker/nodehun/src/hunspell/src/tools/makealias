@@ -1,0 +1,115 @@
+#!/bin/sh
+# makealias: make alias compressed dic and aff files
+# Usage: alias.sh dic aff (not alias.sh aff dic!)
+# Version: 2007-10-26
+
+case $# in
+0|1) 
+echo 'makealias: make alias compressed dic and aff files
+Usage: makealias file.dic file.aff (not makefile file.aff file.dic!)' >/dev/stderr
+exit;;
+esac
+
+DIC=`basename $1 .dic`
+AFF=`basename $2 .aff`
+
+# FLAG type definition must be before alias definitions
+grep '^FLAG' $2 >"${AFF}_alias.aff"
+
+awk 'BEGIN{n=1;m=1}
+function cutslash(st) {
+    if (split(st,t,"/") > 1) return t[1]
+    return st
+}
+function ltrim(st) {
+    sub(/^ +/,"",st)
+    return st
+}
+FILENAME ~ /.dic$/ && $1 ~ "/[^ \t]" {
+    split($1,t,"/")
+    if(!a[t[2]]){
+        a[t[2]]=n
+        b[n]=t[2]
+        n++
+    }
+    if (NF > 1) {
+        $1 = ""
+        if(!a2[$0]){
+            a2[$0]=m
+            c[m]=$0
+            m++
+        }
+        print t[1]"/"a[t[2]] "\t" a2[$0]
+    } else {
+        print t[1]"/"a[t[2]]
+    }
+    next
+}
+FILENAME ~ /.dic$/ && NF > 1 {
+    x = $1
+    $1 = ""
+    if(!a2[$0]){
+        a2[$0]=m
+        c[m]=$0
+        m++
+    }
+    print cutslash(x) "\t" a2[$0]
+    next
+}
+FILENAME ~ /.dic$/ { print cutslash($1) }
+FILENAME ~ /.aff$/ && /^[PS]FX/ && ($4 ~ /\/[^	 ]/) && NF > 4 {
+    split($4,t,"/")
+    if(!a[t[2]]){
+        a[t[2]]=n
+        b[n]=t[2]
+        n++
+    }
+    begin = $1 " " $2 " " $3 " " (t[1]"/"a[t[2]]) " " $5
+    if ($6!="") ok = 1; else ok = 0;
+    $1 = ""
+    $2 = ""
+    $3 = ""
+    $4 = ""
+    $5 = ""
+    if(ok){
+        if(!a2[$0]){
+            a2[$0]=m
+            c[m]=$0
+            m++
+        }
+        print begin " " a2[$0] >>"/dev/stderr"
+    } else print begin >>"/dev/stderr"
+    next
+}
+FILENAME ~ /.aff$/ && /^[PS]FX/ && NF > 4 {
+    begin = $1 " " $2 " " $3 " " cutslash($4) " " $5
+    if ($6!="") ok = 1; else ok = 0;
+    $1 = ""
+    $2 = ""
+    $3 = ""
+    $4 = ""
+    $5 = ""
+    if(ok) {
+        if (!a2[$0]){
+            a2[$0]=m
+            c[m]=$0
+            m++
+        }
+        print begin " " a2[$0] >>"/dev/stderr"
+    } else print begin >>"/dev/stderr"
+    next
+}
+FILENAME ~ /.aff$/ { print $0 >>"/dev/stderr" }
+END{
+    if (n>1) {
+        print "AF", n-1 >>"'${AFF}_alias.aff'"
+        for(i=1;i<n;i++) print "AF", b[i],"#",i >>"'${AFF}_alias.aff'"
+    }
+    if (m>1) {
+        print "AM", m-1 >>"'${AFF}_alias.aff'"
+        for(i=1;i<m;i++) print "AM " ltrim(c[i]) >>"'${AFF}_alias.aff'"
+    }
+}' $1 $2 >${DIC}_alias.dic 2>${AFF}_alias.$$
+grep -v '^FLAG' ${AFF}_alias.$$ >>${AFF}_alias.aff
+echo "output: ${DIC}_alias.dic, ${AFF}_alias.aff"
+rm ${AFF}_alias.$$

@@ -1,0 +1,105 @@
+.x-btn-default-toolbar-small-pressed, .x-btn-default-toolbar-small-menu-active,
+.x-btn-default-toolbar-large-pressed, .x-btn-default-toolbar-large-menu-active {
+    background: #E68656 !important; /* Old browsers */
+    background: -moz-linear-gradient(top,  #BC5C2E 0%, #E68656 80%) !important; /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#BC5C2E), color-stop(80%,#E68656)) !important; /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #BC5C2E 0%,#E68656 80%) !important; /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #BC5C2E 0%,#E68656 80%) !important; /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #BC5C2E 0%,#E68656 80%) !important; /* IE10+ */
+    background: linear-gradient(to bottom,  #BC5C2E 0%,#E68656 80%) !important; /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#BC5C2E', endColorstr='#E68656',GradientType=0 ) !important; /* IE6-9 */
+
+    background-clip: border-box;
+    background-origin:  border-box !important;
+    -moz-background-origin: border !important;
+}
+
+.x-btn-default-toolbar-small-disabled {
+    background: none repeat scroll 0 0 transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    -moz-box-shadow: none !important;
+}
+
+.x-boundlist-selected {
+    background: none repeat scroll 0 0 #eec3a8;
+    border-color: #c68159;
+}
+
+.x-boundlist-item-over, .x-nlg .x-menu-item-active .x-menu-item-link, .x-menu-item-active .x-menu-item-link{ /*excolor*/
+    background: #d96f3c; /* Old browsers */
+    background: -moz-linear-gradient(top,  #d96f3c 0%, #ab562e 110%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#d96f3c), color-stop(100%,#ab562e)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #d96f3c 0%,#ab562e 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #d96f3c 0%,#ab562e 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #d96f3c 0%,#ab562e 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #d96f3c 0%,#ab562e 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d96f3c', endColorstr='#ab562e',GradientType=0 ); /* IE6-9 */
+
+    border: 1px solid transparent;
+    border-top-color:#d96f3c;
+    border-bottom-color:#ab562e;
+    color: #FFFFFF;
+
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+	
+}
+
+.x-nlg .x-menu-item-active .x-menu-item-link, .x-menu-item-active .x-menu-item-link{
+    border-radius: inherit;
+    -o-border-radius: inherit;
+    -moz-border-radius: inherit;
+}
+
+.x-btn-default-small-pressed{
+    background: url(../img/controls/button/toolbar-button-bg.gif) repeat-x top  !important;
+    background-image: -webkit-image-set(url("../img/controls/button/toolbar-button-bg.gif") 1x, url("../img/controls/button/toolbar-button-bg@2x.gif") 2x) !important;
+	background-clip: border-box;
+    background-origin:  border-box !important;
+    -moz-background-origin: border !important;
+}
+	
+.asc-blue-button.x-btn-default-small{
+    background:url(../img/controls/button/normal-blue-button-bg.gif) repeat-x top;
+    background-image: -webkit-image-set(url("../img/controls/button/normal-blue-button-bg.gif") 1x, url("../img/controls/button/normal-blue-button-bg@2x.gif") 2x);
+    border-top: 1px solid #d77f56;
+    border-bottom: 1px solid #bc673d;
+	background-clip: border-box;
+    background-origin:  border-box !important;
+    -moz-background-origin: border !important;
+}
+
+.asc-blue-button.x-btn-default-small-over{
+    background-position: 0 -150px;
+}
+
+.asc-blue-button.x-btn-default-small-pressed{
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+    -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+	
+    background-position: 0 -300px;
+}
+
+.storage-data-view .x-item-over {
+    border: 2px solid #d76936 !important;
+    padding: 0;
+}
+.storage-data-view .x-item-selected {
+    border: 2px solid #d76936 !important;
+    padding: 0;
+	
+}
+
+.group-item.x-item-selected {
+    border:2px solid #d76936 !important;
+}
+
+.group-item.group-item-over {
+    border:2px solid #d76936 !important;
+}
+
+.storage-combodataview .x-item-selected,
+.x-dataview-combo-menu .storage-data-view .x-item-selected {
+    background: #d76936 !important;
+}

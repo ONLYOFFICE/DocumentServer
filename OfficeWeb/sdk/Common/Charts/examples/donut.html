@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>An example of OfficeExcel Donut charts</title>
+    
+    <meta name="keywords" content="html5 canvas example donut charts" />
+    <meta name="description" content="An example of the type of Bi-polar chart that OfficeExcel can produce" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.context.js" ></script>
+    <script src="../libraries/OfficeExcel.common.annotate.js" ></script>
+    <script src="../libraries/OfficeExcel.common.tooltips.js" ></script>
+    <script src="../libraries/OfficeExcel.common.zoom.js" ></script>
+    <script src="../libraries/OfficeExcel.common.key.js" ></script>
+    <script src="../libraries/OfficeExcel.common.effects.js" ></script>
+    <script src="../libraries/OfficeExcel.pie.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+    
+    <script>
+        window.onload = function ()
+        {
+            var donut = new OfficeExcel.Pie('donut1', [41,37,16,3,3]);
+            donut.Set('chart.variant', 'donut');
+            donut.Set('chart.linewidth', 5);
+            donut.Set('chart.strokestyle', 'white');
+            donut.Set('chart.title', "Browser share");
+            donut.Set('chart.tooltips', ['MSIE 7 (41%)', 'MSIE 6 (37%)', 'Firefox (16%)', 'Safari (3%)', 'Other (3%)']);
+            donut.Set('chart.key', ['MSIE 7 (41%)', 'MSIE 6 (37%)', 'Firefox (16%)', 'Safari (3%)', 'Other (3%)']);
+            donut.Set('chart.key.shadow', true);
+            donut.Set('chart.key.shadow.offsetx', 0);
+            donut.Set('chart.key.shadow.offsety', 0);
+            donut.Set('chart.key.shadow.blur', 15);
+            donut.Set('chart.key.shadow.color', '#ccc');
+            donut.Set('chart.key.position', 'graph');
+            donut.Set('chart.align', 'left');
+            donut.Set('chart.shadow', true);
+            donut.Set('chart.shadow.offsetx', 0);
+            donut.Set('chart.shadow.offsety', 0);
+            donut.Set('chart.shadow.blur', 25);
+            donut.Set('chart.centerx', donut.canvas.width / 2);
+            donut.Draw();
+        }
+    </script>
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+
+<div id="breadcrumb">
+    <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+    >
+    <a href="./index.html">Examples</a>
+    >
+    Donut charts example
+</div>
+
+<h1>Donut <span>charts</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <div>
+
+        <p>
+            Formerly the Donut chart was a separate chart entirely, though now it's a variant of the Pie chart. This means smaller downloads and
+            a much simpler implementation.
+        </p>
+
+        <div>
+            <ul>
+                <li><a href="../docs/pie.html">Pie charts API documentation</a></li>
+            </ul>
+        </div>
+
+        <div style="text-align: center">
+            <canvas id="donut1" width="430" height="350">[No canvas support]</canvas>
+        </div>
+    </div>
+
+
+</body>
+</html>

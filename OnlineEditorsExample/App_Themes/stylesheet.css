@@ -1,0 +1,307 @@
+﻿/*
+    Copyright (c) Ascensio System SIA 2014. All rights reserved.
+    http://www.onlyoffice.com
+*/
+html {
+    height: 100%;
+    width: 100%;
+}
+body {
+    background: #fff;
+    color: #333;
+    font-family: Arial, Tahoma,sans-serif;
+    font-size: 12px;
+    font-weight: normal;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+}
+form {
+    height: 100%;
+}
+div {
+    margin: 0;
+    padding: 0;
+}
+a, a:hover, a:visited {
+    color: #333;
+}
+
+
+.top-panel {
+    background: url("images/logo.png") no-repeat 30px center #3D4A6B;
+    height: 80px;
+    width: 100%;
+}
+.main-panel {
+    margin: 105px auto 0;
+    width: 350px;
+}
+.portal-name {
+    color: #3D4A6B;
+    font-size: 20px;
+}
+.portal-descr {
+    display: inline-block;
+    line-height: 20px;
+    margin-bottom: 24px;
+    width: 480px;
+}
+.save-original {
+    color: #929597;
+    line-height: 20px;
+    white-space: nowrap;
+    width: 272px;
+}
+.save-original input {
+    float: left;
+}
+.question {
+    background: url("images/question_small.png") no-repeat center center transparent;
+    cursor: pointer;
+    display: inline-block;
+    height: 16px;
+    width: 16px;
+}
+#hint {
+    background-color: #FFFFFF;
+    border: 1px solid #8E908F;
+    display: none;
+    margin: 4px 0 0 -32px;
+    max-width: 415px;
+    padding: 10px 15px 15px;
+    word-wrap: break-word;
+    z-index: 255;
+}
+.corner {
+    background: url("images/corner.png") no-repeat scroll 0 0 transparent;
+    height: 6px;
+    left: 35px;
+    margin-top: -15px;
+    position: absolute;
+    width: 9px;
+    z-index: 261;
+}
+.try-descr {
+    color: #333;
+    font-size: 12px;
+    white-space : nowrap;
+}
+
+.try-editor {
+    background-color: transparent;
+    background-position: 5px center;
+    background-repeat: no-repeat;
+    color: #333333;
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    height: 30px;
+    margin: 2px 0 0;
+    padding-left: 45px;
+    padding-top: 10px;
+    text-align: left;
+    width: 250px;
+}
+.try-editor.document {
+    background-image: url("images/file_doct.png");
+    margin-top: 10px;
+}
+.try-editor.spreadsheet {
+    background-image: url("images/file_xlst.png");
+}
+.try-editor.presentation {
+    background-image: url("images/file_pptt.png");
+}
+
+.button, .button:visited, .button:hover, .button:active {
+    display: inline-block;
+    font-weight: normal;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;    
+    cursor:pointer;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    touch-callout: none;
+    -o-touch-callout: none;
+    -moz-touch-callout: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+    -o-user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    font-size: 12px;
+    line-height: 16px;
+    padding: 2px 12px;
+
+    color: #fff; 
+    
+    background: #3D96C6;
+    background: linear-gradient(top, #59B1E2, #3D96C6 50%, #3D96C6 51%, #1A76a6);
+    background: -o-linear-gradient(top, #59B1E2, #3D96C6 50%, #3D96C6 51%, #1A76a6);
+    background: -moz-linear-gradient(top, #59B1E2, #3D96C6 50%, #3D96C6 51%, #1A76a6);
+    background: -webkit-linear-gradient(top, #59B1E2, #3D96C6 50%, #3D96C6 51%, #1A76a6);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#59B1E2', EndColorStr='#1A76a6')";
+    
+    border-width: 1px;
+    border-style: solid;
+    border-color: #4da9dc #4098c9 #2d7399 #4098c9;
+}
+
+.button.disable {
+    cursor: default;
+
+    background: #BADDEF;
+    background: linear-gradient(top, #CEE9F6, #BADDEF 50%, #BADDEF 51%, #ABD4EA);
+    background: -o-linear-gradient(top, #CEE9F6, #BADDEF 50%, #BADDEF 51%, #ABD4EA);
+    background: -moz-linear-gradient(top, #CEE9F6, #BADDEF 50%, #BADDEF 51%, #ABD4EA);
+    background: -webkit-linear-gradient(top, #CEE9F6, #BADDEF 50%, #BADDEF 51%, #ABD4EA);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#CEE9F6', EndColorStr='#ABD4EA')";
+
+    border: 1px solid #BCDCED;   
+}
+.button.gray {
+    color: #666;
+    
+    background: #E9EAEA;
+    background: linear-gradient(top, #F3F3F3, #E9EAEA 50%, #E8E9E9 51%, #DEDEDE);
+    background: -o-linear-gradient(top, #F3F3F3, #E9EAEA 50%, #E8E9E9 51%, #DEDEDE);
+    background: -moz-linear-gradient(top, #F3F3F3, #E9EAEA 50%, #E8E9E9 51%, #DEDEDE);
+    background: -webkit-linear-gradient(top, #F3F3F3, #E9EAEA 50%, #E8E9E9 51%, #DEDEDE);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#F3F3F3', EndColorStr='#DEDEDE')";
+    
+    border: 1px solid #BFBFBF;
+}
+
+.file-upload {
+    cursor: pointer;
+    margin-bottom: 8px;
+    padding: 0 !important;
+    overflow: hidden;
+    position: relative;
+}
+.file-upload span {
+    line-height: 21px;
+    margin: 2px 12px;
+}
+.file-upload input {
+    cursor: pointer;
+    font-size: 23px;
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transform: translate(-300px, 0) scale(4);
+}
+
+#mainProgress {
+    color: #979b9f;
+    display: none;
+    margin: 15px;
+}
+#mainProgress #embeddedView {
+    display: none;
+}
+#mainProgress.embedded #embeddedView {
+    display: block;
+}
+#mainProgress.embedded #uploadSteps {
+    display: none;
+}
+.error-message {
+    background: url("images/alert.png") no-repeat scroll 4px 10px #FFECE3;
+    color: #666668 !important;
+    display: none;
+    font-size: 13px;
+    font-weight: normal;
+    margin: 5px 0;
+    padding: 10px 10px 10px 30px;
+    vertical-align: middle;
+}
+#mainProgress .error-message a {
+    color: #666668;
+}
+.step {
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-color: transparent;
+    color: #979B9F;
+    font-size: 14px;
+    line-height: 30px;
+    padding-left: 25px;
+}
+.current {
+    background-image: url("images/loader16.gif");
+    color: #333;
+}
+.done {
+    background-image: url("images/done.png");
+    color: #333;
+}
+.error {
+    background-image: url("images/alert.png");
+}
+.step-descr {
+    display: block;
+    margin-left: 45px;
+}
+#mainProgress .step-descr a {
+    color: #979B9F;
+}
+.progress-descr {
+    color: #333;
+}
+#loadScripts {
+    display: none;
+}
+#iframeScripts {
+    position: absolute;
+    visibility: hidden;
+}
+.bottom-panel {
+    bottom: 0;
+    position: fixed;
+    text-align: right;
+    width: 100%;
+}
+.help-block span {
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 20px;
+}
+
+
+
+
+.blockTitle {
+    background-color: #E2E2E2 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    -moz-border-radius: 0 !important;
+    -webkit-border-radius: 0 !important;
+    color: #333 !important;
+    font-size: 16px !important;
+    font-weight: normal !important;
+    padding: 15px 25px !important;
+}
+.dialog-close {
+    background: url("images/close.png") no-repeat scroll left top #E2E2E2;
+    cursor: pointer;
+    float: right;
+    font-size: 1px;
+    height: 12px;
+    line-height: 1px;
+    margin-top: 4px;
+    width: 12px;
+}
+.blockPage {
+    border: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow:0 2px 4px rgba(0, 0, 0, 0.5);
+    padding: 0 !important;
+}

@@ -1,0 +1,414 @@
+#! /bin/bash
+
+usage()
+{
+    cat <<EOF
+Usage: $pname [OPTION]
+
+Known values for OPTION are:
+  --prefix=DIR        change the output directory for catalog files
+                      [default $DIR]
+  --show              display the output filenames and paths
+  --version=x.y.z     change the DocBook version [default $VERSION]
+  --debug             display script action information
+  --help              display this help and exit
+EOF
+}
+
+setdefault()
+{
+    echo Unable to update root catalog $ROOTCATALOG
+    ROOTCATALOG=$HOME/xmlcatalog
+    CATALOG=$HOME/dbkxmlcatalog
+    DIR=$HOME
+    CAT=xmlcatalog
+    echo Using $ROOTCATALOG as the root catalog
+    echo Remember to export XML_CATALOG_FILES=$ROOTCATALOG
+    echo
+    prefix=1
+}
+
+fixname()
+{
+#
+# ROOTCATALOG contains the full pathname for the catalog.  We will
+# split that into the directory name and the filename, then we will
+# see if the directory exists.  If it does not, we will attempt to
+# create it.
+#
+    if test $verbose = 1
+    then
+        echo Checking path $ROOTCATALOG for permissions
+    fi
+# First we split the filename and directory name
+    CAT=`basename $ROOTCATALOG`
+    DIR=`dirname $ROOTCATALOG`
+    if test "$DIR" = ""
+    then
+        echo Unable to isolate directory name from '$ROOTCATALOG' - exiting
+        exit 1
+    fi
+    CATALOG=${DIR}/docbook
+    parent=`dirname $DIR`
+    if test "$parent" == ""
+    then
+        parent=/
+    fi
+    if [ ! -d $DIR ]
+    then
+        if test $verbose = 1
+        then
+            echo Directory $DIR missing - I will try to create it
+        fi
+        if [ ! -w $parent ]
+        then
+            if test $verbose = 1
+            then
+                echo No write permission for directory $parent
+            fi
+            setdefault
+        else
+            newdir=1
+        fi
+    else
+        if [ -f $ROOTCATALOG -a ! -w $ROOTCATALOG ] ||
+	   [ -e $ROOTCATALOG -a ! -f $ROOTCATALOG ] ||
+           [ ! -e $ROOTCATALOG  -a ! -w $DIR ]
+        then
+            setdefault
+        fi
+    fi
+
+}
+finddbx()
+{
+dtd421=""
+s="//OASIS//DTD DocBook XML V${VERSION}//EN"
+found=`find $1 -name docbookx.dtd -exec grep -l "$s" {} \;`
+for dtd in $found; do
+    docbookdir=`dirname $dtd`
+    echo Found DocBook XML $VERSION DTD in $docbookdir
+#
+# The original script had a check for write permission on the file
+# but I can't see why it should be necessary
+#
+    dtd421=$dtd
+    break
+done
+}
+
+#
+# Preset script control params
+show=0
+prefix=0
+newdir=0
+verbose=0
+#
+# Isolate the script name for messages
+pname=`basename $0`
+VERSION=4.1.2
+
+if test "$XML_CATALOG_FILES" != ""
+then
+    ROOTCATALOG=$XML_CATALOG_FILES
+else
+    ROOTCATALOG=/etc/xml/catalog
+fi
+
+#
+# Interpret script parameters
+while test $# -gt 0; do
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+    *) optarg= ;;
+    esac
+
+    case "$1" in
+    -p=* | --prefix=*)
+        ROOTCATALOG=$optarg/catalog
+        prefix=1
+        ;;
+
+    -s | --show)
+        show=1
+        ;;
+
+    -v=* | --version=*)
+        VERSION=$optarg
+	;;
+
+    -d | --debug)
+        verbose=1
+        ;;
+
+    -h | --help)
+        usage
+	exit 0
+	;;
+
+    * )
+        echo Invalid argument "$1"
+	usage
+        exit 1
+        ;;
+    esac
+    shift
+done
+fixname
+if test $prefix != 0
+then
+    export XML_CATALOG_FILES=$ROOTCATALOG
+fi
+if test $show != 0
+then
+    echo XML Catalog is $ROOTCATALOG
+    echo Docbook Catalog is $CATALOG
+    exit 0
+fi
+if test $newdir!=0
+then
+    mkdir -p $DIR
+    chmod 755 $DIR
+fi
+
+echo Starting run
+#
+# create the catalogs root and docbook specific
+#
+if [ ! -r $ROOTCATALOG ] ; then
+   echo creating XML Catalog root $ROOTCATALOG
+   xmlcatalog --noout --create $ROOTCATALOG
+fi
+if [ ! -r $ROOTCATALOG ] ; then
+   echo Failed creating XML Catalog root $ROOTCATALOG
+   exit 1
+fi
+if [ ! -r $CATALOG ] ; then
+   echo creating DocBook XML Catalog $CATALOG
+   xmlcatalog --noout --create $CATALOG
+fi
+if [ ! -r $CATALOG ] ; then
+   echo Failed creating DocBook XML Catalog $CATALOG
+   exit 1
+fi
+
+#
+# find the prefix for DocBook DTD
+#
+finddbx /usr/share/xml
+if [ "$dtd421" = "" ] ; then
+    finddbx $HOME
+fi
+if [ "$dtd421" = "" ] ; then
+    finddbx /usr/local
+fi
+if [ "$dtd421" = "" ] ; then
+    finddbx /usr/share/sgml
+fi
+
+if [ "$dtd421" = "" ] ; then
+    echo could not locate version $VERSION of DocBook XML
+    exit 1
+fi
+
+xmlcatalog --noout --add "public" \
+    "-//OASIS//ELEMENTS DocBook XML Information Pool V${VERSION}//EN" \
+    "file://$docbookdir/dbpoolx.mod" $CATALOG
+xmlcatalog --noout --add "public" \
+    "-//OASIS//DTD DocBook XML V${VERSION}//EN" \
+    "file://$docbookdir/docbookx.dtd" $CATALOG
+xmlcatalog --noout --add "public" \
+    "-//OASIS//ENTITIES DocBook XML Character Entities V${VERSION}//EN" \
+    "file://$docbookdir/dbcentx.mod" $CATALOG
+xmlcatalog --noout --add "public" \
+    "-//OASIS//ENTITIES DocBook XML Notations V${VERSION}//EN" \
+    "file://$docbookdir/dbnotnx.mod" $CATALOG
+xmlcatalog --noout --add "public" \
+    "-//OASIS//ENTITIES DocBook XML Additional General Entities V${VERSION}//EN" \
+    "file://$docbookdir/dbgenent.mod" $CATALOG
+xmlcatalog --noout --add "public" \
+    "-//OASIS//ELEMENTS DocBook XML Document Hierarchy V${VERSION}//EN" \
+    "file://$docbookdir/dbhierx.mod" $CATALOG
+xmlcatalog --noout --add "public" \
+    "-//OASIS//DTD XML Exchange Table Model 19990315//EN" \
+    "file://$docbookdir/soextblx.dtd" $CATALOG
+xmlcatalog --noout --add "public" \
+    "-//OASIS//DTD DocBook XML CALS Table Model V${VERSION}//EN" \
+    "file://$docbookdir/calstblx.dtd" $CATALOG
+xmlcatalog --noout --add "rewriteSystem" \
+    "http://www.oasis-open.org/docbook/xml/${VERSION}" \
+    "file://$docbookdir" $CATALOG
+xmlcatalog --noout --add "rewriteURI" \
+    "http://www.oasis-open.org/docbook/xml/${VERSION}" \
+    "file://$docbookdir" $CATALOG
+
+xmlcatalog --noout --add "delegatePublic" \
+    "-//OASIS//ENTITIES DocBook XML" \
+    "file://$CATALOG" $ROOTCATALOG
+xmlcatalog --noout --add "delegatePublic" \
+    "-//OASIS//DTD DocBook XML" \
+    "file://$CATALOG" $ROOTCATALOG
+xmlcatalog --noout --add "delegateSystem" \
+    "http://www.oasis-open.org/docbook/" \
+    "file://$CATALOG" $ROOTCATALOG
+xmlcatalog --noout --add "delegateURI" \
+    "http://www.oasis-open.org/docbook/" \
+    "file://$CATALOG" $ROOTCATALOG
+
+#
+# find the prefix for ISO DocBook entities
+#
+top=`dirname $docbookdir`
+found=`find $top -name iso-amsb.ent`
+if [ "$found" = "" ] ; then
+    found=`find /usr/share/xml -name iso-amsb.ent`
+fi
+if [ "$found" = "" ] ; then
+    found=`find $HOME -name iso-amsb.ent`
+fi
+if [ "$found" = "" ] ; then
+    found=`find /usr/local -name iso-amsb.ent`
+fi
+if [ "$found" = "" ] ; then
+    found=`find /usr/share/sgml -name iso-amsb.ent`
+fi
+if [ "$found" = "" ] ; then
+    echo could not locate iso-amsb.ent of ISO DocBook entities
+    exit 1
+fi
+
+entxml=""
+for tst in $found; do
+    check=`grep '<!ENTITY ominus."\&#x2296;">' $tst`
+    if [ "$check" != "" ] ; then
+        entxml=$tst
+        break
+    fi
+done
+
+if [ "$entxml" = "" ] ; then
+    echo could not locate ISO DocBook entities
+    exit 1
+fi
+isodir=`dirname $entxml`
+echo Found ISO DocBook entities in $isodir
+
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Publishing//EN" \
+    "file://$isodir/iso-pub.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Greek Letters//EN" \
+    "file://$isodir/iso-grk1.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Box and Line Drawing//EN" \
+    "file://$isodir/iso-box.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Greek Symbols//EN" \
+    "file://$isodir/iso-grk3.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Added Math Symbols: Negated Relations//EN" \
+    "file://$isodir/iso-amsn.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Numeric and Special Graphic//EN" \
+    "file://$isodir/iso-num.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Alternative Greek Symbols//EN" \
+    "file://$isodir/iso-grk4.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Diacritical Marks//EN" \
+    "file://$isodir/iso-dia.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Monotoniko Greek//EN" \
+    "file://$isodir/iso-grk2.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Added Math Symbols: Arrow Relations//EN" \
+    "file://$isodir/iso-amsa.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Added Math Symbols: Ordinary//EN" \
+    "file://$isodir/iso-amso.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Russian Cyrillic//EN" \
+    "file://$isodir/iso-cyr1.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES General Technical//EN" \
+    "file://$isodir/iso-tech.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Added Math Symbols: Delimiters//EN" \
+    "file://$isodir/iso-amsc.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Added Latin 1//EN" \
+    "file://$isodir/iso-lat1.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Added Math Symbols: Binary Operators//EN" \
+    "file://$isodir/iso-amsb.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Added Latin 2//EN" \
+    "file://$isodir/iso-lat2.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Added Math Symbols: Relations//EN" \
+    "file://$isodir/iso-amsr.ent" $CATALOG
+xmlcatalog --noout --add "public" \
+    "ISO 8879:1986//ENTITIES Non-Russian Cyrillic//EN" \
+    "file://$isodir/iso-cyr2.ent" $CATALOG
+
+xmlcatalog --noout --add "delegatePublic" \
+    "ISO 8879:1986" \
+    "file://$CATALOG" $ROOTCATALOG
+
+#
+# find the prefix for XSLT stylesheets
+#
+top=`dirname $docbookdir`
+found=`find $top -name chunk.xsl`
+if [ "$found" = "" ] ; then
+    found=`find /usr/share/xml -name chunk.xsl`
+fi
+if [ "$found" = "" ] ; then
+    found=`find $HOME -name chunk.xsl`
+fi
+if [ "$found" = "" ] ; then
+    found=`find /usr/local -name chunk.xsl`
+fi
+if [ "$found" = "" ] ; then
+    found=`find /usr/share/sgml -name chunk.xsl`
+fi
+if [ "$found" = "" ] ; then
+    echo could not locate chunk-common.xsl of DocBook XSLT stylesheets
+    exit 1
+fi
+
+xsldir=""
+for tst in $found; do
+    dir=`dirname $tst`
+    dir=`dirname $dir`
+    if [ -r $dir/html/docbook.xsl -a -r $dir/common/l10n.xml ]; then
+        xsldir=$dir
+        break
+    fi
+done
+
+if [ "$xsldir" = "" ] ; then
+    echo could not locate DocBook XSLT stylesheets
+    exit 1
+fi
+echo Found DocBook XSLT stylesheets in $xsldir
+for version in current 1.39 1.40 1.41 1.42 1.43 1.44 1.45 1.46 1.47 \
+               1.48 1.49 1.50
+do
+    xmlcatalog --noout --add "rewriteSystem" \
+	"http://docbook.sourceforge.net/release/xsl/$version" \
+	"file://$xsldir" $CATALOG
+    xmlcatalog --noout --add "rewriteURI" \
+	"http://docbook.sourceforge.net/release/xsl/$version" \
+	"file://$xsldir" $CATALOG
+done
+
+xmlcatalog --noout --add "delegateSystem" \
+    "http://docbook.sourceforge.net/release/xsl/" \
+    "file://$CATALOG" $ROOTCATALOG
+xmlcatalog --noout --add "delegateURI" \
+    "http://docbook.sourceforge.net/release/xsl/" \
+    "file://$CATALOG" $ROOTCATALOG
+
+#
+#

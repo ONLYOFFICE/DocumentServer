@@ -1,0 +1,14 @@
+@import 'recipes/google-webfont';
+@import 'recipes/color';
+
+@include google-webfont('Ubuntu', 700);
+
+@import 'tests';
+
+h2 {
+    font-family: Ubuntu, Helvetica, sans-serif;
+    font-size: 144px;
+    letter-spacing: -10px;
+    font-weight: 700;
+    @include color-by-background(rgba(#eee, .5), 50);
+}

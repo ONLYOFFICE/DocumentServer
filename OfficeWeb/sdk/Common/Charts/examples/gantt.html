@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>An example of the OfficeExcel Gantt chart</title>
+    
+    <meta name="keywords" content="html5 canvas example gantt charts" />
+    <meta name="description" content="An example of the type of Gantt chart that OfficeExcel can produce" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.tooltips.js" ></script>
+    <script src="../libraries/OfficeExcel.gantt.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+    
+    <style>
+        .OfficeExcel_tooltip {
+            color: #00a ! important;
+        }
+        
+        .OfficeExcel_tooltip b {
+            color: black ! important;
+        }
+    </style>
+
+    <script>
+        window.onload = function ()
+        {
+            gantt1 = new OfficeExcel.Gantt('cvs');
+            gantt1.Set('chart.xmax', 122);
+            gantt1.Set('chart.gutter.right', 35);
+            gantt1.Set('chart.labels', ['January', 'February', 'March', 'April']);
+            gantt1.Set('chart.title', 'Work schedule for Xyz Ltd');
+            gantt1.Set('chart.defaultcolor', '#faa');
+            gantt1.Set('chart.background.grid', false);
+
+            if (!OfficeExcel.isOld()) {
+                gantt1.Set('chart.tooltips', ["<b>Richard Crenshaw</b><br />Working through adding something<br /> to the website.",
+                                              null,
+                                              "<b>Rachel Higgenbottom</b><br />Singing sweetly",
+                                              "<b>Rachel Higgenbottom(2)</b><br />Still singing very nicely",
+                                              "<b>Fred Bloggs</b><br />Building a new drive",
+                                              "<b>Barney Rubble</b><br />Not started adding the new garden",
+                                              "<b>Gloria Crockford</b><br />Just started dinner",
+                                              "<b>Paul Josford</b><br />Nearly finished the front garden",
+                                              "<b>Harry Secjom</b><br />Roughly half way through the book reading",
+                                              "<b>Shane Ritchford</b><br />Comedian",
+                                              "<b>Kyle Jasford</b><br />Gardening",
+                                              "<b>Cynthia Frances</b><br />Not entirely sure what she's doing",
+                                              "<b>Mabel Mincy</b><br />Making more lunches",
+                                               "<b>Paul MacFord</b><br />Putting everyone off their work",
+                                               "<b>Kiffen Longbottom</b><br />Farming Maize",
+                                               "<b>John Blussford</b><br />A deer"]);
+                gantt1.Set('chart.tooltips.effect', 'expand');
+            }
+
+            gantt1.Set('chart.events', [
+                                 [[31, 28, 67, 'Richard'], [90,15, 50, null, 'blue', 'red']],
+                                 [[0, 28, 50, 'Rachel'], [80,25, 74]],
+                                 [12, 28, 45, 'Fred'],
+                                 [59, 14, 0, 'Barney'],
+                                 [59, 21, 5, 'Gloria'],
+                                 [46, 31, 92, 'Paul'],
+                                 [80, 21, 46, 'Harry'],
+                                 [94, 17, 84, 'Shane'],
+                                 [34, 14, 32, 'Kyle'],
+                                 [64, 14, 28, 'Cynthia'],
+                                 [13, 61, 74, 'Mabel'],
+                                 [84, 31, 16, 'Paul'],
+                                 [100, 22, 45, 'Kiffen'],
+                                 [0, 365, 50, 'John']
+                                ]);
+            var color = 'rgba(192,255,192,0.5)';
+            gantt1.Set('chart.vbars', [
+                                       [0, 10, color],
+                                       [20, 10, color],
+                                       [40, 10, color],
+                                       [60, 10, color],
+                                       [80, 10, color],
+                                       [100, 10, color]
+                                      ]);
+            gantt1.Set('chart.borders', false);
+            gantt1.Set('chart.title.vpos', 0.6);
+            gantt1.Set('chart.labels.align', 'bottom');
+            gantt1.Draw();
+        }
+    </script>
+
+    <?php PrintAnalyticsCode() ?>
+</head>
+<body>
+
+
+<div id="breadcrumb">
+    <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+    >
+    <a href="./index.html">Examples</a>
+    >
+    Gantt charts example
+</div>
+
+    <h1>Gantt <span>charts</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+
+    <div>
+        <p>
+            Gantt charts are used to show scheduling information. They are commonly used in project management but can also be used
+            to show holiday schedule information. In this case it would be easy to see when someone is unavailable.
+            Gantt charts can have clickable bars that can be used to provide extra detail. They can also show vertical bars that
+            can be used to indicate events, or as in the cases below, can be decorative.
+        </p>
+
+        <p>
+            The charts are made of "units", in this case 365. This represents days in a year. The labels are separate, being
+            equally spaced across the chart. This means you can use more meaningful labels, which are easier to comprehend.
+            As in the example.
+        </p>
+
+        <ul>
+            <li><a href="../docs/gantt.html">Gantt charts API documentation</a></li>
+        </ul>
+    </div>
+
+    <div style="text-align: center">
+        <canvas id="cvs" width="850" height="300">[No canvas support]</canvas>
+    </div>
+
+</body>
+</html>

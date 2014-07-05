@@ -1,0 +1,257 @@
+Index: hash.c
+===================================================================
+RCS file: /cvs/gnome/gnome-xml/hash.c,v
+retrieving revision 1.30
+diff -u -r1.30 hash.c
+--- hash.c	29 Oct 2003 11:18:37 -0000	1.30
++++ hash.c	24 Feb 2004 17:18:42 -0000
+@@ -26,6 +26,7 @@
+ #include <libxml/xmlmemory.h>
+ #include <libxml/xmlerror.h>
+ #include <libxml/globals.h>
++#include <libxml/dict.h>
+ 
+ #define MAX_HASH_LEN 8
+ 
+@@ -38,9 +39,9 @@
+ typedef xmlHashEntry *xmlHashEntryPtr;
+ struct _xmlHashEntry {
+     struct _xmlHashEntry *next;
+-    xmlChar *name;
+-    xmlChar *name2;
+-    xmlChar *name3;
++    const xmlChar *name;
++    const xmlChar *name2;
++    const xmlChar *name3;
+     void *payload;
+     int valid;
+ };
+@@ -52,6 +53,7 @@
+     struct _xmlHashEntry *table;
+     int size;
+     int nbElems;
++    xmlDictPtr dict;
+ };
+ 
+ /*
+@@ -143,12 +145,16 @@
+ xmlHashTablePtr
+ xmlHashCreate(int size) {
+     xmlHashTablePtr table;
++    xmlDictPtr dict;
+   
+     if (size <= 0)
+         size = 256;
+   
++    dict = xmlDictCreate();
++    if (dict == NULL) return(NULL);
+     table = xmlMalloc(sizeof(xmlHashTable));
+     if (table) {
++        table->dict = dict;
+         table->size = size;
+ 	table->nbElems = 0;
+         table->table = xmlMalloc(size * sizeof(xmlHashEntry));
+@@ -158,6 +164,7 @@
+         }
+         xmlFree(table);
+     }
++    xmlDictFree(dict);
+     return(NULL);
+ }
+ 
+@@ -282,12 +289,6 @@
+ 		next = iter->next;
+ 		if ((f != NULL) && (iter->payload != NULL))
+ 		    f(iter->payload, iter->name);
+-		if (iter->name)
+-		    xmlFree(iter->name);
+-		if (iter->name2)
+-		    xmlFree(iter->name2);
+-		if (iter->name3)
+-		    xmlFree(iter->name3);
+ 		iter->payload = NULL;
+ 		if (!inside_table)
+ 		    xmlFree(iter);
+@@ -299,6 +300,7 @@
+ 	}
+ 	xmlFree(table->table);
+     }
++    xmlDictFree(table->dict);
+     xmlFree(table);
+ }
+ 
+@@ -465,6 +467,9 @@
+ 
+     if ((table == NULL) || name == NULL)
+ 	return(-1);
++    if (name) name = xmlDictLookup(table->dict, name, -1);
++    if (name2) name2 = xmlDictLookup(table->dict, name2, -1);
++    if (name3) name3 = xmlDictLookup(table->dict, name3, -1);
+ 
+     /*
+      * Check for duplicate and insertion location.
+@@ -475,15 +480,15 @@
+     } else {
+ 	for (insert = &(table->table[key]); insert->next != NULL;
+ 	     insert = insert->next) {
+-	    if ((xmlStrEqual(insert->name, name)) &&
+-		(xmlStrEqual(insert->name2, name2)) &&
+-		(xmlStrEqual(insert->name3, name3)))
++	    if ((insert->name == name) &&
++		(insert->name2 == name2) &&
++		(insert->name3 == name3))
+ 		return(-1);
+ 	    len++;
+ 	}
+-	if ((xmlStrEqual(insert->name, name)) &&
+-	    (xmlStrEqual(insert->name2, name2)) &&
+-	    (xmlStrEqual(insert->name3, name3)))
++	if ((insert->name == name) &&
++	    (insert->name2 == name2) &&
++	    (insert->name3 == name3))
+ 	    return(-1);
+     }
+ 
+@@ -495,9 +500,9 @@
+ 	     return(-1);
+     }
+ 
+-    entry->name = xmlStrdup(name);
+-    entry->name2 = xmlStrdup(name2);
+-    entry->name3 = xmlStrdup(name3);
++    entry->name = name;
++    entry->name2 = name2;
++    entry->name3 = name3;
+     entry->payload = userdata;
+     entry->next = NULL;
+     entry->valid = 1;
+@@ -539,6 +544,9 @@
+ 
+     if ((table == NULL) || name == NULL)
+ 	return(-1);
++    if (name) name = xmlDictLookup(table->dict, name, -1);
++    if (name2) name2 = xmlDictLookup(table->dict, name2, -1);
++    if (name3) name3 = xmlDictLookup(table->dict, name3, -1);
+ 
+     /*
+      * Check for duplicate and insertion location.
+@@ -549,18 +557,18 @@
+     } else {
+ 	for (insert = &(table->table[key]); insert->next != NULL;
+ 	     insert = insert->next) {
+-	    if ((xmlStrEqual(insert->name, name)) &&
+-		(xmlStrEqual(insert->name2, name2)) &&
+-		(xmlStrEqual(insert->name3, name3))) {
++	    if ((insert->name == name) &&
++		(insert->name2 == name2) &&
++		(insert->name3 == name3)) {
+ 		if (f)
+ 		    f(insert->payload, insert->name);
+ 		insert->payload = userdata;
+ 		return(0);
+ 	    }
+ 	}
+-	if ((xmlStrEqual(insert->name, name)) &&
+-	    (xmlStrEqual(insert->name2, name2)) &&
+-	    (xmlStrEqual(insert->name3, name3))) {
++	if ((insert->name == name) &&
++	    (insert->name2 == name2) &&
++	    (insert->name3 == name3)) {
+ 	    if (f)
+ 		f(insert->payload, insert->name);
+ 	    insert->payload = userdata;
+@@ -576,9 +584,9 @@
+ 	     return(-1);
+     }
+ 
+-    entry->name = xmlStrdup(name);
+-    entry->name2 = xmlStrdup(name2);
+-    entry->name3 = xmlStrdup(name3);
++    entry->name = name;
++    entry->name2 = name2;
++    entry->name3 = name3;
+     entry->payload = userdata;
+     entry->next = NULL;
+     entry->valid = 1;
+@@ -615,10 +623,13 @@
+     key = xmlHashComputeKey(table, name, name2, name3);
+     if (table->table[key].valid == 0)
+ 	return(NULL);
++    if (name) name = xmlDictLookup(table->dict, name, -1);
++    if (name2) name2 = xmlDictLookup(table->dict, name2, -1);
++    if (name3) name3 = xmlDictLookup(table->dict, name3, -1);
+     for (entry = &(table->table[key]); entry != NULL; entry = entry->next) {
+-	if ((xmlStrEqual(entry->name, name)) &&
+-	    (xmlStrEqual(entry->name2, name2)) &&
+-	    (xmlStrEqual(entry->name3, name3)))
++	if ((entry->name == name) &&
++	    (entry->name2 == name2) &&
++	    (entry->name3 == name3))
+ 	    return(entry->payload);
+     }
+     return(NULL);
+@@ -774,6 +785,9 @@
+     if (f == NULL)
+ 	return;
+ 
++    if (name) name = xmlDictLookup(table->dict, name, -1);
++    if (name2) name2 = xmlDictLookup(table->dict, name2, -1);
++    if (name3) name3 = xmlDictLookup(table->dict, name3, -1);
+     if (table->table) {
+ 	for(i = 0; i < table->size; i++) {
+ 	    if (table->table[i].valid == 0)
+@@ -781,9 +795,9 @@
+ 	    iter = &(table->table[i]);
+ 	    while (iter) {
+ 		next = iter->next;
+-		if (((name == NULL) || (xmlStrEqual(name, iter->name))) &&
+-		    ((name2 == NULL) || (xmlStrEqual(name2, iter->name2))) &&
+-		    ((name3 == NULL) || (xmlStrEqual(name3, iter->name3))) &&
++		if (((name == NULL) || (name == iter->name)) &&
++		    ((name2 == NULL) || (name2 == iter->name2)) &&
++		    ((name3 == NULL) || (name3 == iter->name3)) &&
+ 		    (iter->payload != NULL)) {
+ 		    f(iter->payload, data, iter->name,
+ 		      iter->name2, iter->name3);
+@@ -913,19 +927,16 @@
+     if (table->table[key].valid == 0) {
+         return(-1);
+     } else {
++	if (name) name = xmlDictLookup(table->dict, name, -1);
++	if (name2) name2 = xmlDictLookup(table->dict, name2, -1);
++	if (name3) name3 = xmlDictLookup(table->dict, name3, -1);
+         for (entry = &(table->table[key]); entry != NULL; entry = entry->next) {
+-            if (xmlStrEqual(entry->name, name) &&
+-                    xmlStrEqual(entry->name2, name2) &&
+-                    xmlStrEqual(entry->name3, name3)) {
++            if ((entry->name == name) &&
++		(entry->name2 == name2) &&
++		(entry->name3 == name3)) {
+                 if ((f != NULL) && (entry->payload != NULL))
+                     f(entry->payload, entry->name);
+                 entry->payload = NULL;
+-                if(entry->name)
+-                    xmlFree(entry->name);
+-                if(entry->name2)
+-                    xmlFree(entry->name2);
+-                if(entry->name3)
+-                    xmlFree(entry->name3);
+                 if(prev) {
+                     prev->next = entry->next;
+ 		    xmlFree(entry);
+Index: include/libxml/hash.h
+===================================================================
+RCS file: /cvs/gnome/gnome-xml/include/libxml/hash.h,v
+retrieving revision 1.15
+diff -u -r1.15 hash.h
+--- include/libxml/hash.h	20 Nov 2003 11:59:07 -0000	1.15
++++ include/libxml/hash.h	24 Feb 2004 17:18:42 -0000
+@@ -42,7 +42,7 @@
+  *
+  * Callback to free data from a hash.
+  */
+-typedef void (*xmlHashDeallocator)(void *payload, xmlChar *name);
++typedef void (*xmlHashDeallocator)(void *payload, const xmlChar *name);
+ /**
+  * xmlHashCopier:
+  * @payload:  the data in the hash

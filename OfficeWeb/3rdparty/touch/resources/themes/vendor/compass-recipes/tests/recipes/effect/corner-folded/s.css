@@ -1,0 +1,172 @@
+html {
+  padding: 1em;
+  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dddddd), color-stop(100%, #ffffff)) no-repeat;
+  background: -webkit-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -moz-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -o-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: -ms-linear-gradient(#dddddd, #ffffff) no-repeat;
+  background: linear-gradient(#dddddd, #ffffff) no-repeat;
+}
+
+h1 {
+  font-size: 2em;
+  margin-bottom: 1em;
+}
+
+h2 {
+  font-size: 1.4em;
+  margin-bottom: .6em;
+}
+
+.doc {
+  background: #fff;
+  border: #ddd;
+  padding: 1em;
+  color: #aaa;
+  margin: 1em;
+  font-style: italic;
+}
+.doc a {
+  color: #999;
+}
+
+/**
+ * Corner folded with pure CSS
+ * 
+ * Known support: Firefox 3.5+, Chrome 4+, Safari 4+, Opera 10+, IE 9+.
+ * IE8 is not supported because it not render properly box-shadow and
+ * pseudo element should be selected with ::element and not :element
+ * 
+ * @thanks Nicolas Gallagher @necolas
+ * @link http://nicolasgallagher.com/pure-css-folded-corner-effect/demo/
+ */
+/**
+ * Note IE7/6 doesn't understand pseudo element as ::before and ::after
+ * IE8 need to have :before and not ::before
+ * So use only : and not :: if you want to support IE8
+ * IE9 Webkit Firefox Opera understand ::
+ */
+.wrapper {
+  background: #fff;
+  padding: 1em;
+}
+
+.corner-folded-top-left,
+.corner-folded-top-right,
+.corner-folded-bottom-left,
+.corner-folded-bottom-right {
+  background: #ddd;
+  width: 400px;
+  height: 200px;
+  margin: auto;
+  -moz-border-radius: 0.3em;
+  -webkit-border-radius: 0.3em;
+  -o-border-radius: 0.3em;
+  -ms-border-radius: 0.3em;
+  -khtml-border-radius: 0.3em;
+  border-radius: 0.3em;
+}
+
+.corner-folded-top-left {
+  position: relative;
+  overflow: hidden;
+}
+.corner-folded-top-left::before {
+  content: "";
+  position: asolute;
+  display: block;
+  width: 0;
+  border-style: solid;
+  -moz-box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  -o-box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  top: 0;
+  left: 0;
+  border-width: 1em 1em 0 0;
+  border-color: white #dddddd;
+  -moz-border-radius: 0 0 0.3em 0;
+  -webkit-border-radius: 0 0 0.3em 0;
+  -o-border-radius: 0 0 0.3em 0;
+  -ms-border-radius: 0 0 0.3em 0;
+  -khtml-border-radius: 0 0 0.3em 0;
+  border-radius: 0 0 0.3em 0;
+}
+
+.corner-folded-top-right {
+  position: relative;
+  overflow: hidden;
+}
+.corner-folded-top-right::before {
+  content: "";
+  position: asolute;
+  display: block;
+  width: 0;
+  border-style: solid;
+  -moz-box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  -o-box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  top: 0;
+  right: 0;
+  border-width: 0 1em 1em 0;
+  border-color: #dddddd white;
+  -moz-border-radius: 0 0 0 0.3em;
+  -webkit-border-radius: 0 0 0 0.3em;
+  -o-border-radius: 0 0 0 0.3em;
+  -ms-border-radius: 0 0 0 0.3em;
+  -khtml-border-radius: 0 0 0 0.3em;
+  border-radius: 0 0 0 0.3em;
+}
+
+.corner-folded-bottom-left {
+  position: relative;
+  overflow: hidden;
+}
+.corner-folded-bottom-left::before {
+  content: "";
+  position: asolute;
+  display: block;
+  width: 0;
+  border-style: solid;
+  -moz-box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  -o-box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  bottom: 0;
+  left: 0;
+  border-width: 1em 0 0 1em;
+  border-color: #dddddd white;
+  -moz-border-radius: 0 0.3em 0 0;
+  -webkit-border-radius: 0 0.3em 0 0;
+  -o-border-radius: 0 0.3em 0 0;
+  -ms-border-radius: 0 0.3em 0 0;
+  -khtml-border-radius: 0 0.3em 0 0;
+  border-radius: 0 0.3em 0 0;
+}
+
+.corner-folded-bottom-right {
+  position: relative;
+  overflow: hidden;
+}
+.corner-folded-bottom-right::before {
+  content: "";
+  position: asolute;
+  display: block;
+  width: 0;
+  border-style: solid;
+  -moz-box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  -o-box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  box-shadow: rgba(0, 0, 0, 0.3) 0 0 0.6em;
+  bottom: 0;
+  right: 0;
+  border-width: 0 0 1em 1em;
+  border-color: white #dddddd;
+  -moz-border-radius: 0.3em 0 0 0;
+  -webkit-border-radius: 0.3em 0 0 0;
+  -o-border-radius: 0.3em 0 0 0;
+  -ms-border-radius: 0.3em 0 0 0;
+  -khtml-border-radius: 0.3em 0 0 0;
+  border-radius: 0.3em 0 0 0;
+}

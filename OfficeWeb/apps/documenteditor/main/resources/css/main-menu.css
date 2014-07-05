@@ -1,0 +1,147 @@
+.lm-style .x-toolbar-default,
+.lm-style .x-panel-default,
+.lm-style .x-toolbar {
+    /*background-image: none;*/
+    border-top: 1px solid #c8c8c8 !important;
+    border-right: 1px solid #c8c8c8 !important;
+    border-bottom: none !important;
+    padding-left: 0;
+	 filter: none;
+	 background-image: none !important;
+	 
+    background-color: #e9e9e9 !important;
+}
+
+.rm-style .x-toolbar-default,
+.rm-style .x-toolbar {
+    border-top: 1px solid #c8c8c8 !important;
+    border-left: 1px solid #c8c8c8 !important;
+    border-bottom: none !important;
+    padding-left: 0;
+    filter: none;
+    background-image: none !important;
+
+    background-color: #e9e9e9 !important;
+}
+
+.lm-body,
+.rm-body {
+    border: none !important;
+}
+
+.lm-default-toolbar .x-btn-default-toolbar-small,
+.rm-default-toolbar .x-btn-default-toolbar-small {
+    -moz-border-radius: 0;
+    -webkit-border-radius: 0;
+    -o-border-radius: 0;
+    -ms-border-radius: 0;
+    -khtml-border-radius: 0;
+    border-radius: 0;
+}
+
+.splitter-document-area {
+    background-color: #e9e9e9;
+}
+
+.splitter-document-area .x-mask {
+    background-color: #e9e9e9;
+    opacity: 1;
+}
+
+.splitter-document-area.x-item-disabled{
+    opacity: 1;
+}
+
+.menuFile, .menuSearch, .menuComments, .menuChat, .menuAbout,
+.menuText, .menuTable, .menuImage, .menuShape, .menuHeaderFooter, .menuChart{
+    background-image: url("../img/toolbar-menu.png");
+    background-image: -webkit-image-set(url("../img/toolbar-menu.png") 1x, url("../img/toolbar-menu@2x.png") 2x);
+    margin: auto !important;
+}
+
+/*menuFile*/
+.menuFile                       {    background-position: 0 -1332px;}
+.x-btn-over .menuFile           {    background-position: -24px -1332px;}
+.x-btn-pressed .menuFile,
+.x-btn-menu-active .menuFile    {    background-position: -48px -1332px;}
+.x-btn-disabled .menuFile       {    background-position: -72px -1332px;}
+
+/*menuSearch*/
+.menuSearch                     {    background-position: 0 -1284px;}
+.x-btn-over .menuSearch         {    background-position: -24px -1284px;}
+.x-btn-pressed .menuSearch,
+.x-btn-menu-active .menuSearch  {    background-position: -48px -1284px;}
+.x-btn-disabled .menuSearch     {    background-position: -72px -1284px;}
+
+/*menuComments*/
+.menuComments                   {    background-position: 0 -1308px;}
+.x-btn-over .menuComments       {    background-position: -24px -1308px;}
+.x-btn-pressed .menuComments,
+.x-btn-menu-active .menuComments{    background-position: -48px -1308px;}
+.x-btn-disabled .menuComments   {    background-position: -72px -1308px;}
+
+/*menuChat*/
+.menuChat                       {    background-position: 0 -1236px;}
+.x-btn-over .menuChat           {    background-position: -24px -1236px;}
+.x-btn-pressed .menuChat,
+.x-btn-menu-active .menuChat    {    background-position: -48px -1236px;}
+.x-btn-disabled .menuChat       {    background-position: -72px -1236px;}
+
+/*menuAbout*/
+.menuAbout                      {    background-position: 0 -1602px;}
+.x-btn-over .menuAbout          {    background-position: -24px -1602px;}
+.x-btn-pressed .menuAbout,
+.x-btn-menu-active .menuAbout   {    background-position: -48px -1602px;}
+.x-btn-disabled .menuAbout      {    background-position: -72px -1602px;}
+
+/*menuText*/
+.menuText                       {    background-position: 0 -1404px;}
+.x-btn-over .menuText           {    background-position: -24px -1404px;}
+.x-btn-pressed .menuText,
+.x-btn-menu-active .menuText    {    background-position: -48px -1404px;}
+.x-btn-disabled .menuText       {    background-position: -72px -1404px;}
+
+/*menuImage*/
+.menuImage                       {    background-position: 0 -1356px;}
+.x-btn-over .menuImage           {    background-position: -24px -1356px;}
+.x-btn-pressed .menuImage,
+.x-btn-menu-active .menuImage    {    background-position: -48px -1356px;}
+.x-btn-disabled .menuImage       {    background-position: -72px -1356px;}
+
+/*menuTable*/
+.menuTable                       {    background-position: 0 -1380px;}
+.x-btn-over .menuTable           {    background-position: -24px -1380px;}
+.x-btn-pressed .menuTable,
+.x-btn-menu-active .menuTable    {    background-position: -48px -1380px;}
+.x-btn-disabled .menuTable       {    background-position: -72px -1380px;}
+
+/*menuChart*/
+.menuChart                       {    background-position: 0 -1476px;}
+.x-btn-over .menuChart           {    background-position: -24px -1476px;}
+.x-btn-pressed .menuChart,
+.x-btn-menu-active .menuChart    {    background-position: -48px -1476px;}
+.x-btn-disabled .menuChart       {    background-position: -72px -1476px;}
+
+/*menuHeaderFooter*/
+.menuHeaderFooter                       {    background-position: 0 -1428px;}
+.x-btn-over .menuHeaderFooter           {    background-position: -24px -1428px;}
+.x-btn-pressed .menuHeaderFooter,
+.x-btn-menu-active .menuHeaderFooter    {    background-position: -48px -1428px;}
+.x-btn-disabled .menuHeaderFooter       {    background-position: -72px -1428px;}
+
+/*menuShape*/
+.menuShape                       {    background-position: 0 -1452px;}
+.x-btn-over .menuShape           {    background-position: -24px -1452px;}
+.x-btn-pressed .menuShape,
+.x-btn-menu-active .menuShape    {    background-position: -48px -1452px;}
+.x-btn-disabled .menuShape       {    background-position: -72px -1452px;}
+
+.notify .asc-main-menu-btn                  {    background-position: 0  -1260px;}
+.notify.x-btn-over .asc-main-menu-btn       {    background-position: -24px -1260px;}
+.notify.x-btn-pressed .asc-main-menu-btn,
+.notify.x-btn-menu-active .asc-main-menu-btn{    background-position: -48px -1260;}
+
+.asc-btn-search {
+    background-image: url('../img/search-arrows.png') !important;
+    background-image: -webkit-image-set(url("../img/search-arrows.png") 1x, url("../img/search-arrows@2x.png") 2x) !important;
+}

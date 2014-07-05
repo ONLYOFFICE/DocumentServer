@@ -1,0 +1,50 @@
+.common-about-body {
+    padding: 30px 100px;
+    background: #ffffff;
+    border-color: #ffffff;
+}
+
+.asc-about-office {
+    background-image: url("../img/about/TLOffice.png");
+    background-image: -webkit-image-set(url("../img/about/TLOffice.png") 1x, url("../img/about/TLOffice@2x.png") 2x);
+    width: 420px;
+    height: 70px;
+    background-repeat: no-repeat;
+}
+
+.common-about-body .about-separator-cell {
+    width: 50%
+}
+
+.common-about-body .asc-about-header {
+    margin: 0 30px;
+    font: 13px Tahoma;
+    letter-spacing: 1px;
+    color: #666666;
+}
+
+.common-about-body .asc-about-version {
+    font: 15px Tahoma;
+    color: #b6b6b6;
+}
+
+.common-about-body .asc-about-companyname {
+    font: bold 15px Tahoma;
+    color: #000000;
+}
+
+.common-about-body .asc-about-desc,
+.common-about-body .asc-about-desc-name,
+.common-about-body .asc-about-lic {
+    font: 12px Tahoma;
+    color: #000000;
+}
+
+.common-about-body .asc-about-desc-name {
+    color: #666666;
+}
+
+.common-about-body .asc-about-lic {
+    font-weight: bold;
+    white-space: pre-wrap;
+}

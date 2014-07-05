@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <!--
+        /**
+        * o------------------------------------------------------------------------------o
+        * | This file is part of the OfficeExcel package - you can learn more at:             |
+        * |                                                                              |
+        * |                          http://www.OfficeExcel.net                               |
+        * |                                                                              |
+        * | This package is licensed under the OfficeExcel license. For all kinds of business |
+        * | purposes there is a small one-time licensing fee to pay and for non          |
+        * | commercial  purposes it is free to use. You can read the full license here:  |
+        * |                                                                              |
+        * |                      http://www.OfficeExcel.net/LICENSE.txt                       |
+        * o------------------------------------------------------------------------------o
+        */
+    -->
+    <title>Documentation about Odometer charts</title>
+    
+    <meta name="keywords" content="OfficeExcel html5 canvas docs odometer charts" />
+    <meta name="description" content="Documentation about Odometer charts including information on all the options available to you" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+    <meta property="og:image" content="http://www.OfficeExcel.net/images/logo.jpg"/>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+    
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+
+    <?php PrintAnalyticsCode() ?>
+
+</head>
+<body>
+
+    <!-- Social networking buttons -->
+        <?php
+            $prefix = substr($_SERVER['SERVER_NAME'], 0, 3);
+            require("/OfficeExcel.{$prefix}/social.html");
+        ?>
+    <!-- Social networking buttons -->
+
+    <div id="breadcrumb">
+        <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+        >
+        <a href="./index.html">Documentation</a>
+        >
+        Odometer charts
+    </div>
+
+    <h1>Odometer <span>charts documentation</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+    
+    <ul>
+        <li><a href="#example">Example</a></li>
+        <li><a href="#properties">Properties</a></li>
+    </ul>
+
+    <a name="example"></a>
+    <p>&nbsp;</p>
+    <h2>Example</h2>
+    <pre class="code">
+&lt;script&gt;
+    window.onload = function ()
+    {
+        <span class="javascript-comment">// Create the Odometer. The arguments are: the canvas ID, the minimum, the maximum and the value.</span>
+        var odo = new OfficeExcel.Odometer('myOdo', 0, 100, 18);
+
+        <span class="javascript-comment">// Configure the Odometer to appear as you want.</span>
+        odo.Set('chart.green.max', 75);
+        odo.Set('chart.red.min', 90);
+        odo.Set('chart.label.area', 50);
+        odo.Set('chart.needle.thickness', 2);
+
+        <span class="javascript-comment">// Now call the .Draw() method to draw the chart.</span>
+        odo.Draw();
+    }
+&lt;/script&gt;
+</pre>
+    
+    <p> 
+        The example file is <a href="../examples/odo.html">here</a>.
+    </p>
+    
+    <!--
+        <div class="warning">
+            <p>Note</p>
+             As of 20th March 2010, how you specify the start and end values has changed. The chart.green.start, chart.green.end, chart.yellow.start,
+             chart.yellow.end, chart.red.start and chart.red.end have all been replaced by chart.green.max and chart.red.min. Now the
+             green area always starts at zero and goes to chart.green.max, and the red area starts (by default - you can customise this by using
+             chart.red.min) at 90% of the maximum value and goes to the maximum value. The yellow area is between the two.
+        </div>
+    -->
+
+    <a name="properties"></a>
+    <p>&nbsp;</p>
+    <h2>Properties</h2>
+    
+    <p>
+        You can use these properties to control how the Odometer apears. You can set these properties using the <b>Set()</b> method.
+    </p>
+    
+    <ul>
+        <li><a href="#chart configuration">Chart configuration</a></li>
+        <li><a href="#margins">Margins</a></li>
+        <li><a href="#colors">Colors</a></li>
+        <li><a href="#labels and text">Labels and text</a></li>
+        <li><a href="#needle">Needle</a></li>
+        <li><a href="#title">Title</a></li>
+        <li><a href="#shadow">Shadow</a></li>
+        <li><a href="#interactive features">Interactive features</a></li>
+        <li><a href="#zoom">Zoom</a></li><li><a href="#scale">Scale</a></li>
+    </ul>
+
+
+<a name="chart configuration"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Chart configuration</h3>
+
+            <a name="chart.value.text"></a>
+            <b>chart.value.text</b><br />
+            Controls whether the value is indicated as a text label in the center of the dial.<br /><i>Default: false</i><br /><br />
+            
+            <a name="chart.value.units.pre"></a>
+            <b>chart.value.units.pre</b><br />
+            The pre units used on the textual value.<br /><i>Default: nothing (An empty string)</i><br /><br />
+            
+            <a name="chart.value.units.post"></a>
+            <b>chart.value.units.post</b><br />
+            The post units used on the textual value.<br /><i>Default: nothing (An empty string)</i><br /><br />
+            
+            <a name="chart.border"></a>
+            <b>chart.border</b><br />
+            This controls the gray border of the Odometer.<br /><i>Default: false</i><br /><br />
+            
+            <a name="chart.tickmarks"></a>
+            <b>chart.tickmarks</b><br />
+            This controls whether tickmarks are shown. If you're animating the Odometer you'll need to turn this off.<br />
+            <i>Default: true</i><br /><br />
+            
+            <a name="chart.tickmarks.highlighted"></a>
+            <b>chart.tickmarks.highlighted</b><br />
+            This controls whether the tickmarks are highlighted in red/yellow/green.<br />
+            <i>Default: false</i><br /><br />
+            
+            <a name="chart.zerostart"></a>
+            <b>chart.zerostart</b><br />
+            If you want the top value on your chart to be zero instead of the maximum value, set this to true.<br /><i>Default: false</i><br /><br />
+
+<a name="margins"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Margins</h3>
+            
+
+
+
+            <a name="chart.gutter.left"></a>
+            <b>chart.gutter.left</b><br />
+            The left gutter of the chart, (the gutter is where the labels and title are)).<br />
+            <i>Default: 25</i><br /><br />
+
+            <a name="chart.gutter.right"></a>
+            <b>chart.gutter.right</b><br />
+            The right gutter of the chart, (the gutter is where the labels and title are).<br />
+            <i>Default: 25</i><br /><br />
+
+            <a name="chart.gutter.top"></a>
+            <b>chart.gutter.top</b><br />
+            The top gutter of the chart, (the gutter is where the labels and title are).<br />
+            <i>Default: 25</i><br /><br />
+
+            <a name="chart.gutter.bottom"></a>
+            <b>chart.gutter.bottom</b><br />
+            The bottom gutter of the chart, (the gutter is where the labels and title are).<br />
+            <i>Default: 25</i><br /><br />
+
+<a name="colors"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Colors</h3>
+            
+            <a name="chart.border.color1"></a>
+            <b>chart.border.color1</b><br />
+            This is the first color used in the gradient of the outer border of the chart (if enabled).<br />
+            <i>Default: #BEBCB0</i><br /><br />
+            
+            <a name="chart.border.color2"></a>
+            <b>chart.border.color2</b><br />
+            This is the second/middle color used in the gradient of the outer border of the chart (if enabled).<br />
+            <i>Default: #F0EFEA</i><br /><br />
+            
+            <a name="chart.border.color3"></a>
+            <b>chart.border.color3</b><br />
+            This is the third color used in the gradient of the outer border of the chart (if enabled).<br />
+            <i>Default: #BEBCB0</i><br /><br />
+
+            <a name="chart.green.max"></a>
+            <b>chart.green.max</b><br />
+            This is the point at which the green area ends.<br />
+            <i>Default: 75% of the maximum value</i><br /><br />
+
+            <a name="chart.red.min"></a>
+            <b>chart.red.min</b><br />
+            This is the point at which the red area starts. The yellow area is between the green and red areas.<br />
+            <i>Default: 90% of the maximum value</i><br /><br />
+
+            <a name="chart.green.color"></a>
+            <b>chart.green.color</b><br />
+            This option has two roles. If <i>chart.green.solid</i> is true, this is the actual color, whereas if
+            <i>chart.green.solid</i> is false (the default), it's used as one of the gradient colors.<br />
+            <i>Default: green</i><br /><br />
+
+            <a name="chart.yellow.color"></a>
+            <b>chart.yellow.color</b><br />
+            This option has two roles. If <i>chart.yellow.solid</i> is true, this is the actual color, whereas if
+            <i>chart.yellow.solid</i> is false (the default), it's used as one of the gradient colors.<br />
+            <i>Default: yellow</i><br /><br />
+
+            <a name="chart.red.color"></a>
+            <b>chart.red.color</b><br />
+            This option has two roles. If <i>chart.red.solid</i> is true, this is the actual color, whereas if
+            <i>chart.red.solid</i> is false (the default), it's used as one of the gradient colors.<br />
+            <i>Default: red</i><br /><br />
+
+            <a name="chart.green.solid"></a>
+            <b>chart.green.solid</b><br />
+            If <i>true</i> then the associated <i>chart.green.color</i> option is used as the  actual color, not part of a gradient<br />
+            <i>Default: false</i><br /><br />
+
+            <a name="chart.yellow.solid"></a>
+            <b>chart.yellow.solid</b><br />
+            If <i>true</i> then the associated <i>chart.yellow.color</i> option is used as the  actual color, not part of a gradient<br />
+            <i>Default: false</i><br /><br />
+
+            <a name="chart.red.solid"></a>
+            <b>chart.red.solid</b><br />
+            If <i>true</i> then the associated <i>chart.red.color</i> option is used as the  actual color, not part of a gradient<br />
+            <i>Default: false</i><br /><br />
+
+<a name="labels and text"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Labels and text</h3>            <a name="chart.labels"></a>
+<b>chart.labels</b><br />
+            Instead of using computed numbers, which uses the maximum value, you can specify the Odometer to use textual labels instead, with this option.<br /> <i>Default: null</i><br /><br />
+            <a name="chart.label.area"></a>
+<b>chart.label.area</b><br />
+            The width of the area that labels are put in. <br /><i>Default: 35</i><br /><br />
+            <a name="chart.text.size"></a>
+<b>chart.text.size</b><br />
+            The size of the text (in points). <br /><i>Default: 10</i><br /><br />
+            <a name="chart.text.font"></a>
+<b>chart.text.font</b><br />
+            The font used to render the text.<br /><i>Default: Verdana</i><br /><br />
+            <a name="chart.text.color"></a>
+<b>chart.text.color</b><br />
+            The color of the labels. <br /><i>Default: black</i><br /><br />
+<a name="needle"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Needle</h3>            <a name="chart.needle.width"></a>
+<b>chart.needle.width</b><br />
+            How thick the needle is. <br /><i>Default: 2</i><br /><br />
+            <a name="chart.needle.color"></a>
+<b>chart.needle.color</b><br />
+            The color that is applied to the needle. <br /><i>Default: black</i><br /><br />
+            <a name="chart.needle.head"></a>
+<b>chart.needle.head</b><br />
+            This controls whether the arrow head on the end of the needle is displayed. <br /><i>Default: true</i><br /><br />
+            
+            <a name="chart.needle.type"></a>
+            <b>chart.needle.type</b><br />
+            This determines which type of needle is used. It can be <i>pointer</i> or <i>triangle</i>. <br />
+            <i>Default: pointer</i><br /><br />
+            
+            <a name="chart.needle.triangle.border"></a>
+            <b>chart.needle.triangle.border</b><br />
+            This controls the colour of the border for the pointer. If you don't want it you could set it to be transparent -
+            <i>rgba(0,0,0,0)</i>.<br />
+            <i>Default: #aaa</i><br /><br />
+            
+            <a name="chart.needle.extra"></a>
+            <b>chart.needle.extra</b><br />
+            With this you can specify a number of extra pointers that will be drawn on the Odometer. An example would be a meter that's used to show upload and download data. An example use:<pre class="code">odo.Set('chart.needle.extra', [[16, 'red'], [24, 'blue']]);</pre><br />
+            <i>Default: [] (An empty array)</i><br /><br />
+
+<a name="title"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Title</h3>
+
+<a name="chart.title"></a>
+<b>chart.title</b><br />
+            The title text. <br /><i>Default: no title set</i><br /><br />
+
+
+
+<a name="chart.title.font"></a>
+<b>chart.title.font</b><br />
+The font that the title is rendered in. If not specified the chart.text.font setting is used (usually Verdana)<br />
+<i>Default: null</i><br /><br />
+
+<a name="chart.title.size"></a>
+<b>chart.title.size</b><br />
+The size of the title. If not specified the size is usually 2pt bigger than the chart.text.size setting.<br />
+<i>Default: null</i><br /><br />
+
+<a name="chart.title.bold"></a>
+<b>chart.title.bold</b><br />
+Whather the title is bold or not.<br />
+<i>Default: true</i><br /><br />
+
+<a name="chart.title.background"></a>
+<b>chart.title.background</b><br />
+The background color (if any) for the title.<br />
+<i>Default: null</i><br /><br />
+
+            <a name="chart.title.color"></a>
+<b>chart.title.color</b><br />
+            The color of the title.<br /> <i>Default: black</i><br /><br />
+            <a name="chart.title.hpos"></a>
+<b>chart.title.hpos</b><br />
+            This allows you to completely override the horizontal positioning of the title. It should be a number between 0 and 1, and is multiplied with the whole width of the canvas and then used as the horizontal position. <br /><i>Default: null</i><br /><br />
+            <a name="chart.title.vpos"></a>
+<b>chart.title.vpos</b><br />
+            This allows you to completely override the vertical positioning of the title. It should be a number between 0 and 1, and is multiplied with the gutter and then used as the vertical position. It can be useful if you need to have a large gutter.<br /><i>Default: null</i><br /><br />
+<a name="shadow"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Shadow</h3>            <a name="chart.shadow.inner"></a>
+<b>chart.shadow.inner</b><br />
+            Whether a drop shadow is applied to the inner circle of the Odometer<br /><i>Default: false</i><br /><br />
+            <a name="chart.shadow.outer"></a>
+<b>chart.shadow.outer</b><br />
+            Whether a drop shadow is applied to the whole Odometer.<br /><i>Default: false</i><br /><br />
+<a name="interactive features"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Interactive features</h3>            <a name="chart.contextmenu"></a>
+<b>chart.contextmenu</b><br />
+            An array of context menu items. More information on context menus is <a href="context.html">here</a>.<br /><i>Default: [] (An empty array)</i><br /><br />
+            <a name="chart.annotatable"></a>
+<b>chart.annotatable</b><br />
+            Whether annotations are enabled for the chart (ie you can draw on the chart interactively.<br /><i>Default: false</i><br /><br />
+            <a name="chart.annotate.color"></a>
+<b>chart.annotate.color</b><br />
+            If you do not allow the use of the palette, then this will be the only colour allowed for annotations.<br /><i>Default: black</i><br /><br />
+
+
+
+            <a name="chart.resizable"></a>
+            <b>chart.resizable</b><br />
+            Defaulting to false, this determines whether your chart will be resizable. Because of the numerous event handlers this has to install code on, This feature is unlikely to work with other dynamic features (the context menu is fine however).<br />
+            <i>Default: false</i><br /><br />
+
+
+            <a name="chart.resize.handle.background"></a>
+            <b>chart.resize.handle.background</b><br />
+            With this you can specify the background color for the resize handle. If you're adjusting the position of the
+            handle then you may need this to make the handle stand out more.<br />
+            <i>Default: null</i><br /><br />
+
+
+<a name="zoom"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Zoom</h3>            <a name="chart.zoom.mode"></a>
+<b>chart.zoom.mode</b><br />
+            Can be used to control whether the zoom is in thumbnail or canvas mode. Possible values are: <i>thumbnail</i> and <i>canvas</i>.<br /><i>Default: canvas</i><br /><br />
+            <a name="chart.zoom.factor"></a>
+<b>chart.zoom.factor</b><br />
+            This is the factor that the chart will be zoomed by (bigger values means more zoom)<br /><i>Default: 1.5</i><br /><br />
+            <a name="chart.zoom.fade.in"></a>
+<b>chart.zoom.fade.in</b><br />
+            Whether the zoomed canvas fades in or not. This also can be used to control the fade in for the zoom in thumbnail mode.<br /><i>Default: true</i><br /><br />
+            <a name="chart.zoom.fade.out"></a>
+<b>chart.zoom.fade.out</b><br />
+            Whether the zoomed canvas fades out or not. This also can be used to control the fade in for the zoom in thumbnail mode.<br /><i>Default: true</i><br /><br />
+            <a name="chart.zoom.hdir"></a>
+<b>chart.zoom.hdir</b><br />
+            The horizontal direction of the zoom. Possible values are: <i>left</i>, <i>center</i>, <i>right</i><br /><i>Default: right</i><br /><br />
+            <a name="chart.zoom.vdir"></a>
+<b>chart.zoom.vdir</b><br />
+            The vertical direction of the zoom. Possible values are: <i>up</i>, <i>center</i>, <i>down</i><br /><i>Default: down</i><br /><br />
+            <a name="chart.zoom.delay"></a>
+<b>chart.zoom.delay</b><br />
+            The delay (in milliseconds) between frames.<br /><i>Default: 50</i><br /><br />
+            <a name="chart.zoom.frames"></a>
+<b>chart.zoom.frames</b><br />
+            The number of frames in the zoom animation.<br /><i>Default: 10</i><br /><br />
+            <a name="chart.zoom.shadow"></a>
+<b>chart.zoom.shadow</b><br />
+            Whether or not the zoomed canvas has a shadow or not.<br /><i>Default: true</i><br /><br />
+            <a name="chart.zoom.thumbnail.width"></a>
+<b>chart.zoom.thumbnail.width</b><br />
+            When the zoom is in thumbnail mode, this is the width (in pixels) of the thumbnail.<br /><i>Default: 75</i><br /><br />
+            <a name="chart.zoom.thumbnail.height"></a>
+<b>chart.zoom.thumbnail.height</b><br />
+            When the zoom is in thumbnail mode, this is the height (in pixels) of the thumbnail.<br /><i>Default: 75</i><br /><br />
+
+            <a name="chart.zoom.thumbnail.fixed"></a>
+            <b>chart.zoom.thumbnail.fixed</b><br />
+            When the zoom is in thumbnail mode, you can use this property to fix the zoom in the top left corner instead
+            of it following the cursor around.<br />
+            <i>Default: false</i><br /><br />
+
+            <a name="chart.zoom.background"></a>
+<b>chart.zoom.background</b><br />
+            Defaulting to true, this determines whether the zoom has a dark, semi-opaque background that covers the entire web page.<br /><i>Default: true</i><br /><br />
+<a name="scale"></a>
+<h3 style="border: 1px solid #aaa; background-color: #eee; font-style: italic; padding: 5px; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px">Scale</h3>
+
+            <a name="chart.units.pre"></a>
+            <b>chart.units.pre</b><br />
+            The units that the value is measured in. This string is displayed BEFORE the actual number, allowing you to specify values such as "$50" and is only used if chart.value.text is <i>true</i>.<br /><i>Default: none</i><br /><br />
+            
+            <a name="chart.units.post"></a>
+            <b>chart.units.post</b><br />
+            The units that the value is measured in. This string is displayed AFTER the actual number, allowing you to specify values such as "50ms" and is only used if chart.value.text is <i>true</i>.<br /><i>Default: none</i><br /><br />
+
+            <a name="chart.scale.decimals"></a>
+<b>chart.scale.decimals</b><br />
+            The number of decimal places to display for the labels.<br />
+            <i>Default: 0</i><br /><br />
+
+            <a name="chart.scale.point"></a>
+            <b>chart.scale.point</b><br />
+            The character used as the decimal point.<br />
+            <i>Default: .</i><br /><br />
+            
+            <a name="chart.scale.thousand"></a>
+            <b>chart.scale.thousand</b><br />
+            The character used as the thousand separator<br />
+            <i>Default: ,</i><br /><br />
+
+</div><!-- /DOCS --><br /><br />
+
+</body>
+</html>

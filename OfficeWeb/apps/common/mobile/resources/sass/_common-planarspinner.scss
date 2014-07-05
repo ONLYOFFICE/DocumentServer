@@ -1,0 +1,65 @@
+@mixin common-planar-spinner {
+  .x-spinner.planar-spinner {
+    &.x-field-grouped-buttons {
+      background: transparent;
+
+      &.x-field {
+        min-height: 0;
+      }
+
+      .x-form-label {
+        background: transparent;
+
+        span {
+          font-size: inherit;
+        }
+      }
+
+      .x-button {
+        margin-top: 9px;
+        margin-bottom: 9px;
+        padding: 0 8px !important;
+      }
+
+      .x-form-label {
+        padding: 0.16em;
+      }
+
+      .x-field-input {
+        @include box-shadow(darken($base-color, 10%) 0 3px 4px -2px inset);
+        background: lighten($base-color, 100%);
+        min-width: 2.3em;
+
+        .x-input-el{
+          text-align: center;
+          @include border-radius(0);
+          //position: absolute;
+          //bottom: 0;
+          //top: 0;
+          //padding: 0;
+          padding: 3px 0 4px; //TODO: refactor it
+          min-height: 0;
+          border-top: 1px solid darken($base-color, 26%);
+          border-bottom: 1px solid darken($base-color, 26%);
+        }
+      }
+
+      .x-spinner-button {
+        width: auto;
+        border: 1px solid darken($base-color, 22%) !important;
+        margin: 0;
+      }
+
+      .x-spinner-button-down {
+        margin-right: 0;
+        @include border-top-right-radius(0);
+        @include border-bottom-right-radius(0);
+      }
+
+      .x-spinner-button-up {
+        @include border-top-left-radius(0);
+        @include border-bottom-left-radius(0);
+      }
+    }
+  }
+}

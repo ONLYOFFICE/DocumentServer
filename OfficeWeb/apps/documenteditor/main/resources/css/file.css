@@ -1,0 +1,177 @@
+.de-file-body .x-panel-body-default {
+    background: #ffffff;
+    border-color: #ffffff;
+}
+
+.de-file-toolbar,
+.x-nlg .de-file-toolbar {
+    background-color: #f4f4f4 !important;
+    background-image: none !important;
+    -webkit-box-shadow: inset -1px 0 0 #C8C8C8;
+    -moz-box-shadow: inset -1px 0 0 #C8C8C8;
+    box-shadow: inset -1px 0 0 #C8C8C8;
+    filter: none;
+    border: none !important;
+    padding: 0;
+}
+
+.de-file-separator {
+    margin: 10px 20px 10px 20px;
+    height: 1px;
+    line-height: 0px;
+    border: 1px solid #e1e1e1;
+    border-bottom: 1px solid white;
+}
+
+.x-btn-file-over {
+    background-color: #e2e2e2;
+    border: none;
+}
+
+.download-button-style {
+    background-color: #f5f5f5 !important;
+    border: none !important;
+}
+
+.de-file-table table {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.doc-format{
+    background: url("../img/docformat.png") 0 0 no-repeat !important;
+    background-image: -webkit-image-set(url("../img/docformat.png") 1x, url("../img/docformat@2x.png") 2x) !important;
+}
+
+.btn-docx {
+    background-position: -306px 0 !important;
+    border: none  !important;
+}
+
+.btn-doc {
+    background-position: -102px 0 !important;
+    border: none  !important;
+}
+
+.btn-odt {
+    background-position: -102px -129px !important;
+    border: none  !important;
+}
+
+.btn-rtf {
+    background-position: -510px -129px !important;
+    border: none  !important;
+}
+
+.btn-txt {
+    background-position: -714px -129px !important;
+    border: none  !important;
+}
+
+.btn-html {
+    background-position: -714px 0 !important;
+    border: none  !important;
+}
+
+.btn-epub {
+    background-position: -510px 0 !important;
+    border: none  !important;
+}
+
+.btn-pdf {
+    background-position: -306px -129px !important;
+    border: none  !important;
+}
+
+.btn-docx.x-btn-over,
+.btn-docx.x-btn-pressed {
+    background-position: -204px 0 !important;
+}
+
+.btn-doc.x-btn-over,
+.btn-doc.x-btn-pressed {
+    background-position: 0 0 !important;
+}
+
+.btn-odt.x-btn-over,
+.btn-odt.x-btn-pressed {
+    background-position: 0 -129px !important;
+}
+
+.btn-rtf.x-btn-over,
+.btn-rtf.x-btn-pressed {
+    background-position: -408px -129px !important;
+}
+
+.btn-txt.x-btn-over,
+.btn-txt.x-btn-pressed {
+    background-position: -612px -129px !important;
+}
+
+.btn-html.x-btn-over,
+.btn-html.x-btn-pressed {
+    background-position: -612px 0 !important;
+}
+
+.btn-epub.x-btn-over,
+.btn-epub.x-btn-pressed {
+    background-position: -408px 0 !important;
+}
+
+.btn-pdf.x-btn-over,
+.btn-pdf.x-btn-pressed {
+    background-position: -204px -129px !important;
+}
+
+.de-documentinfo-body .doc-info-label-cell,
+.de-documentsettings-body  .doc-info-label-cell {
+    font-weight: bold;
+    width: 30%
+}
+
+.de-documentinfo-body .userLink {
+    background: url("../img/profile.png") no-repeat scroll left center transparent;
+    background-image: -webkit-image-set(url("../img/profile.png") 1x, url("../img/profile@2x.png") 2x) !important;
+    display: inline-block;
+    padding: 0 0 0 17px;
+}
+
+.help-menu-view {
+    padding-top: 14px;
+}
+
+.help-menu-container .thumb-wrap{
+    padding: 7px 2px 7px 20px;
+    width: 100%;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.help-menu-container .thumb-wrap.x-item-over{
+    background: none;
+}
+
+.help-menu-container .thumb-wrap.x-item-selected {
+    background: url(../img/controls/button/toolbar-button-bg.gif) repeat-x !important;
+    background-image: -webkit-image-set(url("../img/controls/button/toolbar-button-bg.gif") 1x, url("../img/controls/button/toolbar-button-bg@2x.gif") 2x);
+    background-origin:  border-box !important;
+    -moz-background-origin: border !important;
+    background-attachment: inherit;
+    border: 1px solid rgba(0, 0, 0, 0.2)!important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+    -moz-box-shadow:  0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.help-menu-container .thumb-wrap.x-item-selected span {
+    color:#FFFFFF !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.help-menu-container .header-wrap {
+    padding: 7px 2px 7px 10px;
+    font-weight: bold;
+}
+
+.de-documentsettings-body {
+    padding: 30px;
+}

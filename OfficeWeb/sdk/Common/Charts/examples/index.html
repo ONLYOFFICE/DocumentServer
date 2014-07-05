@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Examples of the types of charts that OfficeExcel supports</title>
+
+    <link rel="stylesheet" href="../css/website.css" type="text/css" media="screen" />
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+
+    <meta name="keywords" content="charts html5 javascript charts canvas" />
+    <meta name="description" content="Examples of supported chart types" />
+    <meta name="googlebot" content="NOODP">
+    
+    <meta property="og:title" content="OfficeExcel: HTML5 Javascript charts library" />
+    <meta property="og:description" content="A charts library based on the HTML5 canvas tag" />
+    
+    <!-- Place this tag in your head or just before your close body tag -->
+    <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+    
+    <script src="../libraries/OfficeExcel.common.core.js" ></script>
+    <script src="../libraries/OfficeExcel.common.tooltips.js" ></script>
+    <script src="../libraries/OfficeExcel.common.effects.js" ></script>
+    <script src="../libraries/OfficeExcel.rose.js" ></script>
+    <!--[if lt IE 9]><script src="../excanvas/excanvas.original.js"></script><![endif]-->
+
+    <?php PrintAnalyticsCode() ?>
+    
+    <script>
+        window.onload = function ()
+        {
+            var rose1 = new OfficeExcel.Rose('cvs', [41,37,16,3,3,45,26,25,24,12,34,60,36,24,23,22]);
+            
+            grad_x = rose1.canvas.width / 2;
+            grad_y = rose1.canvas.height / 2;
+            
+            var grad = rose1.context.createRadialGradient(grad_x, grad_y, 0, grad_x, grad_y, 150);
+            grad.addColorStop(0, 'rgba(0,255,0,0.3)')
+            grad.addColorStop(1, '#0c0')
+            
+            rose1.Set('chart.colors.alpha', 0.5);
+            rose1.Set('chart.colors', [grad]);
+            rose1.Set('chart.gutter.top', 30);
+            rose1.Set('chart.gutter.left', 30);
+            rose1.Set('chart.gutter.right', 30);
+            rose1.Set('chart.margin', 2);
+            rose1.Set('chart.labels', ['Bev','Ben','Violet','Olga','Wez','Tristan','Hoolio','Nevil','Gary','Pete','Lou','Jim','Rich','Dave','Kevin','Jamie']);
+            rose1.Set('chart.labels.axes', 'n');
+
+            if (!OfficeExcel.isIE8()) {
+                rose1.Set('chart.tooltips', ['Bev','Ben','Violet','Olga','Wez','Tristan','Hoolio','Nevil','Gary','Pete','Lou','Jim','Rich','Dave','Kevin','Jamie']);
+            }
+
+            rose1.Draw();
+        }
+
+    </script>
+</head>
+<body>
+
+
+<div id="breadcrumb">
+    <a href="../index.html">OfficeExcel: HTML5 Javascript charts library</a>
+    >
+    Examples of supported charts
+</div>
+
+<h1>Examples <span>of supported charts</span></h1>
+
+    <script>
+        if (OfficeExcel.isOld()) {
+            document.write('<div style="background-color: #fee; border: 2px dashed red; padding: 5px"><b>Important</b><br /><br /> Internet Explorer does not natively support the HTML5 canvas tag, so if you want to see the charts, you can either:<ul><li>Install <a href="http://code.google.com/chrome/chromeframe/">Google Chrome Frame</a></li><li>Use ExCanvas. This is provided in the OfficeExcel Archive.</li><li>Use another browser entirely. Your choices are Firefox 3.5+, Chrome 2+, Safari 4+ or Opera 10.5+. </li></ul> <b>Note:</b> Internet Explorer 9 fully supports the canvas tag.</div>');
+        }
+    </script>
+
+    <div style="text-align: center">
+        <div class="warning" style="display: inline; display: inline-block">
+            Need something that OfficeExcel doesn't currently support? OfficeExcel license holders can usually be accomodated - please
+        </div>
+    </div>
+
+<p>
+    The following Javascript charts and HTML5 examples are available. The charts are made with the HTML5 canvas tag so they're quick to load and interactive.
+</p>
+
+<div style="float: right; text-align: center; width: 350px">
+    <b>A Rose chart of sales statistics</b>
+    <canvas id="cvs" width="350" height="350">[No canvas support]</canvas>
+</div>
+
+
+    <div style="width: 600px">
+        <div style="float: left; width: 275px">
+            <h4>Bar, line and pie chart examples</h4>
+                <ul>
+                    <li><a href="bar.html">Bar charts</a></li>
+                    <li><a href="bipolar.html">Bi-polar charts</a></li>
+                    <li><a href="hbar.html">Horizontal Bar charts</a></li>
+                    <li><a href="line.html">Line charts</a></li>
+                    <li><a href="pie.html">Pie charts</a></li>
+                    <li><a href="donut.html">Donut charts</a></li>
+                </ul>
+
+                <h4>Planning and management chart examples</h4>
+                    <ul>
+                        <li><a href="gantt.html">Gantt charts</a></li>
+                        <li><a href="funnel.html">Funnel charts</a></li>
+                        <li><a href="waterfall.html">Waterfall charts</a></li>
+                    </ul>
+        </div>
+
+        <div style="float: left; width: 275px">
+            <h4>Meters and gauges examples</h4>
+            <ul>
+                <li><a href="fuel.html">Fuel gauges</a></li>
+                <li><a href="gauge.html">Gauge charts</a></li>
+                <li><a href="hprogress.html">Horizontal progress bar</a></li>
+                <li><a href="meter.html">Meter charts</a></li>
+                <li><a href="odo.html">Odometer charts</a></li>
+                <li><a href="thermometer.html">Thermometer charts</a></li>
+                <li><a href="vprogress.html">Vertical progress bar</a></li>
+            </ul>
+
+            <h4>Other chart type examples</h4>
+                <ul>
+                    <li><a href="led.html">LED grid</a></li>
+                    <li><a href="radar.html">Radar charts</a></li>
+                    <li><a href="rscatter.html">Radial scatter charts</a></li>
+                    <li><a href="rose.html">Rose charts</a></li>
+                    <li><a href="scatter.html">Scatter charts</a></li>
+                </ul>
+        </div>
+    </div>
+
+<br clear="all" />
+
+<h4>Basic examples</h4>
+
+<ul>
+    <li><a href="../docs/basic.html">A basic example (for implementation help)</a></li>
+    <li><a href="../docs/basic_tooltips.html">A basic example of charts in tooltips</a></li>
+    <li><a href="../docs/basic_combined.html">A basic example of a combined Bar &amp; Line chart</a></li>
+</ul>
+
+    
+
+    <h4>More examples</h4>
+    
+    <p>
+        There are more usage examples as well as a few general HTML5 examples in the <a href="../docs/index.html">documentation</a>.
+    </p>
+
+</body>
+</html>
