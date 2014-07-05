@@ -28,4 +28,4 @@ Documentation
 You can compile ONLYOFFICE Online Editors and install it to your local server yourself or use our installer to skip compilation stage and install it for you. The following documentation is available to the community depending on the way you choose:
 
 * [Compiling ONLYOFFICE Online Editors for a Local Server](https://help.teamlab.com/products/files/doceditor.aspx?fileid=3744885&doc=bDB2Zi8wNE5lZmxSbVdYYUFRNFJJUWdBZlBaZnFnWFhwSnlWZFNkckxpVT0_IjM3NDQ4ODUi0 "Compiling ONLYOFFICE Online Editors for a Local Server")
-* [Installing ONLYOFFICE Online Editors on a Local Server](https://help.teamlab.com/products/files/doceditor.aspx?fileid=3473763&doc=ZVRueGxyR1pWOFZ4YlRycjN6cm52dmpCdnA5ZS9ZWklsMUpsUGFhVk1sWT0_IjM0NzM3NjMi0 "Installing ONLYOFFICE Online Editors on a Local Server"
+* [Installing ONLYOFFICE Online Editors on a Local Server](https://help.teamlab.com/products/files/doceditor.aspx?fileid=3473763&doc=ZVRueGxyR1pWOFZ4YlRycjN6cm52dmpCdnA5ZS9ZWklsMUpsUGFhVk1sWT0_IjM0NzM3NjMi0 "Installing ONLYOFFICE Online Editors on a Local Server")
