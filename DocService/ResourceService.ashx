@@ -58,9 +58,29 @@ public class ResourceService : IHttpAsyncHandler
             
             Storage oStorage = new Storage();
             TaskResult oTaskResult = new TaskResult();
-            string sPath = context.Request.Params["path"];
+            string sPathOriginal = context.Request.Params["path"];
+            string sPath = null;
+            if (null != sPathOriginal)
+            {
+                sPath = sPathOriginal.Replace("../", "").Replace("..\\", "");
+                if (sPathOriginal != sPath)
+                {
+                    _log.Error("Possible XSS attack:" + sPathOriginal);
+                }
+            }
+
             string sOutputFilename = context.Request.Params["filename"];
-            string sDeletePath = context.Request.Params["deletepath"];
+
+            string sDeletePathOriginal = context.Request.Params["deletepath"];
+            string sDeletePath = null;
+            if (null != sDeletePathOriginal)
+            {
+                sDeletePath = sDeletePathOriginal.Replace("../", "").Replace("..\\", "");
+                if (sDeletePathOriginal != sDeletePath)
+                {
+                    _log.Error("Possible XSS attack:" + sDeletePathOriginal);
+                }
+            }
             if (string.IsNullOrEmpty(sOutputFilename))
             {
                 if (null != sPath)
