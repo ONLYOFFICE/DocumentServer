@@ -819,8 +819,6 @@ function asc_docs_api(name) {
     g_bIsDocumentCopyPaste = true;
     this.DocumentReaderMode = null;
     this.isChartEditor = false;
-    this.chartStyleManager = new ChartStyleManager();
-    this.chartPreviewManager = new ChartPreviewManager();
     this.IsLongActionCurrent = false;
     this.ParcedDocument = false;
     this.isStartCoAuthoringOnEndLoad = false;

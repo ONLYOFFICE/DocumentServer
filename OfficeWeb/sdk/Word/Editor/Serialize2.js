@@ -9185,6 +9185,14 @@ function Binary_DocumentTableReader(doc, oReadResult, openParams, stream, bAllow
                                     }
                                     if (null != oParaDrawing.Extent) {
                                         oParaDrawing.setExtent(oParaDrawing.Extent.W, oParaDrawing.Extent.H);
+                                        var bChartDisabled = true;
+                                        if (bChartDisabled && oParaDrawing.isChart) {
+                                            delete oParaDrawing.isChart;
+                                            var Image = new WordImage(oParaDrawing, doc, doc.DrawingDocument, null);
+                                            var src = "";
+                                            Image.init(src, oParaDrawing.Extent.W, oParaDrawing.Extent.H, null);
+                                            oParaDrawing.Set_GraphicObject(Image);
+                                        }
                                     }
                                     if (null != oParaDrawing.wrappingPolygon) {
                                         oParaDrawing.addWrapPolygon(oParaDrawing.wrappingPolygon);
@@ -9399,19 +9407,25 @@ function Binary_DocumentTableReader(doc, oReadResult, openParams, stream, bAllow
                 oParaDrawing.Set_GraphicObject(grObject);
             } else {
                 if (c_oSerImageType2.Chart === type) {
-                    var oNewGraphicObj = new CChartAsGroup();
-                    if (g_oTableId) {
-                        g_oTableId.m_bTurnOff = true;
-                    }
-                    var chart = new asc_CChart();
-                    if (g_oTableId) {
-                        g_oTableId.m_bTurnOff = false;
-                    }
-                    var oBinary_ChartReader = new Binary_ChartReader(this.stream, chart, oNewGraphicObj);
-                    oBinary_ChartReader.ReadExternal(length);
-                    if (null != chart.range.interval && chart.range.interval.length > 0) {
-                        oNewGraphicObj.setAscChart(chart);
-                        oParaDrawing.Set_GraphicObject(oNewGraphicObj);
+                    var bChartDisabled = true;
+                    if (bChartDisabled) {
+                        oParaDrawing.isChart = true;
+                        res = c_oSerConstants.ReadUnknown;
+                    } else {
+                        var oNewGraphicObj = new CChartAsGroup();
+                        if (g_oTableId) {
+                            g_oTableId.m_bTurnOff = true;
+                        }
+                        var chart = new asc_CChart();
+                        if (g_oTableId) {
+                            g_oTableId.m_bTurnOff = false;
+                        }
+                        var oBinary_ChartReader = new Binary_ChartReader(this.stream, chart, oNewGraphicObj);
+                        oBinary_ChartReader.ReadExternal(length);
+                        if (null != chart.range.interval && chart.range.interval.length > 0) {
+                            oNewGraphicObj.setAscChart(chart);
+                            oParaDrawing.Set_GraphicObject(oNewGraphicObj);
+                        }
                     }
                 } else {
                     if (c_oSerImageType2.AllowOverlap === type) {

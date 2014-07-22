@@ -71,7 +71,7 @@
         }
         var dc = Ext.fly("header-documentcaption");
         if (dc) {
-            Ext.DomHelper.overwrite(dc, value);
+            Ext.DomHelper.overwrite(dc, Ext.htmlEncode(value));
         }
         return value;
     },

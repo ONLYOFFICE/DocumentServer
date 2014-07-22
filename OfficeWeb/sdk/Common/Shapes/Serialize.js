@@ -3361,34 +3361,6 @@ function BinaryPPTYLoader() {
             case 3:
                 var _length = s.GetLong();
                 var _pos = s.cur;
-                _chart = new CChartAsGroup(this.TempGroupObject);
-                if (g_oTableId) {
-                    g_oTableId.m_bTurnOff = true;
-                }
-                var chart = new asc_CChart();
-                if (g_oTableId) {
-                    g_oTableId.m_bTurnOff = false;
-                }
-                var _stream = new FT_Stream2();
-                _stream.data = s.data;
-                _stream.pos = s.pos;
-                _stream.cur = s.cur;
-                _stream.size = s.size;
-                var oBinary_ChartReader = new Binary_ChartReader(_stream, chart, _chart);
-                oBinary_ChartReader.ReadExternal(_length);
-                if (null != chart.range.interval && chart.range.interval.length > 0) {
-                    if (_xfrm) {
-                        if (_chart.setXfrm) {
-                            _chart.setXfrm(_xfrm.offX, _xfrm.offY, _xfrm.extX, _xfrm.extY, _xfrm.rot, _xfrm.flipH, _xfrm.flipV);
-                        } else {
-                            _chart.setPosition(_xfrm.offX, _xfrm.offY);
-                            _chart.setExtents(_xfrm.extX, _xfrm.extY);
-                        }
-                    }
-                    _chart.setAscChart(chart);
-                } else {
-                    _chart = null;
-                }
                 s.Seek2(_pos + _length);
                 break;
             default:
@@ -3441,19 +3413,6 @@ function BinaryPPTYLoader() {
             case 3:
                 var _length = s.GetLong();
                 var _pos = s.cur;
-                if (typeof CChartAsGroup !== "undefined") {
-                    _chart = new CChartAsGroup(this.TempMainObject);
-                    var _stream = new FT_Stream2();
-                    _stream.data = s.data;
-                    _stream.pos = s.pos;
-                    _stream.cur = s.cur;
-                    _stream.size = s.size;
-                    var oBinary_ChartReader = new Binary_ChartReader(_stream, _chart.chart, _chart);
-                    oBinary_ChartReader.ReadExternal(_length);
-                    if (null == _chart.chart.range.interval || _chart.chart.range.interval.length <= 0) {
-                        _chart = null;
-                    }
-                }
                 s.Seek2(_pos + _length);
                 break;
             default:
