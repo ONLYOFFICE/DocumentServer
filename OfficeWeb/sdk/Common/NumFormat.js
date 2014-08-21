@@ -1970,7 +1970,8 @@ function CellFormat(format) {
                     }
                 }
             }
-            this.oTextFormat = new NumFormat(false).setFormat("@");
+            this.oTextFormat = new NumFormat(false);
+            this.oTextFormat.setFormat("@");
             if (null == oPositive || null == oNegative || null == oNull) {
                 for (var i = 0, length = aParsedFormats.length; i < length; ++i) {
                     var oCurFormat = aParsedFormats[i];
