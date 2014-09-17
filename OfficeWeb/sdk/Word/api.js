@@ -5377,15 +5377,6 @@ asc_docs_api.prototype.ChangeColorScheme = function (index_scheme) {
         data.newScheme = theme.themeElements.clrScheme;
         History.Add(this.WordControl.m_oLogicDocument.DrawingObjects, data);
         this.WordControl.m_oDrawingDocument.CheckGuiControlColors();
-        var is_on = History.Is_On();
-        if (is_on) {
-            History.TurnOff();
-        }
-        this.chartStyleManager.init();
-        this.chartPreviewManager.init();
-        if (is_on) {
-            History.TurnOn();
-        }
         this.asc_fireCallback("asc_onUpdateChartStyles");
         _changer.calculateAfterChangeTheme();
         this.WordControl.m_oDrawingDocument.ClearCachePages();
