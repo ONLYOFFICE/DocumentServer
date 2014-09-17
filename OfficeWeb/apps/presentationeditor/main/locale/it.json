@@ -87,6 +87,7 @@
   "PE.controller.Main.errorCoAuthoringDisconnect": "Connessione al server persa. Impossibile modificare il documento.",
   "PE.controller.Main.errorDefaultMessage": "Codice errore: %1",
   "PE.controller.Main.errorFilePassProtect": "Il documento è protetto da una password.",
+  "PE.controller.Main.errorDatabaseConnection": "Errore esterno.<br>Errore di connessione a banca dati. Si prega di contattare l'assistenza tecnica nel caso in cui l'errore persiste.",
   "PE.controller.Main.errorKeyEncrypt": "Descrittore di chiave sconosciuto",
   "PE.controller.Main.errorKeyExpire": "Descrittore di chiave scaduto",
   "PE.controller.Main.errorProcessSaveResult": "Salvataggio non riuscito",

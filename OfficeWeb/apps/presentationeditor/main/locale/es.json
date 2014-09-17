@@ -87,6 +87,7 @@
   "PE.controller.Main.errorCoAuthoringDisconnect": "Se ha perdido la conexión con servidor. El documento no puede ser editado ahora.",
   "PE.controller.Main.errorDefaultMessage": "Código de error: %1",
   "PE.controller.Main.errorFilePassProtect": "El documento está protegido por contraseña.",
+  "PE.controller.Main.errorDatabaseConnection": "Error externo.<br>Error de conexión de base de datos. Por favor póngase en contacto con soporte si el error se mantiene.",
   "PE.controller.Main.errorKeyEncrypt": "Descriptor de clave desconocido",
   "PE.controller.Main.errorKeyExpire": "Descriptor de clave ha expirado",
   "PE.controller.Main.errorProcessSaveResult": "Problemas al guardar",

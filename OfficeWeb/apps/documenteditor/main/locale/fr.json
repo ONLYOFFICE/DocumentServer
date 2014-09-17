@@ -92,6 +92,7 @@
   "DE.controller.Main.errorCoAuthoringDisconnect": "Connexion au serveur perdue. Le document ne peut être modifié en ce moment.",
   "DE.controller.Main.errorDefaultMessage": "Code d'erreur: %1",
   "DE.controller.Main.errorFilePassProtect": "Le document est protégé par le mot de passe.",
+  "DE.controller.Main.errorDatabaseConnection": "Erreur externe.<br>Erreur de connexion à la base de données. Si l'erreur persiste veillez contactez l'assistance technique.",
   "DE.controller.Main.errorKeyEncrypt": "Descripteur de clés inconnu",
   "DE.controller.Main.errorKeyExpire": "Key descriptor expired",
   "DE.controller.Main.errorProcessSaveResult": "Échec de l'enregistrement",

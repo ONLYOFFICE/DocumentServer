@@ -92,6 +92,7 @@
   "DE.controller.Main.errorCoAuthoringDisconnect": "Потеряно соединение с сервером. В данный момент нельзя отредактировать документ.",
   "DE.controller.Main.errorDefaultMessage": "Код ошибки: %1",
   "DE.controller.Main.errorFilePassProtect": "Документ защищен паролем.",
+  "DE.controller.Main.errorDatabaseConnection": "Внешняя ошибка.<br>Ошибка подключения к базе данных. Если ошибка повторяется, пожалуйста, обратитесь в службу поддержки.",
   "DE.controller.Main.errorKeyEncrypt": "Неизвестный дескриптор ключа",
   "DE.controller.Main.errorKeyExpire": "Срок действия дескриптора ключа истек",
   "DE.controller.Main.errorProcessSaveResult": "Сбой при сохранении.",

@@ -92,6 +92,7 @@
   "DE.controller.Main.errorCoAuthoringDisconnect": "Server connection lost. The document cannot be edited right now.",
   "DE.controller.Main.errorDefaultMessage": "Error code: %1",
   "DE.controller.Main.errorFilePassProtect": "The document is password protected.",
+  "DE.controller.Main.errorDatabaseConnection": "External error.<br>Database connection error. Please contact support in case the error persists.",
   "DE.controller.Main.errorKeyEncrypt": "Unknown key descriptor",
   "DE.controller.Main.errorKeyExpire": "Key descriptor expired",
   "DE.controller.Main.errorProcessSaveResult": "Saving failed.",

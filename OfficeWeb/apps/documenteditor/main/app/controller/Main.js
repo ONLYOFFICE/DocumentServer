@@ -613,6 +613,9 @@ Ext.define("DE.controller.Main", {
         case c_oAscError.ID.ConvertationPassword:
             config.msg = this.errorFilePassProtect;
             break;
+        case c_oAscError.ID.Database:
+            config.msg = this.errorDatabaseConnection;
+            break;
         default:
             config.msg = this.errorDefaultMessage.replace("%1", id);
             break;
@@ -1301,6 +1304,7 @@ Ext.define("DE.controller.Main", {
     errorUsersExceed: "Count of users was exceed",
     errorCoAuthoringDisconnect: "Server connection lost. You can't edit anymore.",
     errorFilePassProtect: "The document is password protected.",
+    errorDatabaseConnection: "External error.<br>Database connection error. Please, contact support.",
     txtBasicShapes: "Basic Shapes",
     txtFiguredArrows: "Figured Arrows",
     txtMath: "Math",

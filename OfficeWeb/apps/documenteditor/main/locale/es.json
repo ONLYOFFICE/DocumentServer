@@ -92,6 +92,7 @@
   "DE.controller.Main.errorCoAuthoringDisconnect": "Se ha perdido la conexión con servidor. El documento no puede ser editado ahora.",
   "DE.controller.Main.errorDefaultMessage": "Código de error: %1",
   "DE.controller.Main.errorFilePassProtect": "El documento está protegido por contraseña.",
+  "DE.controller.Main.errorDatabaseConnection": "Error externo.<br>Error de conexión de base de datos. Por favor póngase en contacto con soporte si el error se mantiene.",
   "DE.controller.Main.errorKeyEncrypt": "Descriptor de clave desconocido",
   "DE.controller.Main.errorKeyExpire": "Descriptor de clave ha expirado",
   "DE.controller.Main.errorProcessSaveResult": "Problemas al guardar",

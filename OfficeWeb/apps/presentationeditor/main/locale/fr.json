@@ -87,6 +87,7 @@
   "PE.controller.Main.errorCoAuthoringDisconnect": "Connexion au serveur perdue. Le document ne peut être modifié en ce moment.",
   "PE.controller.Main.errorDefaultMessage": "Code d'erreur: %1",
   "PE.controller.Main.errorFilePassProtect": "Le document est protégé par le mot de passe.",
+  "PE.controller.Main.errorDatabaseConnection": "Erreur externe.<br>Erreur de connexion à la base de données. Si l'erreur persiste veillez contactez l'assistance technique.",
   "PE.controller.Main.errorKeyEncrypt": "Descripteur de clés inconnu",
   "PE.controller.Main.errorKeyExpire": "Descripteur de clés expiré",
   "PE.controller.Main.errorProcessSaveResult": "Échec de l'enregistrement",

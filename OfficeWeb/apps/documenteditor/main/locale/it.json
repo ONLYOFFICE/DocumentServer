@@ -92,6 +92,7 @@
   "DE.controller.Main.errorCoAuthoringDisconnect": "Connessione al server persa. Impossibile modificare il documento.",
   "DE.controller.Main.errorDefaultMessage": "Codice errore: %1",
   "DE.controller.Main.errorFilePassProtect": "Il documento è protetto da una password.",
+  "DE.controller.Main.errorDatabaseConnection": "Errore esterno.<br>Errore di connessione a banca dati. Si prega di contattare l'assistenza tecnica nel caso in cui l'errore persiste.",
   "DE.controller.Main.errorKeyEncrypt": "Descrittore di chiave sconosciuto",
   "DE.controller.Main.errorKeyExpire": "Descrittore di chiave scaduto",
   "DE.controller.Main.errorProcessSaveResult": "Salvataggio non riuscito",

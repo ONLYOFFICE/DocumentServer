@@ -87,6 +87,7 @@
   "PE.controller.Main.errorCoAuthoringDisconnect": "Server connection lost. The document cannot be edited right now.",
   "PE.controller.Main.errorDefaultMessage": "Error code: %1",
   "PE.controller.Main.errorFilePassProtect": "The document is password protected.",
+  "PE.controller.Main.errorDatabaseConnection": "External error.<br>Database connection error. Please contact support in case the error persists.",
   "PE.controller.Main.errorKeyEncrypt": "Unknown key descriptor",
   "PE.controller.Main.errorKeyExpire": "Key descriptor expired",
   "PE.controller.Main.errorProcessSaveResult": "Saving failed.",

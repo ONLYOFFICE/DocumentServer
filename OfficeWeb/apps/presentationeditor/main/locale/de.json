@@ -87,6 +87,7 @@
   "PE.controller.Main.errorCoAuthoringDisconnect": "Verbindung zum Server verloren. Das Dokument kann momentan nicht bearbeitet werden.",
   "PE.controller.Main.errorDefaultMessage": "Fehlercode: %1",
   "PE.controller.Main.errorFilePassProtect": "Das Dokument ist ein Kennwort geschützt.",
+  "PE.controller.Main.errorDatabaseConnection": "Externer Fehler.<br>Fehler beim Verbinden zur Datenbank. Bitte wenden Sie sich an den Kundendienst, falls der Fehler bestehen bleibt.",
   "PE.controller.Main.errorKeyEncrypt": "Unbekannter Schlüsseldeskriptor",
   "PE.controller.Main.errorKeyExpire": "Der Schlüsseldeskriptor ist abgelaufen",
   "PE.controller.Main.errorProcessSaveResult": "Speichern fehlgeschlagen.",

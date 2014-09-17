@@ -87,6 +87,7 @@
   "PE.controller.Main.errorCoAuthoringDisconnect": "Потеряно соединение с сервером. В данный момент нельзя отредактировать документ.",
   "PE.controller.Main.errorDefaultMessage": "Код ошибки: %1",
   "PE.controller.Main.errorFilePassProtect": "Документ защищен паролем.",
+  "PE.controller.Main.errorDatabaseConnection": "Внешняя ошибка.<br>Ошибка подключения к базе данных. Если ошибка повторяется, пожалуйста, обратитесь в службу поддержки.",
   "PE.controller.Main.errorKeyEncrypt": "Неизвестный дескриптор ключа",
   "PE.controller.Main.errorKeyExpire": "Срок действия дескриптора ключа истек",
   "PE.controller.Main.errorProcessSaveResult": "Сбой при сохранении.",

@@ -92,6 +92,7 @@
   "DE.controller.Main.errorCoAuthoringDisconnect": "Verbindung zum Server verloren. Das Dokument kann momentan nicht bearbeitet werden.",
   "DE.controller.Main.errorDefaultMessage": "Fehlercode: %1",
   "DE.controller.Main.errorFilePassProtect": "Das Dokument ist ein Kennwort geschützt.",
+  "DE.controller.Main.errorDatabaseConnection": "Externer Fehler.<br>Fehler beim Verbinden zur Datenbank. Bitte wenden Sie sich an den Kundendienst, falls der Fehler bestehen bleibt.",
   "DE.controller.Main.errorKeyEncrypt": "Unbekannter Schlüsseldeskriptor",
   "DE.controller.Main.errorKeyExpire": "Der Schlüsseldeskriptor ist abgelaufen",
   "DE.controller.Main.errorProcessSaveResult": "Speichern fehlgeschlagen.",

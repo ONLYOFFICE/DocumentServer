@@ -587,6 +587,9 @@ Ext.define("PE.controller.Main", {
         case c_oAscError.ID.ConvertationPassword:
             config.msg = this.errorFilePassProtect;
             break;
+        case c_oAscError.ID.Database:
+            config.msg = this.errorDatabaseConnection;
+            break;
         default:
             config.msg = this.errorDefaultMessage.replace("%1", id);
             break;
@@ -1350,6 +1353,7 @@ Ext.define("PE.controller.Main", {
     txtEditingMode: "Set editing mode...",
     errorCoAuthoringDisconnect: "Server connection lost. You can't edit anymore.",
     errorFilePassProtect: "The document is password protected.",
+    errorDatabaseConnection: "External error.<br>Database connection error. Please, contact support.",
     textAnonymous: "Anonymous",
     txtNeedSynchronize: "You have an updates",
     applyChangesTitleText: "Loading Data",
