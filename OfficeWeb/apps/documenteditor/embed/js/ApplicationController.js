@@ -40,7 +40,6 @@
     embedCode = '<iframe allowtransparency="true" frameborder="0" scrolling="no" src="{embed-url}" width="{width}" height="{height}"></iframe>',
     maxZIndex = 9090,
     created = false;
-    Common.Analytics.initialize("UA-12442749-13", "Embedded ONLYOFFICE Document");
     if (typeof isBrowserSupported !== "undefined" && !isBrowserSupported()) {
         Common.Gateway.reportError(undefined, "Your browser is not supported.");
         return;

@@ -617,7 +617,6 @@ Ext.define("SSE.controller.Main", {
                 }
                 me.api.asc_setAutoSaveGap(value);
             }
-            Common.component.Analytics.initialize("UA-12442749-13", "Spreadsheet Editor");
             var isInstance, documentHolder = me.getDocumentHolder(),
             formulaInput = me.getFormulaInput();
             Ext.FocusManager.enable();

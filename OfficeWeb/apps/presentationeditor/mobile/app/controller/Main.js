@@ -39,7 +39,6 @@
             return;
         }
         this.initControl();
-        Common.component.Analytics.initialize("UA-12442749-13", "Presentation Editor Mobile");
         var api = this.api,
         app = this.getApplication(),
         profile = app.getCurrentProfile();

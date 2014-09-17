@@ -39,7 +39,6 @@
             return;
         }
         this.initControl();
-        Common.component.Analytics.initialize("UA-12442749-13", "Document Editor Mobile");
         var api = this.api,
         app = this.getApplication();
         api = new asc_docs_api("id-sdkeditor");

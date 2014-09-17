@@ -894,7 +894,6 @@ Ext.define("DE.controller.Main", {
                 me.api.asc_enableKeyEvents(isInstance == false);
             },
             this);
-            Common.component.Analytics.initialize("UA-12442749-13", "Document Editor");
         },
         50);
     },
