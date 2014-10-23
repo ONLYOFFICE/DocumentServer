@@ -84,6 +84,8 @@
     };
 }
 function getFile(filePath) {
+    var VRegExp = new RegExp(/^http(s)?:\/\/[a-z0-9-.]+(:[\d]*)?\//i);
+    filePath = filePath.replace(VRegExp, "/");
     fh = new FileHandler();
     fh.get(filePath);
 }
