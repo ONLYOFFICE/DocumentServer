@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var g_mouse_event_type_down = 0;
+ "use strict";
+var g_mouse_event_type_down = 0;
 var g_mouse_event_type_move = 1;
 var g_mouse_event_type_up = 2;
 var g_mouse_event_type_wheel = 3;
@@ -136,7 +137,7 @@ function check_MouseMoveEvent(e) {
     }
 }
 function CreateMouseUpEventObject(x, y) {
-    var e = new Object();
+    var e = {};
     e.PageX = x;
     e.PageY = y;
     e.altKey = global_mouseEvent.AltKey;
@@ -159,6 +160,9 @@ function check_MouseUpEvent(e) {
     global_mouseEvent.AltKey = e.altKey;
     global_mouseEvent.ShiftKey = e.shiftKey;
     global_mouseEvent.CtrlKey = e.ctrlKey || e.metaKey;
+    global_keyboardEvent.AltKey = global_mouseEvent.AltKey;
+    global_keyboardEvent.ShiftKey = global_mouseEvent.ShiftKey;
+    global_keyboardEvent.CtrlKey = global_mouseEvent.CtrlKey;
     global_mouseEvent.Type = g_mouse_event_type_up;
     global_mouseEvent.Button = e.button;
     var lockedElement = null;
@@ -190,6 +194,9 @@ function check_MouseDownEvent(e, isClicks) {
     global_mouseEvent.AltKey = e.altKey;
     global_mouseEvent.ShiftKey = e.shiftKey;
     global_mouseEvent.CtrlKey = e.ctrlKey || e.metaKey;
+    global_keyboardEvent.AltKey = global_mouseEvent.AltKey;
+    global_keyboardEvent.ShiftKey = global_mouseEvent.ShiftKey;
+    global_keyboardEvent.CtrlKey = global_mouseEvent.CtrlKey;
     global_mouseEvent.Type = g_mouse_event_type_down;
     global_mouseEvent.Button = e.button;
     global_mouseEvent.Sender = (e.srcElement) ? e.srcElement : e.target;
@@ -263,16 +270,6 @@ function Window_OnMouseUp(e) {
             if (undefined != global_mouseEvent.Sender.onmouseup && null != global_mouseEvent.Sender.onmouseup) {
                 global_mouseEvent.Sender.onmouseup(e, true);
             }
-        }
-    }
-    if (window.editor !== undefined) {
-        editor.WordControl.m_oDrawingDocument.UnlockCursorType();
-        editor.WordControl.m_oDrawingDocument.SetCursorType("default");
-        if (editor.WordControl.m_oScrollVerApi) {
-            editor.WordControl.m_oScrollVerApi.evt_mouseup(e);
-        }
-        if (editor.WordControl.m_oScrollHorApi) {
-            editor.WordControl.m_oScrollHorApi.evt_mouseup(e);
         }
     }
 }

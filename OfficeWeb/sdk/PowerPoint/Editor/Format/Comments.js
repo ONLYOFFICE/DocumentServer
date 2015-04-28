@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,12 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function CWriteCommentData() {
+ "use strict";
+var comments_NoComment = 0;
+var comments_NonActiveComment = 1;
+var comments_ActiveComment = 2;
+function ParaComment() {}
+function CWriteCommentData() {
     this.Data = null;
     this.WriteAuthorId = 0;
     this.WriteCommentId = 0;
@@ -51,6 +56,7 @@ CWriteCommentData.prototype = {
     Iso8601ToDate: function (sDate) {
         var numericKeys = [1, 4, 5, 6, 7, 10, 11];
         var minutesOffset = 0;
+        var struct;
         if ((struct = /^(\d{4}|[+\-]\d{6})(?:-(\d{2})(?:-(\d{2}))?)?(?:T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{3}))?)?(?:(Z)|([+\-])(\d{2})(?::(\d{2}))?)?)?$/.exec(sDate))) {
             for (var i = 0, k;
             (k = numericKeys[i]); ++i) {
@@ -165,44 +171,46 @@ function CCommentData() {
     this.m_sUserName = "";
     this.m_sQuoteText = null;
     this.m_bSolved = false;
-    this.m_aReplies = new Array();
-    this.Add_Reply = function (CommentData) {
+    this.m_aReplies = [];
+}
+CCommentData.prototype = {
+    Add_Reply: function (CommentData) {
         this.m_aReplies.push(CommentData);
-    };
-    this.Set_Text = function (Text) {
+    },
+    Set_Text: function (Text) {
         this.m_sText = Text;
-    };
-    this.Get_Text = function () {
+    },
+    Get_Text: function () {
         return this.m_sText;
-    };
-    this.Get_QuoteText = function () {
+    },
+    Get_QuoteText: function () {
         return this.m_sQuoteText;
-    };
-    this.Set_QuoteText = function (Quote) {
+    },
+    Set_QuoteText: function (Quote) {
         this.m_sQuoteText = Quote;
-    };
-    this.Get_Solved = function () {
+    },
+    Get_Solved: function () {
         return this.m_bSolved;
-    };
-    this.Set_Solved = function (Solved) {
+    },
+    Set_Solved: function (Solved) {
         this.m_bSolved = Solved;
-    };
-    this.Set_Name = function (Name) {
+    },
+    Set_Name: function (Name) {
         this.m_sUserName = Name;
-    };
-    this.Get_Name = function () {
+    },
+    Get_Name: function () {
         return this.m_sUserName;
-    };
-    this.Get_RepliesCount = function () {
+    },
+    Get_RepliesCount: function () {
         return this.m_aReplies.length;
-    };
-    this.Get_Reply = function (Index) {
+    },
+    Get_Reply: function (Index) {
         if (Index < 0 || Index >= this.m_aReplies.length) {
             return null;
         }
         return this.m_aReplies[Index];
-    };
-    this.Read_FromAscCommentData = function (AscCommentData) {
+    },
+    Read_FromAscCommentData: function (AscCommentData) {
         this.m_sText = AscCommentData.asc_getText();
         this.m_sTime = AscCommentData.asc_getTime();
         this.m_sUserId = AscCommentData.asc_getUserId();
@@ -215,8 +223,8 @@ function CCommentData() {
             Reply.Read_FromAscCommentData(AscCommentData.asc_getReply(Index));
             this.m_aReplies.push(Reply);
         }
-    };
-    this.Write_ToBinary2 = function (Writer) {
+    },
+    Write_ToBinary2: function (Writer) {
         var Count = this.m_aReplies.length;
         Writer.WriteString2(this.m_sText);
         Writer.WriteString2(this.m_sTime);
@@ -233,8 +241,8 @@ function CCommentData() {
         for (var Index = 0; Index < Count; Index++) {
             this.m_aReplies[Index].Write_ToBinary2(Writer);
         }
-    };
-    this.Read_FromBinary2 = function (Reader) {
+    },
+    Read_FromBinary2: function (Reader) {
         this.m_sText = Reader.GetString2();
         this.m_sTime = Reader.GetString2();
         this.m_sUserId = Reader.GetString2();
@@ -253,8 +261,8 @@ function CCommentData() {
             oReply.Read_FromBinary2(Reader);
             this.m_aReplies.push(oReply);
         }
-    };
-}
+    }
+};
 var comment_type_Common = 1;
 var comment_type_HdrFtr = 2;
 function CComment(Parent, Data) {
@@ -287,7 +295,13 @@ function CComment(Parent, Data) {
         this.Lock.Set_Type(locktype_Mine, false);
         CollaborativeEditing.Add_Unlock2(this);
     }
-    this.hit = function (x, y) {
+    g_oTableId.Add(this, this.Id);
+}
+CComment.prototype = {
+    getObjectType: function () {
+        return historyitem_type_Comment;
+    },
+    hit: function (x, y) {
         var Flags = 0;
         if (this.selected) {
             Flags |= 1;
@@ -297,8 +311,8 @@ function CComment(Parent, Data) {
         }
         var dd = editor.WordControl.m_oDrawingDocument;
         return x > this.x && x < this.x + dd.GetCommentWidth(Flags) && y > this.y && y < this.y + dd.GetCommentHeight(Flags);
-    };
-    this.setPosition = function (x, y) {
+    },
+    setPosition: function (x, y) {
         History.Add(this, {
             Type: historyitem_Comment_Position,
             oldOffsetX: this.x,
@@ -308,8 +322,8 @@ function CComment(Parent, Data) {
         });
         this.x = x;
         this.y = y;
-    };
-    this.draw = function (graphics) {
+    },
+    draw: function (graphics) {
         var Flags = 0;
         if (this.selected) {
             Flags |= 1;
@@ -319,8 +333,8 @@ function CComment(Parent, Data) {
         }
         var dd = editor.WordControl.m_oDrawingDocument;
         graphics.DrawPresentationComment(Flags, this.x, this.y, dd.GetCommentWidth(), dd.GetCommentHeight());
-    };
-    this.Set_StartInfo = function (PageNum, X, Y, H, ParaId) {
+    },
+    Set_StartInfo: function (PageNum, X, Y, H, ParaId) {
         this.m_oStartInfo.X = X;
         this.m_oStartInfo.Y = Y;
         this.m_oStartInfo.H = H;
@@ -328,8 +342,8 @@ function CComment(Parent, Data) {
         if (comment_type_Common === this.m_oTypeInfo.Type) {
             this.m_oStartInfo.PageNum = PageNum;
         }
-    };
-    this.Set_EndInfo = function (PageNum, X, Y, H, ParaId) {
+    },
+    Set_EndInfo: function (PageNum, X, Y, H, ParaId) {
         this.m_oEndInfo.X = X;
         this.m_oEndInfo.Y = Y;
         this.m_oEndInfo.H = H;
@@ -337,8 +351,8 @@ function CComment(Parent, Data) {
         if (comment_type_Common === this.m_oTypeInfo.Type) {
             this.m_oEndInfo.PageNum = PageNum;
         }
-    };
-    this.Check_ByXY = function (PageNum, X, Y, Type) {
+    },
+    Check_ByXY: function (PageNum, X, Y, Type) {
         if (this.m_oTypeInfo.Type != Type) {
             return false;
         }
@@ -369,16 +383,16 @@ function CComment(Parent, Data) {
             }
         }
         return true;
-    };
-    this.Set_Data = function (Data) {
+    },
+    Set_Data: function (Data) {
         History.Add(this, {
             Type: historyitem_Comment_Change,
             New: Data,
             Old: this.Data
         });
         this.Data = Data;
-    };
-    this.Remove_Marks = function () {
+    },
+    Remove_Marks: function () {
         var Para_start = g_oTableId.Get_ById(this.m_oStartInfo.ParaId);
         var Para_end = g_oTableId.Get_ById(this.m_oEndInfo.ParaId);
         if (Para_start === Para_end) {
@@ -393,8 +407,8 @@ function CComment(Parent, Data) {
                 Para_end.Remove_CommentMarks(this.Id);
             }
         }
-    };
-    this.Set_TypeInfo = function (Type, Data) {
+    },
+    Set_TypeInfo: function (Type, Data) {
         var New = {
             Type: Type,
             Data: Data
@@ -410,11 +424,11 @@ function CComment(Parent, Data) {
             this.m_oStartInfo.PageNum = PageNum;
             this.m_oEndInfo.PageNum = PageNum;
         }
-    };
-    this.Get_TypeInfo = function () {
+    },
+    Get_TypeInfo: function () {
         return this.m_oTypeInfo;
-    };
-    this.Undo = function (Data) {
+    },
+    Undo: function (Data) {
         var Type = Data.Type;
         switch (Type) {
         case historyitem_Comment_Change:
@@ -429,8 +443,8 @@ function CComment(Parent, Data) {
             this.y = Data.oldOffsetY;
             break;
         }
-    };
-    this.Redo = function (Data) {
+    },
+    Redo: function (Data) {
         var Type = Data.Type;
         switch (Type) {
         case historyitem_Comment_Change:
@@ -445,9 +459,14 @@ function CComment(Parent, Data) {
             this.y = Data.newOffsetY;
             break;
         }
-    };
-    this.Refresh_RecalcData = function (Data) {};
-    this.Save_Changes = function (Data, Writer) {
+    },
+    Refresh_RecalcData: function (Data) {
+        if (this.slideComments) {
+            this.slideComments.Refresh_RecalcData();
+        }
+    },
+    recalculate: function () {},
+    Save_Changes: function (Data, Writer) {
         Writer.WriteLong(historyitem_type_Comment);
         var Type = Data.Type;
         Writer.WriteLong(Type);
@@ -472,8 +491,8 @@ function CComment(Parent, Data) {
             break;
         }
         return Writer;
-    };
-    this.Save_Changes2 = function (Data, Writer) {
+    },
+    Save_Changes2: function (Data, Writer) {
         var bRetValue = false;
         var Type = Data.Type;
         switch (Type) {
@@ -483,8 +502,8 @@ function CComment(Parent, Data) {
             break;
         }
         return bRetValue;
-    };
-    this.Load_Changes = function (Reader, Reader2) {
+    },
+    Load_Changes: function (Reader, Reader2) {
         var ClassType = Reader.GetLong();
         if (historyitem_type_Comment != ClassType) {
             return;
@@ -513,15 +532,15 @@ function CComment(Parent, Data) {
             break;
         }
         return true;
-    };
-    this.Get_Id = function () {
+    },
+    Get_Id: function () {
         return this.Id;
-    };
-    this.Set_Id = function (newId) {
+    },
+    Set_Id: function (newId) {
         g_oTableId.Reset_Id(this, newId, this.Id);
         this.Id = newId;
-    };
-    this.Write_ToBinary2 = function (Writer) {
+    },
+    Write_ToBinary2: function (Writer) {
         Writer.WriteLong(historyitem_type_Comment);
         Writer.WriteString2(this.Id);
         this.Data.Write_ToBinary2(Writer);
@@ -529,8 +548,8 @@ function CComment(Parent, Data) {
         if (comment_type_HdrFtr === this.m_oTypeInfo.Type) {
             Writer.WriteString2(this.m_oTypeInfo.Data.Get_Id());
         }
-    };
-    this.Read_FromBinary2 = function (Reader) {
+    },
+    Read_FromBinary2: function (Reader) {
         this.Id = Reader.GetString2();
         this.Data = new CCommentData();
         this.Data.Read_FromBinary2(Reader);
@@ -538,8 +557,8 @@ function CComment(Parent, Data) {
         if (comment_type_HdrFtr === this.m_oTypeInfo.Type) {
             this.m_oTypeInfo.Data = g_oTableId.Get_ById(Reader.GetString2());
         }
-    };
-    this.Check_MergeData = function () {
+    },
+    Check_MergeData: function () {
         var bUse = true;
         if (null != this.m_oStartInfo.ParaId) {
             var Para_start = g_oTableId.Get_ById(this.m_oStartInfo.ParaId);
@@ -556,222 +575,5 @@ function CComment(Parent, Data) {
         if (false === bUse) {
             editor.WordControl.m_oLogicDocument.Remove_Comment(this.Id, true);
         }
-    };
-    g_oTableId.Add(this, this.Id);
-}
-var comments_NoComment = 0;
-var comments_NonActiveComment = 1;
-var comments_ActiveComment = 2;
-function CComments() {
-    this.Id = g_oIdCounter.Get_NewId();
-    this.m_bUse = false;
-    this.m_aComments = {};
-    this.m_sCurrent = null;
-    this.m_aCurrentDraw = new Array();
-    this.Get_Id = function () {
-        return this.Id;
-    };
-    this.Set_Id = function (newId) {
-        g_oTableId.Reset_Id(this, newId, this.Id);
-        this.Id = newId;
-    };
-    this.Set_Use = function (Use) {
-        this.m_bUse = Use;
-    };
-    this.Is_Use = function () {
-        return this.m_bUse;
-    };
-    this.Add = function (Comment) {
-        var Id = Comment.Get_Id();
-        History.Add(this, {
-            Type: historyitem_Comments_Add,
-            Id: Id,
-            Comment: Comment
-        });
-        this.m_aComments[Id] = Comment;
-    };
-    this.Get_ById = function (Id) {
-        if ("undefined" != typeof(this.m_aComments[Id])) {
-            return this.m_aComments[Id];
-        }
-        return null;
-    };
-    this.Remove_ById = function (Id) {
-        if ("undefined" != typeof(this.m_aComments[Id])) {
-            History.Add(this, {
-                Type: historyitem_Comments_Remove,
-                Id: Id,
-                Comment: this.m_aComments[Id]
-            });
-            var Comment = this.m_aComments[Id];
-            delete this.m_aComments[Id];
-            Comment.Remove_Marks();
-            return true;
-        }
-        return false;
-    };
-    this.Reset_CurrentDraw = function (PageNum) {
-        this.m_aCurrentDraw.length = 0;
-        for (var Id in this.m_aComments) {
-            var Comment = this.m_aComments[Id];
-            if (PageNum > Comment.m_oStartInfo.PageNum && PageNum <= Comment.m_oEndInfo.PageNum) {
-                this.m_aCurrentDraw.push(Comment.Get_Id());
-            }
-        }
-    };
-    this.Add_CurrentDraw = function (Id) {
-        if (null != this.Get_ById(Id)) {
-            this.m_aCurrentDraw.push(Id);
-        }
-    };
-    this.Remove_CurrentDraw = function (Id) {
-        var Count = this.m_aCurrentDraw.length;
-        for (var Index = 0; Index < Count; Index++) {
-            if (Id === this.m_aCurrentDraw[Index]) {
-                this.m_aCurrentDraw.splice(Index, 1);
-                return;
-            }
-        }
-    };
-    this.Check_CurrentDraw = function () {
-        var Flag = comments_NoComment;
-        var Count = this.m_aCurrentDraw.length;
-        if (Count > 0) {
-            Flag = comments_NonActiveComment;
-        }
-        for (var Index = 0; Index < Count; Index++) {
-            if (this.m_aCurrentDraw[Index] === this.m_sCurrent) {
-                Flag = comments_ActiveComment;
-                return Flag;
-            }
-        }
-        return Flag;
-    };
-    this.Set_Current = function (Id) {
-        this.m_sCurrent = Id;
-    };
-    this.Set_StartInfo = function (Id, PageNum, X, Y, H, ParaId) {
-        var Comment = this.Get_ById(Id);
-        if (null != Comment) {
-            Comment.Set_StartInfo(PageNum, X, Y, H, ParaId);
-        }
-    };
-    this.Set_EndInfo = function (Id, PageNum, X, Y, H, ParaId) {
-        var Comment = this.Get_ById(Id);
-        if (null != Comment) {
-            Comment.Set_EndInfo(PageNum, X, Y, H, ParaId);
-        }
-    };
-    this.Get_ByXY = function (PageNum, X, Y, Type) {
-        for (var Id in this.m_aComments) {
-            var Comment = this.m_aComments[Id];
-            if (true === Comment.Check_ByXY(PageNum, X, Y, Type)) {
-                return Comment;
-            }
-        }
-        return null;
-    };
-    this.Get_Current = function () {
-        if (null != this.m_sCurrent) {
-            var Comment = this.Get_ById(this.m_sCurrent);
-            if (null != Comment) {
-                return Comment;
-            }
-        }
-        return null;
-    };
-    this.Get_CurrentId = function () {
-        return this.m_sCurrent;
-    };
-    this.Set_CommentData = function (Id, CommentData) {
-        var Comment = this.Get_ById(Id);
-        if (null != Comment) {
-            Comment.Set_Data(CommentData);
-        }
-    };
-    this.Check_MergeData = function () {
-        for (var Id in this.m_aComments) {
-            this.m_aComments[Id].Check_MergeData();
-        }
-    };
-    this.Undo = function (Data) {
-        var Type = Data.Type;
-        switch (Type) {
-        case historyitem_Comments_Add:
-            delete this.m_aComments[Data.Id];
-            editor.sync_RemoveComment(Data.Id);
-            break;
-        case historyitem_Comments_Remove:
-            this.m_aComments[Data.Id] = Data.Comment;
-            editor.sync_AddComment(Data.Id, Data.Comment.Data);
-            break;
-        }
-    };
-    this.Redo = function (Data) {
-        var Type = Data.Type;
-        switch (Type) {
-        case historyitem_Comments_Add:
-            this.m_aComments[Data.Id] = Data.Comment;
-            editor.sync_AddComment(Data.Id, Data.Comment.Data);
-            break;
-        case historyitem_Comments_Remove:
-            delete this.m_aComments[Data.Id];
-            editor.sync_RemoveComment(Data.Id);
-            break;
-        }
-    };
-    this.Refresh_RecalcData = function (Data) {};
-    this.Document_Is_SelectionLocked = function (Id) {
-        var Comment = this.Get_ById(Id);
-        if (null != Comment) {
-            Comment.Lock.Check(Comment.Get_Id());
-        }
-    };
-    this.Save_Changes = function (Data, Writer) {
-        Writer.WriteLong(historyitem_type_Comments);
-        var Type = Data.Type;
-        Writer.WriteLong(Type);
-        switch (Type) {
-        case historyitem_Comments_Add:
-            Writer.WriteString2(Data.Id);
-            break;
-        case historyitem_Comments_Remove:
-            Writer.WriteString2(Data.Id);
-            break;
-        }
-        return Writer;
-    };
-    this.Save_Changes2 = function (Data, Writer) {
-        var bRetValue = false;
-        var Type = Data.Type;
-        switch (Type) {
-        case historyitem_Comments_Add:
-            break;
-        case historyitem_Comments_Remove:
-            break;
-        }
-        return bRetValue;
-    };
-    this.Load_Changes = function (Reader, Reader2) {
-        var ClassType = Reader.GetLong();
-        if (historyitem_type_Comments != ClassType) {
-            return;
-        }
-        var Type = Reader.GetLong();
-        switch (Type) {
-        case historyitem_Comments_Add:
-            var CommentId = Reader.GetString2();
-            var Comment = g_oTableId.Get_ById(CommentId);
-            this.m_aComments[CommentId] = Comment;
-            editor.sync_AddComment(CommentId, Comment.Data);
-            break;
-        case historyitem_Comments_Remove:
-            var CommentId = Reader.GetString2();
-            delete this.m_aComments[CommentId];
-            editor.sync_RemoveComment(CommentId);
-            break;
-        }
-        return true;
-    };
-    g_oTableId.Add(this, this.Id);
-}
+    }
+};

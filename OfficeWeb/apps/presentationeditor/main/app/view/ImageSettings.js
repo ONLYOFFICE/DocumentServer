@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,310 +29,185 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("PE.view.ImageSettings", {
-    extend: "Common.view.AbstractSettingsPanel",
-    alias: "widget.peimagesettings",
-    height: 202,
-    requires: ["Ext.ComponentQuery", "Ext.container.Container", "Ext.button.Button", "Ext.form.Label", "Ext.toolbar.Spacer", "Common.view.ImageFromUrlDialog", "PE.view.ImageSettingsAdvanced"],
-    constructor: function (config) {
-        this.callParent(arguments);
-        this.initConfig(config);
-        return this;
-    },
-    initComponent: function () {
-        this.title = this.txtTitle;
-        this._initSettings = true;
-        this._nRatio = 1;
-        this._state = {
-            Width: 0,
-            Height: 0
-        };
-        this._btnOriginalSize = Ext.create("Ext.Button", {
-            id: "image-button-original-size",
-            text: this.textOriginalSize,
-            width: 100,
-            listeners: {
-                click: this.setOriginalSize,
-                scope: this
-            }
-        });
-        this._btnInsertFromFile = Ext.create("Ext.Button", {
-            id: "image-button-from-file",
-            text: this.textFromFile,
-            width: 85,
-            listeners: {
-                click: function (btn) {
-                    if (this.api) {
-                        this.api.ChangeImageFromFile();
-                    }
-                    this.fireEvent("editcomplete", this);
-                },
-                scope: this
-            }
-        });
-        this._btnInsertFromUrl = Ext.create("Ext.Button", {
-            id: "image-button-from-url",
-            text: this.textFromUrl,
-            width: 85,
-            listeners: {
-                click: function (btn) {
-                    var w = Ext.create("Common.view.ImageFromUrlDialog");
-                    w.addListener("onmodalresult", Ext.bind(this._onOpenImageFromURL, [this, w]), false);
-                    w.addListener("close", Ext.bind(function (cnt, eOpts) {
-                        this.fireEvent("editcomplete", this);
-                    },
-                    this));
-                    w.show();
-                },
-                scope: this
-            }
-        });
-        this._SizePanel = Ext.create("Ext.container.Container", {
-            layout: "vbox",
-            layoutConfig: {
-                align: "stretch"
-            },
-            height: 61,
-            width: 200,
-            items: [{
-                xtype: "tbspacer",
-                height: 8
-            },
-            {
-                xtype: "container",
-                layout: {
-                    type: "table",
-                    columns: 2,
-                    tdAttrs: {
-                        style: "padding-right: 8px;"
-                    }
-                },
-                defaults: {
-                    xtype: "container",
-                    layout: "vbox",
-                    layoutConfig: {
-                        align: "stretch"
-                    },
-                    height: 16,
-                    style: "float:left;"
-                },
-                items: [{
-                    items: [this.labelWidth = Ext.create("Ext.form.Label", {
-                        text: this.textWidth,
-                        width: 85
-                    })]
-                },
-                {
-                    items: [this.labelHeight = Ext.create("Ext.form.Label", {
-                        text: this.textHeight,
-                        width: 85
-                    })]
-                }]
-            },
-            {
-                xtype: "tbspacer",
-                height: 7
-            },
-            this._btnOriginalSize, {
-                xtype: "tbspacer",
-                height: 3
-            }]
-        });
-        this._UrlPanel = Ext.create("Ext.container.Container", {
-            layout: "vbox",
-            layoutConfig: {
-                align: "stretch"
-            },
-            height: 36,
-            width: 200,
-            items: [{
-                xtype: "tbspacer",
-                height: 8
-            },
-            {
-                xtype: "container",
-                layout: {
-                    type: "table",
-                    columns: 2,
-                    tdAttrs: {
-                        style: "padding-right: 8px;"
-                    }
-                },
-                items: [this._btnInsertFromFile, this._btnInsertFromUrl]
-            },
-            {
-                xtype: "tbspacer",
-                height: 2
-            }]
-        });
-        this.items = [{
-            xtype: "tbspacer",
-            height: 9
+ define(["text!presentationeditor/main/app/template/ImageSettings.template", "jquery", "underscore", "backbone", "common/main/lib/component/Button", "common/main/lib/view/ImageFromUrlDialog", "presentationeditor/main/app/view/ImageSettingsAdvanced"], function (menuTemplate, $, _, Backbone) {
+    PE.Views.ImageSettings = Backbone.View.extend(_.extend({
+        el: "#id-image-settings",
+        template: _.template(menuTemplate),
+        events: {},
+        options: {
+            alias: "ImageSettings"
         },
-        {
-            xtype: "label",
-            style: "font-weight: bold;margin-top: 1px;",
-            text: this.textSize
-        },
-        this._SizePanel, {
-            xtype: "tbspacer",
-            height: 5
-        },
-        {
-            xtype: "tbspacer",
-            width: "100%",
-            height: 10,
-            style: "padding-right: 10px;",
-            html: '<div style="width: 100%; height: 40%; border-bottom: 1px solid #C7C7C7"></div>'
-        },
-        {
-            xtype: "label",
-            style: "font-weight: bold;margin-top: 1px;",
-            text: this.textInsert
-        },
-        this._UrlPanel, {
-            xtype: "tbspacer",
-            height: 8
-        },
-        {
-            xtype: "tbspacer",
-            width: "100%",
-            height: 10,
-            style: "padding-right: 10px;",
-            html: '<div style="width: 100%; height: 40%; border-bottom: 1px solid #C7C7C7"></div>'
-        },
-        {
-            xtype: "tbspacer",
-            height: 3
-        },
-        {
-            xtype: "container",
-            height: 20,
-            width: 200,
-            items: [{
-                xtype: "box",
-                html: '<div style="width:100%;text-align:center;padding-right:15px;"><label id="image-advanced-link" class="asc-advanced-link">' + this.textAdvanced + "</label></div>",
-                listeners: {
-                    afterrender: function (cmp) {
-                        document.getElementById("image-advanced-link").onclick = Ext.bind(this._openAdvancedSettings, this);
-                    },
-                    scope: this
+        initialize: function () {
+            var me = this;
+            this._initSettings = true;
+            this._state = {
+                Width: 0,
+                Height: 0,
+                DisabledControls: false
+            };
+            this.lockedControls = [];
+            this._locked = false;
+            this._noApply = false;
+            this._originalProps = null;
+            this.render();
+            this.labelWidth = $(this.el).find("#image-label-width");
+            this.labelHeight = $(this.el).find("#image-label-height");
+            this.btnOriginalSize = new Common.UI.Button({
+                el: $("#image-button-original-size")
+            });
+            this.lockedControls.push(this.btnOriginalSize);
+            this.btnInsertFromFile = new Common.UI.Button({
+                el: $("#image-button-from-file")
+            });
+            this.lockedControls.push(this.btnInsertFromFile);
+            this.btnInsertFromUrl = new Common.UI.Button({
+                el: $("#image-button-from-url")
+            });
+            this.lockedControls.push(this.btnInsertFromUrl);
+            this.btnOriginalSize.on("click", _.bind(this.setOriginalSize, this));
+            this.btnInsertFromFile.on("click", _.bind(function (btn) {
+                if (this.api) {
+                    this.api.ChangeImageFromFile();
                 }
-            }]
-        }];
-        this.addEvents("editcomplete");
-        this.callParent(arguments);
-    },
-    setOriginalSize: function () {
-        if (this.api) {
-            var imgsize = this.api.get_OriginalSizeImage();
-            if (imgsize) {
+                this.fireEvent("editcomplete", this);
+            },
+            this));
+            this.btnInsertFromUrl.on("click", _.bind(this.insertFromUrl, this));
+            $(this.el).on("click", "#image-advanced-link", _.bind(this.openAdvancedSettings, this));
+        },
+        render: function () {
+            var el = $(this.el);
+            el.html(this.template({
+                scope: this
+            }));
+            this.linkAdvanced = $("#image-advanced-link");
+        },
+        setApi: function (api) {
+            this.api = api;
+            return this;
+        },
+        updateMetricUnit: function () {
+            var value = Common.Utils.Metric.fnRecalcFromMM(this._state.Width);
+            this.labelWidth[0].innerHTML = this.textWidth + ": " + value.toFixed(1) + " " + Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()];
+            value = Common.Utils.Metric.fnRecalcFromMM(this._state.Height);
+            this.labelHeight[0].innerHTML = this.textHeight + ": " + value.toFixed(1) + " " + Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()];
+        },
+        createDelayedElements: function () {
+            this.updateMetricUnit();
+        },
+        ChangeSettings: function (props) {
+            if (this._initSettings) {
+                this.createDelayedElements();
+                this._initSettings = false;
+            }
+            this.disableControls(this._locked);
+            if (props) {
+                this._originalProps = new CImgProperty(props);
+                var value = props.get_Width();
+                if (Math.abs(this._state.Width - value) > 0.001) {
+                    this.labelWidth[0].innerHTML = this.textWidth + ": " + Common.Utils.Metric.fnRecalcFromMM(value).toFixed(1) + " " + Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()];
+                    this._state.Width = value;
+                }
+                value = props.get_Height();
+                if (Math.abs(this._state.Height - value) > 0.001) {
+                    this.labelHeight[0].innerHTML = this.textHeight + ": " + Common.Utils.Metric.fnRecalcFromMM(value).toFixed(1) + " " + Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()];
+                    this._state.Height = value;
+                }
+                this.btnOriginalSize.setDisabled(props.get_ImageUrl() === null || props.get_ImageUrl() === undefined || this._locked);
+            }
+        },
+        setOriginalSize: function () {
+            if (this.api) {
+                var imgsize = this.api.get_OriginalSizeImage();
                 var w = imgsize.get_ImageWidth();
                 var h = imgsize.get_ImageHeight();
-                this.labelWidth.setText(this.textWidth + ": " + Ext.util.Format.round(Common.MetricSettings.fnRecalcFromMM(w), 1) + " " + Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()]);
-                this.labelHeight.setText(this.textHeight + ": " + Ext.util.Format.round(Common.MetricSettings.fnRecalcFromMM(h), 1) + " " + Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()]);
+                this.labelWidth[0].innerHTML = this.textWidth + ": " + Common.Utils.Metric.fnRecalcFromMM(w).toFixed(1) + " " + Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()];
+                this.labelHeight[0].innerHTML = this.textHeight + ": " + Common.Utils.Metric.fnRecalcFromMM(h).toFixed(1) + " " + Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()];
                 var properties = new CImgProperty();
                 properties.put_Width(w);
                 properties.put_Height(h);
                 this.api.ImgApply(properties);
+                this.fireEvent("editcomplete", this);
             }
-            this.fireEvent("editcomplete", this);
-        }
-    },
-    setApi: function (api) {
-        if (api == undefined) {
-            return;
-        }
-        this.api = api;
-    },
-    ChangeSettings: function (props) {
-        if (this._initSettings) {
-            this.createDelayedElements();
-            this._initSettings = false;
-        }
-        if (props) {
-            var value = props.get_Width();
-            if (Math.abs(this._state.Width - value) > 0.001 || (this._state.Width === null || value === null) && (this._state.Width !== value)) {
-                this.labelWidth.setText(this.textWidth + ": " + ((value !== null) ? (Ext.util.Format.round(Common.MetricSettings.fnRecalcFromMM(value), 1) + " " + Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()]) : "-"));
-                this._state.Width = value;
+        },
+        insertFromUrl: function () {
+            var me = this;
+            (new Common.Views.ImageFromUrlDialog({
+                handler: function (result, value) {
+                    if (result == "ok") {
+                        if (me.api) {
+                            var checkUrl = value.replace(/ /g, "");
+                            if (!_.isEmpty(checkUrl)) {
+                                var props = new CImgProperty();
+                                props.put_ImageUrl(checkUrl);
+                                me.api.ImgApply(props);
+                            }
+                        }
+                    }
+                    me.fireEvent("editcomplete", me);
+                }
+            })).show();
+        },
+        openAdvancedSettings: function (e) {
+            if (this.linkAdvanced.hasClass("disabled")) {
+                return;
             }
-            value = props.get_Height();
-            if (Math.abs(this._state.Height - value) > 0.001 || (this._state.Height === null || value === null) && (this._state.Height !== value)) {
-                this.labelHeight.setText(this.textHeight + ": " + ((value !== null) ? (Ext.util.Format.round(Common.MetricSettings.fnRecalcFromMM(value), 1) + " " + Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()]) : "-"));
-                this._state.Height = value;
-            }
-            this._btnOriginalSize.setDisabled(props.get_ImageUrl() === null || props.get_ImageUrl() === undefined);
-        }
-    },
-    _onOpenImageFromURL: function (mr) {
-        var self = this[0];
-        var url = this[1].txtUrl;
-        if (mr == 1 && self.api) {
-            var checkurl = url.value.replace(/ /g, "");
-            if (checkurl != "") {
-                var props = new CImgProperty();
-                props.put_ImageUrl(url.value);
-                self.api.ImgApply(props);
-            }
-        }
-    },
-    _openAdvancedSettings: function (e) {
-        var me = this;
-        var win;
-        if (me.api) {
-            var selectedElements = me.api.getSelectedElements();
-            if (selectedElements && Ext.isArray(selectedElements)) {
-                var elType, elValue;
-                for (var i = selectedElements.length - 1; i >= 0; i--) {
-                    elType = selectedElements[i].get_ObjectType();
-                    elValue = selectedElements[i].get_ObjectValue();
-                    if (c_oAscTypeSelectElement.Image == elType) {
-                        win = Ext.create("PE.view.ImageSettingsAdvanced", {});
-                        win.updateMetricUnit();
-                        win.setSettings(elValue);
-                        break;
+            var me = this;
+            if (me.api && !this._locked) {
+                var selectedElements = me.api.getSelectedElements();
+                if (selectedElements && selectedElements.length > 0) {
+                    var elType, elValue;
+                    for (var i = selectedElements.length - 1; i >= 0; i--) {
+                        elType = selectedElements[i].get_ObjectType();
+                        elValue = selectedElements[i].get_ObjectValue();
+                        if (c_oAscTypeSelectElement.Image == elType) {
+                            var imgsizeOriginal;
+                            if (!me.btnOriginalSize.isDisabled()) {
+                                imgsizeOriginal = me.api.get_OriginalSizeImage();
+                                if (imgsizeOriginal) {
+                                    imgsizeOriginal = {
+                                        width: imgsizeOriginal.get_ImageWidth(),
+                                        height: imgsizeOriginal.get_ImageHeight()
+                                    };
+                                }
+                            } (new PE.Views.ImageSettingsAdvanced({
+                                imageProps: elValue,
+                                sizeOriginal: imgsizeOriginal,
+                                handler: function (result, value) {
+                                    if (result == "ok") {
+                                        if (me.api) {
+                                            me.api.ImgApply(value.imageProps);
+                                        }
+                                    }
+                                    me.fireEvent("editcomplete", me);
+                                }
+                            })).show();
+                            break;
+                        }
                     }
                 }
             }
-        }
-        if (win) {
-            if (!me._btnOriginalSize.isDisabled()) {
-                var imgsize = this.api.get_OriginalSizeImage();
-                if (imgsize) {
-                    win.setSizeOriginal({
-                        width: imgsize.get_ImageWidth(),
-                        height: imgsize.get_ImageHeight()
-                    });
-                }
+        },
+        setLocked: function (locked) {
+            this._locked = locked;
+        },
+        disableControls: function (disable) {
+            if (this._state.DisabledControls !== disable) {
+                this._state.DisabledControls = disable;
+                _.each(this.lockedControls, function (item) {
+                    item.setDisabled(disable);
+                });
+                this.linkAdvanced.toggleClass("disabled", disable);
             }
-            win.addListener("onmodalresult", Ext.bind(function (o, mr, s) {
-                if (mr == 1 && s) {
-                    me.api.ImgApply(s);
-                }
-                this.fireEvent("editcomplete", this);
-            },
-            this), false);
-            win.show();
-        }
+        },
+        textSize: "Size",
+        textWidth: "Width",
+        textHeight: "Height",
+        textOriginalSize: "Default Size",
+        textInsert: "Insert Image",
+        textFromUrl: "From URL",
+        textFromFile: "From File",
+        textAdvanced: "Show advanced settings"
     },
-    updateMetricUnit: function () {
-        var value = Common.MetricSettings.fnRecalcFromMM(this._state.Width);
-        this.labelWidth.setText(this.textWidth + ": " + Ext.util.Format.round(value, 1) + " " + Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()]);
-        value = Common.MetricSettings.fnRecalcFromMM(this._state.Height);
-        this.labelHeight.setText(this.textHeight + ": " + Ext.util.Format.round(value, 1) + " " + Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()]);
-    },
-    createDelayedElements: function () {
-        this.updateMetricUnit();
-    },
-    textSize: "Size",
-    textKeepRatio: "Constant Proportions",
-    textWidth: "Width",
-    textHeight: "Height",
-    textOriginalSize: "Default Size",
-    textUrl: "Image URL",
-    textInsert: "Change Image",
-    textFromUrl: "From URL",
-    textFromFile: "From File",
-    textAdvanced: "Show advanced settings",
-    txtTitle: "Picture"
+    PE.Views.ImageSettings || {}));
 });

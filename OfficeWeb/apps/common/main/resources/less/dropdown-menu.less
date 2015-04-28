@@ -1,0 +1,100 @@
+.dropdown-menu > .disabled > a {
+    &:hover,
+    &:focus {
+        cursor: default;
+    }
+}
+
+.dropdown-menu {
+    &.scrollable-menu {
+        height: auto;
+        max-height: 400px;
+    }
+
+    &.ps-container {
+        overflow: hidden;
+        .ps-scrollbar-y-rail {
+            margin-top: 1px;
+            margin-bottom: 1px;
+        }
+    }
+
+    li {
+        & > a {
+            padding: 5px 20px;
+            cursor: pointer;
+
+            &:focus {
+                outline: 0;
+            }
+        }
+
+        &.over > a {
+            text-decoration: none;
+            color: @dropdown-link-hover-color;
+            background-color: @dropdown-link-hover-bg;
+        }
+
+        .checked {
+            &:before {
+                content: '';
+                width: 16px;
+                height: 16px;
+                display: inline-block;
+                float: left;
+                margin-left: -18px;
+                background-image: ~"url('@{common-image-path}/@{common-controls}')";
+                background-repeat: no-repeat;
+                background-position: @menu-check-offset-x @menu-check-offset-y;
+                .background-ximage('@{common-image-path}/@{common-controls}', '@{common-image-path}/@{common-controls2x}', 100px);
+            }
+        }
+
+        .menu-item-icon {
+            display: inline-block;
+            float: left;
+            width: 22px;
+            height: 22px;
+            margin: -3px 5px 0 -15px;
+            .background-ximage('@{app-image-path}/popupmenu-btns.png', '@{app-image-path}/popupmenu-btns@2x.png', 88px);
+            background-repeat: no-repeat;
+        }
+    }
+
+    .menu-scroll {
+        position: absolute;
+        background-color: @dropdown-bg;
+        height: 16px;
+        width: 100%;
+
+        &.top {
+            top: 0;
+
+            &::before {
+                content: '';
+                position: absolute;
+                left: 48%;
+                top: 7px;
+                border-top: none;
+                border-bottom: 3px solid;
+                border-right: 3px solid transparent;
+                border-left: 3px solid transparent;
+            }
+        }
+
+        &.bottom {
+            bottom: 0;
+
+            &::before {
+                content: '';
+                position: absolute;
+                left: 48%;
+                top: 7px;
+                border-bottom: none;
+                border-top: 3px solid;
+                border-right: 3px solid transparent;
+                border-left: 3px solid transparent;
+            }
+        }
+    }
+}

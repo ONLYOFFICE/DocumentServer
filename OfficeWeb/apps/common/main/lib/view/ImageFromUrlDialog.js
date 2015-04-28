@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,123 +29,69 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("Common.view.ImageFromUrlDialog", {
-    extend: "Ext.window.Window",
-    alias: "widget.commonimagefromurldialog",
-    requires: ["Ext.window.Window"],
-    modal: true,
-    closable: true,
-    resizable: false,
-    preventHeader: true,
-    plain: true,
-    height: 114,
-    width: 350,
-    padding: "20px",
-    layout: "vbox",
-    layoutConfig: {
-        align: "stretch"
-    },
-    listeners: {
+ define(["common/main/lib/component/Window"], function () {
+    Common.Views.ImageFromUrlDialog = Common.UI.Window.extend(_.extend({
+        options: {
+            width: 330,
+            header: false,
+            cls: "modal-dlg"
+        },
+        initialize: function (options) {
+            _.extend(this.options, options || {});
+            this.template = ['<div class="box">', '<div class="input-row">', "<label>" + this.textUrl + "</label>", "</div>", '<div id="id-dlg-url" class="input-row"></div>', "</div>", '<div class="footer right">', '<button class="btn normal dlg-btn primary" result="ok" style="margin-right: 10px;">' + this.okButtonText + "</button>", '<button class="btn normal dlg-btn" result="cancel">' + this.cancelButtonText + "</button>", "</div>"].join("");
+            this.options.tpl = _.template(this.template, this.options);
+            Common.UI.Window.prototype.initialize.call(this, this.options);
+        },
+        render: function () {
+            Common.UI.Window.prototype.render.call(this);
+            var me = this;
+            me.inputUrl = new Common.UI.InputField({
+                el: $("#id-dlg-url"),
+                allowBlank: false,
+                blankError: me.txtEmpty,
+                style: "width: 100%;",
+                validateOnBlur: false,
+                validation: function (value) {
+                    return (/((^https?)|(^ftp)):\/\/.+/i.test(value)) ? true : me.txtNotUrl;
+                }
+            });
+            var $window = this.getChild();
+            $window.find(".btn").on("click", _.bind(this.onBtnClick, this));
+            $window.find("input").on("keypress", _.bind(this.onKeyPress, this));
+        },
         show: function () {
-            this.txtUrl.focus(false, 500);
-        }
-    },
-    constructor: function (config) {
-        this.callParent(arguments);
-        this.initConfig(config);
-        return this;
-    },
-    initComponent: function () {
-        var _btnOk = Ext.create("Ext.Button", {
-            id: "imgdialog-button-ok",
-            text: this.okButtonText,
-            width: 80,
-            cls: "asc-blue-button",
-            listeners: {
-                click: function () {
-                    if (!this.txtUrl.isValid()) {
+            Common.UI.Window.prototype.show.apply(this, arguments);
+            var me = this;
+            _.delay(function () {
+                me.getChild("input").focus();
+            },
+            500);
+        },
+        onKeyPress: function (event) {
+            if (event.keyCode == Common.UI.Keys.RETURN) {
+                this._handleInput("ok");
+            }
+        },
+        onBtnClick: function (event) {
+            this._handleInput(event.currentTarget.attributes["result"].value);
+        },
+        _handleInput: function (state) {
+            if (this.options.handler) {
+                if (state == "ok") {
+                    if (this.inputUrl.checkValidate() !== true) {
+                        this.inputUrl.cmpEl.find("input").focus();
                         return;
                     }
-                    this._modalresult = 1;
-                    this.fireEvent("onmodalresult", this._modalresult);
-                    this.close();
-                },
-                scope: this
-            }
-        });
-        var _btnCancel = Ext.create("Ext.Button", {
-            id: "imgdialog-button-cancel",
-            text: this.cancelButtonText,
-            width: 80,
-            cls: "asc-darkgray-button",
-            listeners: {
-                click: function () {
-                    this._modalresult = 0;
-                    this.fireEvent("onmodalresult", this._modalresult);
-                    this.close();
-                },
-                scope: this
-            }
-        });
-        this.txtUrl = Ext.create("Ext.form.Text", {
-            id: "imgdialog-text-url",
-            width: 310,
-            msgTarget: "side",
-            validateOnBlur: false,
-            allowBlank: false,
-            value: "",
-            blankText: this.txtEmpty,
-            regex: /(((^https?)|(^ftp)):\/\/([\-\wа-яё]+\.)+[\wа-яё]{2,3}(\/[%\-\wа-яё]+(\.[\wа-яё]{2,})?)*(([\wа-яё\-\.\?\\\/+@&#;`~=%!]*)(\.[\wа-яё]{2,})?)*\/?)/i,
-            regexText: this.txtNotUrl,
-            listeners: {
-                specialkey: function (field, e) {
-                    if (e.getKey() == e.ENTER) {
-                        _btnOk.fireEvent("click");
-                    } else {
-                        if (e.getKey() == e.ESC) {
-                            _btnCancel.fireEvent("click");
-                        }
-                    }
                 }
+                this.options.handler.call(this, state, this.inputUrl.getValue());
             }
-        });
-        this.addEvents("onmodalresult");
-        this.items = [{
-            xtype: "label",
-            text: this.textUrl,
-            width: "100%",
-            style: "text-align:left"
+            this.close();
         },
-        {
-            xtype: "tbspacer",
-            height: 3
-        },
-        this.txtUrl, {
-            xtype: "tbspacer",
-            height: 3
-        },
-        {
-            xtype: "container",
-            width: 310,
-            layout: "hbox",
-            layoutConfig: {
-                align: "stretch"
-            },
-            items: [{
-                xtype: "tbspacer",
-                flex: 1
-            },
-            _btnOk, {
-                xtype: "tbspacer",
-                width: 5
-            },
-            _btnCancel]
-        }];
-        this.callParent(arguments);
+        textUrl: "Paste an image URL:",
+        cancelButtonText: "Cancel",
+        okButtonText: "Ok",
+        txtEmpty: "This field is required",
+        txtNotUrl: 'This field should be a URL in the format "http://www.example.com"'
     },
-    textUrl: "Paste an image URL:",
-    cancelButtonText: "Cancel",
-    okButtonText: "Ok",
-    txtEmpty: "This field is required",
-    txtNotUrl: 'This field should be a URL in the format "http://www.example.com"'
+    Common.Views.ImageFromUrlDialog || {}));
 });

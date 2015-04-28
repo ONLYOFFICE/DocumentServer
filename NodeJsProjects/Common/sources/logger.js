@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -50,4 +50,7 @@ exports.error = function () {
 };
 exports.fatal = function () {
     return logger.fatal.apply(logger, Array.prototype.slice.call(arguments));
+};
+exports.shutdown = function (callback) {
+    return log4js.shutdown(callback);
 };

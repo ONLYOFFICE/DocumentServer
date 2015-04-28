@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,14 +29,20 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("Common.model.Font", {
-    extend: "Ext.data.Model",
-    fields: ["id", "name", "cloneid", {
-        type: "int",
-        name: "imgidx"
-    },
-    {
-        type: "int",
-        name: "type"
-    }]
+ if (Common === undefined) {
+    var Common = {};
+}
+Common.Models = Common.Models || {};
+define(["backbone"], function (Backbone) {
+    Common.Models.Font = Backbone.Model.extend({
+        defaults: function () {
+            return {
+                id: Common.UI.getId(),
+                name: null,
+                cloneid: null,
+                imgidx: 0,
+                type: 0
+            };
+        }
+    });
 });

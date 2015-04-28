@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,115 +29,71 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("Common.component.LoadMask", {
-    extend: "Ext.Component",
-    alias: "widget.cmdloadmask",
-    mixins: {
-        floating: "Ext.util.Floating"
-    },
-    useMsg: true,
-    disabled: false,
-    baseCls: "cmd-loadmask",
-    config: {
-        title: ""
-    },
-    renderTpl: ['<div style="position:relative" class="{baseCls}-body">', "<div>", '<div class="{baseCls}-image"></div>', '<div class="{baseCls}-title"></div>', "</div>", '<div class="{baseCls}-pwd-ct">', '<div class="{baseCls}-pwd-by">POWERED BY</div>', '<div class="{baseCls}-pwd-tm">ONLYOFFICE</div>', "</div>", "</div>"],
-    modal: true,
-    width: "auto",
-    floating: {
-        shadow: false
-    },
-    focusOnToFront: false,
-    constructor: function (el, config) {
-        var me = this;
-        if (el.isComponent) {
-            me.ownerCt = el;
-            me.bindComponent(el);
-        } else {
-            me.ownerCt = new Ext.Component({
-                el: Ext.get(el),
-                rendered: true,
-                componentLayoutCounter: 1
-            });
-            me.container = el;
-        }
-        me.callParent([config]);
-        me.renderSelectors = {
-            titleEl: "." + me.baseCls + "-title"
+ if (Common === undefined) {
+    var Common = {};
+}
+define(["common/main/lib/component/BaseView"], function () {
+    Common.UI.LoadMask = Common.UI.BaseView.extend((function () {
+        var ownerEl, maskeEl, loaderEl;
+        return {
+            options: {
+                cls: "",
+                style: "",
+                title: "Loading...",
+                owner: document.body
+            },
+            template: _.template(['<div id="<%= id %>" class="asc-loadmask-body <%= cls %>" role="presentation" tabindex="-1">', '<div class="asc-loadmask-image"></div>', '<div class="asc-loadmask-title"><%= title %></div>', "</div>"].join("")),
+            initialize: function (options) {
+                Common.UI.BaseView.prototype.initialize.call(this, options);
+                this.template = this.options.template || this.template;
+                this.cls = this.options.cls;
+                this.style = this.options.style;
+                this.title = this.options.title;
+                this.owner = this.options.owner;
+            },
+            render: function () {
+                return this;
+            },
+            show: function () {
+                if (maskeEl || loaderEl) {
+                    return;
+                }
+                ownerEl = (this.owner instanceof Common.UI.BaseView) ? $(this.owner.el) : $(this.owner);
+                if (ownerEl.hasClass("masked")) {
+                    return this;
+                }
+                var me = this;
+                maskeEl = $('<div class="asc-loadmask"></div>');
+                loaderEl = $(this.template({
+                    id: me.id,
+                    cls: me.cls,
+                    style: me.style,
+                    title: me.title
+                }));
+                ownerEl.addClass("masked");
+                ownerEl.append(maskeEl);
+                ownerEl.append(loaderEl);
+                loaderEl.css({
+                    top: Math.round(ownerEl.height() / 2 - (loaderEl.height() + parseInt(loaderEl.css("padding-top")) + parseInt(loaderEl.css("padding-bottom"))) / 2) + "px",
+                    left: Math.round(ownerEl.width() / 2 - (loaderEl.width() + parseInt(loaderEl.css("padding-left")) + parseInt(loaderEl.css("padding-right"))) / 2) + "px"
+                });
+                Common.util.Shortcuts.suspendEvents();
+                return this;
+            },
+            hide: function () {
+                ownerEl && ownerEl.removeClass("masked");
+                maskeEl && maskeEl.remove();
+                loaderEl && loaderEl.remove();
+                maskeEl = null;
+                loaderEl = null;
+                Common.util.Shortcuts.resumeEvents();
+            },
+            setTitle: function (title) {
+                this.title = title;
+                if (ownerEl && ownerEl.hasClass("masked") && loaderEl) {
+                    $(".asc-loadmask-title", loaderEl).html(title);
+                }
+            }
         };
-    },
-    bindComponent: function (comp) {
-        this.mon(comp, {
-            resize: this.onComponentResize,
-            scope: this
-        });
-    },
-    applyTitle: function (title) {
-        var me = this;
-        me.title = title;
-        if (me.rendered) {
-            me.titleEl.update(me.title);
-            var parent = me.floatParent ? me.floatParent.getTargetEl() : me.container;
-            var xy = me.getEl().getAlignToXY(parent, "c-c");
-            var pos = parent.translatePoints(xy[0], xy[1]);
-            if (Ext.isDefined(pos.left) || Ext.isDefined(pos.top)) {
-                me.setPosition(pos.left, pos.top);
-            }
-        }
-    },
-    afterRender: function () {
-        this.callParent(arguments);
-        this.container = this.floatParent.getContentTarget();
-    },
-    onComponentResize: function () {
-        var me = this;
-        if (me.rendered && me.isVisible()) {
-            me.toFront();
-            me.center();
-        }
-    },
-    onDisable: function () {
-        this.callParent(arguments);
-        if (this.loading) {
-            this.onLoad();
-        }
-    },
-    onBeforeLoad: function () {
-        var me = this,
-        owner = me.ownerCt || me.floatParent,
-        origin;
-        if (!this.disabled) {
-            if (owner.componentLayoutCounter) {
-                Ext.Component.prototype.show.call(me);
-            } else {
-                origin = owner.afterComponentLayout;
-                owner.afterComponentLayout = function () {
-                    owner.afterComponentLayout = origin;
-                    origin.apply(owner, arguments);
-                    if (me.loading) {
-                        Ext.Component.prototype.show.call(me);
-                    }
-                };
-            }
-        }
-    },
-    onHide: function () {
-        var me = this;
-        me.callParent(arguments);
-        me.showOnParentShow = true;
-    },
-    onShow: function () {
-        var me = this;
-        me.callParent(arguments);
-        me.loading = true;
-        me.setTitle(me.title);
-    },
-    afterShow: function () {
-        this.callParent(arguments);
-        this.center();
-    },
-    onLoad: function () {
-        this.loading = false;
-        Ext.Component.prototype.hide.call(this);
-    }
+    })());
 });

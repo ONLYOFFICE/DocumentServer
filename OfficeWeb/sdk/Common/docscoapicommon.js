@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,38 +29,59 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- (function (window, undefined) {
+ "use strict";
+(function (window, undefined) {
     var asc = window["Asc"] ? window["Asc"] : (window["Asc"] = {});
     var prot;
-    function asc_CUser() {
-        if (! (this instanceof asc_CUser)) {
-            return new asc_CUser();
-        }
+    function asc_CUser(val) {
         this.id = null;
         this.userName = null;
         this.state = undefined;
+        this.indexUser = -1;
+        this.color = null;
+        this.view = false;
+        this._setUser(val);
         return this;
     }
-    asc_CUser.prototype = {
-        constructor: asc_CUser,
-        asc_getId: function () {
-            return this.id;
-        },
-        asc_getUserName: function () {
-            return this.userName;
-        },
-        asc_getState: function () {
-            return this.state;
-        },
-        asc_setId: function (val) {
-            this.id = val;
-        },
-        asc_setUserName: function (val) {
-            this.userName = val;
-        },
-        asc_setState: function (val) {
-            this.state = val;
+    asc_CUser.prototype._setUser = function (val) {
+        if (val) {
+            this.id = val["id"];
+            this.userName = val["username"];
+            this.indexUser = val["indexUser"];
+            this.color = g_oArrUserColors[this.indexUser % g_oArrUserColors.length];
+            this.state = val["state"];
+            this.view = val["view"];
         }
+    };
+    asc_CUser.prototype.asc_getId = function () {
+        return this.id;
+    };
+    asc_CUser.prototype.asc_getUserName = function () {
+        return this.userName;
+    };
+    asc_CUser.prototype.asc_getState = function () {
+        return this.state;
+    };
+    asc_CUser.prototype.asc_getColor = function () {
+        return "#" + ("000000" + this.color.toString(16)).substr(-6);
+    };
+    asc_CUser.prototype.asc_getColorValue = function () {
+        return this.color;
+    };
+    asc_CUser.prototype.asc_getView = function () {
+        return this.view;
+    };
+    asc_CUser.prototype.asc_setId = function (val) {
+        this.id = val;
+    };
+    asc_CUser.prototype.asc_setUserName = function (val) {
+        this.userName = val;
+    };
+    asc_CUser.prototype.asc_setState = function (val) {
+        this.state = val;
+    };
+    asc_CUser.prototype.asc_setColor = function (val) {
+        this.color = val;
     };
     window["Asc"]["asc_CUser"] = window["Asc"].asc_CUser = asc_CUser;
     prot = asc_CUser.prototype;
@@ -68,6 +89,18 @@
     prot["asc_getUserName"] = prot.asc_getUserName;
     prot["asc_getState"] = prot.asc_getState;
     prot["asc_setId"] = prot.asc_setId;
+    prot["asc_getColor"] = prot.asc_getColor;
+    prot["asc_getColorValue"] = prot.asc_getColorValue;
+    prot["asc_getView"] = prot.asc_getView;
     prot["asc_setUserName"] = prot.asc_setUserName;
     prot["asc_setState"] = prot.asc_setState;
+    prot["asc_setColor"] = prot.asc_setColor;
 })(window);
+var ConnectionState = {
+    Reconnect: -1,
+    None: 0,
+    WaitAuth: 1,
+    Authorized: 2,
+    Closed: 3,
+    SaveChanges: 4
+};

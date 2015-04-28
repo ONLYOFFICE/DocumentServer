@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- window.IsShapeToImageConverter = false;
+ "use strict";
+window.IsShapeToImageConverter = false;
 function DrawLineEnd(xEnd, yEnd, xPrev, yPrev, type, w, len, drawer, trans) {
     switch (type) {
     case LineEndType.None:
@@ -348,6 +349,26 @@ function CShapeDrawer() {
     this.IsRectShape = false;
 }
 CShapeDrawer.prototype = {
+    Clear: function () {
+        this.UniFill = null;
+        this.Ln = null;
+        this.Transform = null;
+        this.bIsTexture = false;
+        this.bIsNoFillAttack = false;
+        this.bIsNoStrokeAttack = false;
+        this.FillUniColor = null;
+        this.StrokeUniColor = null;
+        this.StrokeWidth = 0;
+        this.min_x = 65535;
+        this.min_y = 65535;
+        this.max_x = -65535;
+        this.max_y = -65535;
+        this.OldLineJoin = null;
+        this.IsArrowsDrawing = false;
+        this.IsCurrentPathCanArrows = true;
+        this.bIsCheckBounds = false;
+        this.IsRectShape = false;
+    },
     CheckPoint: function (_x, _y) {
         var x = _x;
         var y = _y;
@@ -458,9 +479,9 @@ CShapeDrawer.prototype = {
             }
             if ((this.Ln.headEnd != null && this.Ln.headEnd.type != null) || (this.Ln.tailEnd != null && this.Ln.tailEnd.type != null)) {
                 if (true === graphics.IsTrack) {
-                    graphics.Graphics.ArrayPoints = new Array();
+                    graphics.Graphics.ArrayPoints = [];
                 } else {
-                    graphics.ArrayPoints = new Array();
+                    graphics.ArrayPoints = [];
                 }
             }
             if (this.Graphics.m_oContext != null && this.Ln.Join != null && this.Ln.Join.type != null) {
@@ -550,33 +571,52 @@ CShapeDrawer.prototype = {
         this.IsCurrentPathCanArrows = true;
         this.Graphics._s();
         if (this.Graphics.ArrayPoints != null) {
-            this.Graphics.ArrayPoints = new Array();
+            this.Graphics.ArrayPoints = [];
         }
     },
     _e: function () {
         this.IsCurrentPathCanArrows = true;
         this.Graphics._e();
         if (this.Graphics.ArrayPoints != null) {
-            this.Graphics.ArrayPoints = new Array();
+            this.Graphics.ArrayPoints = [];
         }
     },
     df: function (mode) {
         if (mode == "none" || this.bIsNoFillAttack) {
             return;
         }
+        if (this.Graphics.IsTrack) {
+            this.Graphics.m_oOverlay.ClearAll = true;
+        }
         if (this.Graphics.IsSlideBoundsCheckerType === true) {
             return;
         }
+        var bIsIntegerGridTRUE = false;
         if (this.bIsTexture) {
+            if (this.Graphics.m_bIntegerGrid === true) {
+                this.Graphics.SetIntegerGrid(false);
+                bIsIntegerGridTRUE = true;
+            }
             if (this.Graphics.RENDERER_PDF_FLAG) {
                 if (null == this.UniFill.fill.tile || this.Graphics.m_oContext === undefined) {
                     this.Graphics.put_brushTexture(_getFullImageSrc(this.UniFill.fill.RasterImageId), 0);
                 } else {
                     this.Graphics.put_brushTexture(_getFullImageSrc(this.UniFill.fill.RasterImageId), 1);
                 }
+                if (bIsIntegerGridTRUE) {
+                    this.Graphics.SetIntegerGrid(true);
+                }
                 return;
             }
-            if (null == this.UniFill.fill.tile || this.Graphics.m_oContext === undefined) {
+            var bIsUnusePattern = false;
+            if (AscBrowser.isIE) {
+                if (this.UniFill.fill.RasterImageId) {
+                    if (this.UniFill.fill.RasterImageId.lastIndexOf(".svg") == this.UniFill.fill.RasterImageId.length - 4) {
+                        bIsUnusePattern = true;
+                    }
+                }
+            }
+            if (bIsUnusePattern || null == this.UniFill.fill.tile || this.Graphics.m_oContext === undefined) {
                 if (this.IsRectShape) {
                     this.Graphics._s();
                     if ((null == this.UniFill.transparent) || (this.UniFill.transparent == 255)) {
@@ -646,11 +686,18 @@ CShapeDrawer.prototype = {
                     _ctx.restore();
                 }
             }
+            if (bIsIntegerGridTRUE) {
+                this.Graphics.SetIntegerGrid(true);
+            }
             return;
         }
         if (this.UniFill != null && this.UniFill.fill != null) {
             var _fill = this.UniFill.fill;
             if (_fill.type == FILL_TYPE_PATT) {
+                if (this.Graphics.m_bIntegerGrid === true) {
+                    this.Graphics.SetIntegerGrid(false);
+                    bIsIntegerGridTRUE = true;
+                }
                 var _is_ctx = false;
                 if (this.Graphics.IsNoSupportTextDraw === true || undefined === this.Graphics.m_oContext || (null == this.UniFill.transparent) || (this.UniFill.transparent == 255)) {
                     _is_ctx = false;
@@ -671,6 +718,10 @@ CShapeDrawer.prototype = {
                 _ctx.save();
                 var koefX = editor.WordControl.m_nZoomValue / 100;
                 var koefY = editor.WordControl.m_nZoomValue / 100;
+                if (this.Graphics.IsThumbnail) {
+                    koefX = 1;
+                    koefY = 1;
+                }
                 _ctx.translate(this.min_x, this.min_y);
                 if (this.Graphics.MaxEpsLine === undefined) {
                     _ctx.scale(koefX * this.Graphics.TextureFillTransformScaleX, koefY * this.Graphics.TextureFillTransformScaleY);
@@ -690,9 +741,16 @@ CShapeDrawer.prototype = {
                     _ctx.fill();
                 }
                 _ctx.restore();
+                if (bIsIntegerGridTRUE) {
+                    this.Graphics.SetIntegerGrid(true);
+                }
                 return;
             } else {
                 if (_fill.type == FILL_TYPE_GRAD) {
+                    if (this.Graphics.m_bIntegerGrid === true) {
+                        this.Graphics.SetIntegerGrid(false);
+                        bIsIntegerGridTRUE = true;
+                    }
                     var _is_ctx = false;
                     if (this.Graphics.IsNoSupportTextDraw === true || undefined === this.Graphics.m_oContext || (null == this.UniFill.transparent) || (this.UniFill.transparent == 255)) {
                         _is_ctx = false;
@@ -726,6 +784,9 @@ CShapeDrawer.prototype = {
                         _ctx.globalAlpha = _old_global_alpha;
                     } else {
                         _ctx.fill();
+                    }
+                    if (bIsIntegerGridTRUE) {
+                        this.Graphics.SetIntegerGrid(true);
                     }
                     return;
                 }
@@ -787,6 +848,9 @@ CShapeDrawer.prototype = {
         if (this.bIsNoStrokeAttack) {
             return;
         }
+        if (this.Graphics.IsTrack) {
+            this.Graphics.m_oOverlay.ClearAll = true;
+        }
         if (null != this.OldLineJoin && !this.IsArrowsDrawing) {
             switch (this.Ln.Join.type) {
             case LineJoinType.Round:
@@ -806,14 +870,10 @@ CShapeDrawer.prototype = {
         var rgba = this.StrokeUniColor;
         this.Graphics.p_color(rgba.R, rgba.G, rgba.B, rgba.A);
         if (this.IsRectShape && this.Graphics.AddSmartRect !== undefined) {
-            if (undefined !== this.Shape.absExtX) {
-                this.Graphics.AddSmartRect(0, 0, this.Shape.absExtX, this.Shape.absExtY, this.StrokeWidth);
+            if (undefined !== this.Shape.extX) {
+                this.Graphics.AddSmartRect(0, 0, this.Shape.extX, this.Shape.extY, this.StrokeWidth);
             } else {
-                if (undefined !== this.Shape.extX) {
-                    this.Graphics.AddSmartRect(0, 0, this.Shape.extX, this.Shape.extY, this.StrokeWidth);
-                } else {
-                    this.Graphics.ds();
-                }
+                this.Graphics.ds();
             }
         } else {
             this.Graphics.ds();
@@ -832,20 +892,22 @@ CShapeDrawer.prototype = {
             var y2 = trans.TransformPointY(1, 1);
             var dKoef = Math.sqrt(((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)) / 2);
             var _pen_w = (this.Graphics.IsTrack === true) ? (this.Graphics.Graphics.m_oContext.lineWidth * dKoef) : (this.Graphics.m_oContext.lineWidth * dKoef);
+            var _max_delta_eps2 = 0.001;
             if (this.Ln.headEnd != null) {
                 var _x1 = trans.TransformPointX(arr[0].x, arr[0].y);
                 var _y1 = trans.TransformPointY(arr[0].x, arr[0].y);
                 var _x2 = trans.TransformPointX(arr[1].x, arr[1].y);
                 var _y2 = trans.TransformPointY(arr[1].x, arr[1].y);
+                var _max_delta_eps = Math.max(this.Ln.headEnd.GetLen(_pen_w), 5);
                 var _max_delta = Math.max(Math.abs(_x1 - _x2), Math.abs(_y1 - _y2));
                 var cur_point = 2;
-                while (_max_delta < 0.001 && cur_point < arr.length) {
+                while (_max_delta < _max_delta_eps && cur_point < arr.length) {
                     _x2 = trans.TransformPointX(arr[cur_point].x, arr[cur_point].y);
                     _y2 = trans.TransformPointY(arr[cur_point].x, arr[cur_point].y);
                     _max_delta = Math.max(Math.abs(_x1 - _x2), Math.abs(_y1 - _y2));
                     cur_point++;
                 }
-                if (_max_delta > 0.001) {
+                if (_max_delta > _max_delta_eps2) {
                     if (this.Graphics.IsTrack) {
                         this.Graphics.Graphics.ArrayPoints = null;
                         DrawLineEnd(_x1, _y1, _x2, _y2, this.Ln.headEnd.type, this.Ln.headEnd.GetWidth(_pen_w), this.Ln.headEnd.GetLen(_pen_w), this, trans1);
@@ -864,15 +926,16 @@ CShapeDrawer.prototype = {
                 var _y1 = trans.TransformPointY(arr[_1].x, arr[_1].y);
                 var _x2 = trans.TransformPointX(arr[_2].x, arr[_2].y);
                 var _y2 = trans.TransformPointY(arr[_2].x, arr[_2].y);
+                var _max_delta_eps = Math.max(this.Ln.tailEnd.GetLen(_pen_w), 5);
                 var _max_delta = Math.max(Math.abs(_x1 - _x2), Math.abs(_y1 - _y2));
                 var cur_point = _2 - 1;
-                while (_max_delta < 0.001 && cur_point >= 0) {
+                while (_max_delta < _max_delta_eps && cur_point >= 0) {
                     _x2 = trans.TransformPointX(arr[cur_point].x, arr[cur_point].y);
                     _y2 = trans.TransformPointY(arr[cur_point].x, arr[cur_point].y);
                     _max_delta = Math.max(Math.abs(_x1 - _x2), Math.abs(_y1 - _y2));
                     cur_point--;
                 }
-                if (_max_delta > 0.001) {
+                if (_max_delta > _max_delta_eps2) {
                     if (this.Graphics.IsTrack) {
                         this.Graphics.Graphics.ArrayPoints = null;
                         DrawLineEnd(_x1, _y1, _x2, _y2, this.Ln.tailEnd.type, this.Ln.tailEnd.GetWidth(_pen_w), this.Ln.tailEnd.GetLen(_pen_w), this, trans1);
@@ -888,6 +951,12 @@ CShapeDrawer.prototype = {
         }
     },
     drawFillStroke: function (bIsFill, fill_mode, bIsStroke) {
+        if (this.Graphics.IsTrack) {
+            this.Graphics.m_oOverlay.ClearAll = true;
+        }
+        if (this.Graphics.IsSlideBoundsCheckerType) {
+            return;
+        }
         if (this.Graphics.RENDERER_PDF_FLAG === undefined) {
             if (bIsFill) {
                 this.df(fill_mode);
@@ -915,14 +984,8 @@ CShapeDrawer.prototype = {
                     if (null == this.UniFill.fill.tile) {
                         if (null == this.UniFill.fill.srcRect) {
                             if (this.UniFill.fill.RasterImageId && this.UniFill.fill.RasterImageId.indexOf(".svg") != 0) {
-                                this.Graphics.SaveGrState();
-                                this.Graphics.StartClipPath();
-                                this.Graphics.EndClipPath();
                                 this.Graphics.drawImage(_getFullImageSrc(this.UniFill.fill.RasterImageId), this.min_x, this.min_y, (this.max_x - this.min_x), (this.max_y - this.min_y), undefined, undefined);
                                 bIsFill = false;
-                                var _histClip = new CHist_Clip();
-                                this.Graphics.GrState.Clips.push(_histClip);
-                                this.Graphics.RestoreGrState();
                             } else {
                                 if (this.UniFill.fill.canvas) {
                                     this.Graphics.put_brushTexture(this.UniFill.fill.canvas.toDataURL("image/png"), 0);
@@ -931,14 +994,8 @@ CShapeDrawer.prototype = {
                                 }
                             }
                         } else {
-                            this.Graphics.SaveGrState();
-                            this.Graphics.StartClipPath();
-                            this.Graphics.EndClipPath();
                             this.Graphics.drawImage(_getFullImageSrc(this.UniFill.fill.RasterImageId), this.min_x, this.min_y, (this.max_x - this.min_x), (this.max_y - this.min_y), undefined, this.UniFill.fill.srcRect);
                             bIsFill = false;
-                            var _histClip = new CHist_Clip();
-                            this.Graphics.GrState.Clips.push(_histClip);
-                            this.Graphics.RestoreGrState();
                         }
                     } else {
                         if (this.UniFill.fill.canvas) {
@@ -1309,7 +1366,9 @@ function ShapeToImageConverter(shape, pageIndex) {
     _bounds_cheker.init(w_px, h_px, w_mm, h_mm);
     _bounds_cheker.transform(1, 0, 0, 1, 0, 0);
     _bounds_cheker.AutoCheckLineWidth = true;
+    _bounds_cheker.CheckLineWidth(shape);
     shape.draw(_bounds_cheker, 0);
+    _bounds_cheker.CorrectBounds2();
     var _need_pix_width = _bounds_cheker.Bounds.max_x - _bounds_cheker.Bounds.min_x + 1;
     var _need_pix_height = _bounds_cheker.Bounds.max_y - _bounds_cheker.Bounds.min_y + 1;
     if (_need_pix_width <= 0 || _need_pix_height <= 0) {

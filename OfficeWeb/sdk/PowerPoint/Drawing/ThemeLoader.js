@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,25 +29,26 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function CThemeLoadInfo() {
+ "use strict";
+function CThemeLoadInfo() {
     this.FontMap = null;
     this.ImageMap = null;
     this.Theme = null;
     this.Master = null;
-    this.Layouts = new Array();
+    this.Layouts = [];
 }
 function CThemeLoader() {
     this.Themes = new CAscThemes();
-    this.themes_info_editor = new Array();
+    this.themes_info_editor = [];
     var count = this.Themes.EditorThemes.length;
     for (var i = 0; i < count; i++) {
         this.themes_info_editor[i] = null;
     }
-    this.themes_info_document = new Array();
+    this.themes_info_document = [];
     this.Api = null;
     this.CurrentLoadThemeIndex = -1;
     this.ThemesUrl = "";
-    this.IsReloadBinaryThemeEditor = true;
+    this.IsReloadBinaryThemeEditor = false;
     this.IsReloadBinaryThemeEditorNow = false;
     var oThis = this;
     this.StartLoadTheme = function (indexTheme) {
@@ -66,11 +67,12 @@ function CThemeLoader() {
             return;
         }
         if (null != theme_load_info) {
-            if (indexTheme >= 0 && this.IsReloadBinaryThemeEditor) {
+            if (indexTheme >= 0 && theme_load_info.Master.sldLayoutLst.length === 0) {
                 this.IsReloadBinaryThemeEditorNow = true;
                 this._callback_theme_load();
                 return;
             }
+            this.Api.sync_StartAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.LoadTheme);
             this.Api.EndLoadTheme(theme_load_info);
             return;
         }
@@ -100,11 +102,17 @@ function CThemeLoader() {
             var _loader = new BinaryPPTYLoader();
             _loader.Api = oThis.Api;
             _loader.IsThemeLoader = true;
-            var pres = new Object();
-            pres.themes = new Array();
-            pres.slideMasters = new Array();
-            pres.slideLayouts = new Array();
+            var pres = {};
+            pres.themes = [];
+            pres.slideMasters = [];
+            pres.slideLayouts = [];
+            pres.DrawingDocument = editor.WordControl.m_oDrawingDocument;
+            History.MinorChanges = true;
             _loader.Load(g_th, pres);
+            for (var i = 0; i < pres.slideMasters.length; ++i) {
+                pres.slideMasters[i].setThemeIndex(oThis.CurrentLoadThemeIndex);
+            }
+            History.MinorChanges = false;
             if (oThis.IsReloadBinaryThemeEditorNow) {
                 oThis.asyncImagesEndLoaded();
                 oThis.IsReloadBinaryThemeEditorNow = false;

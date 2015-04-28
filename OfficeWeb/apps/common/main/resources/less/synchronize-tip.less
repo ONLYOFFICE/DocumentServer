@@ -1,0 +1,71 @@
+.synch-tip-root {
+    position: absolute;
+    z-index: @zindex-tooltip + 5;
+    margin: -32px 0 0 15px;
+    width: 300px;
+}
+
+.asc-synchronizetip {
+    padding: 15px 8px 15px 15px;
+    border-radius: 5px;
+    background-color: #fcfed7;
+    overflow: visible;
+
+    .box-shadow(0 4px 15px -2px rgba(0, 0, 0, 0.5));
+    font-size: 11px;
+}
+
+.asc-synchronizetip .tip-arrow {
+    position: absolute;
+    overflow: hidden;
+    left: -15px;
+    top: 20px;
+    width: 15px;
+    height: 30px;
+}
+
+.asc-synchronizetip .tip-arrow:after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 8px;
+    background-color: #fcfed7;
+    width: 15px;
+    height: 15px;
+
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+
+    .box-shadow(0 4px 8px -1px rgba(0, 0, 0, 0.2));
+}
+
+.asc-synchronizetip .show-link {
+    margin-top: 10px;
+}
+
+.show-link label {
+    border-bottom: 1px dotted #445799;
+    color: #445799;
+    cursor: pointer;
+}
+
+.asc-synchronizetip .close {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 16px;
+    height: 16px;
+    margin: 8px;
+    cursor: pointer;
+
+    .background-ximage('@{common-image-path}/@{common-controls}', '@{common-image-path}/@{common-controls2x}', 100px);
+    background-position: @but-close-offset-x @but-close-offset-y;
+
+    &.over,
+    &:hover {
+        background-position: @but-close-offset-x @but-close-offset-y - 16px;
+    }
+}

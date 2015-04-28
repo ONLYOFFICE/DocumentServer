@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,33 +29,32 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var hdrftr_Header = 1;
+ "use strict";
+var hdrftr_Header = 1;
 var hdrftr_Footer = 2;
 var hdrftr_Default = 1;
 var hdrftr_Even = 2;
 var hdrftr_First = 3;
-function CHeaderFooter(Parent, LogicDocument, DrawingDocument, Type, BoundY2) {
+function CHeaderFooter(Parent, LogicDocument, DrawingDocument, Type) {
     this.Id = g_oIdCounter.Get_NewId();
     this.Parent = Parent;
     this.DrawingDocument = DrawingDocument;
     this.LogicDocument = LogicDocument;
     if ("undefined" != typeof(LogicDocument) && null != LogicDocument) {
         if (Type === hdrftr_Header) {
-            this.Content = new CDocumentContent(this, DrawingDocument, X_Left_Field, BoundY2, X_Right_Field, Page_Height / 2, false, true);
+            this.Content = new CDocumentContent(this, DrawingDocument, 0, 0, 0, 0, false, true);
             this.Content.Content[0].Style_Add(this.Get_Styles().Get_Default_Header());
         } else {
-            this.Content = new CDocumentContent(this, DrawingDocument, X_Left_Field, Y_Bottom_Field + 15, X_Right_Field, Page_Height, false, true);
+            this.Content = new CDocumentContent(this, DrawingDocument, 0, 0, 0, 0, false, true);
             this.Content.Content[0].Style_Add(this.Get_Styles().Get_Default_Footer());
         }
     }
     this.Type = Type;
-    this.BoundY = -1;
-    this.BoundY2 = BoundY2;
-    this.DocumentRecalc = true;
     this.RecalcInfo = {
-        NeedRecalc: true,
-        OldBounds: null,
-        OldFlowPos: null
+        CurPage: -1,
+        RecalcObj: {},
+        NeedRecalc: {},
+        SectPr: {}
     };
     g_oTableId.Add(this, this.Id);
 }
@@ -67,45 +66,69 @@ CHeaderFooter.prototype = {
     Get_Id: function () {
         return this.Id;
     },
-    Recalculate: function () {
-        var bChanges = false;
-        var OldBounds = null;
-        var OldFlowPos = new Array();
-        var OldSumH = 0;
-        if (true === this.RecalcInfo.NeedRecalc) {
-            this.RecalcInfo.NeedRecalc = false;
-            bChanges = true;
-        } else {
-            OldSumH = this.Content.Get_SummaryHeight();
-            OldBounds = this.Content.Get_PageBounds(0);
-            var AllDrawingObjects = this.Content.Get_AllDrawingObjects();
-            var Count = AllDrawingObjects.length;
-            for (var Index = 0; Index < Count; Index++) {
-                var Obj = AllDrawingObjects[Index];
-                if (drawing_Anchor === Obj.Get_DrawingType() && true === Obj.Use_TextWrap()) {
-                    var FlowPos = {
-                        X: Obj.X - Obj.Distance.L,
-                        Y: Obj.Y - Obj.Distance.T,
-                        W: Obj.W + Obj.Distance.R,
-                        H: Obj.H + Obj.Distance.B
-                    };
-                    OldFlowPos.push(FlowPos);
-                }
+    Get_Theme: function () {
+        return this.LogicDocument.Get_Theme();
+    },
+    Get_ColorMap: function () {
+        return this.LogicDocument.Get_ColorMap();
+    },
+    Copy: function () {
+        var NewHdrFtr = new CHeaderFooter(this.Parent, this.LogicDocument, this.DrawingDocument, this.Type);
+        NewHdrFtr.Content.Copy2(this.Content);
+        return NewHdrFtr;
+    },
+    Set_Page: function (Page_abs) {
+        if (Page_abs !== this.RecalcInfo.CurPage && undefined !== this.LogicDocument.Pages[Page_abs]) {
+            var HdrFtrController = this.Parent;
+            var HdrFtrPage = this.Parent.Pages[Page_abs];
+            if (undefined === HdrFtrPage || (this !== HdrFtrPage.Header && this !== HdrFtrPage.Footer)) {
+                return;
+            }
+            var RecalcObj = this.RecalcInfo.RecalcObj[Page_abs];
+            if (undefined !== RecalcObj) {
+                this.RecalcInfo.CurPage = Page_abs;
+                this.Content.Load_RecalculateObject(RecalcObj);
             }
         }
+    },
+    Is_NeedRecalculate: function (Page_abs) {
+        var PageNumInfo = this.LogicDocument.Get_SectionPageNumInfo(Page_abs);
+        if (true === PageNumInfo.Compare(this.RecalcInfo.NeedRecalc[Page_abs]) && undefined !== this.RecalcInfo.RecalcObj[Page_abs]) {
+            return false;
+        }
+        return true;
+    },
+    Recalculate: function (Page_abs, SectPr) {
+        var bChanges = false;
+        var RecalcObj = this.RecalcInfo.RecalcObj[Page_abs];
+        var OldSumH = 0;
+        var OldBounds = null;
+        var OldFlowPos = [];
+        if (undefined === RecalcObj) {
+            bChanges = true;
+        } else {
+            OldSumH = RecalcObj.Get_SummaryHeight();
+            OldBounds = RecalcObj.Get_PageBounds(0);
+            RecalcObj.Get_DrawingFlowPos(OldFlowPos);
+        }
+        this.Content.Set_StartPage(Page_abs);
+        this.Content.Prepare_RecalculateObject();
         var CurPage = 0;
         var RecalcResult = recalcresult2_NextPage;
         while (recalcresult2_End != RecalcResult) {
             RecalcResult = this.Content.Recalculate_Page(CurPage++, true);
         }
+        this.RecalcInfo.RecalcObj[Page_abs] = this.Content.Save_RecalculateObject();
+        this.RecalcInfo.NeedRecalc[Page_abs] = this.LogicDocument.Get_SectionPageNumInfo(Page_abs);
+        this.RecalcInfo.SectPr[Page_abs] = SectPr;
         if (false === bChanges) {
             var NewBounds = this.Content.Get_PageBounds(0);
-            if (Math.abs(NewBounds.Bottom - OldBounds.Bottom) > 0.001) {
+            if ((Math.abs(NewBounds.Bottom - OldBounds.Bottom) > 0.001 && hdrftr_Header === this.Type) || (Math.abs(NewBounds.Top - OldBounds.Top) > 0.001 && hdrftr_Footer === this.Type)) {
                 bChanges = true;
             }
         }
         if (false === bChanges) {
-            var NewFlowPos = new Array();
+            var NewFlowPos = [];
             var AllDrawingObjects = this.Content.Get_AllDrawingObjects();
             var Count = AllDrawingObjects.length;
             for (var Index = 0; Index < Count; Index++) {
@@ -140,54 +163,30 @@ CHeaderFooter.prototype = {
                 bChanges = true;
             }
         }
-        if (true === bChanges) {
-            this.Internal_RecalculateBounds();
+        if (-1 === this.RecalcInfo.CurPage || false === this.LogicDocument.Get_SectionPageNumInfo(this.RecalcInfo.CurPage).Compare(this.RecalcInfo.NeedRecalc[this.RecalcInfo.CurPage])) {
+            this.RecalcInfo.CurPage = Page_abs;
+            if (docpostype_HdrFtr === this.LogicDocument.CurPos.Type) {
+                this.LogicDocument.Document_UpdateSelectionState();
+                this.LogicDocument.Document_UpdateInterfaceState();
+            }
+        } else {
+            var RecalcObj = this.RecalcInfo.RecalcObj[this.RecalcInfo.CurPage];
+            this.Content.Load_RecalculateObject(RecalcObj);
         }
         return bChanges;
     },
-    Reset_RecalculateCache: function () {
-        this.Content.Reset_RecalculateCache();
+    Recalculate2: function (Page_abs) {
+        this.Content.Set_StartPage(Page_abs);
+        this.Content.Prepare_RecalculateObject();
+        var CurPage = 0;
+        var RecalcResult = recalcresult2_NextPage;
+        while (recalcresult2_End != RecalcResult) {
+            RecalcResult = this.Content.Recalculate_Page(CurPage++, true);
+        }
     },
-    Internal_RecalculateBounds: function () {
-        if (this.Type === hdrftr_Header) {
-            var Bottom = this.Get_Bounds().Bottom;
-            var BoundY = Y_Top_Field;
-            if (Bottom >= 0 && Bottom > Y_Top_Field) {
-                BoundY = Bottom;
-            }
-            if (this.BoundY < 0 || (Math.abs(BoundY - this.BoundY) > 0.01)) {
-                this.BoundY = BoundY;
-            }
-        } else {
-            var Bounds = this.Get_Bounds();
-            var SummaryHeight = this.Content.Get_SummaryHeight();
-            var Top = Bounds.Top;
-            var Bottom = Top + SummaryHeight;
-            if (Math.abs(Bottom - this.BoundY2) > 0.001) {
-                if (Bottom - Top < Page_Height / 3) {
-                    this.Content.Reset(X_Left_Field, this.BoundY2 - (Bottom - Top), X_Right_Field, Page_Height);
-                } else {
-                    if (Top - 2 / 3 * Page_Height > 0.001) {
-                        this.Content.Reset(X_Left_Field, 2 / 3 * Page_Height, X_Right_Field, Page_Height);
-                    }
-                }
-                this.Recalculate();
-                return;
-            }
-            var BoundY = Y_Bottom_Field;
-            if (Top >= 0 && Top < Y_Bottom_Field) {
-                BoundY = Top;
-            }
-            if (this.BoundY < 0 || (Math.abs(BoundY - this.BoundY) > 0.01)) {
-                this.BoundY = BoundY;
-            }
-        }
-        if (this.Type === hdrftr_Header) {
-            this.DrawingDocument.Set_RulerState_HdrFtr(true, this.BoundY2, Math.max(this.BoundY, Y_Top_Field));
-        } else {
-            var Top = this.Get_Bounds().Top;
-            this.DrawingDocument.Set_RulerState_HdrFtr(false, Top, Page_Height);
-        }
+    Reset_RecalculateCache: function () {
+        this.Refresh_RecalcData2();
+        this.Content.Reset_RecalculateCache();
     },
     Get_Styles: function () {
         return this.LogicDocument.Get_Styles();
@@ -195,20 +194,46 @@ CHeaderFooter.prototype = {
     Get_TableStyleForPara: function () {
         return null;
     },
+    Get_ShapeStyleForPara: function () {
+        return null;
+    },
+    Get_TextBackGroundColor: function () {
+        return undefined;
+    },
     Get_PageContentStartPos: function () {
         return {
-            X: X_Left_Field,
+            X: this.Content.X,
             Y: 0,
-            XLimit: X_Right_Field,
+            XLimit: this.Content.XLimit,
             YLimit: 0
         };
     },
-    Set_CurrentElement: function () {
+    Set_CurrentElement: function (bUpdateStates) {
+        var PageIndex = -1;
+        for (var Key in this.Parent.Pages) {
+            var PIndex = Key | 0;
+            if ((this === this.Parent.Pages[PIndex].Header || this === this.Parent.Pages[PIndex].Footer) && (-1 === PageIndex || PageIndex > PIndex)) {
+                PageIndex = PIndex;
+            }
+        }
+        if (-1 === PageIndex) {
+            return;
+        }
         this.Parent.CurHdrFtr = this;
+        this.Parent.WaitMouseDown = true;
+        this.Parent.CurPage = PageIndex;
+        var OldDocPosType = this.LogicDocument.CurPos.Type;
         this.LogicDocument.CurPos.Type = docpostype_HdrFtr;
-        this.LogicDocument.Document_UpdateInterfaceState();
-        this.LogicDocument.Document_UpdateRulersState();
-        this.LogicDocument.Document_UpdateSelectionState();
+        if (true === bUpdateStates) {
+            this.Set_Page(PageIndex);
+            this.LogicDocument.Document_UpdateInterfaceState();
+            this.LogicDocument.Document_UpdateRulersState();
+            this.LogicDocument.Document_UpdateSelectionState();
+        }
+        if (docpostype_HdrFtr !== OldDocPosType) {
+            this.DrawingDocument.ClearCachePages();
+            this.DrawingDocument.FirePaint();
+        }
     },
     Is_ThisElementCurrent: function () {
         if (this === this.Parent.CurHdrFtr && docpostype_HdrFtr === this.LogicDocument.CurPos.Type) {
@@ -220,76 +245,20 @@ CHeaderFooter.prototype = {
         this.Content.Reset(X, Y, XLimit, YLimit);
     },
     Draw: function (nPageIndex, pGraphics) {
-        var OldStartPage = this.Content.Get_StartPage_Relative();
-        this.Content.Set_StartPage(nPageIndex);
         this.Content.Draw(nPageIndex, pGraphics);
-        this.Content.Set_StartPage(OldStartPage);
     },
     OnContentRecalculate: function (bChange, bForceRecalc) {
-        this.LogicDocument.NeedUpdateTarget = true;
-        var bNeedDocRecalc = false;
-        if (true === bChange) {
-            if (this.Type === hdrftr_Header) {
-                var Bottom = this.Get_Bounds().Bottom;
-                var BoundY = Y_Top_Field;
-                if (Bottom >= 0 && Bottom > Y_Top_Field) {
-                    BoundY = Bottom;
-                }
-                if (this.BoundY < 0 || (Math.abs(BoundY - this.BoundY) > 0.01)) {
-                    this.BoundY = BoundY;
-                    bNeedDocRecalc = true;
-                }
-            } else {
-                var Bounds = this.Get_Bounds();
-                var SummaryHeight = this.Content.Get_SummaryHeight();
-                var Top = Bounds.Top;
-                var Bottom = Top + SummaryHeight;
-                if (Math.abs(Bottom - this.BoundY2) > 0.001) {
-                    if (Bottom - Top < Page_Height / 3) {
-                        this.Content.Reset(X_Left_Field, this.BoundY2 - (Bottom - Top), X_Right_Field, Page_Height);
-                    } else {
-                        if (Top - 2 / 3 * Page_Height > 0.001) {
-                            this.Content.Reset(X_Left_Field, 2 / 3 * Page_Height, X_Right_Field, Page_Height);
-                        }
-                    }
-                    this.Content.Recalculate();
-                    return;
-                }
-                var BoundY = Y_Bottom_Field;
-                if (Top >= 0 && Top < Y_Bottom_Field) {
-                    BoundY = Top;
-                }
-                if (this.BoundY < 0 || (Math.abs(BoundY - this.BoundY) > 0.01)) {
-                    this.BoundY = BoundY;
-                    bNeedDocRecalc = true;
-                }
-            }
-            if (this.Type === hdrftr_Header) {
-                this.DrawingDocument.Set_RulerState_HdrFtr(true, this.BoundY2, Math.max(this.BoundY, Y_Top_Field));
-            } else {
-                var Top = this.Get_Bounds().Top;
-                this.DrawingDocument.Set_RulerState_HdrFtr(false, Top, Page_Height);
-            }
-        }
-        if (false === this.DocumentRecalc) {
-            this.Document_UpdateRulersState();
-            return;
-        }
-        if (true === bNeedDocRecalc || true === bForceRecalc) {
-            this.LogicDocument.ContentLastChangePos = 0;
-            this.LogicDocument.Recalculate();
-        } else {
-            this.DrawingDocument.ClearCachePages();
-            this.DrawingDocument.FirePaint();
-        }
-        this.Document_UpdateRulersState();
+        return;
     },
     OnContentReDraw: function (StartPage, EndPage) {
         this.DrawingDocument.ClearCachePages();
         this.DrawingDocument.FirePaint();
     },
     RecalculateCurPos: function () {
-        this.Content.RecalculateCurPos();
+        if (-1 !== this.RecalcInfo.CurPage) {
+            return this.Content.RecalculateCurPos();
+        }
+        return null;
     },
     Get_NearestPos: function (X, Y, bAnchor, Drawing) {
         return this.Content.Get_NearestPos(this.Content.StartPage, X, Y, bAnchor, Drawing);
@@ -297,45 +266,20 @@ CHeaderFooter.prototype = {
     Get_Numbering: function () {
         return this.LogicDocument.Get_Numbering();
     },
-    Get_Styles: function () {
-        return this.LogicDocument.Get_Styles();
-    },
     Get_Bounds: function () {
         return this.Content.Get_PageBounds(0);
     },
-    UpdateMargins: function (bNoRecalc, bNoSaveHistory) {
-        this.Content.X = X_Left_Field;
-        this.Content.XLimit = X_Right_Field;
-        if (hdrftr_Footer === this.Type) {
-            if (true !== bNoSaveHistory) {
-                History.Add(this, {
-                    Type: historyitem_HdrFtr_BoundY2,
-                    Old: this.BoundY2,
-                    New: Page_Height - Y_Default_Footer
-                });
-            }
-            this.BoundY2 = Page_Height - Y_Default_Footer;
+    Get_DividingLine: function (PageIndex) {
+        var OldPage = this.RecalcInfo.CurPage;
+        this.Set_Page(PageIndex);
+        var Bounds = this.Get_Bounds();
+        if (-1 !== OldPage) {
+            this.Set_Page(OldPage);
         }
-        if (true != bNoRecalc) {
-            this.DocumentRecalc = false;
-            this.Recalculate();
-            if (hdrftr_Footer === this.Type) {
-                var Bounds = this.Get_Bounds();
-                var SummaryHeight = this.Content.Get_SummaryHeight();
-                var Top = Bounds.Top;
-                var Bottom = Top + SummaryHeight;
-                if (Math.abs(Bottom - this.BoundY2) > 0.001) {
-                    if (Bottom - Top < Page_Height / 3) {
-                        this.Content.Reset(X_Left_Field, this.BoundY2 - (Bottom - Top), X_Right_Field, Page_Height);
-                    } else {
-                        if (Top - 2 / 3 * Page_Height > 0.001) {
-                            this.Content.Reset(X_Left_Field, 2 / 3 * Page_Height, X_Right_Field, Page_Height);
-                        }
-                    }
-                    this.Content.Recalculate();
-                }
-            }
-            this.DocumentRecalc = true;
+        if (hdrftr_Footer === this.Type) {
+            return Bounds.Top;
+        } else {
+            return Bounds.Bottom;
         }
     },
     Is_PointInDrawingObjects: function (X, Y) {
@@ -401,33 +345,8 @@ CHeaderFooter.prototype = {
     Get_SelectedElementsInfo: function (Info) {
         this.Content.Get_SelectedElementsInfo(Info);
     },
-    Set_BoundY2: function (Value, bRecalculate) {
-        History.Add(this, {
-            Type: historyitem_HdrFtr_BoundY2,
-            Old: this.BoundY2,
-            New: Value
-        });
-        this.BoundY2 = Value;
-        if (this.Type === hdrftr_Header) {
-            this.Content.Reset(X_Left_Field, this.BoundY2, X_Right_Field, Page_Height / 2);
-            if (false != bRecalculate) {
-                this.Content.Recalculate();
-            }
-        } else {
-            var Bounds = this.Get_Bounds();
-            var SummaryHeight = this.Content.Get_SummaryHeight();
-            var Top = Bounds.Top;
-            var Bottom = Top + SummaryHeight;
-            if (Bottom - Top < Page_Height / 3) {
-                this.Content.Reset(X_Left_Field, this.BoundY2 - (Bottom - Top), X_Right_Field, Page_Height);
-                if (false != bRecalculate) {
-                    this.Content.Recalculate();
-                }
-            } else {}
-        }
-        if (true === bRecalculate) {
-            this.Internal_RecalculateBounds();
-        }
+    Get_SelectedContent: function (SelectedContent) {
+        this.Content.Get_SelectedContent(SelectedContent);
     },
     Update_CursorType: function (X, Y, PageNum_Abs) {
         if (PageNum_Abs != this.Content.Get_StartPage_Absolute()) {
@@ -437,26 +356,31 @@ CHeaderFooter.prototype = {
         }
     },
     Is_TableBorder: function (X, Y, PageNum_Abs) {
-        this.Content.Set_StartPage(PageNum_Abs);
+        this.Set_Page(PageNum_Abs);
         return this.Content.Is_TableBorder(X, Y, PageNum_Abs);
     },
     Is_InText: function (X, Y, PageNum_Abs) {
-        this.Content.Set_StartPage(PageNum_Abs);
+        this.Set_Page(PageNum_Abs);
         return this.Content.Is_InText(X, Y, PageNum_Abs);
     },
     Is_InDrawing: function (X, Y, PageNum_Abs) {
-        this.Content.Set_StartPage(PageNum_Abs);
+        this.Set_Page(PageNum_Abs);
         return this.Content.Is_InDrawing(X, Y, PageNum_Abs);
     },
     Document_UpdateInterfaceState: function () {
         this.Content.Document_UpdateInterfaceState();
     },
     Document_UpdateRulersState: function () {
+        if (-1 === this.RecalcInfo.CurPage) {
+            return;
+        }
+        var Index = this.LogicDocument.Pages[this.RecalcInfo.CurPage].Pos;
+        var SectPr = this.LogicDocument.SectionsInfo.Get_SectPr(Index).SectPr;
+        var Bounds = this.Get_Bounds();
         if (this.Type === hdrftr_Header) {
-            this.DrawingDocument.Set_RulerState_HdrFtr(true, this.BoundY2, Math.max(this.BoundY, Y_Top_Field));
+            this.DrawingDocument.Set_RulerState_HdrFtr(true, Bounds.Top, Math.max(Bounds.Bottom, SectPr.Get_PageMargin_Top()));
         } else {
-            var Top = this.Get_Bounds().Top;
-            this.DrawingDocument.Set_RulerState_HdrFtr(false, Top, Page_Height);
+            this.DrawingDocument.Set_RulerState_HdrFtr(false, Bounds.Top, SectPr.Get_PageHeight());
         }
         this.Content.Document_UpdateRulersState(this.Content.Get_StartPage_Absolute());
     },
@@ -497,9 +421,6 @@ CHeaderFooter.prototype = {
     },
     Add_NewParagraph: function () {
         this.Content.Add_NewParagraph();
-    },
-    Add_FlowImage: function (W, H, Img) {
-        this.Content.Add_FlowImage(W, H, Img);
     },
     Add_InlineImage: function (W, H, Img, Chart, bFlow) {
         this.Content.Add_InlineImage(W, H, Img, Chart, bFlow);
@@ -561,8 +482,20 @@ CHeaderFooter.prototype = {
         this.Document_UpdateRulersState();
         return bRetValue;
     },
+    Cursor_MoveToStartPos: function (AddToSelect) {
+        var bRetValue = this.Content.Cursor_MoveToStartPos(AddToSelect);
+        this.Document_UpdateInterfaceState();
+        this.Document_UpdateRulersState();
+        return bRetValue;
+    },
+    Cursor_MoveToEndPos: function (AddToSelect) {
+        var bRetValue = this.Content.Cursor_MoveToEndPos(AddToSelect);
+        this.Document_UpdateInterfaceState();
+        this.Document_UpdateRulersState();
+        return bRetValue;
+    },
     Cursor_MoveAt: function (X, Y, PageIndex, AddToSelect, bRemoveOldSelection) {
-        this.Content.Set_StartPage(PageIndex);
+        this.Set_Page(PageIndex);
         return this.Content.Cursor_MoveAt(X, Y, AddToSelect, bRemoveOldSelection);
     },
     Cursor_MoveToCell: function (bNext) {
@@ -634,6 +567,9 @@ CHeaderFooter.prototype = {
     Get_AllParagraphs_ByNumbering: function (NumPr, ParaArray) {
         return this.Content.Get_AllParagraphs_ByNumbering(NumPr, ParaArray);
     },
+    Get_PrevElementEndInfo: function (CurElement) {
+        return null;
+    },
     Selection_Remove: function () {
         return this.Content.Selection_Remove();
     },
@@ -644,7 +580,7 @@ CHeaderFooter.prototype = {
         return this.Content.Selection_Clear();
     },
     Selection_SetStart: function (X, Y, PageIndex, MouseEvent) {
-        this.Content.Set_StartPage(PageIndex);
+        this.Set_Page(PageIndex);
         if (true === editor.isStartAddShape) {
             this.Content.CurPos.Type = docpostype_DrawingObjects;
             this.Content.Selection.Use = true;
@@ -658,16 +594,16 @@ CHeaderFooter.prototype = {
         }
     },
     Selection_SetEnd: function (X, Y, PageIndex, MouseEvent) {
-        this.Content.Set_StartPage(PageIndex);
+        this.Set_Page(PageIndex);
         return this.Content.Selection_SetEnd(X, Y, PageIndex, MouseEvent);
     },
     Selection_Is_TableBorderMove: function () {
         return this.Content.Selection_Is_TableBorderMove();
     },
-    Selection_Check: function (X, Y, Page_Abs) {
+    Selection_Check: function (X, Y, Page_Abs, NearPos) {
         var HdrFtrPage = this.Content.Get_StartPage_Absolute();
-        if (HdrFtrPage === Page_Abs) {
-            return this.Content.Selection_Check(X, Y, Page_Abs);
+        if (undefined !== NearPos || HdrFtrPage === Page_Abs) {
+            return this.Content.Selection_Check(X, Y, Page_Abs, NearPos);
         }
         return false;
     },
@@ -685,31 +621,24 @@ CHeaderFooter.prototype = {
     },
     Table_AddRow: function (bBefore) {
         this.Content.Table_AddRow(bBefore);
-        this.Recalculate();
     },
     Table_AddCol: function (bBefore) {
         this.Content.Table_AddCol(bBefore);
-        this.Recalculate();
     },
     Table_RemoveRow: function () {
         this.Content.Table_RemoveRow();
-        this.Recalculate();
     },
     Table_RemoveCol: function () {
         this.Content.Table_RemoveCol();
-        this.Recalculate();
     },
     Table_MergeCells: function () {
         this.Content.Table_MergeCells();
-        this.Recalculate();
     },
     Table_SplitCell: function (Cols, Rows) {
         this.Content.Table_SplitCell(Cols, Rows);
-        this.Recalculate();
     },
     Table_RemoveTable: function () {
         this.Content.Table_RemoveTable();
-        this.Recalculate();
     },
     Table_Select: function (Type) {
         this.Content.Table_Select(Type);
@@ -723,45 +652,6 @@ CHeaderFooter.prototype = {
     Check_TableCoincidence: function (Table) {
         return false;
     },
-    Undo: function (Data) {
-        var Type = Data.Type;
-        switch (Type) {
-        case historyitem_HdrFtr_BoundY2:
-            this.BoundY2 = Data.Old;
-            if (this.Type === hdrftr_Header) {
-                this.Content.Reset(X_Left_Field, this.BoundY2, X_Right_Field, Page_Height / 2);
-            } else {
-                var Bounds = this.Get_Bounds();
-                var SummaryHeight = this.Content.Get_SummaryHeight();
-                var Top = Bounds.Top;
-                var Bottom = Top + SummaryHeight;
-                if (Bottom - Top < Page_Height / 3) {
-                    this.Content.Reset(X_Left_Field, this.BoundY2 - (Bottom - Top), X_Right_Field, Page_Height);
-                } else {
-                    this.Content.Reset(X_Left_Field, 2 / 3 * Page_Height, X_Right_Field, Page_Height);
-                }
-            }
-            break;
-        }
-    },
-    Redo: function (Data) {
-        var Type = Data.Type;
-        switch (Type) {
-        case historyitem_HdrFtr_BoundY2:
-            this.BoundY2 = Data.New;
-            if (this.Type === hdrftr_Header) {
-                this.Content.Reset(X_Left_Field, this.BoundY2, X_Right_Field, Page_Height / 2);
-            } else {
-                var SummaryHeight = this.Content.Get_SummaryHeight();
-                if (SummaryHeight < Page_Height / 3) {
-                    this.Content.Reset(X_Left_Field, this.BoundY2 - SummaryHeight, X_Right_Field, Page_Height);
-                } else {
-                    this.Content.Reset(X_Left_Field, 2 / 3 * Page_Height, X_Right_Field, Page_Height);
-                }
-            }
-            break;
-        }
-    },
     Get_ParentObject_or_DocumentPos: function () {
         return {
             Type: historyrecalctype_HdrFtr,
@@ -772,13 +662,27 @@ CHeaderFooter.prototype = {
         this.Refresh_RecalcData2();
     },
     Refresh_RecalcData2: function () {
+        this.RecalcInfo.NeedRecalc = {};
+        this.RecalcInfo.SectPr = {};
+        this.RecalcInfo.CurPage = -1;
         History.RecalcData_Add({
             Type: historyrecalctype_HdrFtr,
             Data: this
         });
     },
-    DocumentSearch: function (SearchString, Type) {
-        this.Content.DocumentSearch(SearchString, Type);
+    Refresh_RecalcData_BySection: function (SectPr) {
+        var MinPageIndex = -1;
+        for (var PageIndex in this.RecalcInfo.NeedRecalc) {
+            if (SectPr === this.RecalcInfo.SectPr[PageIndex] && (-1 === MinPageIndex || PageIndex < MinPageIndex)) {
+                MinPageIndex = PageIndex;
+            }
+        }
+        for (var PageIndex in this.RecalcInfo.NeedRecalc) {
+            if (PageIndex >= MinPageIndex) {
+                delete this.RecalcInfo.NeedRecalc[PageIndex];
+                delete this.RecalcInfo.SectPr[PageIndex];
+            }
+        }
     },
     Hyperlink_Add: function (HyperProps) {
         this.Content.Hyperlink_Add(HyperProps);
@@ -804,48 +708,10 @@ CHeaderFooter.prototype = {
     Document_Get_AllFontNames: function (AllFonts) {
         this.Content.Document_Get_AllFontNames(AllFonts);
     },
-    Save_Changes: function (Data, Writer) {
-        Writer.WriteLong(historyitem_type_HdrFtrController);
-        var Type = Data.Type;
-        Writer.WriteLong(Type);
-        switch (Type) {
-        case historyitem_HdrFtr_BoundY2:
-            Writer.WriteDouble(Data.New);
-            break;
-        }
-        return Writer;
-    },
-    Save_Changes2: function (Data, Writer) {
-        return false;
-    },
-    Load_Changes: function (Reader, Reader2) {
-        var ClassType = Reader.GetLong();
-        if (historyitem_type_HdrFtrController != ClassType) {
-            return;
-        }
-        var Type = Reader.GetLong();
-        switch (Type) {
-        case historyitem_HdrFtr_BoundY2:
-            this.BoundY2 = Reader.GetDouble();
-            if (this.Type === hdrftr_Header) {
-                this.Content.Reset(X_Left_Field, this.BoundY2, X_Right_Field, Page_Height / 2);
-            } else {
-                var SummaryHeight = this.Content.Get_SummaryHeight();
-                if (SummaryHeight < Page_Height / 3) {
-                    this.Content.Reset(X_Left_Field, this.BoundY2 - SummaryHeight, X_Right_Field, Page_Height);
-                } else {
-                    this.Content.Reset(X_Left_Field, 2 / 3 * Page_Height, X_Right_Field, Page_Height);
-                }
-            }
-            break;
-        }
-    },
     Write_ToBinary2: function (Writer) {
         Writer.WriteLong(historyitem_type_HdrFtr);
         Writer.WriteString2(this.Id);
         Writer.WriteLong(this.Type);
-        Writer.WriteDouble(this.BoundY);
-        Writer.WriteDouble(this.BoundY2);
         Writer.WriteString2(this.Content.Get_Id());
     },
     Read_FromBinary2: function (Reader) {
@@ -855,21 +721,8 @@ CHeaderFooter.prototype = {
         this.LogicDocument = LogicDocument;
         this.Id = Reader.GetString2();
         this.Type = Reader.GetLong();
-        this.BoundY = Reader.GetDouble();
-        this.BoundY2 = Reader.GetDouble();
         this.Content = g_oTableId.Get_ById(Reader.GetString2());
-        if (this.Type === hdrftr_Header) {
-            this.Content.Reset(X_Left_Field, this.BoundY2, X_Right_Field, Page_Height / 2);
-        } else {
-            var SummaryHeight = this.Content.Get_SummaryHeight();
-            if (SummaryHeight < Page_Height / 3) {
-                this.Content.Reset(X_Left_Field, this.BoundY2 - SummaryHeight, X_Right_Field, Page_Height);
-            } else {
-                this.Content.Reset(X_Left_Field, 2 / 3 * Page_Height, X_Right_Field, Page_Height);
-            }
-        }
     },
-    Load_LinkData: function (LinkData) {},
     Add_Comment: function (Comment) {
         this.Content.Add_Comment(Comment, true, true);
     },
@@ -881,21 +734,8 @@ function CHeaderFooterController(LogicDocument, DrawingDocument) {
     this.Id = g_oIdCounter.Get_NewId();
     this.DrawingDocument = DrawingDocument;
     this.LogicDocument = LogicDocument;
-    this.Content = new Array();
-    this.Content[0] = {
-        Header: {
-            First: null,
-            Even: null,
-            Odd: null
-        },
-        Footer: {
-            First: null,
-            Even: null,
-            Odd: null
-        }
-    };
     this.CurHdrFtr = null;
-    this.Pages = new Array();
+    this.Pages = {};
     this.CurPage = 0;
     this.ChangeCurPageOnEnd = true;
     this.WaitMouseDown = true;
@@ -910,183 +750,79 @@ CHeaderFooterController.prototype = {
     Get_Id: function () {
         return this.Id;
     },
-    AddHeaderOrFooter: function (Type, PageType) {
-        this.LogicDocument.DrawingObjects.AddHeaderOrFooter(Type, PageType);
-        var BoundY2 = Y_Default_Header;
-        if (Type === hdrftr_Footer) {
-            BoundY2 = Page_Height - Y_Default_Footer;
+    Set_CurHdrFtr: function (HdrFtr) {
+        if (null !== this.CurHdrFtr) {
+            this.CurHdrFtr.Selection_Remove();
         }
-        var Content_old = {
-            Header: {
-                First: this.Content[0].Header.First,
-                Even: this.Content[0].Header.Even,
-                Odd: this.Content[0].Header.Odd
-            },
-            Footer: {
-                First: this.Content[0].Footer.First,
-                Even: this.Content[0].Footer.Even,
-                Odd: this.Content[0].Footer.Odd
-            }
-        };
-        var HdrFtr = new CHeaderFooter(this, this.LogicDocument, this.DrawingDocument, Type, BoundY2);
-        switch (Type) {
-        case hdrftr_Footer:
-            switch (PageType) {
-            case hdrftr_Default:
-                if (null === this.Content[0].Footer.First) {
-                    this.Content[0].Footer.First = HdrFtr;
-                }
-                if (null === this.Content[0].Footer.Even) {
-                    this.Content[0].Footer.Even = HdrFtr;
-                }
-                this.Content[0].Footer.Odd = HdrFtr;
-                break;
-            case hdrftr_Even:
-                this.Content[0].Footer.Even = HdrFtr;
-                break;
-            case hdrftr_First:
-                this.Content[0].Footer.First = HdrFtr;
-                break;
-            }
-            break;
-        case hdrftr_Header:
-            switch (PageType) {
-            case hdrftr_Default:
-                if (null === this.Content[0].Header.First) {
-                    this.Content[0].Header.First = HdrFtr;
-                }
-                if (null === this.Content[0].Header.Even) {
-                    this.Content[0].Header.Even = HdrFtr;
-                }
-                this.Content[0].Header.Odd = HdrFtr;
-                break;
-            case hdrftr_Even:
-                this.Content[0].Header.Even = HdrFtr;
-                break;
-            case hdrftr_First:
-                this.Content[0].Header.First = HdrFtr;
-                break;
-            }
-            break;
-        }
-        History.Add(this, {
-            Type: historyitem_HdrFtrController_AddItem,
-            Old: Content_old,
-            New: this.Content[0]
-        });
-        this.LogicDocument.Recalculate();
-        this.CurHdrFtr = this.Internal_GetContentByXY(0, 0, this.CurPage);
-        this.CurHdrFtr.Cursor_MoveAt(0, 0, this.CurPage, false, false);
-        return HdrFtr;
+        this.CurHdrFtr = HdrFtr;
     },
-    RemoveHeaderOrFooter: function (Type, PageType) {
-        this.LogicDocument.DrawingObjects.RemoveHeaderOrFooter(Type, PageType);
-        var Content_old = {
-            Header: {
-                First: this.Content[0].Header.First,
-                Even: this.Content[0].Header.Even,
-                Odd: this.Content[0].Header.Odd
-            },
-            Footer: {
-                First: this.Content[0].Footer.First,
-                Even: this.Content[0].Footer.Even,
-                Odd: this.Content[0].Footer.Odd
-            }
-        };
-        switch (Type) {
-        case hdrftr_Footer:
-            switch (PageType) {
-            case hdrftr_Default:
-                var HdrFtr = this.Content[0].Footer.Odd;
-                if (HdrFtr === this.Content[0].Footer.First) {
-                    this.Content[0].Footer.First = null;
-                }
-                if (HdrFtr === this.Content[0].Footer.Even) {
-                    this.Content[0].Footer.Even = null;
-                }
-                this.Content[0].Footer.Odd = null;
-                break;
-            case hdrftr_Even:
-                if (this.Content[0].Footer.Odd != this.Content[0].Footer.Even) {
-                    this.Content[0].Footer.Even = this.Content[0].Footer.Odd;
-                }
-                break;
-            case hdrftr_First:
-                if (this.Content[0].Footer.Odd != this.Content[0].Footer.First) {
-                    this.Content[0].Footer.First = this.Content[0].Footer.Odd;
-                }
-                break;
-            }
-            break;
-        case hdrftr_Header:
-            switch (PageType) {
-            case hdrftr_Default:
-                var HdrFtr = this.Content[0].Header.Odd;
-                if (HdrFtr === this.Content[0].Header.First) {
-                    this.Content[0].Header.First = null;
-                }
-                if (HdrFtr === this.Content[0].Header.Even) {
-                    this.Content[0].Header.Even = null;
-                }
-                this.Content[0].Header.Odd = null;
-                break;
-            case hdrftr_Even:
-                if (this.Content[0].Header.Odd != this.Content[0].Header.Even) {
-                    if (this.Content[0].Header.Even === this.Content[0].Header.First) {
-                        this.Content[0].Header.First = this.Content[0].Header.Odd;
-                    }
-                    this.Content[0].Header.Even = this.Content[0].Header.Odd;
-                }
-                break;
-            case hdrftr_First:
-                if (this.Content[0].Header.Odd != this.Content[0].Header.First) {
-                    this.Content[0].Header.First = this.Content[0].Header.Odd;
-                }
-                break;
-            }
-            break;
+    GoTo_NextHdrFtr: function () {
+        var CurHdrFtr = this.CurHdrFtr;
+        if (null === CurHdrFtr || -1 === CurHdrFtr.RecalcInfo.CurPage) {
+            return;
         }
-        History.Add(this, {
-            Type: historyitem_HdrFtrController_AddItem,
-            Old: Content_old,
-            New: this.Content[0]
-        });
-        this.CurHdrFtr = this.Internal_GetContentByXY(0, 0, this.CurPage);
-        this.CurHdrFtr.Cursor_MoveAt(0, 0, this.CurPage, false, false);
-        this.LogicDocument.ContentLastChangePos = 0;
-        this.LogicDocument.Recalculate();
-    },
-    AddPageNum: function (PageIndex, AlignV, AlignH) {
-        var bFirst = (0 === PageIndex ? true : false);
-        var bEven = (PageIndex % 2 === 1 ? true : false);
-        var Header = null;
-        var Footer = null;
-        if (true === bFirst) {
-            Header = this.Content[0].Header.First;
-            Footer = this.Content[0].Footer.First;
+        var CurPage = CurHdrFtr.RecalcInfo.CurPage;
+        var Pages = this.Pages;
+        if (hdrftr_Header === CurHdrFtr.Type && undefined !== Pages[CurPage].Footer) {
+            CurHdrFtr = Pages[CurPage].Footer;
         } else {
-            if (true === bEven) {
-                Header = this.Content[0].Header.Even;
-                Footer = this.Content[0].Footer.Even;
+            CurHdrFtr = null;
+        }
+        while (null === CurHdrFtr) {
+            CurPage++;
+            if (undefined === Pages[CurPage]) {
+                break;
             } else {
-                Header = this.Content[0].Header.Odd;
-                Footer = this.Content[0].Footer.Odd;
+                if (undefined !== Pages[CurPage].Header && null !== Pages[CurPage].Header) {
+                    CurHdrFtr = Pages[CurPage].Header;
+                } else {
+                    if (undefined !== Pages[CurPage].Footer && null !== Pages[CurPage].Footer) {
+                        CurHdrFtr = Pages[CurPage].Footer;
+                    }
+                }
             }
         }
-        switch (AlignV) {
-        case hdrftr_Header:
-            if (null === Header) {
-                Header = this.AddHeaderOrFooter(hdrftr_Header, hdrftr_Default);
-            }
-            Header.AddPageNum(AlignH);
-            break;
-        case hdrftr_Footer:
-            if (null === Footer) {
-                Footer = this.AddHeaderOrFooter(hdrftr_Footer, hdrftr_Default);
-            }
-            Footer.AddPageNum(AlignH);
-            break;
+        if (null !== CurHdrFtr) {
+            this.CurHdrFtr = CurHdrFtr;
+            CurHdrFtr.Set_Page(CurPage);
+            CurHdrFtr.Content.Cursor_MoveToStartPos(false);
+            return true;
         }
+        return false;
+    },
+    GoTo_PrevHdrFtr: function () {
+        var CurHdrFtr = this.CurHdrFtr;
+        if (null === CurHdrFtr || -1 === CurHdrFtr.RecalcInfo.CurPage) {
+            return;
+        }
+        var CurPage = CurHdrFtr.RecalcInfo.CurPage;
+        var Pages = this.Pages;
+        if (hdrftr_Footer === CurHdrFtr.Type && undefined !== Pages[CurPage].Header) {
+            CurHdrFtr = Pages[CurPage].Header;
+        } else {
+            CurHdrFtr = null;
+        }
+        while (null === CurHdrFtr) {
+            CurPage--;
+            if (undefined === Pages[CurPage]) {
+                return;
+            } else {
+                if (undefined !== Pages[CurPage].Footer && null !== Pages[CurPage].Footer) {
+                    CurHdrFtr = Pages[CurPage].Footer;
+                } else {
+                    if (undefined !== Pages[CurPage].Header && null !== Pages[CurPage].Header) {
+                        CurHdrFtr = Pages[CurPage].Header;
+                    }
+                }
+            }
+        }
+        if (null !== CurHdrFtr) {
+            this.CurHdrFtr = CurHdrFtr;
+            CurHdrFtr.Set_Page(CurPage);
+            CurHdrFtr.Content.Cursor_MoveToStartPos(false);
+            return true;
+        }
+        return false;
     },
     Get_CurPage: function () {
         if (null != this.CurHdrFtr) {
@@ -1094,72 +830,31 @@ CHeaderFooterController.prototype = {
         }
         return 0;
     },
-    Set_Distance: function (Value, PageHeight) {
-        if (null != this.CurHdrFtr) {
-            if (this.CurHdrFtr.Type === hdrftr_Header) {
-                this.CurHdrFtr.Set_BoundY2(Value, true);
-            } else {
-                this.CurHdrFtr.Set_BoundY2(PageHeight - Value, true);
-            }
-        }
-    },
-    Set_Bounds: function (Y0, Y1) {
-        if (null != this.CurHdrFtr) {
-            if (hdrftr_Header === this.CurHdrFtr.Type) {
-                if (Y_Top_Field != Y1) {
-                    this.CurHdrFtr.DocumentRecalc = false;
-                    History.Add(this.LogicDocument, {
-                        Type: historyitem_Document_Margin,
-                        Fields_old: {
-                            Left: X_Left_Field,
-                            Right: X_Right_Field,
-                            Top: Y_Top_Field,
-                            Bottom: Y_Bottom_Field
-                        },
-                        Fields_new: {
-                            Left: X_Left_Field,
-                            Right: X_Right_Field,
-                            Top: Y1,
-                            Bottom: Y_Bottom_Field
-                        },
-                        Recalc_Margins: false
-                    });
-                    Y_Top_Field = Y1;
-                    this.CurHdrFtr.Set_BoundY2(Y0, true);
-                    this.LogicDocument.ContentLastChangePos = 0;
-                    this.LogicDocument.Recalculate();
-                    this.CurHdrFtr.DocumentRecalc = true;
-                } else {
-                    this.CurHdrFtr.Set_BoundY2(Y0, true);
-                }
-                this.DrawingDocument.Set_RulerState_HdrFtr(true, this.CurHdrFtr.BoundY2, Math.max(this.CurHdrFtr.BoundY, Y_Top_Field));
-            } else {
-                var Bounds = this.CurHdrFtr.Get_Bounds();
-                var BoundY2 = Y0 + (Bounds.Bottom - Bounds.Top);
-                this.CurHdrFtr.Set_BoundY2(BoundY2, true);
-                Bounds = this.CurHdrFtr.Get_Bounds();
-                this.DrawingDocument.Set_RulerState_HdrFtr(false, Bounds.Top, Page_Height);
-            }
-        }
-    },
     Get_Props: function () {
-        if (null != this.CurHdrFtr) {
-            var Pr = new Object();
+        if (null != this.CurHdrFtr && -1 !== this.CurHdrFtr.RecalcInfo.CurPage) {
+            var Pr = {};
             Pr.Type = this.CurHdrFtr.Type;
+            if (undefined === this.LogicDocument.Pages[this.CurHdrFtr.RecalcInfo.CurPage]) {
+                return Pr;
+            }
+            var Index = this.LogicDocument.Pages[this.CurHdrFtr.RecalcInfo.CurPage].Pos;
+            var SectPr = this.LogicDocument.SectionsInfo.Get_SectPr(Index).SectPr;
             if (hdrftr_Footer === Pr.Type) {
-                Pr.Position = Page_Height - this.CurHdrFtr.BoundY2;
+                Pr.Position = SectPr.Get_PageMargins_Footer();
             } else {
-                Pr.Position = this.CurHdrFtr.BoundY2;
+                Pr.Position = SectPr.Get_PageMargins_Header();
             }
-            if (this.Content[0].Footer.First != this.Content[0].Footer.Odd) {
-                Pr.DifferentFirst = true;
+            Pr.DifferentFirst = SectPr.Get_TitlePage();
+            Pr.DifferentEvenOdd = EvenAndOddHeaders;
+            if (SectPr === this.LogicDocument.SectionsInfo.Get_SectPr2(0).SectPr) {
+                Pr.LinkToPrevious = null;
             } else {
-                Pr.DifferentFirst = false;
-            }
-            if (this.Content[0].Footer.Odd != this.Content[0].Footer.Even) {
-                Pr.DifferentEvenOdd = true;
-            } else {
-                Pr.DifferentEvenOdd = false;
+                var PageIndex = this.CurHdrFtr.RecalcInfo.CurPage;
+                var SectionPageInfo = this.LogicDocument.Get_SectionPageNumInfo(PageIndex);
+                var bFirst = (true === SectionPageInfo.bFirst && true === SectPr.Get_TitlePage() ? true : false);
+                var bEven = (true === SectionPageInfo.bEven && true === EvenAndOddHeaders ? true : false);
+                var bHeader = (hdrftr_Header === this.CurHdrFtr.Type ? true : false);
+                Pr.LinkToPrevious = (null === SectPr.Get_HdrFtr(bHeader, bFirst, bEven) ? true : false);
             }
             Pr.Locked = this.Lock.Is_Locked();
             return Pr;
@@ -1168,140 +863,100 @@ CHeaderFooterController.prototype = {
         }
     },
     Set_CurHdrFtr_ById: function (Id) {
-        if (null != this.Content[0].Header.First && Id === this.Content[0].Header.First.Get_Id()) {
-            this.CurHdrFtr = this.Content[0].Header.First;
-            this.CurHdrFtr.Content.Cursor_MoveToStartPos();
-            return true;
-        } else {
-            if (null != this.Content[0].Header.Odd && Id === this.Content[0].Header.Odd.Get_Id()) {
-                this.CurHdrFtr = this.Content[0].Header.Odd;
-                this.CurHdrFtr.Content.Cursor_MoveToStartPos();
-                return true;
-            } else {
-                if (null != this.Content[0].Header.Even && Id === this.Content[0].Header.Even.Get_Id()) {
-                    this.CurHdrFtr = this.Content[0].Header.Even;
-                    this.CurHdrFtr.Content.Cursor_MoveToStartPos();
-                    return true;
-                } else {
-                    if (null != this.Content[0].Footer.First && Id === this.Content[0].Footer.First.Get_Id()) {
-                        this.CurHdrFtr = this.Content[0].Footer.First;
-                        this.CurHdrFtr.Content.Cursor_MoveToStartPos();
-                        return true;
-                    } else {
-                        if (null != this.Content[0].Footer.Odd && Id === this.Content[0].Footer.Odd.Get_Id()) {
-                            this.CurHdrFtr = this.Content[0].Footer.Odd;
-                            this.CurHdrFtr.Content.Cursor_MoveToStartPos();
-                            return true;
-                        } else {
-                            if (null != this.Content[0].Footer.Even && Id === this.Content[0].Footer.Even.Get_Id()) {
-                                this.CurHdrFtr = this.Content[0].Footer.Even;
-                                this.CurHdrFtr.Content.Cursor_MoveToStartPos();
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
+        var HdrFtr = g_oTableId.Get_ById(Id);
+        if (-1 === this.LogicDocument.SectionsInfo.Find_ByHdrFtr(HdrFtr)) {
+            return false;
         }
-        return false;
+        this.CurHdrFtr = HdrFtr;
+        HdrFtr.Content.Cursor_MoveToStartPos();
+        return true;
     },
     RecalculateCurPos: function () {
         if (null != this.CurHdrFtr) {
             return this.CurHdrFtr.RecalculateCurPos();
         }
+        return null;
     },
-    Recalculate: function () {
-        if (null != this.Content[0].Header.First) {
-            this.Content[0].Header.First.Recalculate();
+    Recalculate: function (PageIndex) {
+        var SectionPageInfo = this.LogicDocument.Get_SectionPageNumInfo(PageIndex);
+        var bFirst = SectionPageInfo.bFirst;
+        var bEven = SectionPageInfo.bEven;
+        var HdrFtr = this.LogicDocument.Get_SectionHdrFtr(PageIndex, bFirst, bEven);
+        var Header = HdrFtr.Header;
+        var Footer = HdrFtr.Footer;
+        var SectPr = HdrFtr.SectPr;
+        this.Pages[PageIndex] = new CHdrFtrPage();
+        this.Pages[PageIndex].Header = Header;
+        this.Pages[PageIndex].Footer = Footer;
+        var X, XLimit;
+        var X = SectPr.Get_PageMargin_Left();
+        var XLimit = SectPr.Get_PageWidth() - SectPr.Get_PageMargin_Right();
+        var bRecalcHeader = false;
+        var HeaderDrawings, HeaderTables, FooterDrawings, FooterTables;
+        if (null !== Header) {
+            if (true === Header.Is_NeedRecalculate(PageIndex)) {
+                var Y = SectPr.Get_PageMargins_Header();
+                var YLimit = SectPr.Get_PageHeight() / 2;
+                Header.Reset(X, Y, XLimit, YLimit);
+                bRecalcHeader = Header.Recalculate(PageIndex, SectPr);
+            } else {
+                if (-1 === Header.RecalcInfo.CurPage) {
+                    Header.Set_Page(PageIndex);
+                }
+            }
+            HeaderDrawings = Header.Content.Get_AllDrawingObjects([]);
+            HeaderTables = Header.Content.Get_AllFloatElements();
         }
-        if (null != this.Content[0].Header.Odd && this.Content[0].Header.Odd !== this.Content[0].Header.First) {
-            this.Content[0].Header.Odd.Recalculate();
+        var bRecalcFooter = false;
+        if (null !== Footer) {
+            if (true === Footer.Is_NeedRecalculate(PageIndex)) {
+                var Y = 0;
+                var YLimit = SectPr.Get_PageHeight();
+                Footer.Reset(X, Y, XLimit, YLimit);
+                Footer.Recalculate2(PageIndex);
+                var SummaryHeight = Footer.Content.Get_SummaryHeight();
+                Y = Math.max(2 * YLimit / 3, YLimit - SectPr.Get_PageMargins_Footer() - SummaryHeight);
+                Footer.Reset(X, Y, XLimit, YLimit);
+                bRecalcFooter = Footer.Recalculate(PageIndex, SectPr);
+            } else {
+                if (-1 === Footer.RecalcInfo.CurPage) {
+                    Footer.Set_Page(PageIndex);
+                }
+            }
+            FooterDrawings = Footer.Content.Get_AllDrawingObjects([]);
+            FooterTables = Footer.Content.Get_AllFloatElements();
         }
-        if (null != this.Content[0].Header.Even && this.Content[0].Header.Even !== this.Content[0].Header.Odd && this.Content[0].Header.Even != this.Content[0].Header.First) {
-            this.Content[0].Header.Even.Recalculate();
+        this.LogicDocument.DrawingObjects.mergeDrawings(PageIndex, HeaderDrawings, HeaderTables, FooterDrawings, FooterTables);
+        if (true === bRecalcHeader || true === bRecalcFooter) {
+            return true;
         }
-        if (null != this.Content[0].Footer.First) {
-            this.Content[0].Footer.First.Recalculate();
-        }
-        if (null != this.Content[0].Footer.Odd && this.Content[0].Footer.Odd !== this.Content[0].Footer.First) {
-            this.Content[0].Footer.Odd.Recalculate();
-        }
-        if (null != this.Content[0].Footer.Even && this.Content[0].Footer.Even !== this.Content[0].Footer.Odd && this.Content[0].Footer.Even != this.Content[0].Footer.First) {
-            this.Content[0].Footer.Even.Recalculate();
-        }
-    },
-    Reset_RecalculateCache: function () {
-        if (null != this.Content[0].Header.First) {
-            this.Content[0].Header.First.Reset_RecalculateCache();
-        }
-        if (null != this.Content[0].Header.Odd && this.Content[0].Header.Odd !== this.Content[0].Header.First) {
-            this.Content[0].Header.Odd.Reset_RecalculateCache();
-        }
-        if (null != this.Content[0].Header.Even && this.Content[0].Header.Even !== this.Content[0].Header.Odd && this.Content[0].Header.Even != this.Content[0].Header.First) {
-            this.Content[0].Header.Even.Reset_RecalculateCache();
-        }
-        if (null != this.Content[0].Footer.First) {
-            this.Content[0].Footer.First.Reset_RecalculateCache();
-        }
-        if (null != this.Content[0].Footer.Odd && this.Content[0].Footer.Odd !== this.Content[0].Footer.First) {
-            this.Content[0].Footer.Odd.Reset_RecalculateCache();
-        }
-        if (null != this.Content[0].Footer.Even && this.Content[0].Footer.Even !== this.Content[0].Footer.Odd && this.Content[0].Footer.Even != this.Content[0].Footer.First) {
-            this.Content[0].Footer.Even.Reset_RecalculateCache();
-        }
+        return false;
     },
     Draw: function (nPageIndex, pGraphics) {
-        var bHeader = true;
-        var bFirst = (0 === nPageIndex ? true : false);
-        var bEven = (nPageIndex % 2 === 1 ? true : false);
-        var Ptr = null;
-        if (true === bHeader) {
-            Ptr = this.Content[0].Header;
-        } else {
-            Ptr = this.Content[0].Footer;
+        var Header = this.Pages[nPageIndex].Header;
+        var Footer = this.Pages[nPageIndex].Footer;
+        var OldPageHdr = Header && Header.RecalcInfo.CurPage;
+        var OldPageFtr = Footer && Footer.RecalcInfo.CurPage;
+        Header && Header.Set_Page(nPageIndex);
+        Footer && Footer.Set_Page(nPageIndex);
+        this.LogicDocument.DrawingObjects.drawBehindDocHdrFtr(nPageIndex, pGraphics);
+        this.LogicDocument.DrawingObjects.drawWrappingObjectsHdrFtr(nPageIndex, pGraphics);
+        if (null !== Header) {
+            Header.Draw(nPageIndex, pGraphics);
         }
-        if (true === bFirst) {
-            if (null != this.Content[0].Header.First) {
-                this.Content[0].Header.First.Draw(nPageIndex, pGraphics);
-            }
-            if (null != this.Content[0].Footer.First) {
-                this.Content[0].Footer.First.Draw(nPageIndex, pGraphics);
-            }
-        } else {
-            if (true === bEven) {
-                if (null != this.Content[0].Header.Even) {
-                    this.Content[0].Header.Even.Draw(nPageIndex, pGraphics);
-                }
-                if (null != this.Content[0].Footer.Even) {
-                    this.Content[0].Footer.Even.Draw(nPageIndex, pGraphics);
-                }
-            } else {
-                if (null != this.Content[0].Header.Odd) {
-                    this.Content[0].Header.Odd.Draw(nPageIndex, pGraphics);
-                }
-                if (null != this.Content[0].Footer.Odd) {
-                    this.Content[0].Footer.Odd.Draw(nPageIndex, pGraphics);
-                }
-            }
+        if (null !== Footer) {
+            Footer.Draw(nPageIndex, pGraphics);
         }
+        this.LogicDocument.DrawingObjects.drawBeforeObjectsHdrFtr(nPageIndex, pGraphics);
+        Header && Header.Set_Page(OldPageHdr);
+        Footer && Footer.Set_Page(OldPageFtr);
     },
     CheckRange: function (X0, Y0, X1, Y1, _Y0, _Y1, X_lf, X_rf, PageIndex) {
-        var bFirst = (0 === PageIndex ? true : false);
-        var bEven = (PageIndex % 2 === 1 ? true : false);
-        var Header = null;
-        var Footer = null;
-        if (true === bFirst) {
-            Header = this.Content[0].Header.First;
-            Footer = this.Content[0].Footer.First;
-        } else {
-            if (true === bEven) {
-                Header = this.Content[0].Header.Even;
-                Footer = this.Content[0].Footer.Even;
-            } else {
-                Header = this.Content[0].Header.Odd;
-                Footer = this.Content[0].Footer.Odd;
-            }
+        if (undefined === this.Pages[PageIndex]) {
+            return [];
         }
+        var Header = this.Pages[PageIndex].Header;
+        var Footer = this.Pages[PageIndex].Footer;
         var HeaderRange = [];
         var FooterRange = [];
         if (null != Header) {
@@ -1312,42 +967,25 @@ CHeaderFooterController.prototype = {
         }
         return HeaderRange.concat(FooterRange);
     },
-    Get_HeaderBottomPos: function (PageIndex) {
-        var HdrFtr = this.Internal_GetContentByXY(0, 0, PageIndex);
-        if (null != HdrFtr && hdrftr_Header === HdrFtr.Type) {
-            return HdrFtr.Get_Bounds().Bottom;
+    Get_HdrFtrLines: function (PageIndex) {
+        var Header = null;
+        var Footer = null;
+        if (undefined !== this.Pages[PageIndex]) {
+            Header = this.Pages[PageIndex].Header;
+            Footer = this.Pages[PageIndex].Footer;
         }
-        return -1;
-    },
-    Get_FooterTopPos: function (PageIndex) {
-        var HdrFtr = this.Internal_GetContentByXY(0, Page_Height, PageIndex);
-        if (null != HdrFtr && hdrftr_Footer === HdrFtr.Type) {
-            return HdrFtr.Get_Bounds().Top;
+        var Top = null;
+        if (null !== Header) {
+            Top = Header.Get_DividingLine(PageIndex);
         }
-        return -1;
-    },
-    UpdateMargins: function (Index, bNoRecalc, bNoSaveHistory) {
-        var SectHdrFtr = this.Content[Index];
-        var Headers = SectHdrFtr.Header;
-        var Footers = SectHdrFtr.Footer;
-        if (Headers.First != Headers.Odd && Headers.First != Headers.Even && null != Headers.First) {
-            Headers.First.UpdateMargins(bNoRecalc, bNoSaveHistory);
+        var Bottom = null;
+        if (null !== Footer) {
+            Bottom = Footer.Get_DividingLine(PageIndex);
         }
-        if (Headers.Even != Headers.Odd && null != Headers.Even) {
-            Headers.Even.UpdateMargins(bNoRecalc, bNoSaveHistory);
-        }
-        if (null != Headers.Odd) {
-            Headers.Odd.UpdateMargins(bNoRecalc, bNoSaveHistory);
-        }
-        if (Footers.First != Footers.Odd && Footers.First != Footers.Even && null != Footers.First) {
-            Footers.First.UpdateMargins(bNoRecalc, bNoSaveHistory);
-        }
-        if (Footers.Even != Footers.Odd && null != Footers.Even) {
-            Footers.Even.UpdateMargins(bNoRecalc, bNoSaveHistory);
-        }
-        if (null != Footers.Odd) {
-            Footers.Odd.UpdateMargins(bNoRecalc, bNoSaveHistory);
-        }
+        return {
+            Top: Top,
+            Bottom: Bottom
+        };
     },
     Update_CursorType: function (X, Y, PageNum_Abs) {
         if (true === this.Lock.Is_Locked()) {
@@ -1431,44 +1069,17 @@ CHeaderFooterController.prototype = {
         return false;
     },
     Is_UseInDocument: function (Id) {
-        if (null != this.Content[0].Header.First && Id === this.Content[0].Header.First.Get_Id()) {
-            return true;
+        var HdrFtr = g_oTableId.Get_ById(Id);
+        if (-1 === this.LogicDocument.SectionsInfo.Find_ByHdrFtr(HdrFtr)) {
+            return false;
         }
-        if (null != this.Content[0].Header.Even && Id === this.Content[0].Header.Even.Get_Id()) {
-            return true;
-        }
-        if (null != this.Content[0].Header.Odd && Id === this.Content[0].Header.Odd.Get_Id()) {
-            return true;
-        }
-        if (null != this.Content[0].Footer.First && Id === this.Content[0].Footer.First.Get_Id()) {
-            return true;
-        }
-        if (null != this.Content[0].Footer.Even && Id === this.Content[0].Footer.Even.Get_Id()) {
-            return true;
-        }
-        if (null != this.Content[0].Footer.Odd && Id === this.Content[0].Footer.Odd.Get_Id()) {
-            return true;
-        }
-        return false;
+        return true;
     },
     Check_Page: function (HdrFtr, PageIndex) {
-        var bHeader = (HdrFtr.Type === hdrftr_Header ? true : false);
-        var bFirst = (0 === PageIndex ? true : false);
-        var bEven = (PageIndex % 2 === 1 ? true : false);
-        if (true === bFirst) {
-            if ((true === bHeader && HdrFtr === this.Content[0].Header.First) || (true != bHeader && HdrFtr === this.Content[0].Footer.First)) {
-                return true;
-            }
-        } else {
-            if (true === bEven) {
-                if ((true === bHeader && HdrFtr === this.Content[0].Header.Even) || (true != bHeader && HdrFtr === this.Content[0].Footer.Even)) {
-                    return true;
-                }
-            } else {
-                if ((true === bHeader && HdrFtr === this.Content[0].Header.Odd) || (true != bHeader && HdrFtr === this.Content[0].Footer.Odd)) {
-                    return true;
-                }
-            }
+        var Header = this.Pages[PageIndex].Header;
+        var Footer = this.Pages[PageIndex].Footer;
+        if (HdrFtr === Header || HdrFtr === Footer) {
+            return true;
         }
         return false;
     },
@@ -1492,14 +1103,14 @@ CHeaderFooterController.prototype = {
             this.CurHdrFtr.Get_SelectedElementsInfo(Info);
         }
     },
+    Get_SelectedContent: function (SelectedContent) {
+        if (null != this.CurHdrFtr) {
+            this.CurHdrFtr.Get_SelectedContent(SelectedContent);
+        }
+    },
     Add_NewParagraph: function () {
         if (null != this.CurHdrFtr) {
             return this.CurHdrFtr.Add_NewParagraph();
-        }
-    },
-    Add_FlowImage: function (W, H, Img) {
-        if (null != this.CurHdrFtr) {
-            return this.CurHdrFtr.Add_FlowImage(W, H, Img);
         }
     },
     Add_InlineImage: function (W, H, Img, Chart, bFlow) {
@@ -1575,9 +1186,19 @@ CHeaderFooterController.prototype = {
             return this.CurHdrFtr.Cursor_MoveStartOfLine(AddToSelect);
         }
     },
-    Cursor_MoveAt: function (X, Y, AddToSelect) {
+    Cursor_MoveAt: function (X, Y, PageIndex, AddToSelect) {
         if (null != this.CurHdrFtr) {
-            return this.CurHdrFtr.Cursor_MoveAt(X, Y, AddToSelect);
+            return this.CurHdrFtr.Cursor_MoveAt(X, Y, PageIndex, AddToSelect);
+        }
+    },
+    Cursor_MoveToStartPos: function (AddToSelect) {
+        if (null != this.CurHdrFtr) {
+            return this.CurHdrFtr.Cursor_MoveToStartPos(AddToSelect);
+        }
+    },
+    Cursor_MoveToEndPos: function (AddToSelect) {
+        if (null != this.CurHdrFtr) {
+            return this.CurHdrFtr.Cursor_MoveToEndPos(AddToSelect);
         }
     },
     Cursor_MoveToCell: function (bNext) {
@@ -1692,29 +1313,6 @@ CHeaderFooterController.prototype = {
         }
         return null;
     },
-    Get_AllParagraphs_ByNumbering: function (NumPr, ParaArray) {
-        var SectHdrFtr = this.Content[0];
-        var Headers = SectHdrFtr.Header;
-        var Footers = SectHdrFtr.Footer;
-        if (Headers.First != Headers.Odd && Headers.First != Headers.Even && null != Headers.First) {
-            Headers.First.Get_AllParagraphs_ByNumbering(NumPr, ParaArray);
-        }
-        if (Headers.Even != Headers.Odd && null != Headers.Even) {
-            Headers.Even.Get_AllParagraphs_ByNumbering(NumPr, ParaArray);
-        }
-        if (null != Headers.Odd) {
-            Headers.Odd.Get_AllParagraphs_ByNumbering(NumPr, ParaArray);
-        }
-        if (Footers.First != Footers.Odd && Footers.First != Footers.Even && null != Footers.First) {
-            Footers.First.Get_AllParagraphs_ByNumbering(NumPr, ParaArray);
-        }
-        if (Footers.Even != Footers.Odd && null != Footers.Even) {
-            Footers.Even.Get_AllParagraphs_ByNumbering(NumPr, ParaArray);
-        }
-        if (null != Footers.Odd) {
-            Footers.Odd.Get_AllParagraphs_ByNumbering(NumPr, ParaArray);
-        }
-    },
     Selection_Remove: function () {
         if (null != this.CurHdrFtr) {
             return this.CurHdrFtr.Selection_Remove();
@@ -1742,11 +1340,9 @@ CHeaderFooterController.prototype = {
         }
         this.ChangeCurPageOnEnd = true;
         var OldPage = this.CurPage;
-        var bFirst = (0 === PageIndex ? true : false);
-        var bEven = (PageIndex % 2 === 1 ? true : false);
         var TempHdrFtr = null;
         var PageMetrics = this.LogicDocument.Get_PageContentStartPos(PageIndex);
-        if (MouseEvent.ClickCount >= 2 && true != editor.isStartAddShape && !(Y <= PageMetrics.Y || (((true === bFirst && null != (TempHdrFtr = this.Content[0].Header.First)) || (true === bEven && null != (TempHdrFtr = this.Content[0].Header.Even)) || (false === bEven && null != (TempHdrFtr = this.Content[0].Header.Odd))) && true === TempHdrFtr.Is_PointInDrawingObjects(X, Y))) && !(Y >= PageMetrics.YLimit || (((true === bFirst && null != (TempHdrFtr = this.Content[0].Footer.First)) || (true === bEven && null != (TempHdrFtr = this.Content[0].Footer.Even)) || (false === bEven && null != (TempHdrFtr = this.Content[0].Footer.Odd))) && true === TempHdrFtr.Is_PointInDrawingObjects(X, Y)))) {
+        if (MouseEvent.ClickCount >= 2 && true != editor.isStartAddShape && !(Y <= PageMetrics.Y || (null !== (TempHdrFtr = this.Pages[PageIndex].Header) && true === TempHdrFtr.Is_PointInDrawingObjects(X, Y))) && !(Y >= PageMetrics.YLimit || (null !== (TempHdrFtr = this.Pages[PageIndex].Footer) && true === TempHdrFtr.Is_PointInDrawingObjects(X, Y)))) {
             if (null != this.CurHdrFtr) {
                 this.CurHdrFtr.Selection_Remove();
             }
@@ -1754,74 +1350,57 @@ CHeaderFooterController.prototype = {
             return false;
         }
         this.CurPage = PageIndex;
-        var bHeader = null;
-        if (Y <= PageMetrics.Y || (((true === bFirst && null != (TempHdrFtr = this.Content[0].Header.First)) || (true === bEven && null != (TempHdrFtr = this.Content[0].Header.Even)) || (false === bEven && null != (TempHdrFtr = this.Content[0].Header.Odd))) && true === TempHdrFtr.Is_PointInDrawingObjects(X, Y)) || true === editor.isStartAddShape) {
-            bHeader = true;
-            if ((null === this.Content[0].Header.First && true === bFirst) || (null === this.Content[0].Header.Even && true === bEven) || (null === this.Content[0].Header.Odd && false === bEven)) {
+        var HdrFtr = null;
+        if (Y <= PageMetrics.Y || (null !== (TempHdrFtr = this.Pages[PageIndex].Header) && true === TempHdrFtr.Is_PointInDrawingObjects(X, Y)) || true === editor.isStartAddShape) {
+            if (null === this.Pages[PageIndex].Header) {
                 if (false === editor.WordControl.m_oLogicDocument.Document_Is_SelectionLocked(changestype_HdrFtr)) {
                     this.LogicDocument.CurPos.Type = docpostype_Content;
-                    History.Create_NewPoint();
+                    History.Create_NewPoint(historydescription_Document_AddHeader);
                     this.LogicDocument.CurPos.Type = docpostype_HdrFtr;
-                    this.AddHeaderOrFooter(hdrftr_Header, hdrftr_Default);
+                    HdrFtr = this.LogicDocument.Create_SectionHdrFtr(hdrftr_Header, PageIndex);
+                    this.LogicDocument.Recalculate();
                 } else {
                     return false;
                 }
+            } else {
+                HdrFtr = this.Pages[PageIndex].Header;
             }
         } else {
-            if (Y >= PageMetrics.YLimit || (((true === bFirst && null != (TempHdrFtr = this.Content[0].Footer.First)) || (true === bEven && null != (TempHdrFtr = this.Content[0].Footer.Even)) || (false === bEven && null != (TempHdrFtr = this.Content[0].Footer.Odd))) && true === TempHdrFtr.Is_PointInDrawingObjects(X, Y))) {
-                bHeader = false;
-                if ((null === this.Content[0].Footer.First && true === bFirst) || (null === this.Content[0].Footer.Even && true === bEven) || (null === this.Content[0].Footer.Odd && false === bEven)) {
+            if (Y >= PageMetrics.YLimit || (null !== (TempHdrFtr = this.Pages[PageIndex].Footer) && true === TempHdrFtr.Is_PointInDrawingObjects(X, Y))) {
+                if (null === this.Pages[PageIndex].Footer) {
                     if (false === editor.WordControl.m_oLogicDocument.Document_Is_SelectionLocked(changestype_HdrFtr)) {
                         this.LogicDocument.CurPos.Type = docpostype_Content;
-                        History.Create_NewPoint();
+                        History.Create_NewPoint(historydescription_Document_AddFooter);
                         this.LogicDocument.CurPos.Type = docpostype_HdrFtr;
-                        this.AddHeaderOrFooter(hdrftr_Footer, hdrftr_Default);
+                        HdrFtr = this.LogicDocument.Create_SectionHdrFtr(hdrftr_Footer, PageIndex);
+                        this.LogicDocument.Recalculate();
                     } else {
                         return false;
                     }
+                } else {
+                    HdrFtr = this.Pages[PageIndex].Footer;
                 }
             }
         }
-        if (null === bHeader) {
+        if (null === HdrFtr) {
             this.WaitMouseDown = true;
             return true;
         } else {
             this.WaitMouseDown = false;
         }
-        var Ptr = null;
-        if (true === bHeader) {
-            Ptr = this.Content[0].Header;
-        } else {
-            Ptr = this.Content[0].Footer;
-        }
         var OldHdrFtr = this.CurHdrFtr;
-        if (true === bFirst) {
-            this.CurHdrFtr = Ptr.First;
-        } else {
-            if (true === bEven) {
-                this.CurHdrFtr = Ptr.Even;
-            } else {
-                this.CurHdrFtr = Ptr.Odd;
-            }
-        }
+        this.CurHdrFtr = HdrFtr;
         if (null != OldHdrFtr && (OldHdrFtr != this.CurHdrFtr || OldPage != this.CurPage)) {
             OldHdrFtr.Selection_Remove();
         }
         if (null != this.CurHdrFtr) {
-            if (null != bHeader && (OldHdrFtr != this.CurHdrFtr || true === bActivate)) {
-                if (true === bHeader) {
-                    this.DrawingDocument.Set_RulerState_HdrFtr(true, this.CurHdrFtr.BoundY2, Math.max(this.CurHdrFtr.BoundY, Y_Top_Field));
-                } else {
-                    var Top = this.CurHdrFtr.Get_Bounds().Top;
-                    this.DrawingDocument.Set_RulerState_HdrFtr(false, Top, Page_Height);
-                }
-            }
             this.CurHdrFtr.Selection_SetStart(X, Y, PageIndex, MouseEvent);
             if (true === bActivate) {
-                var NewMouseEvent = new Object();
+                var NewMouseEvent = {};
                 NewMouseEvent.Type = g_mouse_event_type_up;
                 NewMouseEvent.ClickCount = 1;
                 this.CurHdrFtr.Selection_SetEnd(X, Y, PageIndex, NewMouseEvent);
+                this.CurHdrFtr.Content.Cursor_MoveToStartPos(false);
             }
         }
         return true;
@@ -1834,7 +1413,7 @@ CHeaderFooterController.prototype = {
             var ResY = Y;
             if (docpostype_DrawingObjects != this.CurHdrFtr.Content.CurPos.Type) {
                 if (PageIndex > this.CurPage) {
-                    ResY = Page_Height + 10;
+                    ResY = this.LogicDocument.Get_PageLimits(this.CurPage).YLimit + 10;
                 } else {
                     if (PageIndex < this.CurPage) {
                         ResY = -10;
@@ -1844,7 +1423,7 @@ CHeaderFooterController.prototype = {
             }
             this.CurHdrFtr.Selection_SetEnd(X, ResY, PageIndex, MouseEvent);
             if (false === this.ChangeCurPageOnEnd) {
-                this.CurHdrFtr.Content.Set_StartPage(this.CurPage);
+                this.CurHdrFtr.Set_Page(this.CurPage);
             }
         }
     },
@@ -1854,10 +1433,16 @@ CHeaderFooterController.prototype = {
         }
         return false;
     },
-    Selection_Check: function (X, Y, Page_Abs) {
+    Selection_Check: function (X, Y, Page_Abs, NearPos) {
         if (null != this.CurHdrFtr) {
-            return this.CurHdrFtr.Selection_Check(X, Y, Page_Abs);
+            return this.CurHdrFtr.Selection_Check(X, Y, Page_Abs, NearPos);
         }
+    },
+    Selection_IsEmpty: function (bCheckHidden) {
+        if (null !== this.CurHdrFtr) {
+            return this.CurHdrFtr.Content.Selection_IsEmpty(bCheckHidden);
+        }
+        return true;
     },
     Select_All: function () {
         if (null != this.CurHdrFtr) {
@@ -1865,7 +1450,7 @@ CHeaderFooterController.prototype = {
         }
     },
     Get_NearestPos: function (PageNum, X, Y, bAnchor, Drawing) {
-        var HdrFtr = this.Internal_GetContentByXY(X, Y, PageNum);
+        var HdrFtr = (true === editor.isStartAddShape ? this.CurHdrFtr : this.Internal_GetContentByXY(X, Y, PageNum));
         if (null != HdrFtr) {
             return HdrFtr.Get_NearestPos(X, Y, bAnchor, Drawing);
         } else {
@@ -1880,26 +1465,17 @@ CHeaderFooterController.prototype = {
         return this.CurHdrFtr.Get_CurrentParagraph();
     },
     Internal_GetContentByXY: function (X, Y, PageIndex) {
-        var bFirst = (0 === PageIndex ? true : false);
-        var bEven = (PageIndex % 2 === 1 ? true : false);
         var Header = null;
         var Footer = null;
-        if (true === bFirst) {
-            Header = this.Content[0].Header.First;
-            Footer = this.Content[0].Footer.First;
-        } else {
-            if (true === bEven) {
-                Header = this.Content[0].Header.Even;
-                Footer = this.Content[0].Footer.Even;
-            } else {
-                Header = this.Content[0].Header.Odd;
-                Footer = this.Content[0].Footer.Odd;
-            }
+        if (undefined !== this.Pages[PageIndex]) {
+            Header = this.Pages[PageIndex].Header;
+            Footer = this.Pages[PageIndex].Footer;
         }
-        if (Y <= Page_Height / 2 && null != Header) {
+        var PageH = this.LogicDocument.Get_PageLimits(PageIndex).YLimit;
+        if (Y <= PageH / 2 && null != Header) {
             return Header;
         } else {
-            if (Y >= Page_Height / 2 && null != Footer) {
+            if (Y >= PageH / 2 && null != Footer) {
                 return Footer;
             } else {
                 if (null != Header) {
@@ -1962,13 +1538,13 @@ CHeaderFooterController.prototype = {
         }
     },
     Get_SelectionState: function () {
-        var HdrFtrState = new Object();
+        var HdrFtrState = {};
         HdrFtrState.CurHdrFtr = this.CurHdrFtr;
         var State = null;
         if (null != this.CurHdrFtr) {
             State = this.CurHdrFtr.Content.Get_SelectionState();
         } else {
-            State = new Array();
+            State = [];
         }
         State.push(HdrFtrState);
         return State;
@@ -1981,150 +1557,6 @@ CHeaderFooterController.prototype = {
         this.CurHdrFtr = HdrFtrState.CurHdrFtr;
         if (null != this.CurHdrFtr) {
             this.CurHdrFtr.Content.Set_SelectionState(State, StateIndex - 1);
-        }
-    },
-    Undo: function (Data) {
-        var Type = Data.Type;
-        switch (Type) {
-        case historyitem_HdrFtrController_AddItem:
-            this.Content[0] = Data.Old;
-            break;
-        case historyitem_HdrFtrController_RemoveItem:
-            this.Content[0] = Data.Old;
-            break;
-        }
-    },
-    Redo: function (Data) {
-        var Type = Data.Type;
-        switch (Type) {
-        case historyitem_HdrFtrController_AddItem:
-            this.Content[0] = Data.New;
-            break;
-        case historyitem_HdrFtrController_RemoveItem:
-            this.Content[0] = Data.New;
-            break;
-        }
-    },
-    Refresh_RecalcData: function (Data) {
-        if (null != this.Content[0].Header.First) {
-            History.RecalcData_Add({
-                Type: historyrecalctype_HdrFtr,
-                Data: this.Content[0].Header.First
-            });
-        }
-        if (null != this.Content[0].Header.Even) {
-            History.RecalcData_Add({
-                Type: historyrecalctype_HdrFtr,
-                Data: this.Content[0].Header.Even
-            });
-        }
-        if (null != this.Content[0].Header.Odd) {
-            History.RecalcData_Add({
-                Type: historyrecalctype_HdrFtr,
-                Data: this.Content[0].Header.Odd
-            });
-        }
-        if (null != this.Content[0].Footer.First) {
-            History.RecalcData_Add({
-                Type: historyrecalctype_HdrFtr,
-                Data: this.Content[0].Footer.First
-            });
-        }
-        if (null != this.Content[0].Footer.Even) {
-            History.RecalcData_Add({
-                Type: historyrecalctype_HdrFtr,
-                Data: this.Content[0].Footer.Even
-            });
-        }
-        if (null != this.Content[0].Footer.Odd) {
-            History.RecalcData_Add({
-                Type: historyrecalctype_HdrFtr,
-                Data: this.Content[0].Footer.Odd
-            });
-        }
-    },
-    DocumentSearch: function (SearchString) {
-        var bHdr_first = false;
-        var bHdr_even = false;
-        if (this.Content[0].Header.First != this.Content[0].Header.Odd) {
-            bHdr_first = true;
-        }
-        if (this.Content[0].Header.Even != this.Content[0].Header.Odd) {
-            bHdr_even = true;
-        }
-        if (true === bHdr_even && true === bHdr_first) {
-            if (null != this.Content[0].Header.First) {
-                this.Content[0].Header.First.DocumentSearch(SearchString, search_Header | search_HdrFtr_First);
-            }
-            if (null != this.Content[0].Header.Even) {
-                this.Content[0].Header.Even.DocumentSearch(SearchString, search_Header | search_HdrFtr_Even);
-            }
-            if (null != this.Content[0].Header.Odd) {
-                this.Content[0].Header.Odd.DocumentSearch(SearchString, search_Header | search_HdrFtr_Odd_no_First);
-            }
-        } else {
-            if (true === bHdr_even) {
-                if (null != this.Content[0].Header.Even) {
-                    this.Content[0].Header.Even.DocumentSearch(SearchString, search_Header | search_HdrFtr_Even);
-                }
-                if (null != this.Content[0].Header.Odd) {
-                    this.Content[0].Header.Odd.DocumentSearch(SearchString, search_Header | search_HdrFtr_Odd);
-                }
-            } else {
-                if (true === bHdr_first) {
-                    if (null != this.Content[0].Header.First) {
-                        this.Content[0].Header.First.DocumentSearch(SearchString, search_Header | search_HdrFtr_First);
-                    }
-                    if (null != this.Content[0].Header.Odd) {
-                        this.Content[0].Header.Odd.DocumentSearch(SearchString, search_Header | search_HdrFtr_All_no_First);
-                    }
-                } else {
-                    if (null != this.Content[0].Header.Odd) {
-                        this.Content[0].Header.Odd.DocumentSearch(SearchString, search_Header | search_HdrFtr_All);
-                    }
-                }
-            }
-        }
-        var bFtr_first = false;
-        var bFtr_even = false;
-        if (this.Content[0].Footer.First != this.Content[0].Footer.Odd) {
-            bFtr_first = true;
-        }
-        if (this.Content[0].Footer.Even != this.Content[0].Footer.Odd) {
-            bFtr_even = true;
-        }
-        if (true === bFtr_even && true === bFtr_first) {
-            if (null != this.Content[0].Footer.First) {
-                this.Content[0].Footer.First.DocumentSearch(SearchString, search_Footer | search_HdrFtr_First);
-            }
-            if (null != this.Content[0].Footer.Even) {
-                this.Content[0].Footer.Even.DocumentSearch(SearchString, search_Footer | search_HdrFtr_Even);
-            }
-            if (null != this.Content[0].Footer.Odd) {
-                this.Content[0].Footer.Odd.DocumentSearch(SearchString, search_Footer | search_HdrFtr_Odd_no_First);
-            }
-        } else {
-            if (true === bFtr_even) {
-                if (null != this.Content[0].Footer.Even) {
-                    this.Content[0].Footer.Even.DocumentSearch(SearchString, search_Footer | search_HdrFtr_Even);
-                }
-                if (null != this.Content[0].Footer.Odd) {
-                    this.Content[0].Footer.Odd.DocumentSearch(SearchString, search_Footer | search_HdrFtr_Odd);
-                }
-            } else {
-                if (true === bFtr_first) {
-                    if (null != this.Content[0].Footer.First) {
-                        this.Content[0].Footer.First.DocumentSearch(SearchString, search_Footer | search_HdrFtr_First);
-                    }
-                    if (null != this.Content[0].Footer.Odd) {
-                        this.Content[0].Footer.Odd.DocumentSearch(SearchString, search_Footer | search_HdrFtr_All_no_First);
-                    }
-                } else {
-                    if (null != this.Content[0].Footer.Odd) {
-                        this.Content[0].Footer.Odd.DocumentSearch(SearchString, search_Footer | search_HdrFtr_All);
-                    }
-                }
-            }
         }
     },
     Hyperlink_Add: function (HyperProps) {
@@ -2154,402 +1586,6 @@ CHeaderFooterController.prototype = {
         }
         return null;
     },
-    Document_CreateFontMap: function (FontMap) {
-        var bHdr_first = false;
-        var bHdr_even = false;
-        if (this.Content[0].Header.First != this.Content[0].Header.Odd) {
-            bHdr_first = true;
-        }
-        if (this.Content[0].Header.Even != this.Content[0].Header.Odd) {
-            bHdr_even = true;
-        }
-        if (true === bHdr_even && true === bHdr_first) {
-            if (null != this.Content[0].Header.First) {
-                this.Content[0].Header.First.Document_CreateFontMap(FontMap);
-            }
-            if (null != this.Content[0].Header.Even) {
-                this.Content[0].Header.Even.Document_CreateFontMap(FontMap);
-            }
-            if (null != this.Content[0].Header.Odd) {
-                this.Content[0].Header.Odd.Document_CreateFontMap(FontMap);
-            }
-        } else {
-            if (true === bHdr_even) {
-                if (null != this.Content[0].Header.Even) {
-                    this.Content[0].Header.Even.Document_CreateFontMap(FontMap);
-                }
-                if (null != this.Content[0].Header.Odd) {
-                    this.Content[0].Header.Odd.Document_CreateFontMap(FontMap);
-                }
-            } else {
-                if (true === bHdr_first) {
-                    if (null != this.Content[0].Header.First) {
-                        this.Content[0].Header.First.Document_CreateFontMap(FontMap);
-                    }
-                    if (null != this.Content[0].Header.Odd) {
-                        this.Content[0].Header.Odd.Document_CreateFontMap(FontMap);
-                    }
-                } else {
-                    if (null != this.Content[0].Header.Odd) {
-                        this.Content[0].Header.Odd.Document_CreateFontMap(FontMap);
-                    }
-                }
-            }
-        }
-        var bFtr_first = false;
-        var bFtr_even = false;
-        if (this.Content[0].Footer.First != this.Content[0].Footer.Odd) {
-            bFtr_first = true;
-        }
-        if (this.Content[0].Footer.Even != this.Content[0].Footer.Odd) {
-            bFtr_even = true;
-        }
-        if (true === bFtr_even && true === bFtr_first) {
-            if (null != this.Content[0].Footer.First) {
-                this.Content[0].Footer.First.Document_CreateFontMap(FontMap);
-            }
-            if (null != this.Content[0].Footer.Even) {
-                this.Content[0].Footer.Even.Document_CreateFontMap(FontMap);
-            }
-            if (null != this.Content[0].Footer.Odd) {
-                this.Content[0].Footer.Odd.Document_CreateFontMap(FontMap);
-            }
-        } else {
-            if (true === bFtr_even) {
-                if (null != this.Content[0].Footer.Even) {
-                    this.Content[0].Footer.Even.Document_CreateFontMap(FontMap);
-                }
-                if (null != this.Content[0].Footer.Odd) {
-                    this.Content[0].Footer.Odd.Document_CreateFontMap(FontMap);
-                }
-            } else {
-                if (true === bFtr_first) {
-                    if (null != this.Content[0].Footer.First) {
-                        this.Content[0].Footer.First.Document_CreateFontMap(FontMap);
-                    }
-                    if (null != this.Content[0].Footer.Odd) {
-                        this.Content[0].Footer.Odd.Document_CreateFontMap(FontMap);
-                    }
-                } else {
-                    if (null != this.Content[0].Footer.Odd) {
-                        this.Content[0].Footer.Odd.Document_CreateFontMap(FontMap);
-                    }
-                }
-            }
-        }
-    },
-    Document_CreateFontCharMap: function (FontMap) {
-        var bHdr_first = false;
-        var bHdr_even = false;
-        if (this.Content[0].Header.First != this.Content[0].Header.Odd) {
-            bHdr_first = true;
-        }
-        if (this.Content[0].Header.Even != this.Content[0].Header.Odd) {
-            bHdr_even = true;
-        }
-        if (true === bHdr_even && true === bHdr_first) {
-            if (null != this.Content[0].Header.First) {
-                this.Content[0].Header.First.Document_CreateFontCharMap(FontMap);
-            }
-            if (null != this.Content[0].Header.Even) {
-                this.Content[0].Header.Even.Document_CreateFontCharMap(FontMap);
-            }
-            if (null != this.Content[0].Header.Odd) {
-                this.Content[0].Header.Odd.Document_CreateFontCharMap(FontMap);
-            }
-        } else {
-            if (true === bHdr_even) {
-                if (null != this.Content[0].Header.Even) {
-                    this.Content[0].Header.Even.Document_CreateFontCharMap(FontMap);
-                }
-                if (null != this.Content[0].Header.Odd) {
-                    this.Content[0].Header.Odd.Document_CreateFontCharMap(FontMap);
-                }
-            } else {
-                if (true === bHdr_first) {
-                    if (null != this.Content[0].Header.First) {
-                        this.Content[0].Header.First.Document_CreateFontCharMap(FontMap);
-                    }
-                    if (null != this.Content[0].Header.Odd) {
-                        this.Content[0].Header.Odd.Document_CreateFontCharMap(FontMap);
-                    }
-                } else {
-                    if (null != this.Content[0].Header.Odd) {
-                        this.Content[0].Header.Odd.Document_CreateFontCharMap(FontMap);
-                    }
-                }
-            }
-        }
-        var bFtr_first = false;
-        var bFtr_even = false;
-        if (this.Content[0].Footer.First != this.Content[0].Footer.Odd) {
-            bFtr_first = true;
-        }
-        if (this.Content[0].Footer.Even != this.Content[0].Footer.Odd) {
-            bFtr_even = true;
-        }
-        if (true === bFtr_even && true === bFtr_first) {
-            if (null != this.Content[0].Footer.First) {
-                this.Content[0].Footer.First.Document_CreateFontCharMap(FontMap);
-            }
-            if (null != this.Content[0].Footer.Even) {
-                this.Content[0].Footer.Even.Document_CreateFontCharMap(FontMap);
-            }
-            if (null != this.Content[0].Footer.Odd) {
-                this.Content[0].Footer.Odd.Document_CreateFontCharMap(FontMap);
-            }
-        } else {
-            if (true === bFtr_even) {
-                if (null != this.Content[0].Footer.Even) {
-                    this.Content[0].Footer.Even.Document_CreateFontCharMap(FontMap);
-                }
-                if (null != this.Content[0].Footer.Odd) {
-                    this.Content[0].Footer.Odd.Document_CreateFontCharMap(FontMap);
-                }
-            } else {
-                if (true === bFtr_first) {
-                    if (null != this.Content[0].Footer.First) {
-                        this.Content[0].Footer.First.Document_CreateFontCharMap(FontMap);
-                    }
-                    if (null != this.Content[0].Footer.Odd) {
-                        this.Content[0].Footer.Odd.Document_CreateFontCharMap(FontMap);
-                    }
-                } else {
-                    if (null != this.Content[0].Footer.Odd) {
-                        this.Content[0].Footer.Odd.Document_CreateFontCharMap(FontMap);
-                    }
-                }
-            }
-        }
-    },
-    Document_Get_AllFontNames: function (AllFonts) {
-        var bHdr_first = false;
-        var bHdr_even = false;
-        if (this.Content[0].Header.First != this.Content[0].Header.Odd) {
-            bHdr_first = true;
-        }
-        if (this.Content[0].Header.Even != this.Content[0].Header.Odd) {
-            bHdr_even = true;
-        }
-        if (true === bHdr_even && true === bHdr_first) {
-            if (null != this.Content[0].Header.First) {
-                this.Content[0].Header.First.Document_Get_AllFontNames(AllFonts);
-            }
-            if (null != this.Content[0].Header.Even) {
-                this.Content[0].Header.Even.Document_Get_AllFontNames(AllFonts);
-            }
-            if (null != this.Content[0].Header.Odd) {
-                this.Content[0].Header.Odd.Document_Get_AllFontNames(AllFonts);
-            }
-        } else {
-            if (true === bHdr_even) {
-                if (null != this.Content[0].Header.Even) {
-                    this.Content[0].Header.Even.Document_Get_AllFontNames(AllFonts);
-                }
-                if (null != this.Content[0].Header.Odd) {
-                    this.Content[0].Header.Odd.Document_Get_AllFontNames(AllFonts);
-                }
-            } else {
-                if (true === bHdr_first) {
-                    if (null != this.Content[0].Header.First) {
-                        this.Content[0].Header.First.Document_Get_AllFontNames(AllFonts);
-                    }
-                    if (null != this.Content[0].Header.Odd) {
-                        this.Content[0].Header.Odd.Document_Get_AllFontNames(AllFonts);
-                    }
-                } else {
-                    if (null != this.Content[0].Header.Odd) {
-                        this.Content[0].Header.Odd.Document_Get_AllFontNames(AllFonts);
-                    }
-                }
-            }
-        }
-        var bFtr_first = false;
-        var bFtr_even = false;
-        if (this.Content[0].Footer.First != this.Content[0].Footer.Odd) {
-            bFtr_first = true;
-        }
-        if (this.Content[0].Footer.Even != this.Content[0].Footer.Odd) {
-            bFtr_even = true;
-        }
-        if (true === bFtr_even && true === bFtr_first) {
-            if (null != this.Content[0].Footer.First) {
-                this.Content[0].Footer.First.Document_Get_AllFontNames(AllFonts);
-            }
-            if (null != this.Content[0].Footer.Even) {
-                this.Content[0].Footer.Even.Document_Get_AllFontNames(AllFonts);
-            }
-            if (null != this.Content[0].Footer.Odd) {
-                this.Content[0].Footer.Odd.Document_Get_AllFontNames(AllFonts);
-            }
-        } else {
-            if (true === bFtr_even) {
-                if (null != this.Content[0].Footer.Even) {
-                    this.Content[0].Footer.Even.Document_Get_AllFontNames(AllFonts);
-                }
-                if (null != this.Content[0].Footer.Odd) {
-                    this.Content[0].Footer.Odd.Document_Get_AllFontNames(AllFonts);
-                }
-            } else {
-                if (true === bFtr_first) {
-                    if (null != this.Content[0].Footer.First) {
-                        this.Content[0].Footer.First.Document_Get_AllFontNames(AllFonts);
-                    }
-                    if (null != this.Content[0].Footer.Odd) {
-                        this.Content[0].Footer.Odd.Document_Get_AllFontNames(AllFonts);
-                    }
-                } else {
-                    if (null != this.Content[0].Footer.Odd) {
-                        this.Content[0].Footer.Odd.Document_Get_AllFontNames(AllFonts);
-                    }
-                }
-            }
-        }
-    },
-    Document_Is_SelectionLocked: function (CheckType) {
-        this.Lock.Check(this.Get_Id());
-    },
-    Save_Changes: function (Data, Writer) {
-        Writer.WriteLong(historyitem_type_HdrFtrController);
-        var Type = Data.Type;
-        Writer.WriteLong(Type);
-        switch (Type) {
-        case historyitem_HdrFtrController_AddItem:
-            case historyitem_HdrFtrController_RemoveItem:
-            var HeaderFlag = 0;
-            if (null != Data.New.Header.First) {
-                HeaderFlag |= 1;
-            }
-            if (null != Data.New.Header.Even) {
-                HeaderFlag |= 2;
-            }
-            if (null != Data.New.Header.Odd) {
-                HeaderFlag |= 4;
-            }
-            if (Data.New.Header.First === Data.New.Header.Even) {
-                HeaderFlag |= 8;
-            }
-            if (Data.New.Header.First === Data.New.Header.Odd) {
-                HeaderFlag |= 16;
-            }
-            if (Data.New.Header.Even === Data.New.Header.Odd) {
-                HeaderFlag |= 32;
-            }
-            Writer.WriteLong(HeaderFlag);
-            if (HeaderFlag & 1) {
-                Writer.WriteString2(Data.New.Header.First.Get_Id());
-            }
-            if (HeaderFlag & 2 && !(HeaderFlag & 8)) {
-                Writer.WriteString2(Data.New.Header.Even.Get_Id());
-            }
-            if (HeaderFlag & 4 && !(HeaderFlag & 16) && !(HeaderFlag & 32)) {
-                Writer.WriteString2(Data.New.Header.Odd.Get_Id());
-            }
-            var FooterFlag = 0;
-            if (null != Data.New.Footer.First) {
-                FooterFlag |= 1;
-            }
-            if (null != Data.New.Footer.Even) {
-                FooterFlag |= 2;
-            }
-            if (null != Data.New.Footer.Odd) {
-                FooterFlag |= 4;
-            }
-            if (Data.New.Footer.First === Data.New.Footer.Even) {
-                FooterFlag |= 8;
-            }
-            if (Data.New.Footer.First === Data.New.Footer.Odd) {
-                FooterFlag |= 16;
-            }
-            if (Data.New.Footer.Even === Data.New.Footer.Odd) {
-                FooterFlag |= 32;
-            }
-            Writer.WriteLong(FooterFlag);
-            if (FooterFlag & 1) {
-                Writer.WriteString2(Data.New.Footer.First.Get_Id());
-            }
-            if (FooterFlag & 2 && !(FooterFlag & 8)) {
-                Writer.WriteString2(Data.New.Footer.Even.Get_Id());
-            }
-            if (FooterFlag & 4 && !(FooterFlag & 16) && !(FooterFlag & 32)) {
-                Writer.WriteString2(Data.New.Footer.Odd.Get_Id());
-            }
-            break;
-        }
-        return Writer;
-    },
-    Save_Changes2: function (Data, Writer) {
-        return false;
-    },
-    Load_Changes: function (Reader, Reader2) {
-        var ClassType = Reader.GetLong();
-        if (historyitem_type_HdrFtrController != ClassType) {
-            return;
-        }
-        var Type = Reader.GetLong();
-        switch (Type) {
-        case historyitem_HdrFtrController_AddItem:
-            case historyitem_HdrFtrController_RemoveItem:
-            var HeaderFlag = Reader.GetLong();
-            if (HeaderFlag & 1) {
-                this.Content[0].Header.First = g_oTableId.Get_ById(Reader.GetString2());
-            } else {
-                this.Content[0].Header.First = null;
-            }
-            if (HeaderFlag & 2) {
-                if (! (HeaderFlag & 8)) {
-                    this.Content[0].Header.Even = g_oTableId.Get_ById(Reader.GetString2());
-                } else {
-                    this.Content[0].Header.Even = this.Content[0].Header.First;
-                }
-            } else {
-                this.Content[0].Header.Even = null;
-            }
-            if (HeaderFlag & 4) {
-                if (! (HeaderFlag & 16) && !(HeaderFlag & 32)) {
-                    this.Content[0].Header.Odd = g_oTableId.Get_ById(Reader.GetString2());
-                } else {
-                    if (! (HeaderFlag & 16)) {
-                        this.Content[0].Header.Odd = this.Content[0].Header.First;
-                    } else {
-                        this.Content[0].Header.Odd = this.Content[0].Header.Even;
-                    }
-                }
-            } else {
-                this.Content[0].Header.Odd = null;
-            }
-            var FooterFlag = Reader.GetLong();
-            if (FooterFlag & 1) {
-                this.Content[0].Footer.First = g_oTableId.Get_ById(Reader.GetString2());
-            } else {
-                this.Content[0].Footer.First = null;
-            }
-            if (FooterFlag & 2) {
-                if (! (FooterFlag & 8)) {
-                    this.Content[0].Footer.Even = g_oTableId.Get_ById(Reader.GetString2());
-                } else {
-                    this.Content[0].Footer.Even = this.Content[0].Footer.First;
-                }
-            } else {
-                this.Content[0].Footer.Even = null;
-            }
-            if (FooterFlag & 4) {
-                if (! (FooterFlag & 16) && !(FooterFlag & 32)) {
-                    this.Content[0].Footer.Odd = g_oTableId.Get_ById(Reader.GetString2());
-                } else {
-                    if (FooterFlag & 16) {
-                        this.Content[0].Footer.Odd = this.Content[0].Footer.First;
-                    } else {
-                        this.Content[0].Footer.Odd = this.Content[0].Footer.Even;
-                    }
-                }
-            } else {
-                this.Content[0].Footer.Odd = null;
-            }
-            break;
-        }
-    },
-    Load_LinkData: function (LinkData) {},
     Add_Comment: function (Comment) {
         if (null != this.CurHdrFtr) {
             Comment.Set_TypeInfo(comment_type_HdrFtr, this.CurHdrFtr);
@@ -2561,5 +1597,19 @@ CHeaderFooterController.prototype = {
             return this.CurHdrFtr.CanAdd_Comment();
         }
         return false;
+    },
+    Get_SelectionAnchorPos: function () {
+        if (null != this.CurHdrFtr) {
+            return this.CurHdrFtr.Content.Get_SelectionAnchorPos();
+        }
+        return {
+            X: 0,
+            Y: 0,
+            Page: 0
+        };
     }
 };
+function CHdrFtrPage() {
+    this.Header = null;
+    this.Footer = null;
+}

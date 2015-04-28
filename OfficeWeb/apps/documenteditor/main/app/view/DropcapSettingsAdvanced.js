@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -34,525 +34,169 @@
     Inline: false,
     Flow: true
 };
-Ext.define("DE.view.DropcapSettingsAdvanced", {
-    extend: "Ext.window.Window",
-    alias: "widget.dedropcapsettingsadvanced",
-    requires: ["Ext.Array", "Ext.form.field.ComboBox", "Ext.window.Window", "Common.component.ThemeColorPalette", "Common.component.MetricSpinner", "DE.component.TableStyler", "Common.component.IndeterminateCheckBox", "DE.component.ComboDropFonts", "Common.plugin.ComboBoxScrollPane"],
-    cls: "asc-advanced-settings-window",
-    modal: true,
-    resizable: false,
-    plain: true,
-    constrain: true,
-    height: 490,
-    width: 516,
-    layout: {
-        type: "vbox",
-        align: "stretch"
-    },
-    listeners: {
-        show: function () {
-            if (!this.isFrame && this.btnNone.pressed) {
-                this._DisableElem(c_oAscDropCap.None);
-            } else {
-                if (this.isFrame && this.btnFrameNone.pressed) {
-                    this._DisableElem(c_oAscFrameWrap.None);
-                }
-            }
-        }
-    },
-    initComponent: function () {
-        var me = this;
-        this.addEvents("onmodalresult");
-        this.Borders = {};
-        this.BorderSize = {
-            ptValue: 0,
-            pxValue: 0
-        };
-        this.paragraphShade = "transparent";
-        this._changedProps = null;
-        this.ChangedBorders = undefined;
-        this._noApply = true;
-        this.Margins = undefined;
-        this.ThemeValues = [6, 15, 7, 16, 0, 1, 2, 3, 4, 5];
-        this._spacer = Ext.create("Ext.toolbar.Spacer", {
-            width: "100%",
-            height: 10,
-            html: '<div style="width: 100%; height: 40%; border-bottom: 1px solid #C7C7C7"></div>'
-        });
-        var _arrBorderPresets = [[c_tableBorder.BORDER_OUTER, "lrtb", "asc-advanced-settings-position-btn btn-adv-paragraph-outer", "paragraphadv-button-border-outer"], [c_tableBorder.BORDER_ALL, "lrtbm", "asc-advanced-settings-position-btn btn-adv-paragraph-all", "paragraphadv-button-border-all"], [c_tableBorder.BORDER_NONE, "", "asc-advanced-settings-position-btn btn-adv-paragraph-none", "paragraphadv-button-border-none"], [c_tableBorder.BORDER_VERTICAL_LEFT, "l", "asc-advanced-settings-position-btn btn-adv-paragraph-left", "paragraphadv-button-border-left"], [c_tableBorder.BORDER_VERTICAL_RIGHT, "r", "asc-advanced-settings-position-btn btn-adv-paragraph-right", "paragraphadv-button-border-right"], [c_tableBorder.BORDER_HORIZONTAL_TOP, "t", "asc-advanced-settings-position-btn btn-adv-paragraph-top", "paragraphadv-button-border-top"], [c_tableBorder.BORDER_HORIZONTAL_CENTER, "m", "asc-advanced-settings-position-btn btn-adv-paragraph-inner-hor", "paragraphadv-button-border-inner-hor"], [c_tableBorder.BORDER_HORIZONTAL_BOTTOM, "b", "asc-advanced-settings-position-btn btn-adv-paragraph-bottom", "paragraphadv-button-border-bottom"]];
-        this._btnsBorderPosition = [];
-        Ext.Array.forEach(_arrBorderPresets, function (item, index) {
-            var _btn = Ext.create("Ext.Button", {
-                id: item[3],
-                cls: item[2],
-                posId: item[0],
-                strId: item[1],
-                text: "",
-                listeners: {
-                    click: Ext.bind(function (btn, eOpts) {
-                        this._ApplyBorderPreset(btn.strId);
-                    },
-                    this)
-                }
-            });
-            this._btnsBorderPosition.push(_btn);
+define(["text!documenteditor/main/app/template/DropcapSettingsAdvanced.template", "core", "common/main/lib/component/Button", "common/main/lib/component/CheckBox", "common/main/lib/component/ComboBoxFonts", "common/main/lib/component/MetricSpinner", "common/main/lib/component/TableStyler", "common/main/lib/component/ThemeColorPalette", "common/main/lib/view/AdvancedSettingsWindow"], function (contentTemplate) {
+    DE.Views.DropcapSettingsAdvanced = Common.Views.AdvancedSettingsWindow.extend(_.extend({
+        options: {
+            contentWidth: 320,
+            height: 380,
+            toggleGroup: "dropcap-adv-settings-group"
         },
-        this);
-        this._BordersImage = Ext.widget("detablestyler", {
-            id: "id-dedropgraphstyler",
-            width: 200,
-            height: 170,
-            rows: this.tableStylerRows,
-            columns: this.tableStylerColumns,
-            spacingMode: false
-        });
-        var dataBorders = [{
-            borderstyle: "",
-            text: this.txtNoBorders,
-            value: 0,
-            offsety: 0
-        },
-        {
-            text: "0.5 pt",
-            value: 0.5,
-            pxValue: 0.5,
-            offsety: 0
-        },
-        {
-            text: "1 pt",
-            value: 1,
-            pxValue: 1,
-            offsety: 20
-        },
-        {
-            text: "1.5 pt",
-            value: 1.5,
-            pxValue: 2,
-            offsety: 40
-        },
-        {
-            text: "2.25 pt",
-            value: 2.25,
-            pxValue: 3,
-            offsety: 60
-        },
-        {
-            text: "3 pt",
-            value: 3,
-            pxValue: 4,
-            offsety: 80
-        },
-        {
-            text: "4.5 pt",
-            value: 4.5,
-            pxValue: 5,
-            offsety: 100
-        },
-        {
-            text: "6 pt",
-            value: 6,
-            pxValue: 6,
-            offsety: 120
-        }];
-        for (var i = 1; i < dataBorders.length; i++) {
-            dataBorders[i].borderstyle = Ext.String.format("background:url({0}) 0 {1}px; width:69px; height:20px; margin-right:5px;", "resources/img/right-panels/BorderSize.png", -dataBorders[i].offsety);
-        }
-        var fieldStore = Ext.create("Ext.data.Store", {
-            model: "DE.model.ModelBorders",
-            data: dataBorders
-        });
-        var item_tpl = Ext.create("Ext.XTemplate", '<tpl for=".">' + '<span style="display: inline-block; margin-top: 3px; font-size: 11px; height: 17px;">{text}</span>' + '<img src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" align="right" style="{borderstyle}">' + "</tpl>");
-        this.cmbBorderSize = Ext.create("Ext.form.field.ComboBox", {
-            width: 93,
-            height: 21,
-            editable: false,
-            queryMode: "local",
-            matchFieldWidth: false,
-            displayField: "text",
-            store: fieldStore,
-            listConfig: {
-                mode: "local",
-                width: 145,
-                itemTpl: item_tpl
-            },
-            listeners: {
-                select: Ext.bind(function (combo, records, eOpts) {
-                    this.BorderSize = {
-                        ptValue: records[0].data.value,
-                        pxValue: records[0].data.pxValue
-                    };
-                    this._BordersImage.setVirtualBorderSize(this.BorderSize.pxValue);
-                    if (combo.inputEl) {
-                        if (records[0].data.value > 0) {
-                            combo.inputEl.set({
-                                type: "image"
-                            });
-                            combo.inputEl.set({
-                                src: "data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
-                            });
-                            var style = Ext.String.format("background:url({0}) no-repeat scroll 0 {1}px, url({2}) repeat scroll 0 0 white", "resources/img/right-panels/BorderSize.png", -records[0].data.offsety, "resources/img/controls/text-bg.gif");
-                            Ext.DomHelper.applyStyles(combo.inputEl, style);
-                        } else {
-                            var style = Ext.String.format("background: url({0}) repeat scroll 0 0 white", "resources/img/controls/text-bg.gif");
-                            Ext.DomHelper.applyStyles(combo.inputEl, style);
-                            combo.inputEl.set({
-                                type: "text"
-                            });
-                            combo.inputEl.set({
-                                value: me.txtNoBorders
-                            });
-                            combo.onItemClick(combo.picker, records[0]);
-                        }
-                    }
+        initialize: function (options) {
+            _.extend(this.options, {
+                title: this.textTitle,
+                contentTemplate: _.template(contentTemplate)({
+                    scope: this
+                }),
+                items: [{
+                    panelId: "id-adv-dropcap-frame",
+                    panelCaption: this.textFrame
                 },
-                this),
-                afterRender: function () {
-                    if (this.inputEl) {
-                        Ext.DomHelper.applyStyles(this.inputEl, "padding-left:7px");
-                        this.inputEl.set({
-                            type: "image"
-                        });
-                        this.inputEl.set({
-                            src: "data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
-                        });
-                        var style = Ext.String.format("background:url({0}) repeat scroll 0 {1}px, url({2}) repeat scroll 0 0 white", "resources/img/right-panels/BorderSize.png", -20, "resources/img/controls/text-bg.gif");
-                        Ext.DomHelper.applyStyles(this.inputEl, style);
-                    }
-                }
-            },
-            plugins: [{
-                ptype: "comboboxscrollpane",
-                pluginId: "scrollpane",
-                settings: {
-                    enableKeyboardNavigation: true
-                }
-            }]
-        });
-        var rec = this.cmbBorderSize.getStore().getAt(2);
-        this.cmbBorderSize.select(rec);
-        this.BorderSize = {
-            ptValue: rec.data.value,
-            pxValue: rec.data.pxValue
-        };
-        this._btnBorderColor = Ext.create("Ext.button.Button", {
-            id: "dropadv-button-border-color",
-            arrowCls: "",
-            width: 45,
-            height: 22,
-            color: "000000",
-            menu: {
-                showSeparator: false,
-                items: [this.colorsBorder = Ext.create("Common.component.ThemeColorPalette", {
-                    value: "000000",
-                    width: 165,
-                    height: 214,
-                    dynamiccolors: true,
-                    dyncolorscount: 10,
-                    colors: [this.textThemeColors, "-", {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 3
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 4
-                    },
-                    {
-                        color: "000000",
-                        effectId: 5
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 3
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 4
-                    },
-                    "-", {
-                        color: "3D55FE",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 3
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 4
-                    },
-                    {
-                        color: "000000",
-                        effectId: 5
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    "-", "--", "-", this.textStandartColors, "-", "3D55FE", "5301B3", "980ABD", "B2275F", "F83D26", "F86A1D", "F7AC16", "F7CA12", "FAFF44", "D6EF39", "-", "--"],
-                    listeners: {
-                        select: {
-                            fn: function (picker, color, eOpts, id) {
-                                Ext.menu.Manager.hideAll();
-                                var colorstr = Ext.String.format("#{0}", (typeof(color) == "object") ? color.color : color);
-                                me._btnBorderColor.color = color;
-                                me._BordersImage.setVirtualBorderColor(colorstr);
-                                if (me._btnBorderColor.btnEl) {
-                                    Ext.DomHelper.applyStyles(me._btnBorderColor.btnEl, {
-                                        "background-color": colorstr
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }), {
-                    cls: "menu-item-noicon menu-item-color-palette-theme",
-                    text: this.textNewColor,
-                    listeners: {
-                        click: function (item, event) {
-                            me.colorsBorder.addNewColor();
-                        }
-                    }
+                {
+                    panelId: "id-adv-dropcap-dropcap",
+                    panelCaption: this.strDropcap
+                },
+                {
+                    panelId: "id-adv-dropcap-borders",
+                    panelCaption: this.strBorders
+                },
+                {
+                    panelId: "id-adv-dropcap-margins",
+                    panelCaption: this.strMargins
                 }]
             },
-            listeners: {
-                render: function (c) {
-                    var colorStyle = Ext.String.format("background-color:#{0}", (typeof(c.color) == "object") ? c.color.color : c.color);
-                    Ext.DomHelper.applyStyles(c.btnEl, colorStyle);
-                }
+            options);
+            this.tableStylerRows = this.options.tableStylerRows;
+            this.tableStylerColumns = this.options.tableStylerColumns;
+            this.fontStore = this.options.fontStore;
+            this.borderProps = this.options.borderProps;
+            this.isFrame = this.options.isFrame;
+            this.api = this.options.api;
+            this.Borders = {};
+            this.BorderSize = {
+                ptValue: 0,
+                pxValue: 0
+            };
+            this.paragraphShade = "transparent";
+            this._changedProps = null;
+            this.ChangedBorders = undefined;
+            this._noApply = true;
+            this.Margins = undefined;
+            this._originalProps = new CParagraphProp(this.options.paragraphProps);
+            Common.Views.AdvancedSettingsWindow.prototype.initialize.call(this, this.options);
+        },
+        render: function () {
+            var me = this;
+            Common.Views.AdvancedSettingsWindow.prototype.render.call(this);
+            this.tableStyler = new Common.UI.TableStyler({
+                el: $("#drop-advanced-borderstyler"),
+                width: 200,
+                height: 170,
+                rows: this.tableStylerRows,
+                columns: this.tableStylerColumns,
+                spacingMode: false
+            });
+            _.each([[c_tableBorder.BORDER_HORIZONTAL_TOP, "t", "btn-borders-large btn-adv-paragraph-top", "00"], [c_tableBorder.BORDER_HORIZONTAL_CENTER, "m", "btn-borders-large btn-adv-paragraph-inner-hor", "01"], [c_tableBorder.BORDER_HORIZONTAL_BOTTOM, "b", "btn-borders-large btn-adv-paragraph-bottom", "10"], [c_tableBorder.BORDER_OUTER, "lrtb", "btn-borders-large btn-adv-paragraph-outer", "11"], [c_tableBorder.BORDER_VERTICAL_LEFT, "l", "btn-borders-large btn-adv-paragraph-left", "20"], [c_tableBorder.BORDER_ALL, "lrtbm", "btn-borders-large btn-adv-paragraph-all", "21"], [c_tableBorder.BORDER_VERTICAL_RIGHT, "r", "btn-borders-large btn-adv-paragraph-right", "30"], [c_tableBorder.BORDER_NONE, "", "btn-borders-large btn-adv-paragraph-none", "31"]], function (item, index) {
+                var _btn = new Common.UI.Button({
+                    posId: item[0],
+                    strId: item[1],
+                    iconCls: item[2],
+                    style: "margin-left: 5px; margin-bottom: 4px;",
+                    cls: "btn-options large"
+                });
+                _btn.render($("#drop-advanced-button-borderline-" + item[3])).on("click", function (btn) {
+                    me._ApplyBorderPreset(btn.options.strId);
+                });
             },
-            setColor: function (newcolor) {
-                var border, clr;
-                this.color = newcolor;
-                if (newcolor == "transparent" || newcolor.color == "transparent") {
-                    border = "1px solid #BEBEBE";
-                    clr = newcolor;
-                } else {
-                    border = "none";
-                    clr = Ext.String.format("#{0}", (typeof(newcolor) == "object") ? newcolor.color : newcolor);
-                }
-                if (this.btnEl !== undefined) {
-                    Ext.DomHelper.applyStyles(this.btnEl, {
-                        "background-color": clr,
-                        "border": border
-                    });
-                }
-            }
-        });
-        this._btnBackColor = Ext.create("Ext.button.Button", {
-            id: "dropadv-button-back-color",
-            arrowCls: "",
-            width: 50,
-            height: 22,
-            color: "transparent",
-            menu: {
-                showSeparator: false,
-                items: [this.colorsBack = Ext.create("Common.component.ThemeColorPalette", {
-                    value: "000000",
-                    width: 165,
-                    height: 214,
-                    dynamiccolors: true,
-                    dyncolorscount: 10,
-                    colors: [this.textThemeColors, "-", {
+            this);
+            this.cmbBorderSize = new Common.UI.ComboBorderSize({
+                el: $("#drop-advanced-input-bordersize"),
+                style: "width: 90px;",
+                store: new Backbone.Collection(),
+                data: [{
+                    id: Common.UI.getId(),
+                    displayValue: this.txtNoBorders,
+                    value: 0,
+                    borderstyle: ""
+                },
+                {
+                    id: Common.UI.getId(),
+                    displayValue: "0.5 pt",
+                    value: 0.5,
+                    pxValue: 0.5,
+                    offsety: 0
+                },
+                {
+                    id: Common.UI.getId(),
+                    displayValue: "1 pt",
+                    value: 1,
+                    pxValue: 1,
+                    offsety: 20
+                },
+                {
+                    id: Common.UI.getId(),
+                    displayValue: "1.5 pt",
+                    value: 1.5,
+                    pxValue: 2,
+                    offsety: 40
+                },
+                {
+                    id: Common.UI.getId(),
+                    displayValue: "2.25 pt",
+                    value: 2.25,
+                    pxValue: 3,
+                    offsety: 60
+                },
+                {
+                    id: Common.UI.getId(),
+                    displayValue: "3 pt",
+                    value: 3,
+                    pxValue: 4,
+                    offsety: 80
+                },
+                {
+                    id: Common.UI.getId(),
+                    displayValue: "4.5 pt",
+                    value: 4.5,
+                    pxValue: 5,
+                    offsety: 100
+                },
+                {
+                    id: Common.UI.getId(),
+                    displayValue: "6 pt",
+                    value: 6,
+                    pxValue: 6,
+                    offsety: 120
+                }]
+            }).on("selected", _.bind(function (combo, record) {
+                this.BorderSize = {
+                    ptValue: record.value,
+                    pxValue: record.pxValue
+                };
+                this.tableStyler.setVirtualBorderSize(this.BorderSize.pxValue);
+            },
+            this));
+            var rec = this.cmbBorderSize.store.at(2);
+            this.cmbBorderSize.setValue(rec.get("value"));
+            this.BorderSize = {
+                ptValue: rec.get("value"),
+                pxValue: rec.get("pxValue")
+            };
+            this.btnBorderColor = new Common.UI.ColorButton({
+                style: "width:45px;",
+                menu: new Common.UI.Menu({
+                    items: [{
+                        template: _.template('<div id="drop-advanced-border-color-menu" style="width: 165px; height: 220px; margin: 10px;"></div>')
+                    },
+                    {
+                        template: _.template('<a id="drop-advanced-border-color-new" style="padding-left:12px;">' + me.textNewColor + "</a>")
+                    }]
+                })
+            });
+            this.btnBorderColor.on("render:after", function (btn) {
+                me.colorsBorder = new Common.UI.ThemeColorPalette({
+                    el: $("#drop-advanced-border-color-menu"),
+                    dynamiccolors: 10,
+                    colors: [me.textThemeColors, "-", {
                         color: "3366FF",
                         effectId: 1
                     },
@@ -792,1716 +436,1267 @@ Ext.define("DE.view.DropcapSettingsAdvanced", {
                         color: "000000",
                         effectId: 1
                     },
-                    "-", "--", "-", this.textStandartColors, "-", "transparent", "5301B3", "980ABD", "B2275F", "F83D26", "F86A1D", "F7AC16", "F7CA12", "FAFF44", "D6EF39", "-", "--"],
-                    listeners: {
-                        select: {
-                            fn: function (picker, color, eOpts, id) {
-                                Ext.menu.Manager.hideAll();
-                                var clr, border;
-                                me._btnBackColor.color = color;
-                                if (color == "transparent") {
-                                    clr = "transparent";
-                                    border = "1px solid #BEBEBE";
-                                } else {
-                                    clr = Ext.String.format("#{0}", (typeof(color) == "object") ? color.color : color);
-                                    border = "none";
-                                }
-                                if (me._btnBackColor.btnEl) {
-                                    Ext.DomHelper.applyStyles(me._btnBackColor.btnEl, {
-                                        "background-color": clr,
-                                        "border": border
-                                    });
-                                }
-                                me.paragraphShade = me._btnBackColor.color;
-                                if (me._changedProps) {
-                                    if (me._changedProps.get_Shade() === undefined || me._changedProps.get_Shade() === null) {
-                                        me._changedProps.put_Shade(new CParagraphShd());
-                                    }
-                                    if (me._btnBackColor.color == "transparent") {
-                                        me._changedProps.get_Shade().put_Value(shd_Nil);
-                                    } else {
-                                        me._changedProps.get_Shade().put_Value(shd_Clear);
-                                        me._changedProps.get_Shade().put_Color(me.getRgbColor(me._btnBackColor.color));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }), {
-                    cls: "menu-item-noicon menu-item-color-palette-theme",
-                    text: me.textNewColor,
-                    listeners: {
-                        click: function (item, event) {
-                            me.colorsBack.addNewColor();
-                        }
-                    }
-                }]
+                    "-", "--", "-", me.textStandartColors, "-", "3D55FE", "5301B3", "980ABD", "B2275F", "F83D26", "F86A1D", "F7AC16", "F7CA12", "FAFF44", "D6EF39", "-", "--"]
+                }).on("select", _.bind(function (picker, color) {
+                    me.btnBorderColor.setColor(color);
+                    me.tableStyler.setVirtualBorderColor((typeof(color) == "object") ? color.color : color);
+                },
+                me));
+            });
+            this.btnBorderColor.render($("#drop-advanced-button-bordercolor"));
+            this.btnBorderColor.setColor("000000");
+            this.btnBorderColor.menu.cmpEl.on("click", "#drop-advanced-border-color-new", _.bind(function () {
+                me.colorsBorder.addNewColor((typeof(me.btnBorderColor.color) == "object") ? me.btnBorderColor.color.color : me.btnBorderColor.color);
             },
-            listeners: {
-                render: function (c) {
-                    var border, clr;
-                    if (c.color == "transparent") {
-                        border = "1px solid #BEBEBE";
-                        clr = c.color;
-                    } else {
-                        border = "none";
-                        clr = Ext.String.format("#{0}", (typeof(c.color) == "object") ? c.color.color : c.color);
-                    }
-                    Ext.DomHelper.applyStyles(c.btnEl, {
-                        "background-color": clr,
-                        "border": border
-                    });
-                }
-            },
-            setColor: function (newcolor) {
-                var border, clr;
-                this.color = newcolor;
-                if (newcolor == "transparent") {
-                    border = "1px solid #BEBEBE";
-                    clr = newcolor;
-                } else {
-                    border = "none";
-                    clr = Ext.String.format("#{0}", (typeof(newcolor) == "object") ? newcolor.color : newcolor);
-                }
-                if (this.btnEl !== undefined) {
-                    Ext.DomHelper.applyStyles(this.btnEl, {
-                        "background-color": clr,
-                        "border": border
-                    });
-                }
-            }
-        });
-        this._spnMarginTop = Ext.create("Common.component.MetricSpinner", {
-            id: "dropadv-number-margin-top",
-            readOnly: false,
-            maxValue: 55.87,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0 cm",
-            width: 100,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (!this._noApply) {
-                        if (this.Margins === undefined) {
-                            this.Margins = {};
-                        }
-                        this.Margins.Top = Common.MetricSettings.fnRecalcToMM(field.getNumberValue());
-                    }
-                },
-                this)
-            }
-        });
-        this._spnMarginBottom = Ext.create("Common.component.MetricSpinner", {
-            id: "dropadv-number-margin-bottom",
-            readOnly: false,
-            maxValue: 55.87,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0 cm",
-            width: 100,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (!this._noApply) {
-                        if (this.Margins === undefined) {
-                            this.Margins = {};
-                        }
-                        this.Margins.Bottom = Common.MetricSettings.fnRecalcToMM(field.getNumberValue());
-                    }
-                },
-                this)
-            }
-        });
-        this._spnMarginLeft = Ext.create("Common.component.MetricSpinner", {
-            id: "dropadv-number-margin-left",
-            readOnly: false,
-            maxValue: 9.34,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0.19 cm",
-            width: 100,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (!this._noApply) {
-                        if (this.Margins === undefined) {
-                            this.Margins = {};
-                        }
-                        this.Margins.Left = Common.MetricSettings.fnRecalcToMM(field.getNumberValue());
-                    }
-                },
-                this)
-            }
-        });
-        this._spnMarginRight = Ext.create("Common.component.MetricSpinner", {
-            id: "dropadv-number-margin-right",
-            readOnly: false,
-            maxValue: 9.34,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0.19 cm",
-            width: 100,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (!this._noApply) {
-                        if (this.Margins === undefined) {
-                            this.Margins = {};
-                        }
-                        this.Margins.Right = Common.MetricSettings.fnRecalcToMM(field.getNumberValue());
-                    }
-                },
-                this)
-            }
-        });
-        this.btnNone = Ext.create("Ext.Button", {
-            id: "drop-advanced-button-none",
-            cls: "asc-right-panel-wrapbtn btn-drop-none",
-            posId: c_oAscDropCap.None,
-            margin: "0 10 0 0",
-            text: "",
-            tooltip: this.textNone,
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "dropAdvGroup",
-            pressed: true,
-            toggleHandler: Ext.bind(function (btn) {
-                if (this._changedProps && btn.pressed) {
-                    this._DisableElem(btn.posId);
-                    this._changedProps.put_DropCap(btn.posId);
-                }
-            },
-            this)
-        });
-        this.btnInText = Ext.create("Ext.Button", {
-            id: "drop-advanced-button-intext",
-            cls: "asc-right-panel-wrapbtn btn-drop-text",
-            posId: c_oAscDropCap.Drop,
-            margin: "0 10 0 0",
-            text: "",
-            tooltip: this.textInText,
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "dropAdvGroup",
-            toggleHandler: Ext.bind(function (btn) {
-                if (this._changedProps && btn.pressed) {
-                    this._DisableElem(btn.posId);
-                    this._changedProps.put_DropCap(btn.posId);
-                }
-            },
-            this)
-        });
-        this.btnInMargin = Ext.create("Ext.Button", {
-            id: "drop-advanced-button-inmargin",
-            cls: "asc-right-panel-wrapbtn btn-drop-margin",
-            posId: c_oAscDropCap.Margin,
-            margin: "0 10 0 0",
-            text: "",
-            tooltip: this.textInMargin,
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "dropAdvGroup",
-            toggleHandler: Ext.bind(function (btn) {
-                if (this._changedProps && btn.pressed) {
-                    this._DisableElem(btn.posId);
-                    this._changedProps.put_DropCap(btn.posId);
-                }
-            },
-            this)
-        });
-        this.spnRowHeight = Ext.widget("numberfield", {
-            id: "dropadv-spin-row-height",
-            width: 140,
-            minValue: 1,
-            maxValue: 10,
-            value: 3,
-            allowDecimals: false,
-            step: 1,
-            listeners: {
-                afterRender: function () {
-                    if (this.inputEl) {
-                        Ext.DomHelper.applyStyles(this.inputEl, "text-align:right;");
-                    }
-                },
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps && field.isValid()) {
-                        this._changedProps.put_Lines(field.getValue());
-                    }
-                },
-                this)
-            }
-        });
-        this.numDistance = Ext.create("Common.component.MetricSpinner", {
-            id: "dropadv-spin-dist",
-            readOnly: false,
-            step: 0.1,
-            width: 140,
-            defaultUnit: "cm",
-            value: "0 cm",
-            maxValue: 55.87,
-            minValue: 0,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_HSpace(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                    }
-                },
-                this)
-            }
-        });
-        this.cmbFonts = Ext.create("DE.component.ComboDropFonts", {
-            id: "dropadv-combo-fonts",
-            margin: "0",
-            width: 290,
-            colspan: 2,
-            cls: "asc-toolbar-combo",
-            editable: true,
-            selectOnFocus: true,
-            showlastused: false,
-            enableKeyEvents: true,
-            tooltip: this.tipFontName,
-            listId: "dropcap-combo-fonts-list",
-            store: this.fontStore,
-            plugins: [{
-                ptype: "comboboxscrollpane",
-                pluginId: "scrollpane",
-                settings: {
-                    enableKeyboardNavigation: true
-                }
-            }],
-            listeners: {
-                select: Ext.bind(function (combo, records, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_FontFamily(records[0].data.name);
-                    }
-                },
-                this)
-            }
-        });
-        this.cmbFonts.fillFonts();
-        this.btnFrameNone = Ext.create("Ext.Button", {
-            id: "drop-advanced-frame-none",
-            cls: "asc-right-panel-btn btn-frame-none",
-            posId: c_oAscFrameWrap.None,
-            margin: "0 10 0 0",
-            text: "",
-            tooltip: this.textNone,
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "frameAdvGroup",
-            pressed: true,
-            toggleHandler: Ext.bind(function (btn) {
-                if (this._changedProps && btn.pressed) {
-                    this._DisableElem(btn.posId);
-                    this._changedProps.put_Wrap(btn.posId);
-                }
-            },
-            this)
-        });
-        this.btnFrameInline = Ext.create("Ext.Button", {
-            id: "drop-advanced-frame-inline",
-            cls: "asc-right-panel-btn btn-frame-inline",
-            posId: c_oAscFrameWrap.Inline,
-            margin: "0 10 0 0",
-            text: "",
-            tooltip: this.textInline,
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "frameAdvGroup",
-            toggleHandler: Ext.bind(function (btn) {
-                if (this._changedProps && btn.pressed) {
-                    this._DisableElem(btn.posId);
-                    this._changedProps.put_Wrap(btn.posId);
-                }
-            },
-            this)
-        });
-        this.btnFrameFlow = Ext.create("Ext.Button", {
-            id: "drop-advanced-frame-flow",
-            cls: "asc-right-panel-btn btn-frame-flow",
-            posId: c_oAscFrameWrap.Flow,
-            margin: "0 10 0 0",
-            text: "",
-            tooltip: this.textFlow,
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "frameAdvGroup",
-            toggleHandler: Ext.bind(function (btn) {
-                if (this._changedProps && btn.pressed) {
-                    this._DisableElem(btn.posId);
-                    this._changedProps.put_Wrap(btn.posId);
-                }
-            },
-            this)
-        });
-        this._arrWidth = [this.textAuto, this.textExact];
-        this.cmbWidth = Ext.create("Ext.form.field.ComboBox", {
-            id: "dropadv-combo-width",
-            width: 120,
-            editable: false,
-            store: this._arrWidth,
-            mode: "local",
-            triggerAction: "all",
-            style: "margin-bottom: 0;",
-            listeners: {
-                select: Ext.bind(function (combo, records, eOpts) {
-                    if (this._changedProps) {
-                        this._spnWidth.suspendEvents(false);
-                        this._spnWidth.setValue((records[0].index == 0) ? "" : 1);
-                        this._spnWidth.resumeEvents();
-                        this._changedProps.put_W((records[0].index == 0) ? undefined : Common.MetricSettings.fnRecalcToMM(this._spnWidth.getNumberValue()));
-                    }
-                },
-                this)
-            }
-        });
-        this.cmbWidth.setValue(this._arrWidth[0]);
-        this._spnWidth = Ext.create("Common.component.MetricSpinner", {
-            id: "dropadv-spin-width",
-            readOnly: false,
-            maxValue: 55.88,
-            minValue: 0.02,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "",
-            width: 85,
-            style: "margin-bottom: 0;",
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        this.cmbWidth.suspendEvents(false);
-                        this.cmbWidth.setValue(this._arrWidth[1]);
-                        this.cmbWidth.resumeEvents();
-                        this._changedProps.put_W(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                    }
-                },
-                this)
-            }
-        });
-        this._arrHeight = [this.textAuto, this.textExact, this.textAtLeast];
-        this.cmbHeight = Ext.create("Ext.form.field.ComboBox", {
-            id: "dropadv-combo-height",
-            width: 120,
-            editable: false,
-            store: this._arrHeight,
-            mode: "local",
-            triggerAction: "all",
-            style: "margin-bottom: 0;",
-            listeners: {
-                select: Ext.bind(function (combo, records, eOpts) {
-                    if (this._changedProps) {
-                        this._spnHeight.suspendEvents(false);
-                        this._spnHeight.setValue((records[0].index == 0) ? "" : 1);
-                        this._spnHeight.resumeEvents();
-                        this._changedProps.put_HRule((records[0].index == 0) ? linerule_Auto : ((records[0].index == 1) ? linerule_Exact : linerule_AtLeast));
-                        if (records[0].index > 0) {
-                            this._changedProps.put_H(Common.MetricSettings.fnRecalcToMM(this._spnHeight.getNumberValue()));
-                        }
-                    }
-                },
-                this)
-            }
-        });
-        this.cmbHeight.setValue(this._arrHeight[0]);
-        this._spnHeight = Ext.create("Common.component.MetricSpinner", {
-            id: "dropadv-spin-height",
-            readOnly: false,
-            maxValue: 55.88,
-            minValue: 0.02,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "",
-            width: 85,
-            style: "margin-bottom: 0;",
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        var type = linerule_Auto;
-                        if (this.cmbHeight.getValue() == this._arrHeight[1]) {
-                            type = linerule_Exact;
-                        } else {
-                            if (this.cmbHeight.getValue() == this._arrHeight[2]) {
-                                type = linerule_AtLeast;
-                            }
-                        }
-                        if (type == linerule_Auto) {
-                            this.cmbHeight.suspendEvents(false);
-                            this.cmbHeight.setValue(this._arrHeight[2]);
-                            type = linerule_AtLeast;
-                            this.cmbHeight.resumeEvents();
-                        }
-                        this._changedProps.put_HRule(type);
-                        this._changedProps.put_H(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                    }
-                },
-                this)
-            }
-        });
-        this._spnX = Ext.create("Common.component.MetricSpinner", {
-            id: "dropadv-spin-x",
-            readOnly: false,
-            maxValue: 55.87,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0 cm",
-            width: 85,
-            style: "margin-bottom: 0;",
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_HSpace(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                    }
-                },
-                this)
-            }
-        });
-        this._spnY = Ext.create("Common.component.MetricSpinner", {
-            id: "dropadv-spin-y",
-            readOnly: false,
-            maxValue: 55.87,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0 cm",
-            width: 85,
-            style: "margin-bottom: 0;",
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_VSpace(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                    }
-                },
-                this)
-            }
-        });
-        this._arrHAlign = [[c_oAscXAlign.Left, this.textLeft], [c_oAscXAlign.Center, this.textCenter], [c_oAscXAlign.Right, this.textRight]];
-        this.cmbHAlign = Ext.create("Ext.form.field.ComboBox", {
-            id: "dropadv-combo-halign",
-            width: 120,
-            editable: true,
-            disableKeyFilter: true,
-            store: this._arrHAlign,
-            queryMode: "local",
-            triggerAction: "all",
-            style: "margin-bottom: 0;",
-            minChars: 20,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_XAlign(undefined);
-                        this._changedProps.put_X(Common.MetricSettings.fnRecalcToMM(parseFloat(field.getValue())));
-                    }
-                },
-                this),
-                select: Ext.bind(function (combo, records, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_XAlign(this._arrHAlign[records[0].index][0]);
-                    }
-                },
-                this)
-            }
-        });
-        this.cmbHAlign.setValue(this._arrHAlign[0][0]);
-        this._arrHRelative = [[c_oAscHAnchor.Margin, this.textMargin], [c_oAscHAnchor.Page, this.textPage], [c_oAscHAnchor.Text, this.textColumn]];
-        this.cmbHRelative = Ext.create("Ext.form.field.ComboBox", {
-            id: "dropadv-combo-hrelative",
-            width: 85,
-            editable: false,
-            store: this._arrHRelative,
-            queryMode: "local",
-            triggerAction: "all",
-            style: "margin-bottom: 0;",
-            listeners: {
-                select: Ext.bind(function (combo, records, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_HAnchor(this._arrHRelative[records[0].index][0]);
-                    }
-                },
-                this)
-            }
-        });
-        this.cmbHRelative.setValue(this._arrHRelative[1][0]);
-        this._arrVAlign = [[c_oAscYAlign.Top, this.textTop], [c_oAscYAlign.Center, this.textCenter], [c_oAscYAlign.Bottom, this.textBottom]];
-        this.cmbVAlign = Ext.create("Ext.form.field.ComboBox", {
-            id: "dropadv-combo-valign",
-            width: 120,
-            editable: true,
-            disableKeyFilter: true,
-            store: this._arrVAlign,
-            queryMode: "local",
-            triggerAction: "all",
-            style: "margin-bottom: 0;",
-            minChars: 20,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_YAlign(undefined);
-                        this._changedProps.put_Y(Common.MetricSettings.fnRecalcToMM(parseFloat(field.getValue())));
-                    }
-                },
-                this),
-                select: Ext.bind(function (combo, records, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_YAlign(this._arrVAlign[records[0].index][0]);
-                    }
-                },
-                this)
-            }
-        });
-        this.cmbVAlign.setValue(this._arrVAlign[0][0]);
-        this._arrVRelative = [[c_oAscVAnchor.Margin, this.textMargin], [c_oAscVAnchor.Page, this.textPage], [c_oAscVAnchor.Text, this.textParagraph]];
-        this.cmbVRelative = Ext.create("Ext.form.field.ComboBox", {
-            id: "dropadv-combo-vrelative",
-            width: 85,
-            editable: false,
-            store: this._arrVRelative,
-            queryMode: "local",
-            triggerAction: "all",
-            style: "margin-bottom: 0;",
-            listeners: {
-                select: Ext.bind(function (combo, records, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_VAnchor(this._arrVRelative[records[0].index][0]);
-                        this.chMove.suspendEvents(false);
-                        this.chMove.setValue(this._arrVRelative[records[0].index][0] == c_oAscVAnchor.Text);
-                        this.chMove.resumeEvents();
-                    }
-                },
-                this)
-            }
-        });
-        this.cmbVRelative.setValue(this._arrVRelative[2][0]);
-        this.chMove = Ext.create("Common.component.IndeterminateCheckBox", {
-            id: "dropadv-checkbox-move",
-            boxLabel: this.textMove,
-            colspan: 3,
-            checked: true,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        var rec = this.cmbVRelative.getStore().getAt((field.getValue() == "checked") ? 2 : 1);
-                        this.cmbVRelative.select(rec);
-                        this.cmbVRelative.fireEvent("select", this.cmbVRelative, [rec]);
-                    }
-                },
-                this)
-            }
-        });
-        this.btnBorders = Ext.widget("button", {
-            width: 160,
-            height: 27,
-            cls: "asc-dialogmenu-btn",
-            textAlign: "right",
-            text: this.strBorders,
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "advtablecardGroup",
-            listeners: {
-                click: function (btn) {
-                    if (btn.pressed) {
-                        this.mainCard.getLayout().setActiveItem("card-borders");
-                    }
-                },
-                scope: this
-            }
-        });
-        this.btnMargins = Ext.widget("button", {
-            width: 160,
-            height: 27,
-            cls: "asc-dialogmenu-btn",
-            textAlign: "right",
-            text: this.strMargins,
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "advtablecardGroup",
-            listeners: {
-                click: function (btn) {
-                    if (btn.pressed) {
-                        this.mainCard.getLayout().setActiveItem("card-margins");
-                    }
-                },
-                scope: this
-            }
-        });
-        this.btnFrame = Ext.widget("button", {
-            width: 160,
-            height: 27,
-            cls: "asc-dialogmenu-btn",
-            textAlign: "right",
-            text: this.textFrame,
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "advtablecardGroup",
-            pressed: true,
-            listeners: {
-                click: function (btn) {
-                    if (btn.pressed) {
-                        this.mainCard.getLayout().setActiveItem((this.isFrame) ? "card-frame" : "card-drop");
-                    }
-                },
-                scope: this
-            }
-        });
-        this._BordersContainer = {
-            xtype: "container",
-            itemId: "card-borders",
-            layout: {
-                type: "vbox",
-                align: "stretch"
-            },
-            height: 285,
-            items: [{
-                xtype: "container",
-                layout: {
-                    type: "hbox",
-                    align: "middle"
-                },
-                height: 28,
-                padding: "2px 10px 0 10px",
-                style: "vertical-align: middle;",
-                items: [{
-                    xtype: "label",
-                    text: this.textBorderWidth
-                },
-                {
-                    xtype: "tbspacer",
-                    width: 4
-                },
-                this.cmbBorderSize, {
-                    xtype: "tbspacer",
-                    flex: 1
-                },
-                {
-                    xtype: "label",
-                    text: this.textBorderColor
-                },
-                {
-                    xtype: "tbspacer",
-                    width: 4
-                },
-                this._btnBorderColor]
-            },
-            {
-                xtype: "tbspacer",
-                height: 10
-            },
-            {
-                xtype: "label",
-                text: this.textBorderDesc,
-                style: "padding-left:10px;height:13px;"
-            },
-            {
-                xtype: "tbspacer",
-                height: 20
-            },
-            {
-                xtype: "container",
-                layout: {
-                    type: "hbox",
-                    align: "top"
-                },
-                height: 180,
-                width: 200,
-                padding: "0 10",
-                style: "vertical-align: top;",
-                items: [this.bordersImagePanel = Ext.create("Ext.container.Container", {
-                    layout: "card",
-                    activeItem: 0,
-                    width: 200,
-                    height: 180,
-                    style: "padding-bottom:10px;",
-                    items: [this._BordersImage]
-                }), {
-                    xtype: "tbspacer",
-                    width: 25
-                },
-                {
-                    xtype: "container",
-                    layout: "hbox",
-                    height: 180,
-                    width: 100,
-                    items: [this._PresetsContainer = Ext.create("Ext.container.Container", {
-                        height: 180,
-                        width: 100,
-                        layout: {
-                            type: "table",
-                            columns: 2,
-                            tdAttrs: {
-                                style: "padding-right: 10px; padding-bottom: 4px; vertical-align: middle;"
-                            }
-                        },
-                        items: [{
-                            xtype: "tbspacer",
-                            height: 5
-                        },
-                        {
-                            xtype: "tbspacer",
-                            height: 5
-                        },
-                        this._btnsBorderPosition[5], this._btnsBorderPosition[6], this._btnsBorderPosition[7], this._btnsBorderPosition[0], this._btnsBorderPosition[3], this._btnsBorderPosition[1], this._btnsBorderPosition[4], this._btnsBorderPosition[2]]
-                    })]
-                }]
-            },
-            {
-                xtype: "tbspacer",
-                height: 5
-            },
-            {
-                xtype: "container",
-                height: 23,
-                padding: "0 10",
-                layout: "hbox",
-                items: [this._BackContainer = Ext.create("Ext.container.Container", {
-                    height: 23,
-                    width: 250,
-                    layout: "hbox",
-                    margin: "0 4px 0 0",
+            me));
+            this.btnBackColor = new Common.UI.ColorButton({
+                style: "width:45px;",
+                menu: new Common.UI.Menu({
                     items: [{
-                        xtype: "label",
-                        text: this.textBackColor,
-                        margin: "2px 4px 0 0"
+                        template: _.template('<div id="drop-advanced-back-color-menu" style="width: 165px; height: 220px; margin: 10px;"></div>')
                     },
-                    this._btnBackColor]
-                })]
-            }]
-        };
-        this._MarginsContainer = {
-            xtype: "container",
-            itemId: "card-margins",
-            width: 330,
-            layout: {
-                type: "vbox",
-                align: "stretch"
-            },
-            items: [{
-                xtype: "container",
-                padding: "0 10",
-                layout: {
-                    type: "table",
-                    columns: 2,
-                    tdAttrs: {
-                        style: "padding-right: 40px;vertical-align: middle;"
+                    {
+                        template: _.template('<a id="drop-advanced-back-color-new" style="padding-left:12px;">' + me.textNewColor + "</a>")
+                    }]
+                })
+            });
+            this.btnBackColor.on("render:after", function (btn) {
+                me.colorsBack = new Common.UI.ThemeColorPalette({
+                    el: $("#drop-advanced-back-color-menu"),
+                    dynamiccolors: 10,
+                    colors: [me.textThemeColors, "-", {
+                        color: "3366FF",
+                        effectId: 1
+                    },
+                    {
+                        color: "0000FF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000090",
+                        effectId: 3
+                    },
+                    {
+                        color: "660066",
+                        effectId: 4
+                    },
+                    {
+                        color: "800000",
+                        effectId: 5
+                    },
+                    {
+                        color: "FF0000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FF6600",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFF00",
+                        effectId: 2
+                    },
+                    {
+                        color: "CCFFCC",
+                        effectId: 3
+                    },
+                    {
+                        color: "008000",
+                        effectId: 4
+                    },
+                    "-", {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 3
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 4
+                    },
+                    {
+                        color: "000000",
+                        effectId: 5
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    "-", "--", "-", me.textStandartColors, "-", "transparent", "5301B3", "980ABD", "B2275F", "F83D26", "F86A1D", "F7AC16", "F7CA12", "FAFF44", "D6EF39", "-", "--"]
+                }).on("select", _.bind(function (picker, color) {
+                    var clr, border;
+                    me.btnBackColor.setColor(color);
+                    me.paragraphShade = color;
+                    if (me._changedProps) {
+                        if (me._changedProps.get_Shade() === undefined || me._changedProps.get_Shade() === null) {
+                            me._changedProps.put_Shade(new CParagraphShd());
+                        }
+                        if (color == "transparent") {
+                            me._changedProps.get_Shade().put_Value(shd_Nil);
+                        } else {
+                            me._changedProps.get_Shade().put_Value(shd_Clear);
+                            me._changedProps.get_Shade().put_Color(Common.Utils.ThemeColor.getRgbColor(color));
+                        }
                     }
                 },
-                items: [{
-                    xtype: "label",
-                    text: this.textTop,
-                    width: 85
-                },
-                {
-                    xtype: "label",
-                    text: this.textLeft,
-                    width: 85
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                this._spnMarginTop, this._spnMarginLeft, {
-                    xtype: "tbspacer",
-                    height: 5
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 5
-                },
-                {
-                    xtype: "label",
-                    text: this.textBottom,
-                    width: 85
-                },
-                {
-                    xtype: "label",
-                    text: this.textRight,
-                    width: 85
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                this._spnMarginBottom, this._spnMarginRight]
-            }]
-        };
-        this._DropcapContainer = {
-            xtype: "container",
-            itemId: "card-drop",
-            width: 330,
-            layout: {
-                type: "vbox",
-                align: "stretch"
+                me));
+            });
+            this.btnBackColor.render($("#drop-advanced-button-color"));
+            this.btnBackColor.menu.cmpEl.on("click", "#drop-advanced-back-color-new", _.bind(function () {
+                me.colorsBack.addNewColor();
             },
-            items: [{
-                xtype: "label",
-                style: "font-weight: bold;margin-top: 1px; padding-left:10px;height:13px;",
-                text: this.textPosition
-            },
-            {
-                xtype: "tbspacer",
-                height: 10
-            },
-            {
-                xtype: "container",
-                padding: "0 10",
-                items: [this.btnNone, this.btnInText, this.btnInMargin]
-            },
-            {
-                xtype: "tbspacer",
-                height: 20
-            },
-            {
-                xtype: "label",
-                style: "font-weight: bold;margin-top: 1px; padding-left:10px;height:13px;",
-                text: this.textParameters
-            },
-            {
-                xtype: "tbspacer",
-                height: 10
-            },
-            {
-                xtype: "container",
-                padding: "0 10",
-                layout: {
-                    type: "table",
-                    columns: 2,
-                    tdAttrs: {
-                        style: "padding-right: 10px;vertical-align: middle;"
+            me));
+            this.spnMarginTop = new Common.UI.MetricSpinner({
+                el: $("#drop-advanced-input-top"),
+                step: 0.1,
+                width: 100,
+                value: "0 cm",
+                defaultUnit: "cm",
+                maxValue: 55.87,
+                minValue: 0
+            }).on("change", _.bind(function (field, newValue, oldValue) {
+                if (!this._noApply) {
+                    if (_.isUndefined(this.Margins)) {
+                        this.Margins = {};
                     }
-                },
-                items: [{
-                    xtype: "label",
-                    text: this.textFont,
-                    width: 140,
-                    colspan: 2
-                },
-                this.cmbFonts, {
-                    xtype: "tbspacer",
-                    height: 10,
-                    colspan: 2
-                },
-                {
-                    xtype: "label",
-                    text: this.textRowHeight,
-                    width: 140
-                },
-                {
-                    xtype: "label",
-                    text: this.textDistance,
-                    width: 140
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                this.spnRowHeight, this.numDistance]
-            }]
-        };
-        this._FrameContainer = {
-            xtype: "container",
-            itemId: "card-frame",
-            width: 330,
-            layout: {
-                type: "vbox",
-                align: "stretch"
+                    this.Margins.Top = Common.Utils.Metric.fnRecalcToMM(field.getNumberValue());
+                }
             },
-            items: [{
-                xtype: "label",
-                style: "font-weight: bold;margin-top: 1px; padding-left:10px;height:13px;",
-                text: this.textPosition
+            me));
+            this.spnMarginLeft = new Common.UI.MetricSpinner({
+                el: $("#drop-advanced-input-left"),
+                step: 0.1,
+                width: 100,
+                value: "0 cm",
+                defaultUnit: "cm",
+                maxValue: 55.87,
+                minValue: 0
+            }).on("change", _.bind(function (field, newValue, oldValue) {
+                if (!this._noApply) {
+                    if (_.isUndefined(this.Margins)) {
+                        this.Margins = {};
+                    }
+                    this.Margins.Left = Common.Utils.Metric.fnRecalcToMM(field.getNumberValue());
+                }
+            },
+            me));
+            this.spnMarginBottom = new Common.UI.MetricSpinner({
+                el: $("#drop-advanced-input-bottom"),
+                step: 0.1,
+                width: 100,
+                value: "0 cm",
+                defaultUnit: "cm",
+                maxValue: 55.87,
+                minValue: 0
+            }).on("change", _.bind(function (field, newValue, oldValue) {
+                if (!this._noApply) {
+                    if (_.isUndefined(this.Margins)) {
+                        this.Margins = {};
+                    }
+                    this.Margins.Bottom = Common.Utils.Metric.fnRecalcToMM(field.getNumberValue());
+                }
+            },
+            me));
+            this.spnMarginRight = new Common.UI.MetricSpinner({
+                el: $("#drop-advanced-input-right"),
+                step: 0.1,
+                width: 100,
+                value: "0 cm",
+                defaultUnit: "cm",
+                maxValue: 55.87,
+                minValue: 0
+            }).on("change", _.bind(function (field, newValue, oldValue) {
+                if (!this._noApply) {
+                    if (_.isUndefined(this.Margins)) {
+                        this.Margins = {};
+                    }
+                    this.Margins.Right = Common.Utils.Metric.fnRecalcToMM(field.getNumberValue());
+                }
+            },
+            me));
+            this.btnNone = new Common.UI.Button({
+                cls: "btn x-huge btn-options",
+                iconCls: "icon-advanced-wrap btn-drop-none",
+                enableToggle: true,
+                toggleGroup: "dropAdvGroup",
+                allowDepress: false,
+                hint: this.textNone
+            }).on("toggle", _.bind(function (btn, pressed) {
+                if (me._changedProps && pressed) {
+                    me._DisableElem(c_oAscDropCap.None);
+                    me._changedProps.put_DropCap(c_oAscDropCap.None);
+                }
+            },
+            me));
+            this.btnInText = new Common.UI.Button({
+                cls: "btn x-huge btn-options",
+                iconCls: "icon-advanced-wrap btn-drop-text",
+                enableToggle: true,
+                toggleGroup: "dropAdvGroup",
+                allowDepress: false,
+                hint: this.textInText
+            }).on("toggle", _.bind(function (btn, pressed) {
+                if (me._changedProps && pressed) {
+                    me._DisableElem(c_oAscDropCap.Drop);
+                    me._changedProps.put_DropCap(c_oAscDropCap.Drop);
+                }
+            },
+            me));
+            this.btnInMargin = new Common.UI.Button({
+                cls: "btn x-huge btn-options",
+                iconCls: "icon-advanced-wrap btn-drop-margin",
+                enableToggle: true,
+                toggleGroup: "dropAdvGroup",
+                allowDepress: false,
+                hint: this.textInMargin
+            }).on("toggle", _.bind(function (btn, pressed) {
+                if (me._changedProps && pressed) {
+                    me._DisableElem(c_oAscDropCap.Margin);
+                    me._changedProps.put_DropCap(c_oAscDropCap.Margin);
+                }
+            },
+            me));
+            this.spnRowHeight = new Common.UI.MetricSpinner({
+                el: $("#drop-advanced-input-rowheight"),
+                step: 1,
+                width: 120,
+                value: 3,
+                defaultUnit: "",
+                maxValue: 10,
+                minValue: 1,
+                allowDecimal: false
+            }).on("change", _.bind(function (field, newValue, oldValue) {
+                if (me._changedProps) {
+                    me._changedProps.put_Lines(field.getNumberValue());
+                }
+            },
+            me));
+            this.numDistance = new Common.UI.MetricSpinner({
+                el: $("#drop-advanced-input-distance"),
+                step: 0.1,
+                width: 120,
+                value: "0 cm",
+                defaultUnit: "cm",
+                maxValue: 55.87,
+                minValue: 0
+            }).on("change", _.bind(function (field, newValue, oldValue) {
+                if (me._changedProps) {
+                    me._changedProps.put_HSpace(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                }
+            },
+            me));
+            this.cmbFonts = new Common.UI.ComboBoxFonts({
+                el: $("#drop-advanced-input-fonts"),
+                cls: "input-group-nr",
+                style: "width: 290px;",
+                menuCls: "scrollable-menu",
+                menuStyle: "min-width: 55px;",
+                store: new Common.Collections.Fonts(),
+                recent: 0,
+                hint: this.tipFontName
+            }).on("selected", _.bind(function (combo, record) {
+                if (me._changedProps) {
+                    me._changedProps.put_FontFamily(record.name);
+                }
+            },
+            me));
+            this.btnFrameNone = new Common.UI.Button({
+                cls: "btn huge btn-options",
+                iconCls: "icon-right-panel btn-frame-none",
+                enableToggle: true,
+                toggleGroup: "frameAdvGroup",
+                allowDepress: false,
+                hint: this.textNone
+            }).on("toggle", _.bind(function (btn, pressed) {
+                if (me._changedProps && pressed) {
+                    me._DisableElem(c_oAscFrameWrap.None);
+                    me._changedProps.put_Wrap(c_oAscFrameWrap.None);
+                }
+            },
+            me));
+            this.btnFrameInline = new Common.UI.Button({
+                cls: "btn huge btn-options",
+                iconCls: "icon-right-panel btn-frame-inline",
+                enableToggle: true,
+                toggleGroup: "frameAdvGroup",
+                allowDepress: false,
+                hint: this.textInline
+            }).on("toggle", _.bind(function (btn, pressed) {
+                if (me._changedProps && pressed) {
+                    me._DisableElem(c_oAscFrameWrap.Inline);
+                    me._changedProps.put_Wrap(c_oAscFrameWrap.Inline);
+                }
+            },
+            me));
+            this.btnFrameFlow = new Common.UI.Button({
+                cls: "btn huge btn-options",
+                iconCls: "icon-right-panel btn-frame-flow",
+                enableToggle: true,
+                toggleGroup: "frameAdvGroup",
+                allowDepress: false,
+                hint: this.textFlow
+            }).on("toggle", _.bind(function (btn, pressed) {
+                if (me._changedProps && pressed) {
+                    me._DisableElem(c_oAscFrameWrap.Flow);
+                    me._changedProps.put_Wrap(c_oAscFrameWrap.Flow);
+                }
+            },
+            me));
+            this._arrWidth = [{
+                displayValue: this.textAuto,
+                value: 0
             },
             {
-                xtype: "tbspacer",
-                height: 10
+                displayValue: this.textExact,
+                value: 1
+            }];
+            this.cmbWidth = new Common.UI.ComboBox({
+                el: $("#frame-advanced-input-widthtype"),
+                cls: "input-group-nr",
+                menuStyle: "min-width: 130px;",
+                editable: false,
+                data: this._arrWidth
+            }).on("selected", _.bind(function (combo, record) {
+                if (me._changedProps) {
+                    me.spnWidth.suspendEvents();
+                    me.spnWidth.setValue((record.value == 0) ? "" : 1);
+                    me.spnWidth.resumeEvents();
+                    me._changedProps.put_W((record.value == 0) ? undefined : Common.Utils.Metric.fnRecalcToMM(this.spnWidth.getNumberValue()));
+                }
+            },
+            me));
+            this.cmbWidth.setValue(this._arrWidth[0].value);
+            this.spnWidth = new Common.UI.MetricSpinner({
+                el: $("#frame-advanced-input-width"),
+                maxValue: 55.88,
+                minValue: 0.02,
+                step: 0.1,
+                defaultUnit: "cm",
+                value: ""
+            }).on("change", _.bind(function (field, newValue, oldValue) {
+                if (me._changedProps) {
+                    me.cmbWidth.suspendEvents();
+                    me.cmbWidth.setValue(this._arrWidth[1].value);
+                    me.cmbWidth.resumeEvents();
+                    me._changedProps.put_W(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                }
+            },
+            me));
+            this._arrHeight = [{
+                displayValue: this.textAuto,
+                value: 0
             },
             {
-                xtype: "container",
-                padding: "0 10",
-                items: [this.btnFrameNone, this.btnFrameInline, this.btnFrameFlow]
-            },
-            this._spacer.cloneConfig({
-                style: "margin: 13px 0 8px 0;",
-                height: 6
-            }), {
-                xtype: "container",
-                padding: "0 10",
-                layout: {
-                    type: "table",
-                    columns: 3,
-                    tdAttrs: {
-                        style: "padding-right: 10px;vertical-align: middle;"
-                    }
-                },
-                items: [{
-                    xtype: "tbspacer",
-                    height: 1,
-                    width: 70
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 1,
-                    colspan: 2
-                },
-                {
-                    xtype: "label",
-                    text: this.textWidth,
-                    width: 70
-                },
-                this.cmbWidth, this._spnWidth, {
-                    xtype: "tbspacer",
-                    height: 8,
-                    colspan: 3
-                },
-                {
-                    xtype: "label",
-                    text: this.textHeight,
-                    width: 70
-                },
-                this.cmbHeight, this._spnHeight]
-            },
-            this._spacer.cloneConfig({
-                style: "margin: 12px 0 6px 0;",
-                height: 6
-            }), {
-                xtype: "label",
-                style: "font-weight: bold;margin-top: 1px; padding-left:10px;height:13px;",
-                text: this.textHorizontal
+                displayValue: this.textExact,
+                value: 1
             },
             {
-                xtype: "container",
-                padding: "0 10",
-                layout: {
-                    type: "table",
-                    columns: 3,
-                    tdAttrs: {
-                        style: "padding-right: 10px;vertical-align: middle;"
+                displayValue: this.textAtLeast,
+                value: 2
+            }];
+            this.cmbHeight = new Common.UI.ComboBox({
+                el: $("#frame-advanced-input-heighttype"),
+                cls: "input-group-nr",
+                menuStyle: "min-width: 130px;",
+                editable: false,
+                data: this._arrHeight
+            }).on("selected", _.bind(function (combo, record) {
+                if (me._changedProps) {
+                    me.spnHeight.suspendEvents();
+                    me.spnHeight.setValue((record.value == 0) ? "" : 1);
+                    me.spnHeight.resumeEvents();
+                    me._changedProps.put_HRule((record.value == 0) ? linerule_Auto : ((record.value == 1) ? linerule_Exact : linerule_AtLeast));
+                    if (record.value > 0) {
+                        this._changedProps.put_H(Common.Utils.Metric.fnRecalcToMM(this.spnHeight.getNumberValue()));
                     }
-                },
-                items: [{
-                    xtype: "tbspacer",
-                    colspan: 2
-                },
-                {
-                    xtype: "label",
-                    text: this.textRelative,
-                    width: 70
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2,
-                    width: 70
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2,
-                    colspan: 2
-                },
-                {
-                    xtype: "label",
-                    text: this.textPosition,
-                    width: 70
-                },
-                this.cmbHAlign, this.cmbHRelative, {
-                    xtype: "tbspacer",
-                    height: 8,
-                    colspan: 3
-                },
-                {
-                    xtype: "tbspacer",
-                    width: 70
-                },
-                {
-                    xtype: "label",
-                    text: this.textDistance,
-                    width: 120,
-                    style: "float: right; text-align: right;"
-                },
-                this._spnX]
+                }
             },
-            this._spacer.cloneConfig({
-                style: "margin: 13px 0 6px 0;",
-                height: 6
-            }), {
-                xtype: "label",
-                style: "font-weight: bold;margin-top: 1px; padding-left:10px;height:13px;",
-                text: this.textVertical
-            },
-            {
-                xtype: "container",
-                padding: "0 10",
-                layout: {
-                    type: "table",
-                    columns: 3,
-                    tdAttrs: {
-                        style: "padding-right: 10px;vertical-align: middle;"
+            me));
+            this.cmbHeight.setValue(this._arrHeight[0].value);
+            this.spnHeight = new Common.UI.MetricSpinner({
+                el: $("#frame-advanced-input-height"),
+                maxValue: 55.88,
+                minValue: 0.02,
+                step: 0.1,
+                defaultUnit: "cm",
+                value: ""
+            }).on("change", _.bind(function (field, newValue, oldValue) {
+                if (me._changedProps) {
+                    var type = linerule_Auto;
+                    if (me.cmbHeight.getValue() == me._arrHeight[1].value) {
+                        type = linerule_Exact;
+                    } else {
+                        if (me.cmbHeight.getValue() == me._arrHeight[2].value) {
+                            type = linerule_AtLeast;
+                        }
                     }
-                },
-                items: [{
-                    xtype: "tbspacer",
-                    colspan: 2
-                },
-                {
-                    xtype: "label",
-                    text: this.textRelative,
-                    width: 70
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2,
-                    width: 70
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2,
-                    colspan: 2
-                },
-                {
-                    xtype: "label",
-                    text: this.textPosition,
-                    width: 70
-                },
-                this.cmbVAlign, this.cmbVRelative, {
-                    xtype: "tbspacer",
-                    height: 8,
-                    colspan: 3
-                },
-                {
-                    xtype: "tbspacer",
-                    width: 70
-                },
-                {
-                    xtype: "label",
-                    text: this.textDistance,
-                    width: 120,
-                    style: "float: right; text-align: right;"
-                },
-                this._spnY, this.chMove]
-            }]
-        };
-        this.items = [this.mainBody = Ext.create("Ext.container.Container", {
-            height: 400,
-            layout: {
-                type: "hbox",
-                align: "stretch"
-            },
-            items: [{
-                xtype: "container",
-                width: 160,
-                padding: "5px 0 0 0",
-                layout: {
-                    type: "vbox",
-                    align: "stretch"
-                },
-                defaults: {
-                    xtype: "container",
-                    layout: {
-                        type: "hbox",
-                        align: "middle",
-                        pack: "end"
+                    if (type == linerule_Auto) {
+                        me.cmbHeight.suspendEvents();
+                        me.cmbHeight.setValue(me._arrHeight[2].value);
+                        type = linerule_AtLeast;
+                        me.cmbHeight.resumeEvents();
                     }
-                },
-                items: [{
-                    height: 30,
-                    items: [this.btnFrame]
-                },
-                {
-                    height: 30,
-                    items: [this.btnBorders]
-                },
-                {
-                    height: 30,
-                    items: [this.btnMargins]
-                }]
+                    me._changedProps.put_HRule(type);
+                    me._changedProps.put_H(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                }
+            },
+            me));
+            this.spnX = new Common.UI.MetricSpinner({
+                el: $("#frame-advanced-input-hdist"),
+                maxValue: 55.87,
+                minValue: 0,
+                step: 0.1,
+                defaultUnit: "cm",
+                value: "0 cm",
+                width: "auto"
+            }).on("change", _.bind(function (field, newValue, oldValue) {
+                if (me._changedProps) {
+                    me._changedProps.put_HSpace(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                }
+            },
+            me));
+            this.spnY = new Common.UI.MetricSpinner({
+                el: $("#frame-advanced-input-vdist"),
+                maxValue: 55.87,
+                minValue: 0,
+                step: 0.1,
+                defaultUnit: "cm",
+                value: "0 cm",
+                width: "auto"
+            }).on("change", _.bind(function (field, newValue, oldValue) {
+                if (me._changedProps) {
+                    me._changedProps.put_VSpace(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                }
+            },
+            me));
+            this._arrHAlign = [{
+                displayValue: this.textLeft,
+                value: c_oAscXAlign.Left
             },
             {
-                xtype: "box",
-                cls: "advanced-settings-separator",
-                height: "100%",
-                width: 8
+                displayValue: this.textCenter,
+                value: c_oAscXAlign.Center
             },
-            this.mainCard = Ext.create("Ext.container.Container", {
-                height: 300,
-                flex: 1,
-                padding: "12px 18px 0 10px",
-                layout: "card",
-                items: [this._FrameContainer, this._DropcapContainer, this._BordersContainer, this._MarginsContainer]
-            })]
-        }), this._spacer.cloneConfig({
-            style: "margin: 0 18px"
-        }), {
-            xtype: "container",
-            height: 40,
-            layout: {
-                type: "vbox",
-                align: "center",
-                pack: "center"
+            {
+                displayValue: this.textRight,
+                value: c_oAscXAlign.Right
+            }];
+            this.cmbHAlign = new Common.UI.ComboBox({
+                el: $("#frame-advanced-input-hposition"),
+                cls: "input-group-nr",
+                menuStyle: "min-width: 130px;",
+                data: this._arrHAlign
+            }).on("changed:after", _.bind(function (combo, record) {
+                if (me._changedProps) {
+                    me._changedProps.put_XAlign(undefined);
+                    me._changedProps.put_X(Common.Utils.Metric.fnRecalcToMM(parseFloat(record.value)));
+                }
             },
-            items: [{
-                xtype: "container",
-                width: 182,
-                height: 24,
-                layout: {
-                    type: "hbox",
-                    align: "middle"
-                },
-                items: [this.btnOk = Ext.widget("button", {
-                    cls: "asc-blue-button",
-                    width: 86,
-                    height: 22,
-                    margin: "0 5px 0 0",
-                    text: this.okButtonText,
-                    listeners: {
-                        click: function (btn) {
-                            this.fireEvent("onmodalresult", this, 1, this.getSettings());
-                            this.close();
-                        },
-                        scope: this
-                    }
-                }), this.btnCancel = Ext.widget("button", {
-                    cls: "asc-darkgray-button",
-                    width: 86,
-                    height: 22,
-                    text: this.cancelButtonText,
-                    listeners: {
-                        click: function (btn) {
-                            this.fireEvent("onmodalresult", this, 0);
-                            this.close();
-                        },
-                        scope: this
-                    }
-                })]
-            }]
-        }];
-        this.callParent(arguments);
-    },
-    afterRender: function () {
-        this.callParent(arguments);
-        this._setDefaults(this._originalProps);
-        if (this.borderProps !== undefined) {
-            this._btnBorderColor.setColor(this.borderProps.borderColor);
-            var colorstr = Ext.String.format("#{0}", (typeof(this.borderProps.borderColor) == "object") ? this.borderProps.borderColor.color : this.borderProps.borderColor);
-            this._BordersImage.setVirtualBorderColor(colorstr);
-            var rec = this.cmbBorderSize.getStore().findRecord("value", this.borderProps.borderSize.ptValue);
-            if (rec) {
-                this.cmbBorderSize.select(rec);
-                this.cmbBorderSize.fireEvent("select", this.cmbBorderSize, [rec]);
-            }
-            this.colorsBorder.select(this.borderProps.borderColor);
-        }
-        this.setTitle((this.isFrame) ? this.textTitleFrame : this.textTitle);
-        if (this.colorProps !== undefined) {
-            this.sendThemeColors(this.colorProps[0], this.colorProps[1]);
-        }
-        for (var i = 0; i < this._BordersImage.rows; i++) {
-            for (var j = 0; j < this._BordersImage.columns; j++) {
-                this._BordersImage.getCell(j, i).addListener("borderclick", function (ct, border, size, color) {
-                    if (this.ChangedBorders === undefined) {
-                        this.ChangedBorders = new CParagraphBorders();
-                    }
-                    this._UpdateCellBordersStyle(ct, border, size, color, this.Borders);
-                },
-                this);
-            }
-        }
-        this._BordersImage.addListener("borderclick", function (ct, border, size, color) {
-            if (this.ChangedBorders === undefined) {
-                this.ChangedBorders = new CParagraphBorders();
-            }
-            this._UpdateTableBordersStyle(ct, border, size, color, this.Borders);
+            me)).on("selected", _.bind(function (combo, record) {
+                if (me._changedProps) {
+                    me._changedProps.put_XAlign(record.value);
+                }
+            },
+            me));
+            this.cmbHAlign.setValue(this._arrHAlign[0].value);
+            this._arrHRelative = [{
+                displayValue: this.textMargin,
+                value: c_oAscHAnchor.Margin
+            },
+            {
+                displayValue: this.textPage,
+                value: c_oAscHAnchor.Page
+            },
+            {
+                displayValue: this.textColumn,
+                value: c_oAscHAnchor.Text
+            }];
+            this.cmbHRelative = new Common.UI.ComboBox({
+                el: $("#frame-advanced-input-hrelative"),
+                cls: "input-group-nr",
+                menuStyle: "min-width: 95px;",
+                data: this._arrHRelative,
+                editable: false
+            }).on("selected", _.bind(function (combo, record) {
+                if (me._changedProps) {
+                    me._changedProps.put_HAnchor(record.value);
+                }
+            },
+            me));
+            this.cmbHRelative.setValue(this._arrHRelative[1].value);
+            this._arrVAlign = [{
+                displayValue: this.textTop,
+                value: c_oAscYAlign.Top
+            },
+            {
+                displayValue: this.textCenter,
+                value: c_oAscYAlign.Center
+            },
+            {
+                displayValue: this.textBottom,
+                value: c_oAscYAlign.Bottom
+            }];
+            this.cmbVAlign = new Common.UI.ComboBox({
+                el: $("#frame-advanced-input-vposition"),
+                cls: "input-group-nr",
+                menuStyle: "min-width: 130px;",
+                data: this._arrVAlign
+            }).on("changed:after", _.bind(function (combo, record) {
+                if (me._changedProps) {
+                    me._changedProps.put_YAlign(undefined);
+                    me._changedProps.put_Y(Common.Utils.Metric.fnRecalcToMM(parseFloat(record.value)));
+                }
+            },
+            me)).on("selected", _.bind(function (combo, record) {
+                if (me._changedProps) {
+                    me._changedProps.put_YAlign(record.value);
+                }
+            },
+            me));
+            this.cmbVAlign.setValue(this._arrVAlign[0].value);
+            this._arrVRelative = [{
+                displayValue: this.textMargin,
+                value: c_oAscVAnchor.Margin
+            },
+            {
+                displayValue: this.textPage,
+                value: c_oAscVAnchor.Page
+            },
+            {
+                displayValue: this.textParagraph,
+                value: c_oAscVAnchor.Text
+            }];
+            this.cmbVRelative = new Common.UI.ComboBox({
+                el: $("#frame-advanced-input-vrelative"),
+                cls: "input-group-nr",
+                menuStyle: "min-width: 95px;",
+                data: this._arrVRelative,
+                editable: false
+            }).on("selected", _.bind(function (combo, record) {
+                if (me._changedProps) {
+                    me._changedProps.put_VAnchor(record.value);
+                    this.chMove.setValue(record.value == c_oAscVAnchor.Text, true);
+                }
+            },
+            me));
+            this.cmbVRelative.setValue(this._arrVRelative[2].value);
+            this.chMove = new Common.UI.CheckBox({
+                el: $("#frame-advanced-checkbox-move"),
+                labelText: this.textMove
+            }).on("change", _.bind(function (checkbox, state) {
+                if (me._changedProps) {
+                    var rec = this.cmbVRelative.store.at(state == "checked" ? 2 : 1);
+                    me.cmbVRelative.setValue(rec.get("value"));
+                    me._changedProps.put_VAnchor(rec.get("value"));
+                }
+            },
+            me));
+            this.btnNone.render($("#drop-advanced-button-none"));
+            this.btnInText.render($("#drop-advanced-button-intext"));
+            this.btnInMargin.render($("#drop-advanced-button-inmargin"));
+            this.btnFrameNone.render($("#frame-advanced-button-none"));
+            this.btnFrameInline.render($("#frame-advanced-button-inline"));
+            this.btnFrameFlow.render($("#frame-advanced-button-flow"));
+            this.on("show", _.bind(this.onShowDialog, this));
+            this.afterRender();
         },
-        this);
-        if (!this.isFrame) {
-            this.btnFrame.setText(this.strDropcap);
-            this.setHeight(390);
-            this.mainBody.setHeight(300);
-            this.mainCard.getLayout().setActiveItem("card-drop");
-        }
-    },
-    setSettings: function (props) {
-        this._originalProps = new CParagraphProp(props.paragraphProps);
-        this.borderProps = props.borderProps;
-        this.colorProps = props.colorProps;
-        this.isFrame = props.isFrame;
-        this._changedProps = null;
-        this.api = props.api;
-    },
-    _setDefaults: function (props) {
-        if (props) {
-            this._noApply = true;
-            this._originalProps = new CParagraphProp(props);
-            var frame_props = props.get_FramePr();
-            if (frame_props) {
-                var value;
-                if (this.isFrame) {
-                    value = frame_props.get_W();
-                    this.cmbWidth.setValue((value === undefined) ? this._arrWidth[0] : this._arrWidth[1]);
-                    this._spnWidth.setValue((value !== undefined) ? Common.MetricSettings.fnRecalcFromMM(value) : "");
-                    value = frame_props.get_HRule();
-                    if (value !== undefined) {
-                        this.cmbHeight.setValue((value === linerule_Exact) ? this._arrHeight[1] : this._arrHeight[2]);
-                        this._spnHeight.setValue(Common.MetricSettings.fnRecalcFromMM(frame_props.get_H()));
-                    } else {
-                        this.cmbHeight.setValue(this._arrHeight[0]);
-                        this._spnHeight.setValue("");
-                    }
-                    value = frame_props.get_HSpace();
-                    this._spnX.setValue((value !== undefined) ? Common.MetricSettings.fnRecalcFromMM(value) : 0);
-                    value = frame_props.get_VSpace();
-                    this._spnY.setValue((value !== undefined) ? Common.MetricSettings.fnRecalcFromMM(value) : 0);
-                    value = frame_props.get_HAnchor();
-                    for (var i = 0; i < this._arrHRelative.length; i++) {
-                        if (value == this._arrHRelative[i][0]) {
-                            this.cmbHRelative.setValue(this._arrHRelative[i][1]);
-                            break;
+        afterRender: function () {
+            this.updateMetricUnit();
+            this.updateThemeColors();
+            if (!this.isFrame) {
+                this.cmbFonts.fillFonts(this.fontStore);
+            }
+            this._setDefaults(this._originalProps);
+            if (this.borderProps !== undefined) {
+                this.btnBorderColor.setColor(this.borderProps.borderColor);
+                this.tableStyler.setVirtualBorderColor((typeof(this.borderProps.borderColor) == "object") ? this.borderProps.borderColor.color : this.borderProps.borderColor);
+                this.cmbBorderSize.setValue(this.borderProps.borderSize.ptValue);
+                this.BorderSize = {
+                    ptValue: this.borderProps.borderSize.ptValue,
+                    pxValue: this.borderProps.borderSize.pxValue
+                };
+                this.tableStyler.setVirtualBorderSize(this.BorderSize.pxValue);
+                this.colorsBorder.select(this.borderProps.borderColor);
+            }
+            this.setTitle((this.isFrame) ? this.textTitleFrame : this.textTitle);
+            for (var i = 0; i < this.tableStyler.rows; i++) {
+                for (var j = 0; j < this.tableStyler.columns; j++) {
+                    this.tableStyler.getCell(j, i).on("borderclick", function (ct, border, size, color) {
+                        if (this.ChangedBorders === undefined) {
+                            this.ChangedBorders = new CParagraphBorders();
                         }
-                    }
-                    value = frame_props.get_XAlign();
-                    if (value !== undefined) {
-                        for (var i = 0; i < this._arrHAlign.length; i++) {
-                            if (value == this._arrHAlign[i][0]) {
-                                this.cmbHAlign.setValue(this._arrHAlign[i][1]);
-                                break;
-                            }
-                        }
-                    } else {
-                        value = frame_props.get_X();
-                        this.cmbHAlign.setValue(Common.MetricSettings.fnRecalcFromMM((value !== undefined) ? value : 0) + " " + Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()]);
-                    }
-                    value = frame_props.get_VAnchor();
-                    for (var i = 0; i < this._arrVRelative.length; i++) {
-                        if (value == this._arrVRelative[i][0]) {
-                            this.cmbVRelative.setValue(this._arrVRelative[i][1]);
-                            break;
-                        }
-                    }
-                    this.chMove.setValue(value == c_oAscVAnchor.Text);
-                    value = frame_props.get_YAlign();
-                    if (value !== undefined) {
-                        for (var i = 0; i < this._arrVAlign.length; i++) {
-                            if (value == this._arrVAlign[i][0]) {
-                                this.cmbVAlign.setValue(this._arrVAlign[i][1]);
-                                break;
-                            }
-                        }
-                    } else {
-                        value = frame_props.get_Y();
-                        this.cmbVAlign.setValue(Common.MetricSettings.fnRecalcFromMM((value !== undefined) ? value : 0) + " " + Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()]);
-                    }
-                    value = frame_props.get_Wrap();
-                    if (value === false) {
-                        this.btnFrameInline.toggle(true, false);
-                    } else {
-                        this.btnFrameFlow.toggle(true, false);
-                    }
+                        this._UpdateCellBordersStyle(ct, border, size, color, this.Borders);
+                    },
+                    this);
+                }
+            }
+            this.tableStyler.on("borderclick", function (ct, border, size, color) {
+                if (this.ChangedBorders === undefined) {
+                    this.ChangedBorders = new CParagraphBorders();
+                }
+                this._UpdateTableBordersStyle(ct, border, size, color, this.Borders);
+            },
+            this);
+            var btnCategoryFrame, btnCategoryDropcap;
+            _.each(this.btnsCategory, function (btn) {
+                if (btn.options.contentTarget == "id-adv-dropcap-frame") {
+                    btnCategoryFrame = btn;
                 } else {
-                    this.spnRowHeight.setValue((frame_props.get_Lines() !== null) ? frame_props.get_Lines() : "");
-                    this.numDistance.setValue((frame_props.get_HSpace() !== null) ? Common.MetricSettings.fnRecalcFromMM(frame_props.get_HSpace()) : "");
-                    value = frame_props.get_DropCap();
-                    if (value == c_oAscDropCap.Drop) {
-                        this.btnInText.toggle(true, false);
+                    if (btn.options.contentTarget == "id-adv-dropcap-dropcap") {
+                        btnCategoryDropcap = btn;
+                    }
+                }
+            });
+            this.content_panels.filter(".active").removeClass("active");
+            if (!this.isFrame) {
+                btnCategoryFrame.hide();
+                btnCategoryDropcap.toggle(true, true);
+                $("#" + btnCategoryDropcap.options.contentTarget).addClass("active");
+            } else {
+                btnCategoryDropcap.hide();
+                btnCategoryFrame.toggle(true, true);
+                $("#" + btnCategoryFrame.options.contentTarget).addClass("active");
+                this.setHeight(500);
+            }
+        },
+        getSettings: function () {
+            if (this.ChangedBorders === null) {
+                this._changedProps.put_Borders(this.Borders);
+            } else {
+                if (this.ChangedBorders !== undefined) {
+                    this._changedProps.put_Borders(this.ChangedBorders);
+                }
+            }
+            if (this.Margins) {
+                var borders = this._changedProps.get_Borders();
+                if (borders === undefined || borders === null) {
+                    this._changedProps.put_Borders(new CParagraphBorders());
+                    borders = this._changedProps.get_Borders();
+                }
+                if (this.Margins.Left !== undefined) {
+                    if (borders.get_Left() === undefined || borders.get_Left() === null) {
+                        borders.put_Left(new CBorder(this.Borders.get_Left()));
+                    }
+                    borders.get_Left().put_Space(this.Margins.Left);
+                }
+                if (this.Margins.Top !== undefined) {
+                    if (borders.get_Top() === undefined || borders.get_Top() === null) {
+                        borders.put_Top(new CBorder(this.Borders.get_Top()));
+                    }
+                    borders.get_Top().put_Space(this.Margins.Top);
+                }
+                if (this.Margins.Right !== undefined) {
+                    if (borders.get_Right() === undefined || borders.get_Right() === null) {
+                        borders.put_Right(new CBorder(this.Borders.get_Right()));
+                    }
+                    borders.get_Right().put_Space(this.Margins.Right);
+                }
+                if (this.Margins.Bottom !== undefined) {
+                    if (borders.get_Bottom() === undefined || borders.get_Bottom() === null) {
+                        borders.put_Bottom(new CBorder(this.Borders.get_Bottom()));
+                    }
+                    borders.get_Bottom().put_Space(this.Margins.Bottom);
+                    if (borders.get_Between() === undefined || borders.get_Between() === null) {
+                        borders.put_Between(new CBorder(this.Borders.get_Between()));
+                    }
+                    borders.get_Between().put_Space(this.Margins.Bottom);
+                }
+            }
+            this._changedProps.put_FromDropCapMenu(!this.isFrame);
+            return {
+                paragraphProps: this._changedProps,
+                borderProps: {
+                    borderSize: this.BorderSize,
+                    borderColor: this.btnBorderColor.color
+                }
+            };
+        },
+        onShowDialog: function (dlg) {
+            if (!this.isFrame && this.btnNone.pressed) {
+                this._DisableElem(c_oAscDropCap.None);
+            } else {
+                if (this.isFrame && this.btnFrameNone.pressed) {
+                    this._DisableElem(c_oAscFrameWrap.None);
+                }
+            }
+        },
+        onBtnBordersClick: function (btn, eOpts) {
+            this.updateBordersStyle(btn.options.strId, true);
+            if (this.api) {
+                var properties = new CTableProp();
+                properties.put_CellBorders(this.CellBorders);
+                properties.put_CellSelect(true);
+                this.api.tblApply(properties);
+            }
+            this.fireEvent("editcomplete", this);
+        },
+        updateThemeColors: function () {
+            this.colorsBorder.updateColors(Common.Utils.ThemeColor.getEffectColors(), Common.Utils.ThemeColor.getStandartColors());
+            this.colorsBack.updateColors(Common.Utils.ThemeColor.getEffectColors(), Common.Utils.ThemeColor.getStandartColors());
+        },
+        updateMetricUnit: function () {
+            var me = this;
+            _.each([me.spnMarginTop, me.spnMarginLeft, me.spnMarginBottom, me.spnMarginRight, me.numDistance, me.spnWidth, me.spnHeight, me.spnX, me.spnY], function (spinner) {
+                spinner.setDefaultUnit(Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()]);
+                spinner.setStep(Common.Utils.Metric.getCurrentMetric() == Common.Utils.Metric.c_MetricUnits.cm ? 0.1 : 1);
+            });
+        },
+        _setDefaults: function (props) {
+            if (props) {
+                this._noApply = true;
+                this._originalProps = new CParagraphProp(props);
+                var frame_props = props.get_FramePr();
+                if (frame_props) {
+                    var value;
+                    if (this.isFrame) {
+                        value = frame_props.get_W();
+                        this.cmbWidth.setValue((value === undefined) ? this._arrWidth[0].value : this._arrWidth[1].value);
+                        this.spnWidth.setValue((value !== undefined) ? Common.Utils.Metric.fnRecalcFromMM(value) : "");
+                        value = frame_props.get_HRule();
+                        if (value !== undefined) {
+                            this.cmbHeight.setValue((value === linerule_Exact) ? this._arrHeight[1].value : this._arrHeight[2].value);
+                            this.spnHeight.setValue(Common.Utils.Metric.fnRecalcFromMM(frame_props.get_H()));
+                        } else {
+                            this.cmbHeight.setValue(this._arrHeight[0].value);
+                            this.spnHeight.setValue("");
+                        }
+                        value = frame_props.get_HSpace();
+                        this.spnX.setValue((value !== undefined) ? Common.Utils.Metric.fnRecalcFromMM(value) : 0);
+                        value = frame_props.get_VSpace();
+                        this.spnY.setValue((value !== undefined) ? Common.Utils.Metric.fnRecalcFromMM(value) : 0);
+                        value = frame_props.get_HAnchor();
+                        for (var i = 0; i < this._arrHRelative.length; i++) {
+                            if (value == this._arrHRelative[i].value) {
+                                this.cmbHRelative.setValue(this._arrHRelative[i].value);
+                                break;
+                            }
+                        }
+                        value = frame_props.get_XAlign();
+                        if (value !== undefined) {
+                            for (var i = 0; i < this._arrHAlign.length; i++) {
+                                if (value == this._arrHAlign[i].value) {
+                                    this.cmbHAlign.setValue(this._arrHAlign[i].value);
+                                    break;
+                                }
+                            }
+                        } else {
+                            value = frame_props.get_X();
+                            this.cmbHAlign.setValue(Common.Utils.Metric.fnRecalcFromMM((value !== undefined) ? value : 0) + " " + Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()]);
+                        }
+                        value = frame_props.get_VAnchor();
+                        for (var i = 0; i < this._arrVRelative.length; i++) {
+                            if (value == this._arrVRelative[i].value) {
+                                this.cmbVRelative.setValue(this._arrVRelative[i].value);
+                                break;
+                            }
+                        }
+                        this.chMove.setValue(value == c_oAscVAnchor.Text);
+                        value = frame_props.get_YAlign();
+                        if (value !== undefined) {
+                            for (var i = 0; i < this._arrVAlign.length; i++) {
+                                if (value == this._arrVAlign[i].value) {
+                                    this.cmbVAlign.setValue(this._arrVAlign[i].value);
+                                    break;
+                                }
+                            }
+                        } else {
+                            value = frame_props.get_Y();
+                            this.cmbVAlign.setValue(Common.Utils.Metric.fnRecalcFromMM((value !== undefined) ? value : 0) + " " + Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()]);
+                        }
+                        value = frame_props.get_Wrap();
+                        if (value === false) {
+                            this.btnFrameInline.toggle(true, false);
+                        } else {
+                            this.btnFrameFlow.toggle(true, false);
+                        }
                     } else {
-                        if (value == c_oAscDropCap.Margin) {
-                            this.btnInMargin.toggle(true, false);
+                        this.spnRowHeight.setValue((frame_props.get_Lines() !== null) ? frame_props.get_Lines() : "");
+                        this.numDistance.setValue((frame_props.get_HSpace() !== null) ? Common.Utils.Metric.fnRecalcFromMM(frame_props.get_HSpace()) : "");
+                        value = frame_props.get_DropCap();
+                        if (value == c_oAscDropCap.Drop) {
+                            this.btnInText.toggle(true, false);
                         } else {
-                            this.btnNone.toggle(true, false);
+                            if (value == c_oAscDropCap.Margin) {
+                                this.btnInMargin.toggle(true, false);
+                            } else {
+                                this.btnNone.toggle(true, false);
+                            }
+                        }
+                        value = frame_props.get_FontFamily();
+                        if (value) {
+                            var rec = this.cmbFonts.store.findWhere({
+                                name: value.get_Name()
+                            });
+                            if (rec) {
+                                this.cmbFonts.setValue(rec.get("name"));
+                            } else {
+                                this.cmbFonts.setRawValue(value.get_Name());
+                            }
                         }
                     }
-                    value = frame_props.get_FontFamily();
-                    if (value) {
-                        var rec = this.cmbFonts.store.findRecord("name", value.get_Name(), 0, false, false, true);
-                        this.cmbFonts.clearValue();
-                        if (rec) {
-                            this.cmbFonts.select(rec);
-                        } else {
-                            this.cmbFonts.setRawValue(value.get_Name());
-                        }
+                    this.Borders = new CParagraphBorders(frame_props.get_Borders());
+                    if (this.Borders) {
+                        var brd = this.Borders.get_Left();
+                        var val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.Utils.Metric.fnRecalcFromMM(brd.get_Space()) : "";
+                        this.spnMarginLeft.setValue(val);
+                        brd = this.Borders.get_Top();
+                        val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.Utils.Metric.fnRecalcFromMM(brd.get_Space()) : "";
+                        this.spnMarginTop.setValue(val);
+                        brd = this.Borders.get_Right();
+                        val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.Utils.Metric.fnRecalcFromMM(brd.get_Space()) : "";
+                        this.spnMarginRight.setValue(val);
+                        brd = this.Borders.get_Bottom();
+                        val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.Utils.Metric.fnRecalcFromMM(brd.get_Space()) : "";
+                        this.spnMarginBottom.setValue(val);
                     }
-                }
-                this.Borders = new CParagraphBorders(frame_props.get_Borders());
-                if (this.Borders) {
-                    var brd = this.Borders.get_Left();
-                    var val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.MetricSettings.fnRecalcFromMM(brd.get_Space()) : "";
-                    this._spnMarginLeft.setValue(val);
-                    brd = this.Borders.get_Top();
-                    val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.MetricSettings.fnRecalcFromMM(brd.get_Space()) : "";
-                    this._spnMarginTop.setValue(val);
-                    brd = this.Borders.get_Right();
-                    val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.MetricSettings.fnRecalcFromMM(brd.get_Space()) : "";
-                    this._spnMarginRight.setValue(val);
-                    brd = this.Borders.get_Bottom();
-                    val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.MetricSettings.fnRecalcFromMM(brd.get_Space()) : "";
-                    this._spnMarginBottom.setValue(val);
-                }
-                var shd = frame_props.get_Shade();
-                if (shd !== null && shd !== undefined && shd.get_Value() === shd_Clear) {
-                    var color = shd.get_Color();
-                    if (color) {
-                        if (color.get_type() == c_oAscColor.COLOR_TYPE_SCHEME) {
-                            this.paragraphShade = {
-                                color: this.getHexColor(color.get_r(), color.get_g(), color.get_b()),
-                                effectValue: color.get_value()
-                            };
+                    var shd = frame_props.get_Shade();
+                    if (shd !== null && shd !== undefined && shd.get_Value() === shd_Clear) {
+                        var color = shd.get_Color();
+                        if (color) {
+                            if (color.get_type() == c_oAscColor.COLOR_TYPE_SCHEME) {
+                                this.paragraphShade = {
+                                    color: Common.Utils.ThemeColor.getHexColor(color.get_r(), color.get_g(), color.get_b()),
+                                    effectValue: color.get_value()
+                                };
+                            } else {
+                                this.paragraphShade = Common.Utils.ThemeColor.getHexColor(color.get_r(), color.get_g(), color.get_b());
+                            }
                         } else {
-                            this.paragraphShade = this.getHexColor(color.get_r(), color.get_g(), color.get_b());
+                            this.paragraphShade = "transparent";
                         }
                     } else {
                         this.paragraphShade = "transparent";
                     }
-                } else {
-                    this.paragraphShade = "transparent";
-                }
-                this._btnBackColor.setColor(this.paragraphShade);
-                if (typeof(this.paragraphShade) == "object") {
-                    for (var i = 0; i < 10; i++) {
-                        if (this.ThemeValues[i] == this.paragraphShade.effectValue) {
-                            this.colorsBack.select(this.paragraphShade, true);
-                            break;
+                    this.btnBackColor.setColor(this.paragraphShade);
+                    if (_.isObject(this.paragraphShade)) {
+                        var isselected = false;
+                        for (var i = 0; i < 10; i++) {
+                            if (Common.Utils.ThemeColor.ThemeValues[i] == this.paragraphShade.effectValue) {
+                                this.colorsBack.select(this.paragraphShade, true);
+                                isselected = true;
+                                break;
+                            }
                         }
+                        if (!isselected) {
+                            this.colorsBack.clearSelection();
+                        }
+                    } else {
+                        this.colorsBack.select(this.paragraphShade, true);
                     }
+                    this._UpdateBorders();
+                }
+                this._noApply = false;
+                this._changedProps = new CParagraphFrame();
+                if (this.isFrame && frame_props && frame_props.get_W() !== undefined) {
+                    this._changedProps.put_W(frame_props.get_W());
+                }
+                this.ChangedBorders = undefined;
+            }
+        },
+        _DisableElem: function (btnId) {
+            var disabled = (btnId === c_oAscDropCap.None || btnId === c_oAscFrameWrap.None);
+            _.each(this.btnsCategory, function (btn) {
+                if (btn.options.contentTarget == "id-adv-dropcap-borders" || btn.options.contentTarget == "id-adv-dropcap-margins") {
+                    btn.setDisabled(disabled);
+                }
+            });
+            if (this.isFrame) {
+                disabled = (btnId == c_oAscFrameWrap.None);
+                this.cmbHAlign.setDisabled(disabled);
+                this.cmbHRelative.setDisabled(disabled);
+                this.spnX.setDisabled(disabled);
+                this.cmbVAlign.setDisabled(disabled);
+                this.cmbVRelative.setDisabled(disabled);
+                this.spnY.setDisabled(disabled);
+                this.chMove.setDisabled(disabled);
+                this.cmbWidth.setDisabled(disabled);
+                this.cmbHeight.setDisabled(disabled);
+                this.spnWidth.setDisabled(disabled);
+                this.spnHeight.setDisabled(disabled);
+            } else {
+                disabled = (btnId == c_oAscDropCap.None);
+                this.spnRowHeight.setDisabled(disabled);
+                this.numDistance.setDisabled(disabled);
+                this.cmbFonts.setDisabled(disabled);
+            }
+        },
+        _UpdateBorders: function () {
+            var oldSize = this.BorderSize;
+            var oldColor = this.btnBorderColor.color;
+            this._UpdateBorder(this.Borders.get_Left(), "l");
+            this._UpdateBorder(this.Borders.get_Top(), "t");
+            this._UpdateBorder(this.Borders.get_Right(), "r");
+            this._UpdateBorder(this.Borders.get_Bottom(), "b");
+            if (this.Borders.get_Between() !== null) {
+                for (var i = 0; i < this.tableStyler.columns; i++) {
+                    this._UpdateCellBorder(this.Borders.get_Between(), "b", this.tableStyler.getCell(i, 0));
+                    this._UpdateCellBorder(this.Borders.get_Between(), "t", this.tableStyler.getCell(i, 1));
+                }
+            }
+            this.tableStyler.setVirtualBorderSize(oldSize.pxValue);
+            this.tableStyler.setVirtualBorderColor((typeof(oldColor) == "object") ? oldColor.color : oldColor);
+        },
+        _UpdateCellBorder: function (BorderParam, borderName, cell) {
+            if (null !== BorderParam && undefined !== BorderParam) {
+                if (null !== BorderParam.get_Value() && null !== BorderParam.get_Size() && null !== BorderParam.get_Color() && 1 == BorderParam.get_Value()) {
+                    cell.setBordersSize(borderName, this._BorderPt2Px(BorderParam.get_Size() * 72 / 25.4));
+                    cell.setBordersColor(borderName, "rgb(" + BorderParam.get_Color().get_r() + "," + BorderParam.get_Color().get_g() + "," + BorderParam.get_Color().get_b() + ")");
                 } else {
-                    this.colorsBack.select(this.paragraphShade, true);
+                    cell.setBordersSize(borderName, 0);
                 }
-                this._UpdateBorders();
-            }
-            this._noApply = false;
-            this._changedProps = new CParagraphFrame();
-            if (this.isFrame && frame_props && frame_props.get_W() !== undefined) {
-                this._changedProps.put_W(frame_props.get_W());
-            }
-            this.ChangedBorders = undefined;
-        }
-    },
-    getSettings: function () {
-        if (this.ChangedBorders === null) {
-            this._changedProps.put_Borders(this.Borders);
-        } else {
-            if (this.ChangedBorders !== undefined) {
-                this._changedProps.put_Borders(this.ChangedBorders);
-            }
-        }
-        if (this.Margins) {
-            var borders = this._changedProps.get_Borders();
-            if (borders === undefined || borders === null) {
-                this._changedProps.put_Borders(new CParagraphBorders());
-                borders = this._changedProps.get_Borders();
-            }
-            if (this.Margins.Left !== undefined) {
-                if (borders.get_Left() === undefined || borders.get_Left() === null) {
-                    borders.put_Left(new CBorder(this.Borders.get_Left()));
-                }
-                borders.get_Left().put_Space(this.Margins.Left);
-            }
-            if (this.Margins.Top !== undefined) {
-                if (borders.get_Top() === undefined || borders.get_Top() === null) {
-                    borders.put_Top(new CBorder(this.Borders.get_Top()));
-                }
-                borders.get_Top().put_Space(this.Margins.Top);
-            }
-            if (this.Margins.Right !== undefined) {
-                if (borders.get_Right() === undefined || borders.get_Right() === null) {
-                    borders.put_Right(new CBorder(this.Borders.get_Right()));
-                }
-                borders.get_Right().put_Space(this.Margins.Right);
-            }
-            if (this.Margins.Bottom !== undefined) {
-                if (borders.get_Bottom() === undefined || borders.get_Bottom() === null) {
-                    borders.put_Bottom(new CBorder(this.Borders.get_Bottom()));
-                }
-                borders.get_Bottom().put_Space(this.Margins.Bottom);
-                if (borders.get_Between() === undefined || borders.get_Between() === null) {
-                    borders.put_Between(new CBorder(this.Borders.get_Between()));
-                }
-                borders.get_Between().put_Space(this.Margins.Bottom);
-            }
-        }
-        this._changedProps.put_FromDropCapMenu(!this.isFrame);
-        return {
-            paragraphProps: this._changedProps,
-            borderProps: {
-                borderSize: this.BorderSize,
-                borderColor: this._btnBorderColor.color
-            }
-        };
-    },
-    _UpdateBorders: function () {
-        var oldSize = this.BorderSize;
-        var oldColor = this._btnBorderColor.color;
-        this._UpdateBorder(this.Borders.get_Left(), "l");
-        this._UpdateBorder(this.Borders.get_Top(), "t");
-        this._UpdateBorder(this.Borders.get_Right(), "r");
-        this._UpdateBorder(this.Borders.get_Bottom(), "b");
-        if (this.Borders.get_Between() !== null) {
-            for (var i = 0; i < this._BordersImage.columns; i++) {
-                this._UpdateCellBorder(this.Borders.get_Between(), "b", this._BordersImage.getCell(i, 0));
-                this._UpdateCellBorder(this.Borders.get_Between(), "t", this._BordersImage.getCell(i, 1));
-            }
-        }
-        this._BordersImage.setVirtualBorderSize(oldSize.pxValue);
-        var colorstr = Ext.String.format("#{0}", (typeof(oldColor) == "object") ? oldColor.color : oldColor);
-        this._BordersImage.setVirtualBorderColor(colorstr);
-    },
-    _UpdateCellBorder: function (BorderParam, borderName, cell) {
-        if (null !== BorderParam && undefined !== BorderParam) {
-            if (null !== BorderParam.get_Value() && null !== BorderParam.get_Size() && null !== BorderParam.get_Color() && 1 == BorderParam.get_Value()) {
-                cell.setBordersSize(borderName, this._BorderPt2Px(BorderParam.get_Size() * 72 / 25.4));
-                cell.setBordersColor(borderName, "rgb(" + BorderParam.get_Color().get_r() + "," + BorderParam.get_Color().get_g() + "," + BorderParam.get_Color().get_b() + ")");
             } else {
                 cell.setBordersSize(borderName, 0);
             }
-        } else {
-            cell.setBordersSize(borderName, 0);
-        }
-    },
-    _UpdateBorder: function (BorderParam, borderName) {
-        if (null !== BorderParam && undefined !== BorderParam) {
-            if (null !== BorderParam.get_Value() && null !== BorderParam.get_Size() && null !== BorderParam.get_Color() && 1 == BorderParam.get_Value()) {
-                this._BordersImage.setBordersSize(borderName, this._BorderPt2Px(BorderParam.get_Size() * 72 / 25.4));
-                this._BordersImage.setBordersColor(borderName, "rgb(" + BorderParam.get_Color().get_r() + "," + BorderParam.get_Color().get_g() + "," + BorderParam.get_Color().get_b() + ")");
+        },
+        _UpdateBorder: function (BorderParam, borderName) {
+            if (null !== BorderParam && undefined !== BorderParam) {
+                if (null !== BorderParam.get_Value() && null !== BorderParam.get_Size() && null !== BorderParam.get_Color() && 1 == BorderParam.get_Value()) {
+                    this.tableStyler.setBordersSize(borderName, this._BorderPt2Px(BorderParam.get_Size() * 72 / 25.4));
+                    this.tableStyler.setBordersColor(borderName, "rgb(" + BorderParam.get_Color().get_r() + "," + BorderParam.get_Color().get_g() + "," + BorderParam.get_Color().get_b() + ")");
+                } else {
+                    this.tableStyler.setBordersSize(borderName, 0);
+                }
             } else {
-                this._BordersImage.setBordersSize(borderName, 0);
+                this.tableStyler.setBordersSize(borderName, 0);
             }
-        } else {
-            this._BordersImage.setBordersSize(borderName, 0);
-        }
-    },
-    _BorderPt2Px: function (value) {
-        if (value == 0) {
-            return 0;
-        }
-        if (value < 0.6) {
-            return 0.5;
-        }
-        if (value <= 1) {
-            return 1;
-        }
-        if (value <= 1.5) {
-            return 2;
-        }
-        if (value <= 2.25) {
-            return 3;
-        }
-        if (value <= 3) {
-            return 4;
-        }
-        if (value <= 4.5) {
-            return 5;
-        }
-        return 6;
-    },
-    _ApplyBorderPreset: function (border) {
-        this.ChangedBorders = null;
-        this.Borders.put_Left(this._UpdateBorderStyle(this.Borders.get_Left(), (border.indexOf("l") > -1)));
-        this.Borders.put_Top(this._UpdateBorderStyle(this.Borders.get_Top(), (border.indexOf("t") > -1)));
-        this.Borders.put_Right(this._UpdateBorderStyle(this.Borders.get_Right(), (border.indexOf("r") > -1)));
-        this.Borders.put_Bottom(this._UpdateBorderStyle(this.Borders.get_Bottom(), (border.indexOf("b") > -1)));
-        this.Borders.put_Between(this._UpdateBorderStyle(this.Borders.get_Between(), (border.indexOf("m") > -1)));
-        this._UpdateBorders();
-    },
-    _UpdateBorderStyle: function (border, visible) {
-        if (null == border) {
-            border = new CBorder();
-        }
-        if (visible && this.BorderSize.ptValue > 0) {
-            var size = parseFloat(this.BorderSize.ptValue);
-            border.put_Value(1);
-            border.put_Size(size * 25.4 / 72);
-            var color = this.getRgbColor(this._btnBorderColor.color);
-            border.put_Color(color);
-        } else {
-            border.put_Color(new CColor());
-            border.put_Value(0);
-        }
-        return border;
-    },
-    _UpdateCellBordersStyle: function (ct, border, size, color, destination) {
-        var updateBorders = destination;
-        if (ct.col == 0 && border.indexOf("l") > -1) {
-            updateBorders.put_Left(this._UpdateBorderStyle(updateBorders.get_Left(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Left(new CBorder(updateBorders.get_Left()));
+        },
+        _BorderPt2Px: function (value) {
+            if (value == 0) {
+                return 0;
             }
-        }
-        if (ct.col == this.tableStylerColumns - 1 && border.indexOf("r") > -1) {
-            updateBorders.put_Right(this._UpdateBorderStyle(updateBorders.get_Right(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Right(new CBorder(updateBorders.get_Right()));
+            if (value < 0.6) {
+                return 0.5;
             }
-        }
-        if (ct.row == 0 && border.indexOf("t") > -1) {
-            updateBorders.put_Top(this._UpdateBorderStyle(updateBorders.get_Top(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Top(new CBorder(updateBorders.get_Top()));
+            if (value <= 1) {
+                return 1;
             }
-        }
-        if (ct.row == this.tableStylerRows - 1 && border.indexOf("b") > -1) {
-            updateBorders.put_Bottom(this._UpdateBorderStyle(updateBorders.get_Bottom(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Bottom(new CBorder(updateBorders.get_Bottom()));
+            if (value <= 1.5) {
+                return 2;
             }
-        }
-        if (ct.row == 0 && border.indexOf("b") > -1 || ct.row == this.tableStylerRows - 1 && border.indexOf("t") > -1) {
-            updateBorders.put_Between(this._UpdateBorderStyle(updateBorders.get_Between(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Between(new CBorder(updateBorders.get_Between()));
+            if (value <= 2.25) {
+                return 3;
             }
-        }
+            if (value <= 3) {
+                return 4;
+            }
+            if (value <= 4.5) {
+                return 5;
+            }
+            return 6;
+        },
+        _ApplyBorderPreset: function (border) {
+            this.ChangedBorders = null;
+            this.Borders.put_Left(this._UpdateBorderStyle(this.Borders.get_Left(), (border.indexOf("l") > -1)));
+            this.Borders.put_Top(this._UpdateBorderStyle(this.Borders.get_Top(), (border.indexOf("t") > -1)));
+            this.Borders.put_Right(this._UpdateBorderStyle(this.Borders.get_Right(), (border.indexOf("r") > -1)));
+            this.Borders.put_Bottom(this._UpdateBorderStyle(this.Borders.get_Bottom(), (border.indexOf("b") > -1)));
+            this.Borders.put_Between(this._UpdateBorderStyle(this.Borders.get_Between(), (border.indexOf("m") > -1)));
+            this._UpdateBorders();
+        },
+        _UpdateBorderStyle: function (border, visible) {
+            if (null == border) {
+                border = new CBorder();
+            }
+            if (visible && this.BorderSize.ptValue > 0) {
+                var size = parseFloat(this.BorderSize.ptValue);
+                border.put_Value(1);
+                border.put_Size(size * 25.4 / 72);
+                var color = Common.Utils.ThemeColor.getRgbColor(this.btnBorderColor.color);
+                border.put_Color(color);
+            } else {
+                border.put_Color(new CColor());
+                border.put_Value(0);
+            }
+            return border;
+        },
+        _UpdateCellBordersStyle: function (ct, border, size, color, destination) {
+            var updateBorders = destination;
+            if (ct.col == 0 && border.indexOf("l") > -1) {
+                updateBorders.put_Left(this._UpdateBorderStyle(updateBorders.get_Left(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Left(new CBorder(updateBorders.get_Left()));
+                }
+            }
+            if (ct.col == this.tableStylerColumns - 1 && border.indexOf("r") > -1) {
+                updateBorders.put_Right(this._UpdateBorderStyle(updateBorders.get_Right(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Right(new CBorder(updateBorders.get_Right()));
+                }
+            }
+            if (ct.row == 0 && border.indexOf("t") > -1) {
+                updateBorders.put_Top(this._UpdateBorderStyle(updateBorders.get_Top(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Top(new CBorder(updateBorders.get_Top()));
+                }
+            }
+            if (ct.row == this.tableStylerRows - 1 && border.indexOf("b") > -1) {
+                updateBorders.put_Bottom(this._UpdateBorderStyle(updateBorders.get_Bottom(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Bottom(new CBorder(updateBorders.get_Bottom()));
+                }
+            }
+            if (ct.row == 0 && border.indexOf("b") > -1 || ct.row == this.tableStylerRows - 1 && border.indexOf("t") > -1) {
+                updateBorders.put_Between(this._UpdateBorderStyle(updateBorders.get_Between(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Between(new CBorder(updateBorders.get_Between()));
+                }
+            }
+        },
+        _UpdateTableBordersStyle: function (ct, border, size, color, destination) {
+            var updateBorders = destination;
+            if (border.indexOf("l") > -1) {
+                updateBorders.put_Left(this._UpdateBorderStyle(updateBorders.get_Left(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Left(new CBorder(updateBorders.get_Left()));
+                }
+            }
+            if (border.indexOf("t") > -1) {
+                updateBorders.put_Top(this._UpdateBorderStyle(updateBorders.get_Top(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Top(new CBorder(updateBorders.get_Top()));
+                }
+            }
+            if (border.indexOf("r") > -1) {
+                updateBorders.put_Right(this._UpdateBorderStyle(updateBorders.get_Right(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Right(new CBorder(updateBorders.get_Right()));
+                }
+            }
+            if (border.indexOf("b") > -1) {
+                updateBorders.put_Bottom(this._UpdateBorderStyle(updateBorders.get_Bottom(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Bottom(new CBorder(updateBorders.get_Bottom()));
+                }
+            }
+        },
+        textTitle: "Drop Cap - Advanced Settings",
+        strBorders: "Borders & Fill",
+        textBorderWidth: "Border Size",
+        textBorderColor: "Border Color",
+        textBackColor: "Background Color",
+        textBorderDesc: "Click on diagramm or use buttons to select borders",
+        cancelButtonText: "Cancel",
+        okButtonText: "Ok",
+        txtNoBorders: "No borders",
+        textNewColor: "Add New Custom Color",
+        textPosition: "Position",
+        textThemeColors: "Theme Colors",
+        textStandartColors: "Standart Colors",
+        textAlign: "Alignment",
+        textTop: "Top",
+        textLeft: "Left",
+        textBottom: "Bottom",
+        textRight: "Right",
+        textCenter: "Center",
+        strMargins: "Margins",
+        strDropcap: "Drop Cap",
+        textNone: "None",
+        textInText: "In text",
+        textInMargin: "In margin",
+        textParameters: "Parameters",
+        textRowHeight: "Height in rows",
+        textDistance: "Distance from text",
+        textFont: "Font",
+        textInline: "Inline frame",
+        textFlow: "Flow frame",
+        textFrame: "Frame",
+        textWidth: "Width",
+        textHeight: "Height",
+        textAuto: "Auto",
+        textExact: "Exactly",
+        textAtLeast: "At least",
+        textMove: "Move with text",
+        textHorizontal: "Horizontal",
+        textVertical: "Vertical",
+        textRelative: "Relative to",
+        textColumn: "Column",
+        textMargin: "Margin",
+        textPage: "Page",
+        textParagraph: "Paragraph",
+        tipFontName: "Font Name",
+        textTitleFrame: "Frame - Advanced Settings"
     },
-    _UpdateTableBordersStyle: function (ct, border, size, color, destination) {
-        var updateBorders = destination;
-        if (border.indexOf("l") > -1) {
-            updateBorders.put_Left(this._UpdateBorderStyle(updateBorders.get_Left(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Left(new CBorder(updateBorders.get_Left()));
-            }
-        }
-        if (border.indexOf("t") > -1) {
-            updateBorders.put_Top(this._UpdateBorderStyle(updateBorders.get_Top(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Top(new CBorder(updateBorders.get_Top()));
-            }
-        }
-        if (border.indexOf("r") > -1) {
-            updateBorders.put_Right(this._UpdateBorderStyle(updateBorders.get_Right(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Right(new CBorder(updateBorders.get_Right()));
-            }
-        }
-        if (border.indexOf("b") > -1) {
-            updateBorders.put_Bottom(this._UpdateBorderStyle(updateBorders.get_Bottom(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Bottom(new CBorder(updateBorders.get_Bottom()));
-            }
-        }
-    },
-    getRgbColor: function (clr) {
-        var color = (typeof(clr) == "object") ? clr.color : clr;
-        color = color.replace(/#/, "");
-        if (color.length == 3) {
-            color = color.replace(/(.)/g, "$1$1");
-        }
-        color = parseInt(color, 16);
-        var c = new CAscColor();
-        c.put_type((typeof(clr) == "object") ? c_oAscColor.COLOR_TYPE_SCHEME : c_oAscColor.COLOR_TYPE_SRGB);
-        c.put_r(color >> 16);
-        c.put_g((color & 65280) >> 8);
-        c.put_b(color & 255);
-        c.put_a(255);
-        if (clr.effectId !== undefined) {
-            c.put_value(clr.effectId);
-        }
-        return c;
-    },
-    getHexColor: function (r, g, b) {
-        r = r.toString(16);
-        g = g.toString(16);
-        b = b.toString(16);
-        if (r.length == 1) {
-            r = "0" + r;
-        }
-        if (g.length == 1) {
-            g = "0" + g;
-        }
-        if (b.length == 1) {
-            b = "0" + b;
-        }
-        return r + g + b;
-    },
-    sendThemeColors: function (effectcolors, standartcolors) {
-        if (standartcolors && effectcolors) {
-            this.colorsBorder.updateColors(effectcolors, standartcolors);
-            this.colorsBack.updateColors(effectcolors, standartcolors);
-        }
-    },
-    updateMetricUnit: function () {
-        var spinners = this.query("commonmetricspinner");
-        if (spinners) {
-            for (var i = 0; i < spinners.length; i++) {
-                var spinner = spinners[i];
-                spinner.setDefaultUnit(Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()]);
-                spinner.setStep(Common.MetricSettings.getCurrentMetric() == Common.MetricSettings.c_MetricUnits.cm ? 0.1 : 1);
-            }
-        }
-    },
-    _DisableElem: function (btnId) {
-        var disabled = (btnId === c_oAscDropCap.None || btnId === c_oAscFrameWrap.None);
-        this.btnBorders.setDisabled(disabled);
-        this.btnMargins.setDisabled(disabled);
-        if (this.isFrame) {
-            disabled = (btnId == c_oAscFrameWrap.None);
-            this.cmbHAlign.setDisabled(disabled);
-            this.cmbHRelative.setDisabled(disabled);
-            this._spnX.setDisabled(disabled);
-            this.cmbVAlign.setDisabled(disabled);
-            this.cmbVRelative.setDisabled(disabled);
-            this._spnY.setDisabled(disabled);
-            this.chMove.setDisabled(disabled);
-            this.cmbWidth.setDisabled(disabled);
-            this.cmbHeight.setDisabled(disabled);
-            this._spnWidth.setDisabled(disabled);
-            this._spnHeight.setDisabled(disabled);
-        } else {
-            disabled = (btnId == c_oAscDropCap.None);
-            this.spnRowHeight.setDisabled(disabled);
-            this.numDistance.setDisabled(disabled);
-            this.cmbFonts.setDisabled(disabled);
-        }
-    },
-    textTitle: "Drop Cap - Advanced Settings",
-    strBorders: "Borders & Fill",
-    textBorderWidth: "Border Size",
-    textBorderColor: "Border Color",
-    textBackColor: "Background Color",
-    textBorderDesc: "Click on diagramm or use buttons to select borders",
-    cancelButtonText: "Cancel",
-    okButtonText: "Ok",
-    txtNoBorders: "No borders",
-    textNewColor: "Add New Custom Color",
-    textPosition: "Position",
-    textThemeColors: "Theme Colors",
-    textStandartColors: "Standart Colors",
-    textAlign: "Alignment",
-    textTop: "Top",
-    textLeft: "Left",
-    textBottom: "Bottom",
-    textRight: "Right",
-    textCenter: "Center",
-    strMargins: "Margins",
-    strDropcap: "Drop Cap",
-    textNone: "None",
-    textInText: "In text",
-    textInMargin: "In margin",
-    textParameters: "Parameters",
-    textRowHeight: "Height in rows",
-    textDistance: "Distance from text",
-    textFont: "Font",
-    textInline: "Inline frame",
-    textFlow: "Flow frame",
-    textFrame: "Frame",
-    textWidth: "Width",
-    textHeight: "Height",
-    textAuto: "Auto",
-    textExact: "Exactly",
-    textAtLeast: "At least",
-    textMove: "Move with text",
-    textHorizontal: "Horizontal",
-    textVertical: "Vertical",
-    textRelative: "Relative to",
-    textColumn: "Column",
-    textMargin: "Margin",
-    textPage: "Page",
-    textParagraph: "Paragraph",
-    tipFontName: "Font Name",
-    textTitleFrame: "Frame - Advanced Settings"
+    DE.Views.DropcapSettingsAdvanced || {}));
 });

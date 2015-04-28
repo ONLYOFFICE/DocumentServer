@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,361 +29,231 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("SSE.view.ImageSettings", {
-    extend: "Common.view.AbstractSettingsPanel",
-    alias: "widget.sseimagesettings",
-    height: 192,
-    requires: ["Ext.ComponentQuery", "Ext.container.Container", "Ext.button.Button", "Ext.form.Label", "Ext.toolbar.Spacer", "Common.view.ImageFromUrlDialog", "Ext.util.Cookies"],
-    constructor: function (config) {
-        this.callParent(arguments);
-        this.initConfig(config);
-        return this;
-    },
-    initComponent: function () {
-        this.title = this.txtTitle;
-        this._initSettings = true;
-        this._nRatio = 1;
-        this._state = {
-            Width: 0,
-            Height: 0
-        };
-        this._spnWidth = Ext.create("Common.component.MetricSpinner", {
-            id: "image-spin-width",
-            readOnly: false,
-            maxValue: 55.88,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "3 cm",
-            width: 78,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    var w = field.getNumberValue();
-                    var h = this._spnHeight.getNumberValue();
-                    if (this._btnRatio.pressed) {
-                        h = w / this._nRatio;
-                        if (h > this._spnHeight.maxValue) {
-                            h = this._spnHeight.maxValue;
-                            w = h * this._nRatio;
-                            this._spnWidth.suspendEvents(false);
-                            this._spnWidth.setValue(w);
-                            this._spnWidth.resumeEvents();
-                        }
-                        this._spnHeight.suspendEvents(false);
-                        this._spnHeight.setValue(h);
-                        this._spnHeight.resumeEvents();
-                    }
-                    if (this.api) {
-                        var props = new Asc.asc_CImgProperty();
-                        props.asc_putWidth(Common.MetricSettings.fnRecalcToMM(w));
-                        props.asc_putHeight(Common.MetricSettings.fnRecalcToMM(h));
-                        this.api.asc_setGraphicObjectProps(props);
-                    }
-                    this.fireEvent("editcomplete", this);
-                },
-                this)
+ define(["text!spreadsheeteditor/main/app/template/ImageSettings.template", "jquery", "underscore", "backbone", "common/main/lib/component/Button", "common/main/lib/component/MetricSpinner", "common/main/lib/view/ImageFromUrlDialog"], function (menuTemplate, $, _, Backbone) {
+    SSE.Views.ImageSettings = Backbone.View.extend(_.extend({
+        el: "#id-image-settings",
+        template: _.template(menuTemplate),
+        events: {},
+        options: {
+            alias: "ImageSettings"
+        },
+        initialize: function () {
+            var me = this;
+            this._initSettings = true;
+            this._nRatio = 1;
+            this._state = {
+                Width: 0,
+                Height: 0,
+                DisabledControls: false
+            };
+            this.spinners = [];
+            this.lockedControls = [];
+            this._locked = false;
+            this._noApply = false;
+            this.render();
+            this.spnWidth = new Common.UI.MetricSpinner({
+                el: $("#image-spin-width"),
+                step: 0.1,
+                width: 78,
+                defaultUnit: "cm",
+                value: "3 cm",
+                maxValue: 55.88,
+                minValue: 0
+            });
+            this.spinners.push(this.spnWidth);
+            this.lockedControls.push(this.spnWidth);
+            this.spnHeight = new Common.UI.MetricSpinner({
+                el: $("#image-spin-height"),
+                step: 0.1,
+                width: 78,
+                defaultUnit: "cm",
+                value: "3 cm",
+                maxValue: 55.88,
+                minValue: 0
+            });
+            this.spinners.push(this.spnHeight);
+            this.lockedControls.push(this.spnHeight);
+            this.btnRatio = new Common.UI.Button({
+                cls: "btn-toolbar btn-toolbar-default",
+                iconCls: "advanced-btn-ratio",
+                style: "margin-bottom: 1px;",
+                enableToggle: true,
+                hint: this.textKeepRatio
+            });
+            this.btnRatio.render($("#image-button-ratio"));
+            this.lockedControls.push(this.btnRatio);
+            var value = window.localStorage.getItem("sse-settings-imageratio");
+            if (value === null || parseInt(value) == 1) {
+                this.btnRatio.toggle(true);
             }
-        });
-        this.controls.push(this._spnWidth);
-        this._spnHeight = Ext.create("Common.component.MetricSpinner", {
-            id: "image-span-height",
-            readOnly: false,
-            maxValue: 55.88,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "3 cm",
-            width: 78,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    var h = field.getNumberValue(),
-                    w = this._spnWidth.getNumberValue();
-                    if (this._btnRatio.pressed) {
-                        w = h * this._nRatio;
-                        if (w > this._spnWidth.maxValue) {
-                            w = this._spnWidth.maxValue;
-                            h = w / this._nRatio;
-                            this._spnHeight.suspendEvents(false);
-                            this._spnHeight.setValue(h);
-                            this._spnHeight.resumeEvents();
-                        }
-                        this._spnWidth.suspendEvents(false);
-                        this._spnWidth.setValue(w);
-                        this._spnWidth.resumeEvents();
-                    }
-                    if (this.api) {
-                        var props = new Asc.asc_CImgProperty();
-                        props.asc_putWidth(Common.MetricSettings.fnRecalcToMM(w));
-                        props.asc_putHeight(Common.MetricSettings.fnRecalcToMM(h));
-                        this.api.asc_setGraphicObjectProps(props);
-                    }
-                    this.fireEvent("editcomplete", this);
-                },
-                this)
-            }
-        });
-        this.controls.push(this._spnHeight);
-        var value = window.localStorage.getItem("sse-settings-imageratio");
-        this._btnRatio = Ext.create("Ext.Button", {
-            id: "image-button-ratio",
-            iconCls: "advanced-btn-ratio",
-            enableToggle: true,
-            width: 22,
-            height: 22,
-            pressed: (value === null || parseInt(value) == 1),
-            style: "margin: 0 0 0 4px;",
-            tooltip: this.textKeepRatio,
-            toggleHandler: Ext.bind(function (btn) {
-                if (btn.pressed && this._spnHeight.getNumberValue() > 0) {
-                    this._nRatio = this._spnWidth.getNumberValue() / this._spnHeight.getNumberValue();
+            this.btnRatio.on("click", _.bind(function (btn, e) {
+                if (btn.pressed && this.spnHeight.getNumberValue() > 0) {
+                    this._nRatio = this.spnWidth.getNumberValue() / this.spnHeight.getNumberValue();
                 }
                 window.localStorage.setItem("sse-settings-imageratio", (btn.pressed) ? 1 : 0);
             },
-            this)
-        });
-        this._btnOriginalSize = Ext.create("Ext.Button", {
-            id: "image-button-original-size",
-            text: this.textOriginalSize,
-            width: 106,
-            listeners: {
-                click: this.setOriginalSize,
+            this));
+            this.btnOriginalSize = new Common.UI.Button({
+                el: $("#image-button-original-size")
+            });
+            this.lockedControls.push(this.btnOriginalSize);
+            this.btnInsertFromFile = new Common.UI.Button({
+                el: $("#image-button-from-file")
+            });
+            this.lockedControls.push(this.btnInsertFromFile);
+            this.btnInsertFromUrl = new Common.UI.Button({
+                el: $("#image-button-from-url")
+            });
+            this.lockedControls.push(this.btnInsertFromUrl);
+            this.spnWidth.on("change", _.bind(this.onWidthChange, this));
+            this.spnHeight.on("change", _.bind(this.onHeightChange, this));
+            this.btnOriginalSize.on("click", _.bind(this.setOriginalSize, this));
+            this.btnInsertFromFile.on("click", _.bind(function (btn) {
+                if (this.api) {
+                    this.api.asc_changeImageFromFile();
+                }
+                Common.NotificationCenter.trigger("edit:complete", this);
+            },
+            this));
+            this.btnInsertFromUrl.on("click", _.bind(this.insertFromUrl, this));
+        },
+        render: function () {
+            var el = $(this.el);
+            el.html(this.template({
                 scope: this
+            }));
+        },
+        setApi: function (api) {
+            if (api == undefined) {
+                return;
             }
-        });
-        this._btnInsertFromFile = Ext.create("Ext.Button", {
-            id: "image-button-from-file",
-            text: this.textFromFile,
-            width: 85,
-            listeners: {
-                click: function (btn) {
-                    if (this.api) {
-                        this.api.asc_changeImageFromFile();
-                    }
-                    this.fireEvent("editcomplete", this);
-                },
-                scope: this
+            this.api = api;
+            return this;
+        },
+        updateMetricUnit: function () {
+            if (this.spinners) {
+                for (var i = 0; i < this.spinners.length; i++) {
+                    var spinner = this.spinners[i];
+                    spinner.setDefaultUnit(Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()]);
+                    spinner.setStep(Common.Utils.Metric.getCurrentMetric() == Common.Utils.Metric.c_MetricUnits.cm ? 0.1 : 1);
+                }
             }
-        });
-        this._btnInsertFromUrl = Ext.create("Ext.Button", {
-            id: "image-button-from-url",
-            text: this.textFromUrl,
-            width: 85,
-            listeners: {
-                click: function (btn) {
-                    var w = Ext.create("Common.view.ImageFromUrlDialog");
-                    w.addListener("onmodalresult", Ext.bind(this._onOpenImageFromURL, [this, w]), false);
-                    w.addListener("close", Ext.bind(function (cnt, eOpts) {
-                        this.fireEvent("editcomplete", this);
-                    },
-                    this));
-                    w.show();
-                },
-                scope: this
+        },
+        createDelayedElements: function () {
+            this.updateMetricUnit();
+        },
+        ChangeSettings: function (props) {
+            if (this._initSettings) {
+                this.createDelayedElements();
+                this._initSettings = false;
             }
-        });
-        this._SizePanel = Ext.create("Ext.container.Container", {
-            layout: "vbox",
-            layoutConfig: {
-                align: "stretch"
-            },
-            height: 88,
-            width: 195,
-            items: [{
-                xtype: "tbspacer",
-                height: 8
-            },
-            {
-                xtype: "container",
-                layout: {
-                    type: "table",
-                    columns: 2
-                },
-                defaults: {
-                    xtype: "container",
-                    layout: "vbox",
-                    layoutConfig: {
-                        align: "stretch"
-                    },
-                    height: 43,
-                    style: "float:left;"
-                },
-                items: [{
-                    items: [{
-                        xtype: "label",
-                        text: this.textWidth,
-                        width: 78
-                    },
-                    {
-                        xtype: "tbspacer",
-                        height: 3
-                    },
-                    {
-                        xtype: "container",
-                        width: 108,
-                        layout: {
-                            type: "hbox"
-                        },
-                        items: [this._spnWidth, this._btnRatio, {
-                            xtype: "tbspacer",
-                            width: 4
-                        }]
-                    }]
-                },
-                {
-                    items: [{
-                        xtype: "label",
-                        text: this.textHeight,
-                        width: 78
-                    },
-                    {
-                        xtype: "tbspacer",
-                        height: 3
-                    },
-                    this._spnHeight]
-                }]
-            },
-            {
-                xtype: "tbspacer",
-                height: 7
-            },
-            this._btnOriginalSize, {
-                xtype: "tbspacer",
-                height: 3
-            }]
-        });
-        this._UrlPanel = Ext.create("Ext.container.Container", {
-            layout: "vbox",
-            layoutConfig: {
-                align: "stretch"
-            },
-            height: 36,
-            width: 195,
-            items: [{
-                xtype: "tbspacer",
-                height: 8
-            },
-            {
-                xtype: "container",
-                layout: {
-                    type: "table",
-                    columns: 2,
-                    tdAttrs: {
-                        style: "padding-right: 8px;"
-                    }
-                },
-                items: [this._btnInsertFromFile, this._btnInsertFromUrl]
-            },
-            {
-                xtype: "tbspacer",
-                height: 2
-            }]
-        });
-        this.items = [{
-            xtype: "tbspacer",
-            height: 9
+            this.disableControls(this._locked);
+            if (props) {
+                var value = props.asc_getWidth();
+                if (Math.abs(this._state.Width - value) > 0.001 || (this._state.Width === null || value === null) && (this._state.Width !== value)) {
+                    this.spnWidth.setValue((value !== null) ? Common.Utils.Metric.fnRecalcFromMM(value) : "", true);
+                    this._state.Width = value;
+                }
+                value = props.asc_getHeight();
+                if (Math.abs(this._state.Height - value) > 0.001 || (this._state.Height === null || value === null) && (this._state.Height !== value)) {
+                    this.spnHeight.setValue((value !== null) ? Common.Utils.Metric.fnRecalcFromMM(value) : "", true);
+                    this._state.Height = value;
+                }
+                if (props.asc_getHeight() > 0) {
+                    this._nRatio = props.asc_getWidth() / props.asc_getHeight();
+                }
+                this.btnOriginalSize.setDisabled(props.asc_getImageUrl() === null || props.asc_getImageUrl() === undefined || this._locked);
+            }
         },
-        {
-            xtype: "label",
-            style: "font-weight: bold;margin-top: 1px;",
-            text: this.textSize
+        onWidthChange: function (field, newValue, oldValue, eOpts) {
+            var w = field.getNumberValue();
+            var h = this.spnHeight.getNumberValue();
+            if (this.btnRatio.pressed) {
+                h = w / this._nRatio;
+                if (h > this.spnHeight.options.maxValue) {
+                    h = this.spnHeight.options.maxValue;
+                    w = h * this._nRatio;
+                    this.spnWidth.setValue(w, true);
+                }
+                this.spnHeight.setValue(h, true);
+            }
+            if (this.api) {
+                var props = new Asc.asc_CImgProperty();
+                props.asc_putWidth(Common.Utils.Metric.fnRecalcToMM(w));
+                props.asc_putHeight(Common.Utils.Metric.fnRecalcToMM(h));
+                this.api.asc_setGraphicObjectProps(props);
+            }
+            Common.NotificationCenter.trigger("edit:complete", this);
         },
-        this._SizePanel, {
-            xtype: "tbspacer",
-            height: 5
+        onHeightChange: function (field, newValue, oldValue, eOpts) {
+            var h = field.getNumberValue(),
+            w = this.spnWidth.getNumberValue();
+            if (this.btnRatio.pressed) {
+                w = h * this._nRatio;
+                if (w > this.spnWidth.options.maxValue) {
+                    w = this.spnWidth.options.maxValue;
+                    h = w / this._nRatio;
+                    this.spnHeight.setValue(h, true);
+                }
+                this.spnWidth.setValue(w, true);
+            }
+            if (this.api) {
+                var props = new Asc.asc_CImgProperty();
+                props.asc_putWidth(Common.Utils.Metric.fnRecalcToMM(w));
+                props.asc_putHeight(Common.Utils.Metric.fnRecalcToMM(h));
+                this.api.asc_setGraphicObjectProps(props);
+            }
+            Common.NotificationCenter.trigger("edit:complete", this);
         },
-        {
-            xtype: "tbspacer",
-            width: "100%",
-            height: 10,
-            style: "padding-right: 10px;",
-            html: '<div style="width: 100%; height: 40%; border-bottom: 1px solid #C7C7C7"></div>'
-        },
-        {
-            xtype: "label",
-            style: "font-weight: bold;margin-top: 1px;",
-            text: this.textInsert
-        },
-        this._UrlPanel];
-        this.addEvents("editcomplete");
-        this.callParent(arguments);
-    },
-    setOriginalSize: function () {
-        if (this.api) {
-            var imgsize = this.api.asc_getOriginalImageSize();
-            if (imgsize) {
+        setOriginalSize: function () {
+            if (this.api) {
+                var imgsize = this.api.asc_getOriginalImageSize();
                 var w = imgsize.asc_getImageWidth();
                 var h = imgsize.asc_getImageHeight();
                 var properties = new Asc.asc_CImgProperty();
                 properties.asc_putWidth(w);
                 properties.asc_putHeight(h);
                 this.api.asc_setGraphicObjectProps(properties);
+                Common.NotificationCenter.trigger("edit:complete", this);
             }
-            this.fireEvent("editcomplete", this);
-        }
-    },
-    setApi: function (api) {
-        if (api == undefined) {
-            return;
-        }
-        this.api = api;
-    },
-    ChangeSettings: function (props) {
-        if (this._initSettings) {
-            this.createDelayedElements();
-            this._initSettings = false;
-        }
-        if (props) {
-            this.SuspendEvents();
-            var value = props.asc_getWidth();
-            if (Math.abs(this._state.Width - value) > 0.001 || (this._state.Width === null || value === null) && (this._state.Width !== value)) {
-                this._spnWidth.setValue((value !== null) ? Common.MetricSettings.fnRecalcFromMM(value) : "");
-                this._state.Width = value;
+        },
+        insertFromUrl: function () {
+            var me = this;
+            (new Common.Views.ImageFromUrlDialog({
+                handler: function (result, value) {
+                    if (result == "ok") {
+                        if (me.api) {
+                            var checkUrl = value.replace(/ /g, "");
+                            if (!_.isEmpty(checkUrl)) {
+                                var props = new Asc.asc_CImgProperty();
+                                props.asc_putImageUrl(checkUrl);
+                                me.api.asc_setGraphicObjectProps(props);
+                            }
+                        }
+                    }
+                    Common.NotificationCenter.trigger("edit:complete", me);
+                }
+            })).show();
+        },
+        setLocked: function (locked) {
+            this._locked = locked;
+        },
+        disableControls: function (disable) {
+            if (this._state.DisabledControls !== disable) {
+                this._state.DisabledControls = disable;
+                _.each(this.lockedControls, function (item) {
+                    item.setDisabled(disable);
+                });
             }
-            value = props.asc_getHeight();
-            if (Math.abs(this._state.Height - value) > 0.001 || (this._state.Height === null || value === null) && (this._state.Height !== value)) {
-                this._spnHeight.setValue((value !== null) ? Common.MetricSettings.fnRecalcFromMM(value) : "");
-                this._state.Height = value;
-            }
-            this.ResumeEvents();
-            if (props.asc_getHeight() > 0) {
-                this._nRatio = props.asc_getWidth() / props.asc_getHeight();
-            }
-            this._btnOriginalSize.setDisabled(props.asc_getImageUrl() === null || props.asc_getImageUrl() === undefined);
-        }
+        },
+        textKeepRatio: "Constant Proportions",
+        textSize: "Size",
+        textWidth: "Width",
+        textHeight: "Height",
+        textOriginalSize: "Default Size",
+        textInsert: "Insert Image",
+        textFromUrl: "From URL",
+        textFromFile: "From File"
     },
-    _onOpenImageFromURL: function (mr) {
-        var self = this[0];
-        var url = this[1].txtUrl;
-        if (mr == 1 && self.api) {
-            var checkurl = url.value.replace(/ /g, "");
-            if (checkurl != "") {
-                var props = new Asc.asc_CImgProperty();
-                props.asc_putImageUrl(url.value);
-                self.api.asc_setGraphicObjectProps(props);
-            }
-        }
-    },
-    updateMetricUnit: function () {
-        var spinners = this.query("commonmetricspinner");
-        if (spinners) {
-            for (var i = 0; i < spinners.length; i++) {
-                var spinner = spinners[i];
-                spinner.setDefaultUnit(Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()]);
-                spinner.setStep(Common.MetricSettings.getCurrentMetric() == Common.MetricSettings.c_MetricUnits.cm ? 0.1 : 1);
-            }
-        }
-    },
-    createDelayedElements: function () {
-        this.updateMetricUnit();
-    },
-    textKeepRatio: "Constant Proportions",
-    textSize: "Size",
-    textWidth: "Width",
-    textHeight: "Height",
-    textOriginalSize: "Default Size",
-    textUrl: "Image URL",
-    textInsert: "Change Image",
-    textFromUrl: "From URL",
-    textFromFile: "From File",
-    txtTitle: "Picture"
+    SSE.Views.ImageSettings || {}));
 });

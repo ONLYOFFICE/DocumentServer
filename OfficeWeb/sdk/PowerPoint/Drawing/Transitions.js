@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function CCacheSlideImage() {
+ "use strict";
+function CCacheSlideImage() {
     this.Image = null;
     this.Color = {
         r: 0,
@@ -127,6 +128,22 @@ function CTransitionAnimation(htmlpage) {
         this.Rect.y = _t >> 0;
         this.Rect.w = _w >> 0;
         this.Rect.h = _h >> 0;
+    };
+    this.SetBaseTransform = function () {
+        if (this.DemonstrationObject == null) {
+            var ctx1 = this.HtmlPage.m_oEditor.HtmlElement.getContext("2d");
+            if (this.HtmlPage.bIsRetinaSupport) {
+                ctx1.setTransform(2, 0, 0, 2, 0, 0);
+            } else {
+                ctx1.setTransform(1, 0, 0, 1, 0, 0);
+            }
+            this.HtmlPage.m_oOverlayApi.SetBaseTransform();
+        } else {
+            var _ctx1 = oThis.DemonstrationObject.Canvas.getContext("2d");
+            _ctx1.setTransform(1, 0, 0, 1, 0, 0);
+            var _ctx2 = oThis.DemonstrationObject.Overlay.getContext("2d");
+            _ctx2.setTransform(1, 0, 0, 1, 0, 0);
+        }
     };
     this.DrawImage1 = function (slide_num, _not_use_prev) {
         if (undefined === slide_num) {
@@ -234,6 +251,7 @@ function CTransitionAnimation(htmlpage) {
             this._startZoom();
             break;
         default:
+            this.End(true);
             break;
         }
     };
@@ -270,6 +288,7 @@ function CTransitionAnimation(htmlpage) {
             oThis.End(false);
             return;
         }
+        oThis.SetBaseTransform();
         if (oThis.TimerId === null) {
             oThis.Params = {
                 IsFirstAfterHalf: true
@@ -277,18 +296,24 @@ function CTransitionAnimation(htmlpage) {
             var _ctx1 = null;
             if (null == oThis.DemonstrationObject) {
                 _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext("2d");
-                _ctx1.fillStyle = "#B0B0B0";
+                _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                 _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
             } else {
                 _ctx1 = oThis.DemonstrationObject.Canvas.getContext("2d");
                 _ctx1.fillStyle = "#000000";
                 _ctx1.fillRect(0, 0, oThis.DemonstrationObject.Canvas.width, oThis.DemonstrationObject.Canvas.height);
             }
-            if (null != oThis.CacheImage1.Image) {
-                _ctx1.drawImage(oThis.CacheImage1.Image, oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
+            if (!oThis.IsBackward) {
+                if (null != oThis.CacheImage1.Image) {
+                    _ctx1.drawImage(oThis.CacheImage1.Image, oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
+                } else {
+                    var _c = oThis.CacheImage1.Color;
+                    _ctx1.fillStyle = "rgb(" + _c.r + "," + _c.g + "," + _c.b + ")";
+                    _ctx1.fillRect(oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
+                    _ctx1.beginPath();
+                }
             } else {
-                var _c = oThis.CacheImage1.Color;
-                _ctx1.fillStyle = "rgb(" + _c.r + "," + _c.g + "," + _c.b + ")";
+                _ctx1.fillStyle = "rgb(0,0,0)";
                 _ctx1.fillRect(oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
                 _ctx1.beginPath();
             }
@@ -319,34 +344,72 @@ function CTransitionAnimation(htmlpage) {
             _ctx2.globalAlpha = 1;
         } else {
             if (oThis.Param == c_oAscSlideTransitionParams.Fade_Through_Black) {
-                if (oThis.Params.IsFirstAfterHalf) {
-                    if (_part > 0.5) {
-                        var _ctx1 = null;
-                        if (null == oThis.DemonstrationObject) {
-                            _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext("2d");
-                        } else {
-                            _ctx1 = oThis.DemonstrationObject.Canvas.getContext("2d");
+                if (!oThis.IsBackward) {
+                    if (oThis.Params.IsFirstAfterHalf) {
+                        if (_part > 0.5) {
+                            var _ctx1 = null;
+                            if (null == oThis.DemonstrationObject) {
+                                _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext("2d");
+                            } else {
+                                _ctx1 = oThis.DemonstrationObject.Canvas.getContext("2d");
+                            }
+                            _ctx1.fillStyle = "rgb(0,0,0)";
+                            _ctx1.fillRect(oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
+                            _ctx1.beginPath();
+                            oThis.Params.IsFirstAfterHalf = false;
                         }
-                        _ctx1.fillStyle = "rgb(0,0,0)";
-                        _ctx1.fillRect(oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
-                        _ctx1.beginPath();
-                        oThis.Params.IsFirstAfterHalf = false;
                     }
-                }
-                if (oThis.Params.IsFirstAfterHalf) {
-                    _ctx2.globalAlpha = (2 * _part);
-                    _ctx2.fillStyle = "rgb(0,0,0)";
-                    _ctx2.fillRect(oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
-                    _ctx2.beginPath();
-                } else {
-                    _ctx2.globalAlpha = (2 * (_part - 0.5));
-                    if (null != oThis.CacheImage2.Image) {
-                        _ctx2.drawImage(oThis.CacheImage2.Image, oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
-                    } else {
-                        var _c = oThis.CacheImage2.Color;
-                        _ctx2.fillStyle = "rgb(" + _c.r + "," + _c.g + "," + _c.b + ")";
+                    if (oThis.Params.IsFirstAfterHalf) {
+                        _ctx2.globalAlpha = (2 * _part);
+                        _ctx2.fillStyle = "rgb(0,0,0)";
                         _ctx2.fillRect(oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
                         _ctx2.beginPath();
+                    } else {
+                        _ctx2.globalAlpha = (2 * (_part - 0.5));
+                        if (null != oThis.CacheImage2.Image) {
+                            _ctx2.drawImage(oThis.CacheImage2.Image, oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
+                        } else {
+                            var _c = oThis.CacheImage2.Color;
+                            _ctx2.fillStyle = "rgb(" + _c.r + "," + _c.g + "," + _c.b + ")";
+                            _ctx2.fillRect(oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
+                            _ctx2.beginPath();
+                        }
+                    }
+                } else {
+                    if (oThis.Params.IsFirstAfterHalf) {
+                        if (_part < 0.5) {
+                            var _ctx1 = null;
+                            if (null == oThis.DemonstrationObject) {
+                                _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext("2d");
+                            } else {
+                                _ctx1 = oThis.DemonstrationObject.Canvas.getContext("2d");
+                            }
+                            if (null != oThis.CacheImage1.Image) {
+                                _ctx1.drawImage(oThis.CacheImage1.Image, oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
+                            } else {
+                                var _c = oThis.CacheImage1.Color;
+                                _ctx1.fillStyle = "rgb(" + _c.r + "," + _c.g + "," + _c.b + ")";
+                                _ctx1.fillRect(oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
+                                _ctx1.beginPath();
+                            }
+                            oThis.Params.IsFirstAfterHalf = false;
+                        }
+                    }
+                    if (!oThis.Params.IsFirstAfterHalf) {
+                        _ctx2.globalAlpha = (2 * _part);
+                        _ctx2.fillStyle = "rgb(0,0,0)";
+                        _ctx2.fillRect(oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
+                        _ctx2.beginPath();
+                    } else {
+                        _ctx2.globalAlpha = (2 * (_part - 0.5));
+                        if (null != oThis.CacheImage2.Image) {
+                            _ctx2.drawImage(oThis.CacheImage2.Image, oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
+                        } else {
+                            var _c = oThis.CacheImage2.Color;
+                            _ctx2.fillStyle = "rgb(" + _c.r + "," + _c.g + "," + _c.b + ")";
+                            _ctx2.fillRect(oThis.Rect.x, oThis.Rect.y, oThis.Rect.w, oThis.Rect.h);
+                            _ctx2.beginPath();
+                        }
                     }
                 }
                 _ctx2.globalAlpha = 1;
@@ -360,6 +423,7 @@ function CTransitionAnimation(htmlpage) {
             oThis.End(false);
             return;
         }
+        oThis.SetBaseTransform();
         var _xDst = oThis.Rect.x;
         var _yDst = oThis.Rect.y;
         var _wDst = oThis.Rect.w;
@@ -370,7 +434,7 @@ function CTransitionAnimation(htmlpage) {
             };
             if (null == oThis.DemonstrationObject) {
                 var _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext("2d");
-                _ctx1.fillStyle = "#B0B0B0";
+                _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                 _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
             } else {
                 var _ctx1 = oThis.DemonstrationObject.Canvas.getContext("2d");
@@ -456,11 +520,12 @@ function CTransitionAnimation(htmlpage) {
             oThis.End(false);
             return;
         }
+        oThis.SetBaseTransform();
         if (oThis.TimerId === null) {
             var _ctx1 = null;
             if (null == oThis.DemonstrationObject) {
                 _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext("2d");
-                _ctx1.fillStyle = "#B0B0B0";
+                _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                 _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
             } else {
                 _ctx1 = oThis.DemonstrationObject.Canvas.getContext("2d");
@@ -489,7 +554,6 @@ function CTransitionAnimation(htmlpage) {
             oThis.HtmlPage.m_oOverlayApi.Clear();
             oThis.HtmlPage.m_oOverlayApi.CheckRect(_xDst, _yDst, _wDst, _hDst);
             _ctx2 = oThis.HtmlPage.m_oOverlayApi.m_oContext;
-            _ctx2.setTransform(1, 0, 0, 1, 0, 0);
         } else {
             _ctx2 = oThis.DemonstrationObject.Overlay.getContext("2d");
             _ctx2.clearRect(_xDst, _yDst, _wDst, _hDst);
@@ -873,6 +937,7 @@ function CTransitionAnimation(htmlpage) {
             oThis.End(false);
             return;
         }
+        oThis.SetBaseTransform();
         var _xDst = oThis.Rect.x;
         var _yDst = oThis.Rect.y;
         var _wDst = oThis.Rect.w;
@@ -886,7 +951,6 @@ function CTransitionAnimation(htmlpage) {
             oThis.HtmlPage.m_oOverlayApi.Clear();
             oThis.HtmlPage.m_oOverlayApi.CheckRect(_xDst, _yDst, _wDst, _hDst);
             _ctx2 = oThis.HtmlPage.m_oOverlayApi.m_oContext;
-            _ctx2.setTransform(1, 0, 0, 1, 0, 0);
         } else {
             _ctx2 = oThis.DemonstrationObject.Overlay.getContext("2d");
             _ctx2.clearRect(_xDst, _yDst, _wDst, _hDst);
@@ -895,7 +959,7 @@ function CTransitionAnimation(htmlpage) {
             var _ctx1 = null;
             if (null == oThis.DemonstrationObject) {
                 _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext("2d");
-                _ctx1.fillStyle = "#B0B0B0";
+                _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                 _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
             } else {
                 _ctx1 = oThis.DemonstrationObject.Canvas.getContext("2d");
@@ -1140,11 +1204,12 @@ function CTransitionAnimation(htmlpage) {
             oThis.End(false);
             return;
         }
+        oThis.SetBaseTransform();
         if (oThis.TimerId === null) {
             var _ctx1 = null;
             if (null == oThis.DemonstrationObject) {
                 _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext("2d");
-                _ctx1.fillStyle = "#B0B0B0";
+                _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                 _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
             } else {
                 _ctx1 = oThis.DemonstrationObject.Canvas.getContext("2d");
@@ -1243,11 +1308,12 @@ function CTransitionAnimation(htmlpage) {
             oThis.End(false);
             return;
         }
+        oThis.SetBaseTransform();
         if (oThis.TimerId === null) {
             var _ctx1 = null;
             if (null == oThis.DemonstrationObject) {
                 _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext("2d");
-                _ctx1.fillStyle = "#B0B0B0";
+                _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                 _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
             } else {
                 _ctx1 = oThis.DemonstrationObject.Canvas.getContext("2d");
@@ -1346,11 +1412,12 @@ function CTransitionAnimation(htmlpage) {
             oThis.End(false);
             return;
         }
+        oThis.SetBaseTransform();
         if (oThis.TimerId === null) {
             var _ctx1 = null;
             if (null == oThis.DemonstrationObject) {
                 _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext("2d");
-                _ctx1.fillStyle = "#B0B0B0";
+                _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                 _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
             } else {
                 _ctx1 = oThis.DemonstrationObject.Canvas.getContext("2d");
@@ -1662,6 +1729,7 @@ function CTransitionAnimation(htmlpage) {
             oThis.End(false);
             return;
         }
+        oThis.SetBaseTransform();
         var _xDst = oThis.Rect.x;
         var _yDst = oThis.Rect.y;
         var _wDst = oThis.Rect.w;
@@ -1675,7 +1743,7 @@ function CTransitionAnimation(htmlpage) {
             var _ctx1 = null;
             if (null == oThis.DemonstrationObject) {
                 _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext("2d");
-                _ctx1.fillStyle = "#B0B0B0";
+                _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                 _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
             } else {
                 _ctx1 = oThis.DemonstrationObject.Canvas.getContext("2d");
@@ -1715,7 +1783,7 @@ function CTransitionAnimation(htmlpage) {
             var _ctx1 = null;
             if (null == oThis.DemonstrationObject) {
                 _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext("2d");
-                _ctx1.fillStyle = "#B0B0B0";
+                _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                 _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
             } else {
                 _ctx1 = oThis.DemonstrationObject.Canvas.getContext("2d");
@@ -1757,7 +1825,7 @@ function CTransitionAnimation(htmlpage) {
                 var _ctx1 = null;
                 if (null == oThis.DemonstrationObject) {
                     _ctx1 = oThis.HtmlPage.m_oEditor.HtmlElement.getContext("2d");
-                    _ctx1.fillStyle = "#B0B0B0";
+                    _ctx1.fillStyle = GlobalSkin.BackgroundColor;
                     _ctx1.fillRect(0, 0, oThis.HtmlPage.m_oEditor.HtmlElement.width, oThis.HtmlPage.m_oEditor.HtmlElement.height);
                 } else {
                     _ctx1 = oThis.DemonstrationObject.Canvas.getContext("2d");
@@ -1797,7 +1865,7 @@ function CTransitionAnimation(htmlpage) {
             global_MatrixTransformer.ScaleAppend(localTransform, _scale, _scale);
             global_MatrixTransformer.RotateRadAppend(localTransform, _angle);
             global_MatrixTransformer.TranslateAppend(localTransform, _xC, _yC);
-            _ctx2.setTransform(localTransform.sx, localTransform.shy, localTransform.shx, localTransform.sy, localTransform.tx, localTransform.ty);
+            _ctx2.transform(localTransform.sx, localTransform.shy, localTransform.shx, localTransform.sy, localTransform.tx, localTransform.ty);
             if (null != oThis.CacheImage2.Image) {
                 _ctx2.drawImage(oThis.CacheImage2.Image, _xDst, _yDst, _wDst, _hDst);
             } else {
@@ -2128,6 +2196,8 @@ function CDemonstrationManager(htmlpage) {
         this.SlideNum = -1;
         this.DemonstrationDiv = null;
         this.Mode = false;
+        var ctx1 = this.HtmlPage.m_oEditor.HtmlElement.getContext("2d");
+        ctx1.setTransform(1, 0, 0, 1, 0, 0);
         this.HtmlPage.m_oApi.sync_endDemonstration();
     };
     this.NextSlide = function () {

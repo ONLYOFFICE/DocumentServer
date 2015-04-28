@@ -1,6 +1,6 @@
 ﻿<%@ WebHandler Language="C#" Class="FileUploader" %>
 /*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -58,10 +58,10 @@ public class FileUploader : IHttpAsyncHandler
         try
         {
             _log.Info("Starting process request...");
-            _log.Info(context.Request.Params.ToString());
+            _log.Info(context.Request.QueryString.ToString());
                       
-            string vKey = context.Request.Params["vkey"];
-            string sKey = context.Request.Params["key"];
+            string vKey = context.Request.QueryString["vkey"];
+            string sKey = context.Request.QueryString["key"];
 
             if (null != sKey && false == string.IsNullOrEmpty(sKey))
             {
@@ -72,9 +72,10 @@ public class FileUploader : IHttpAsyncHandler
                     bStartAsync = true;
                     Storage oStorage = new Storage();
                     string sTempKey = "temp_" + sKey;
-                    string sPath = sTempKey + "/" + sKey + ".tmp";
+                    string sFilename = sKey + ".tmp";
+                    string sPath = sTempKey + "/" + sFilename;
                     AsyncContextReadOperation asynch = new AsyncContextReadOperation();
-                    TransportClass oTransportClass = new TransportClass(context, cb, oStorage, asynch, sPath, sTempKey);
+                    TransportClass oTransportClass = new TransportClass(context, cb, oStorage, asynch, sPath, sTempKey, sFilename);
                     asynch.ReadContextBegin(context.Request.InputStream, ReadContextCallback, oTransportClass);
                 }
             }
@@ -83,7 +84,7 @@ public class FileUploader : IHttpAsyncHandler
         {
             eError = ErrorTypes.Unknown;
             
-            _log.Error(context.Request.Params.ToString());
+            _log.Error(context.Request.QueryString.ToString());
             _log.Error("Exeption: ", e);
         }
         finally
@@ -92,7 +93,7 @@ public class FileUploader : IHttpAsyncHandler
                 writeXml(context, null, null, null, eError);
         }
         
-        TransportClass oTempTransportClass = new TransportClass(context, cb, null, null, null, null);
+        TransportClass oTempTransportClass = new TransportClass(context, cb, null, null, null, null, null);
         if (false == bStartAsync)
             cb(new AsyncOperationData(oTempTransportClass));
         return new AsyncOperationData(oTempTransportClass);
@@ -116,8 +117,8 @@ public class FileUploader : IHttpAsyncHandler
         try
         {
             oTransportClass.m_oAsyncContextRead.ReadContextEnd(result);
-            MemoryStream ms = new MemoryStream(oTransportClass.m_oAsyncContextRead.m_aBuffer);
-            oTransportClass.m_oStorage.WriteFileBegin(oTransportClass.m_sPath, ms, WriteFileCallback, oTransportClass);
+            oTransportClass.m_oAsyncContextRead.m_aOutput.Position = 0;
+            oTransportClass.m_oStorage.WriteFileBegin(oTransportClass.m_sPath, oTransportClass.m_oAsyncContextRead.m_aOutput, WriteFileCallback, oTransportClass);
         }
         catch
         {
@@ -134,11 +135,8 @@ public class FileUploader : IHttpAsyncHandler
             ErrorTypes eError = oTransportClass.m_oStorage.WriteFileEnd(result, out nWriteBytes);
             if (ErrorTypes.NoError == eError)
             {
-                System.Uri oUrl = oTransportClass.m_oContext.Request.Url;
-                string sSiteUrl = oUrl.Scheme + "://" + oUrl.Host;
-                if (-1 != oUrl.Port)
-                    sSiteUrl += ":" + oUrl.Port;
-                string sFileUrl = sSiteUrl + "/ResourceService.ashx?deletepath=" + HttpUtility.UrlEncode(oTransportClass.m_sDeletePath) + "&path=" + HttpUtility.UrlEncode(oTransportClass.m_sPath);
+                string sSiteUrl = UrlBuilder.UrlWithoutPath(oTransportClass.m_oContext.Request);
+                string sFileUrl = sSiteUrl + Constants.mc_sResourceServiceUrlRel + HttpUtility.UrlEncode(oTransportClass.m_sPath) + "&nocache=true" + "&deletepath=" + HttpUtility.UrlEncode(oTransportClass.m_sDeletePath) + "&filename=" + HttpUtility.UrlEncode(oTransportClass.m_sFilename);
                 writeXml(oTransportClass.m_oContext, sFileUrl, "100", true, null);
             }
             else
@@ -192,7 +190,8 @@ public class FileUploader : IHttpAsyncHandler
         public AsyncContextReadOperation m_oAsyncContextRead;
         public string m_sPath;
         public string m_sDeletePath;
-        public TransportClass(HttpContext oContext, AsyncCallback oCallback, Storage oStorage, AsyncContextReadOperation oAsyncContextRead, string sPath, string sDeletePath)
+        public string m_sFilename;
+        public TransportClass(HttpContext oContext, AsyncCallback oCallback, Storage oStorage, AsyncContextReadOperation oAsyncContextRead, string sPath, string sDeletePath, string sFilename)
         {
             m_oContext = oContext;
             m_oCallback = oCallback;
@@ -200,6 +199,7 @@ public class FileUploader : IHttpAsyncHandler
             m_oAsyncContextRead = oAsyncContextRead;
             m_sPath = sPath;
             m_sDeletePath = sDeletePath;
+            m_sFilename = sFilename;
         }
     }
 }

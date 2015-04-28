@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,77 +29,79 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("Common.view.DocumentAccessDialog", {
-    extend: "Ext.window.Window",
-    alias: "widget.commondocumentaccessdialog",
-    uses: ["Common.component.LoadMask"],
-    modal: true,
-    resizable: false,
-    plain: true,
-    constrain: true,
-    height: 534,
-    width: 850,
-    layout: "fit",
-    closable: true,
-    style: "background-color:white;",
-    initComponent: function () {
-        this.items = [{
-            xtype: "container",
-            flex: 1,
-            html: '<div id="id-sharing-placeholder"></div>'
-        }];
-        this.title = this.textTitle;
-        this.addEvents("accessrights");
-        this.callParent(arguments);
-    },
-    afterRender: function (cmp) {
-        this.callParent(arguments);
-        var iframe = document.createElement("iframe");
-        iframe.src = this.settingsurl;
-        iframe.width = 850;
-        iframe.height = 500;
-        iframe.align = "top";
-        iframe.frameBorder = 0;
-        iframe.scrolling = "no";
-        iframe.onload = Ext.bind(this._onLoad, this);
-        var target = cmp.down("#id-sharing-placeholder", true);
-        target.parentNode.replaceChild(iframe, target);
-        this.loadMask = Ext.widget("cmdloadmask", this);
-        this.loadMask.setTitle(this.textLoading);
-        this.loadMask.show();
-        this._bindWindowEvents.call(this);
-    },
-    _bindWindowEvents: function () {
-        var me = this;
-        if (window.addEventListener) {
-            window.addEventListener("message", function (msg) {
-                me._onWindowMessage(msg);
+ define(["common/main/lib/component/Window", "common/main/lib/component/LoadMask"], function () {
+    Common.Views.DocumentAccessDialog = Common.UI.Window.extend(_.extend({
+        initialize: function (options) {
+            var _options = {};
+            _.extend(_options, {
+                title: this.textTitle,
+                width: 850,
+                height: 534,
+                header: true
             },
-            false);
-        } else {
-            if (window.attachEvent) {
-                window.attachEvent("onmessage", function (msg) {
+            options);
+            this.template = ['<div id="id-sharing-placeholder"></div>'].join("");
+            _options.tpl = _.template(this.template, _options);
+            this.settingsurl = options.settingsurl || "";
+            Common.UI.Window.prototype.initialize.call(this, _options);
+        },
+        render: function () {
+            Common.UI.Window.prototype.render.call(this);
+            this.$window.find("> .body").css({
+                height: "auto",
+                overflow: "hidden"
+            });
+            var iframe = document.createElement("iframe");
+            iframe.width = "100%";
+            iframe.height = 500;
+            iframe.align = "top";
+            iframe.frameBorder = 0;
+            iframe.scrolling = "no";
+            iframe.onload = _.bind(this._onLoad, this);
+            $("#id-sharing-placeholder").append(iframe);
+            this.loadMask = new Common.UI.LoadMask({
+                owner: $("#id-sharing-placeholder")
+            });
+            this.loadMask.setTitle(this.textLoading);
+            this.loadMask.show();
+            iframe.src = this.settingsurl;
+            this._bindWindowEvents.call(this);
+        },
+        _bindWindowEvents: function () {
+            var me = this;
+            if (window.addEventListener) {
+                window.addEventListener("message", function (msg) {
                     me._onWindowMessage(msg);
-                });
+                },
+                false);
+            } else {
+                if (window.attachEvent) {
+                    window.attachEvent("onmessage", function (msg) {
+                        me._onWindowMessage(msg);
+                    });
+                }
             }
-        }
+        },
+        _onWindowMessage: function (msg) {
+            if (msg && window.JSON) {
+                try {
+                    this._onMessage.call(this, window.JSON.parse(msg.data));
+                } catch(e) {}
+            }
+        },
+        _onMessage: function (msg) {
+            if (msg && msg.needUpdate) {
+                this.trigger("accessrights", this, msg.sharingSettings);
+            }
+            this.close();
+        },
+        _onLoad: function () {
+            if (this.loadMask) {
+                this.loadMask.hide();
+            }
+        },
+        textTitle: "Sharing Settings",
+        textLoading: "Loading"
     },
-    _onWindowMessage: function (msg) {
-        if (msg && window.JSON) {
-            try {
-                this._onMessage.call(this, window.JSON.parse(msg.data));
-            } catch(e) {}
-        }
-    },
-    _onMessage: function (msg) {
-        if (msg && msg.needUpdate) {
-            this.fireEvent("accessrights", this, msg.sharingSettings);
-        }
-        this.close();
-    },
-    _onLoad: function () {
-        this.loadMask.hide();
-    },
-    textTitle: "Sharing Settings",
-    textLoading: "Loading"
+    Common.Views.DocumentAccessDialog || {}));
 });

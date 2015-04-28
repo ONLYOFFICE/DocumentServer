@@ -1,0 +1,10 @@
+<div class="ce-group-name">
+    <input id="ce-cell-name" class="aslabel form-control" type="text">
+    <button id="ce-func-label" type="button" class="btn small btn-toolbar btn-toolbar-default"><span class="btn-icon">&nbsp;</span></button>
+</div>
+<div class="ce-group-expand">
+    <button id="ce-btn-expand" type="button" class="btn"><span class="caret">&nbsp;</span></button>
+</div>
+<div class="ce-group-content">
+    <textarea id="ce-cell-content" class="form-control" spellcheck="false" rows="1" cols="20"></textarea>
+</div>

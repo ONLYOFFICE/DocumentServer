@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,10 +29,11 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- (function (global) {
+ "use strict";
+(function (window, undefined) {
     var asc = window["Asc"];
-    var asc_user = asc.asc_CUser;
-    var CDocsCoApi = function (options) {
+    var asc_coAuthV = "3.0.8";
+    function CDocsCoApi(options) {
         this._CoAuthoringApi = new DocsCoApi();
         this._onlineWork = false;
         if (options) {
@@ -43,24 +44,27 @@
             this.onLocksReleased = options.onLocksReleased;
             this.onLocksReleasedEnd = options.onLocksReleasedEnd;
             this.onDisconnect = options.onDisconnect;
-            this.onFirstLoadChanges = options.onFirstLoadChanges;
+            this.onFirstLoadChangesEnd = options.onFirstLoadChangesEnd;
             this.onConnectionStateChanged = options.onConnectionStateChanged;
             this.onSetIndexUser = options.onSetIndexUser;
             this.onSaveChanges = options.onSaveChanges;
             this.onStartCoAuthoring = options.onStartCoAuthoring;
+            this.onEndCoAuthoring = options.onEndCoAuthoring;
+            this.onUnSaveLock = options.onUnSaveLock;
+            this.onRecalcLocks = options.onRecalcLocks;
         }
-    };
-    CDocsCoApi.prototype.init = function (user, docid, token, serverHost, serverPath, callback, editorType) {
+    }
+    CDocsCoApi.prototype.init = function (user, docid, documentCallbackUrl, token, callback, editorType, documentFormatSave, isViewer) {
         if (this._CoAuthoringApi && this._CoAuthoringApi.isRightURL()) {
             var t = this;
-            this._CoAuthoringApi.onAuthParticipantsChanged = function (e) {
-                t.callback_OnAuthParticipantsChanged(e);
+            this._CoAuthoringApi.onAuthParticipantsChanged = function (e, count) {
+                t.callback_OnAuthParticipantsChanged(e, count);
             };
-            this._CoAuthoringApi.onParticipantsChanged = function (e, Count) {
-                t.callback_OnParticipantsChanged(e, Count);
+            this._CoAuthoringApi.onParticipantsChanged = function (e, count) {
+                t.callback_OnParticipantsChanged(e, count);
             };
-            this._CoAuthoringApi.onMessage = function (e) {
-                t.callback_OnMessage(e);
+            this._CoAuthoringApi.onMessage = function (e, clear) {
+                t.callback_OnMessage(e, clear);
             };
             this._CoAuthoringApi.onLocksAcquired = function (e) {
                 t.callback_OnLocksAcquired(e);
@@ -74,8 +78,8 @@
             this._CoAuthoringApi.onDisconnect = function (e, isDisconnectAtAll, isCloseCoAuthoring) {
                 t.callback_OnDisconnect(e, isDisconnectAtAll, isCloseCoAuthoring);
             };
-            this._CoAuthoringApi.onFirstLoadChanges = function (e) {
-                t.callback_OnFirstLoadChanges(e);
+            this._CoAuthoringApi.onFirstLoadChangesEnd = function () {
+                t.callback_OnFirstLoadChangesEnd();
             };
             this._CoAuthoringApi.onConnectionStateChanged = function (e) {
                 t.callback_OnConnectionStateChanged(e);
@@ -83,23 +87,35 @@
             this._CoAuthoringApi.onSetIndexUser = function (e) {
                 t.callback_OnSetIndexUser(e);
             };
-            this._CoAuthoringApi.onSaveChanges = function (e) {
-                t.callback_OnSaveChanges(e);
+            this._CoAuthoringApi.onSaveChanges = function (e, userId, bFirstLoad) {
+                t.callback_OnSaveChanges(e, userId, bFirstLoad);
             };
             this._CoAuthoringApi.onStartCoAuthoring = function (e) {
                 t.callback_OnStartCoAuthoring(e);
             };
-            this._CoAuthoringApi.init(user, docid, token, serverHost, serverPath, callback, editorType);
+            this._CoAuthoringApi.onEndCoAuthoring = function (e) {
+                t.callback_OnEndCoAuthoring(e);
+            };
+            this._CoAuthoringApi.onUnSaveLock = function () {
+                t.callback_OnUnSaveLock();
+            };
+            this._CoAuthoringApi.onRecalcLocks = function (e) {
+                t.callback_OnRecalcLocks(e);
+            };
+            this._CoAuthoringApi.init(user, docid, documentCallbackUrl, token, callback, editorType, documentFormatSave, isViewer);
             this._onlineWork = true;
         } else {
             this.callback_OnSetIndexUser("123");
-            this.callback_OnFirstLoadChanges([]);
+            this.onFirstLoadChangesEnd();
         }
     };
     CDocsCoApi.prototype.set_url = function (url) {
         if (this._CoAuthoringApi) {
             this._CoAuthoringApi.set_url(url);
         }
+    };
+    CDocsCoApi.prototype.get_onlineWork = function () {
+        return this._onlineWork;
     };
     CDocsCoApi.prototype.get_state = function () {
         if (this._CoAuthoringApi) {
@@ -148,27 +164,44 @@
             window.setTimeout(function () {
                 if (callback && _.isFunction(callback)) {
                     callback({
-                        "savelock": false
+                        "saveLock": false
                     });
                 }
             },
             100);
         }
     };
-    CDocsCoApi.prototype.unSaveChanges = function () {
+    CDocsCoApi.prototype.unSaveLock = function () {
         if (this._CoAuthoringApi && this._onlineWork) {
-            this._CoAuthoringApi.unSaveChanges();
+            this._CoAuthoringApi.unSaveLock();
+        } else {
+            var t = this;
+            window.setTimeout(function () {
+                t.callback_OnUnSaveLock();
+            },
+            100);
         }
     };
-    CDocsCoApi.prototype.saveChanges = function (arrayChanges) {
+    CDocsCoApi.prototype.saveChanges = function (arrayChanges, deleteIndex, excelAdditionalInfo) {
         if (this._CoAuthoringApi && this._onlineWork) {
-            this._CoAuthoringApi.saveChanges(arrayChanges);
+            this._CoAuthoringApi.saveChanges(arrayChanges, null, deleteIndex, excelAdditionalInfo);
+        }
+    };
+    CDocsCoApi.prototype.unLockDocument = function (isSave) {
+        if (this._CoAuthoringApi && this._onlineWork) {
+            this._CoAuthoringApi.unLockDocument(isSave);
         }
     };
     CDocsCoApi.prototype.getUsers = function () {
         if (this._CoAuthoringApi && this._onlineWork) {
             this._CoAuthoringApi.getUsers();
         }
+    };
+    CDocsCoApi.prototype.getUser = function (userId) {
+        if (this._CoAuthoringApi && this._onlineWork) {
+            return this._CoAuthoringApi.getUser(userId);
+        }
+        return null;
     };
     CDocsCoApi.prototype.releaseLocks = function (blockId) {
         if (this._CoAuthoringApi && this._onlineWork) {
@@ -180,67 +213,86 @@
             this._CoAuthoringApi.disconnect();
         }
     };
-    CDocsCoApi.prototype.callback_OnAuthParticipantsChanged = function (e) {
+    CDocsCoApi.prototype.callback_OnAuthParticipantsChanged = function (e, count) {
         if (this.onAuthParticipantsChanged) {
-            return this.onAuthParticipantsChanged(e);
+            this.onAuthParticipantsChanged(e, count);
         }
     };
-    CDocsCoApi.prototype.callback_OnParticipantsChanged = function (e, Count) {
+    CDocsCoApi.prototype.callback_OnParticipantsChanged = function (e, count) {
         if (this.onParticipantsChanged) {
-            return this.onParticipantsChanged(e, Count);
+            this.onParticipantsChanged(e, count);
         }
     };
-    CDocsCoApi.prototype.callback_OnMessage = function (e) {
+    CDocsCoApi.prototype.callback_OnMessage = function (e, clear) {
         if (this.onMessage) {
-            return this.onMessage(e);
+            this.onMessage(e, clear);
         }
     };
     CDocsCoApi.prototype.callback_OnLocksAcquired = function (e) {
         if (this.onLocksAcquired) {
-            return this.onLocksAcquired(e);
+            this.onLocksAcquired(e);
         }
     };
     CDocsCoApi.prototype.callback_OnLocksReleased = function (e, bChanges) {
         if (this.onLocksReleased) {
-            return this.onLocksReleased(e, bChanges);
+            this.onLocksReleased(e, bChanges);
         }
     };
     CDocsCoApi.prototype.callback_OnLocksReleasedEnd = function () {
         if (this.onLocksReleasedEnd) {
-            return this.onLocksReleasedEnd();
+            this.onLocksReleasedEnd();
         }
     };
     CDocsCoApi.prototype.callback_OnDisconnect = function (e, isDisconnectAtAll, isCloseCoAuthoring) {
         if (this.onDisconnect) {
-            return this.onDisconnect(e, isDisconnectAtAll, isCloseCoAuthoring);
+            this.onDisconnect(e, isDisconnectAtAll, isCloseCoAuthoring);
         }
     };
-    CDocsCoApi.prototype.callback_OnFirstLoadChanges = function (e) {
-        if (this.onFirstLoadChanges) {
-            return this.onFirstLoadChanges(e);
+    CDocsCoApi.prototype.callback_OnFirstLoadChangesEnd = function () {
+        if (this.onFirstLoadChangesEnd) {
+            this.onFirstLoadChangesEnd();
         }
     };
     CDocsCoApi.prototype.callback_OnConnectionStateChanged = function (e) {
         if (this.onConnectionStateChanged) {
-            return this.onConnectionStateChanged(e);
+            this.onConnectionStateChanged(e);
         }
     };
     CDocsCoApi.prototype.callback_OnSetIndexUser = function (e) {
         if (this.onSetIndexUser) {
-            return this.onSetIndexUser(e);
+            this.onSetIndexUser(e);
         }
     };
-    CDocsCoApi.prototype.callback_OnSaveChanges = function (e) {
+    CDocsCoApi.prototype.callback_OnSaveChanges = function (e, userId, bFirstLoad) {
         if (this.onSaveChanges) {
-            return this.onSaveChanges(e);
+            this.onSaveChanges(e, userId, bFirstLoad);
         }
     };
     CDocsCoApi.prototype.callback_OnStartCoAuthoring = function (e) {
         if (this.onStartCoAuthoring) {
-            return this.onStartCoAuthoring(e);
+            this.onStartCoAuthoring(e);
         }
     };
-    var DocsCoApi = function (options) {
+    CDocsCoApi.prototype.callback_OnEndCoAuthoring = function (e) {
+        if (this.onEndCoAuthoring) {
+            this.onEndCoAuthoring(e);
+        }
+    };
+    CDocsCoApi.prototype.callback_OnUnSaveLock = function () {
+        if (this.onUnSaveLock) {
+            this.onUnSaveLock();
+        }
+    };
+    CDocsCoApi.prototype.callback_OnRecalcLocks = function (e) {
+        if (this.onRecalcLocks) {
+            this.onRecalcLocks(e);
+        }
+    };
+    function LockBufferElement(arrayBlockId, callback) {
+        this._arrayBlockId = arrayBlockId;
+        this._callback = callback;
+    }
+    function DocsCoApi(options) {
         if (options) {
             this.onAuthParticipantsChanged = options.onAuthParticipantsChanged;
             this.onParticipantsChanged = options.onParticipantsChanged;
@@ -251,27 +303,59 @@
             this.onRelockFailed = options.onRelockFailed;
             this.onDisconnect = options.onDisconnect;
             this.onConnect = options.onConnect;
-            this.onFirstLoadChanges = options.onFirstLoadChanges;
+            this.onSaveChanges = options.onSaveChanges;
+            this.onFirstLoadChangesEnd = options.onFirstLoadChangesEnd;
             this.onConnectionStateChanged = options.onConnectionStateChanged;
+            this.onUnSaveLock = options.onUnSaveLock;
+            this.onRecalcLocks = options.onRecalcLocks;
         }
-        this._state = 0;
-        this._participants = [];
-        this._user = "Anonymous";
+        this._state = ConnectionState.None;
+        this._participants = {};
+        this._countEditUsers = 0;
+        this._countUsers = 0;
         this._locks = {};
         this._msgBuffer = [];
         this._lockCallbacks = {};
-        this._saveLock = false;
         this._saveCallback = [];
+        this.saveLockCallbackErrorTimeOutId = null;
         this.saveCallbackErrorTimeOutId = null;
-        this._id = "";
-        this._indexuser = -1;
+        this.unSaveLockCallbackErrorTimeOutId = null;
+        this._id = null;
+        this._indexUser = -1;
         this.isCoAuthoring = false;
         this.isCloseCoAuthoring = false;
         this.maxCountSaveChanges = 20000;
         this.currentIndex = 0;
+        this.deleteIndex = 0;
         this.arrayChanges = null;
+        this.lastOtherSaveTime = -1;
+        this.changesIndex = 0;
+        this.excelAdditionalInfo = null;
         this._url = "";
-    };
+        this.reconnectTimeout = null;
+        this.attemptCount = 0;
+        this.maxAttemptCount = 50;
+        this.reconnectInterval = 2000;
+        this.errorTimeOut = 10000;
+        this.errorTimeOutSave = 60000;
+        this._docid = null;
+        this._documentCallbackUrl = null;
+        this._token = null;
+        this._user = null;
+        this._userId = "Anonymous";
+        this._initCallback = null;
+        this.ownedLockBlocks = [];
+        this.sockjs_url = null;
+        this.sockjs = null;
+        this.editorType = -1;
+        this._isExcel = false;
+        this._isPresentation = false;
+        this._isAuth = false;
+        this._documentFormatSave = 0;
+        this._isViewer = false;
+        this._isReSaveAfterAuth = false;
+        this._lockBuffer = [];
+    }
     DocsCoApi.prototype.isRightURL = function () {
         return ("" != this._url);
     };
@@ -282,13 +366,10 @@
         return this._state;
     };
     DocsCoApi.prototype.get_indexUser = function () {
-        return this._indexuser;
+        return this._indexUser;
     };
     DocsCoApi.prototype.getSessionId = function () {
         return this._id;
-    };
-    DocsCoApi.prototype.getParticipants = function () {
-        return this._participants;
     };
     DocsCoApi.prototype.getUser = function () {
         return this._user;
@@ -296,13 +377,25 @@
     DocsCoApi.prototype.getLocks = function () {
         return this._locks;
     };
+    DocsCoApi.prototype._sendBufferedLocks = function () {
+        var elem;
+        for (var i = 0, length = this._lockBuffer.length; i < length; ++i) {
+            elem = this._lockBuffer[i];
+            this.askLock(elem._arrayBlockId, elem._callback);
+        }
+        this._lockBuffer = [];
+    };
     DocsCoApi.prototype.askLock = function (arrayBlockId, callback) {
+        if (ConnectionState.SaveChanges === this._state) {
+            this._lockBuffer.push(new LockBufferElement(arrayBlockId, callback));
+            return;
+        }
         var i = 0;
         var lengthArray = (arrayBlockId) ? arrayBlockId.length : 0;
         var isLock = false;
         var idLockInArray = null;
         for (; i < lengthArray; ++i) {
-            idLockInArray = (this._isExcel) ? arrayBlockId[i].guid : (this._isPresentation) ? arrayBlockId[i]["guid"] : arrayBlockId[i];
+            idLockInArray = (this._isExcel || this._isPresentation) ? arrayBlockId[i]["guid"] : arrayBlockId[i];
             if (this._locks[idLockInArray] && 0 !== this._locks[idLockInArray].state) {
                 isLock = true;
                 break;
@@ -311,7 +404,7 @@
         if (0 === lengthArray) {
             isLock = true;
         }
-        idLockInArray = (this._isExcel) ? arrayBlockId[0].guid : (this._isPresentation) ? arrayBlockId[0]["guid"] : arrayBlockId[0];
+        idLockInArray = (this._isExcel || this._isPresentation) ? arrayBlockId[0]["guid"] : arrayBlockId[0];
         if (!isLock) {
             this._locks[idLockInArray] = {
                 "state": 1
@@ -327,26 +420,13 @@
                         delete lockCalbacks[idLockInArray];
                     }
                 },
-                5000);
+                this.errorTimeOut);
             }
-            if (this._isExcel) {
-                this._send({
-                    "type": "getlockrange",
-                    "block": arrayBlockId
-                });
-            } else {
-                if (this._isPresentation) {
-                    this._send({
-                        "type": "getlockpresentation",
-                        "block": arrayBlockId
-                    });
-                } else {
-                    this._send({
-                        "type": "getlock",
-                        "block": arrayBlockId
-                    });
-                }
-            }
+            this._send({
+                "type": "getLock",
+                "editorType": this.editorType,
+                "block": arrayBlockId
+            });
         } else {
             window.setTimeout(function () {
                 if (callback && _.isFunction(callback)) {
@@ -362,11 +442,11 @@
         if (this._saveCallback[this._saveCallback.length - 1]) {
             return;
         }
-        if (null !== this.saveCallbackErrorTimeOutId) {
-            clearTimeout(this.saveCallbackErrorTimeOutId);
+        if (null !== this.saveLockCallbackErrorTimeOutId) {
+            clearTimeout(this.saveLockCallbackErrorTimeOutId);
         }
-        if (-1 === this.get_state()) {
-            this.saveCallbackErrorTimeOutId = window.setTimeout(function () {
+        if (ConnectionState.Reconnect === this._state) {
+            this.saveLockCallbackErrorTimeOutId = window.setTimeout(function () {
                 if (callback && _.isFunction(callback)) {
                     callback({
                         error: "No connection"
@@ -380,8 +460,8 @@
             var t = this;
             var indexCallback = this._saveCallback.length;
             this._saveCallback[indexCallback] = callback;
-            window.setTimeout(function () {
-                t.saveCallbackErrorTimeOutId = null;
+            this.saveLockCallbackErrorTimeOutId = window.setTimeout(function () {
+                t.saveLockCallbackErrorTimeOutId = null;
                 var oTmpCallback = t._saveCallback[indexCallback];
                 if (oTmpCallback) {
                     t._saveCallback[indexCallback] = null;
@@ -390,15 +470,21 @@
                     });
                 }
             },
-            5000);
+            this.errorTimeOut);
         }
         this._send({
-            "type": "issavelock"
+            "type": "isSaveLock"
         });
     };
-    DocsCoApi.prototype.unSaveChanges = function () {
+    DocsCoApi.prototype.unSaveLock = function () {
+        var t = this;
+        this.unSaveLockCallbackErrorTimeOutId = window.setTimeout(function () {
+            t.unSaveLockCallbackErrorTimeOutId = null;
+            t.unSaveLock();
+        },
+        this.errorTimeOut);
         this._send({
-            "type": "unsavelock"
+            "type": "unSaveLock"
         });
     };
     DocsCoApi.prototype.releaseLocks = function (blockId) {
@@ -408,10 +494,18 @@
             };
         }
     };
-    DocsCoApi.prototype.saveChanges = function (arrayChanges, currentIndex) {
-        if (undefined === currentIndex) {
+    DocsCoApi.prototype._reSaveChanges = function () {
+        this.saveChanges(this.arrayChanges, this.currentIndex);
+    };
+    DocsCoApi.prototype.saveChanges = function (arrayChanges, currentIndex, deleteIndex, excelAdditionalInfo) {
+        if (null === currentIndex) {
+            this.deleteIndex = deleteIndex;
+            if (null != this.deleteIndex && -1 !== this.deleteIndex) {
+                this.deleteIndex += this.changesIndex;
+            }
             this.currentIndex = 0;
             this.arrayChanges = arrayChanges;
+            this.excelAdditionalInfo = excelAdditionalInfo;
         } else {
             this.currentIndex = currentIndex;
         }
@@ -419,22 +513,44 @@
         var endIndex = Math.min(this.maxCountSaveChanges * (this.currentIndex + 1), arrayChanges.length);
         if (endIndex === arrayChanges.length) {
             for (var key in this._locks) {
-                if (2 === this._locks[key].state) {
-                    delete this._locks[key];
+                if (this._locks.hasOwnProperty(key)) {
+                    if (2 === this._locks[key].state) {
+                        delete this._locks[key];
+                    }
                 }
             }
         }
+        var t = this;
+        this.saveCallbackErrorTimeOutId = window.setTimeout(function () {
+            t.saveCallbackErrorTimeOutId = null;
+            t._reSaveChanges();
+        },
+        this.errorTimeOutSave);
+        this._state = ConnectionState.SaveChanges;
         this._send({
-            "type": "savechanges",
+            "type": "saveChanges",
             "changes": JSON.stringify(arrayChanges.slice(startIndex, endIndex)),
-            "endSaveChanges": (endIndex == arrayChanges.length),
-            "isExcel": this._isExcel
+            "startSaveChanges": (startIndex === 0),
+            "endSaveChanges": (endIndex === arrayChanges.length),
+            "isCoAuthoring": this.isCoAuthoring,
+            "isExcel": this._isExcel,
+            "deleteIndex": this.deleteIndex,
+            "excelAdditionalInfo": this.excelAdditionalInfo ? JSON.stringify(this.excelAdditionalInfo) : null
+        });
+    };
+    DocsCoApi.prototype.unLockDocument = function (isSave) {
+        this._send({
+            "type": "unLockDocument",
+            "isSave": isSave
         });
     };
     DocsCoApi.prototype.getUsers = function () {
-        this._send({
-            "type": "getusers"
-        });
+        if (this.onAuthParticipantsChanged) {
+            this.onAuthParticipantsChanged(this._participants, this._countUsers);
+        }
+    };
+    DocsCoApi.prototype.getUser = function (userId) {
+        return this._participants[userId];
     };
     DocsCoApi.prototype.disconnect = function () {
         this.isCloseCoAuthoring = true;
@@ -442,7 +558,7 @@
     };
     DocsCoApi.prototype.getMessages = function () {
         this._send({
-            "type": "getmessages"
+            "type": "getMessages"
         });
     };
     DocsCoApi.prototype.sendMessage = function (message) {
@@ -468,9 +584,9 @@
             }
         }
     };
-    DocsCoApi.prototype._onMessages = function (data) {
+    DocsCoApi.prototype._onMessages = function (data, clear) {
         if (data["messages"] && this.onMessage) {
-            this.onMessage(data["messages"]);
+            this.onMessage(data["messages"], clear);
         }
     };
     DocsCoApi.prototype._onGetLock = function (data) {
@@ -478,8 +594,8 @@
             for (var key in data["locks"]) {
                 if (data["locks"].hasOwnProperty(key)) {
                     var lock = data["locks"][key],
-                    blockTmp = (this._isExcel) ? lock["block"]["guid"] : (this._isPresentation) ? lock["block"]["guid"] : key,
-                    blockValue = (this._isExcel) ? lock["block"] : (this._isPresentation) ? lock["block"] : key;
+                    blockTmp = (this._isExcel || this._isPresentation) ? lock["block"]["guid"] : key,
+                    blockValue = (this._isExcel || this._isPresentation) ? lock["block"] : key;
                     if (lock !== null) {
                         var changed = true;
                         if (this._locks[blockTmp] && 1 !== this._locks[blockTmp].state) {
@@ -520,7 +636,7 @@
             for (var block in data["locks"]) {
                 if (data["locks"].hasOwnProperty(block)) {
                     var lock = data["locks"][block],
-                    blockTmp = (this._isExcel) ? lock["block"]["guid"] : (this._isPresentation) ? lock["block"]["guid"] : lock["block"];
+                    blockTmp = (this._isExcel || this._isPresentation) ? lock["block"]["guid"] : lock["block"];
                     if (lock !== null) {
                         this._locks[blockTmp] = {
                             "state": 0,
@@ -547,7 +663,7 @@
             for (var block in data["locks"]) {
                 if (data["locks"].hasOwnProperty(block)) {
                     var lock = data["locks"][block],
-                    blockTmp = (this._isExcel) ? lock["block"]["guid"] : (this._isPresentation) ? lock["block"]["guid"] : lock["block"];
+                    blockTmp = (this._isExcel || this._isPresentation) ? lock["block"]["guid"] : lock["block"];
                     if (lock !== null) {
                         this._locks[blockTmp] = {
                             "state": 0,
@@ -567,10 +683,9 @@
                 this.onLocksReleasedEnd();
             }
         }
-        if (data["changes"]) {
-            if (this.onSaveChanges) {
-                this.onSaveChanges(JSON.parse(data["changes"]));
-            }
+        this._updateChanges(data["changes"], data["changesIndex"], false);
+        if (this.onRecalcLocks) {
+            this.onRecalcLocks(data["excelAdditionalInfo"]);
         }
     };
     DocsCoApi.prototype._onStartCoAuthoring = function (isStartEvent) {
@@ -581,13 +696,21 @@
             }
         }
     };
+    DocsCoApi.prototype._onEndCoAuthoring = function (isStartEvent) {
+        if (true === this.isCoAuthoring) {
+            this.isCoAuthoring = false;
+            if (this.onEndCoAuthoring) {
+                this.onEndCoAuthoring(isStartEvent);
+            }
+        }
+    };
     DocsCoApi.prototype._onSaveLock = function (data) {
-        if (undefined != data["savelock"] && null != data["savelock"]) {
+        if (undefined != data["saveLock"] && null != data["saveLock"]) {
             var indexCallback = this._saveCallback.length - 1;
             var oTmpCallback = this._saveCallback[indexCallback];
             if (oTmpCallback) {
-                if (null !== this.saveCallbackErrorTimeOutId) {
-                    clearTimeout(this.saveCallbackErrorTimeOutId);
+                if (null !== this.saveLockCallbackErrorTimeOutId) {
+                    clearTimeout(this.saveLockCallbackErrorTimeOutId);
                 }
                 this._saveCallback[indexCallback] = null;
                 oTmpCallback(data);
@@ -595,34 +718,50 @@
         }
     };
     DocsCoApi.prototype._onUnSaveLock = function (data) {
-        this._saveLock = false;
+        if (null !== this.saveCallbackErrorTimeOutId) {
+            clearTimeout(this.saveCallbackErrorTimeOutId);
+        }
+        if (null !== this.unSaveLockCallbackErrorTimeOutId) {
+            clearTimeout(this.unSaveLockCallbackErrorTimeOutId);
+        }
+        this._state = ConnectionState.Authorized;
+        this._sendBufferedLocks();
+        if (-1 !== data["index"]) {
+            this.changesIndex = data["index"];
+        }
         if (this.onUnSaveLock) {
             this.onUnSaveLock();
         }
     };
-    DocsCoApi.prototype._onFirstLoadChanges = function (allServerChanges) {
-        var t = this;
-        if (allServerChanges && this.onFirstLoadChanges) {
-            var allChanges = [];
-            for (var changeId in allServerChanges) {
-                var change = allServerChanges[changeId];
-                var changesOneUser = change["changes"];
-                if (changesOneUser) {
-                    changesOneUser = JSON.parse(changesOneUser);
-                    for (var i in changesOneUser) {
-                        allChanges.push(changesOneUser[i]);
+    DocsCoApi.prototype._updateChanges = function (allServerChanges, changesIndex, bFirstLoad) {
+        if (this.onSaveChanges) {
+            this.changesIndex = changesIndex;
+            if (allServerChanges) {
+                for (var i = 0; i < allServerChanges.length; ++i) {
+                    var change = allServerChanges[i];
+                    var changesOneUser = change["change"];
+                    if (changesOneUser) {
+                        if (change["user"] !== this._userId) {
+                            this.lastOtherSaveTime = change["time"];
+                        }
+                        this.onSaveChanges(JSON.parse(changesOneUser), change["user"], bFirstLoad);
                     }
                 }
             }
-            t.onFirstLoadChanges(allChanges);
         }
     };
     DocsCoApi.prototype._onSetIndexUser = function (data) {
-        if (data && this.onSetIndexUser) {
+        if (this.onSetIndexUser) {
             this.onSetIndexUser(data);
         }
     };
-    DocsCoApi.prototype._onSavePartChanges = function () {
+    DocsCoApi.prototype._onSavePartChanges = function (data) {
+        if (null !== this.saveCallbackErrorTimeOutId) {
+            clearTimeout(this.saveCallbackErrorTimeOutId);
+        }
+        if (-1 !== data["changesIndex"]) {
+            this.changesIndex = data["changesIndex"];
+        }
         this.saveChanges(this.arrayChanges, this.currentIndex + 1);
     };
     DocsCoApi.prototype._onPreviousLocks = function (locks, previousLocks) {
@@ -647,190 +786,259 @@
             previousLocks = [];
         }
     };
-    DocsCoApi.prototype._onParticipantsChanged = function (participants, isStartEvent) {
-        this._participants = [];
+    DocsCoApi.prototype._onAuthParticipantsChanged = function (participants) {
+        this._participants = {};
+        this._countEditUsers = 0;
+        this._countUsers = 0;
         if (participants) {
-            var tmpUser, countEditUsers = 0;
+            var tmpUser;
             for (var i = 0; i < participants.length; ++i) {
-                tmpUser = new asc_user();
-                tmpUser.asc_setId(participants[i]["id"]);
-                tmpUser.asc_setUserName(participants[i]["username"]);
-                this._participants.push(tmpUser);
-                ++countEditUsers;
+                tmpUser = new asc.asc_CUser(participants[i]);
+                this._participants[tmpUser.asc_getId()] = tmpUser;
+                if (!tmpUser.asc_getView()) {
+                    ++this._countEditUsers;
+                }++this._countUsers;
             }
-            if (isStartEvent) {
-                if (this.onAuthParticipantsChanged) {
-                    this.onAuthParticipantsChanged(this._participants);
-                }
+            if (this.onAuthParticipantsChanged) {
+                this.onAuthParticipantsChanged(this._participants, this._countUsers);
+            }
+            if (1 < this._countEditUsers) {
+                this._onStartCoAuthoring(true);
             } else {
-                if (this.onParticipantsChanged) {
-                    this.onParticipantsChanged(this._participants, countEditUsers);
-                }
-            }
-            if (1 < countEditUsers) {
-                this._onStartCoAuthoring(isStartEvent);
+                this._onEndCoAuthoring(true);
             }
         }
     };
     DocsCoApi.prototype._onConnectionStateChanged = function (data) {
-        var userStateChanged = null;
+        var userStateChanged = null,
+        userId, stateChanged = false,
+        isEditUser = true;
         if (undefined !== data["state"] && this.onConnectionStateChanged) {
-            userStateChanged = new asc_user();
-            userStateChanged.asc_setId(data["id"]);
-            userStateChanged.asc_setUserName(data["username"]);
-            userStateChanged.asc_setState(data["state"]);
-            this.onConnectionStateChanged(userStateChanged);
+            userStateChanged = new asc.asc_CUser(data);
+            userId = userStateChanged.asc_getId();
+            isEditUser = !userStateChanged.asc_getView();
+            if (userStateChanged.asc_getState()) {
+                this._participants[userId] = userStateChanged;
+                ++this._countUsers;
+                if (isEditUser) {
+                    ++this._countEditUsers;
+                }
+                stateChanged = true;
+            } else {
+                if (this._participants.hasOwnProperty(userId)) {
+                    delete this._participants[userId];
+                    --this._countUsers;
+                    if (isEditUser) {
+                        --this._countEditUsers;
+                    }
+                    stateChanged = true;
+                }
+            }
+            if (stateChanged) {
+                if (1 < this._countEditUsers) {
+                    this._onStartCoAuthoring(false);
+                } else {
+                    this._onEndCoAuthoring(false);
+                }
+                this.onParticipantsChanged(this._participants, this._countUsers);
+                this.onConnectionStateChanged(userStateChanged);
+            }
         }
     };
-    var reconnectTimeout, attemptCount = 0;
-    function initSocksJs(url, docsCoApi) {
-        var sockjs = new SockJS(url, null, {
+    DocsCoApi.prototype._onDrop = function (data) {
+        this.disconnect();
+        this.onDisconnect(data ? data["description"] : "", true, this.isCloseCoAuthoring);
+    };
+    DocsCoApi.prototype._onAuth = function (data) {
+        if (true === this._isAuth) {
+            this._state = ConnectionState.Authorized;
+            this._onAuthParticipantsChanged(data["participants"]);
+            this._onMessages(data, true);
+            this._onGetLock(data);
+            if (this._isReSaveAfterAuth) {
+                var t = this;
+                var callbackAskSaveChanges = function (e) {
+                    if (false == e["saveLock"]) {
+                        t._reSaveChanges();
+                    } else {
+                        setTimeout(function () {
+                            t.askSaveChanges(callbackAskSaveChanges);
+                        },
+                        1000);
+                    }
+                };
+                this.askSaveChanges(callbackAskSaveChanges);
+            }
+            return;
+        }
+        if (data["result"] === 1) {
+            this._isAuth = true;
+            this._state = ConnectionState.Authorized;
+            this._id = data["sessionId"];
+            this._onAuthParticipantsChanged(data["participants"]);
+            this._onSetIndexUser(this._indexUser = data["indexUser"]);
+            this._userId = this._user.asc_getId() + this._indexUser;
+            this._onMessages(data, false);
+            this._onGetLock(data);
+            if (window["AscApplyChanges"] && window["AscChanges"]) {
+                var userOfflineChanges = window["AscChanges"],
+                changeOneUser;
+                for (var i = 0; i < userOfflineChanges.length; ++i) {
+                    changeOneUser = userOfflineChanges[i];
+                    for (var j = 0; j < changeOneUser.length; ++j) {
+                        this.onSaveChanges(changeOneUser[j], null, true);
+                    }
+                }
+            }
+            this._updateChanges(data["changes"], data["changesIndex"], true);
+            if (this.onFirstLoadChangesEnd) {
+                this.onFirstLoadChangesEnd();
+            }
+            this._sendPrebuffered();
+        }
+        if (this._initCallback) {
+            this._initCallback({
+                result: data["result"]
+            });
+        }
+    };
+    DocsCoApi.prototype.init = function (user, docid, documentCallbackUrl, token, callback, editorType, documentFormatSave, isViewer) {
+        this._user = user;
+        this._docid = docid;
+        this._documentCallbackUrl = documentCallbackUrl;
+        this._token = token;
+        this._initCallback = callback;
+        this.ownedLockBlocks = [];
+        this.sockjs_url = this._url + "/doc/" + docid + "/c";
+        this.editorType = editorType;
+        this._isExcel = c_oEditorId.Spreadsheet === editorType;
+        this._isPresentation = c_oEditorId.Presentation === editorType;
+        this._isAuth = false;
+        this._documentFormatSave = documentFormatSave;
+        this._isViewer = isViewer;
+        this._initSocksJs();
+    };
+    DocsCoApi.prototype._initSocksJs = function () {
+        var t = this;
+        var sockjs = this.sockjs = new SockJS(this.sockjs_url, null, {
             debug: true
         });
         sockjs.onopen = function () {
-            if (reconnectTimeout) {
-                clearTimeout(reconnectTimeout);
-                attemptCount = 0;
+            if (t.reconnectTimeout) {
+                clearTimeout(t.reconnectTimeout);
+                t.attemptCount = 0;
             }
-            docsCoApi._state = 1;
-            if (docsCoApi.onConnect) {
-                docsCoApi.onConnect();
+            t._state = ConnectionState.WaitAuth;
+            if (t.onConnect) {
+                t.onConnect();
             }
-            if (docsCoApi._locks) {
-                docsCoApi.ownedLockBlocks = [];
-                for (var block in docsCoApi._locks) {
-                    if (docsCoApi._locks.hasOwnProperty(block)) {
-                        var lock = docsCoApi._locks[block];
+            if (t._locks) {
+                t.ownedLockBlocks = [];
+                for (var block in t._locks) {
+                    if (t._locks.hasOwnProperty(block)) {
+                        var lock = t._locks[block];
                         if (lock["state"] === 2) {
-                            docsCoApi.ownedLockBlocks.push(lock["block"]);
+                            t.ownedLockBlocks.push(lock["blockValue"]);
                         }
                     }
                 }
-                docsCoApi._locks = {};
+                t._locks = {};
             }
-            docsCoApi._send({
+            t._send({
                 "type": "auth",
-                "docid": docsCoApi._docid,
-                "token": docsCoApi._token,
-                "user": docsCoApi._user.asc_getId(),
-                "username": docsCoApi._user.asc_getUserName(),
-                "locks": docsCoApi.ownedLockBlocks,
-                "sessionId": docsCoApi._id,
-                "serverHost": docsCoApi._serverHost,
-                "serverPath": docsCoApi._serverPath
+                "docid": t._docid,
+                "documentCallbackUrl": t._documentCallbackUrl,
+                "token": t._token,
+                "user": {
+                    "id": t._user.asc_getId(),
+                    "name": t._user.asc_getUserName(),
+                    "indexUser": t._indexUser
+                },
+                "editorType": t.editorType,
+                "lastOtherSaveTime": t.lastOtherSaveTime,
+                "block": t.ownedLockBlocks,
+                "sessionId": t._id,
+                "server": window.location.protocol + "//" + window.location.host + g_sMainServiceLocalUrl,
+                "documentFormatSave": t._documentFormatSave,
+                "isViewer": t._isViewer,
+                "version": asc_coAuthV
             });
         };
         sockjs.onmessage = function (e) {
             var dataObject = JSON.parse(e.data);
             var type = dataObject.type;
-            docsCoApi.dataHandler[type](dataObject);
+            switch (type) {
+            case "auth":
+                t._onAuth(dataObject);
+                break;
+            case "message":
+                t._onMessages(dataObject, false);
+                break;
+            case "getLock":
+                t._onGetLock(dataObject);
+                break;
+            case "releaseLock":
+                t._onReleaseLock(dataObject);
+                break;
+            case "connectState":
+                t._onConnectionStateChanged(dataObject);
+                break;
+            case "saveChanges":
+                t._onSaveChanges(dataObject);
+                break;
+            case "saveLock":
+                t._onSaveLock(dataObject);
+                break;
+            case "unSaveLock":
+                t._onUnSaveLock(dataObject);
+                break;
+            case "savePartChanges":
+                t._onSavePartChanges(dataObject);
+                break;
+            case "drop":
+                t._onDrop(dataObject);
+                break;
+            case "waitAuth":
+                break;
+            case "error":
+                t._onDrop(dataObject);
+                break;
+            }
         };
         sockjs.onclose = function (evt) {
-            docsCoApi._state = -1;
-            var bIsDisconnectAtAll = attemptCount >= 20 || docsCoApi.isCloseCoAuthoring;
+            if (ConnectionState.SaveChanges === t._state) {
+                t._isReSaveAfterAuth = true;
+                if (null !== t.saveCallbackErrorTimeOutId) {
+                    clearTimeout(t.saveCallbackErrorTimeOutId);
+                }
+            }
+            t._state = ConnectionState.Reconnect;
+            var bIsDisconnectAtAll = t.attemptCount >= t.maxAttemptCount || t.isCloseCoAuthoring;
             if (bIsDisconnectAtAll) {
-                docsCoApi._state = 3;
+                t._state = ConnectionState.Closed;
             }
-            if (docsCoApi.onDisconnect) {
-                docsCoApi.onDisconnect(evt.reason, bIsDisconnectAtAll, docsCoApi.isCloseCoAuthoring);
-            }
-            if (docsCoApi.isCloseCoAuthoring) {
+            if (t.isCloseCoAuthoring) {
                 return;
             }
-            if (attemptCount < 20) {
-                tryReconnect();
+            if (t.onDisconnect) {
+                t.onDisconnect(evt.reason, bIsDisconnectAtAll, t.isCloseCoAuthoring);
+            }
+            if (t.attemptCount < t.maxAttemptCount) {
+                t._tryReconnect();
             }
         };
-        function tryReconnect() {
-            if (reconnectTimeout) {
-                clearTimeout(reconnectTimeout);
-            }
-            attemptCount++;
-            reconnectTimeout = setTimeout(function () {
-                delete docsCoApi.sockjs;
-                docsCoApi.sockjs = initSocksJs(url, docsCoApi);
-            },
-            500 * attemptCount);
-        }
         return sockjs;
-    }
-    DocsCoApi.prototype.init = function (user, docid, token, serverHost, serverPath, callback, editorType) {
-        this._user = user;
-        this._docid = docid;
-        this._token = token;
-        this._initCallback = callback;
-        this.ownedLockBlocks = [];
-        var docsCoApi = this;
-        this._serverHost = serverHost;
-        this._serverPath = serverPath;
-        this.sockjs_url = this._url + "/doc/" + docid + "/c";
-        this.sockjs = initSocksJs(this.sockjs_url, this);
-        this._isExcel = c_oEditorId.Speadsheet === editorType;
-        this._isPresentation = c_oEditorId.Presentation === editorType;
-        this._isAuth = false;
-        this.dataHandler = {
-            "auth": function (data) {
-                if (true === docsCoApi._isAuth) {
-                    return;
-                }
-                if (data["result"] === 1) {
-                    docsCoApi._isAuth = true;
-                    docsCoApi._state = 2;
-                    docsCoApi._id = data["sessionId"];
-                    docsCoApi._onParticipantsChanged(data["participants"], true);
-                    if (data["indexuser"]) {
-                        docsCoApi._indexuser = data["indexuser"];
-                        docsCoApi._onSetIndexUser(docsCoApi._indexuser);
-                    }
-                    if (data["messages"] && docsCoApi.onMessage) {
-                        docsCoApi._onMessages(data);
-                    }
-                    if (data["locks"]) {
-                        if (docsCoApi.ownedLockBlocks && docsCoApi.ownedLockBlocks.length > 0) {
-                            docsCoApi._onPreviousLocks(data["locks"], docsCoApi.ownedLockBlocks);
-                        }
-                        docsCoApi._onGetLock(data);
-                    }
-                    docsCoApi._onFirstLoadChanges(data["changes"] || []);
-                    docsCoApi._sendPrebuffered();
-                }
-                if (docsCoApi._initCallback) {
-                    docsCoApi._initCallback({
-                        result: data["result"]
-                    });
-                }
-            },
-            "getusers": function (data) {
-                docsCoApi._onParticipantsChanged(data["participants"], true);
-            },
-            "participants": function (data) {
-                docsCoApi._onParticipantsChanged(data["participants"], false);
-            },
-            "message": function (data) {
-                docsCoApi._onMessages(data);
-            },
-            "getlock": function (data) {
-                docsCoApi._onGetLock(data);
-            },
-            "releaselock": function (data) {
-                docsCoApi._onReleaseLock(data);
-            },
-            "connectstate": function (data) {
-                docsCoApi._onConnectionStateChanged(data);
-            },
-            "savechanges": function (data) {
-                docsCoApi._onSaveChanges(data);
-            },
-            "savelock": function (data) {
-                docsCoApi._onSaveLock(data);
-            },
-            "unsavelock": function (data) {
-                docsCoApi._onUnSaveLock(data);
-            },
-            "savePartChanges": function () {
-                docsCoApi._onSavePartChanges();
-            }
-        };
     };
-    global["CDocsCoApi"] = CDocsCoApi;
-})(this);
+    DocsCoApi.prototype._tryReconnect = function () {
+        var t = this;
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout);
+        }++this.attemptCount;
+        this.reconnectTimeout = setTimeout(function () {
+            delete t.sockjs;
+            t._initSocksJs();
+        },
+        this.reconnectInterval);
+    };
+    window["CDocsCoApi"] = CDocsCoApi;
+})(window);

@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function CPageMeta() {
+ "use strict";
+function CPageMeta() {
     this.width_mm = 0;
     this.height_mm = 0;
     this.start = 0;
@@ -290,7 +291,7 @@ function CLineInfo() {
     this.text = "";
 }
 function CDocMeta() {
-    this.Fonts = new Array();
+    this.Fonts = [];
     this.ImageMap = {};
     this.Pages = null;
     this.PagesCount = 0;
@@ -301,7 +302,7 @@ function CDocMeta() {
     this.CountWords = 0;
     this.CountSymbols = 0;
     this.CountSpaces = 0;
-    this.Drawings = new Array();
+    this.Drawings = [];
     this.Selection = new CDocMetaSelection();
     this.TextMatrix = new CMatrix();
     this.SearchInfo = {
@@ -668,7 +669,7 @@ function CDocMeta() {
         var _linePrevCharX = 0;
         var _lineCharCount = 0;
         var _lineLastGlyphWidth = 0;
-        var _arrayGlyphOffsets = new Array();
+        var _arrayGlyphOffsets = [];
         var _numLine = -1;
         var _lenGls = 0;
         var tmp = 0;
@@ -1073,7 +1074,7 @@ function CDocMeta() {
         var _linePrevCharX = 0;
         var _lineCharCount = 0;
         var _lineLastGlyphWidth = 0;
-        var _arrayGlyphOffsets = new Array();
+        var _arrayGlyphOffsets = [];
         var _numLine = -1;
         var dKoefX = width / page.width_mm;
         var dKoefY = height / page.height_mm;
@@ -1337,7 +1338,7 @@ function CDocMeta() {
         var page = this.Pages[pageNum];
         var s = this.stream;
         s.Seek(page.start);
-        var lineSpans = new Array();
+        var lineSpans = [];
         var curSpan = new CSpan();
         var isChangeSpan = false;
         var _lineCharCount = 0;
@@ -1519,7 +1520,7 @@ function CDocMeta() {
         var _findGlyphIndex = 0;
         var _SeekToNextPoint = 0;
         var _SeekLinePrevCharX = 0;
-        var arrayLines = new Array();
+        var arrayLines = [];
         var curLine = null;
         while (s.pos < page.end) {
             var command = s.GetUChar();
@@ -1679,7 +1680,7 @@ function CDocMeta() {
                     _findLineOffsetR = _linePrevCharX + _lineLastGlyphWidth;
                     if (glyphsFindCount == glyphsEqualFound) {
                         var _text = "";
-                        var _rects = new Array();
+                        var _rects = [];
                         for (var i = _findLine; i <= _numLine; i++) {
                             var ps = 0;
                             if (_findLine == i) {
@@ -1832,7 +1833,7 @@ function CDocMeta() {
         var _findGlyphIndex = 0;
         var _SeekToNextPoint = 0;
         var _SeekLinePrevCharX = 0;
-        var arrayLines = new Array();
+        var arrayLines = [];
         var curLine = null;
         while (s.pos < page.end) {
             var command = s.GetUChar();
@@ -2003,7 +2004,7 @@ function CDocMeta() {
                     glyphsEqualFound++;
                     _findLineOffsetR = _linePrevCharX + _lineLastGlyphWidth;
                     if (glyphsFindCount == glyphsEqualFound) {
-                        var _rects = new Array();
+                        var _rects = [];
                         for (var i = _findLine; i <= _numLine; i++) {
                             var ps = 0;
                             if (_findLine == i) {
@@ -2212,6 +2213,15 @@ function CDocMeta() {
                                         } else {
                                             if (e.KeyCode == 67 && true === e.CtrlKey) {
                                                 Editor_Copy(editor);
+                                            } else {
+                                                if (e.KeyCode == 80 && true === e.CtrlKey) {
+                                                    editor.asc_Print();
+                                                    bRetValue = true;
+                                                } else {
+                                                    if (e.KeyCode == 83 && true === e.CtrlKey) {
+                                                        bRetValue = true;
+                                                    }
+                                                }
                                             }
                                         }
                                     }

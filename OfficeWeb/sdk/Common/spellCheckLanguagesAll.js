@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var g_spellCheckLanguages = [];
+ "use strict";
+var g_spellCheckLanguages = [];
 g_spellCheckLanguages.push(window["Asc"].asc_CLanguage("ca-ES", 1027));
 g_spellCheckLanguages.push(window["Asc"].asc_CLanguage("cs-CZ", 1029));
 g_spellCheckLanguages.push(window["Asc"].asc_CLanguage("da-DK", 1030));
@@ -53,8 +54,11 @@ g_spellCheckLanguages.push(window["Asc"].asc_CLanguage("uk-UA", 1058));
 g_spellCheckLanguages.push(window["Asc"].asc_CLanguage("lv-LV", 1062));
 g_spellCheckLanguages.push(window["Asc"].asc_CLanguage("lt-LT", 1063));
 g_spellCheckLanguages.push(window["Asc"].asc_CLanguage("vi-VN", 1066));
+g_spellCheckLanguages.push(window["Asc"].asc_CLanguage("az-Latn-AZ", 1068));
 g_spellCheckLanguages.push(window["Asc"].asc_CLanguage("de-CH", 2055));
+g_spellCheckLanguages.push(window["Asc"].asc_CLanguage("en-GB", 2057));
 g_spellCheckLanguages.push(window["Asc"].asc_CLanguage("nn-NO", 2068));
 g_spellCheckLanguages.push(window["Asc"].asc_CLanguage("pt-PT", 2070));
 g_spellCheckLanguages.push(window["Asc"].asc_CLanguage("de-AT", 3079));
+g_spellCheckLanguages.push(window["Asc"].asc_CLanguage("en-AU", 3081));
 g_spellCheckLanguages.push(window["Asc"].asc_CLanguage("es-ES", 3082));

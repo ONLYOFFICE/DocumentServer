@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var g_dDpiX = 96;
+ "use strict";
+var g_dDpiX = 96;
 var g_dDpiY = 96;
 var g_dKoef_mm_to_pix = g_dDpiX / 25.4;
 var g_dKoef_pix_to_mm = 25.4 / g_dDpiX;
@@ -56,11 +57,36 @@ var selectionflag_DrawingObject = 2;
 var orientation_Portrait = 0;
 var orientation_Landscape = 1;
 var tableSpacingMinValue = 0.02;
-if (AscBrowser.isIE || window.opera) {
-    document.onselectstart = function () {
-        return false;
-    };
-}
+var GlobalSkinTeamlab = {
+    Name: "classic",
+    RulersButton: true,
+    NavigationButtons: true,
+    BackgroundColor: "#B0B0B0",
+    RulerDark: "#B0B0B0",
+    RulerLight: "EDEDED",
+    BackgroundScroll: "#D3D3D3",
+    RulerOutline: "#929292",
+    RulerMarkersFillColor: "#E7E7E7",
+    PageOutline: "#81878F",
+    STYLE_THUMBNAIL_WIDTH: 80,
+    STYLE_THUMBNAIL_HEIGHT: 40
+};
+var GlobalSkinFlat = {
+    Name: "flat",
+    RulersButton: false,
+    NavigationButtons: false,
+    BackgroundColor: "#F4F4F4",
+    RulerDark: "#CFCFCF",
+    RulerLight: "#FFFFFF",
+    BackgroundScroll: "#F1F1F1",
+    RulerOutline: "#BBBEC2",
+    RulerMarkersFillColor: "#FFFFFF",
+    PageOutline: "#BBBEC2",
+    STYLE_THUMBNAIL_WIDTH: 109,
+    STYLE_THUMBNAIL_HEIGHT: 45,
+    isNeedInvertOnActive: false
+};
+var GlobalSkin = GlobalSkinTeamlab;
 function CEditorPage(api) {
     this.Name = "";
     this.X = 0;
@@ -91,6 +117,7 @@ function CEditorPage(api) {
     this.m_oTopRuler_horRuler = null;
     this.m_bIsHorScrollVisible = false;
     this.m_bIsRuler = (api.isMobileVersion === true) ? false : true;
+    this.m_bDocumentPlaceChangedEnabled = false;
     this.m_nZoomValue = 100;
     this.m_oBoundsController = new CBoundsController();
     this.m_nTabsType = 0;
@@ -105,7 +132,7 @@ function CEditorPage(api) {
     this.m_dDocumentPageHeight = 0;
     this.NoneRepaintPages = false;
     this.m_bIsScroll = false;
-    this.ScrollsWidthPx = 16;
+    this.ScrollsWidthPx = 14;
     this.m_oHorRuler = new CHorRuler();
     this.m_oVerRuler = new CVerRuler();
     this.m_oDrawingDocument = new CDrawingDocument();
@@ -120,7 +147,11 @@ function CEditorPage(api) {
     this.m_oScrollVer_ = null;
     this.m_oScrollHorApi = null;
     this.m_oScrollVerApi = null;
-    this.arrayEventHandlers = new Array();
+    this.m_nIntervalSlowAutosave = 600000;
+    this.m_nIntervalFastAutosave = 2000;
+    this.m_nIntervalWaitAutoSave = 1000;
+    this.m_nLastAutosaveTime = -1;
+    this.arrayEventHandlers = [];
     this.m_oTimerScrollSelect = -1;
     this.IsFocus = true;
     this.m_bIsMouseLock = false;
@@ -157,6 +188,7 @@ function CEditorPage(api) {
     this.TextBoxChangedValueEvent = true;
     this.TextBoxMaxWidth = 20;
     this.TextBoxMaxHeight = 20;
+    this.TextboxUsedForSpecials = false;
     this.MobileTouchManager = null;
     this.ReaderTouchManager = null;
     this.ReaderModeCurrent = 0;
@@ -184,12 +216,27 @@ function CEditorPage(api) {
     this.RequestAnimationOldTime = -1;
     this.checkBodySize = function () {
         var off = jQuery("#" + this.Name).offset();
-        this.X = off.left;
-        this.Y = off.top;
+        if (off) {
+            this.X = off.left;
+            this.Y = off.top;
+        }
         var el = document.getElementById(this.Name);
-        if (this.Width != el.offsetWidth || this.Height != el.offsetHeight) {
-            this.Width = el.offsetWidth;
-            this.Height = el.offsetHeight;
+        var _newW = el.offsetWidth;
+        var _newH = el.offsetHeight;
+        var _left_border_w = 0;
+        if (window.getComputedStyle) {
+            var _computed_style = window.getComputedStyle(el, null);
+            if (_computed_style) {
+                var _value = _computed_style.getPropertyValue("border-left-width");
+                if (typeof _value == "string") {
+                    _left_border_w = parseInt(_value);
+                }
+            }
+        }
+        _newW -= _left_border_w;
+        if (this.Width != _newW || this.Height != _newH) {
+            this.Width = _newW;
+            this.Height = _newH;
             return true;
         }
         return false;
@@ -214,6 +261,11 @@ function CEditorPage(api) {
         this.m_oPanelRight_buttonRulers.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, scrollWidthMm);
         this.m_oPanelRight_buttonRulers.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right);
         this.m_oPanelRight.AddControl(this.m_oPanelRight_buttonRulers);
+        var _vertScrollTop = scrollWidthMm;
+        if (GlobalSkin.RulersButton === false) {
+            this.m_oPanelRight_buttonRulers.HtmlElement.style.display = "none";
+            _vertScrollTop = 0;
+        }
         this.m_oPanelRight_buttonNextPage = CreateControl("id_buttonNextPage");
         this.m_oPanelRight_buttonNextPage.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, scrollWidthMm);
         this.m_oPanelRight_buttonNextPage.Anchor = (g_anchor_left | g_anchor_bottom | g_anchor_right);
@@ -222,8 +274,14 @@ function CEditorPage(api) {
         this.m_oPanelRight_buttonPrevPage.Bounds.SetParams(0, 0, 1000, scrollWidthMm, false, false, false, true, -1, scrollWidthMm);
         this.m_oPanelRight_buttonPrevPage.Anchor = (g_anchor_left | g_anchor_bottom | g_anchor_right);
         this.m_oPanelRight.AddControl(this.m_oPanelRight_buttonPrevPage);
+        var _vertScrollBottom = 2 * scrollWidthMm;
+        if (GlobalSkin.NavigationButtons == false) {
+            this.m_oPanelRight_buttonNextPage.HtmlElement.style.display = "none";
+            this.m_oPanelRight_buttonPrevPage.HtmlElement.style.display = "none";
+            _vertScrollBottom = 0;
+        }
         this.m_oPanelRight_vertScroll = CreateControl("id_vertical_scroll");
-        this.m_oPanelRight_vertScroll.Bounds.SetParams(0, scrollWidthMm, 1000, 2 * scrollWidthMm, false, true, false, true, -1, -1);
+        this.m_oPanelRight_vertScroll.Bounds.SetParams(0, _vertScrollTop, 1000, _vertScrollBottom, false, true, false, true, -1, -1);
         this.m_oPanelRight_vertScroll.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right | g_anchor_bottom);
         this.m_oPanelRight.AddControl(this.m_oPanelRight_vertScroll);
         this.m_oMainContent = CreateControlContainer("id_main");
@@ -305,16 +363,14 @@ function CEditorPage(api) {
     this.CheckRetinaDisplay = function () {
         var old = this.bIsRetinaSupport;
         if (!this.bIsRetinaNoSupportAttack) {
-            if (window.devicePixelRatio != 2) {
-                this.bIsRetinaSupport = false;
-            } else {
-                this.bIsRetinaSupport = true;
-            }
+            this.bIsRetinaSupport = AscBrowser.isRetina;
+            this.m_oOverlayApi.IsRetina = this.bIsRetinaSupport;
         } else {
             this.bIsRetinaSupport = false;
         }
         if (old != this.bIsRetinaSupport) {
             this.m_oDrawingDocument.ClearCachePages();
+            this.onButtonTabsDraw();
         }
     };
     this.ShowOverlay = function () {
@@ -551,9 +607,6 @@ function CEditorPage(api) {
         oThis.OnResize(true);
     };
     this.HideRulers = function () {
-        if (false === oThis.m_oApi.bInit_word_control) {
-            return;
-        }
         if (oThis.m_bIsRuler === false) {
             return;
         }
@@ -665,9 +718,6 @@ function CEditorPage(api) {
         oWordControl.m_oApi.sync_zoomChangeCallback(this.m_nZoomValue, type);
         oWordControl.m_bIsUpdateTargetNoAttack = true;
         oWordControl.m_bIsRePaintOnScroll = true;
-        if (oWordControl.m_oLogicDocument) {
-            oWordControl.m_oLogicDocument.DrawingObjects.redrawCharts();
-        }
         oWordControl.OnScroll();
     };
     this.zoom_Out = function () {
@@ -812,22 +862,54 @@ function CEditorPage(api) {
         }
     };
     this.onButtonTabsClick = function () {
-        if (false === oThis.m_oApi.bInit_word_control) {
-            return;
-        }
         var oWordControl = oThis;
         if (oWordControl.m_nTabsType == g_tabtype_left) {
             oWordControl.m_nTabsType = g_tabtype_center;
-            oWordControl.m_oLeftRuler_buttonsTabs.HtmlElement.style.backgroundPosition = "0px -37px";
+            oWordControl.onButtonTabsDraw();
         } else {
             if (oWordControl.m_nTabsType == g_tabtype_center) {
                 oWordControl.m_nTabsType = g_tabtype_right;
-                oWordControl.m_oLeftRuler_buttonsTabs.HtmlElement.style.backgroundPosition = "0px -18px";
+                oWordControl.onButtonTabsDraw();
             } else {
                 oWordControl.m_nTabsType = g_tabtype_left;
-                oWordControl.m_oLeftRuler_buttonsTabs.HtmlElement.style.backgroundPosition = "0px 0px";
+                oWordControl.onButtonTabsDraw();
             }
         }
+    };
+    this.onButtonTabsDraw = function () {
+        var _ctx = this.m_oLeftRuler_buttonsTabs.HtmlElement.getContext("2d");
+        if (this.bIsRetinaSupport) {
+            _ctx.setTransform(2, 0, 0, 2, 0, 0);
+        } else {
+            _ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+        var _width = 19;
+        var _height = 19;
+        _ctx.clearRect(0, 0, 19, 19);
+        _ctx.lineWidth = 1;
+        _ctx.strokeStyle = "#BBBEC2";
+        _ctx.strokeRect(2.5, 3.5, 14, 14);
+        _ctx.beginPath();
+        _ctx.strokeStyle = "#3E3E3E";
+        _ctx.lineWidth = 2;
+        if (this.m_nTabsType == g_tabtype_left) {
+            _ctx.moveTo(8, 9);
+            _ctx.lineTo(8, 14);
+            _ctx.lineTo(13, 14);
+        } else {
+            if (this.m_nTabsType == g_tabtype_center) {
+                _ctx.moveTo(6, 14);
+                _ctx.lineTo(14, 14);
+                _ctx.moveTo(10, 9);
+                _ctx.lineTo(10, 14);
+            } else {
+                _ctx.moveTo(12, 9);
+                _ctx.lineTo(12, 14);
+                _ctx.lineTo(7, 14);
+            }
+        }
+        _ctx.stroke();
+        _ctx.beginPath();
     };
     this.onPrevPage = function () {
         if (false === oThis.m_oApi.bInit_word_control) {
@@ -1038,6 +1120,7 @@ function CEditorPage(api) {
             oWordControl.m_bIsMouseLock = true;
         }
         oWordControl.StartUpdateOverlay();
+        var bIsSendSelectWhell = false;
         if ((0 == global_mouseEvent.Button) || (undefined == global_mouseEvent.Button)) {
             var pos = null;
             if (oWordControl.m_oDrawingDocument.AutoShapesTrackLockPageNum == -1) {
@@ -1058,6 +1141,10 @@ function CEditorPage(api) {
                 if (ret === true) {
                     return;
                 }
+                if (-1 == oWordControl.m_oTimerScrollSelect) {
+                    oWordControl.m_oTimerScrollSelect = setInterval(oWordControl.SelectWheel, 20);
+                    bIsSendSelectWhell = true;
+                }
                 oWordControl.m_oDrawingDocument.NeedScrollToTargetFlag = true;
                 oWordControl.m_oLogicDocument.OnMouseDown(global_mouseEvent, pos.X, pos.Y, pos.Page);
                 oWordControl.m_oDrawingDocument.NeedScrollToTargetFlag = false;
@@ -1071,7 +1158,7 @@ function CEditorPage(api) {
                 oWordControl.MouseDownDocumentCounter++;
             }
         }
-        if (-1 == oWordControl.m_oTimerScrollSelect) {
+        if (!bIsSendSelectWhell && -1 == oWordControl.m_oTimerScrollSelect) {
             oWordControl.m_oTimerScrollSelect = setInterval(oWordControl.SelectWheel, 20);
         }
         oWordControl.EndUpdateOverlay();
@@ -1162,6 +1249,22 @@ function CEditorPage(api) {
         if ((global_mouseEvent.Sender != oThis.m_oEditor.HtmlElement && global_mouseEvent.Sender != oThis.m_oOverlay.HtmlElement && global_mouseEvent.Sender != oThis.m_oDrawingDocument.TargetHtmlElement) && (oThis.TextBoxBackground && oThis.TextBoxBackground.HtmlElement != global_mouseEvent.Sender)) {
             return;
         }
+        if (-1 != oWordControl.m_oTimerScrollSelect) {
+            clearInterval(oWordControl.m_oTimerScrollSelect);
+            oWordControl.m_oTimerScrollSelect = -1;
+        }
+        if (oWordControl.m_oHorRuler.m_bIsMouseDown) {
+            oWordControl.m_oHorRuler.OnMouseUpExternal();
+        }
+        if (oWordControl.m_oVerRuler.DragType != 0) {
+            oWordControl.m_oVerRuler.OnMouseUpExternal();
+        }
+        if (oWordControl.m_oScrollVerApi.getIsLockedMouse()) {
+            oWordControl.m_oScrollVerApi.evt_mouseup(e);
+        }
+        if (oWordControl.m_oScrollHorApi.getIsLockedMouse()) {
+            oWordControl.m_oScrollHorApi.evt_mouseup(e);
+        }
         check_MouseUpEvent(e);
         var pos = null;
         if (oWordControl.m_oDrawingDocument.AutoShapesTrackLockPageNum == -1) {
@@ -1181,10 +1284,6 @@ function CEditorPage(api) {
         var is_drawing = oWordControl.m_oDrawingDocument.checkMouseUp_Drawing(pos);
         if (is_drawing === true) {
             return;
-        }
-        if (-1 != oWordControl.m_oTimerScrollSelect) {
-            clearInterval(oWordControl.m_oTimerScrollSelect);
-            oWordControl.m_oTimerScrollSelect = -1;
         }
         if (null != oWordControl.m_oDrawingDocument.m_oDocumentRenderer) {
             oWordControl.m_oDrawingDocument.m_oDocumentRenderer.OnMouseUp();
@@ -1209,6 +1308,21 @@ function CEditorPage(api) {
         oWordControl.m_oLogicDocument.Document_UpdateRulersState();
         oWordControl.EndUpdateOverlay();
     };
+    this.onMouseUpMainSimple = function () {
+        if (false === oThis.m_oApi.bInit_word_control) {
+            return;
+        }
+        var oWordControl = oThis;
+        global_mouseEvent.Type = g_mouse_event_type_up;
+        g_bIsMouseUpLockedSend = true;
+        global_mouseEvent.Sender = null;
+        global_mouseEvent.UnLockMouse();
+        global_mouseEvent.IsPressed = false;
+        if (-1 != oWordControl.m_oTimerScrollSelect) {
+            clearInterval(oWordControl.m_oTimerScrollSelect);
+            oWordControl.m_oTimerScrollSelect = -1;
+        }
+    };
     this.onMouseUpExternal = function (x, y) {
         if (false === oThis.m_oApi.bInit_word_control) {
             return;
@@ -1224,9 +1338,27 @@ function CEditorPage(api) {
         if (oWordControl.m_oVerRuler.DragType != 0) {
             oWordControl.m_oVerRuler.OnMouseUpExternal();
         }
+        if (oWordControl.m_oScrollVerApi.getIsLockedMouse()) {
+            var __e = {
+                clientX: x,
+                clientY: y
+            };
+            oWordControl.m_oScrollVerApi.evt_mouseup(__e);
+        }
+        if (oWordControl.m_oScrollHorApi.getIsLockedMouse()) {
+            var __e = {
+                clientX: x,
+                clientY: y
+            };
+            oWordControl.m_oScrollHorApi.evt_mouseup(__e);
+        }
         global_mouseEvent.Sender = null;
         global_mouseEvent.UnLockMouse();
         global_mouseEvent.IsPressed = false;
+        if (-1 != oWordControl.m_oTimerScrollSelect) {
+            clearInterval(oWordControl.m_oTimerScrollSelect);
+            oWordControl.m_oTimerScrollSelect = -1;
+        }
         var pos = null;
         if (oWordControl.m_oDrawingDocument.AutoShapesTrackLockPageNum == -1) {
             pos = oWordControl.m_oDrawingDocument.ConvertCoordsFromCursor2(global_mouseEvent.X, global_mouseEvent.Y);
@@ -1245,10 +1377,6 @@ function CEditorPage(api) {
         var is_drawing = oWordControl.m_oDrawingDocument.checkMouseUp_Drawing(pos);
         if (is_drawing === true) {
             return;
-        }
-        if (-1 != oWordControl.m_oTimerScrollSelect) {
-            clearInterval(oWordControl.m_oTimerScrollSelect);
-            oWordControl.m_oTimerScrollSelect = -1;
         }
         if (null != oWordControl.m_oDrawingDocument.m_oDocumentRenderer) {
             oWordControl.m_oDrawingDocument.m_oDocumentRenderer.OnMouseUp();
@@ -1274,6 +1402,20 @@ function CEditorPage(api) {
     this.onMouseWhell = function (e) {
         if (false === oThis.m_oApi.bInit_word_control) {
             return;
+        }
+        var _ctrl = false;
+        if (e.metaKey !== undefined) {
+            _ctrl = e.ctrlKey || e.metaKey;
+        } else {
+            _ctrl = e.ctrlKey;
+        }
+        if (true === _ctrl) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            } else {
+                e.returnValue = false;
+            }
+            return false;
         }
         var delta = 0;
         var deltaX = 0;
@@ -1311,6 +1453,17 @@ function CEditorPage(api) {
                 oThis.m_oScrollVerApi.scrollBy(0, deltaY, false);
             }
         }
+        var _e = {};
+        _e.pageX = global_mouseEvent.X;
+        _e.pageY = global_mouseEvent.Y;
+        _e.clientX = global_mouseEvent.X;
+        _e.clientY = global_mouseEvent.Y;
+        _e.altKey = global_mouseEvent.AltKey;
+        _e.shiftKey = global_mouseEvent.ShiftKey;
+        _e.ctrlKey = global_mouseEvent.CtrlKey;
+        _e.metaKey = global_mouseEvent.CtrlKey;
+        _e.srcElement = global_mouseEvent.Sender;
+        oThis.onMouseMove(_e);
         if (e.preventDefault) {
             e.preventDefault();
         } else {
@@ -1474,7 +1627,7 @@ function CEditorPage(api) {
         _div.style.top = topPos + "px";
     };
     this.onKeyDown = function (e) {
-        if (oThis.m_oApi.IsLongActionCurrent) {
+        if (oThis.m_oApi.asc_IsLongAction()) {
             e.preventDefault();
             return;
         }
@@ -1484,6 +1637,11 @@ function CEditorPage(api) {
         }
         var oWordControl = oThis;
         if (false === oWordControl.m_oApi.bInit_word_control) {
+            check_KeyboardEvent2(e);
+            e.preventDefault();
+            return;
+        }
+        if (oWordControl.m_bIsRuler && oWordControl.m_oHorRuler.m_bIsMouseDown) {
             check_KeyboardEvent2(e);
             e.preventDefault();
             return;
@@ -1516,7 +1674,7 @@ function CEditorPage(api) {
         oWordControl.IsKeyDownButNoPress = true;
         oWordControl.bIsUseKeyPress = (oWordControl.m_oLogicDocument.OnKeyDown(global_keyboardEvent) === true) ? false : true;
         oWordControl.EndUpdateOverlay();
-        if (false === oWordControl.bIsUseKeyPress || true === global_keyboardEvent.AltKey) {
+        if (false === oWordControl.bIsUseKeyPress || (true === global_keyboardEvent.AltKey && !AscBrowser.isMacOs)) {
             e.preventDefault();
         }
     };
@@ -1535,7 +1693,7 @@ function CEditorPage(api) {
         return bSendToEditor;
     };
     this.onKeyDownTBIM = function (e) {
-        if (oThis.m_oApi.IsLongActionCurrent) {
+        if (oThis.m_oApi.asc_IsLongAction()) {
             e.preventDefault();
             return;
         }
@@ -1612,7 +1770,7 @@ function CEditorPage(api) {
         global_keyboardEvent.ShiftKey = false;
     };
     this.onKeyPress = function (e) {
-        if (oThis.m_oApi.IsLongActionCurrent) {
+        if (oThis.m_oApi.asc_IsLongAction()) {
             e.preventDefault();
             return;
         }
@@ -1658,11 +1816,30 @@ function CEditorPage(api) {
             return;
         }
         check_KeyboardEvent(e);
-        oWordControl.StartUpdateOverlay();
-        var retValue = oWordControl.m_oLogicDocument.OnKeyPress(global_keyboardEvent);
-        oWordControl.EndUpdateOverlay();
-        if (true === retValue) {
-            e.preventDefault();
+        if (false === oWordControl.TextboxUsedForSpecials) {
+            oWordControl.StartUpdateOverlay();
+            var retValue = oWordControl.m_oLogicDocument.OnKeyPress(global_keyboardEvent);
+            oWordControl.EndUpdateOverlay();
+            if (true === retValue) {
+                e.preventDefault();
+            }
+        } else {
+            var _oldCtrl = global_keyboardEvent.CtrlKey;
+            var _oldAlt = global_keyboardEvent.AltKey;
+            if ((_oldCtrl || _oldAlt) && ("" != oWordControl.TextBoxInput.value)) {
+                global_keyboardEvent.CtrlKey = false;
+                global_keyboardEvent.AltKey = false;
+                global_keyboardEvent.Which = oWordControl.TextBoxInput.value.charCodeAt(0);
+            }
+            oWordControl.StartUpdateOverlay();
+            var retValue = oWordControl.m_oLogicDocument.OnKeyPress(global_keyboardEvent);
+            oWordControl.EndUpdateOverlay();
+            if (true === retValue) {
+                e.preventDefault();
+            }
+            oWordControl.TextBoxInput.value = "";
+            global_keyboardEvent.CtrlKey = _oldCtrl;
+            global_keyboardEvent.AltKey = _oldAlt;
         }
     };
     this.verticalScroll = function (sender, scrollPositionY, maxY, isAtTop, isAtBottom) {
@@ -1740,15 +1917,17 @@ function CEditorPage(api) {
         }
     };
     this.UpdateScrolls = function () {
+        if (window["NATIVE_EDITOR_ENJINE"]) {
+            return;
+        }
         var settings = {
             showArrows: true,
             animateScroll: false,
-            scrollBackgroundColor: "#D3D3D3",
-            scrollerColor: "#EDEDED",
             screenW: this.m_oEditor.HtmlElement.width,
             screenH: this.m_oEditor.HtmlElement.height,
             vscrollStep: 45,
-            hscrollStep: 45
+            hscrollStep: 45,
+            isNeedInvertOnActive: GlobalSkin.isNeedInvertOnActive
         };
         if (this.bIsRetinaSupport) {
             settings.screenW /= 2;
@@ -1810,6 +1989,7 @@ function CEditorPage(api) {
         }
         this.CheckRetinaDisplay();
         this.m_oBody.Resize(this.Width * g_dKoef_pix_to_mm, this.Height * g_dKoef_pix_to_mm, this);
+        this.onButtonTabsDraw();
         if (this.TextBoxBackground != null) {
             this.TextBoxBackground.HtmlElement.style.top = "10px";
         }
@@ -2000,6 +2180,17 @@ function CEditorPage(api) {
             if (drDoc.FrameRect.IsActive) {
                 drDoc.DrawFrameTrack(overlay);
             }
+            if (drDoc.MathRect.IsActive) {
+                drDoc.DrawMathTrack(overlay);
+            }
+            if (drDoc.InlineTextTrackEnabled && null != drDoc.InlineTextTrack) {
+                var _oldPage = drDoc.AutoShapesTrack.PageIndex;
+                var _oldCurPageInfo = drDoc.AutoShapesTrack.CurrentPageInfo;
+                drDoc.AutoShapesTrack.PageIndex = drDoc.InlineTextTrackPage;
+                drDoc.AutoShapesTrack.DrawInlineMoveCursor(drDoc.InlineTextTrack.X, drDoc.InlineTextTrack.Y, drDoc.InlineTextTrack.Height, drDoc.InlineTextTrack.transform);
+                drDoc.AutoShapesTrack.PageIndex = _oldPage;
+                drDoc.AutoShapesTrack.CurrentPageInfo = _oldCurPageInfo;
+            }
             drDoc.DrawHorVerAnchor();
         } else {
             ctx.globalAlpha = 0.2;
@@ -2125,6 +2316,9 @@ function CEditorPage(api) {
                 this.m_oApi.asc_fireCallback("asc_onCurrentPage", lPage);
             }
         }
+        if (this.m_bDocumentPlaceChangedEnabled) {
+            this.m_oApi.asc_fireCallback("asc_onDocumentPlaceChanged");
+        }
     };
     this.OnPaint = function () {
         if (this.DrawingFreeze) {
@@ -2135,7 +2329,7 @@ function CEditorPage(api) {
             return;
         }
         var context = canvas.getContext("2d");
-        context.fillStyle = "#B0B0B0";
+        context.fillStyle = GlobalSkin.BackgroundColor;
         var rectsPages = [];
         for (var i = this.m_oDrawingDocument.m_lDrawingFirst; i <= this.m_oDrawingDocument.m_lDrawingEnd; i++) {
             var drawPage = this.m_oDrawingDocument.m_arrPages[i].drawingPage;
@@ -2219,7 +2413,7 @@ function CEditorPage(api) {
     };
     this.CheckRetinaElement = function (htmlElem) {
         if (this.bIsRetinaSupport) {
-            if (htmlElem.id == "id_viewer" || htmlElem.id == "id_hor_ruler" || htmlElem.id == "id_vert_ruler") {
+            if (htmlElem.id == "id_viewer" || (htmlElem.id == "id_viewer_overlay" && this.m_oOverlayApi.IsRetina) || htmlElem.id == "id_hor_ruler" || htmlElem.id == "id_vert_ruler" || htmlElem.id == "id_buttonTabs") {
                 return true;
             }
         }
@@ -2398,6 +2592,9 @@ function CEditorPage(api) {
         if (!oWordControl.m_oApi.bInit_word_control) {
             return;
         }
+        if (oWordControl.IsFocus && oWordControl.TextBoxInputMode && oWordControl.TextBoxInput && !window.USER_AGENT_SAFARI_MACOS) {
+            oWordControl.TextBoxInput.focus();
+        }
         oWordControl.m_nTimeDrawingLast = new Date().getTime();
         if (oWordControl.m_bIsScroll) {
             oWordControl.m_bIsScroll = false;
@@ -2413,6 +2610,27 @@ function CEditorPage(api) {
             oWordControl.m_oDrawingDocument.UpdateTargetFromPaint = false;
             oWordControl.CheckFontCache();
             oWordControl.m_oDrawingDocument.CheckTrackTable();
+        }
+        if (oWordControl.m_oApi.autoSaveGap != 0 && !oWordControl.m_oApi.isViewMode && !oWordControl.TextBoxInputFocus) {
+            var _curTime = new Date().getTime();
+            if (-1 == oWordControl.m_nLastAutosaveTime) {
+                oWordControl.m_nLastAutosaveTime = _curTime;
+            }
+            var _bIsWaitScheme = false;
+            if (History.Points && History.Index >= 0 && History.Index < History.Points.length) {
+                if ((_curTime - History.Points[History.Index].Time) < oWordControl.m_nIntervalWaitAutoSave) {
+                    _bIsWaitScheme = true;
+                }
+            }
+            if (!_bIsWaitScheme) {
+                var _interval = (CollaborativeEditing.m_nUseType <= 0) ? oWordControl.m_nIntervalSlowAutosave : oWordControl.m_nIntervalFastAutosave;
+                if ((_curTime - oWordControl.m_nLastAutosaveTime) > _interval) {
+                    if (History.Have_Changes() == true) {
+                        oWordControl.m_oApi.asc_Save();
+                    }
+                    oWordControl.m_nLastAutosaveTime = _curTime;
+                }
+            }
         }
         this.m_nPaintTimerId = setTimeout(oWordControl.onTimerScroll2, oWordControl.m_nTimerScrollInterval);
     };
@@ -2550,9 +2768,11 @@ function CEditorPage(api) {
         var dKoef = g_dKoef_mm_to_pix * this.m_nZoomValue / 100;
         return 5 + dKoef * x;
     };
-    this.ReinitTB = function () {
+    this.ReinitTB = function (bIsNoResetValue) {
         this.TextBoxChangedValueEvent = false;
-        this.TextBoxInput.value = "";
+        if (true !== bIsNoResetValue) {
+            this.TextBoxInput.value = "";
+        }
         this.TextBoxChangedValueEvent = true;
     };
     this.SetTextBoxMode = function (isEA) {
@@ -2569,9 +2789,9 @@ function CEditorPage(api) {
                 this.TextBoxInput.style.width = "100px";
                 this.TextBoxInput.rows = 1;
                 this.m_oMainView.HtmlElement.appendChild(this.TextBoxInput);
-                this.TextBoxInput["oninput"] = this.OnTextBoxInput;
-                this.TextBoxInput.onkeydown = this.TextBoxOnKeyDown;
             }
+            this.TextBoxInput["oninput"] = this.OnTextBoxInput;
+            this.TextBoxInput.onkeydown = this.TextBoxOnKeyDown;
             if (this.TextBoxInputFocus) {
                 this.onChangeTB();
             } else {
@@ -2586,9 +2806,25 @@ function CEditorPage(api) {
             if (this.TextBoxInputFocus) {
                 this.onChangeTB();
             }
-            if (null != this.TextBoxInput) {
-                this.m_oMainView.HtmlElement.removeChild(this.TextBoxInput);
-                this.TextBoxInput = null;
+            if (false === this.TextboxUsedForSpecials) {
+                if (null != this.TextBoxInput) {
+                    this.m_oMainView.HtmlElement.removeChild(this.TextBoxInput);
+                    this.TextBoxInput = null;
+                }
+            } else {
+                if (null == this.TextBoxInput) {
+                    this.TextBoxInput = document.createElement("textarea");
+                    this.TextBoxInput.id = "area_id";
+                    this.TextBoxInput.setAttribute("style", "font-family:arial;font-size:12pt;position:absolute;resize:none;padding:2px;margin:0px;font-weight:normal;box-sizing:content-box;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;");
+                    this.TextBoxInput.style.border = "2px solid #4363A4";
+                    this.TextBoxInput.style.width = "100px";
+                    this.TextBoxInput.rows = 1;
+                    this.m_oMainView.HtmlElement.appendChild(this.TextBoxInput);
+                }
+                this.TextBoxInput.style.overflow = "hidden";
+                this.TextBoxInput.style.zIndex = -1;
+                this.TextBoxInput.style.top = "-1000px";
+                this.TextBoxInput.focus();
             }
         }
     };
@@ -2599,8 +2835,8 @@ function CEditorPage(api) {
         oThis.TextBoxInputFocus = true;
         CollaborativeEditing.m_bGlobalLock = true;
         oThis.CheckTextBoxInputPos();
-        this.ReinitTB();
-        oThis.TextBoxInput.style.zIndex = 1000;
+        this.ReinitTB(true);
+        oThis.TextBoxInput.style.zIndex = 90;
     };
     this.OnTextBoxInput = function () {
         oThis.TextBoxFocus();
@@ -2623,6 +2859,9 @@ function CEditorPage(api) {
         _p.innerHTML = "<span>" + _t + "</span>";
         var _width = _p.firstChild.offsetWidth;
         _width = Math.min(_width + 10, this.TextBoxMaxWidth);
+        if (AscBrowser.isIE) {
+            _width += 10;
+        }
         var area = document.createElement("textarea");
         area.style.zIndex = "-1";
         area.id = "area2_id";
@@ -2644,7 +2883,7 @@ function CEditorPage(api) {
         this.TextBoxInput.style.width = _width + "px";
         this.TextBoxInput.style.height = _height + "px";
         var oldZindex = parseInt(this.TextBoxInput.style.zIndex);
-        var newZindex = (oldZindex == 1000) ? "999" : "1000";
+        var newZindex = (oldZindex == 90) ? "89" : "90";
         this.TextBoxInput.style.zIndex = newZindex;
     };
     this.TextBoxOnKeyDown = function (e) {
@@ -2659,8 +2898,32 @@ function CEditorPage(api) {
         this.TextBoxInput.style.zIndex = -1;
         this.TextBoxInput.style.top = "-1000px";
         this.TextBoxInputFocus = false;
-        oThis.m_oLogicDocument.TextBox_Put(oThis.TextBoxInput.value);
-        this.ReinitTB();
+        var _fontSelections = g_fontApplication.g_fontSelections;
+        var _language = _fontSelections.checkText(oThis.TextBoxInput.value);
+        if (_language == LanguagesFontSelectTypes.Unknown) {
+            oThis.m_oLogicDocument.TextBox_Put(oThis.TextBoxInput.value);
+            this.ReinitTB();
+        } else {
+            var _textPr = oThis.m_oLogicDocument.Get_Paragraph_TextPr();
+            var _check_obj = _fontSelections.checkPasteText(_textPr, _language);
+            if (_check_obj.is_async) {
+                var loader = window.g_font_loader;
+                var fontinfo = g_fontApplication.GetFontInfo(_check_obj.name);
+                var isasync = loader.LoadFont(fontinfo);
+                if (false === isasync) {
+                    var _rfonts = _fontSelections.getSetupRFonts(_check_obj);
+                    oThis.m_oLogicDocument.TextBox_Put(oThis.TextBoxInput.value, _rfonts);
+                    this.ReinitTB();
+                } else {
+                    oThis.m_oApi.sync_StartAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.LoadFont);
+                    _check_obj.text = oThis.TextBoxInput.value;
+                    _fontSelections.CurrentLoadedObj = _check_obj;
+                }
+            } else {
+                oThis.m_oLogicDocument.TextBox_Put(oThis.TextBoxInput.value);
+                this.ReinitTB();
+            }
+        }
     };
     this.CheckTextBoxInputPos = function () {
         if (this.TextBoxInput == null || !this.TextBoxInputFocus) {

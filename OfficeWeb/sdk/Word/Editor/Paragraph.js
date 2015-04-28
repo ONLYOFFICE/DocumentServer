@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,9 +29,10 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var type_Paragraph = 1;
+ "use strict";
+var type_Paragraph = 1;
 var UnknownValue = null;
-function Paragraph(DrawingDocument, Parent, PageNum, X, Y, XLimit, YLimit) {
+function Paragraph(DrawingDocument, Parent, PageNum, X, Y, XLimit, YLimit, bFromPresentation) {
     this.Id = g_oIdCounter.Get_NewId();
     this.Prev = null;
     this.Next = null;
@@ -60,41 +61,42 @@ function Paragraph(DrawingDocument, Parent, PageNum, X, Y, XLimit, YLimit) {
     };
     this.TextPr = new ParaTextPr();
     this.TextPr.Parent = this;
-    this.Bounds = new CDocumentBounds(X, Y, X_Right_Field, Y);
+    this.SectPr = undefined;
+    this.Bounds = new CDocumentBounds(X, Y, XLimit, Y);
     this.RecalcInfo = new CParaRecalcInfo();
-    this.Pages = new Array();
-    this.Lines = new Array();
-    this.Content = new Array();
-    this.Content[0] = new ParaEnd();
-    this.Content[1] = new ParaEmpty();
-    this.Numbering = new ParaNumbering();
+    this.Pages = [];
+    this.Lines = [];
+    if (! (bFromPresentation === true)) {
+        this.Numbering = new ParaNumbering();
+    } else {
+        this.Numbering = new ParaPresentationNumbering();
+    }
+    this.ParaEnd = {
+        Line: 0,
+        Range: 0
+    };
     this.CurPos = {
         X: 0,
         Y: 0,
         ContentPos: 0,
         Line: -1,
+        Range: -1,
         RealX: 0,
         RealY: 0,
         PagesPos: 0
     };
-    this.Selection = {
-        Start: false,
-        Use: false,
-        StartPos: 0,
-        EndPos: 0,
-        Flag: selectionflag_Common
-    };
-    this.NeedReDraw = true;
-    this.DrawingDocument = DrawingDocument;
-    this.LogicDocument = editor.WordControl.m_oLogicDocument;
-    this.TurnOffRecalcEvent = false;
+    this.Selection = new CParagraphSelection();
+    this.DrawingDocument = null;
+    this.LogicDocument = null;
+    this.bFromDocument = true;
+    if (undefined !== DrawingDocument && null !== DrawingDocument) {
+        this.DrawingDocument = DrawingDocument;
+        this.LogicDocument = bFromPresentation ? null : this.DrawingDocument.m_oLogicDocument;
+        this.bFromDocument = bFromPresentation === true ? false : !!this.LogicDocument;
+    }
     this.ApplyToAll = false;
     this.Lock = new CLock();
-    if (false === g_oIdCounter.m_bLoad) {
-        this.Lock.Set_Type(locktype_Mine, false);
-        CollaborativeEditing.Add_Unlock2(this);
-    }
-    this.DeleteCollaborativeMarks = true;
+    if (false === g_oIdCounter.m_bLoad) {}
     this.DeleteCommentOnRemove = true;
     this.m_oContentChanges = new CContentChanges();
     this.PresentationPr = {
@@ -105,13 +107,33 @@ function Paragraph(DrawingDocument, Parent, PageNum, X, Y, XLimit, YLimit) {
         Map: {},
         NeedRecalc: true
     };
-    this.SearchResults = new Object();
-    this.SpellChecker = new CParaSpellChecker();
+    this.SearchResults = {};
+    this.SpellChecker = new CParaSpellChecker(this);
+    this.NearPosArray = [];
+    this.Content = [];
+    var EndRun = new ParaRun(this);
+    EndRun.Add_ToContent(0, new ParaEnd());
+    this.Content[0] = EndRun;
+    this.m_oPRSW = new CParagraphRecalculateStateWrap(this);
+    this.m_oPRSC = new CParagraphRecalculateStateCounter();
+    this.m_oPRSA = new CParagraphRecalculateStateAlign();
+    this.m_oPRSI = new CParagraphRecalculateStateInfo();
+    this.m_oPDSE = new CParagraphDrawStateElements();
+    this.StartState = null;
     g_oTableId.Add(this, this.Id);
+    if (bFromPresentation === true) {
+        this.Save_StartState();
+    }
 }
 Paragraph.prototype = {
     GetType: function () {
         return type_Paragraph;
+    },
+    Get_Type: function () {
+        return type_Paragraph;
+    },
+    Save_StartState: function () {
+        this.StartState = new CParagraphStartState(this);
     },
     GetId: function () {
         return this.Id;
@@ -127,7 +149,7 @@ Paragraph.prototype = {
         return this.SetId(newId);
     },
     Use_Wrap: function () {
-        if (undefined != this.Get_FramePr()) {
+        if (true !== this.Is_Inline()) {
             return false;
         }
         return true;
@@ -147,33 +169,101 @@ Paragraph.prototype = {
             New: Pr_new
         });
         this.Pr = oNewPr;
+        this.Recalc_CompiledPr();
     },
-    Copy: function (Parent) {
-        var Para = new Paragraph(this.DrawingDocument, Parent, 0, 0, 0, 0, 0);
+    Copy: function (Parent, DrawingDocument) {
+        var Para = new Paragraph(DrawingDocument ? DrawingDocument : this.DrawingDocument, Parent, 0, 0, 0, 0, 0, !this.bFromDocument);
         Para.Set_Pr(this.Pr.Copy());
-        Para.TextPr.Set_Value(this.TextPr.Value);
+        Para.TextPr.Set_Value(this.TextPr.Value.Copy());
         Para.Internal_Content_Remove2(0, Para.Content.length);
         var Count = this.Content.length;
         for (var Index = 0; Index < Count; Index++) {
             var Item = this.Content[Index];
-            if (true === Item.Is_RealContent()) {
-                Para.Internal_Content_Add(Para.Content.length, Item.Copy(), false);
-            }
+            Para.Internal_Content_Add(Para.Content.length, Item.Copy(false), false);
         }
+        var EndRun = new ParaRun(Para);
+        EndRun.Add_ToContent(0, new ParaEnd());
+        Para.Internal_Content_Add(Para.Content.length, EndRun, false);
+        EndRun.Set_Pr(this.TextPr.Value.Copy());
+        if (undefined !== this.SectPr) {
+            var SectPr = new CSectionPr(this.SectPr.LogicDocument);
+            SectPr.Copy(this.SectPr);
+            Para.Set_SectionPr(SectPr);
+        }
+        Para.Selection_Remove();
+        Para.Cursor_MoveToStartPos(false);
         return Para;
+    },
+    Copy2: function (Parent) {
+        var Para = new Paragraph(this.DrawingDocument, Parent, 0, 0, 0, 0, 0, true);
+        Para.Set_Pr(this.Pr.Copy());
+        Para.TextPr.Set_Value(this.TextPr.Value.Copy());
+        Para.Internal_Content_Remove2(0, Para.Content.length);
+        var Count = this.Content.length;
+        for (var Index = 0; Index < Count; Index++) {
+            var Item = this.Content[Index];
+            Para.Internal_Content_Add(Para.Content.length, Item.Copy2(), false);
+        }
+        Para.Selection_Remove();
+        Para.Cursor_MoveToStartPos(false);
+        return Para;
+    },
+    Get_FirstRunPr: function () {
+        if (this.Content.length <= 0 || para_Run !== this.Content[0].Type) {
+            return this.TextPr.Value.Copy();
+        }
+        return this.Content[0].Pr.Copy();
+    },
+    Get_FirstTextPr: function () {
+        if (this.Content.length <= 0 || para_Run !== this.Content[0].Type) {
+            return this.Get_CompiledPr2(false).TextPr;
+        }
+        return this.Content[0].Get_CompiledPr();
     },
     Get_AllDrawingObjects: function (DrawingObjs) {
         if (undefined === DrawingObjs) {
-            DrawingObjs = new Array();
+            DrawingObjs = [];
         }
         var Count = this.Content.length;
         for (var Pos = 0; Pos < Count; Pos++) {
             var Item = this.Content[Pos];
-            if (para_Drawing === Item.Type) {
-                DrawingObjs.push(Item);
+            if (para_Hyperlink === Item.Type || para_Run === Item.Type) {
+                Item.Get_AllDrawingObjects(DrawingObjs);
             }
         }
         return DrawingObjs;
+    },
+    Get_AllComments: function (List) {
+        if (undefined === List) {
+            List = [];
+        }
+        var Len = this.Content.length;
+        for (var Pos = 0; Pos < Len; Pos++) {
+            var Item = this.Content[Pos];
+            if (para_Comment === Item.Type) {
+                List.push({
+                    Comment: Item,
+                    Paragraph: this
+                });
+            }
+        }
+        return List;
+    },
+    Get_AllMaths: function (List) {
+        if (undefined === List) {
+            List = [];
+        }
+        var Len = this.Content.length;
+        for (var Pos = 0; Pos < Len; Pos++) {
+            var Item = this.Content[Pos];
+            if (para_Math === Item.Type) {
+                List.push({
+                    Math: Item,
+                    Paragraph: this
+                });
+            }
+        }
+        return List;
     },
     Get_AllParagraphs_ByNumbering: function (NumPr, ParaArray) {
         var _NumPr = this.Numbering_Get();
@@ -195,9 +285,15 @@ Paragraph.prototype = {
         var Pr = this.Get_CompiledPr();
         var EndTextPr = Pr.TextPr.Copy();
         EndTextPr.Merge(this.TextPr.Value);
-        g_oTextMeasurer.SetTextPr(EndTextPr);
+        g_oTextMeasurer.SetTextPr(EndTextPr, this.Get_Theme());
         g_oTextMeasurer.SetFontSlot(fontslot_ASCII);
         return g_oTextMeasurer.GetHeight();
+    },
+    Get_Theme: function () {
+        return this.Parent.Get_Theme();
+    },
+    Get_ColorMap: function () {
+        return this.Parent.Get_ColorMap();
     },
     Reset: function (X, Y, XLimit, YLimit, PageNum) {
         this.X = X;
@@ -237,11 +333,6 @@ Paragraph.prototype = {
         if (undefined != NumPr) {
             OtherParagraph.Numbering_Set(NumPr.NumId, NumPr.Lvl);
         }
-        var Bullet = this.Get_PresentationNumbering();
-        if (numbering_presentationnumfrmt_None != Bullet.Get_Type()) {
-            OtherParagraph.Add_PresentationNumbering(Bullet.Copy());
-        }
-        OtherParagraph.Set_PresentationLevel(this.PresentationPr.Level);
         var oOldPr = OtherParagraph.Pr;
         OtherParagraph.Pr = this.Pr.Copy();
         History.Add(OtherParagraph, {
@@ -249,269 +340,220 @@ Paragraph.prototype = {
             Old: oOldPr,
             New: OtherParagraph.Pr
         });
-        OtherParagraph.Style_Add(this.Style_Get(), true);
+        if (this.bFromDocument) {
+            OtherParagraph.Style_Add(this.Style_Get(), true);
+        }
+        OtherParagraph.TextPr.Apply_TextPr(this.TextPr.Value);
     },
     Internal_Content_Add: function (Pos, Item, bCorrectPos) {
-        if (true === Item.Is_RealContent()) {
-            var ClearPos = this.Internal_Get_ClearPos(Pos);
-            History.Add(this, {
-                Type: historyitem_Paragraph_AddItem,
-                Pos: ClearPos,
-                EndPos: ClearPos,
-                Items: [Item]
-            });
-        }
+        History.Add(this, {
+            Type: historyitem_Paragraph_AddItem,
+            Pos: Pos,
+            EndPos: Pos,
+            Items: [Item]
+        });
         this.Content.splice(Pos, 0, Item);
         if (this.CurPos.ContentPos >= Pos) {
-            this.Set_ContentPos(this.CurPos.ContentPos + 1, bCorrectPos);
+            this.CurPos.ContentPos++;
+            if (this.CurPos.ContentPos >= this.Content.length) {
+                this.CurPos.ContentPos = this.Content.length - 1;
+            }
         }
         if (this.Selection.StartPos >= Pos) {
             this.Selection.StartPos++;
+            if (this.Selection.StartPos >= this.Content.length) {
+                this.Selection.StartPos = this.Content.length - 1;
+            }
         }
         if (this.Selection.EndPos >= Pos) {
             this.Selection.EndPos++;
-        }
-        if (this.Numbering.Pos >= Pos) {
-            this.Numbering.Pos++;
-        }
-        var LinesCount = this.Lines.length;
-        for (var CurLine = 0; CurLine < LinesCount; CurLine++) {
-            if (this.Lines[CurLine].StartPos > Pos) {
-                this.Lines[CurLine].StartPos++;
-            }
-            if (this.Lines[CurLine].EndPos + 1 > Pos) {
-                this.Lines[CurLine].EndPos++;
-            }
-            var RangesCount = this.Lines[CurLine].Ranges.length;
-            for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
-                if (this.Lines[CurLine].Ranges[CurRange].StartPos > Pos) {
-                    this.Lines[CurLine].Ranges[CurRange].StartPos++;
-                }
+            if (this.Selection.EndPos >= this.Content.length) {
+                this.Selection.EndPos = this.Content.length - 1;
             }
         }
-        for (var CurSearch in this.SearchResults) {
-            if (this.SearchResults[CurSearch].StartPos >= Pos) {
-                this.SearchResults[CurSearch].StartPos++;
+        var NearPosLen = this.NearPosArray.length;
+        for (var Index = 0; Index < NearPosLen; Index++) {
+            var ParaNearPos = this.NearPosArray[Index];
+            var ParaContentPos = ParaNearPos.NearPos.ContentPos;
+            if (ParaContentPos.Data[0] >= Pos) {
+                ParaContentPos.Data[0]++;
             }
-            if (this.SearchResults[CurSearch].EndPos >= Pos) {
-                this.SearchResults[CurSearch].EndPos++;
+        }
+        for (var Id in this.SearchResults) {
+            var ContentPos = this.SearchResults[Id].StartPos;
+            if (ContentPos.Data[0] >= Pos) {
+                ContentPos.Data[0]++;
+            }
+            ContentPos = this.SearchResults[Id].EndPos;
+            if (ContentPos.Data[0] >= Pos) {
+                ContentPos.Data[0]++;
+            }
+        }
+        var SpellingsCount = this.SpellChecker.Elements.length;
+        for (var Pos = 0; Pos < SpellingsCount; Pos++) {
+            var Element = this.SpellChecker.Elements[Pos];
+            var ContentPos = Element.StartPos;
+            if (ContentPos.Data[0] >= Pos) {
+                ContentPos.Data[0]++;
+            }
+            ContentPos = Element.EndPos;
+            if (ContentPos.Data[0] >= Pos) {
+                ContentPos.Data[0]++;
             }
         }
         this.SpellChecker.Update_OnAdd(this, Pos, Item);
+        Item.Set_Paragraph(this);
     },
-    Internal_Content_Add2: function (Pos, Item, bCorrectPos) {
-        if (true === Item.Is_RealContent()) {
-            var ClearPos = this.Internal_Get_ClearPos(Pos);
-            History.Add(this, {
-                Type: historyitem_Paragraph_AddItem,
-                Pos: ClearPos,
-                EndPos: ClearPos,
-                Items: [Item]
-            });
-        }
-        this.Content.splice(Pos, 0, Item);
-        for (var CurSearch in this.SearchResults) {
-            if (this.SearchResults[CurSearch].StartPos >= Pos) {
-                this.SearchResults[CurSearch].StartPos++;
-            }
-            if (this.SearchResults[CurSearch].EndPos >= Pos) {
-                this.SearchResults[CurSearch].EndPos++;
-            }
-        }
+    Add_ToContent: function (Pos, Item) {
+        this.Internal_Content_Add(Pos, Item);
+    },
+    Remove_FromContent: function (Pos, Count) {
+        this.Internal_Content_Remove2(Pos, Count);
     },
     Internal_Content_Concat: function (Items) {
-        var NewItems = new Array();
-        var ItemsCount = Items.length;
-        for (var Index = 0; Index < ItemsCount; Index++) {
-            if (true === Items[Index].Is_RealContent()) {
-                NewItems.push(Items[Index]);
-            }
-        }
-        if (NewItems.length <= 0) {
-            return;
-        }
         var StartPos = this.Content.length;
-        this.Content = this.Content.concat(NewItems);
+        this.Content = this.Content.concat(Items);
         History.Add(this, {
             Type: historyitem_Paragraph_AddItem,
-            Pos: this.Internal_Get_ClearPos(StartPos),
-            EndPos: this.Internal_Get_ClearPos(this.Content.length - 1),
-            Items: NewItems
+            Pos: StartPos,
+            EndPos: this.Content.length - 1,
+            Items: Items
         });
+        for (var CurPos = StartPos; CurPos < this.Content.length; CurPos++) {
+            this.Content[CurPos].Set_Paragraph(this);
+            if (this.Content[CurPos].Recalc_RunsCompiledPr) {
+                this.Content[CurPos].Recalc_RunsCompiledPr();
+            }
+        }
         this.RecalcInfo.Set_Type_0_Spell(pararecalc_0_Spell_All);
     },
-    Internal_Content_Remove: function (Pos, bCorrectPos) {
+    Internal_Content_Remove: function (Pos) {
         var Item = this.Content[Pos];
-        if (true === Item.Is_RealContent()) {
-            var ClearPos = this.Internal_Get_ClearPos(Pos);
-            History.Add(this, {
-                Type: historyitem_Paragraph_RemoveItem,
-                Pos: ClearPos,
-                EndPos: ClearPos,
-                Items: [Item]
-            });
-        }
-        if (this.Selection.StartPos <= this.Selection.EndPos) {
-            if (this.Selection.StartPos > Pos) {
-                this.Selection.StartPos--;
-            }
-            if (this.Selection.EndPos > Pos) {
-                this.Selection.EndPos--;
-            }
-        } else {
-            if (this.Selection.StartPos > Pos) {
-                this.Selection.StartPos--;
-            }
-            if (this.Selection.EndPos > Pos) {
-                this.Selection.EndPos--;
-            }
-        }
-        if (this.Numbering.Pos > Pos) {
-            this.Numbering.Pos--;
-        }
-        var LinesCount = this.Lines.length;
-        for (var CurLine = 0; CurLine < LinesCount; CurLine++) {
-            if (this.Lines[CurLine].StartPos > Pos) {
-                this.Lines[CurLine].StartPos--;
-            }
-            if (this.Lines[CurLine].EndPos >= Pos) {
-                this.Lines[CurLine].EndPos--;
-            }
-            var RangesCount = this.Lines[CurLine].Ranges.length;
-            for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
-                if (this.Lines[CurLine].Ranges[CurRange].StartPos > Pos) {
-                    this.Lines[CurLine].Ranges[CurRange].StartPos--;
-                }
-            }
-        }
-        for (var CurSearch in this.SearchResults) {
-            if (this.SearchResults[CurSearch].StartPos > Pos) {
-                this.SearchResults[CurSearch].StartPos--;
-            }
-            if (this.SearchResults[CurSearch].EndPos > Pos) {
-                this.SearchResults[CurSearch].EndPos--;
-            }
-        }
+        History.Add(this, {
+            Type: historyitem_Paragraph_RemoveItem,
+            Pos: Pos,
+            EndPos: Pos,
+            Items: [Item]
+        });
         this.Content.splice(Pos, 1);
-        if (this.CurPos.ContentPos > Pos) {
-            this.Set_ContentPos(this.CurPos.ContentPos - 1, bCorrectPos);
-        }
-        if (true === this.DeleteCommentOnRemove && (para_CommentStart === Item.Type || para_CommentEnd === Item.Type)) {
-            if (para_CommentStart === Item.Type) {
-                editor.WordControl.m_oLogicDocument.Comments.Set_StartInfo(Item.Id, 0, 0, 0, 0, null);
-            } else {
-                editor.WordControl.m_oLogicDocument.Comments.Set_EndInfo(Item.Id, 0, 0, 0, 0, null);
+        if (this.Selection.StartPos > Pos) {
+            this.Selection.StartPos--;
+            if (this.Selection.StartPos < 0) {
+                this.Selection.StartPos = 0;
             }
-            editor.WordControl.m_oLogicDocument.Remove_Comment(Item.Id, true);
+        }
+        if (this.Selection.EndPos >= Pos) {
+            this.Selection.EndPos--;
+            if (this.Selection.EndPos < 0) {
+                this.Selection.EndPos = 0;
+            }
+        }
+        if (this.CurPos.ContentPos > Pos) {
+            this.CurPos.ContentPos--;
+            if (this.CurPos.ContentPos < 0) {
+                this.CurPos.ContentPos = 0;
+            }
+        }
+        var NearPosLen = this.NearPosArray.length;
+        for (var Index = 0; Index < NearPosLen; Index++) {
+            var ParaNearPos = this.NearPosArray[Index];
+            var ParaContentPos = ParaNearPos.NearPos.ContentPos;
+            if (ParaContentPos.Data[0] > Pos) {
+                ParaContentPos.Data[0]--;
+            }
+        }
+        for (var Id in this.SearchResults) {
+            var ContentPos = this.SearchResults[Id].StartPos;
+            if (ContentPos.Data[0] > Pos) {
+                ContentPos.Data[0]--;
+            }
+            ContentPos = this.SearchResults[Id].EndPos;
+            if (ContentPos.Data[0] > Pos) {
+                ContentPos.Data[0]--;
+            }
+        }
+        if (true === this.DeleteCommentOnRemove && para_Comment === Item.Type) {
+            this.LogicDocument.Remove_Comment(Item.CommentId, true, false);
+        }
+        var SpellingsCount = this.SpellChecker.Elements.length;
+        for (var Pos = 0; Pos < SpellingsCount; Pos++) {
+            var Element = this.SpellChecker.Elements[Pos];
+            var ContentPos = Element.StartPos;
+            if (ContentPos.Data[0] > Pos) {
+                ContentPos.Data[0]--;
+            }
+            ContentPos = Element.EndPos;
+            if (ContentPos.Data[0] > Pos) {
+                ContentPos.Data[0]--;
+            }
         }
         this.SpellChecker.Update_OnRemove(this, Pos, 1);
     },
     Internal_Content_Remove2: function (Pos, Count) {
-        var DocumentComments = editor.WordControl.m_oLogicDocument.Comments;
-        var CommentsToDelete = new Object();
-        for (var Index = Pos; Index < Pos + Count; Index++) {
-            var ItemType = this.Content[Index].Type;
-            if (true === this.DeleteCommentOnRemove && (para_CommentStart === ItemType || para_CommentEnd === ItemType)) {
-                if (para_CommentStart === ItemType) {
-                    DocumentComments.Set_StartInfo(this.Content[Index].Id, 0, 0, 0, 0, null);
-                } else {
-                    DocumentComments.Set_EndInfo(this.Content[Index].Id, 0, 0, 0, 0, null);
+        var CommentsToDelete = [];
+        if (true === this.DeleteCommentOnRemove && null !== this.LogicDocument) {
+            var DocumentComments = this.LogicDocument.Comments;
+            for (var Index = Pos; Index < Pos + Count; Index++) {
+                var Item = this.Content[Index];
+                if (para_Comment === Item.Type) {
+                    var CommentId = Item.CommentId;
+                    var Comment = DocumentComments.Get_ById(CommentId);
+                    if (null != Comment) {
+                        if (true === Item.Start) {
+                            Comment.Set_StartId(null);
+                        } else {
+                            Comment.Set_EndId(null);
+                        }
+                    }
+                    CommentsToDelete.push(CommentId);
                 }
-                CommentsToDelete[this.Content[Index].Id] = 1;
             }
         }
-        var LastArray = this.Content.slice(Pos, Pos + Count);
-        var LastItems = new Array();
-        var ItemsCount = LastArray.length;
-        for (var Index = 0; Index < ItemsCount; Index++) {
-            if (true === LastArray[Index].Is_RealContent()) {
-                LastItems.push(LastArray[Index]);
-            }
-        }
+        var DeletedItems = this.Content.slice(Pos, Pos + Count);
         History.Add(this, {
             Type: historyitem_Paragraph_RemoveItem,
-            Pos: this.Internal_Get_ClearPos(Pos),
-            EndPos: this.Internal_Get_ClearPos(Pos + Count - 1),
-            Items: LastItems
+            Pos: Pos,
+            EndPos: Pos + Count - 1,
+            Items: DeletedItems
         });
-        if (this.CurPos.ContentPos > Pos) {
-            if (this.CurPos.ContentPos > Pos + Count) {
-                this.Set_ContentPos(this.CurPos.ContentPos - Count, true, -1);
-            } else {
-                this.Set_ContentPos(Pos, true, -1);
-            }
-        }
-        if (this.Selection.StartPos <= this.Selection.EndPos) {
-            if (this.Selection.StartPos > Pos) {
-                if (this.Selection.StartPos > Pos + Count) {
-                    this.Selection.StartPos -= Count;
-                } else {
-                    this.Selection.StartPos = Pos;
-                }
-            }
-            if (this.Selection.EndPos > Pos) {
-                if (this.Selection.EndPos >= Pos + Count) {
-                    this.Selection.EndPos -= Count;
-                } else {
-                    this.Selection.EndPos = Math.max(0, Pos - 1);
-                }
-            }
+        if (this.Selection.StartPos > Pos + Count) {
+            this.Selection.StartPos -= Count;
         } else {
             if (this.Selection.StartPos > Pos) {
-                if (this.Selection.StartPos >= Pos + Count) {
-                    this.Selection.StartPos -= Count;
-                } else {
-                    this.Selection.StartPos = Math.max(0, Pos - 1);
-                }
-            }
-            if (this.Selection.EndPos > Pos) {
-                if (this.Selection.EndPos > Pos + Count) {
-                    this.Selection.EndPos -= Count;
-                } else {
-                    this.Selection.EndPos = Pos;
-                }
+                this.Selection.StartPos = Pos;
             }
         }
-        var LinesCount = this.Lines.length;
-        for (var CurLine = 0; CurLine < LinesCount; CurLine++) {
-            if (this.Lines[CurLine].StartPos > Pos) {
-                if (this.Lines[CurLine].StartPos > Pos + Count) {
-                    this.Lines[CurLine].StartPos -= Count;
-                } else {
-                    this.Lines[CurLine].StartPos = Math.max(0, Pos);
-                }
+        if (this.Selection.EndPos > Pos + Count) {
+            this.Selection.EndPos -= Count;
+        }
+        if (this.Selection.EndPos > Pos) {
+            this.Selection.EndPos = Pos;
+        }
+        if (this.CurPos.ContentPos > Pos + Count) {
+            this.CurPos.ContentPos -= Count;
+        } else {
+            if (this.CurPos.ContentPos > Pos) {
+                this.CurPos.ContentPos = Pos;
             }
-            if (this.Lines[CurLine].EndPos >= Pos) {
-                if (this.Lines[CurLine].EndPos >= Pos + Count) {
-                    this.Lines[CurLine].EndPos -= Count;
-                } else {
-                    this.Lines[CurLine].EndPos = Math.max(0, Pos);
-                }
-            }
-            var RangesCount = this.Lines[CurLine].Ranges.length;
-            for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
-                if (this.Lines[CurLine].Ranges[CurRange].StartPos > Pos) {
-                    if (this.Lines[CurLine].Ranges[CurRange].StartPos > Pos + Count) {
-                        this.Lines[CurLine].Ranges[CurRange].StartPos -= Count;
-                    } else {
-                        this.Lines[CurLine].Ranges[CurRange].StartPos = Math.max(0, Pos);
-                    }
+        }
+        var NearPosLen = this.NearPosArray.length;
+        for (var Index = 0; Index < NearPosLen; Index++) {
+            var ParaNearPos = this.NearPosArray[Index];
+            var ParaContentPos = ParaNearPos.NearPos.ContentPos;
+            if (ParaContentPos.Data[0] > Pos + Count) {
+                ParaContentPos.Data[0] -= Count;
+            } else {
+                if (ParaContentPos.Data[0] > Pos) {
+                    ParaContentPos.Data[0] = Math.max(0, Pos);
                 }
             }
         }
         this.Content.splice(Pos, Count);
-        for (var Id in CommentsToDelete) {
-            editor.WordControl.m_oLogicDocument.Remove_Comment(Id, true);
+        var CountCommentsToDelete = CommentsToDelete.length;
+        for (var Index = 0; Index < CountCommentsToDelete; Index++) {
+            this.LogicDocument.Remove_Comment(CommentsToDelete[Index], true, false);
         }
         this.SpellChecker.Update_OnRemove(this, Pos, Count);
-    },
-    Internal_Check_EmptyHyperlink: function (Pos) {
-        var Start = this.Internal_FindBackward(Pos, [para_Text, para_Drawing, para_Space, para_Tab, para_PageNum, para_HyperlinkStart]);
-        var End = this.Internal_FindForward(Pos, [para_Text, para_Drawing, para_Space, para_Tab, para_PageNum, para_HyperlinkEnd, para_End]);
-        if (true === Start.Found && para_HyperlinkStart === Start.Type && true === End.Found && para_HyperlinkEnd === End.Type) {
-            this.Internal_Content_Remove(End.LetterPos);
-            this.Internal_Content_Remove(Start.LetterPos);
-        }
     },
     Clear_ContentChanges: function () {
         this.m_oContentChanges.Clear();
@@ -522,1762 +564,165 @@ Paragraph.prototype = {
     Refresh_ContentChanges: function () {
         this.m_oContentChanges.Refresh();
     },
-    Internal_Get_ParaPos_By_Pos: function (ContentPos) {
-        var _ContentPos = Math.max(0, Math.min(ContentPos, this.Content.length - 1));
-        while (undefined === this.Content[_ContentPos].CurPage) {
-            _ContentPos--;
-            if (_ContentPos < 0) {
-                return new CParaPos(0, 0, 0, 0);
+    Get_CurrentParaPos: function () {
+        var ParaPos = this.Content[this.CurPos.ContentPos].Get_CurrentParaPos();
+        if (-1 !== this.CurPos.Line) {
+            ParaPos.Line = this.CurPos.Line;
+            ParaPos.Range = this.CurPos.Range;
+        }
+        ParaPos.Page = this.Get_PageByLine(ParaPos.Line);
+        return ParaPos;
+    },
+    Get_PageByLine: function (LineIndex) {
+        for (var CurPage = this.Pages.length - 1; CurPage >= 0; CurPage--) {
+            var Page = this.Pages[CurPage];
+            if (LineIndex >= Page.StartLine && LineIndex <= Page.EndLine) {
+                return CurPage;
             }
         }
-        if (_ContentPos === this.CurPos.ContentPos && -1 != this.CurPos.Line) {
-            return new CParaPos(this.Content[_ContentPos].CurRange, this.CurPos.Line, this.Content[_ContentPos].CurPage, ContentPos);
+        return 0;
+    },
+    Get_ParaPosByContentPos: function (ContentPos) {
+        var ParaPos = this.Content[ContentPos.Get(0)].Get_ParaPosByContentPos(ContentPos, 1);
+        var CurLine = ParaPos.Line;
+        var PagesCount = this.Pages.length;
+        for (var CurPage = PagesCount - 1; CurPage >= 0; CurPage--) {
+            var Page = this.Pages[CurPage];
+            if (CurLine >= Page.StartLine && CurLine <= Page.EndLine) {
+                ParaPos.Page = CurPage;
+                return ParaPos;
+            }
         }
-        return new CParaPos(this.Content[_ContentPos].CurRange, this.Content[_ContentPos].CurLine, this.Content[_ContentPos].CurPage, ContentPos);
+        return ParaPos;
     },
-    Internal_Get_ParaPos_By_Page: function (Page) {
-        var CurPage = Page;
-        var CurLine = this.Pages[CurPage].StartLine;
-        var CurRange = 0;
-        var CurPos = this.Lines[CurLine].StartPos;
-        return new CParaPos(CurRange, CurLine, CurPage, CurPos);
-    },
-    Internal_Update_ParaPos: function (CurPage, CurLine, CurRange, CurPos) {
-        var _CurPage = CurPage;
-        var _CurLine = CurLine;
-        var _CurRange = CurRange;
-        while (_CurPage < this.Pages.length - 1) {
-            if (this.Lines[this.Pages[_CurPage + 1].StartLine].StartPos <= CurPos) {
-                _CurPage++;
-                _CurLine = this.Pages[_CurPage].StartLine;
-                _CurRange = 0;
-            } else {
+    Check_Range_OnlyMath: function (CurRange, CurLine) {
+        var StartPos = this.Lines[CurLine].Ranges[CurRange].StartPos;
+        var EndPos = this.Lines[CurLine].Ranges[CurRange].EndPos;
+        var Checker = new CParagraphMathRangeChecker();
+        for (var Pos = StartPos; Pos <= EndPos; Pos++) {
+            this.Content[Pos].Check_Range_OnlyMath(Checker, CurRange, CurLine);
+            if (false === Checker.Result) {
                 break;
             }
         }
-        while (_CurLine < this.Lines.length - 1) {
-            if (this.Lines[_CurLine + 1].StartPos <= CurPos) {
-                _CurLine++;
-                _CurRange = 0;
-            } else {
-                break;
-            }
+        if (true !== Checker.Result || null === Checker.Math || true === Checker.Math.Get_Inline()) {
+            return null;
         }
-        while (_CurRange < this.Lines[_CurLine].Ranges.length - 1) {
-            if (this.Lines[_CurLine].Ranges[_CurRange + 1].StartPos <= CurPos) {
-                _CurRange++;
-            } else {
-                break;
-            }
-        }
-        return new CParaPos(_CurRange, _CurLine, _CurPage, CurPos);
+        return Checker.Math;
     },
-    Internal_Recalculate_0: function () {
-        if (pararecalc_0_None === this.RecalcInfo.Recalc_0_Type) {
-            return;
+    Check_MathPara: function (MathPos) {
+        if (undefined === this.Content[MathPos] || para_Math !== this.Content[MathPos].Type) {
+            return false;
         }
-        var Pr = this.Get_CompiledPr();
-        var ParaPr = Pr.ParaPr;
-        var CurTextPr = Pr.TextPr;
-        g_oTextMeasurer.SetTextPr(CurTextPr);
-        var TextAscent = 0;
-        var TextHeight = 0;
-        var TextDescent = 0;
-        g_oTextMeasurer.SetFontSlot(fontslot_ASCII);
-        TextHeight = g_oTextMeasurer.GetHeight();
-        TextDescent = Math.abs(g_oTextMeasurer.GetDescender());
-        TextAscent = TextHeight - TextDescent;
-        TextAscent2 = g_oTextMeasurer.GetAscender();
-        var ContentLength = this.Content.length;
-        if (para_PresentationNumbering === this.Numbering.Type) {
-            var Item = this.Numbering;
-            var Level = this.PresentationPr.Level;
-            var Bullet = this.PresentationPr.Bullet;
-            var BulletNum = 0;
-            if (Bullet.Get_Type() >= numbering_presentationnumfrmt_ArabicPeriod) {
-                var Prev = this.Prev;
-                while (null != Prev && type_Paragraph === Prev.GetType()) {
-                    var PrevLevel = Prev.PresentationPr.Level;
-                    var PrevBullet = Prev.Get_PresentationNumbering();
-                    if (Level < PrevLevel) {
-                        Prev = Prev.Prev;
-                        continue;
-                    } else {
-                        if (Level > PrevLevel) {
-                            break;
-                        } else {
-                            if (PrevBullet.Get_Type() === Bullet.Get_Type() && PrevBullet.Get_StartAt() === PrevBullet.Get_StartAt()) {
-                                if (true != Prev.IsEmpty()) {
-                                    BulletNum++;
-                                }
-                                Prev = Prev.Prev;
-                            } else {
-                                break;
-                            }
-                        }
-                    }
+        var MathParaChecker = new CParagraphMathParaChecker();
+        MathParaChecker.Direction = -1;
+        for (var CurPos = MathPos - 1; CurPos >= 0; CurPos--) {
+            if (this.Content[CurPos].Check_MathPara) {
+                this.Content[CurPos].Check_MathPara(MathParaChecker);
+                if (false !== MathParaChecker.Found) {
+                    break;
                 }
             }
-            var FirstTextPr = this.Internal_CalculateTextPr(this.Internal_GetStartPos());
-            Item.Bullet = Bullet;
-            Item.BulletNum = BulletNum + 1;
-            Item.Measure(g_oTextMeasurer, FirstTextPr);
         }
-        for (var Pos = 0; Pos < ContentLength; Pos++) {
-            var Item = this.Content[Pos];
-            switch (Item.Type) {
-            case para_Text:
-                case para_Space:
-                case para_PageNum:
-                Item.Measure(g_oTextMeasurer, CurTextPr);
-                break;
-            case para_Drawing:
-                Item.Parent = this;
-                Item.DocumentContent = this.Parent;
-                Item.DrawingDocument = this.Parent.DrawingDocument;
-                Item.Measure(g_oTextMeasurer, CurTextPr);
-                break;
-            case para_Tab:
-                case para_NewLine:
-                Item.Measure(g_oTextMeasurer);
-                break;
-            case para_TextPr:
-                Item.Parent = this;
-                CurTextPr = this.Internal_CalculateTextPr(Pos);
-                Item.CalcValue = CurTextPr;
-                g_oTextMeasurer.SetTextPr(CurTextPr);
-                g_oTextMeasurer.SetFontSlot(fontslot_ASCII);
-                TextDescent = Math.abs(g_oTextMeasurer.GetDescender());
-                TextHeight = g_oTextMeasurer.GetHeight();
-                TextAscent = TextHeight - TextDescent;
-                TextAscent2 = g_oTextMeasurer.GetAscender();
-                break;
-            case para_End:
-                var bEndCell = false;
-                if (null === this.Get_DocumentNext() && true === this.Parent.Is_TableCellContent()) {
-                    bEndCell = true;
+        if (true !== MathParaChecker.Found && undefined !== this.Numbering_Get()) {
+            return false;
+        }
+        if (true !== MathParaChecker.Result) {
+            return false;
+        }
+        MathParaChecker.Direction = 1;
+        MathParaChecker.Found = false;
+        var Count = this.Content.length;
+        for (var CurPos = MathPos + 1; CurPos < Count; CurPos++) {
+            if (this.Content[CurPos].Check_MathPara) {
+                this.Content[CurPos].Check_MathPara(MathParaChecker);
+                if (false !== MathParaChecker.Found) {
+                    break;
                 }
-                var EndTextPr = this.Get_CompiledPr2(false).TextPr.Copy();
-                EndTextPr.Merge(this.TextPr.Value);
-                Item.TextPr = EndTextPr;
-                g_oTextMeasurer.SetTextPr(EndTextPr);
-                Item.Measure(g_oTextMeasurer, bEndCell);
-                TextDescent = Math.abs(g_oTextMeasurer.GetDescender());
-                TextHeight = g_oTextMeasurer.GetHeight();
-                TextAscent = TextHeight - TextDescent;
-                TextAscent2 = g_oTextMeasurer.GetAscender();
-                g_oTextMeasurer.SetTextPr(CurTextPr);
-                break;
             }
-            Item.TextAscent = TextAscent;
-            Item.TextDescent = TextDescent;
-            Item.TextHeight = TextHeight;
-            Item.TextAscent2 = TextAscent2;
-            Item.YOffset = CurTextPr.Position;
         }
-        this.RecalcInfo.Set_Type_0(pararecalc_0_None);
+        if (true !== MathParaChecker.Result) {
+            return false;
+        }
+        return true;
     },
-    Internal_Recalculate_1_: function (StartPos, CurPage, _CurLine) {
-        var Pr = this.Get_CompiledPr();
-        var ParaPr = Pr.ParaPr;
-        var CurLine = _CurLine;
-        var X, Y, XLimit, YLimit, _X, _XLimit;
-        if (0 === CurPage || (undefined != this.Get_FramePr() && this.Parent instanceof CDocument)) {
-            X = this.X + ParaPr.Ind.Left + ParaPr.Ind.FirstLine;
-            Y = this.Y;
-            XLimit = this.XLimit - ParaPr.Ind.Right;
-            YLimit = this.YLimit;
-            _X = this.X;
-            _XLimit = this.XLimit;
+    Get_EndInfo: function () {
+        var PagesCount = this.Pages.length;
+        if (PagesCount > 0) {
+            return this.Pages[PagesCount - 1].EndInfo.Copy();
         } else {
-            var PageStart = this.Parent.Get_PageContentStartPos(this.PageNum + CurPage);
-            X = (0 != CurLine ? PageStart.X + ParaPr.Ind.Left : PageStart.X + ParaPr.Ind.Left + ParaPr.Ind.FirstLine);
-            Y = PageStart.Y;
-            XLimit = PageStart.XLimit - ParaPr.Ind.Right;
-            YLimit = PageStart.YLimit;
-            _X = PageStart.X;
-            _XLimit = PageStart.XLimit;
+            return null;
         }
-        this.Pages.length = CurPage + 1;
-        this.Pages[CurPage] = new CParaPage(_X, Y, _XLimit, YLimit, CurLine);
-        this.Pages[CurPage].TextPr = this.Internal_CalculateTextPr(StartPos, Pr);
-        var LineStart_Pos = StartPos;
-        if (0 === CurPage) {
-            if (ParaPr.Ind.FirstLine <= 0) {
-                this.Bounds.Left = X;
-            } else {
-                this.Bounds.Left = this.X + ParaPr.Ind.Left;
-            }
-            this.Bounds.Right = XLimit;
-        }
-        var bFirstItemOnLine = true;
-        var bEmptyLine = true;
-        var bStartWord = false;
-        var bWord = false;
-        var nWordStartPos = 0;
-        var nWordLen = 0;
-        var nSpaceLen = 0;
-        var nSpacesCount = 0;
-        var pLastTab = {
-            TabPos: 0,
-            X: 0,
-            Value: -1,
-            Item: null
-        };
-        var bNewLine = false;
-        var bNewRange = false;
-        var bNewPage = false;
-        var bExtendBoundToBottom = false;
-        var bEnd = false;
-        var bForceNewPage = false;
-        var bBreakPageLine = false;
-        if (CurPage > 1) {
-            bAddNumbering = false;
-        } else {
-            if (0 === CurPage) {
-                bAddNumbering = true;
-            } else {
-                for (var Pos = 0; Pos < StartPos; Pos++) {
-                    var Item = this.Content[Pos];
-                    if (true === Item.Can_AddNumbering()) {
-                        bAddNumbering = false;
-                    }
-                }
-            }
-        }
-        var Ranges = [];
-        var RangesCount = Ranges.length;
-        var TextAscent = 0;
-        var TextDescent = 0;
-        var TextAscent2 = 0;
-        this.Lines.length = CurLine + 1;
-        this.Lines[CurLine] = new CParaLine(StartPos);
-        var LineTextAscent = 0;
-        var LineTextDescent = 0;
-        var LineTextAscent2 = 0;
-        var LineAscent = 0;
-        var LineDescent = 0;
-        this.Lines[CurLine].Add_Range(X, (RangesCount == 0 ? XLimit : Ranges[0].X0));
-        this.Lines[CurLine].Set_RangeStartPos(0, StartPos);
-        for (var Index = 1; Index < Ranges.length + 1; Index++) {
-            this.Lines[CurLine].Add_Range(Ranges[Index - 1].X1, (Index == RangesCount ? XLimit : Ranges[Index].X0));
-        }
-        var CurRange = 0;
-        var XEnd = 0;
-        if (RangesCount == 0) {
-            XEnd = XLimit;
-        } else {
-            XEnd = Ranges[0].X0;
-        }
-        if (this.Parent instanceof CDocument) {
-            if (0 === CurPage && true === ParaPr.PageBreakBefore) {
-                var Prev = this.Get_DocumentPrev();
-                if (null != Prev) {
-                    this.Pages[CurPage].Set_EndLine(CurLine - 1);
-                    if (0 === CurLine) {
-                        this.Lines[-1] = new CParaLine(0);
-                        this.Lines[-1].Set_EndPos(StartPos - 1, this);
-                    }
-                    return recalcresult_NextPage;
-                }
-            } else {
-                if (true === this.Parent.RecalcInfo.Check_WidowControl(this, CurLine)) {
-                    this.Parent.RecalcInfo.Reset_WidowControl();
-                    this.Pages[CurPage].Set_EndLine(CurLine - 1);
-                    if (0 === CurLine) {
-                        this.Lines[-1] = new CParaLine(0);
-                        this.Lines[-1].Set_EndPos(LineStart_Pos - 1, this);
-                    }
-                    return recalcresult_NextPage;
-                } else {
-                    if (true === this.Parent.RecalcInfo.Check_KeepNext(this) && 0 === CurPage && null != this.Get_DocumentPrev()) {
-                        this.Parent.RecalcInfo.Reset();
-                        this.Pages[CurPage].Set_EndLine(CurLine - 1);
-                        if (0 === CurLine) {
-                            this.Lines[-1] = new CParaLine(0);
-                            this.Lines[-1].Set_EndPos(LineStart_Pos - 1, this);
-                        }
-                        return recalcresult_NextPage;
-                    }
-                }
-            }
-        }
-        var RecalcResult = recalcresult_NextElement;
-        var bAddNumbering = this.Internal_CheckAddNumbering(CurPage, CurLine, CurRange);
-        for (var Pos = LineStart_Pos; Pos < this.Content.length; Pos++) {
-            if (false === bStartWord && true === bFirstItemOnLine && Math.abs(XEnd - X) < 0.001 && RangesCount > 0) {
-                if (RangesCount == CurRange) {
-                    Pos--;
-                    bNewLine = true;
-                } else {
-                    Pos--;
-                    bNewRange = true;
-                }
-            }
-            if (true != bNewLine && true != bNewRange) {
-                var Item = this.Content[Pos];
-                Item.Parent = this;
-                Item.DocumentContent = this.Parent;
-                Item.DrawingDocument = this.Parent.DrawingDocument;
-                if (undefined != Item.TextAscent) {
-                    TextAscent = Item.TextAscent;
-                }
-                if (undefined != Item.TextAscent2) {
-                    TextAscent2 = Item.TextAscent2;
-                }
-                if (undefined != Item.TextDescent) {
-                    TextDescent = Item.TextDescent;
-                }
-                Item.CurPage = CurPage;
-                Item.CurLine = CurLine;
-                Item.CurRange = CurRange;
-                var bBreak = false;
-                if (true === bAddNumbering) {
-                    if (true === Item.Can_AddNumbering()) {
-                        var NumberingItem = this.Numbering;
-                        var NumberingType = this.Numbering.Type;
-                        if (para_Numbering === NumberingType) {
-                            var NumPr = ParaPr.NumPr;
-                            if (undefined === NumPr || undefined === NumPr.NumId || 0 === NumPr.NumId || "0" === NumPr.NumId) {
-                                NumberingItem.Measure(g_oTextMeasurer, undefined);
-                            } else {
-                                var Numbering = this.Parent.Get_Numbering();
-                                var NumLvl = Numbering.Get_AbstractNum(NumPr.NumId).Lvl[NumPr.Lvl];
-                                var NumSuff = NumLvl.Suff;
-                                var NumJc = NumLvl.Jc;
-                                var NumInfo = this.Parent.Internal_GetNumInfo(this.Id, NumPr);
-                                var NumTextPr = this.Get_CompiledPr2(false).TextPr.Copy();
-                                NumTextPr.Merge(this.TextPr.Value);
-                                NumTextPr.Merge(NumLvl.TextPr);
-                                NumberingItem.Measure(g_oTextMeasurer, Numbering, NumInfo, NumTextPr, NumPr);
-                                if (LineAscent < NumberingItem.Height) {
-                                    LineAscent = NumberingItem.Height;
-                                }
-                                switch (NumJc) {
-                                case align_Right:
-                                    NumberingItem.WidthVisible = 0;
-                                    break;
-                                case align_Center:
-                                    NumberingItem.WidthVisible = NumberingItem.WidthNum / 2;
-                                    X += NumberingItem.WidthNum / 2;
-                                    break;
-                                case align_Left:
-                                    default:
-                                    NumberingItem.WidthVisible = NumberingItem.WidthNum;
-                                    X += NumberingItem.WidthNum;
-                                    break;
-                                }
-                                switch (NumSuff) {
-                                case numbering_suff_Nothing:
-                                    break;
-                                case numbering_suff_Space:
-                                    var OldTextPr = g_oTextMeasurer.GetTextPr();
-                                    g_oTextMeasurer.SetTextPr(NumTextPr);
-                                    g_oTextMeasurer.SetFontSlot(fontslot_ASCII);
-                                    NumberingItem.WidthSuff = g_oTextMeasurer.Measure(" ").Width;
-                                    g_oTextMeasurer.SetTextPr(OldTextPr);
-                                    break;
-                                case numbering_suff_Tab:
-                                    var NewX = null;
-                                    var PageStart = this.Parent.Get_PageContentStartPos(this.PageNum + CurPage);
-                                    var TabsCount = ParaPr.Tabs.Get_Count();
-                                    var TabsPos = new Array();
-                                    var bCheckLeft = true;
-                                    for (var Index = 0; Index < TabsCount; Index++) {
-                                        var Tab = ParaPr.Tabs.Get(Index);
-                                        var TabPos = Tab.Pos + PageStart.X;
-                                        if (true === bCheckLeft && TabPos > PageStart.X + ParaPr.Ind.Left) {
-                                            TabsPos.push(PageStart.X + ParaPr.Ind.Left);
-                                            bCheckLeft = false;
-                                        }
-                                        if (tab_Clear != Tab.Value) {
-                                            TabsPos.push(TabPos);
-                                        }
-                                    }
-                                    if (true === bCheckLeft) {
-                                        TabsPos.push(PageStart.X + ParaPr.Ind.Left);
-                                    }
-                                    TabsCount++;
-                                    for (var Index = 0; Index < TabsCount; Index++) {
-                                        var TabPos = TabsPos[Index];
-                                        if (X < TabPos) {
-                                            NewX = TabPos;
-                                            break;
-                                        }
-                                    }
-                                    if (null === NewX) {
-                                        if (X < PageStart.X + ParaPr.Ind.Left) {
-                                            NewX = PageStart.X + ParaPr.Ind.Left;
-                                        } else {
-                                            NewX = this.X;
-                                            while (X >= NewX) {
-                                                NewX += Default_Tab_Stop;
-                                            }
-                                        }
-                                    }
-                                    NumberingItem.WidthSuff = NewX - X;
-                                    break;
-                                }
-                                NumberingItem.Width = NumberingItem.WidthNum;
-                                NumberingItem.WidthVisible += NumberingItem.WidthSuff;
-                                X += NumberingItem.WidthSuff;
-                                this.Numbering.Pos = Pos;
-                            }
-                        } else {
-                            if (para_PresentationNumbering === NumberingType) {
-                                var Bullet = this.PresentationPr.Bullet;
-                                if (numbering_presentationnumfrmt_None != Bullet.Get_Type()) {
-                                    if (ParaPr.Ind.FirstLine < 0) {
-                                        NumberingItem.WidthVisible = Math.max(NumberingItem.Width, this.X + ParaPr.Ind.Left + ParaPr.Ind.FirstLine - X, this.X + ParaPr.Ind.Left - X);
-                                    } else {
-                                        NumberingItem.WidthVisible = Math.max(this.X + ParaPr.Ind.Left + NumberingItem.Width - X, this.X + ParaPr.Ind.Left + ParaPr.Ind.FirstLine - X, this.X + ParaPr.Ind.Left - X);
-                                    }
-                                }
-                                X += NumberingItem.WidthVisible;
-                                this.Numbering.Pos = Pos;
-                            }
-                        }
-                        bAddNumbering = false;
-                    }
-                }
-                switch (Item.Type) {
-                case para_Text:
-                    bStartWord = true;
-                    if (LineTextAscent < TextAscent) {
-                        LineTextAscent = TextAscent;
-                    }
-                    if (LineTextAscent2 < TextAscent2) {
-                        LineTextAscent2 = TextAscent2;
-                    }
-                    if (LineTextDescent < TextDescent) {
-                        LineTextDescent = TextDescent;
-                    }
-                    if (linerule_Exact === ParaPr.Spacing.LineRule) {
-                        if (LineAscent < TextAscent) {
-                            LineAscent = TextAscent;
-                        }
-                        if (LineDescent < TextDescent) {
-                            LineDescent = TextDescent;
-                        }
-                    } else {
-                        if (LineAscent < TextAscent + Item.YOffset) {
-                            LineAscent = TextAscent + Item.YOffset;
-                        }
-                        if (LineDescent < TextDescent - Item.YOffset) {
-                            LineDescent = TextDescent - Item.YOffset;
-                        }
-                    }
-                    if (!bWord) {
-                        var LetterLen = Item.Width;
-                        if (!bFirstItemOnLine || false === this.Internal_Check_Ranges(CurLine, CurRange)) {
-                            if (X + nSpaceLen + LetterLen > XEnd) {
-                                if (RangesCount == CurRange) {
-                                    bNewLine = true;
-                                    Pos--;
-                                } else {
-                                    bNewRange = true;
-                                    Pos--;
-                                }
-                            }
-                        }
-                        if (!bNewLine && !bNewRange) {
-                            nWordStartPos = Pos;
-                            nWordLen = Item.Width;
-                            bWord = true;
-                        }
-                    } else {
-                        var LetterLen = Item.Width;
-                        if (X + nSpaceLen + nWordLen + LetterLen > XEnd) {
-                            if (bFirstItemOnLine) {
-                                if (false === this.Internal_Check_Ranges(CurLine, CurRange)) {
-                                    Pos = nWordStartPos - 1;
-                                    if (RangesCount != CurRange) {
-                                        bNewRange = true;
-                                    } else {
-                                        bNewLine = true;
-                                    }
-                                } else {
-                                    bEmptyLine = false;
-                                    X += nWordLen;
-                                    Pos--;
-                                    if (RangesCount != CurRange) {
-                                        bNewRange = true;
-                                    } else {
-                                        bNewLine = true;
-                                    }
-                                }
-                            } else {
-                                Pos = nWordStartPos;
-                                if (RangesCount == CurRange) {
-                                    Pos--;
-                                    bNewLine = true;
-                                } else {
-                                    Pos--;
-                                    bNewRange = true;
-                                }
-                            }
-                        }
-                        if (!bNewLine && !bNewRange) {
-                            nWordLen += LetterLen;
-                            if (true === Item.SpaceAfter) {
-                                X += nSpaceLen;
-                                X += nWordLen;
-                                bWord = false;
-                                bFirstItemOnLine = false;
-                                bEmptyLine = false;
-                                nSpaceLen = 0;
-                                nWordLen = 0;
-                                nSpacesCount = 0;
-                            }
-                        }
-                    }
-                    break;
-                case para_Space:
-                    bFirstItemOnLine = false;
-                    var SpaceLen = Item.Width;
-                    if (bWord) {
-                        X += nSpaceLen;
-                        X += nWordLen;
-                        bWord = false;
-                        bEmptyLine = false;
-                        nSpaceLen = 0;
-                        nWordLen = 0;
-                        nSpacesCount = 1;
-                    } else {
-                        nSpacesCount++;
-                    }
-                    nSpaceLen += SpaceLen;
-                    break;
-                case para_Drawing:
-                    if (true === Item.Is_Inline() || true === this.Parent.Is_DrawingShape()) {
-                        if (true != Item.Is_Inline()) {
-                            Item.Set_DrawingType(drawing_Inline);
-                        }
-                        if (true === bStartWord) {
-                            bFirstItemOnLine = false;
-                        }
-                        if (bWord || nWordLen > 0) {
-                            X += nSpaceLen;
-                            X += nWordLen;
-                            bWord = false;
-                            nSpaceLen = 0;
-                            nSpacesCount = 0;
-                            nWordLen = 0;
-                        }
-                        if (X + nSpaceLen + Item.Width > XEnd && (false === bFirstItemOnLine || false === this.Internal_Check_Ranges(CurLine, CurRange))) {
-                            if (RangesCount == CurRange) {
-                                bNewLine = true;
-                                Pos--;
-                            } else {
-                                bNewRange = true;
-                                Pos--;
-                            }
-                        } else {
-                            X += nSpaceLen;
-                            if (linerule_Exact === ParaPr.Spacing.LineRule) {
-                                if (LineAscent < Item.Height) {
-                                    LineAscent = Item.Height;
-                                }
-                                if (Item.Height > this.Lines[CurLine].Metrics.Ascent) {
-                                    this.Lines[CurLine].Metrics.Ascent = Item.Height;
-                                }
-                            } else {
-                                if (LineAscent < Item.Height + Item.YOffset) {
-                                    LineAscent = Item.Height + Item.YOffset;
-                                }
-                                if (Item.Height + Item.YOffset > this.Lines[CurLine].Metrics.Ascent) {
-                                    this.Lines[CurLine].Metrics.Ascent = Item.Height + Item.YOffset;
-                                }
-                                if (-Item.YOffset > this.Lines[CurLine].Metrics.Descent) {
-                                    this.Lines[CurLine].Metrics.Descent = -Item.YOffset;
-                                }
-                            }
-                            X += Item.Width;
-                            bFirstItemOnLine = false;
-                            bEmptyLine = false;
-                        }
-                        nSpaceLen = 0;
-                        nSpacesCount = 0;
-                    } else {
-                        var LogicDocument = this.Parent;
-                        var LDRecalcInfo = LogicDocument.RecalcInfo;
-                        var DrawingObjects = LogicDocument.DrawingObjects;
-                        if (true === LDRecalcInfo.Check_FlowObject(Item) && true === LDRecalcInfo.Is_PageBreakBefore()) {
-                            LDRecalcInfo.Reset();
-                            if (null != this.Get_DocumentPrev() && true != this.Parent.Is_TableCellContent() && 0 === CurPage) {
-                                for (var TempPos = StartPos; TempPos < Pos; TempPos++) {
-                                    var TempItem = this.Content[TempPos];
-                                    if (para_Drawing === TempItem.Type && drawing_Anchor === TempItem.DrawingType && true === TempItem.Use_TextWrap()) {
-                                        DrawingObjects.removeById(TempItem.PageNum, TempItem.Get_Id());
-                                    }
-                                }
-                                this.Pages[CurPage].Set_EndLine(-1);
-                                if (0 === CurLine) {
-                                    this.Lines[-1] = new CParaLine(0);
-                                    this.Lines[-1].Set_EndPos(LineStart_Pos - 1, this);
-                                }
-                                RecalcResult = recalcresult_NextPage;
-                                return;
-                            } else {
-                                if (CurLine != this.Pages[CurPage].FirstLine) {
-                                    this.Pages[CurPage].Set_EndLine(CurLine - 1);
-                                    if (0 === CurLine) {
-                                        this.Lines[-1] = new CParaLine(0);
-                                        this.Lines[-1].Set_EndPos(LineStart_Pos - 1, this);
-                                    }
-                                    RecalcResult = recalcresult_NextPage;
-                                    bBreak = true;
-                                    break;
-                                } else {
-                                    Pos--;
-                                    bNewLine = true;
-                                    bForceNewPage = true;
-                                }
-                            }
-                            if (bWord || nWordLen > 0) {
-                                X += nSpaceLen;
-                                X += nWordLen;
-                                bWord = false;
-                                nSpaceLen = 0;
-                                nSpacesCount = 0;
-                                nWordLen = 0;
-                            }
-                        }
-                    }
-                    break;
-                case para_PageNum:
-                    if (bWord || nWordLen > 0) {
-                        X += nSpaceLen;
-                        X += nWordLen;
-                        bWord = false;
-                        nSpaceLen = 0;
-                        nSpacesCount = 0;
-                        nWordLen = 0;
-                    }
-                    if (true === bStartWord) {
-                        bFirstItemOnLine = false;
-                    }
-                    if (LineTextAscent < TextAscent) {
-                        LineTextAscent = TextAscent;
-                    }
-                    if (LineTextAscent2 < TextAscent2) {
-                        LineTextAscent2 = TextAscent2;
-                    }
-                    if (LineTextDescent < TextDescent) {
-                        LineTextDescent = TextDescent;
-                    }
-                    if (linerule_Exact === ParaPr.Spacing.LineRule) {
-                        if (LineAscent < TextAscent) {
-                            LineAscent = TextAscent;
-                        }
-                        if (LineDescent < TextDescent) {
-                            LineDescent = TextDescent;
-                        }
-                    } else {
-                        if (LineAscent < TextAscent + Item.YOffset) {
-                            LineAscent = TextAscent + Item.YOffset;
-                        }
-                        if (LineDescent < TextDescent - Item.YOffset) {
-                            LineDescent = TextDescent - Item.YOffset;
-                        }
-                    }
-                    if (X + nSpaceLen + Item.Width > XEnd && (false === bFirstItemOnLine || RangesCount > 0)) {
-                        if (RangesCount == CurRange) {
-                            bNewLine = true;
-                            Pos--;
-                        } else {
-                            bNewRange = true;
-                            Pos--;
-                        }
-                    } else {
-                        X += nSpaceLen;
-                        X += Item.Width;
-                        bFirstItemOnLine = false;
-                        bEmptyLine = false;
-                    }
-                    nSpaceLen = 0;
-                    nSpacesCount = 0;
-                    break;
-                case para_Tab:
-                    if (-1 != pLastTab.Value) {
-                        var TempTabX = X;
-                        if (bWord || nWordLen > 0) {
-                            TempTabX += nSpaceLen + nWordLen;
-                        }
-                        var TabItem = pLastTab.Item;
-                        var TabStartX = pLastTab.X;
-                        var TabRangeW = TempTabX - TabStartX;
-                        var TabValue = pLastTab.Value;
-                        var TabPos = pLastTab.TabPos;
-                        var TabCalcW = 0;
-                        if (tab_Right === TabValue) {
-                            TabCalcW = Math.max(TabPos - (TabStartX + TabRangeW), 0);
-                        } else {
-                            if (tab_Center === TabValue) {
-                                TabCalcW = Math.max(TabPos - (TabStartX + TabRangeW / 2), 0);
-                            }
-                        }
-                        if (X + TabCalcW > XEnd) {
-                            TabCalcW = XEnd - X;
-                        }
-                        TabItem.Width = TabCalcW;
-                        TabItem.WidthVisible = TabCalcW;
-                        pLastTab.Value = -1;
-                        X += TabCalcW;
-                    }
-                    X += nSpaceLen;
-                    X += nWordLen;
-                    bWord = false;
-                    nSpaceLen = 0;
-                    nWordLen = 0;
-                    nSpacesCount = 0;
-                    this.Lines[CurLine].Ranges[CurRange].Spaces = 0;
-                    this.Lines[CurLine].Ranges[CurRange].TabPos = Pos;
-                    var PageStart = this.Parent.Get_PageContentStartPos(this.PageNum + CurPage);
-                    if (undefined != this.Get_FramePr()) {
-                        PageStart.X = 0;
-                    }
-                    var TabsCount = ParaPr.Tabs.Get_Count();
-                    var TabsPos = new Array();
-                    var bCheckLeft = true;
-                    for (var Index = 0; Index < TabsCount; Index++) {
-                        var Tab = ParaPr.Tabs.Get(Index);
-                        var TabPos = Tab.Pos + PageStart.X;
-                        if (true === bCheckLeft && TabPos > PageStart.X + ParaPr.Ind.Left) {
-                            TabsPos.push(PageStart.X + ParaPr.Ind.Left);
-                            bCheckLeft = false;
-                        }
-                        if (tab_Clear != Tab.Value) {
-                            TabsPos.push(Tab);
-                        }
-                    }
-                    if (true === bCheckLeft) {
-                        TabsPos.push(PageStart.X + ParaPr.Ind.Left);
-                    }
-                    TabsCount = TabsPos.length;
-                    var Tab = null;
-                    for (var Index = 0; Index < TabsCount; Index++) {
-                        var TempTab = TabsPos[Index];
-                        if (X < TempTab.Pos + PageStart.X) {
-                            Tab = TempTab;
-                            break;
-                        }
-                    }
-                    var NewX = null;
-                    if (null === Tab) {
-                        if (X < PageStart.X + ParaPr.Ind.Left) {
-                            NewX = PageStart.X + ParaPr.Ind.Left;
-                        } else {
-                            NewX = this.X;
-                            while (X >= NewX - 0.001) {
-                                NewX += Default_Tab_Stop;
-                            }
-                        }
-                    } else {
-                        if (tab_Left === Tab.Value) {
-                            NewX = Tab.Pos + PageStart.X;
-                        } else {
-                            pLastTab.TabPos = Tab.Pos + PageStart.X;
-                            pLastTab.Value = Tab.Value;
-                            pLastTab.X = X;
-                            pLastTab.Item = Item;
-                            Item.Width = 0;
-                            Item.WidthVisible = 0;
-                        }
-                    }
-                    if (null != NewX) {
-                        if (NewX > XEnd && (false === bFirstItemOnLine || RangesCount > 0)) {
-                            nWordLen = NewX - X;
-                            if (RangesCount == CurRange) {
-                                bNewLine = true;
-                                Pos--;
-                            } else {
-                                bNewRange = true;
-                                Pos--;
-                            }
-                        } else {
-                            Item.Width = NewX - X;
-                            Item.WidthVisible = NewX - X;
-                            X = NewX;
-                        }
-                    }
-                    if (RangesCount === CurRange) {
-                        if (true === bStartWord) {
-                            bFirstItemOnLine = false;
-                            bEmptyLine = false;
-                        }
-                        nWordStartPos = Pos;
-                    }
-                    nSpacesCount = 0;
-                    bStartWord = true;
-                    bWord = true;
-                    nWordStartPos = Pos;
-                    break;
-                case para_TextPr:
-                    break;
-                case para_NewLine:
-                    if (break_Page === Item.BreakType) {
-                        if (! (this.Parent instanceof CDocument)) {
-                            this.Internal_Content_Remove(Pos);
-                            Pos--;
-                            break;
-                        }
-                        bNewPage = true;
-                        bNewLine = true;
-                        bBreakPageLine = true;
-                    } else {
-                        if (RangesCount === CurRange) {
-                            bNewLine = true;
-                        } else {
-                            bNewRange = true;
-                        }
-                        bEmptyLine = false;
-                    }
-                    X += nWordLen;
-                    if (bWord && this.Lines[CurLine].Words > 1) {
-                        this.Lines[CurLine].Spaces += nSpacesCount;
-                    }
-                    if (bWord && this.Lines[CurLine].Ranges[CurRange].Words > 1) {
-                        this.Lines[CurLine].Ranges[CurRange].Spaces += nSpacesCount;
-                    }
-                    if (bWord) {
-                        bEmptyLine = false;
-                        bWord = false;
-                        X += nSpaceLen;
-                        nSpaceLen = 0;
-                    }
-                    break;
-                case para_End:
-                    if (true === bWord) {
-                        bFirstItemOnLine = false;
-                        bEmptyLine = false;
-                    }
-                    if (false === bExtendBoundToBottom) {
-                        X += nWordLen;
-                        if (bWord) {
-                            this.Lines[CurLine].Spaces += nSpacesCount;
-                            this.Lines[CurLine].Ranges[CurRange].Spaces += nSpacesCount;
-                        }
-                        if (bWord) {
-                            X += nSpaceLen;
-                            nSpaceLen = 0;
-                        }
-                        if (-1 != pLastTab.Value) {
-                            var TabItem = pLastTab.Item;
-                            var TabStartX = pLastTab.X;
-                            var TabRangeW = X - TabStartX;
-                            var TabValue = pLastTab.Value;
-                            var TabPos = pLastTab.TabPos;
-                            var TabCalcW = 0;
-                            if (tab_Right === TabValue) {
-                                TabCalcW = Math.max(TabPos - (TabStartX + TabRangeW), 0);
-                            } else {
-                                if (tab_Center === TabValue) {
-                                    TabCalcW = Math.max(TabPos - (TabStartX + TabRangeW / 2), 0);
-                                }
-                            }
-                            if (X + TabCalcW > XEnd) {
-                                TabCalcW = XEnd - X;
-                            }
-                            TabItem.Width = TabCalcW;
-                            TabItem.WidthVisible = TabCalcW;
-                            pLastTab.Value = -1;
-                            X += TabCalcW;
-                        }
-                    }
-                    bNewLine = true;
-                    bEnd = true;
-                    break;
-                }
-                if (bBreak) {
-                    break;
-                }
-            }
-            if (bNewLine) {
-                pLastTab.Value = -1;
-                nSpaceLen = 0;
-                if (true === bEmptyLine || LineAscent < 0.001) {
-                    if (true === bEnd) {
-                        TextAscent = Item.TextAscent;
-                        TextDescent = Item.TextDescent;
-                        TextAscent2 = Item.TextAscent2;
-                    }
-                    if (LineTextAscent < TextAscent) {
-                        LineTextAscent = TextAscent;
-                    }
-                    if (LineTextAscent2 < TextAscent2) {
-                        LineTextAscent2 = TextAscent2;
-                    }
-                    if (LineTextDescent < TextDescent) {
-                        LineTextDescent = TextDescent;
-                    }
-                    if (LineAscent < TextAscent) {
-                        LineAscent = TextAscent;
-                    }
-                    if (LineDescent < TextDescent) {
-                        LineDescent = TextDescent;
-                    }
-                }
-                this.Lines[CurLine].Metrics.Update(LineTextAscent, LineTextAscent2, LineTextDescent, LineAscent, LineDescent, ParaPr);
-                bFirstItemOnLine = true;
-                bStartWord = false;
-                bNewLine = false;
-                bNewRange = false;
-                var TempDy = this.Lines[this.Pages[CurPage].FirstLine].Metrics.Ascent;
-                if (0 === this.Pages[CurPage].FirstLine && (0 === CurPage || true === this.Parent.Is_TableCellContent() || true === ParaPr.PageBreakBefore)) {
-                    TempDy += ParaPr.Spacing.Before;
-                }
-                if (0 === this.Pages[CurPage].FirstLine) {
-                    if ((true === ParaPr.Brd.First || 1 === CurPage) && border_Single === ParaPr.Brd.Top.Value) {
-                        TempDy += ParaPr.Brd.Top.Size + ParaPr.Brd.Top.Space;
-                    } else {
-                        if (false === ParaPr.Brd.First && border_Single === ParaPr.Brd.Between.Value) {
-                            TempDy += ParaPr.Brd.Between.Size + ParaPr.Brd.Between.Space;
-                        }
-                    }
-                }
-                var Top, Bottom;
-                var Top2, Bottom2;
-                var LastPage_Bottom = this.Pages[CurPage].Bounds.Bottom;
-                if (true === this.Lines[CurLine].RangeY) {
-                    Top = Y;
-                    Top2 = Y;
-                    this.Lines[CurLine].Top = Top - this.Pages[CurPage].Y;
-                    if (0 === CurLine) {
-                        if (0 === CurPage || true === this.Parent.Is_TableCellContent()) {
-                            Top2 = Top + ParaPr.Spacing.Before;
-                            Bottom2 = Top + ParaPr.Spacing.Before + this.Lines[0].Metrics.Ascent + this.Lines[0].Metrics.Descent;
-                            Bottom = Top + ParaPr.Spacing.Before + this.Lines[0].Metrics.Ascent + this.Lines[0].Metrics.Descent + this.Lines[0].Metrics.LineGap;
-                            if (true === ParaPr.Brd.First && border_Single === ParaPr.Brd.Top.Value) {
-                                Top2 += ParaPr.Brd.Top.Size + ParaPr.Brd.Top.Space;
-                                Bottom2 += ParaPr.Brd.Top.Size + ParaPr.Brd.Top.Space;
-                                Bottom += ParaPr.Brd.Top.Size + ParaPr.Brd.Top.Space;
-                            } else {
-                                if (false === ParaPr.Brd.First && border_Single === ParaPr.Brd.Between.Value) {
-                                    Top2 += ParaPr.Brd.Between.Size + ParaPr.Brd.Between.Space;
-                                    Bottom2 += ParaPr.Brd.Between.Size + ParaPr.Brd.Between.Space;
-                                    Bottom += ParaPr.Brd.Between.Size + ParaPr.Brd.Between.Space;
-                                }
-                            }
-                        } else {
-                            Bottom2 = Top + this.Lines[0].Metrics.Ascent + this.Lines[0].Metrics.Descent;
-                            Bottom = Top + this.Lines[0].Metrics.Ascent + this.Lines[0].Metrics.Descent + this.Lines[0].Metrics.LineGap;
-                            if (border_Single === ParaPr.Brd.Top.Value) {
-                                Top2 += ParaPr.Brd.Top.Size + ParaPr.Brd.Top.Space;
-                                Bottom2 += ParaPr.Brd.Top.Size + ParaPr.Brd.Top.Space;
-                                Bottom += ParaPr.Brd.Top.Size + ParaPr.Brd.Top.Space;
-                            }
-                        }
-                    } else {
-                        Bottom2 = Top + this.Lines[CurLine].Metrics.Ascent + this.Lines[CurLine].Metrics.Descent;
-                        Bottom = Top + this.Lines[CurLine].Metrics.Ascent + this.Lines[CurLine].Metrics.Descent + this.Lines[CurLine].Metrics.LineGap;
-                    }
-                    if (bEnd) {
-                        Bottom += ParaPr.Spacing.After;
-                        if (true === ParaPr.Brd.Last) {
-                            if (border_Single === ParaPr.Brd.Bottom.Value) {
-                                Bottom += ParaPr.Brd.Bottom.Size + ParaPr.Brd.Bottom.Space;
-                            }
-                        } else {
-                            if (border_Single === ParaPr.Brd.Between.Value) {
-                                Bottom += ParaPr.Brd.Between.Space;
-                            }
-                        }
-                        if (false === this.Parent.Is_TableCellContent() && Bottom > this.YLimit && Bottom - this.YLimit <= ParaPr.Spacing.After) {
-                            Bottom = this.YLimit;
-                        }
-                    }
-                    this.Lines[CurLine].Bottom = Bottom - this.Pages[CurPage].Y;
-                    this.Bounds.Bottom = Bottom;
-                    this.Pages[CurPage].Bounds.Bottom = Bottom;
-                } else {
-                    if (0 != CurLine) {
-                        if (CurLine != this.Pages[CurPage].FirstLine) {
-                            Top = Y + TempDy + this.Lines[CurLine - 1].Metrics.Descent + this.Lines[CurLine - 1].Metrics.LineGap;
-                            Bottom = Top + this.Lines[CurLine].Metrics.Ascent + this.Lines[CurLine].Metrics.Descent + this.Lines[CurLine].Metrics.LineGap;
-                            Top2 = Top;
-                            Bottom2 = Top + this.Lines[CurLine].Metrics.Ascent + this.Lines[CurLine].Metrics.Descent;
-                            this.Lines[CurLine].Top = Top - this.Pages[CurPage].Y;
-                            if (bEnd) {
-                                Bottom += ParaPr.Spacing.After;
-                                if (true === ParaPr.Brd.Last) {
-                                    if (border_Single === ParaPr.Brd.Bottom.Value) {
-                                        Bottom += ParaPr.Brd.Bottom.Size + ParaPr.Brd.Bottom.Space;
-                                    }
-                                } else {
-                                    if (border_Single === ParaPr.Brd.Between.Value) {
-                                        Bottom += ParaPr.Brd.Between.Space;
-                                    }
-                                }
-                                if (false === this.Parent.Is_TableCellContent() && Bottom > this.YLimit && Bottom - this.YLimit <= ParaPr.Spacing.After) {
-                                    Bottom = this.YLimit;
-                                }
-                            }
-                            this.Lines[CurLine].Bottom = Bottom - this.Pages[CurPage].Y;
-                            this.Bounds.Bottom = Bottom;
-                            this.Pages[CurPage].Bounds.Bottom = Bottom;
-                        } else {
-                            Top = this.Pages[CurPage].Y;
-                            Bottom = Top + this.Lines[CurLine].Metrics.Ascent + this.Lines[CurLine].Metrics.Descent + this.Lines[CurLine].Metrics.LineGap;
-                            Top2 = Top;
-                            Bottom2 = Top + this.Lines[CurLine].Metrics.Ascent + this.Lines[CurLine].Metrics.Descent;
-                            this.Lines[CurLine].Top = 0;
-                            if (bEnd) {
-                                Bottom += ParaPr.Spacing.After;
-                                if (true === ParaPr.Brd.Last) {
-                                    if (border_Single === ParaPr.Brd.Bottom.Value) {
-                                        Bottom += ParaPr.Brd.Bottom.Size + ParaPr.Brd.Bottom.Space;
-                                    }
-                                } else {
-                                    if (border_Single === ParaPr.Brd.Between.Value) {
-                                        Bottom += ParaPr.Brd.Between.Space;
-                                    }
-                                }
-                                if (false === this.Parent.Is_TableCellContent() && Bottom > this.YLimit && Bottom - this.YLimit <= ParaPr.Spacing.After) {
-                                    Bottom = this.YLimit;
-                                }
-                            }
-                            this.Lines[CurLine].Bottom = Bottom - this.Pages[CurPage].Y;
-                            this.Bounds.Bottom = Bottom;
-                            this.Pages[CurPage].Bounds.Bottom = Bottom;
-                        }
-                    } else {
-                        Top = Y;
-                        Top2 = Y;
-                        if (0 === CurPage || true === this.Parent.Is_TableCellContent() || true === ParaPr.PageBreakBefore) {
-                            Top2 = Top + ParaPr.Spacing.Before;
-                            Bottom = Top + ParaPr.Spacing.Before + this.Lines[0].Metrics.Ascent + this.Lines[0].Metrics.Descent + this.Lines[0].Metrics.LineGap;
-                            Bottom2 = Top + ParaPr.Spacing.Before + this.Lines[0].Metrics.Ascent + this.Lines[0].Metrics.Descent;
-                            if (true === ParaPr.Brd.First && border_Single === ParaPr.Brd.Top.Value) {
-                                Top2 += ParaPr.Brd.Top.Size + ParaPr.Brd.Top.Space;
-                                Bottom2 += ParaPr.Brd.Top.Size + ParaPr.Brd.Top.Space;
-                                Bottom += ParaPr.Brd.Top.Size + ParaPr.Brd.Top.Space;
-                            } else {
-                                if (false === ParaPr.Brd.First && border_Single === ParaPr.Brd.Between.Value) {
-                                    Top2 += ParaPr.Brd.Between.Size + ParaPr.Brd.Between.Space;
-                                    Bottom2 += ParaPr.Brd.Between.Size + ParaPr.Brd.Between.Space;
-                                    Bottom += ParaPr.Brd.Between.Size + ParaPr.Brd.Between.Space;
-                                }
-                            }
-                        } else {
-                            Bottom = Top + this.Lines[0].Metrics.Ascent + this.Lines[0].Metrics.Descent + this.Lines[0].Metrics.LineGap;
-                            Bottom2 = Top + this.Lines[0].Metrics.Ascent + this.Lines[0].Metrics.Descent;
-                            if (border_Single === ParaPr.Brd.Top.Value) {
-                                Top2 += ParaPr.Brd.Top.Size + ParaPr.Brd.Top.Space;
-                                Bottom2 += ParaPr.Brd.Top.Size + ParaPr.Brd.Top.Space;
-                                Bottom += ParaPr.Brd.Top.Size + ParaPr.Brd.Top.Space;
-                            }
-                        }
-                        if (bEnd) {
-                            Bottom += ParaPr.Spacing.After;
-                            if (true === ParaPr.Brd.Last) {
-                                if (border_Single === ParaPr.Brd.Bottom.Value) {
-                                    Bottom += ParaPr.Brd.Bottom.Size + ParaPr.Brd.Bottom.Space;
-                                }
-                            } else {
-                                if (border_Single === ParaPr.Brd.Between.Value) {
-                                    Bottom += ParaPr.Brd.Between.Space;
-                                }
-                            }
-                            if (false === this.Parent.Is_TableCellContent() && Bottom > this.YLimit && Bottom - this.YLimit <= ParaPr.Spacing.After) {
-                                Bottom = this.YLimit;
-                            }
-                        }
-                        this.Lines[0].Top = Top - this.Pages[CurPage].Y;
-                        this.Lines[0].Bottom = Bottom - this.Pages[CurPage].Y;
-                        this.Bounds.Top = Top;
-                        this.Bounds.Bottom = Bottom;
-                        this.Pages[CurPage].Bounds.Top = Top;
-                        this.Pages[CurPage].Bounds.Bottom = Bottom;
-                    }
-                }
-                var bBreakPageLineEmpty = false;
-                if (true === bBreakPageLine) {
-                    bBreakPageLineEmpty = true;
-                    for (var _Pos = Pos - 1; _Pos >= LineStart_Pos; _Pos--) {
-                        var _Item = this.Content[_Pos];
-                        var _Type = _Item.Type;
-                        if (para_Drawing === _Type || para_End === _Type || (para_NewLine === _Type && break_Line === _Item.BreakType) || para_PageNum === _Type || para_Space === _Type || para_Tab === _Type || para_Text === _Type) {
-                            bBreakPageLineEmpty = false;
-                            break;
-                        }
-                    }
-                }
-                if (true === this.Use_YLimit() && (Top > this.YLimit || Bottom2 > this.YLimit) && (CurLine != this.Pages[CurPage].FirstLine || (0 === CurPage && (null != this.Get_DocumentPrev() || true === this.Parent.Is_TableCellContent()))) && false === bBreakPageLineEmpty) {
-                    if (this.Parent instanceof CDocument && true === this.Parent.RecalcInfo.Can_RecalcObject() && true === ParaPr.WidowControl && CurLine - this.Pages[CurPage].StartLine <= 1 && CurLine >= 1 && true != bBreakPageLine && (0 === CurPage && null != this.Get_DocumentPrev())) {
-                        this.Parent.RecalcInfo.Set_WidowControl(this, CurLine - 1);
-                        RecalcResult = recalcresult_CurPage;
-                        break;
-                    } else {
-                        if (true === ParaPr.KeepLines && null != this.Get_DocumentPrev() && true != this.Parent.Is_TableCellContent() && 0 === CurPage) {
-                            CurLine = 0;
-                            LineStart_Pos = 0;
-                        }
-                        this.Pages[CurPage].Bounds.Bottom = LastPage_Bottom;
-                        this.Pages[CurPage].Set_EndLine(CurLine - 1);
-                        if (0 === CurLine) {
-                            this.Lines[-1] = new CParaLine(0);
-                            this.Lines[-1].Set_EndPos(LineStart_Pos - 1, this);
-                        }
-                        RecalcResult = recalcresult_NextPage;
-                        break;
-                    }
-                }
-                bBreakPageLine = false;
-                var Left = (0 != CurLine ? this.X + ParaPr.Ind.Left : this.X + ParaPr.Ind.Left + ParaPr.Ind.FirstLine);
-                var Right = this.XLimit - ParaPr.Ind.Right;
-                var PageFields = this.Parent.Get_PageFields(this.PageNum + CurPage);
-                var Ranges2;
-                if (true === this.Use_Wrap()) {
-                    Ranges2 = this.Parent.CheckRange(Left, Top, Right, Bottom, Top2, Bottom2, PageFields.X, PageFields.XLimit, this.PageNum + CurPage, true);
-                } else {
-                    Ranges2 = new Array();
-                }
-                if (-1 == FlowObjects_CompareRanges(Ranges, Ranges2) && true === FlowObjects_CheckInjection(Ranges, Ranges2) && false === bBreakPageLineEmpty) {
-                    bEnd = false;
-                    Ranges = Ranges2;
-                    Pos = LineStart_Pos - 1;
-                    if (0 == CurLine) {
-                        X = this.X + ParaPr.Ind.Left + ParaPr.Ind.FirstLine;
-                    } else {
-                        X = this.X + ParaPr.Ind.Left;
-                    }
-                    this.Lines[CurLine].Reset();
-                    LineTextAscent = 0;
-                    LineTextAscent2 = 0;
-                    LineTextDescent = 0;
-                    LineAscent = 0;
-                    LineDescent = 0;
-                    TextAscent = 0;
-                    TextDescent = 0;
-                    TextAscent2 = 0;
-                    RangesCount = Ranges.length;
-                    this.Lines[CurLine].Add_Range((0 == CurLine ? this.X + ParaPr.Ind.Left + ParaPr.Ind.FirstLine : this.X + ParaPr.Ind.Left), (RangesCount == 0 ? XLimit : Ranges[0].X0));
-                    this.Lines[CurLine].Set_RangeStartPos(0, Pos + 1);
-                    for (var Index = 1; Index < Ranges.length + 1; Index++) {
-                        this.Lines[CurLine].Add_Range(Ranges[Index - 1].X1, (RangesCount == Index ? XLimit : Ranges[Index].X0));
-                    }
-                    CurRange = 0;
-                    XEnd = 0;
-                    if (RangesCount == 0) {
-                        XEnd = XLimit;
-                    } else {
-                        XEnd = Ranges[0].X0;
-                    }
-                    bStartWord = false;
-                    bWord = false;
-                    bNewPage = false;
-                    bForceNewPage = false;
-                    bExtendBoundToBottom = false;
-                    nWordLen = 0;
-                    nSpacesCount = 0;
-                    bAddNumbering = this.Internal_CheckAddNumbering(CurPage, CurLine, CurRange);
-                } else {
-                    if (0 != CurLine) {
-                        this.Lines[CurLine].W = X - this.X - ParaPr.Ind.Left;
-                    } else {
-                        this.Lines[CurLine].W = X - this.X - ParaPr.Ind.Left - ParaPr.Ind.FirstLine;
-                    }
-                    if (0 == CurRange) {
-                        if (0 != CurLine) {
-                            this.Lines[CurLine].Ranges[CurRange].W = X - this.X - ParaPr.Ind.Left;
-                        } else {
-                            this.Lines[CurLine].Ranges[CurRange].W = X - this.X - ParaPr.Ind.Left - ParaPr.Ind.FirstLine;
-                        }
-                    } else {
-                        if (true === this.Lines[CurLine].Ranges[CurRange].FirstRange) {
-                            if (ParaPr.Ind.FirstLine < 0) {
-                                Ranges[CurRange - 1].X1 += ParaPr.Ind.Left + ParaPr.Ind.FirstLine;
-                            } else {
-                                Ranges[CurRange - 1].X1 += ParaPr.Ind.FirstLine;
-                            }
-                        }
-                        this.Lines[CurLine].Ranges[CurRange].W = X - Ranges[CurRange - 1].X1;
-                    }
-                    if (true === bNewPage) {
-                        bNewPage = false;
-                        var ____Pos = Pos + 1;
-                        var Next = this.Internal_FindForward(____Pos, [para_End, para_NewLine, para_Space, para_Text, para_Drawing, para_Tab, para_PageNum]);
-                        while (true === Next.Found && para_Drawing === Next.Type && drawing_Anchor === this.Content[Next.LetterPos].Get_DrawingType()) {
-                            Next = this.Internal_FindForward(++____Pos, [para_End, para_NewLine, para_Space, para_Text, para_Drawing, para_Tab, para_PageNum]);
-                        }
-                        if (true === Next.Found && para_End === Next.Type) {
-                            Item.Flags.NewLine = false;
-                            bExtendBoundToBottom = true;
-                            continue;
-                        }
-                        if (true === this.Lines[CurLine].RangeY) {
-                            this.Lines[CurLine].Y = Y - this.Pages[CurPage].Y;
-                        } else {
-                            if (CurLine > 0) {
-                                if (CurLine != this.Pages[CurPage].FirstLine) {
-                                    Y += this.Lines[CurLine - 1].Metrics.Descent + this.Lines[CurLine - 1].Metrics.LineGap + this.Lines[CurLine].Metrics.Ascent;
-                                }
-                                this.Lines[CurLine].Y = Y - this.Pages[CurPage].Y;
-                            }
-                        }
-                        this.Pages[CurPage].Set_EndLine(CurLine);
-                        this.Lines[CurLine].Set_EndPos(Pos, this);
-                        RecalcResult = recalcresult_NextPage;
-                        break;
-                    } else {
-                        if (true === this.Lines[CurLine].RangeY) {
-                            this.Lines[CurLine].Y = Y - this.Pages[CurPage].Y;
-                        } else {
-                            if (CurLine > 0) {
-                                if (CurLine != this.Pages[CurPage].FirstLine) {
-                                    Y += this.Lines[CurLine - 1].Metrics.Descent + this.Lines[CurLine - 1].Metrics.LineGap + this.Lines[CurLine].Metrics.Ascent;
-                                }
-                                this.Lines[CurLine].Y = Y - this.Pages[CurPage].Y;
-                            }
-                        }
-                        if ((true === bEmptyLine && RangesCount > 0 && LineStart_Pos < 0) || Pos < 0) {
-                            X = this.X + ParaPr.Ind.Left + ParaPr.Ind.FirstLine;
-                        } else {
-                            X = this.X + ParaPr.Ind.Left;
-                        }
-                    }
-                    if (!bEnd) {
-                        if (true === bEmptyLine && RangesCount > 0) {
-                            Pos = LineStart_Pos - 1;
-                            var RangesY = Ranges[0].Y1;
-                            for (var Index = 1; Index < Ranges.length; Index++) {
-                                if (RangesY > Ranges[Index].Y1) {
-                                    RangesY = Ranges[Index].Y1;
-                                }
-                            }
-                            if (Math.abs(RangesY - Y) < 0.01) {
-                                Y = RangesY + 1;
-                            } else {
-                                Y = RangesY + 0.001;
-                            }
-                            if (0 === CurLine) {
-                                X = this.X + ParaPr.Ind.Left + ParaPr.Ind.FirstLine;
-                            } else {
-                                X = this.X + ParaPr.Ind.Left;
-                            }
-                        } else {
-                            this.Lines[CurLine].Set_EndPos(Pos, this);
-                            CurLine++;
-                            if (this.Parent instanceof CDocument && true === this.Parent.RecalcInfo.Check_WidowControl(this, CurLine)) {
-                                this.Parent.RecalcInfo.Reset_WidowControl();
-                                this.Pages[CurPage].Set_EndLine(CurLine - 1);
-                                if (0 === CurLine) {
-                                    this.Lines[-1] = new CParaLine(0);
-                                    this.Lines[-1].Set_EndPos(LineStart_Pos - 1, this);
-                                }
-                                RecalcResult = recalcresult_NextPage;
-                                break;
-                            }
-                        }
-                        this.Lines[CurLine] = new CParaLine(Pos + 1);
-                        LineTextAscent = 0;
-                        LineTextDescent = 0;
-                        LineTextAscent2 = 0;
-                        LineAscent = 0;
-                        LineDescent = 0;
-                        TextAscent = 0;
-                        TextDescent = 0;
-                        TextAscent2 = 0;
-                        var TempY;
-                        if (true === bEmptyLine && RangesCount > 0) {
-                            TempY = Y;
-                            this.Lines[CurLine].RangeY = true;
-                        } else {
-                            if (CurLine > 0) {
-                                if (CurLine != this.Pages[CurPage].FirstLine) {
-                                    TempY = TempDy + Y + this.Lines[CurLine - 1].Metrics.Descent + this.Lines[CurLine - 1].Metrics.LineGap;
-                                } else {
-                                    TempY = this.Pages[CurPage].Y;
-                                }
-                            } else {
-                                TempY = this.Y;
-                            }
-                        }
-                        Ranges = [];
-                        RangesCount = Ranges.length;
-                        this.Lines[CurLine].Add_Range(X, (RangesCount == 0 ? XLimit : Ranges[0].X0));
-                        this.Lines[CurLine].Set_RangeStartPos(0, Pos + 1);
-                        for (var Index = 1; Index < Ranges.length + 1; Index++) {
-                            this.Lines[CurLine].Add_Range(Ranges[Index - 1].X1, (RangesCount == Index ? XLimit : Ranges[Index].X0));
-                        }
-                        CurRange = 0;
-                        XEnd = 0;
-                        if (RangesCount == 0) {
-                            XEnd = XLimit;
-                        } else {
-                            XEnd = Ranges[0].X0;
-                        }
-                        bWord = false;
-                        nWordLen = 0;
-                        nSpacesCount = 0;
-                        LineStart_Pos = Pos + 1;
-                        if (true === bForceNewPage) {
-                            this.Pages[CurPage].Set_EndLine(CurLine - 1);
-                            if (0 === CurLine) {
-                                this.Lines[-1] = new CParaLine(0);
-                                this.Lines[-1].Set_EndPos(LineStart_Pos - 1, this);
-                            }
-                            RecalcResult = recalcresult_NextPage;
-                            break;
-                        }
-                        bAddNumbering = this.Internal_CheckAddNumbering(CurPage, CurLine, CurRange);
-                    } else {
-                        for (var TempRange = CurRange + 1; TempRange <= RangesCount; TempRange++) {
-                            this.Lines[CurLine].Set_RangeStartPos(TempRange, Pos + 1);
-                        }
-                        this.Lines[CurLine].Set_EndPos(Pos, this);
-                        if (true === ParaPr.WidowControl && CurLine === this.Pages[CurPage].StartLine && CurLine >= 1) {
-                            var bBreakPagePrevLine = false;
-                            var StartPos = (CurLine == 2 ? this.Lines[CurLine - 2].StartPos : this.Lines[CurLine - 1].StartPos);
-                            var EndPos = this.Lines[CurLine - 1].EndPos;
-                            for (var TempPos = StartPos; TempPos <= EndPos; TempPos++) {
-                                var TempItem = this.Content[TempPos];
-                                if (para_NewLine === TempItem.Type && break_Page === TempItem.BreakType) {
-                                    bBreakPagePrevLine = true;
-                                    break;
-                                }
-                            }
-                            if (this.Parent instanceof CDocument && true === this.Parent.RecalcInfo.Can_RecalcObject() && false === bBreakPagePrevLine && (1 === CurPage && null != this.Get_DocumentPrev()) && this.Lines[CurLine - 1].Ranges.length <= 1) {
-                                this.Parent.RecalcInfo.Set_WidowControl(this, (CurLine > 2 ? CurLine - 1 : 0));
-                                RecalcResult = recalcresult_PrevPage;
-                                break;
-                            }
-                        }
-                        if (true === bEnd && true === bExtendBoundToBottom) {
-                            this.Pages[CurPage].Bounds.Bottom = this.Pages[CurPage].YLimit;
-                            this.Bounds.Bottom = this.Pages[CurPage].YLimit;
-                            this.Lines[CurLine].Set_EndPos(Pos, this);
-                            this.Pages[CurPage].Set_EndLine(CurLine);
-                            for (var TempRange = CurRange + 1; TempRange <= RangesCount; TempRange++) {
-                                this.Lines[CurLine].Set_RangeStartPos(TempRange, Pos);
-                            }
-                            if (Pos === this.Numbering.Pos) {
-                                this.Numbering.Pos = -1;
-                            }
-                        } else {
-                            this.Lines[CurLine].Set_EndPos(Pos, this);
-                            this.Pages[CurPage].Set_EndLine(CurLine);
-                            for (var TempRange = CurRange + 1; TempRange <= RangesCount; TempRange++) {
-                                this.Lines[CurLine].Set_RangeStartPos(TempRange, Pos + 1);
-                            }
-                        }
-                    }
-                }
-                bEmptyLine = true;
-            } else {
-                if (bNewRange) {
-                    pLastTab.Value = -1;
-                    this.Lines[CurLine].Set_RangeStartPos(CurRange + 1, Pos + 1);
-                    nSpaceLen = 0;
-                    bNewRange = false;
-                    bFirstItemOnLine = true;
-                    bStartWord = false;
-                    if (0 == CurRange) {
-                        if (0 != CurLine) {
-                            this.Lines[CurLine].Ranges[CurRange].W = X - this.X - ParaPr.Ind.Left;
-                        } else {
-                            this.Lines[CurLine].Ranges[CurRange].W = X - this.X - ParaPr.Ind.Left - ParaPr.Ind.FirstLine;
-                        }
-                    } else {
-                        if (true === this.Lines[CurLine].Ranges[CurRange].FirstRange) {
-                            if (ParaPr.Ind.FirstLine < 0) {
-                                Ranges[CurRange - 1].X1 += ParaPr.Ind.Left + ParaPr.Ind.FirstLine;
-                            } else {
-                                Ranges[CurRange - 1].X1 += ParaPr.Ind.FirstLine;
-                            }
-                        }
-                        this.Lines[CurLine].Ranges[CurRange].W = X - Ranges[CurRange - 1].X1;
-                    }
-                    CurRange++;
-                    if (0 === CurLine && true === bEmptyLine) {
-                        if (ParaPr.Ind.FirstLine < 0) {
-                            this.Lines[CurLine].Ranges[CurRange].X += ParaPr.Ind.Left + ParaPr.Ind.FirstLine;
-                        } else {
-                            this.Lines[CurLine].Ranges[CurRange].X += ParaPr.Ind.FirstLine;
-                        }
-                        this.Lines[CurLine].Ranges[CurRange].FirstRange = true;
-                    }
-                    X = this.Lines[CurLine].Ranges[CurRange].X;
-                    if (CurRange == RangesCount) {
-                        XEnd = XLimit;
-                    } else {
-                        XEnd = Ranges[CurRange].X0;
-                    }
-                    bWord = false;
-                    nWordLen = 0;
-                    nSpacesCount = 0;
-                    bAddNumbering = this.Internal_CheckAddNumbering(CurPage, CurLine, CurRange);
-                }
-            }
-        }
-        var StartLine = this.Pages[CurPage].FirstLine;
-        var EndLine = this.Lines.length - 1;
-        var TempDy = this.Lines[this.Pages[CurPage].FirstLine].Metrics.Ascent;
-        if (0 === StartLine && (0 === CurPage || true === this.Parent.Is_TableCellContent() || true === ParaPr.PageBreakBefore)) {
-            TempDy += ParaPr.Spacing.Before;
-        }
-        if (0 === StartLine) {
-            if ((true === ParaPr.Brd.First || 1 === CurPage) && border_Single === ParaPr.Brd.Top.Value) {
-                TempDy += ParaPr.Brd.Top.Size + ParaPr.Brd.Top.Space;
-            } else {
-                if (false === ParaPr.Brd.First && border_Single === ParaPr.Brd.Between.Value) {
-                    TempDy += ParaPr.Brd.Between.Size + ParaPr.Brd.Between.Space;
-                }
-            }
-        }
-        for (var Index = StartLine; Index <= EndLine; Index++) {
-            this.Lines[Index].Y += TempDy;
-            if (this.Lines[Index].Metrics.LineGap < 0) {
-                this.Lines[Index].Y += this.Lines[Index].Metrics.LineGap;
-            }
-        }
-        return RecalcResult;
     },
-    Internal_Recalculate_2_: function (StartPos, _CurPage, _CurLine) {
-        var Pr = this.Get_CompiledPr2(false);
-        var ParaPr = Pr.ParaPr;
-        var CurRange = 0;
-        var CurLine = _CurLine;
-        var CurPage = _CurPage;
-        if (this.Pages[CurPage].EndLine < 0) {
-            return recalcresult_NextPage;
+    Get_EndInfoByPage: function (CurPage) {
+        if (CurPage < 0) {
+            return this.Parent.Get_PrevElementEndInfo(this);
+        } else {
+            return this.Pages[CurPage].EndInfo.Copy();
         }
-        var EndPos = this.Lines[this.Pages[CurPage].EndLine].EndPos;
-        var JustifyWord = 0;
-        var JustifySpace = 0;
-        var Y = this.Pages[CurPage].Y + this.Lines[CurLine].Y;
-        var bFirstLineItem = true;
-        var Range = this.Lines[CurLine].Ranges[CurRange];
-        var RangesCount = this.Lines[CurLine].Ranges.length;
-        var RangeWidth = Range.XEnd - Range.X;
-        var X = 0;
-        switch (ParaPr.Jc) {
-        case align_Left:
-            X = Range.X;
-            break;
-        case align_Right:
-            X = Math.max(Range.X + RangeWidth - Range.W, Range.X);
-            break;
-        case align_Center:
-            X = Math.max(Range.X + (RangeWidth - Range.W) / 2, Range.X);
-            break;
-        case align_Justify:
-            X = Range.X;
-            if (1 == Range.Words) {
-                if (1 == RangesCount && this.Lines.length > 1) {
-                    var LettersCount = 0;
-                    var TempPos = StartPos;
-                    var LastW = 0;
-                    var __CurLine = CurLine;
-                    var __CurRange = CurRange;
-                    while (this.Content[TempPos].Type != para_End) {
-                        var __Item = this.Content[TempPos];
-                        if (undefined != __Item.CurPage) {
-                            if (__CurLine != __Item.CurLine || __CurRange != __Item.Range) {
-                                break;
-                            }
-                        }
-                        if (para_Text == this.Content[TempPos].Type) {
-                            LettersCount++;
-                            LastW = this.Content[TempPos].Width;
-                        }
-                        TempPos++;
-                    }
-                    if (RangeWidth - Range.W <= 0.05 * RangeWidth && LettersCount > 1) {
-                        JustifyWord = (RangeWidth - Range.W) / (LettersCount - 1);
-                    }
-                } else {
-                    if (0 == CurRange || (CurLine == this.Lines.length - 1 && CurRange == this.Lines[CurLine].Ranges.length - 1)) {} else {
-                        if (CurRange == this.Lines[CurLine].Ranges.length - 1) {
-                            X = Range.X + RangeWidth - Range.W;
-                        } else {
-                            X = Range.X + (RangeWidth - Range.W) / 2;
-                        }
-                    }
+    },
+    Recalculate_PageEndInfo: function (PRSW, CurPage) {
+        var PrevInfo = (0 === CurPage ? this.Parent.Get_PrevElementEndInfo(this) : this.Pages[CurPage - 1].EndInfo.Copy());
+        var PRSI = this.m_oPRSI;
+        PRSI.Reset(PrevInfo);
+        var StartLine = this.Pages[CurPage].StartLine;
+        var EndLine = this.Pages[CurPage].EndLine;
+        var LinesCount = this.Lines.length;
+        for (var CurLine = StartLine; CurLine <= EndLine; CurLine++) {
+            var RangesCount = this.Lines[CurLine].Ranges.length;
+            for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
+                var StartPos = this.Lines[CurLine].Ranges[CurRange].StartPos;
+                var EndPos = this.Lines[CurLine].Ranges[CurRange].EndPos;
+                for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+                    this.Content[CurPos].Recalculate_PageEndInfo(PRSI, CurLine, CurRange);
                 }
-            } else {
-                if (Range.Spaces > 0 && (CurLine != this.Lines.length - 1 || CurRange != this.Lines[CurLine].Ranges.length - 1)) {
-                    JustifySpace = (RangeWidth - Range.W) / Range.Spaces;
-                } else {
-                    JustifySpace = 0;
-                }
-            }
-            break;
-        default:
-            X = Range.X;
-            break;
-        }
-        var SpacesCounter = this.Lines[CurLine].Ranges[CurRange].Spaces;
-        this.Lines[CurLine].Ranges[CurRange].XVisible = X;
-        this.Lines[CurLine].X = X - this.X;
-        var LastW = 0;
-        for (var ItemNum = StartPos; ItemNum <= EndPos; ItemNum++) {
-            var Item = this.Content[ItemNum];
-            if (undefined != Item.CurPage) {
-                if (CurLine < Item.CurLine) {
-                    CurLine = Item.CurLine;
-                    CurRange = Item.CurRange;
-                    JustifyWord = 0;
-                    JustifySpace = 0;
-                    Y = this.Pages[CurPage].Y + this.Lines[CurLine].Y;
-                    bFirstLineItem = true;
-                    Range = this.Lines[CurLine].Ranges[CurRange];
-                    RangesCount = this.Lines[CurLine].Ranges.length;
-                    RangeWidth = Range.XEnd - Range.X;
-                    switch (ParaPr.Jc) {
-                    case align_Left:
-                        X = Range.X;
-                        break;
-                    case align_Right:
-                        X = Math.max(Range.X + RangeWidth - Range.W, Range.X);
-                        break;
-                    case align_Center:
-                        X = Math.max(Range.X + (RangeWidth - Range.W) / 2, Range.X);
-                        break;
-                    case align_Justify:
-                        X = Range.X;
-                        if (1 == Range.Words) {
-                            if (1 == RangesCount && this.Lines.length > 1) {
-                                var LettersCount = 0;
-                                var TempPos = ItemNum + 1;
-                                var LastW = 0;
-                                var __CurLine = CurLine;
-                                var __CurRange = CurRange;
-                                while (this.Content[TempPos].Type != para_End) {
-                                    var __Item = this.Content[TempPos];
-                                    if (undefined != __Item.CurPage) {
-                                        if (__CurLine != __Item.CurLine || __CurRange != __Item.Range) {
-                                            break;
-                                        }
-                                    }
-                                    if (para_Text == this.Content[TempPos].Type) {
-                                        LettersCount++;
-                                        LastW = this.Content[TempPos].Width;
-                                    }
-                                    TempPos++;
-                                }
-                                if (RangeWidth - Range.W <= 0.05 * RangeWidth && LettersCount > 1) {
-                                    JustifyWord = (RangeWidth - Range.W) / (LettersCount - 1);
-                                }
-                            } else {
-                                if (0 == CurRange || (CurLine == this.Lines.length - 1 && CurRange == this.Lines[CurLine].Ranges.length - 1)) {} else {
-                                    if (CurRange == this.Lines[CurLine].Ranges.length - 1) {
-                                        X = Range.X + RangeWidth - Range.W;
-                                    } else {
-                                        X = Range.X + (RangeWidth - Range.W) / 2;
-                                    }
-                                }
-                            }
-                        } else {
-                            if (Range.Spaces > 0 && (CurLine != this.Lines.length - 1 || CurRange != this.Lines[CurLine].Ranges.length - 1)) {
-                                JustifySpace = (RangeWidth - Range.W) / Range.Spaces;
-                            } else {
-                                JustifySpace = 0;
-                            }
-                        }
-                        break;
-                    default:
-                        X = Range.X;
-                        break;
-                    }
-                    SpacesCounter = this.Lines[CurLine].Ranges[CurRange].Spaces;
-                    this.Lines[CurLine].Ranges[CurRange].XVisible = X;
-                    this.Lines[CurLine].X = X - this.X;
-                } else {
-                    if (CurRange < Item.CurRange) {
-                        CurRange = Item.CurRange;
-                        Range = this.Lines[CurLine].Ranges[CurRange];
-                        RangeWidth = Range.XEnd - Range.X;
-                        switch (ParaPr.Jc) {
-                        case align_Left:
-                            X = Range.X;
-                            break;
-                        case align_Right:
-                            X = Math.max(Range.X + RangeWidth - Range.W, Range.X);
-                            break;
-                        case align_Center:
-                            X = Math.max(Range.X + (RangeWidth - Range.W) / 2, Range.X);
-                            break;
-                        case align_Justify:
-                            X = Range.X;
-                            if (1 == Range.Words) {
-                                if (1 == RangesCount && this.Lines.length > 1) {
-                                    var LettersCount = 0;
-                                    var TempPos = ItemNum + 1;
-                                    var LastW = 0;
-                                    var __CurLine = CurLine;
-                                    var __CurRange = CurRange;
-                                    while (this.Content[TempPos].Type != para_End) {
-                                        var __Item = this.Content[TempPos];
-                                        if (undefined != __Item.CurPage) {
-                                            if (__CurLine != __Item.CurLine || __CurRange != __Item.Range) {
-                                                break;
-                                            }
-                                        }
-                                        if (para_Text == this.Content[TempPos].Type) {
-                                            LettersCount++;
-                                            LastW = this.Content[TempPos].Width;
-                                        }
-                                        TempPos++;
-                                    }
-                                    if (RangeWidth - Range.W <= 0.05 * RangeWidth && LettersCount > 1) {
-                                        JustifyWord = (RangeWidth - Range.W) / (LettersCount - 1);
-                                    }
-                                } else {
-                                    if (0 == CurRange || (CurLine == this.Lines.length - 1 && CurRange == this.Lines[CurLine].Ranges.length - 1)) {} else {
-                                        if (CurRange == this.Lines[CurLine].Ranges.length - 1) {
-                                            X = Range.X + RangeWidth - Range.W;
-                                        } else {
-                                            X = Range.X + (RangeWidth - Range.W) / 2;
-                                        }
-                                    }
-                                }
-                            } else {
-                                if (Range.Spaces > 0 && (CurLine != this.Lines.length - 1 || CurRange != this.Lines[CurLine].Ranges.length - 1)) {
-                                    JustifySpace = (RangeWidth - Range.W) / Range.Spaces;
-                                } else {
-                                    JustifySpace = 0;
-                                }
-                            }
-                            break;
-                        default:
-                            X = Range.X;
-                            break;
-                        }
-                        SpacesCounter = this.Lines[CurLine].Ranges[CurRange].Spaces;
-                        this.Lines[CurLine].Ranges[CurRange].XVisible = X;
-                    }
-                }
-            }
-            if (ItemNum == this.CurPos.ContentPos) {
-                this.CurPos.X = X;
-                this.CurPos.Y = Y;
-                this.CurPos.PagesPos = CurPage;
-            }
-            if (ItemNum == this.Numbering.Pos) {
-                X += this.Numbering.WidthVisible;
-            }
-            switch (Item.Type) {
-            case para_Text:
-                bFirstLineItem = false;
-                if (CurLine != this.Lines.length - 1 && JustifyWord > 0) {
-                    Item.WidthVisible = Item.Width + JustifyWord;
-                } else {
-                    Item.WidthVisible = Item.Width;
-                }
-                X += Item.WidthVisible;
-                LastW = Item.WidthVisible;
-                break;
-            case para_Space:
-                if (!bFirstLineItem && CurLine != this.Lines.length - 1 && SpacesCounter > 0 && (ItemNum > this.Lines[CurLine].Ranges[CurRange].SpacePos)) {
-                    Item.WidthVisible = Item.Width + JustifySpace;
-                    SpacesCounter--;
-                } else {
-                    Item.WidthVisible = Item.Width;
-                }
-                X += Item.WidthVisible;
-                LastW = Item.WidthVisible;
-                break;
-            case para_Drawing:
-                var DrawingObjects = this.Parent.DrawingObjects;
-                var PageLimits = this.Parent.Get_PageLimits(this.PageNum + CurPage);
-                var PageFields = this.Parent.Get_PageFields(this.PageNum + CurPage);
-                var ColumnStartX = (0 === CurPage ? this.X_ColumnStart : this.Pages[CurPage].X);
-                var ColumnEndX = (0 === CurPage ? this.X_ColumnEnd : this.Pages[CurPage].XLimit);
-                var Top_Margin = Y_Top_Margin;
-                var Bottom_Margin = Y_Bottom_Margin;
-                var Page_H = Page_Height;
-                if (true === this.Parent.Is_TableCellContent() && true == Item.Use_TextWrap()) {
-                    Top_Margin = 0;
-                    Bottom_Margin = 0;
-                    Page_H = 0;
-                }
-                if (true != Item.Use_TextWrap()) {
-                    PageFields.X = X_Left_Field;
-                    PageFields.Y = Y_Top_Field;
-                    PageFields.XLimit = X_Right_Field;
-                    PageFields.YLimit = Y_Bottom_Field;
-                    PageLimits.X = 0;
-                    PageLimits.Y = 0;
-                    PageLimits.XLimit = Page_Width;
-                    PageLimits.YLimit = Page_Height;
-                }
-                if (true === Item.Is_Inline() || true === this.Parent.Is_DrawingShape()) {
-                    Item.Update_Position(new CParagraphLayout(X, Y, this.Get_StartPage_Absolute() + CurPage, LastW, ColumnStartX, ColumnEndX, X_Left_Margin, X_Right_Margin, Page_Width, Top_Margin, Bottom_Margin, Page_H, PageFields.X, PageFields.Y, this.Pages[CurPage].Y + this.Lines[CurLine].Y - this.Lines[CurLine].Metrics.Ascent, this.Pages[CurPage].Y), PageLimits);
-                    Item.Reset_SavedPosition();
-                    bFirstLineItem = false;
-                    X += Item.WidthVisible;
-                    LastW = Item.WidthVisible;
-                } else {
-                    if (true === Item.Use_TextWrap()) {
-                        var LogicDocument = this.Parent;
-                        var LDRecalcInfo = this.Parent.RecalcInfo;
-                        var Page_abs = this.Get_StartPage_Absolute() + CurPage;
-                        if (true === LDRecalcInfo.Can_RecalcObject()) {
-                            Item.Update_Position(new CParagraphLayout(X, Y, this.Get_StartPage_Absolute() + CurPage, LastW, ColumnStartX, ColumnEndX, X_Left_Margin, X_Right_Margin, Page_Width, Top_Margin, Bottom_Margin, Page_H, PageFields.X, PageFields.Y, this.Pages[CurPage].Y + this.Lines[CurLine].Y - this.Lines[CurLine].Metrics.Ascent, this.Pages[CurPage].Y), PageLimits);
-                            LDRecalcInfo.Set_FlowObject(Item, 0, recalcresult_NextElement);
-                            return recalcresult_CurPage;
-                        } else {
-                            if (true === LDRecalcInfo.Check_FlowObject(Item)) {
-                                if (Item.PageNum === Page_abs) {
-                                    LDRecalcInfo.Reset();
-                                    Item.Reset_SavedPosition();
-                                } else {
-                                    if (true === this.Parent.Is_TableCellContent()) {
-                                        Item.Update_Position(new CParagraphLayout(X, Y, this.Get_StartPage_Absolute() + CurPage, LastW, ColumnStartX, ColumnEndX, X_Left_Margin, X_Right_Margin, Page_Width, Top_Margin, Bottom_Margin, Page_H, PageFields.X, PageFields.Y, this.Pages[CurPage].Y + this.Lines[CurLine].Y - this.Lines[CurLine].Metrics.Ascent, this.Pages[CurPage].Y), PageLimits);
-                                        LDRecalcInfo.Set_FlowObject(Item, 0, recalcresult_NextElement);
-                                        LDRecalcInfo.Set_PageBreakBefore(false);
-                                        return recalcresult_CurPage;
-                                    } else {
-                                        LDRecalcInfo.Set_PageBreakBefore(true);
-                                        DrawingObjects.removeById(Item.PageNum, Item.Get_Id());
-                                        return recalcresult_PrevPage;
-                                    }
-                                }
-                            } else {}
-                        }
-                        continue;
-                    } else {
-                        Item.Update_Position(new CParagraphLayout(X, Y, this.Get_StartPage_Absolute() + CurPage, LastW, ColumnStartX, ColumnEndX, X_Left_Margin, X_Right_Margin, Page_Width, Top_Margin, Bottom_Margin, Page_H, PageFields.X, PageFields.Y, this.Pages[CurPage].Y + this.Lines[CurLine].Y - this.Lines[CurLine].Metrics.Ascent, this.Pages[CurPage].Y), PageLimits);
-                        Item.Reset_SavedPosition();
-                        continue;
-                    }
-                }
-                break;
-            case para_PageNum:
-                bFirstLineItem = false;
-                X += Item.WidthVisible;
-                LastW = Item.WidthVisible;
-                break;
-            case para_Tab:
-                X += Item.WidthVisible;
-                break;
-            case para_TextPr:
-                break;
-            case para_End:
-                X += Item.Width;
-                break;
-            case para_NewLine:
-                X += Item.WidthVisible;
-                break;
-            case para_CommentStart:
-                var DocumentComments = editor.WordControl.m_oLogicDocument.Comments;
-                var CommentId = Item.Id;
-                var CommentY = this.Pages[CurPage].Y + this.Lines[CurLine].Top;
-                var CommentH = this.Lines[CurLine].Bottom - this.Lines[CurLine].Top;
-                DocumentComments.Set_StartInfo(CommentId, this.Get_StartPage_Absolute() + CurPage, X, CommentY, CommentH, this.Id);
-                break;
-            case para_CommentEnd:
-                var DocumentComments = editor.WordControl.m_oLogicDocument.Comments;
-                var CommentId = Item.Id;
-                var CommentY = this.Pages[CurPage].Y + this.Lines[CurLine].Top;
-                var CommentH = this.Lines[CurLine].Bottom - this.Lines[CurLine].Top;
-                DocumentComments.Set_EndInfo(CommentId, this.Get_StartPage_Absolute() + CurPage, X, CommentY, CommentH, this.Id);
-                break;
             }
         }
-        return recalcresult_NextElement;
+        this.Pages[CurPage].EndInfo.Comments = PRSI.Comments;
+        if (PRSW) {
+            this.Pages[CurPage].EndInfo.RunRecalcInfo = PRSW.RunRecalcInfoBreak;
+        }
+    },
+    Update_EndInfo: function () {
+        for (var CurPage = 0, PagesCount = this.Pages.length; CurPage < PagesCount; CurPage++) {
+            this.Recalculate_PageEndInfo(null, CurPage);
+        }
+    },
+    Recalculate_Drawing_AddPageBreak: function (CurLine, CurPage, RemoveDrawings) {
+        if (true === RemoveDrawings) {
+            for (var TempPage = 0; TempPage <= CurPage; TempPage++) {
+                var DrawingsLen = this.Pages[TempPage].Drawings.length;
+                for (var CurPos = 0; CurPos < DrawingsLen; CurPos++) {
+                    var Item = this.Pages[TempPage].Drawings[CurPos];
+                    this.Parent.DrawingObjects.removeById(Item.PageNum, Item.Get_Id());
+                }
+                this.Pages[TempPage].Drawings = [];
+            }
+        }
+        this.Pages[CurPage].Set_EndLine(CurLine - 1);
+        if (0 === CurLine) {
+            this.Lines[-1] = new CParaLine(0);
+        }
+    },
+    Check_PageBreak: function () {
+        var Count = this.Content.length;
+        for (var Pos = 0; Pos < Count; Pos++) {
+            if (true === this.Content[Pos].Check_PageBreak()) {
+                return true;
+            }
+        }
+        return false;
+    },
+    Check_BreakPageEnd: function (Item) {
+        var PBChecker = new CParagraphCheckPageBreakEnd(Item);
+        var ContentLen = this.Content.length;
+        for (var CurPos = 0; CurPos < ContentLen; CurPos++) {
+            var Element = this.Content[CurPos];
+            if (true !== Element.Check_BreakPageEnd(PBChecker)) {
+                return false;
+            }
+        }
+        return true;
     },
     Internal_Recalculate_CurPos: function (Pos, UpdateCurPos, UpdateTarget, ReturnTarget) {
         if (this.Lines.length <= 0) {
@@ -2292,140 +737,52 @@ Paragraph.prototype = {
                 }
             };
         }
-        var LinePos = this.Internal_Get_ParaPos_By_Pos(Pos);
+        var LinePos = this.Get_CurrentParaPos();
+        if (-1 === LinePos.Line) {
+            return {
+                X: 0,
+                Y: 0,
+                Height: 0,
+                Internal: {
+                    Line: 0,
+                    Page: 0,
+                    Range: 0
+                }
+            };
+        }
         var CurLine = LinePos.Line;
         var CurRange = LinePos.Range;
         var CurPage = LinePos.Page;
-        if (Pos === this.CurPos.ContentPos && -1 != this.CurPos.Line) {
+        if (-1 != this.CurPos.Line) {
             CurLine = this.CurPos.Line;
+            CurRange = this.CurPos.Range;
         }
         var X = this.Lines[CurLine].Ranges[CurRange].XVisible;
         var Y = this.Pages[CurPage].Y + this.Lines[CurLine].Y;
-        if (Pos < this.Lines[CurLine].Ranges[CurRange].StartPos) {
-            var _X = X;
-            if (Pos < this.Numbering.Pos) {
-                _X += this.Numbering.WidthVisible;
-            }
-            if (true === UpdateCurPos) {
-                this.Internal_UpdateCurPos(_X, Y, Pos, CurLine, CurPage, UpdateTarget);
-            }
-            if (true === ReturnTarget) {
-                return {
-                    X: _X,
-                    Y: Y,
-                    Height: 0,
-                    Internal: {
-                        Line: CurLine,
-                        Page: CurPage,
-                        Range: CurRange
-                    }
-                };
+        var StartPos = this.Lines[CurLine].Ranges[CurRange].StartPos;
+        var EndPos = this.Lines[CurLine].Ranges[CurRange].EndPos;
+        if (true === this.Numbering.Check_Range(CurRange, CurLine)) {
+            X += this.Numbering.WidthVisible;
+        }
+        for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+            var Item = this.Content[CurPos];
+            var Res = Item.Recalculate_CurPos(X, Y, (CurPos === this.CurPos.ContentPos ? true : false), CurRange, CurLine, CurPage, UpdateCurPos, UpdateTarget, ReturnTarget);
+            if (CurPos === this.CurPos.ContentPos) {
+                return Res;
             } else {
-                return {
-                    X: _X,
-                    Y: Y,
-                    PageNum: CurPage + this.Get_StartPage_Absolute(),
-                    Internal: {
-                        Line: CurLine,
-                        Page: CurPage,
-                        Range: CurRange
-                    }
-                };
+                X = Res.X;
             }
         }
-        for (var ItemNum = this.Lines[CurLine].Ranges[CurRange].StartPos; ItemNum < this.Content.length; ItemNum++) {
-            var Item = this.Content[ItemNum];
-            if (ItemNum === this.Numbering.Pos) {
-                X += this.Numbering.WidthVisible;
+        return {
+            X: X,
+            Y: Y,
+            PageNum: CurPage + this.Get_StartPage_Absolute(),
+            Internal: {
+                Line: CurLine,
+                Page: CurPage,
+                Range: CurRange
             }
-            if (Pos === ItemNum) {
-                var _X = X;
-                if (ItemNum < this.Numbering.Pos) {
-                    _X += this.Numbering.WidthVisible;
-                }
-                if (true === UpdateCurPos) {
-                    this.Internal_UpdateCurPos(_X, Y, ItemNum, CurLine, CurPage, UpdateTarget);
-                }
-                if (true === ReturnTarget) {
-                    var CurTextPr = this.Internal_CalculateTextPr(ItemNum);
-                    g_oTextMeasurer.SetTextPr(CurTextPr);
-                    g_oTextMeasurer.SetFontSlot(fontslot_ASCII, CurTextPr.Get_FontKoef());
-                    var Height = g_oTextMeasurer.GetHeight();
-                    var Descender = Math.abs(g_oTextMeasurer.GetDescender());
-                    var Ascender = Height - Descender;
-                    var TargetY = Y - Ascender - CurTextPr.Position;
-                    switch (CurTextPr.VertAlign) {
-                    case vertalign_SubScript:
-                        TargetY -= CurTextPr.FontSize * g_dKoef_pt_to_mm * vertalign_Koef_Sub;
-                        break;
-                    case vertalign_SuperScript:
-                        TargetY -= CurTextPr.FontSize * g_dKoef_pt_to_mm * vertalign_Koef_Super;
-                        break;
-                    }
-                    return {
-                        X: _X,
-                        Y: TargetY,
-                        Height: Height,
-                        Internal: {
-                            Line: CurLine,
-                            Page: CurPage,
-                            Range: CurRange
-                        }
-                    };
-                } else {
-                    return {
-                        X: _X,
-                        Y: Y,
-                        PageNum: CurPage + this.Get_StartPage_Absolute(),
-                        Internal: {
-                            Line: CurLine,
-                            Page: CurPage,
-                            Range: CurRange
-                        }
-                    };
-                }
-            }
-            switch (Item.Type) {
-            case para_Text:
-                case para_Space:
-                case para_PageNum:
-                case para_Tab:
-                case para_TextPr:
-                case para_End:
-                case para_NewLine:
-                X += Item.WidthVisible;
-                break;
-            case para_Drawing:
-                if (drawing_Inline != Item.DrawingType) {
-                    break;
-                }
-                X += Item.WidthVisible;
-                break;
-            }
-        }
-        if (true === ReturnTarget) {
-            return {
-                X: X,
-                Y: TargetY,
-                Height: Height,
-                Internal: {
-                    Line: CurLine,
-                    Page: CurPage,
-                    Range: CurRange
-                }
-            };
-        } else {
-            return {
-                X: X,
-                Y: Y,
-                PageNum: CurPage + this.Get_StartPage_Absolute(),
-                Internal: {
-                    Line: CurLine,
-                    Page: CurPage,
-                    Range: CurRange
-                }
-            };
-        }
+        };
     },
     Internal_UpdateCurPos: function (X, Y, CurPos, CurLine, CurPage, UpdateTarget) {
         this.CurPos.X = X;
@@ -2433,13 +790,31 @@ Paragraph.prototype = {
         this.CurPos.PagesPos = CurPage;
         if (true === UpdateTarget) {
             var CurTextPr = this.Internal_CalculateTextPr(CurPos);
-            g_oTextMeasurer.SetTextPr(CurTextPr);
+            g_oTextMeasurer.SetTextPr(CurTextPr, this.Get_Theme());
             g_oTextMeasurer.SetFontSlot(fontslot_ASCII, CurTextPr.Get_FontKoef());
             var Height = g_oTextMeasurer.GetHeight();
             var Descender = Math.abs(g_oTextMeasurer.GetDescender());
             var Ascender = Height - Descender;
             this.DrawingDocument.SetTargetSize(Height);
-            this.DrawingDocument.SetTargetColor(CurTextPr.Color.r, CurTextPr.Color.g, CurTextPr.Color.b);
+            if (true === CurTextPr.Color.Auto) {
+                var Pr = this.Get_CompiledPr();
+                var BgColor = undefined;
+                if (undefined !== Pr.ParaPr.Shd && shd_Nil !== Pr.ParaPr.Shd.Value) {
+                    if (Pr.ParaPr.Shd.Unifill) {
+                        Pr.ParaPr.Shd.Unifill.check(this.Get_Theme(), this.Get_ColorMap());
+                        var RGBA = Pr.ParaPr.Shd.Unifill.getRGBAColor();
+                        BgColor = new CDocumentColor(RGBA.R, RGBA.G, RGBA.B, false);
+                    } else {
+                        BgColor = Pr.ParaPr.Shd.Color;
+                    }
+                } else {
+                    BgColor = this.Parent.Get_TextBackGroundColor();
+                }
+                var AutoColor = (undefined != BgColor && false === BgColor.Check_BlackAutoColor() ? new CDocumentColor(255, 255, 255, false) : new CDocumentColor(0, 0, 0, false));
+                this.DrawingDocument.SetTargetColor(AutoColor.r, AutoColor.g, AutoColor.b);
+            } else {
+                this.DrawingDocument.SetTargetColor(CurTextPr.Color.r, CurTextPr.Color.g, CurTextPr.Color.b);
+            }
             var TargetY = Y - Ascender - CurTextPr.Position;
             switch (CurTextPr.VertAlign) {
             case vertalign_SubScript:
@@ -2463,31 +838,6 @@ Paragraph.prototype = {
             }
         }
     },
-    Internal_CheckAddNumbering: function (CurPage, CurLine, CurRange) {
-        var StartLine = this.Pages[CurPage].StartLine;
-        var bRes = false;
-        if (CurLine != StartLine) {
-            bRes = false;
-        } else {
-            if (CurPage > 1) {
-                bRes = false;
-            } else {
-                var StartPos = this.Lines[CurLine].Ranges[CurRange].StartPos;
-                bRes = true;
-                for (var Pos = 0; Pos < StartPos; Pos++) {
-                    var Item = this.Content[Pos];
-                    if (true === Item.Can_AddNumbering()) {
-                        bRes = false;
-                        break;
-                    }
-                }
-            }
-        }
-        if (true === bRes) {
-            this.Numbering.Pos = -1;
-        }
-        return bRes;
-    },
     Internal_CompareBrd: function (Pr1, Pr2) {
         var Left_1 = Math.min(Pr1.Ind.Left, Pr1.Ind.Left + Pr1.Ind.FirstLine);
         var Right_1 = Pr1.Ind.Right;
@@ -2500,6 +850,60 @@ Paragraph.prototype = {
             return false;
         }
         return true;
+    },
+    Internal_GetTabPos: function (X, ParaPr, CurPage) {
+        var PRS = this.m_oPRSW;
+        var PageStart = this.Parent.Get_PageContentStartPos(this.PageNum + CurPage, this.Index);
+        if (undefined != this.Get_FramePr()) {
+            PageStart.X = 0;
+        } else {
+            if (PRS.RangesCount > 0 && Math.abs(PRS.Ranges[0].X0 - PageStart.X) < 0.001) {
+                PageStart.X = PRS.Ranges[0].X1;
+            }
+        }
+        var TabsCount = ParaPr.Tabs.Get_Count();
+        var TabsPos = [];
+        var bCheckLeft = true;
+        for (var Index = 0; Index < TabsCount; Index++) {
+            var Tab = ParaPr.Tabs.Get(Index);
+            var TabPos = Tab.Pos + PageStart.X;
+            if (true === bCheckLeft && TabPos > PageStart.X + ParaPr.Ind.Left - 0.001) {
+                TabsPos.push(new CParaTab(tab_Left, ParaPr.Ind.Left - 0.001));
+                bCheckLeft = false;
+            }
+            if (tab_Clear != Tab.Value) {
+                TabsPos.push(Tab);
+            }
+        }
+        if (true === bCheckLeft) {
+            TabsPos.push(new CParaTab(tab_Left, ParaPr.Ind.Left - 0.001));
+        }
+        TabsCount = TabsPos.length;
+        var Tab = null;
+        for (var Index = 0; Index < TabsCount; Index++) {
+            var TempTab = TabsPos[Index];
+            if (X < TempTab.Pos + PageStart.X + 0.001) {
+                Tab = TempTab;
+                break;
+            }
+        }
+        var NewX = 0;
+        if (null === Tab) {
+            if (X < PageStart.X + ParaPr.Ind.Left) {
+                NewX = PageStart.X + ParaPr.Ind.Left;
+            } else {
+                NewX = PageStart.X;
+                while (X >= NewX - 0.001) {
+                    NewX += Default_Tab_Stop;
+                }
+            }
+        } else {
+            NewX = Tab.Pos + PageStart.X + 0.001;
+        }
+        return {
+            NewX: NewX,
+            TabValue: (null === Tab ? tab_Left : Tab.Value)
+        };
     },
     Internal_Is_NullBorders: function (Borders) {
         if (border_None != Borders.Top.Value || border_None != Borders.Bottom.Value || border_None != Borders.Left.Value || border_None != Borders.Right.Value || border_None != Borders.Between.Value) {
@@ -2555,217 +959,33 @@ Paragraph.prototype = {
         NumTextPr.FontFamily.Name = NumTextPr.RFonts.Ascii.Name;
         return NumTextPr;
     },
-    Internal_Get_ClearPos: function (Pos) {
-        var Counter = 0;
-        for (var Index = 0; Index < Math.min(Pos, this.Content.length - 1); Index++) {
-            if (false === this.Content[Index].Is_RealContent() || para_Numbering === this.Content[Index].Type) {
-                Counter++;
+    Is_EmptyRange: function (CurLine, CurRange) {
+        var Line = this.Lines[CurLine];
+        var Range = Line.Ranges[CurRange];
+        var StartPos = Range.StartPos;
+        var EndPos = Range.EndPos;
+        for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+            if (false === this.Content[CurPos].Is_EmptyRange(CurLine, CurRange)) {
+                return false;
             }
         }
-        return Pos - Counter;
-    },
-    Internal_Get_RealPos: function (Pos) {
-        var Counter = Pos;
-        for (var Index = 0; Index <= Math.min(Counter, this.Content.length - 1); Index++) {
-            if (false === this.Content[Index].Is_RealContent() || para_Numbering === this.Content[Index].Type) {
-                Counter++;
-            }
-        }
-        return Counter;
-    },
-    Internal_Get_ClearContentLength: function () {
-        var Len = this.Content.length;
-        var ClearLen = Len;
-        for (var Index = 0; Index < Len; Index++) {
-            var Item = this.Content[Index];
-            if (false === Item.Is_RealContent()) {
-                ClearLen--;
-            }
-        }
-        return ClearLen;
-    },
-    Recalculate_Fast: function () {},
-    Start_FromNewPage: function () {
-        this.Pages.length = 1;
-        this.Pages[0].Set_EndLine(-1);
-        this.Lines[-1] = new CParaLine(0);
-        this.Lines[-1].Set_EndPos(-1, this);
+        return true;
     },
     Reset_RecalculateCache: function () {},
-    Recalculate_Page: function (_PageIndex) {
-        this.CurPos.Line = -1;
-        var PageIndex = _PageIndex - this.PageNum;
-        var CurPage, StartPos, CurLine;
-        if (0 === PageIndex) {
-            CurPage = 0;
-            StartPos = 0;
-            CurLine = 0;
-        } else {
-            CurPage = PageIndex;
-            if (CurPage > 0) {
-                CurLine = this.Pages[CurPage - 1].EndLine + 1;
-            } else {
-                CurLine = 0;
-            }
-            if (CurLine > 0) {
-                StartPos = this.Lines[CurLine - 1].EndPos + 1;
-            } else {
-                StartPos = 0;
-            }
-        }
-        if (1 === CurPage && this.Pages[0].EndLine < 0 && this.Parent instanceof CDocument && false === this.Get_CompiledPr2(false).ParaPr.PageBreakBefore) {
-            var Curr = this.Get_DocumentPrev();
-            while (null != Curr && type_Paragraph === Curr.GetType()) {
-                var CurrKeepNext = Curr.Get_CompiledPr2(false).ParaPr.KeepNext;
-                if ((true === CurrKeepNext && Curr.Pages.length > 1) || false === CurrKeepNext) {
-                    break;
-                } else {
-                    var Prev = Curr.Get_DocumentPrev();
-                    if (null === Prev || type_Paragraph != Prev.GetType()) {
-                        break;
-                    }
-                    var PrevKeepNext = Prev.Get_CompiledPr2(false).ParaPr.KeepNext;
-                    if (false === PrevKeepNext) {
-                        if (true === this.Parent.RecalcInfo.Can_RecalcObject()) {
-                            this.Parent.RecalcInfo.Set_KeepNext(Curr);
-                            return recalcresult_PrevPage;
-                        } else {
-                            break;
-                        }
-                    } else {
-                        Curr = Prev;
-                    }
-                }
-            }
-        }
-        this.FontMap.NeedRecalc = true;
-        this.Internal_Recalculate_0();
-        this.Internal_CheckSpelling();
-        var RecalcResult_1 = this.Internal_Recalculate_1_(StartPos, CurPage, CurLine);
-        var RecalcResult_2 = this.Internal_Recalculate_2_(StartPos, CurPage, CurLine);
-        if (true === this.Parent.RecalcInfo.WidowControlReset) {
-            this.Parent.RecalcInfo.Reset();
-        }
-        var RecalcResult = (recalcresult_NextElement != RecalcResult_2 ? RecalcResult_2 : RecalcResult_1);
-        return RecalcResult;
-    },
     RecalculateCurPos: function () {
-        this.Internal_Recalculate_CurPos(this.CurPos.ContentPos, true, true, false);
+        return this.Internal_Recalculate_CurPos(this.CurPos.ContentPos, true, true, false);
     },
     Recalculate_MinMaxContentWidth: function () {
-        this.Internal_Recalculate_0();
-        var bWord = false;
-        var nWordLen = 0;
-        var nSpaceLen = 0;
-        var nMinWidth = 0;
-        var nMaxWidth = 0;
-        var nCurMaxWidth = 0;
+        var MinMax = new CParagraphMinMaxContentWidth();
         var Count = this.Content.length;
         for (var Pos = 0; Pos < Count; Pos++) {
             var Item = this.Content[Pos];
-            switch (Item.Type) {
-            case para_Text:
-                if (false === bWord) {
-                    bWord = true;
-                    nWordLen = Item.Width;
-                } else {
-                    nWordLen += Item.Width;
-                    if (true === Item.SpaceAfter) {
-                        if (nMinWidth < nWordLen) {
-                            nMinWidth = nWordLen;
-                        }
-                        bWord = false;
-                        nWordLen = 0;
-                    }
-                }
-                if (nSpaceLen > 0) {
-                    nCurMaxWidth += nSpaceLen;
-                    nSpaceLen = 0;
-                }
-                nCurMaxWidth += Item.Width;
-                break;
-            case para_Space:
-                if (true === bWord) {
-                    if (nMinWidth < nWordLen) {
-                        nMinWidth = nWordLen;
-                    }
-                    bWord = false;
-                    nWordLen = 0;
-                }
-                nSpaceLen += Item.Width;
-                break;
-            case para_Drawing:
-                if (true === bWord) {
-                    if (nMinWidth < nWordLen) {
-                        nMinWidth = nWordLen;
-                    }
-                    bWord = false;
-                    nWordLen = 0;
-                }
-                if ((true === Item.Is_Inline() || true === this.Parent.Is_DrawingShape()) && Item.Width > nMinWidth) {
-                    nMinWidth = Item.Width;
-                }
-                if (nSpaceLen > 0) {
-                    nCurMaxWidth += nSpaceLen;
-                    nSpaceLen = 0;
-                }
-                nCurMaxWidth += Item.Width;
-                break;
-            case para_PageNum:
-                if (true === bWord) {
-                    if (nMinWidth < nWordLen) {
-                        nMinWidth = nWordLen;
-                    }
-                    bWord = false;
-                    nWordLen = 0;
-                }
-                if (Item.Width > nMinWidth) {
-                    nMinWidth = Item.Width;
-                }
-                if (nSpaceLen > 0) {
-                    nCurMaxWidth += nSpaceLen;
-                    nSpaceLen = 0;
-                }
-                nCurMaxWidth += Item.Width;
-                break;
-            case para_Tab:
-                nWordLen += Item.Width;
-                if (nMinWidth < nWordLen) {
-                    nMinWidth = nWordLen;
-                }
-                bWord = false;
-                nWordLen = 0;
-                if (nSpaceLen > 0) {
-                    nCurMaxWidth += nSpaceLen;
-                    nSpaceLen = 0;
-                }
-                nCurMaxWidth += Item.Width;
-                break;
-            case para_NewLine:
-                if (nMinWidth < nWordLen) {
-                    nMinWidth = nWordLen;
-                }
-                bWord = false;
-                nWordLen = 0;
-                nSpaceLen = 0;
-                if (nCurMaxWidth > nMaxWidth) {
-                    nMaxWidth = nCurMaxWidth;
-                }
-                nCurMaxWidth = 0;
-                break;
-            case para_End:
-                if (nMinWidth < nWordLen) {
-                    nMinWidth = nWordLen;
-                }
-                if (nCurMaxWidth > nMaxWidth) {
-                    nMaxWidth = nCurMaxWidth;
-                }
-                break;
-            }
+            Item.Set_Paragraph(this);
+            Item.Recalculate_MinMaxContentWidth(MinMax);
         }
         return {
-            Min: (nMinWidth > 0 ? nMinWidth + 0.001 : 0),
-            Max: (nMaxWidth > 0 ? nMaxWidth + 0.001 : 0)
+            Min: (MinMax.nMinWidth > 0 ? MinMax.nMinWidth + 0.001 : 0),
+            Max: (MinMax.nMaxWidth > 0 ? MinMax.nMaxWidth + 0.001 : 0)
         };
     },
     Draw: function (PageNum, pGraphics) {
@@ -2774,40 +994,58 @@ Paragraph.prototype = {
             return;
         }
         var Pr = this.Get_CompiledPr();
-        var FramePr = this.Get_FramePr();
-        if (undefined != FramePr && this.Parent instanceof CDocument) {
-            var PixelError = editor.WordControl.m_oLogicDocument.DrawingDocument.GetMMPerDot(1);
-            var BoundsL = this.CalculatedFrame.L2 - PixelError;
-            var BoundsT = this.CalculatedFrame.T2 - PixelError;
-            var BoundsH = this.CalculatedFrame.H2 + 2 * PixelError;
-            var BoundsW = this.CalculatedFrame.W2 + 2 * PixelError;
-            pGraphics.SaveGrState();
-            pGraphics.AddClipRect(BoundsL, BoundsT, BoundsW, BoundsH);
+        if (true !== this.Is_Inline()) {
+            var FramePr = this.Get_FramePr();
+            if (undefined != FramePr && this.Parent instanceof CDocument) {
+                var PixelError = editor.WordControl.m_oLogicDocument.DrawingDocument.GetMMPerDot(1);
+                var BoundsL = this.CalculatedFrame.L2 - PixelError;
+                var BoundsT = this.CalculatedFrame.T2 - PixelError;
+                var BoundsH = this.CalculatedFrame.H2 + 2 * PixelError;
+                var BoundsW = this.CalculatedFrame.W2 + 2 * PixelError;
+                pGraphics.SaveGrState();
+                pGraphics.AddClipRect(BoundsL, BoundsT, BoundsW, BoundsH);
+            }
+        }
+        var Theme = this.Get_Theme();
+        var ColorMap = this.Get_ColorMap();
+        var BgColor = undefined;
+        if (undefined !== Pr.ParaPr.Shd && shd_Nil !== Pr.ParaPr.Shd.Value && true !== Pr.ParaPr.Shd.Color.Auto) {
+            if (Pr.ParaPr.Shd.Unifill) {
+                Pr.ParaPr.Shd.Unifill.check(this.Get_Theme(), this.Get_ColorMap());
+                var RGBA = Pr.ParaPr.Shd.Unifill.getRGBAColor();
+                BgColor = new CDocumentColor(RGBA.R, RGBA.G, RGBA.B, false);
+            } else {
+                BgColor = Pr.ParaPr.Shd.Color;
+            }
+        } else {
+            BgColor = this.Parent.Get_TextBackGroundColor();
         }
         this.Internal_Draw_1(CurPage, pGraphics, Pr);
         this.Internal_Draw_2(CurPage, pGraphics, Pr);
         this.Internal_Draw_3(CurPage, pGraphics, Pr);
-        this.Internal_Draw_4(CurPage, pGraphics, Pr);
-        this.Internal_Draw_5(CurPage, pGraphics, Pr);
+        this.Internal_Draw_4(CurPage, pGraphics, Pr, BgColor, Theme, ColorMap);
+        this.Internal_Draw_5(CurPage, pGraphics, Pr, BgColor);
         this.Internal_Draw_6(CurPage, pGraphics, Pr);
         if (undefined != FramePr && this.Parent instanceof CDocument) {
             pGraphics.RestoreGrState();
         }
     },
     Internal_Draw_1: function (CurPage, pGraphics, Pr) {
-        if (locktype_None != this.Lock.Get_Type()) {
-            if ((CurPage > 0 || false === this.Is_StartFromNewPage() || null === this.Get_DocumentPrev())) {
-                var X_min = -1 + Math.min(this.Pages[CurPage].X, this.Pages[CurPage].X + Pr.ParaPr.Ind.Left, this.Pages[CurPage].X + Pr.ParaPr.Ind.Left + Pr.ParaPr.Ind.FirstLine);
-                var Y_top = this.Pages[CurPage].Bounds.Top;
-                var Y_bottom = this.Pages[CurPage].Bounds.Bottom;
-                if (true === editor.isCoMarksDraw || locktype_Mine != this.Lock.Get_Type()) {
-                    pGraphics.DrawLockParagraph(this.Lock.Get_Type(), X_min, Y_top, Y_bottom);
+        if (this.bFromDocument) {
+            if (locktype_None != this.Lock.Get_Type()) {
+                if ((CurPage > 0 || false === this.Is_StartFromNewPage() || null === this.Get_DocumentPrev())) {
+                    var X_min = -1 + Math.min(this.Pages[CurPage].X, this.Pages[CurPage].X + Pr.ParaPr.Ind.Left, this.Pages[CurPage].X + Pr.ParaPr.Ind.Left + Pr.ParaPr.Ind.FirstLine);
+                    var Y_top = this.Pages[CurPage].Bounds.Top;
+                    var Y_bottom = this.Pages[CurPage].Bounds.Bottom;
+                    if (true === editor.isCoMarksDraw || locktype_Mine != this.Lock.Get_Type()) {
+                        pGraphics.DrawLockParagraph(this.Lock.Get_Type(), X_min, Y_top, Y_bottom);
+                    }
                 }
             }
         }
     },
     Internal_Draw_2: function (CurPage, pGraphics, Pr) {
-        if (true === editor.ShowParaMarks && ((0 === CurPage && (this.Pages.length <= 1 || this.Pages[1].FirstLine > 0)) || (1 === CurPage && this.Pages.length > 1 && this.Pages[1].FirstLine === 0)) && (true === Pr.ParaPr.KeepNext || true === Pr.ParaPr.KeepLines || true === Pr.ParaPr.PageBreakBefore)) {
+        if (this.bFromDocument && true === editor.ShowParaMarks && ((0 === CurPage && (this.Pages.length <= 1 || this.Pages[1].FirstLine > 0)) || (1 === CurPage && this.Pages.length > 1 && this.Pages[1].FirstLine === 0)) && (true === Pr.ParaPr.KeepNext || true === Pr.ParaPr.KeepLines || true === Pr.ParaPr.PageBreakBefore)) {
             var SpecFont = {
                 FontFamily: {
                     Name: "Arial",
@@ -2830,34 +1068,20 @@ Paragraph.prototype = {
         }
     },
     Internal_Draw_3: function (CurPage, pGraphics, Pr) {
+        if (!this.bFromDocument) {
+            return;
+        }
+        var bDrawBorders = this.Is_NeedDrawBorders();
+        var PDSH = g_oPDSH;
         var _Page = this.Pages[CurPage];
         var DocumentComments = editor.WordControl.m_oLogicDocument.Comments;
-        var bDrawComments = (DocumentComments.Is_Use() && true != editor.isViewMode);
-        var CommentsFlag = DocumentComments.Check_CurrentDraw();
-        var CollaborativeChanges = 0;
-        var StartPagePos = this.Lines[_Page.StartLine].StartPos;
-        var DrawSearch = editor.WordControl.m_oLogicDocument.SearchEngine.Selection;
-        if (undefined === pGraphics.RENDERER_PDF_FLAG) {
-            var Pos = 0;
-            while (Pos < StartPagePos) {
-                Item = this.Content[Pos];
-                if (para_CollaborativeChangesEnd == Item.Type) {
-                    CollaborativeChanges--;
-                } else {
-                    if (para_CollaborativeChangesStart == Item.Type) {
-                        CollaborativeChanges++;
-                    }
-                }
-                Pos++;
-            }
-        }
-        var CurTextPr = _Page.TextPr;
+        var Page_abs = CurPage + this.Get_StartPage_Absolute();
+        var DrawComm = (DocumentComments.Is_Use() && true != editor.isViewMode);
+        var DrawFind = editor.WordControl.m_oLogicDocument.SearchEngine.Selection;
+        var DrawColl = (undefined === pGraphics.RENDERER_PDF_FLAG ? false : true);
+        PDSH.Reset(this, pGraphics, DrawColl, DrawFind, DrawComm, this.Get_EndInfoByPage(CurPage - 1));
         var StartLine = _Page.StartLine;
         var EndLine = _Page.EndLine;
-        var aHigh = new CParaDrawingRangeLines();
-        var aColl = new CParaDrawingRangeLines();
-        var aFind = new CParaDrawingRangeLines();
-        var aComm = new CParaDrawingRangeLines();
         for (var CurLine = StartLine; CurLine <= EndLine; CurLine++) {
             var _Line = this.Lines[CurLine];
             var _LineMetrics = _Line.Metrics;
@@ -2870,33 +1094,16 @@ Paragraph.prototype = {
             var RangesCount = _Line.Ranges.length;
             for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
                 var _Range = _Line.Ranges[CurRange];
-                aHigh.Clear();
-                aColl.Clear();
-                aFind.Clear();
-                aComm.Clear();
                 var X = _Range.XVisible;
                 var StartPos = _Range.StartPos;
-                var EndPos = (CurRange === RangesCount - 1 ? EndLinePos : _Line.Ranges[CurRange + 1].StartPos - 1);
-                for (var Pos = StartPos; Pos <= EndPos; Pos++) {
-                    var Item = this.Content[Pos];
-                    var bSearchResult = false;
-                    if (true === DrawSearch) {
-                        for (var SId in this.SearchResults) {
-                            var SResult = this.SearchResults[SId];
-                            if (Pos >= SResult.StartPos && Pos < SResult.EndPos) {
-                                bSearchResult = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (Pos === this.Numbering.Pos) {
-                        var NumberingType = this.Numbering.Type;
-                        var NumberingItem = this.Numbering;
-                        if (para_Numbering === NumberingType) {
-                            var NumPr = Pr.ParaPr.NumPr;
-                            if (undefined === NumPr || undefined === NumPr.NumId || 0 === NumPr.NumId || "0" === NumPr.NumId) {
-                                break;
-                            }
+                var EndPos = _Range.EndPos;
+                PDSH.Reset_Range(CurPage, CurLine, CurRange, X, Y0, Y1, _Range.Spaces);
+                if (true === this.Numbering.Check_Range(CurRange, CurLine)) {
+                    var NumberingType = this.Numbering.Type;
+                    var NumberingItem = this.Numbering;
+                    if (para_Numbering === NumberingType) {
+                        var NumPr = Pr.ParaPr.NumPr;
+                        if (undefined === NumPr || undefined === NumPr.NumId || 0 === NumPr.NumId || "0" === NumPr.NumId) {} else {
                             var Numbering = this.Parent.Get_Numbering();
                             var NumLvl = Numbering.Get_AbstractNum(NumPr.NumId).Lvl[NumPr.Lvl];
                             var NumJc = NumLvl.Jc;
@@ -2912,108 +1119,17 @@ Paragraph.prototype = {
                                 }
                             }
                             if (highlight_None != NumTextPr.HighLight) {
-                                aHigh.Add(Y0, Y1, X_start, X_start + NumberingItem.WidthNum + NumberingItem.WidthSuff, 0, NumTextPr.HighLight.r, NumTextPr.HighLight.g, NumTextPr.HighLight.b);
-                            }
-                            if (CollaborativeChanges > 0) {
-                                aColl.Add(Y0, Y1, X_start, X_start + NumberingItem.WidthNum + NumberingItem.WidthSuff, 0, 0, 0, 0);
-                            }
-                            X += NumberingItem.WidthVisible;
-                        } else {
-                            if (para_PresentationNumbering === NumberingType) {
-                                X += NumberingItem.WidthVisible;
+                                PDSH.High.Add(Y0, Y1, X_start, X_start + NumberingItem.WidthNum + NumberingItem.WidthSuff, 0, NumTextPr.HighLight.r, NumTextPr.HighLight.g, NumTextPr.HighLight.b);
                             }
                         }
                     }
-                    switch (Item.Type) {
-                    case para_PageNum:
-                        case para_Drawing:
-                        case para_Tab:
-                        case para_Text:
-                        if (para_Drawing === Item.Type && drawing_Anchor === Item.DrawingType) {
-                            break;
-                        }
-                        if (CommentsFlag != comments_NoComment && true === bDrawComments) {
-                            aComm.Add(Y0, Y1, X, X + Item.WidthVisible, 0, 0, 0, 0, {
-                                Active: CommentsFlag === comments_ActiveComment ? true : false
-                            });
-                        } else {
-                            if (highlight_None != CurTextPr.HighLight) {
-                                aHigh.Add(Y0, Y1, X, X + Item.WidthVisible, 0, CurTextPr.HighLight.r, CurTextPr.HighLight.g, CurTextPr.HighLight.b);
-                            }
-                        }
-                        if (true === bSearchResult) {
-                            aFind.Add(Y0, Y1, X, X + Item.WidthVisible, 0, 0, 0, 0);
-                        } else {
-                            if (CollaborativeChanges > 0) {
-                                aColl.Add(Y0, Y1, X, X + Item.WidthVisible, 0, 0, 0, 0);
-                            }
-                        }
-                        if (para_Drawing != Item.Type || drawing_Anchor != Item.DrawingType) {
-                            X += Item.WidthVisible;
-                        }
-                        break;
-                    case para_Space:
-                        if (Pos >= _Range.StartPos2 && Pos <= _Range.EndPos2) {
-                            if (CommentsFlag != comments_NoComment && bDrawComments) {
-                                aComm.Add(Y0, Y1, X, X + Item.WidthVisible, 0, 0, 0, 0, {
-                                    Active: CommentsFlag === comments_ActiveComment ? true : false
-                                });
-                            } else {
-                                if (highlight_None != CurTextPr.HighLight) {
-                                    aHigh.Add(Y0, Y1, X, X + Item.WidthVisible, 0, CurTextPr.HighLight.r, CurTextPr.HighLight.g, CurTextPr.HighLight.b);
-                                }
-                            }
-                        }
-                        if (true === bSearchResult) {
-                            aFind.Add(Y0, Y1, X, X + Item.WidthVisible, 0, 0, 0, 0);
-                        } else {
-                            if (CollaborativeChanges > 0) {
-                                aColl.Add(Y0, Y1, X, X + Item.WidthVisible, 0, 0, 0, 0);
-                            }
-                        }
-                        X += Item.WidthVisible;
-                        break;
-                    case para_TextPr:
-                        CurTextPr = Item.CalcValue;
-                        break;
-                    case para_End:
-                        if (CollaborativeChanges > 0) {
-                            aColl.Add(Y0, Y1, X, X + Item.WidthVisible, 0, 0, 0, 0);
-                        }
-                        X += Item.Width;
-                        break;
-                    case para_NewLine:
-                        X += Item.WidthVisible;
-                        break;
-                    case para_CollaborativeChangesStart:
-                        CollaborativeChanges++;
-                        break;
-                    case para_CollaborativeChangesEnd:
-                        CollaborativeChanges--;
-                        break;
-                    case para_CommentStart:
-                        if (undefined === pGraphics.RENDERER_PDF_FLAG) {
-                            var CommentId = Item.Id;
-                            var CommentY = this.Pages[CurPage].Y + this.Lines[CurLine].Top;
-                            var CommentH = this.Lines[CurLine].Bottom - this.Lines[CurLine].Top;
-                            DocumentComments.Set_StartInfo(CommentId, this.Get_StartPage_Absolute() + CurPage, X, CommentY, CommentH, this.Id);
-                            DocumentComments.Add_CurrentDraw(CommentId);
-                            CommentsFlag = DocumentComments.Check_CurrentDraw();
-                        }
-                        break;
-                    case para_CommentEnd:
-                        if (undefined === pGraphics.RENDERER_PDF_FLAG) {
-                            var CommentId = Item.Id;
-                            var CommentY = this.Pages[CurPage].Y + this.Lines[CurLine].Top;
-                            var CommentH = this.Lines[CurLine].Bottom - this.Lines[CurLine].Top;
-                            DocumentComments.Set_EndInfo(CommentId, this.Get_StartPage_Absolute() + CurPage, X, CommentY, CommentH, this.Id);
-                            DocumentComments.Remove_CurrentDraw(CommentId);
-                            CommentsFlag = DocumentComments.Check_CurrentDraw();
-                        }
-                        break;
-                    }
+                    PDSH.X += this.Numbering.WidthVisible;
                 }
-                if ((_Range.W > 0.001 || true === this.IsEmpty()) && ((this.Pages.length - 1 === CurPage) || (CurLine < this.Pages[CurPage + 1].FirstLine)) && shd_Clear === Pr.ParaPr.Shd.Value) {
+                for (var Pos = StartPos; Pos <= EndPos; Pos++) {
+                    var Item = this.Content[Pos];
+                    Item.Draw_HighLights(PDSH);
+                }
+                if ((_Range.W > 0.001 || true === this.IsEmpty() || true !== this.Is_EmptyRange(CurLine, CurRange)) && ((this.Pages.length - 1 === CurPage) || (CurLine < this.Pages[CurPage + 1].FirstLine)) && shd_Clear === Pr.ParaPr.Shd.Value && (Pr.ParaPr.Shd.Unifill || (Pr.ParaPr.Shd.Color && true !== Pr.ParaPr.Shd.Color.Auto))) {
                     var TempX0 = this.Lines[CurLine].Ranges[CurRange].X;
                     if (0 === CurRange) {
                         TempX0 = Math.min(TempX0, this.Pages[CurPage].X + Pr.ParaPr.Ind.Left, this.Pages[CurPage].X + Pr.ParaPr.Ind.Left + Pr.ParaPr.Ind.FirstLine);
@@ -3077,10 +1193,25 @@ Paragraph.prototype = {
                             TempX1 += 1;
                         }
                     }
-                    pGraphics.b_color1(Pr.ParaPr.Shd.Color.r, Pr.ParaPr.Shd.Color.g, Pr.ParaPr.Shd.Color.b, 255);
+                    if (Pr.ParaPr.Shd.Unifill) {
+                        Pr.ParaPr.Shd.Unifill.check(this.Get_Theme(), this.Get_ColorMap());
+                        var RGBA = Pr.ParaPr.Shd.Unifill.getRGBAColor();
+                        pGraphics.b_color1(RGBA.R, RGBA.G, RGBA.B, 255);
+                    } else {
+                        pGraphics.b_color1(Pr.ParaPr.Shd.Color.r, Pr.ParaPr.Shd.Color.g, Pr.ParaPr.Shd.Color.b, 255);
+                    }
                     pGraphics.rect(TempX0, this.Pages[CurPage].Y + TempTop, TempX1 - TempX0, TempBottom - TempTop);
                     pGraphics.df();
                 }
+                var aShd = PDSH.Shd;
+                var Element = aShd.Get_Next();
+                while (null != Element) {
+                    pGraphics.b_color1(Element.r, Element.g, Element.b, 255);
+                    pGraphics.rect(Element.x0, Element.y0, Element.x1 - Element.x0, Element.y1 - Element.y0);
+                    pGraphics.df();
+                    Element = aShd.Get_Next();
+                }
+                var aHigh = PDSH.High;
                 var Element = aHigh.Get_Next();
                 while (null != Element) {
                     pGraphics.b_color1(Element.r, Element.g, Element.b, 255);
@@ -3088,7 +1219,8 @@ Paragraph.prototype = {
                     pGraphics.df();
                     Element = aHigh.Get_Next();
                 }
-                Element = aComm.Get_Next();
+                var aComm = PDSH.Comm;
+                Element = (pGraphics.RENDERER_PDF_FLAG === true ? null : aComm.Get_Next());
                 while (null != Element) {
                     if (Element.Additional.Active === true) {
                         pGraphics.b_color1(240, 200, 120, 255);
@@ -3097,20 +1229,32 @@ Paragraph.prototype = {
                     }
                     pGraphics.rect(Element.x0, Element.y0, Element.x1 - Element.x0, Element.y1 - Element.y0);
                     pGraphics.df();
+                    var TextTransform = this.Get_ParentTextTransform();
+                    if (TextTransform) {
+                        var _x0 = TextTransform.TransformPointX(Element.x0, Element.y0);
+                        var _y0 = TextTransform.TransformPointY(Element.x0, Element.y0);
+                        var _x1 = TextTransform.TransformPointX(Element.x1, Element.y1);
+                        var _y1 = TextTransform.TransformPointY(Element.x1, Element.y1);
+                        DocumentComments.Add_DrawingRect(_x0, _y0, _x1 - _x0, _y1 - _y0, Page_abs, Element.Additional.CommentId);
+                    } else {
+                        DocumentComments.Add_DrawingRect(Element.x0, Element.y0, Element.x1 - Element.x0, Element.y1 - Element.y0, Page_abs, Element.Additional.CommentId);
+                    }
                     Element = aComm.Get_Next();
                 }
+                var aColl = PDSH.Coll;
                 Element = aColl.Get_Next();
                 while (null != Element) {
-                    pGraphics.drawCollaborativeChanges(Element.x0, Element.y0, Element.x1 - Element.x0, Element.y1 - Element.y0);
+                    pGraphics.drawCollaborativeChanges(Element.x0, Element.y0, Element.x1 - Element.x0, Element.y1 - Element.y0, Element);
                     Element = aColl.Get_Next();
                 }
+                var aFind = PDSH.Find;
                 Element = aFind.Get_Next();
                 while (null != Element) {
                     pGraphics.drawSearchResult(Element.x0, Element.y0, Element.x1 - Element.x0, Element.y1 - Element.y0);
                     Element = aFind.Get_Next();
                 }
             }
-            if ((this.Pages.length - 1 === CurPage) || (CurLine < this.Pages[CurPage + 1].FirstLine)) {
+            if (true === bDrawBorders && ((this.Pages.length - 1 === CurPage) || (CurLine < this.Pages[CurPage + 1].FirstLine))) {
                 var TempX0 = Math.min(this.Lines[CurLine].Ranges[0].X, this.Pages[CurPage].X + Pr.ParaPr.Ind.Left, this.Pages[CurPage].X + Pr.ParaPr.Ind.Left + Pr.ParaPr.Ind.FirstLine);
                 var TempX1 = this.Lines[CurLine].Ranges[this.Lines[CurLine].Ranges.length - 1].XEnd;
                 if (true === this.Is_LineDropCap()) {
@@ -3119,8 +1263,8 @@ Paragraph.prototype = {
                 var TempTop = this.Lines[CurLine].Top;
                 var TempBottom = this.Lines[CurLine].Bottom;
                 if (0 === CurLine) {
-                    if (true === Pr.ParaPr.Brd.First && (Pr.ParaPr.Brd.Top.Value === border_Single || shd_Clear === Pr.ParaPr.Shd.Value)) {
-                        if (false === this.Is_StartFromNewPage() || null === this.Get_DocumentPrev()) {
+                    if (Pr.ParaPr.Brd.Top.Value === border_Single || shd_Clear === Pr.ParaPr.Shd.Value) {
+                        if ((true === Pr.ParaPr.Brd.First && (0 === CurPage || true === this.Parent.Is_TableCellContent() || true === Pr.ParaPr.PageBreakBefore)) || (true !== Pr.ParaPr.Brd.First && ((0 === CurPage && null === this.Get_DocumentPrev()) || (1 === CurPage && true === this.Is_StartFromNewPage())))) {
                             TempTop += Pr.ParaPr.Spacing.Before;
                         }
                     }
@@ -3136,340 +1280,183 @@ Paragraph.prototype = {
                     }
                 }
                 if (Pr.ParaPr.Brd.Right.Value === border_Single) {
-                    pGraphics.p_color(Pr.ParaPr.Brd.Right.Color.r, Pr.ParaPr.Brd.Right.Color.g, Pr.ParaPr.Brd.Right.Color.b, 255);
+                    var RGBA = Pr.ParaPr.Brd.Right.Get_Color(this);
+                    pGraphics.p_color(RGBA.r, RGBA.g, RGBA.b, 255);
                     pGraphics.drawVerLine(c_oAscLineDrawingRule.Right, TempX1 + 1 + Pr.ParaPr.Brd.Right.Size + Pr.ParaPr.Brd.Right.Space, this.Pages[CurPage].Y + TempTop, this.Pages[CurPage].Y + TempBottom, Pr.ParaPr.Brd.Right.Size);
                 }
                 if (Pr.ParaPr.Brd.Left.Value === border_Single) {
-                    pGraphics.p_color(Pr.ParaPr.Brd.Left.Color.r, Pr.ParaPr.Brd.Left.Color.g, Pr.ParaPr.Brd.Left.Color.b, 255);
+                    var RGBA = Pr.ParaPr.Brd.Left.Get_Color(this);
+                    pGraphics.p_color(RGBA.r, RGBA.g, RGBA.b, 255);
                     pGraphics.drawVerLine(c_oAscLineDrawingRule.Left, TempX0 - 1 - Pr.ParaPr.Brd.Left.Size - Pr.ParaPr.Brd.Left.Space, this.Pages[CurPage].Y + TempTop, this.Pages[CurPage].Y + TempBottom, Pr.ParaPr.Brd.Left.Size);
                 }
             }
         }
     },
-    Internal_Draw_4: function (CurPage, pGraphics, Pr) {
-        var StartPagePos = this.Lines[this.Pages[CurPage].StartLine].StartPos;
-        var HyperPos = this.Internal_FindBackward(StartPagePos, [para_HyperlinkStart, para_HyperlinkEnd]);
-        var bVisitedHyperlink = false;
-        if (true === HyperPos.Found && para_HyperlinkStart === HyperPos.Type) {
-            bVisitedHyperlink = this.Content[HyperPos.LetterPos].Get_Visited();
-        }
-        var CurTextPr = this.Pages[CurPage].TextPr;
-        pGraphics.SetTextPr(CurTextPr);
-        if (true === bVisitedHyperlink) {
-            pGraphics.b_color1(128, 0, 151, 255);
-        } else {
-            pGraphics.b_color1(CurTextPr.Color.r, CurTextPr.Color.g, CurTextPr.Color.b, 255);
-        }
+    Internal_Draw_4: function (CurPage, pGraphics, Pr, BgColor, Theme, ColorMap) {
+        var PDSE = this.m_oPDSE;
+        PDSE.Reset(this, pGraphics, BgColor, Theme, ColorMap);
         var StartLine = this.Pages[CurPage].StartLine;
         var EndLine = this.Pages[CurPage].EndLine;
         for (var CurLine = StartLine; CurLine <= EndLine; CurLine++) {
-            var StartPos = this.Lines[CurLine].StartPos;
-            var EndPos = this.Lines[CurLine].EndPos;
-            var bFirstLineItem = true;
-            var CurRange = 0;
-            var Y = this.Pages[CurPage].Y + this.Lines[CurLine].Y;
-            var X = this.Lines[CurLine].Ranges[CurRange].XVisible;
-            var bEnd = false;
-            for (var Pos = StartPos; Pos <= EndPos; Pos++) {
-                var Item = this.Content[Pos];
-                if (undefined != Item.CurRange) {
-                    if (Item.CurRange > CurRange) {
-                        CurRange = Item.CurRange;
-                        X = this.Lines[CurLine].Ranges[CurRange].XVisible;
-                    }
-                }
-                var TempY = Y;
-                switch (CurTextPr.VertAlign) {
-                case vertalign_SubScript:
-                    Y -= vertalign_Koef_Sub * CurTextPr.FontSize * g_dKoef_pt_to_mm;
-                    break;
-                case vertalign_SuperScript:
-                    Y -= vertalign_Koef_Super * CurTextPr.FontSize * g_dKoef_pt_to_mm;
-                    break;
-                }
-                if (Pos === this.Numbering.Pos) {
+            var Line = this.Lines[CurLine];
+            var RangesCount = Line.Ranges.length;
+            for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
+                var Y = this.Pages[CurPage].Y + this.Lines[CurLine].Y;
+                var X = this.Lines[CurLine].Ranges[CurRange].XVisible;
+                var Range = Line.Ranges[CurRange];
+                PDSE.Reset_Range(CurPage, CurLine, CurRange, X, Y);
+                var StartPos = Range.StartPos;
+                var EndPos = Range.EndPos;
+                if (true === this.Numbering.Check_Range(CurRange, CurLine)) {
                     var NumberingItem = this.Numbering;
-                    if (para_Numbering === this.Numbering.Type) {
+                    if (para_Numbering === NumberingItem.Type) {
                         var NumPr = Pr.ParaPr.NumPr;
-                        if (undefined === NumPr || undefined === NumPr.NumId || 0 === NumPr.NumId || "0" === NumPr.NumId) {
-                            break;
-                        }
-                        var Numbering = this.Parent.Get_Numbering();
-                        var NumLvl = Numbering.Get_AbstractNum(NumPr.NumId).Lvl[NumPr.Lvl];
-                        var NumSuff = NumLvl.Suff;
-                        var NumJc = NumLvl.Jc;
-                        var NumTextPr = this.Get_CompiledPr2(false).TextPr.Copy();
-                        var TextPr_temp = this.TextPr.Value.Copy();
-                        TextPr_temp.Underline = undefined;
-                        NumTextPr.Merge(TextPr_temp);
-                        NumTextPr.Merge(NumLvl.TextPr);
-                        var X_start = X;
-                        if (align_Right === NumJc) {
-                            X_start = X - NumberingItem.WidthNum;
-                        } else {
-                            if (align_Center === NumJc) {
-                                X_start = X - NumberingItem.WidthNum / 2;
+                        if (undefined === NumPr || undefined === NumPr.NumId || 0 === NumPr.NumId || "0" === NumPr.NumId || (undefined !== this.Get_SectionPr() && true === this.IsEmpty())) {} else {
+                            var Numbering = this.Parent.Get_Numbering();
+                            var NumLvl = Numbering.Get_AbstractNum(NumPr.NumId).Lvl[NumPr.Lvl];
+                            var NumSuff = NumLvl.Suff;
+                            var NumJc = NumLvl.Jc;
+                            var NumTextPr = this.Get_CompiledPr2(false).TextPr.Copy();
+                            var TextPr_temp = this.TextPr.Value.Copy();
+                            TextPr_temp.Underline = undefined;
+                            NumTextPr.Merge(TextPr_temp);
+                            NumTextPr.Merge(NumLvl.TextPr);
+                            var X_start = X;
+                            if (align_Right === NumJc) {
+                                X_start = X - NumberingItem.WidthNum;
+                            } else {
+                                if (align_Center === NumJc) {
+                                    X_start = X - NumberingItem.WidthNum / 2;
+                                }
                             }
-                        }
-                        pGraphics.b_color1(NumTextPr.Color.r, NumTextPr.Color.g, NumTextPr.Color.b, 255);
-                        switch (NumJc) {
-                        case align_Right:
-                            NumberingItem.Draw(X - NumberingItem.WidthNum, Y, pGraphics, Numbering, NumTextPr, NumPr);
-                            break;
-                        case align_Center:
-                            NumberingItem.Draw(X - NumberingItem.WidthNum / 2, Y, pGraphics, Numbering, NumTextPr, NumPr);
-                            break;
-                        case align_Left:
-                            default:
-                            NumberingItem.Draw(X, Y, pGraphics, Numbering, NumTextPr, NumPr);
-                            break;
-                        }
-                        if (true === editor.ShowParaMarks && numbering_suff_Tab === NumSuff) {
-                            var TempWidth = NumberingItem.WidthSuff;
-                            var TempRealWidth = 3.143;
-                            var X1 = X;
+                            var AutoColor = (undefined != BgColor && false === BgColor.Check_BlackAutoColor() ? new CDocumentColor(255, 255, 255, false) : new CDocumentColor(0, 0, 0, false));
+                            var RGBA;
+                            if (NumTextPr.Unifill) {
+                                NumTextPr.Unifill.check(PDSE.Theme, PDSE.ColorMap);
+                                RGBA = NumTextPr.Unifill.getRGBAColor();
+                                pGraphics.b_color1(RGBA.R, RGBA.G, RGBA.B, 255);
+                            } else {
+                                if (true === NumTextPr.Color.Auto) {
+                                    pGraphics.b_color1(AutoColor.r, AutoColor.g, AutoColor.b, 255);
+                                } else {
+                                    pGraphics.b_color1(NumTextPr.Color.r, NumTextPr.Color.g, NumTextPr.Color.b, 255);
+                                }
+                            }
                             switch (NumJc) {
                             case align_Right:
+                                NumberingItem.Draw(X - NumberingItem.WidthNum, Y, pGraphics, Numbering, NumTextPr, NumPr, PDSE.Theme);
                                 break;
                             case align_Center:
-                                X1 += NumberingItem.WidthNum / 2;
+                                NumberingItem.Draw(X - NumberingItem.WidthNum / 2, Y, pGraphics, Numbering, NumTextPr, NumPr, PDSE.Theme);
                                 break;
                             case align_Left:
                                 default:
-                                X1 += NumberingItem.WidthNum;
+                                NumberingItem.Draw(X, Y, pGraphics, Numbering, NumTextPr, NumPr, PDSE.Theme);
                                 break;
                             }
-                            var X0 = TempWidth / 2 - TempRealWidth / 2;
-                            pGraphics.SetFont({
-                                FontFamily: {
-                                    Name: "ASCW3",
-                                    Index: -1
-                                },
-                                FontSize: 10,
-                                Italic: false,
-                                Bold: false
-                            });
-                            if (X0 > 0) {
-                                pGraphics.FillText2(X1 + X0, Y, String.fromCharCode(tab_Symbol), 0, TempWidth);
-                            } else {
-                                pGraphics.FillText2(X1, Y, String.fromCharCode(tab_Symbol), TempRealWidth - TempWidth, TempWidth);
+                            if (true === editor.ShowParaMarks && numbering_suff_Tab === NumSuff) {
+                                var TempWidth = NumberingItem.WidthSuff;
+                                var TempRealWidth = 3.143;
+                                var X1 = X;
+                                switch (NumJc) {
+                                case align_Right:
+                                    break;
+                                case align_Center:
+                                    X1 += NumberingItem.WidthNum / 2;
+                                    break;
+                                case align_Left:
+                                    default:
+                                    X1 += NumberingItem.WidthNum;
+                                    break;
+                                }
+                                var X0 = TempWidth / 2 - TempRealWidth / 2;
+                                pGraphics.SetFont({
+                                    FontFamily: {
+                                        Name: "ASCW3",
+                                        Index: -1
+                                    },
+                                    FontSize: 10,
+                                    Italic: false,
+                                    Bold: false
+                                });
+                                if (X0 > 0) {
+                                    pGraphics.FillText2(X1 + X0, Y, String.fromCharCode(tab_Symbol), 0, TempWidth);
+                                } else {
+                                    pGraphics.FillText2(X1, Y, String.fromCharCode(tab_Symbol), TempRealWidth - TempWidth, TempWidth);
+                                }
                             }
-                        }
-                        if (true === NumTextPr.Strikeout || true === NumTextPr.Underline) {
-                            pGraphics.p_color(NumTextPr.Color.r, NumTextPr.Color.g, NumTextPr.Color.b, 255);
-                        }
-                        if (true === NumTextPr.Strikeout) {
-                            pGraphics.drawHorLine(0, (Y - NumTextPr.FontSize * g_dKoef_pt_to_mm * 0.27), X_start, X_start + NumberingItem.WidthNum, (NumTextPr.FontSize / 18) * g_dKoef_pt_to_mm);
-                        }
-                        if (true === NumTextPr.Underline) {
-                            pGraphics.drawHorLine(0, (Y + this.Lines[CurLine].Metrics.TextDescent * 0.4), X_start, X_start + NumberingItem.WidthNum, (NumTextPr.FontSize / 18) * g_dKoef_pt_to_mm);
-                        }
-                        X += NumberingItem.WidthVisible;
-                        pGraphics.SetTextPr(CurTextPr);
-                        if (true === bVisitedHyperlink) {
-                            pGraphics.b_color1(128, 0, 151, 255);
-                        } else {
-                            pGraphics.b_color1(CurTextPr.Color.r, CurTextPr.Color.g, CurTextPr.Color.b, 255);
+                            if (true === NumTextPr.Strikeout || true === NumTextPr.Underline) {
+                                if (NumTextPr.Unifill) {
+                                    pGraphics.p_color(RGBA.R, RGBA.G, RGBA.B, 255);
+                                } else {
+                                    if (true === NumTextPr.Color.Auto) {
+                                        pGraphics.p_color(AutoColor.r, AutoColor.g, AutoColor.b, 255);
+                                    } else {
+                                        pGraphics.p_color(NumTextPr.Color.r, NumTextPr.Color.g, NumTextPr.Color.b, 255);
+                                    }
+                                }
+                            }
+                            if (true === NumTextPr.Strikeout) {
+                                pGraphics.drawHorLine(0, (Y - NumTextPr.FontSize * g_dKoef_pt_to_mm * 0.27), X_start, X_start + NumberingItem.WidthNum, (NumTextPr.FontSize / 18) * g_dKoef_pt_to_mm);
+                            }
+                            if (true === NumTextPr.Underline) {
+                                pGraphics.drawHorLine(0, (Y + this.Lines[CurLine].Metrics.TextDescent * 0.4), X_start, X_start + NumberingItem.WidthNum, (NumTextPr.FontSize / 18) * g_dKoef_pt_to_mm);
+                            }
                         }
                     } else {
                         if (para_PresentationNumbering === this.Numbering.Type) {
                             if (true != this.IsEmpty()) {
-                                var FirstTextPr = this.Internal_CalculateTextPr(this.Internal_GetStartPos());
                                 if (Pr.ParaPr.Ind.FirstLine < 0) {
-                                    NumberingItem.Draw(X, Y, pGraphics, FirstTextPr);
+                                    NumberingItem.Draw(X, Y, pGraphics, this.Get_FirstTextPr(), PDSE);
                                 } else {
-                                    NumberingItem.Draw(this.X + Pr.ParaPr.Ind.Left, Y, pGraphics, FirstTextPr);
+                                    NumberingItem.Draw(this.X + Pr.ParaPr.Ind.Left, Y, pGraphics, this.Get_FirstTextPr(), PDSE);
                                 }
                             }
-                            X += NumberingItem.WidthVisible;
                         }
                     }
+                    PDSE.X += NumberingItem.WidthVisible;
                 }
-                switch (Item.Type) {
-                case para_PageNum:
-                    case para_Drawing:
-                    case para_Tab:
-                    case para_Text:
-                    if (para_Drawing != Item.Type || drawing_Anchor != Item.DrawingType) {
-                        bFirstLineItem = false;
-                        if (para_PageNum != Item.Type) {
-                            Item.Draw(X, Y - Item.YOffset, pGraphics);
-                        } else {
-                            Item.Draw(X, Y - Item.YOffset, pGraphics, this.Get_StartPage_Absolute() + CurPage, Pr.ParaPr.Jc);
-                        }
-                        X += Item.WidthVisible;
-                    }
-                    if (para_Drawing === Item.Type && drawing_Inline === Item.DrawingType) {
-                        pGraphics.SetTextPr(CurTextPr);
-                        pGraphics.b_color1(CurTextPr.Color.r, CurTextPr.Color.g, CurTextPr.Color.b, 255);
-                        pGraphics.p_color(CurTextPr.Color.r, CurTextPr.Color.g, CurTextPr.Color.b, 255);
-                    }
-                    break;
-                case para_Space:
-                    Item.Draw(X, Y - Item.YOffset, pGraphics);
-                    X += Item.WidthVisible;
-                    break;
-                case para_TextPr:
-                    CurTextPr = Item.CalcValue;
-                    pGraphics.SetTextPr(CurTextPr);
-                    if (true === bVisitedHyperlink) {
-                        pGraphics.b_color1(128, 0, 151, 255);
-                    } else {
-                        pGraphics.b_color1(CurTextPr.Color.r, CurTextPr.Color.g, CurTextPr.Color.b, 255);
-                    }
-                    break;
-                case para_End:
-                    var EndTextPr = Item.TextPr;
-                    pGraphics.SetTextPr(EndTextPr);
-                    pGraphics.b_color1(EndTextPr.Color.r, EndTextPr.Color.g, EndTextPr.Color.b, 255);
-                    bEnd = true;
-                    var bEndCell = false;
-                    if (null === this.Get_DocumentNext() && true === this.Parent.Is_TableCellContent()) {
-                        bEndCell = true;
-                    }
-                    Item.Draw(X, Y - Item.YOffset, pGraphics, bEndCell);
-                    X += Item.Width;
-                    break;
-                case para_NewLine:
-                    Item.Draw(X, Y - Item.YOffset, pGraphics);
-                    X += Item.WidthVisible;
-                    break;
-                case para_HyperlinkStart:
-                    bVisitedHyperlink = Item.Get_Visited();
-                    if (true === bVisitedHyperlink) {
-                        pGraphics.b_color1(128, 0, 151, 255);
-                    } else {
-                        pGraphics.b_color1(CurTextPr.Color.r, CurTextPr.Color.g, CurTextPr.Color.b, 255);
-                    }
-                    break;
-                case para_HyperlinkEnd:
-                    bVisitedHyperlink = false;
-                    pGraphics.b_color1(CurTextPr.Color.r, CurTextPr.Color.g, CurTextPr.Color.b, 255);
-                    break;
+                for (var Pos = StartPos; Pos <= EndPos; Pos++) {
+                    var Item = this.Content[Pos];
+                    PDSE.CurPos.Update(Pos, 0);
+                    Item.Draw_Elements(PDSE);
                 }
-                Y = TempY;
             }
         }
     },
-    Internal_Draw_5: function (CurPage, pGraphics, Pr) {
-        var _Page = this.Pages[CurPage];
-        var StartPagePos = this.Lines[_Page.StartLine].StartPos;
-        var HyperPos = this.Internal_FindBackward(StartPagePos, [para_HyperlinkStart, para_HyperlinkEnd]);
-        var bVisitedHyperlink = false;
-        if (true === HyperPos.Found && para_HyperlinkStart === HyperPos.Type) {
-            bVisitedHyperlink = this.Content[HyperPos.LetterPos].Get_Visited();
-        }
-        var CurTextPr = _Page.TextPr;
-        var CurColor;
-        if (true === bVisitedHyperlink) {
-            CurColor = new CDocumentColor(128, 0, 151);
-        } else {
-            CurColor = new CDocumentColor(CurTextPr.Color.r, CurTextPr.Color.g, CurTextPr.Color.b);
-        }
-        var StartLine = _Page.StartLine;
-        var EndLine = _Page.EndLine;
-        var CheckSpelling = this.SpellChecker.Get_DrawingInfo();
-        var aStrikeout = new CParaDrawingRangeLines();
-        var aDStrikeout = new CParaDrawingRangeLines();
-        var aUnderline = new CParaDrawingRangeLines();
-        var aSpelling = new CParaDrawingRangeLines();
+    Internal_Draw_5: function (CurPage, pGraphics, Pr, BgColor) {
+        var PDSL = g_oPDSL;
+        PDSL.Reset(this, pGraphics, BgColor);
+        var Page = this.Pages[CurPage];
+        var StartLine = Page.StartLine;
+        var EndLine = Page.EndLine;
+        PDSL.SpellingCounter = this.SpellChecker.Get_DrawingInfo(this.Get_PageStartPos(CurPage));
         for (var CurLine = StartLine; CurLine <= EndLine; CurLine++) {
-            var _Line = this.Lines[CurLine];
-            var EndLinePos = _Line.EndPos;
-            var LineY = _Page.Y + _Line.Y;
-            var Y = LineY;
-            var LineM = _Line.Metrics;
-            var LineM_D_04 = LineM.TextDescent * 0.4;
-            var RangesCount = _Line.Ranges.length;
-            aStrikeout.Clear();
-            aDStrikeout.Clear();
-            aUnderline.Clear();
-            aSpelling.Clear();
+            var Line = this.Lines[CurLine];
+            var LineM = Line.Metrics;
+            var Baseline = Page.Y + Line.Y;
+            var UnderlineOffset = LineM.TextDescent * 0.4;
+            PDSL.Reset_Line(CurPage, CurLine, Baseline, UnderlineOffset);
+            var RangesCount = Line.Ranges.length;
             for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
-                var _Range = _Line.Ranges[CurRange];
-                var X = _Range.XVisible;
-                var StartPos = _Range.StartPos;
-                var EndPos = (CurRange === RangesCount - 1 ? EndLinePos : _Line.Ranges[CurRange + 1].StartPos - 1);
+                var Range = Line.Ranges[CurRange];
+                var X = Range.XVisible;
+                PDSL.Reset_Range(CurRange, X, Range.Spaces);
+                var StartPos = Range.StartPos;
+                var EndPos = Range.EndPos;
+                if (true === this.Numbering.Check_Range(CurRange, CurLine)) {
+                    PDSL.X += this.Numbering.WidthVisible;
+                }
                 for (var Pos = StartPos; Pos <= EndPos; Pos++) {
+                    PDSL.CurPos.Update(Pos, 0);
                     var Item = this.Content[Pos];
-                    if (Pos === this.Numbering.Pos) {
-                        X += this.Numbering.WidthVisible;
-                    }
-                    switch (Item.Type) {
-                    case para_End:
-                        case para_NewLine:
-                        X += Item.WidthVisible;
-                        break;
-                    case para_PageNum:
-                        case para_Drawing:
-                        case para_Tab:
-                        case para_Text:
-                        if (para_Drawing != Item.Type || drawing_Anchor != Item.DrawingType) {
-                            if (true === CurTextPr.DStrikeout) {
-                                aDStrikeout.Add(Y - CurTextPr.FontSize * g_dKoef_pt_to_mm * 0.27, Y - CurTextPr.FontSize * g_dKoef_pt_to_mm * 0.27, X, X + Item.WidthVisible, (CurTextPr.FontSize / 18) * g_dKoef_pt_to_mm, CurColor.r, CurColor.g, CurColor.b);
-                            } else {
-                                if (true === CurTextPr.Strikeout) {
-                                    aStrikeout.Add(Y - CurTextPr.FontSize * g_dKoef_pt_to_mm * 0.27, Y - CurTextPr.FontSize * g_dKoef_pt_to_mm * 0.27, X, X + Item.WidthVisible, (CurTextPr.FontSize / 18) * g_dKoef_pt_to_mm, CurColor.r, CurColor.g, CurColor.b);
-                                }
-                            }
-                            if (true === CurTextPr.Underline) {
-                                aUnderline.Add(Y + this.Lines[CurLine].Metrics.TextDescent * 0.4, Y + this.Lines[CurLine].Metrics.TextDescent * 0.4, X, X + Item.WidthVisible, (CurTextPr.FontSize / 18) * g_dKoef_pt_to_mm, CurColor.r, CurColor.g, CurColor.b);
-                            }
-                            if (true === CheckSpelling[Pos]) {
-                                aSpelling.Add(Y + LineM_D_04, Y + LineM_D_04, X, X + Item.WidthVisible, (CurTextPr.FontSize / 18) * g_dKoef_pt_to_mm, 0, 0, 0);
-                            }
-                            X += Item.WidthVisible;
-                        }
-                        break;
-                    case para_Space:
-                        if (Pos >= _Range.StartPos2 && Pos <= _Range.EndPos2) {
-                            if (true === CurTextPr.DStrikeout) {
-                                aDStrikeout.Add(Y - CurTextPr.FontSize * g_dKoef_pt_to_mm * 0.27, Y - CurTextPr.FontSize * g_dKoef_pt_to_mm * 0.27, X, X + Item.WidthVisible, (CurTextPr.FontSize / 18) * g_dKoef_pt_to_mm, CurColor.r, CurColor.g, CurColor.b);
-                            } else {
-                                if (true === CurTextPr.Strikeout) {
-                                    aStrikeout.Add(Y - CurTextPr.FontSize * g_dKoef_pt_to_mm * 0.27, Y - CurTextPr.FontSize * g_dKoef_pt_to_mm * 0.27, X, X + Item.WidthVisible, (CurTextPr.FontSize / 18) * g_dKoef_pt_to_mm, CurColor.r, CurColor.g, CurColor.b);
-                                }
-                            }
-                            if (true === CurTextPr.Underline) {
-                                aUnderline.Add(Y + LineM_D_04, Y + LineM_D_04, X, X + Item.WidthVisible, (CurTextPr.FontSize / 18) * g_dKoef_pt_to_mm, CurColor.r, CurColor.g, CurColor.b);
-                            }
-                        }
-                        X += Item.WidthVisible;
-                        break;
-                    case para_TextPr:
-                        CurTextPr = Item.CalcValue;
-                        if (true === bVisitedHyperlink) {
-                            CurColor.Set(128, 0, 151, 255);
-                        } else {
-                            CurColor.Set(CurTextPr.Color.r, CurTextPr.Color.g, CurTextPr.Color.b, 255);
-                        }
-                        switch (CurTextPr.VertAlign) {
-                        case vertalign_SubScript:
-                            Y = LineY - vertalign_Koef_Sub * CurTextPr.FontSize * g_dKoef_pt_to_mm;
-                            break;
-                        case vertalign_SuperScript:
-                            Y = LineY - vertalign_Koef_Super * CurTextPr.FontSize * g_dKoef_pt_to_mm;
-                            break;
-                        default:
-                            Y = LineY;
-                            break;
-                        }
-                        break;
-                    case para_HyperlinkStart:
-                        bVisitedHyperlink = Item.Get_Visited();
-                        if (true === bVisitedHyperlink) {
-                            CurColor.Set(128, 0, 151, 255);
-                        } else {
-                            CurColor.Set(CurTextPr.Color.r, CurTextPr.Color.g, CurTextPr.Color.b, 255);
-                        }
-                        break;
-                    case para_HyperlinkEnd:
-                        bVisitedHyperlink = false;
-                        CurColor.Set(CurTextPr.Color.r, CurTextPr.Color.g, CurTextPr.Color.b, 255);
-                        break;
-                    }
+                    Item.Draw_Lines(PDSL);
                 }
             }
+            var aStrikeout = PDSL.Strikeout;
+            var aDStrikeout = PDSL.DStrikeout;
+            var aUnderline = PDSL.Underline;
+            var aSpelling = PDSL.Spelling;
             var Element = aStrikeout.Get_Next();
             while (null != Element) {
                 pGraphics.p_color(Element.r, Element.g, Element.b, 255);
@@ -3489,16 +1476,21 @@ Paragraph.prototype = {
                 pGraphics.drawHorLine(0, Element.y0, Element.x0, Element.x1, Element.w);
                 Element = aUnderline.Get_Next();
             }
-            pGraphics.p_color(255, 0, 0, 255);
-            var SpellingW = editor.WordControl.m_oDrawingDocument.GetMMPerDot(1);
-            Element = aSpelling.Get_Next();
-            while (null != Element) {
-                pGraphics.DrawSpellingLine(Element.y0, Element.x0, Element.x1, SpellingW);
+            if (this.bFromDocument && this.LogicDocument && true === this.LogicDocument.Spelling.Use) {
+                pGraphics.p_color(255, 0, 0, 255);
+                var SpellingW = editor.WordControl.m_oDrawingDocument.GetMMPerDot(1);
                 Element = aSpelling.Get_Next();
+                while (null != Element) {
+                    pGraphics.DrawSpellingLine(Element.y0, Element.x0, Element.x1, SpellingW);
+                    Element = aSpelling.Get_Next();
+                }
             }
         }
     },
     Internal_Draw_6: function (CurPage, pGraphics, Pr) {
+        if (true !== this.Is_NeedDrawBorders()) {
+            return;
+        }
         var bEmpty = this.IsEmpty();
         var X_left = Math.min(this.Pages[CurPage].X + Pr.ParaPr.Ind.Left, this.Pages[CurPage].X + Pr.ParaPr.Ind.Left + Pr.ParaPr.Ind.FirstLine);
         var X_right = this.Pages[CurPage].XLimit - Pr.ParaPr.Ind.Right;
@@ -3517,18 +1509,20 @@ Paragraph.prototype = {
         }
         var LeftMW = -(border_Single === Pr.ParaPr.Brd.Left.Value ? Pr.ParaPr.Brd.Left.Size : 0);
         var RightMW = (border_Single === Pr.ParaPr.Brd.Right.Value ? Pr.ParaPr.Brd.Right.Size : 0);
+        var RGBA;
         if (true === Pr.ParaPr.Brd.First && border_Single === Pr.ParaPr.Brd.Top.Value && ((0 === CurPage && (false === this.Is_StartFromNewPage() || null === this.Get_DocumentPrev())) || (1 === CurPage && true === this.Is_StartFromNewPage()))) {
             var Y_top = this.Pages[CurPage].Y;
-            if (0 === CurPage) {
+            if (0 === CurPage || true === this.Parent.Is_TableCellContent() || true === Pr.ParaPr.PageBreakBefore) {
                 Y_top += Pr.ParaPr.Spacing.Before;
             }
-            pGraphics.p_color(Pr.ParaPr.Brd.Top.Color.r, Pr.ParaPr.Brd.Top.Color.g, Pr.ParaPr.Brd.Top.Color.b, 255);
+            RGBA = Pr.ParaPr.Brd.Top.Get_Color(this);
+            pGraphics.p_color(RGBA.r, RGBA.g, RGBA.b, 255);
             var StartLine = this.Pages[CurPage].StartLine;
             var RangesCount = this.Lines[StartLine].Ranges.length;
             for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
                 var X0 = (0 === CurRange ? X_left : this.Lines[StartLine].Ranges[CurRange].X);
                 var X1 = (RangesCount - 1 === CurRange ? X_right : this.Lines[StartLine].Ranges[CurRange].XEnd);
-                if (this.Lines[StartLine].Ranges[CurRange].W > 0.001 || (true === bEmpty && 1 === RangesCount)) {
+                if (false === this.Is_EmptyRange(StartLine, CurRange) || (true === bEmpty && 1 === RangesCount)) {
                     pGraphics.drawHorLineExt(c_oAscLineDrawingRule.Top, Y_top, X0, X1, Pr.ParaPr.Brd.Top.Size, LeftMW, RightMW);
                 }
             }
@@ -3538,15 +1532,17 @@ Paragraph.prototype = {
                 var Size = 0;
                 var Y = 0;
                 if (1 === CurPage && true === this.Is_StartFromNewPage() && border_Single === Pr.ParaPr.Brd.Top.Value) {
-                    pGraphics.p_color(Pr.ParaPr.Brd.Top.Color.r, Pr.ParaPr.Brd.Top.Color.g, Pr.ParaPr.Brd.Top.Color.b, 255);
+                    RGBA = Pr.ParaPr.Brd.Top.Get_Color(this);
+                    pGraphics.p_color(RGBA.r, RGBA.g, RGBA.b, 255);
                     Size = Pr.ParaPr.Brd.Top.Size;
-                    Y = this.Pages[CurPage].Y + this.Lines[this.Pages[CurPage].FirstLine].Top;
+                    Y = this.Pages[CurPage].Y + this.Lines[this.Pages[CurPage].FirstLine].Top + Pr.ParaPr.Spacing.Before;
                     bDraw = true;
                 } else {
                     if (0 === CurPage && false === this.Is_StartFromNewPage() && border_Single === Pr.ParaPr.Brd.Between.Value) {
-                        pGraphics.p_color(Pr.ParaPr.Brd.Between.Color.r, Pr.ParaPr.Brd.Between.Color.g, Pr.ParaPr.Brd.Between.Color.b, 255);
+                        RGBA = Pr.ParaPr.Brd.Between.Get_Color(this);
+                        pGraphics.p_color(RGBA.r, RGBA.g, RGBA.b, 255);
                         Size = Pr.ParaPr.Brd.Between.Size;
-                        Y = this.Pages[CurPage].Y;
+                        Y = this.Pages[CurPage].Y + Pr.ParaPr.Spacing.Before;
                         bDraw = true;
                     }
                 }
@@ -3556,7 +1552,7 @@ Paragraph.prototype = {
                     for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
                         var X0 = (0 === CurRange ? X_left : this.Lines[StartLine].Ranges[CurRange].X);
                         var X1 = (RangesCount - 1 === CurRange ? X_right : this.Lines[StartLine].Ranges[CurRange].XEnd);
-                        if (this.Lines[StartLine].Ranges[CurRange].W > 0.001 || (true === bEmpty && 1 === RangesCount)) {
+                        if (false === this.Is_EmptyRange(StartLine, CurRange) || (true === bEmpty && 1 === RangesCount)) {
                             pGraphics.drawHorLineExt(c_oAscLineDrawingRule.Top, Y, X0, X1, Size, LeftMW, RightMW);
                         }
                     }
@@ -3564,7 +1560,7 @@ Paragraph.prototype = {
             }
         }
         var CurLine = this.Pages[CurPage].EndLine;
-        var bEnd = (this.Content.length - 2 <= this.Lines[CurLine].EndPos ? true : false);
+        var bEnd = (this.Lines[CurLine].Info & paralineinfo_End ? true : false);
         if (true === bEnd && true === Pr.ParaPr.Brd.Last && border_Single === Pr.ParaPr.Brd.Bottom.Value) {
             var TempY = this.Pages[CurPage].Y;
             var NextEl = this.Get_DocumentNext();
@@ -3576,13 +1572,14 @@ Paragraph.prototype = {
                 TempY = this.Pages[CurPage].Y + this.Lines[CurLine].Bottom - Pr.ParaPr.Spacing.After;
                 DrawLineRule = c_oAscLineDrawingRule.Bottom;
             }
-            pGraphics.p_color(Pr.ParaPr.Brd.Bottom.Color.r, Pr.ParaPr.Brd.Bottom.Color.g, Pr.ParaPr.Brd.Bottom.Color.b, 255);
+            RGBA = Pr.ParaPr.Brd.Bottom.Get_Color(this);
+            pGraphics.p_color(RGBA.r, RGBA.g, RGBA.b, 255);
             var EndLine = this.Pages[CurPage].EndLine;
             var RangesCount = this.Lines[EndLine].Ranges.length;
             for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
                 var X0 = (0 === CurRange ? X_left : this.Lines[EndLine].Ranges[CurRange].X);
                 var X1 = (RangesCount - 1 === CurRange ? X_right : this.Lines[EndLine].Ranges[CurRange].XEnd);
-                if (this.Lines[EndLine].Ranges[CurRange].W > 0.001 || (true === bEmpty && 1 === RangesCount)) {
+                if (false === this.Is_EmptyRange(EndLine, CurRange) || (true === bEmpty && 1 === RangesCount)) {
                     pGraphics.drawHorLineExt(DrawLineRule, TempY, X0, X1, Pr.ParaPr.Brd.Bottom.Size, LeftMW, RightMW);
                 }
             }
@@ -3590,19 +1587,26 @@ Paragraph.prototype = {
             if (true === bEnd && false === Pr.ParaPr.Brd.Last && border_Single === Pr.ParaPr.Brd.Bottom.Value) {
                 var NextEl = this.Get_DocumentNext();
                 if (null != NextEl && type_Paragraph === NextEl.GetType() && true === NextEl.Is_StartFromNewPage()) {
-                    pGraphics.p_color(Pr.ParaPr.Brd.Bottom.Color.r, Pr.ParaPr.Brd.Bottom.Color.g, Pr.ParaPr.Brd.Bottom.Color.b, 255);
+                    RGBA = Pr.ParaPr.Brd.Bottom.Get_Color(this);
+                    pGraphics.p_color(RGBA.r, RGBA.g, RGBA.b, 255);
                     var EndLine = this.Pages[CurPage].EndLine;
                     var RangesCount = this.Lines[EndLine].Ranges.length;
                     for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
                         var X0 = (0 === CurRange ? X_left : this.Lines[EndLine].Ranges[CurRange].X);
                         var X1 = (RangesCount - 1 === CurRange ? X_right : this.Lines[EndLine].Ranges[CurRange].XEnd);
-                        if (this.Lines[EndLine].Ranges[CurRange].W > 0.001 || (true === bEmpty && 1 === RangesCount)) {
+                        if (false === this.Is_EmptyRange(EndLine, CurRange) || (true === bEmpty && 1 === RangesCount)) {
                             pGraphics.drawHorLineExt(c_oAscLineDrawingRule.Top, this.Pages[CurPage].Y + this.Lines[CurLine].Y + this.Lines[CurLine].Metrics.Descent + this.Lines[CurLine].Metrics.LineGap, X0, X1, Pr.ParaPr.Brd.Bottom.Size, LeftMW, RightMW);
                         }
                     }
                 }
             }
         }
+    },
+    Is_NeedDrawBorders: function () {
+        if (true === this.IsEmpty() && undefined !== this.SectPr) {
+            return false;
+        }
+        return true;
     },
     ReDraw: function () {
         this.Parent.OnContentReDraw(this.Get_StartPage_Absolute(), this.Get_StartPage_Absolute() + this.Pages.length - 1);
@@ -3616,155 +1620,149 @@ Paragraph.prototype = {
         }
         var Page_abs = PageIndex + this.Get_StartPage_Absolute();
         this.Pages[PageIndex].Shift(Dx, Dy);
-        var StartLine = this.Pages[PageIndex].FirstLine;
-        var EndLine = (PageIndex >= this.Pages.length - 1 ? this.Lines.length - 1 : this.Pages[PageIndex + 1].FirstLine - 1);
+        var StartLine = this.Pages[PageIndex].StartLine;
+        var EndLine = this.Pages[PageIndex].EndLine;
         for (var CurLine = StartLine; CurLine <= EndLine; CurLine++) {
             this.Lines[CurLine].Shift(Dx, Dy);
         }
         var Count = this.Content.length;
-        for (var Index = 0; Index < Count; Index++) {
-            var Item = this.Content[Index];
-            if (para_Drawing === Item.Type && Item.PageNum === Page_abs) {
-                Item.Shift(Dx, Dy);
+        for (var CurLine = StartLine; CurLine <= EndLine; CurLine++) {
+            var Line = this.Lines[CurLine];
+            var RangesCount = Line.Ranges.length;
+            for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
+                var Range = Line.Ranges[CurRange];
+                var StartPos = Range.StartPos;
+                var EndPos = Range.EndPos;
+                for (var Pos = StartPos; Pos <= EndPos; Pos++) {
+                    var Item = this.Content[Pos];
+                    Item.Shift_Range(Dx, Dy, CurLine, CurRange);
+                }
             }
         }
     },
-    Internal_Remove_CollaborativeMarks: function (bCorrectPos) {
-        for (var Pos = 0; Pos < this.Content.length; Pos++) {
-            var Item = this.Content[Pos];
-            if (para_CollaborativeChangesEnd === Item.Type || para_CollaborativeChangesStart === Item.Type) {
-                this.Internal_Content_Remove(Pos, bCorrectPos);
-                Pos--;
-            }
-        }
-    },
-    Remove: function (nCount, bOnlyText) {
-        this.Internal_Remove_CollaborativeMarks(true);
-        this.RecalcInfo.Set_Type_0(pararecalc_0_All);
+    Remove: function (nCount, bOnlyText, bRemoveOnlySelection, bOnAddText) {
+        var Direction = nCount;
+        var Result = true;
         if (true === this.Selection.Use) {
             var StartPos = this.Selection.StartPos;
             var EndPos = this.Selection.EndPos;
             if (StartPos > EndPos) {
-                var Temp = EndPos;
-                EndPos = StartPos;
-                StartPos = Temp;
+                var Temp = StartPos;
+                StartPos = EndPos;
+                EndPos = Temp;
             }
-            if (EndPos >= this.Content.length - 1) {
-                for (var Index = StartPos; Index < this.Content.length - 2; Index++) {
-                    var Item = this.Content[Index];
-                    if (para_Drawing === Item.Type) {
-                        var ObjId = Item.Get_Id();
-                        this.Parent.DrawingObjects.Remove_ById(ObjId);
-                    }
-                }
-                var Hyper_start = null;
-                if (StartPos < EndPos) {
-                    Hyper_start = this.Check_Hyperlink2(StartPos);
-                }
-                this.Internal_Content_Remove2(StartPos, this.Content.length - 2 - StartPos);
-                StartPos = this.Selection.StartPos;
-                EndPos = this.Selection.EndPos;
-                if (StartPos > EndPos) {
-                    var Temp = EndPos;
-                    EndPos = StartPos;
-                    StartPos = Temp;
-                }
-                this.Set_ContentPos(StartPos, true, -1);
-                if (null != Hyper_start) {
-                    this.Internal_Content_Add(StartPos, new ParaTextPr());
-                    this.Internal_Content_Add(StartPos, new ParaHyperlinkEnd());
-                }
-                return false;
-            } else {
-                var Hyper_start = this.Check_Hyperlink2(StartPos);
-                var Hyper_end = this.Check_Hyperlink2(EndPos);
-                var LastTextPr = null;
-                for (var Index = StartPos; Index < EndPos; Index++) {
-                    var Item = this.Content[Index];
-                    if (para_Drawing === Item.Type) {
-                        var ObjId = Item.Get_Id();
-                        this.Parent.DrawingObjects.Remove_ById(ObjId);
-                    } else {
-                        if (para_TextPr === Item.Type) {
-                            LastTextPr = Item;
-                        }
-                    }
-                }
-                this.Internal_Content_Remove2(StartPos, EndPos - StartPos);
-                StartPos = this.Selection.StartPos;
-                EndPos = this.Selection.EndPos;
-                if (StartPos > EndPos) {
-                    var Temp = EndPos;
-                    EndPos = StartPos;
-                    StartPos = Temp;
-                }
-                if (null != LastTextPr) {
-                    this.Internal_Content_Add(StartPos, new ParaTextPr(LastTextPr.Value));
-                }
-                this.Set_ContentPos(StartPos, true, -1);
-                if (Hyper_start != Hyper_end) {
-                    if (null != Hyper_end) {
-                        this.Internal_Content_Add(StartPos, Hyper_end);
-                        this.Set_ContentPos(this.CurPos.ContentPos + 1);
-                    }
-                    if (null != Hyper_start) {
-                        this.Internal_Content_Add(StartPos, new ParaHyperlinkEnd());
-                        this.Set_ContentPos(this.CurPos.ContentPos + 1);
-                    }
-                } else {
-                    this.Internal_Content_Add(StartPos, new ParaHyperlinkEnd());
-                    this.Internal_Check_EmptyHyperlink(StartPos);
-                }
+            if (EndPos === this.Content.length - 1 && true === this.Content[EndPos].Selection_CheckParaEnd()) {
+                Result = false;
+                this.Set_SectionPr(undefined);
             }
-            return;
-        }
-        if (0 == nCount) {
-            return;
-        }
-        var absCount = (nCount < 0 ? -nCount : nCount);
-        for (var Index = 0; Index < absCount; Index++) {
-            var OldPos = this.CurPos.ContentPos;
-            if (nCount < 0) {
-                if (false === this.Internal_RemoveBackward(bOnlyText)) {
-                    return false;
+            if (StartPos === EndPos) {
+                this.Content[StartPos].Remove(nCount, bOnAddText);
+                if (StartPos < this.Content.length - 2 && true === this.Content[StartPos].Is_Empty() && true !== this.Content[StartPos].Is_CheckingNearestPos()) {
+                    if (this.Selection.StartPos === this.Selection.EndPos) {
+                        this.Selection.Use = false;
+                    }
+                    this.Internal_Content_Remove(StartPos);
+                    this.CurPos.ContentPos = StartPos;
+                    this.Content[StartPos].Cursor_MoveToStartPos();
+                    this.Correct_ContentPos2();
                 }
             } else {
-                if (false === this.Internal_RemoveForward(bOnlyText)) {
-                    return false;
+                var CommentsToDelete = {};
+                for (var Pos = StartPos; Pos <= EndPos; Pos++) {
+                    var Item = this.Content[Pos];
+                    if (para_Comment === Item.Type) {
+                        CommentsToDelete[Item.CommentId] = true;
+                    }
+                }
+                this.DeleteCommentOnRemove = false;
+                this.Content[EndPos].Remove(nCount, bOnAddText);
+                if (EndPos < this.Content.length - 2 && true === this.Content[EndPos].Is_Empty() && true !== this.Content[EndPos].Is_CheckingNearestPos()) {
+                    this.Internal_Content_Remove(EndPos);
+                    this.CurPos.ContentPos = EndPos;
+                    this.Content[EndPos].Cursor_MoveToStartPos();
+                }
+                this.Internal_Content_Remove2(StartPos + 1, EndPos - StartPos - 1);
+                this.Content[StartPos].Remove(nCount, bOnAddText);
+                if (StartPos < this.Content.length - 2 && true === this.Content[StartPos].Is_Empty() && true !== this.Content[StartPos].Is_CheckingNearestPos()) {
+                    if (this.Selection.StartPos === this.Selection.EndPos) {
+                        this.Selection.Use = false;
+                    }
+                    this.Internal_Content_Remove(StartPos);
+                }
+                this.Correct_ContentPos2();
+                this.DeleteCommentOnRemove = true;
+                for (var CommentId in CommentsToDelete) {
+                    this.LogicDocument.Remove_Comment(CommentId, true, false);
                 }
             }
-            this.Internal_Check_EmptyHyperlink(OldPos);
-        }
-        return true;
-    },
-    Internal_RemoveBackward: function (bOnlyText) {
-        var Line = this.Content;
-        var CurPos = this.CurPos.ContentPos;
-        if (!bOnlyText) {
-            if (CurPos == 0) {
-                return false;
+            if (true !== this.Content[this.CurPos.ContentPos].Selection_IsUse()) {
+                this.Selection_Remove();
+                this.Correct_Content();
             } else {
-                this.Internal_Content_Remove(CurPos - 1);
+                this.Selection.Use = true;
+                this.Selection.Start = false;
+                this.Selection.Flag = selectionflag_Common;
+                this.Selection.StartPos = this.CurPos.ContentPos;
+                this.Selection.EndPos = this.CurPos.ContentPos;
+                this.Correct_Content();
+                this.Document_SetThisElementCurrent(false);
+                return true;
             }
         } else {
-            var LetterPos = CurPos - 1;
-            var oPos = this.Internal_FindBackward(LetterPos, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine]);
-            if (oPos.Found) {
-                if (para_Drawing === oPos.Type) {
-                    this.Parent.Select_DrawingObject(this.Content[oPos.LetterPos].Get_Id());
+            var ContentPos = this.CurPos.ContentPos;
+            while (false === this.Content[ContentPos].Remove(Direction, bOnAddText)) {
+                if (Direction < 0) {
+                    ContentPos--;
                 } else {
-                    this.Internal_Content_Remove(oPos.LetterPos);
-                    this.Set_ContentPos(oPos.LetterPos, true, -1);
+                    ContentPos++;
                 }
+                if (ContentPos < 0 || ContentPos >= this.Content.length) {
+                    break;
+                }
+                if (Direction < 0) {
+                    this.Content[ContentPos].Cursor_MoveToEndPos(false);
+                } else {
+                    this.Content[ContentPos].Cursor_MoveToStartPos();
+                }
+            }
+            if (ContentPos < 0 || ContentPos >= this.Content.length) {
+                Result = false;
             } else {
+                if (true === this.Content[ContentPos].Selection_IsUse()) {
+                    this.Selection.Use = true;
+                    this.Selection.Start = false;
+                    this.Selection.Flag = selectionflag_Common;
+                    this.Selection.StartPos = ContentPos;
+                    this.Selection.EndPos = ContentPos;
+                    this.Correct_Content(ContentPos, ContentPos);
+                    this.Document_SetThisElementCurrent(false);
+                    return true;
+                }
+                if (ContentPos < this.Content.length - 2 && true === this.Content[ContentPos].Is_Empty()) {
+                    this.Internal_Content_Remove(ContentPos);
+                    this.CurPos.ContentPos = ContentPos;
+                    this.Content[ContentPos].Cursor_MoveToStartPos();
+                    this.Correct_ContentPos2();
+                } else {
+                    this.CurPos.ContentPos = ContentPos;
+                }
+            }
+            this.Correct_Content(ContentPos, ContentPos);
+            if (Direction < 0 && false === Result) {
+                Result = true;
                 var Pr = this.Get_CompiledPr2(false).ParaPr;
                 if (undefined != this.Numbering_Get()) {
-                    this.Numbering_Remove();
-                    this.Set_Ind({
-                        FirstLine: 0,
-                        Left: Math.max(Pr.Ind.Left, Pr.Ind.Left + Pr.Ind.FirstLine)
-                    },
-                    false);
+                    var NumPr = this.Numbering_Get();
+                    if (0 === NumPr.Lvl) {
+                        this.Numbering_Remove();
+                        this.Set_Ind({
+                            FirstLine: 0,
+                            Left: Math.max(Pr.Ind.Left, Pr.Ind.Left + Pr.Ind.FirstLine)
+                        },
+                        false);
+                    } else {
+                        this.Numbering_IndDec_Level(false);
+                    }
                 } else {
                     if (numbering_presentationnumfrmt_None != this.PresentationPr.Bullet.Get_Type()) {
                         this.Remove_PresentationNumbering();
@@ -3795,7 +1793,7 @@ Paragraph.prototype = {
                                         },
                                         false);
                                     } else {
-                                        return false;
+                                        Result = false;
                                     }
                                 }
                             }
@@ -3804,32 +1802,16 @@ Paragraph.prototype = {
                 }
             }
         }
-        return true;
+        return Result;
     },
-    Internal_RemoveForward: function (bOnlyText) {
-        var Line = this.Content;
-        var CurPos = this.CurPos.ContentPos;
-        if (!bOnlyText) {
-            if (CurPos == Line.length - 1) {
-                return false;
-            } else {
-                this.Internal_Content_Remove(CurPos + 1);
-            }
-        } else {
-            var LetterPos = CurPos;
-            var oPos = this.Internal_FindForward(LetterPos, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine]);
-            if (oPos.Found) {
-                if (para_Drawing === oPos.Type) {
-                    this.Parent.Select_DrawingObject(this.Content[oPos.LetterPos].Get_Id());
-                } else {
-                    this.Internal_Content_Remove(oPos.LetterPos);
-                    this.Set_ContentPos(oPos.LetterPos, true, -1);
-                }
-            } else {
-                return false;
+    Remove_ParaEnd: function () {
+        var ContentLen = this.Content.length;
+        for (var CurPos = ContentLen - 1; CurPos >= 0; CurPos--) {
+            var Element = this.Content[CurPos];
+            if (para_Run === Element.Type && true === Element.Remove_ParaEnd()) {
+                return;
             }
         }
-        return true;
     },
     Internal_FindForward: function (CurPos, arrId) {
         var LetterPos = CurPos;
@@ -3893,6 +1875,11 @@ Paragraph.prototype = {
             Type: Type
         };
     },
+    Get_TextPr: function (_ContentPos) {
+        var ContentPos = (undefined === _ContentPos ? this.Get_ParaContentPos(false, false) : _ContentPos);
+        var CurPos = ContentPos.Get(0);
+        return this.Content[CurPos].Get_TextPr(ContentPos, 1);
+    },
     Internal_CalculateTextPr: function (LetterPos, StartPr) {
         var Pr;
         if ("undefined" != typeof(StartPr)) {
@@ -3950,87 +1937,130 @@ Paragraph.prototype = {
         return TextPr;
     },
     Add: function (Item) {
-        var CurPos = this.CurPos.ContentPos;
-        if ("undefined" != typeof(Item.Parent)) {
-            Item.Parent = this;
-        }
-        switch (Item.Type) {
+        Item.Parent = this;
+        switch (Item.Get_Type()) {
         case para_Text:
-            this.Internal_Content_Add(CurPos, Item);
-            break;
-        case para_Space:
-            this.Internal_Content_Add(CurPos, Item);
-            break;
-        case para_TextPr:
-            this.Internal_AddTextPr(Item.Value);
-            break;
-        case para_HyperlinkStart:
-            this.Internal_AddHyperlink(Item);
-            break;
-        case para_PageNum:
+            case para_Space:
+            case para_PageNum:
             case para_Tab:
             case para_Drawing:
+            case para_NewLine:
+            this.Content[this.CurPos.ContentPos].Add(Item);
+            break;
+        case para_TextPr:
+            var TextPr = Item.Value;
+            if (undefined != TextPr.FontFamily) {
+                var FName = TextPr.FontFamily.Name;
+                var FIndex = TextPr.FontFamily.Index;
+                TextPr.RFonts = new CRFonts();
+                TextPr.RFonts.Ascii = {
+                    Name: FName,
+                    Index: FIndex
+                };
+                TextPr.RFonts.EastAsia = {
+                    Name: FName,
+                    Index: FIndex
+                };
+                TextPr.RFonts.HAnsi = {
+                    Name: FName,
+                    Index: FIndex
+                };
+                TextPr.RFonts.CS = {
+                    Name: FName,
+                    Index: FIndex
+                };
+            }
+            if (true === this.ApplyToAll) {
+                var ContentLen = this.Content.length;
+                for (var CurPos = 0; CurPos < ContentLen; CurPos++) {
+                    this.Content[CurPos].Apply_TextPr(TextPr, undefined, true);
+                }
+                this.TextPr.Apply_TextPr(TextPr);
+            } else {
+                if (true === this.Selection.Use) {
+                    this.Apply_TextPr(TextPr);
+                } else {
+                    var CurParaPos = this.Get_ParaContentPos(false, false);
+                    var CurPos = CurParaPos.Get(0);
+                    var SearchLPos = new CParagraphSearchPos();
+                    this.Get_LeftPos(SearchLPos, CurParaPos);
+                    var RItem = this.Get_RunElementByPos(CurParaPos);
+                    var LItem = (false === SearchLPos.Found ? null : this.Get_RunElementByPos(SearchLPos.Pos));
+                    if (null === RItem || para_End === RItem.Type) {
+                        this.Apply_TextPr(TextPr);
+                        this.TextPr.Apply_TextPr(TextPr);
+                    } else {
+                        if (null !== RItem && null !== LItem && para_Text === RItem.Type && para_Text === LItem.Type && false === RItem.Is_Punctuation() && false === LItem.Is_Punctuation()) {
+                            var SearchSPos = new CParagraphSearchPos();
+                            var SearchEPos = new CParagraphSearchPos();
+                            this.Get_WordStartPos(SearchSPos, CurParaPos);
+                            this.Get_WordEndPos(SearchEPos, CurParaPos);
+                            if (true !== SearchSPos.Found || true !== SearchEPos.Found) {
+                                return;
+                            }
+                            this.Selection.Use = true;
+                            this.Set_SelectionContentPos(SearchSPos.Pos, SearchEPos.Pos);
+                            this.Apply_TextPr(TextPr);
+                            this.Selection_Remove();
+                        } else {
+                            this.Apply_TextPr(TextPr);
+                        }
+                    }
+                }
+            }
+            break;
+        case para_Math:
+            var ContentPos = this.Get_ParaContentPos(false, false);
+            var CurPos = ContentPos.Get(0);
+            if (para_Math !== this.Content[CurPos].Type && para_Hyperlink !== this.Content[CurPos].Type) {
+                var NewElement = this.Content[CurPos].Split(ContentPos, 1);
+                if (null !== NewElement) {
+                    this.Internal_Content_Add(CurPos + 1, NewElement);
+                }
+                var Elem = new ParaMath();
+                Elem.Root.Load_FromMenu(Item.Menu, this);
+                Elem.Root.Correct_Content(true);
+                this.Internal_Content_Add(CurPos + 1, Elem);
+                this.CurPos.ContentPos = CurPos + 1;
+                this.Content[this.CurPos.ContentPos].Cursor_MoveToEndPos(false);
+            } else {
+                this.Content[CurPos].Add(Item);
+            }
+            break;
+        case para_Run:
+            var ContentPos = this.Get_ParaContentPos(false, false);
+            var CurPos = ContentPos.Get(0);
+            var CurItem = this.Content[CurPos];
+            switch (CurItem.Type) {
+            case para_Run:
+                var NewRun = CurItem.Split(ContentPos, 1);
+                this.Internal_Content_Add(CurPos + 1, Item);
+                this.Internal_Content_Add(CurPos + 2, NewRun);
+                this.CurPos.ContentPos = CurPos + 1;
+                break;
+            case para_Math:
+                case para_Hyperlink:
+                CurItem.Add(Item);
+                break;
             default:
-            this.Internal_Content_Add(CurPos, Item);
+                this.Internal_Content_Add(CurPos + 1, Item);
+                this.CurPos.ContentPos = CurPos + 1;
+                break;
+            }
+            Item.Cursor_MoveToEndPos(false);
             break;
         }
-        if (para_TextPr != Item.Type) {
-            this.DeleteCollaborativeMarks = true;
-        }
-        this.RecalcInfo.Set_Type_0(pararecalc_0_All);
     },
     Add_Tab: function (bShift) {
         var NumPr = this.Numbering_Get();
-        if (undefined != NumPr) {
-            if (true != this.Selection.Use) {
-                var NumId = NumPr.NumId;
-                var Lvl = NumPr.Lvl;
-                var NumInfo = this.Parent.Internal_GetNumInfo(this.Id, NumPr);
-                if (0 === Lvl && NumInfo[Lvl] <= 1) {
-                    var Numbering = this.Parent.Get_Numbering();
-                    var AbstractNum = Numbering.Get_AbstractNum(NumId);
-                    var NumLvl = AbstractNum.Lvl[Lvl];
-                    var NumParaPr = NumLvl.ParaPr;
-                    var ParaPr = this.Get_CompiledPr2(false).ParaPr;
-                    if (undefined != NumParaPr.Ind && undefined != NumParaPr.Ind.Left) {
-                        var NewX = ParaPr.Ind.Left;
-                        if (true != bShift) {
-                            NewX += Default_Tab_Stop;
-                        } else {
-                            NewX -= Default_Tab_Stop;
-                            if (NewX < 0) {
-                                NewX = 0;
-                            }
-                            if (ParaPr.Ind.FirstLine < 0 && NewX + ParaPr.Ind.FirstLine < 0) {
-                                NewX = -ParaPr.Ind.FirstLine;
-                            }
-                        }
-                        AbstractNum.Change_LeftInd(NewX);
-                        History.Add(this, {
-                            Type: historyitem_Paragraph_Ind_First,
-                            Old: (undefined != this.Pr.Ind.FirstLine ? this.Pr.Ind.FirstLine : undefined),
-                            New: undefined
-                        });
-                        History.Add(this, {
-                            Type: historyitem_Paragraph_Ind_Left,
-                            Old: (undefined != this.Pr.Ind.Left ? this.Pr.Ind.Left : undefined),
-                            New: undefined
-                        });
-                        this.Pr.Ind.FirstLine = undefined;
-                        this.Pr.Ind.Left = undefined;
-                        this.CompiledPr.NeedRecalc = true;
-                    }
-                } else {
-                    this.Numbering_IndDec_Level(!bShift);
-                }
-            } else {
-                this.Numbering_IndDec_Level(!bShift);
-            }
+        if (undefined !== this.Numbering_Get()) {
+            this.Shift_NumberingLvl(bShift);
         } else {
             if (true === this.Is_SelectionUse()) {
                 this.IncDec_Indent(!bShift);
             } else {
                 var ParaPr = this.Get_CompiledPr2(false).ParaPr;
+                var LD_PageFields = this.LogicDocument.Get_PageFields(this.Get_StartPage_Absolute());
                 if (true != bShift) {
                     if (ParaPr.Ind.FirstLine < 0) {
                         this.Set_Ind({
@@ -4046,7 +2076,7 @@ Paragraph.prototype = {
                             false);
                             this.CompiledPr.NeedRecalc = true;
                         } else {
-                            if (X_Right_Field - X_Left_Margin > ParaPr.Ind.Left + 25) {
+                            if (LD_PageFields.XLimit - LD_PageFields.X > ParaPr.Ind.Left + 25) {
                                 this.Set_Ind({
                                     Left: ParaPr.Ind.Left + 12.5
                                 },
@@ -4097,28 +2127,38 @@ Paragraph.prototype = {
         }
     },
     Extend_ToPos: function (_X) {
+        var CompiledPr = this.Get_CompiledPr2(false).ParaPr;
         var Page = this.Pages[this.Pages.length - 1];
         var X0 = Page.X;
         var X1 = Page.XLimit - X0;
         var X = _X - X0;
+        var Align = CompiledPr.Jc;
+        if (X < 0 || X > X1 || (X < 7.5 && align_Left === Align) || (X > X1 - 10 && align_Right === Align) || (Math.abs(X1 / 2 - X) < 10 && align_Center === Align)) {
+            return false;
+        }
         if (true === this.IsEmpty()) {
+            if (align_Left !== Align) {
+                this.Set_Align(align_Left);
+            }
             if (Math.abs(X - X1 / 2) < 12.5) {
-                return this.Set_Align(align_Center);
+                this.Set_Align(align_Center);
+                return true;
             } else {
                 if (X > X1 - 12.5) {
-                    return this.Set_Align(align_Right);
+                    this.Set_Align(align_Right);
+                    return true;
                 } else {
-                    if (X < 12.5) {
-                        return this.Set_Ind({
+                    if (X < 17.5) {
+                        this.Set_Ind({
                             FirstLine: 12.5
                         },
                         false);
+                        return true;
                     }
                 }
             }
         }
-        var Tabs = this.Get_CompiledPr2(false).ParaPr.Tabs.Copy();
-        var CurPos = this.Internal_GetEndPos();
+        var Tabs = CompiledPr.Tabs.Copy();
         if (Math.abs(X - X1 / 2) < 12.5) {
             Tabs.Add(new CParaTab(tab_Center, X1 / 2));
         } else {
@@ -4129,198 +2169,204 @@ Paragraph.prototype = {
             }
         }
         this.Set_Tabs(Tabs);
-        this.Internal_Content_Add(CurPos, new ParaTab());
-    },
-    Internal_IncDecFontSize: function (bIncrease, Value) {
-        var Sizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
-        var NewValue = Value;
-        if (true === bIncrease) {
-            if (Value < Sizes[0]) {
-                if (Value >= Sizes[0] - 1) {
-                    NewValue = Sizes[0];
-                } else {
-                    NewValue = Math.floor(Value + 1);
-                }
-            } else {
-                if (Value >= Sizes[Sizes.length - 1]) {
-                    NewValue = Math.min(300, Math.floor(Value / 10 + 1) * 10);
-                } else {
-                    for (var Index = 0; Index < Sizes.length; Index++) {
-                        if (Value < Sizes[Index]) {
-                            NewValue = Sizes[Index];
-                            break;
-                        }
-                    }
-                }
-            }
-        } else {
-            if (Value <= Sizes[0]) {
-                NewValue = Math.max(Math.floor(Value - 1), 1);
-            } else {
-                if (Value > Sizes[Sizes.length - 1]) {
-                    if (Value <= Math.floor(Sizes[Sizes.length - 1] / 10 + 1) * 10) {
-                        NewValue = Sizes[Sizes.length - 1];
-                    } else {
-                        NewValue = Math.floor(Math.ceil(Value / 10) - 1) * 10;
-                    }
-                } else {
-                    for (var Index = Sizes.length - 1; Index >= 0; Index--) {
-                        if (Value > Sizes[Index]) {
-                            NewValue = Sizes[Index];
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        return NewValue;
+        this.Set_ParaContentPos(this.Get_EndPos(false), false, -1, -1);
+        this.Add(new ParaTab());
+        return true;
     },
     IncDec_FontSize: function (bIncrease) {
-        this.RecalcInfo.Set_Type_0(pararecalc_0_All);
-        var StartTextPr = this.Get_CompiledPr().TextPr;
         if (true === this.ApplyToAll) {
-            var StartFontSize = this.Internal_IncDecFontSize(bIncrease, StartTextPr.FontSize);
-            this.Internal_Content_Add(0, new ParaTextPr({
-                FontSize: StartFontSize
-            }));
-            for (var Index = 1; Index < this.Content.length; Index++) {
-                var Item = this.Content[Index];
-                if (para_TextPr === Item.Type) {
-                    if (undefined != Item.Value.FontSize) {
-                        Item.Set_FontSize(this.Internal_IncDecFontSize(bIncrease, Item.Value.FontSize));
-                    } else {
-                        Item.Set_FontSize(this.Internal_IncDecFontSize(bIncrease, StartTextPr.FontSize));
-                    }
-                }
+            var ContentLen = this.Content.length;
+            for (var CurPos = 0; CurPos < ContentLen; CurPos++) {
+                this.Content[CurPos].Apply_TextPr(undefined, bIncrease, true);
             }
-            if (undefined != this.TextPr.Value.FontSize) {
-                this.TextPr.Set_FontSize(this.Internal_IncDecFontSize(bIncrease, this.TextPr.Value.FontSize));
-            } else {
-                this.TextPr.Set_FontSize(this.Internal_IncDecFontSize(bIncrease, StartTextPr.FontSize));
-            }
-            return true;
-        }
-        var Line = this.Content;
-        var CurPos = this.CurPos.ContentPos;
-        if (true === this.Selection.Use) {
-            var StartPos = this.Selection.StartPos;
-            var EndPos = this.Selection.EndPos;
-            if (StartPos > EndPos) {
-                var Temp = EndPos;
-                EndPos = StartPos;
-                StartPos = Temp;
-            }
-            var LastPos = this.Internal_GetEndPos();
-            var bEnd = false;
-            if (EndPos > LastPos) {
-                EndPos = LastPos;
-                bEnd = true;
-            }
-            var TextPr_end = this.Internal_GetTextPr(EndPos);
-            var TextPr_start = this.Internal_GetTextPr(StartPos);
-            if (undefined != TextPr_start.FontSize) {
-                TextPr_start.FontSize = this.Internal_IncDecFontSize(bIncrease, TextPr_start.FontSize);
-            } else {
-                TextPr_start.FontSize = this.Internal_IncDecFontSize(bIncrease, StartTextPr.FontSize);
-            }
-            this.Internal_Content_Add(StartPos, new ParaTextPr(TextPr_start));
-            if (false === bEnd) {
-                this.Internal_Content_Add(EndPos + 1, new ParaTextPr(TextPr_end));
-            } else {
-                if (undefined != this.TextPr.Value.FontSize) {
-                    this.TextPr.Set_FontSize(this.Internal_IncDecFontSize(bIncrease, this.TextPr.Value.FontSize));
-                } else {
-                    this.TextPr.Set_FontSize(this.Internal_IncDecFontSize(bIncrease, StartTextPr.FontSize));
-                }
-            }
-            for (var Pos = StartPos + 1; Pos < EndPos; Pos++) {
-                Item = this.Content[Pos];
-                if (para_TextPr === Item.Type) {
-                    if (undefined != Item.Value.FontSize) {
-                        Item.Set_FontSize(this.Internal_IncDecFontSize(bIncrease, Item.Value.FontSize));
-                    } else {
-                        Item.Set_FontSize(this.Internal_IncDecFontSize(bIncrease, StartTextPr.FontSize));
-                    }
-                }
-            }
-            return true;
-        }
-        var oEnd = this.Internal_FindForward(CurPos, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_End, para_NewLine]);
-        var oStart = this.Internal_FindBackward(CurPos - 1, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine]);
-        var CurType = this.Content[CurPos].Type;
-        if (!oEnd.Found) {
-            return false;
-        }
-        if (para_End == oEnd.Type) {
-            var Pos = oEnd.LetterPos;
-            var TextPr_start = this.Internal_GetTextPr(Pos);
-            if (undefined != TextPr_start.FontSize) {
-                TextPr_start.FontSize = this.Internal_IncDecFontSize(bIncrease, TextPr_start.FontSize);
-            } else {
-                TextPr_start.FontSize = this.Internal_IncDecFontSize(bIncrease, StartTextPr.FontSize);
-            }
-            this.Internal_Content_Add(Pos, new ParaTextPr(TextPr_start));
-            this.Set_ContentPos(Pos + 1, true, -1);
-            if (undefined != this.TextPr.Value.FontSize) {
-                this.TextPr.Set_FontSize(this.Internal_IncDecFontSize(bIncrease, this.TextPr.Value.FontSize));
-            } else {
-                this.TextPr.Set_FontSize(this.Internal_IncDecFontSize(bIncrease, StartTextPr.FontSize));
-            }
-            return true;
         } else {
-            if (para_PageNum === CurType || para_Drawing === CurType || para_Tab == CurType || para_Space == CurType || para_NewLine == CurType || !oStart.Found || para_NewLine == oEnd.Type || para_Space == oEnd.Type || para_NewLine == oStart.Type || para_Space == oStart.Type || para_Tab == oEnd.Type || para_Tab == oStart.Type || para_Drawing == oEnd.Type || para_Drawing == oStart.Type || para_PageNum == oEnd.Type || para_PageNum == oStart.Type) {
-                var TextPr_old = this.Internal_GetTextPr(CurPos);
-                var TextPr_new = TextPr_old.Copy();
-                if (undefined != TextPr_new.FontSize) {
-                    TextPr_new.FontSize = this.Internal_IncDecFontSize(bIncrease, TextPr_new.FontSize);
-                } else {
-                    TextPr_new.FontSize = this.Internal_IncDecFontSize(bIncrease, StartTextPr.FontSize);
-                }
-                this.Internal_Content_Add(CurPos, new ParaTextPr(TextPr_old));
-                this.Internal_Content_Add(CurPos, new ParaEmpty(true));
-                this.Internal_Content_Add(CurPos, new ParaTextPr(TextPr_new));
-                this.Set_ContentPos(CurPos + 1, true, -1);
-                this.RecalculateCurPos();
-                return false;
+            if (true === this.Selection.Use) {
+                this.Apply_TextPr(undefined, bIncrease, false);
             } else {
-                var oWordStart = this.Internal_FindBackward(CurPos, [para_PageNum, para_Drawing, para_Tab, para_Space, para_NewLine]);
-                if (!oWordStart.Found) {
-                    oWordStart = this.Internal_FindForward(0, [para_Text]);
+                var CurParaPos = this.Get_ParaContentPos(false, false);
+                var CurPos = CurParaPos.Get(0);
+                var SearchLPos = new CParagraphSearchPos();
+                this.Get_LeftPos(SearchLPos, CurParaPos);
+                var RItem = this.Get_RunElementByPos(CurParaPos);
+                var LItem = (false === SearchLPos.Found ? null : this.Get_RunElementByPos(SearchLPos.Pos));
+                if (null === RItem || para_End === RItem.Type) {
+                    this.Apply_TextPr(undefined, bIncrease, false);
                 } else {
-                    oWordStart.LetterPos++;
+                    if (null !== RItem && null !== LItem && para_Text === RItem.Type && para_Text === LItem.Type && false === RItem.Is_Punctuation() && false === LItem.Is_Punctuation()) {
+                        var SearchSPos = new CParagraphSearchPos();
+                        var SearchEPos = new CParagraphSearchPos();
+                        this.Get_WordStartPos(SearchSPos, CurParaPos);
+                        this.Get_WordEndPos(SearchEPos, CurParaPos);
+                        if (true !== SearchSPos.Found || true !== SearchEPos.Found) {
+                            return;
+                        }
+                        this.Selection.Use = true;
+                        this.Set_SelectionContentPos(SearchSPos.Pos, SearchEPos.Pos);
+                        this.Apply_TextPr(undefined, bIncrease, false);
+                        this.Selection_Remove();
+                    } else {
+                        this.Apply_TextPr(undefined, bIncrease, false);
+                    }
                 }
-                var oWordEnd = this.Internal_FindForward(CurPos, [para_PageNum, para_Drawing, para_Tab, para_Space, para_End, para_NewLine]);
-                if (!oWordStart.Found || !oWordEnd.Found) {
-                    return;
+            }
+        }
+        return true;
+    },
+    Shift_NumberingLvl: function (bShift) {
+        var NumPr = this.Numbering_Get();
+        if (true != this.Selection.Use) {
+            var NumId = NumPr.NumId;
+            var Lvl = NumPr.Lvl;
+            var NumInfo = this.Parent.Internal_GetNumInfo(this.Id, NumPr);
+            if (0 === Lvl && NumInfo[Lvl] <= 1) {
+                var Numbering = this.Parent.Get_Numbering();
+                var AbstractNum = Numbering.Get_AbstractNum(NumId);
+                var NumLvl = AbstractNum.Lvl[Lvl];
+                var NumParaPr = NumLvl.ParaPr;
+                var ParaPr = this.Get_CompiledPr2(false).ParaPr;
+                if (undefined != NumParaPr.Ind && undefined != NumParaPr.Ind.Left) {
+                    var NewX = ParaPr.Ind.Left;
+                    if (true != bShift) {
+                        NewX += Default_Tab_Stop;
+                    } else {
+                        NewX -= Default_Tab_Stop;
+                        if (NewX < 0) {
+                            NewX = 0;
+                        }
+                        if (ParaPr.Ind.FirstLine < 0 && NewX + ParaPr.Ind.FirstLine < 0) {
+                            NewX = -ParaPr.Ind.FirstLine;
+                        }
+                    }
+                    AbstractNum.Change_LeftInd(NewX);
+                    History.Add(this, {
+                        Type: historyitem_Paragraph_Ind_First,
+                        Old: (undefined != this.Pr.Ind.FirstLine ? this.Pr.Ind.FirstLine : undefined),
+                        New: undefined
+                    });
+                    History.Add(this, {
+                        Type: historyitem_Paragraph_Ind_Left,
+                        Old: (undefined != this.Pr.Ind.Left ? this.Pr.Ind.Left : undefined),
+                        New: undefined
+                    });
+                    this.Pr.Ind.FirstLine = undefined;
+                    this.Pr.Ind.Left = undefined;
+                    this.CompiledPr.NeedRecalc = true;
                 }
-                var TextPr_end = this.Internal_GetTextPr(oWordEnd.LetterPos);
-                var TextPr_start = this.Internal_GetTextPr(oWordStart.LetterPos);
-                if (undefined != TextPr_start.FontSize) {
-                    TextPr_start.FontSize = this.Internal_IncDecFontSize(bIncrease, TextPr_start.FontSize);
-                } else {
-                    TextPr_start.FontSize = this.Internal_IncDecFontSize(bIncrease, StartTextPr.FontSize);
+            } else {
+                this.Numbering_IndDec_Level(!bShift);
+            }
+        } else {
+            this.Numbering_IndDec_Level(!bShift);
+        }
+    },
+    Can_IncreaseLevel: function (bIncrease) {
+        var CurLevel = isRealNumber(this.Pr.Lvl) ? this.Pr.Lvl : 0,
+        NewPr,
+        OldPr = this.Get_CompiledPr2(false).TextPr,
+        DeltaFontSize,
+        i,
+        j,
+        RunPr;
+        if (bIncrease) {
+            if (CurLevel >= 8) {
+                return false;
+            }
+            NewPr = this.Internal_CompiledParaPrPresentation(CurLevel + 1).TextPr;
+        } else {
+            if (CurLevel <= 0) {
+                return false;
+            }
+            NewPr = this.Internal_CompiledParaPrPresentation(CurLevel - 1).TextPr;
+        }
+        DeltaFontSize = NewPr.FontSize - OldPr.FontSize;
+        if (this.Pr.DefaultRunPr && isRealNumber(this.Pr.DefaultRunPr.FontSize)) {
+            if (this.Pr.DefaultRunPr.FontSize + DeltaFontSize < 1) {
+                return false;
+            }
+        }
+        if (isRealNumber(this.TextPr.FontSize)) {
+            if (this.TextPr.FontSize + DeltaFontSize < 1) {
+                return false;
+            }
+        }
+        for (i = 0; i < this.Content.length; ++i) {
+            if (this.Content[i].Type === para_Run) {
+                RunPr = this.Content[i].Get_CompiledPr();
+                if (RunPr.FontSize + DeltaFontSize < 1) {
+                    return false;
                 }
-                this.Internal_Content_Add(oWordStart.LetterPos, new ParaTextPr(TextPr_start));
-                this.Internal_Content_Add(oWordEnd.LetterPos + 1, new ParaTextPr(TextPr_end));
-                this.Set_ContentPos(CurPos + 1, true, -1);
-                for (var Pos = oWordStart.LetterPos + 1; Pos < oWordEnd.LetterPos; Pos++) {
-                    Item = this.Content[Pos];
-                    if (para_TextPr === Item.Type) {
-                        if (undefined != Item.Value.FontSize) {
-                            Item.Set_FontSize(this.Internal_IncDecFontSize(bIncrease, Item.Value.FontSize));
-                        } else {
-                            Item.Set_FontSize(this.Internal_IncDecFontSize(bIncrease, StartTextPr.FontSize));
+            } else {
+                if (this.Content[i].Type === para_Hyperlink) {
+                    for (j = 0; j < this.Content[i].Content.length; ++j) {
+                        RunPr = this.Content[i].Content[j].Get_CompiledPr();
+                        if (RunPr.FontSize + DeltaFontSize < 1) {
+                            return false;
                         }
                     }
                 }
-                return true;
+            }
+        }
+        return true;
+    },
+    Increase_Level: function (bIncrease) {
+        var CurLevel = isRealNumber(this.Pr.Lvl) ? this.Pr.Lvl : 0,
+        NewPr,
+        OldPr = this.Get_CompiledPr2(false).TextPr,
+        DeltaFontSize,
+        i,
+        j,
+        RunPr;
+        if (bIncrease) {
+            NewPr = this.Internal_CompiledParaPrPresentation(CurLevel + 1).TextPr;
+            if (this.Pr.Ind && this.Pr.Ind.Left != undefined) {
+                this.Set_Ind({
+                    FirstLine: this.Pr.Ind.FirstLine,
+                    Left: this.Pr.Ind.Left + 11.1125
+                },
+                false);
+            }
+            this.Set_PresentationLevel(CurLevel + 1);
+        } else {
+            NewPr = this.Internal_CompiledParaPrPresentation(CurLevel - 1).TextPr;
+            if (this.Pr.Ind && this.Pr.Ind.Left != undefined) {
+                this.Set_Ind({
+                    FirstLine: this.Pr.Ind.FirstLine,
+                    Left: this.Pr.Ind.Left - 11.1125
+                },
+                false);
+            }
+            this.Set_PresentationLevel(CurLevel - 1);
+        }
+        DeltaFontSize = NewPr.FontSize - OldPr.FontSize;
+        if (DeltaFontSize !== 0) {
+            if (this.Pr.DefaultRunPr && isRealNumber(this.Pr.DefaultRunPr.FontSize)) {
+                var NewParaPr = this.Pr.Copy();
+                NewParaPr.DefaultRunPr.FontSize += DeltaFontSize;
+                this.Set_Pr(NewParaPr);
+            }
+            if (isRealNumber(this.TextPr.FontSize)) {
+                this.TextPr.Set_FontSize(this.TextPr.FontSize + DeltaFontSize);
+            }
+            for (i = 0; i < this.Content.length; ++i) {
+                if (this.Content[i].Type === para_Run) {
+                    if (isRealNumber(this.Content[i].Pr.FontSize)) {
+                        this.Content[i].Set_FontSize(this.Content[i].Pr.FontSize + DeltaFontSize);
+                    }
+                } else {
+                    if (this.Content[i].Type === para_Hyperlink) {
+                        for (j = 0; j < this.Content[i].Content.length; ++j) {
+                            if (isRealNumber(this.Content[i].Content[j].Pr.FontSize)) {
+                                this.Content[i].Content[j].Set_FontSize(this.Content[i].Content[j].Pr.FontSize + DeltaFontSize);
+                            }
+                        }
+                    }
+                }
             }
         }
     },
     IncDec_Indent: function (bIncrease) {
-        var NumPr = this.Numbering_Get();
-        if (undefined != NumPr) {
-            this.Numbering_IndDec_Level(bIncrease);
+        if (undefined !== this.Numbering_Get()) {
+            this.Shift_NumberingLvl(!bIncrease);
         } else {
             var ParaPr = this.Get_CompiledPr2(false).ParaPr;
             var LeftMargin = ParaPr.Ind.Left;
@@ -4357,6 +2403,286 @@ Paragraph.prototype = {
         var NewPresLvl = (true === bIncrease ? Math.min(8, this.PresentationPr.Level + 1) : Math.max(0, this.PresentationPr.Level - 1));
         this.Set_PresentationLevel(NewPresLvl);
     },
+    Correct_ContentPos: function (CorrectEndLinePos) {
+        var Count = this.Content.length;
+        var CurPos = this.CurPos.ContentPos;
+        if (true === CorrectEndLinePos && true === this.Content[CurPos].Cursor_Is_End()) {
+            var _CurPos = CurPos + 1;
+            while (_CurPos < Count && true === this.Content[_CurPos].Is_Empty({
+                SkipAnchor: true
+            })) {
+                _CurPos++;
+            }
+            if (_CurPos < Count && true === this.Content[_CurPos].Is_StartFromNewLine()) {
+                CurPos = _CurPos;
+                this.Content[CurPos].Cursor_MoveToStartPos();
+            }
+        }
+        while (CurPos > 0 && true === this.Content[CurPos].Cursor_Is_NeededCorrectPos() && para_Run === this.Content[CurPos - 1].Type) {
+            CurPos--;
+            this.Content[CurPos].Cursor_MoveToEndPos();
+        }
+        this.CurPos.ContentPos = CurPos;
+    },
+    Correct_ContentPos2: function () {
+        var Count = this.Content.length;
+        var CurPos = Math.min(Math.max(0, this.CurPos.ContentPos), Count - 1);
+        while (CurPos > 0 && false === this.Content[CurPos].Is_CursorPlaceable()) {
+            CurPos--;
+            this.Content[CurPos].Cursor_MoveToEndPos();
+        }
+        while (CurPos < Count && false === this.Content[CurPos].Is_CursorPlaceable()) {
+            CurPos++;
+            this.Content[CurPos].Cursor_MoveToStartPos(false);
+        }
+        while (CurPos > 0 && para_Run !== this.Content[CurPos].Type && para_Math !== this.Content[CurPos].Type && true === this.Content[CurPos].Cursor_Is_Start()) {
+            if (false === this.Content[CurPos - 1].Is_CursorPlaceable()) {
+                break;
+            }
+            CurPos--;
+            this.Content[CurPos].Cursor_MoveToEndPos();
+        }
+        while (CurPos < Count && para_Run !== this.Content[CurPos].Type && para_Math !== this.Content[CurPos].Type && true === this.Content[CurPos].Cursor_Is_End()) {
+            if (false === this.Content[CurPos + 1].Is_CursorPlaceable()) {
+                break;
+            }
+            CurPos++;
+            this.Content[CurPos].Cursor_MoveToStartPos(false);
+        }
+        this.private_CorrectCurPosRangeLine();
+        this.CurPos.ContentPos = CurPos;
+    },
+    Get_ParaContentPos: function (bSelection, bStart) {
+        var ContentPos = new CParagraphContentPos();
+        var Pos = (true !== bSelection ? this.CurPos.ContentPos : (false !== bStart ? this.Selection.StartPos : this.Selection.EndPos));
+        ContentPos.Add(Pos);
+        this.Content[Pos].Get_ParaContentPos(bSelection, bStart, ContentPos);
+        return ContentPos;
+    },
+    Set_ParaContentPos: function (ContentPos, CorrectEndLinePos, Line, Range) {
+        var Pos = ContentPos.Get(0);
+        if (Pos >= this.Content.length) {
+            Pos = this.Content.length - 1;
+        }
+        if (Pos < 0) {
+            Pos = 0;
+        }
+        this.CurPos.ContentPos = Pos;
+        this.Content[Pos].Set_ParaContentPos(ContentPos, 1);
+        this.Correct_ContentPos(CorrectEndLinePos);
+        this.Correct_ContentPos2();
+        this.CurPos.Line = Line;
+        this.CurPos.Range = Range;
+    },
+    Set_SelectionContentPos: function (StartContentPos, EndContentPos, CorrectAnchor) {
+        var Depth = 0;
+        var Direction = 1;
+        if (StartContentPos.Compare(EndContentPos) > 0) {
+            Direction = -1;
+        }
+        var OldStartPos = Math.max(0, Math.min(this.Selection.StartPos, this.Content.length - 1));
+        var OldEndPos = Math.max(0, Math.min(this.Selection.EndPos, this.Content.length - 1));
+        if (OldStartPos > OldEndPos) {
+            OldStartPos = this.Selection.EndPos;
+            OldEndPos = this.Selection.StartPos;
+        }
+        var StartPos = StartContentPos.Get(Depth);
+        var EndPos = EndContentPos.Get(Depth);
+        this.Selection.StartPos = StartPos;
+        this.Selection.EndPos = EndPos;
+        if (OldStartPos < StartPos && OldStartPos < EndPos) {
+            var TempLimit = Math.min(StartPos, EndPos);
+            for (var CurPos = OldStartPos; CurPos < TempLimit; CurPos++) {
+                this.Content[CurPos].Selection_Remove();
+            }
+        }
+        if (OldEndPos > StartPos && OldEndPos > EndPos) {
+            var TempLimit = Math.max(StartPos, EndPos);
+            for (var CurPos = TempLimit + 1; CurPos <= OldEndPos; CurPos++) {
+                this.Content[CurPos].Selection_Remove();
+            }
+        }
+        if (StartPos === EndPos) {
+            this.Content[StartPos].Set_SelectionContentPos(StartContentPos, EndContentPos, Depth + 1, 0, 0);
+        } else {
+            if (StartPos > EndPos) {
+                this.Content[StartPos].Set_SelectionContentPos(StartContentPos, null, Depth + 1, 0, 1);
+                this.Content[EndPos].Set_SelectionContentPos(null, EndContentPos, Depth + 1, -1, 0);
+                for (var CurPos = EndPos + 1; CurPos < StartPos; CurPos++) {
+                    this.Content[CurPos].Select_All(-1);
+                }
+            } else {
+                this.Content[StartPos].Set_SelectionContentPos(StartContentPos, null, Depth + 1, 0, -1);
+                this.Content[EndPos].Set_SelectionContentPos(null, EndContentPos, Depth + 1, 1, 0);
+                for (var CurPos = StartPos + 1; CurPos < EndPos; CurPos++) {
+                    this.Content[CurPos].Select_All(1);
+                }
+            }
+        }
+        if (false !== CorrectAnchor) {
+            if (true === this.Selection_CheckParaEnd()) {
+                var bNeedSelectAll = true;
+                var StartPos = Math.min(this.Selection.StartPos, this.Selection.EndPos);
+                for (var Pos = 0; Pos <= StartPos; Pos++) {
+                    if (false === this.Content[Pos].Is_SelectedAll({
+                        SkipAnchor: true
+                    })) {
+                        bNeedSelectAll = false;
+                        break;
+                    }
+                }
+                if (true === bNeedSelectAll) {
+                    if (1 === Direction) {
+                        this.Selection.StartPos = 0;
+                    } else {
+                        this.Selection.EndPos = 0;
+                    }
+                    for (var Pos = 0; Pos <= StartPos; Pos++) {
+                        this.Content[Pos].Select_All(Direction);
+                    }
+                }
+            } else {
+                if (true !== this.Selection_IsEmpty(true) && ((1 === Direction && true === this.Selection.StartManually) || (1 !== Direction && true === this.Selection.EndManually))) {
+                    var bNeedCorrectLeftPos = true;
+                    var _StartPos = Math.min(StartPos, EndPos);
+                    var _EndPos = Math.max(StartPos, EndPos);
+                    for (var Pos = 0; Pos < StartPos; Pos++) {
+                        if (true !== this.Content[Pos].Is_Empty({
+                            SkipAnchor: true
+                        })) {
+                            bNeedCorrectLeftPos = false;
+                            break;
+                        }
+                    }
+                    if (true === bNeedCorrectLeftPos) {
+                        for (var Pos = _StartPos; Pos <= EndPos; Pos++) {
+                            if (true === this.Content[Pos].Selection_CorrectLeftPos(Direction)) {
+                                if (1 === Direction) {
+                                    if (Pos + 1 > this.Selection.EndPos) {
+                                        break;
+                                    }
+                                    this.Selection.StartPos = Pos + 1;
+                                } else {
+                                    if (Pos + 1 > this.Selection.StartPos) {
+                                        break;
+                                    }
+                                    this.Selection.EndPos = Pos + 1;
+                                }
+                                this.Content[Pos].Selection_Remove();
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    Get_ParaContentPosByXY: function (X, Y, PageNum, bYLine, StepEnd, bCenterMode) {
+        var SearchPos = new CParagraphSearchPosXY();
+        SearchPos.CenterMode = (undefined === bCenterMode ? true : bCenterMode);
+        if (this.Lines.length <= 0) {
+            return SearchPos;
+        }
+        var PNum = (PageNum === -1 || undefined === PageNum ? 0 : PageNum - this.PageNum);
+        if (PNum >= this.Pages.length) {
+            PNum = this.Pages.length - 1;
+            bYLine = true;
+            Y = this.Lines.length - 1;
+        } else {
+            if (PNum < 0) {
+                PNum = 0;
+                bYLine = true;
+                Y = 0;
+            }
+        }
+        var CurLine = 0;
+        if (true === bYLine) {
+            CurLine = Y;
+        } else {
+            CurLine = this.Pages[PNum].FirstLine;
+            var bFindY = false;
+            var CurLineY = this.Pages[PNum].Y + this.Lines[CurLine].Y + this.Lines[CurLine].Metrics.Descent + this.Lines[CurLine].Metrics.LineGap;
+            var LastLine = (PNum >= this.Pages.length - 1 ? this.Lines.length - 1 : this.Pages[PNum + 1].FirstLine - 1);
+            while (!bFindY) {
+                if (Y < CurLineY) {
+                    break;
+                }
+                if (CurLine >= LastLine) {
+                    break;
+                }
+                CurLine++;
+                CurLineY = this.Lines[CurLine].Y + this.Pages[PNum].Y + this.Lines[CurLine].Metrics.Descent + this.Lines[CurLine].Metrics.LineGap;
+            }
+        }
+        var CurRange = 0;
+        var RangesCount = this.Lines[CurLine].Ranges.length;
+        if (RangesCount > 1) {
+            for (; CurRange < RangesCount - 1; CurRange++) {
+                var _CurRange = this.Lines[CurLine].Ranges[CurRange];
+                var _NextRange = this.Lines[CurLine].Ranges[CurRange + 1];
+                if (X < (_CurRange.XEnd + _NextRange.X) / 2) {
+                    break;
+                }
+            }
+        }
+        if (CurRange >= RangesCount) {
+            CurRange = Math.max(RangesCount - 1, 0);
+        }
+        var Range = this.Lines[CurLine].Ranges[CurRange];
+        var StartPos = Range.StartPos;
+        var EndPos = Range.EndPos;
+        SearchPos.CurX = Range.XVisible;
+        SearchPos.X = X;
+        SearchPos.Y = Y;
+        if (true === this.Numbering.Check_Range(CurRange, CurLine)) {
+            var NumPr = this.Numbering_Get();
+            if (para_Numbering === this.Numbering.Type && undefined !== NumPr && undefined !== NumPr.NumId && 0 !== NumPr.NumId && "0" !== NumPr.NumId) {
+                var NumJc = this.Parent.Get_Numbering().Get_AbstractNum(NumPr.NumId).Lvl[NumPr.Lvl].Jc;
+                var NumX0 = SearchPos.CurX;
+                var NumX1 = SearchPos.CurX;
+                switch (NumJc) {
+                case align_Right:
+                    NumX0 -= this.Numbering.WidthNum;
+                    break;
+                case align_Center:
+                    NumX0 -= this.Numbering.WidthNum / 2;
+                    NumX1 += this.Numbering.WidthNum / 2;
+                    break;
+                case align_Left:
+                    default:
+                    NumX1 += this.Numbering.WidthNum;
+                    break;
+                }
+                if (SearchPos.X >= NumX0 && SearchPos.X <= NumX1) {
+                    SearchPos.Numbering = true;
+                }
+            }
+            SearchPos.CurX += this.Numbering.WidthVisible;
+        }
+        for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+            var Item = this.Content[CurPos];
+            if (false === SearchPos.InText) {
+                SearchPos.InTextPos.Update2(CurPos, 0);
+            }
+            if (true === Item.Get_ParaContentPosByXY(SearchPos, 1, CurLine, CurRange, StepEnd)) {
+                SearchPos.Pos.Update2(CurPos, 0);
+            }
+        }
+        if (true === SearchPos.InText && Y >= this.Pages[PNum].Y + this.Lines[CurLine].Y - this.Lines[CurLine].Metrics.Ascent - 0.01 && Y <= this.Pages[PNum].Y + this.Lines[CurLine].Y + this.Lines[CurLine].Metrics.Descent + this.Lines[CurLine].Metrics.LineGap + 0.01) {
+            SearchPos.InText = true;
+        } else {
+            SearchPos.InText = false;
+        }
+        if (SearchPos.DiffX > 1000000 - 1) {
+            SearchPos.Line = -1;
+            SearchPos.Range = -1;
+        } else {
+            SearchPos.Line = CurLine;
+            SearchPos.Range = CurRange;
+        }
+        return SearchPos;
+    },
     Cursor_GetPos: function () {
         return {
             X: this.CurPos.RealX,
@@ -4364,17 +2690,60 @@ Paragraph.prototype = {
         };
     },
     Cursor_MoveLeft: function (Count, AddToSelect, Word) {
-        if (this.CurPos.ContentPos < 0) {
-            return false;
-        }
-        if (0 == Count || !Count) {
-            return;
-        }
-        var absCount = (Count < 0 ? -Count : Count);
-        for (var Index = 0; Index < absCount; Index++) {
-            if (false === this.Internal_MoveCursorBackward(AddToSelect, Word)) {
-                return false;
+        if (true === this.Selection.Use) {
+            var EndSelectionPos = this.Get_ParaContentPos(true, false);
+            var StartSelectionPos = this.Get_ParaContentPos(true, true);
+            if (true !== AddToSelect) {
+                var SelectPos = StartSelectionPos;
+                if (StartSelectionPos.Compare(EndSelectionPos) > 0) {
+                    SelectPos = EndSelectionPos;
+                }
+                this.Selection_Remove();
+                this.Set_ParaContentPos(SelectPos, true, -1, -1);
+            } else {
+                var SearchPos = new CParagraphSearchPos();
+                SearchPos.ForSelection = true;
+                if (true === Word) {
+                    this.Get_WordStartPos(SearchPos, EndSelectionPos);
+                } else {
+                    this.Get_LeftPos(SearchPos, EndSelectionPos);
+                }
+                if (true === SearchPos.Found) {
+                    this.Set_SelectionContentPos(StartSelectionPos, SearchPos.Pos);
+                } else {
+                    return false;
+                }
             }
+        } else {
+            var SearchPos = new CParagraphSearchPos();
+            var ContentPos = this.Get_ParaContentPos(false, false);
+            if (true === AddToSelect) {
+                SearchPos.ForSelection = true;
+            }
+            if (true === Word) {
+                this.Get_WordStartPos(SearchPos, ContentPos);
+            } else {
+                this.Get_LeftPos(SearchPos, ContentPos);
+            }
+            if (true === AddToSelect) {
+                if (true === SearchPos.Found) {
+                    this.Selection.Use = true;
+                    this.Set_SelectionContentPos(ContentPos, SearchPos.Pos);
+                } else {
+                    this.Selection.Use = false;
+                    return false;
+                }
+            } else {
+                if (true === SearchPos.Found) {
+                    this.Set_ParaContentPos(SearchPos.Pos, true, -1, -1);
+                } else {
+                    return false;
+                }
+            }
+        }
+        if (true === this.Selection.Use) {
+            var SelectionEndPos = this.Get_ParaContentPos(true, false);
+            this.Set_ParaContentPos(SelectionEndPos, false, -1, -1);
         }
         this.Internal_Recalculate_CurPos(this.CurPos.ContentPos, true, false, false);
         this.CurPos.RealX = this.CurPos.X;
@@ -4382,296 +2751,570 @@ Paragraph.prototype = {
         return true;
     },
     Cursor_MoveRight: function (Count, AddToSelect, Word) {
-        if (this.CurPos.ContentPos < 0) {
-            return false;
-        }
-        if (0 == Count || !Count) {
-            return;
-        }
-        var absCount = (Count < 0 ? -Count : Count);
-        for (var Index = 0; Index < absCount; Index++) {
-            if (false === this.Internal_MoveCursorForward(AddToSelect, Word)) {
-                return false;
+        if (true === this.Selection.Use) {
+            var EndSelectionPos = this.Get_ParaContentPos(true, false);
+            var StartSelectionPos = this.Get_ParaContentPos(true, true);
+            if (true !== AddToSelect) {
+                if (true === this.Selection_CheckParaEnd()) {
+                    this.Selection_Remove();
+                    this.Cursor_MoveToEndPos(false);
+                    return false;
+                } else {
+                    var SelectPos = EndSelectionPos;
+                    if (StartSelectionPos.Compare(EndSelectionPos) > 0) {
+                        SelectPos = StartSelectionPos;
+                    }
+                    this.Selection_Remove();
+                    this.Set_ParaContentPos(SelectPos, true, -1, -1);
+                }
+            } else {
+                var SearchPos = new CParagraphSearchPos();
+                SearchPos.ForSelection = true;
+                if (true === Word) {
+                    this.Get_WordEndPos(SearchPos, EndSelectionPos, true);
+                } else {
+                    this.Get_RightPos(SearchPos, EndSelectionPos, true);
+                }
+                if (true === SearchPos.Found) {
+                    this.Set_SelectionContentPos(StartSelectionPos, SearchPos.Pos);
+                } else {
+                    return false;
+                }
             }
+        } else {
+            var SearchPos = new CParagraphSearchPos();
+            var ContentPos = this.Get_ParaContentPos(false, false);
+            if (true === AddToSelect) {
+                SearchPos.ForSelection = true;
+            }
+            if (true === Word) {
+                this.Get_WordEndPos(SearchPos, ContentPos, AddToSelect);
+            } else {
+                this.Get_RightPos(SearchPos, ContentPos, AddToSelect);
+            }
+            if (true === AddToSelect) {
+                if (true === SearchPos.Found) {
+                    this.Selection.Use = true;
+                    this.Set_SelectionContentPos(ContentPos, SearchPos.Pos);
+                } else {
+                    this.Selection.Use = false;
+                    return false;
+                }
+            } else {
+                if (true === SearchPos.Found) {
+                    this.Set_ParaContentPos(SearchPos.Pos, true, -1, -1);
+                } else {
+                    return false;
+                }
+            }
+        }
+        if (true === this.Selection.Use) {
+            var SelectionEndPos = this.Get_ParaContentPos(true, false);
+            this.Set_ParaContentPos(SelectionEndPos, false, -1, -1);
         }
         this.Internal_Recalculate_CurPos(this.CurPos.ContentPos, true, false, false);
         this.CurPos.RealX = this.CurPos.X;
         this.CurPos.RealY = this.CurPos.Y;
         return true;
     },
-    Cursor_MoveUp: function (Count, AddToSelect) {
-        var CursorPos_max = this.Internal_GetEndPos();
-        var CursorPos_min = this.Internal_GetStartPos();
-        if (this.CurPos.ContentPos < 0) {
-            return false;
+    Cursor_MoveAt: function (X, Y, bLine, bDontChangeRealPos, PageNum) {
+        var SearchPosXY = this.Get_ParaContentPosByXY(X, Y, PageNum, bLine, false);
+        this.Set_ParaContentPos(SearchPosXY.Pos, false, SearchPosXY.Line, SearchPosXY.Range);
+        this.Internal_Recalculate_CurPos(-1, false, false, false);
+        if (bDontChangeRealPos != true) {
+            this.CurPos.RealX = this.CurPos.X;
+            this.CurPos.RealY = this.CurPos.Y;
         }
-        if (!Count || 0 == Count) {
+        if (true != bLine) {
+            this.CurPos.RealX = X;
+            this.CurPos.RealY = Y;
+        }
+    },
+    Get_PosByElement: function (Class) {
+        var ContentPos = new CParagraphContentPos();
+        var CurRange = Class.StartRange;
+        var CurLine = Class.StartLine;
+        var StartPos = this.Lines[CurLine].Ranges[CurRange].StartPos;
+        var EndPos = this.Lines[CurLine].Ranges[CurRange].EndPos;
+        for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+            var Element = this.Content[CurPos];
+            ContentPos.Update(CurPos, 0);
+            if (true === Element.Get_PosByElement(Class, ContentPos, 1, true, CurRange, CurLine)) {
+                return ContentPos;
+            }
+        }
+        var ContentLen = this.Content.length;
+        for (var CurPos = 0; CurPos < ContentLen; CurPos++) {
+            var Element = this.Content[CurPos];
+            ContentPos.Update(CurPos, 0);
+            if (true === Element.Get_PosByElement(Class, ContentPos, 1, false, -1, -1)) {
+                return ContentPos;
+            }
+        }
+    },
+    Get_RunElementByPos: function (ContentPos) {
+        var CurPos = ContentPos.Get(0);
+        var ContentLen = this.Content.length;
+        var Element = this.Content[CurPos].Get_RunElementByPos(ContentPos, 1);
+        while (null === Element) {
+            CurPos++;
+            if (CurPos >= ContentLen) {
+                break;
+            }
+            Element = this.Content[CurPos].Get_RunElementByPos();
+        }
+        return Element;
+    },
+    Get_PageStartPos: function (CurPage) {
+        var CurLine = this.Pages[CurPage].StartLine;
+        var CurRange = 0;
+        return this.Get_StartRangePos2(CurLine, CurRange);
+    },
+    Get_LeftPos: function (SearchPos, ContentPos) {
+        var Depth = 0;
+        var CurPos = ContentPos.Get(Depth);
+        this.Content[CurPos].Get_LeftPos(SearchPos, ContentPos, Depth + 1, true);
+        SearchPos.Pos.Update(CurPos, Depth);
+        if (true === SearchPos.Found) {
+            return true;
+        }
+        CurPos--;
+        if (CurPos >= 0 && para_Math === this.Content[CurPos + 1].Type) {
+            this.Content[CurPos].Get_EndPos(false, SearchPos.Pos, Depth + 1);
+            SearchPos.Pos.Update(CurPos, Depth);
+            SearchPos.Found = true;
+            return true;
+        }
+        while (CurPos >= 0) {
+            this.Content[CurPos].Get_LeftPos(SearchPos, ContentPos, Depth + 1, false);
+            SearchPos.Pos.Update(CurPos, Depth);
+            if (true === SearchPos.Found) {
+                return true;
+            }
+            CurPos--;
+        }
+        return false;
+    },
+    Get_RightPos: function (SearchPos, ContentPos, StepEnd) {
+        var Depth = 0;
+        var CurPos = ContentPos.Get(Depth);
+        this.Content[CurPos].Get_RightPos(SearchPos, ContentPos, Depth + 1, true, StepEnd);
+        SearchPos.Pos.Update(CurPos, Depth);
+        if (true === SearchPos.Found) {
+            return true;
+        }
+        CurPos++;
+        var Count = this.Content.length;
+        if (CurPos < Count && para_Math === this.Content[CurPos - 1].Type) {
+            this.Content[CurPos].Get_StartPos(SearchPos.Pos, Depth + 1);
+            SearchPos.Pos.Update(CurPos, Depth);
+            SearchPos.Found = true;
+            return true;
+        }
+        while (CurPos < Count) {
+            this.Content[CurPos].Get_RightPos(SearchPos, ContentPos, Depth + 1, false, StepEnd);
+            SearchPos.Pos.Update(CurPos, Depth);
+            if (true === SearchPos.Found) {
+                return true;
+            }
+            CurPos++;
+        }
+        return false;
+    },
+    Get_WordStartPos: function (SearchPos, ContentPos) {
+        var Depth = 0;
+        var CurPos = ContentPos.Get(Depth);
+        this.Content[CurPos].Get_WordStartPos(SearchPos, ContentPos, Depth + 1, true);
+        if (true === SearchPos.UpdatePos) {
+            SearchPos.Pos.Update(CurPos, Depth);
+        }
+        if (true === SearchPos.Found) {
             return;
         }
-        var absCount = (Count < 0 ? -Count : Count);
-        var CurLine = this.Internal_Get_ParaPos_By_Pos(this.CurPos.ContentPos).Line;
+        CurPos--;
+        var Count = this.Content.length;
+        while (CurPos >= 0) {
+            this.Content[CurPos].Get_WordStartPos(SearchPos, ContentPos, Depth + 1, false);
+            if (true === SearchPos.UpdatePos) {
+                SearchPos.Pos.Update(CurPos, Depth);
+            }
+            if (true === SearchPos.Found) {
+                return;
+            }
+            CurPos--;
+        }
+        if (true === SearchPos.Shift) {
+            SearchPos.Found = true;
+        }
+    },
+    Get_WordEndPos: function (SearchPos, ContentPos, StepEnd) {
+        var Depth = 0;
+        var CurPos = ContentPos.Get(Depth);
+        this.Content[CurPos].Get_WordEndPos(SearchPos, ContentPos, Depth + 1, true, StepEnd);
+        if (true === SearchPos.UpdatePos) {
+            SearchPos.Pos.Update(CurPos, Depth);
+        }
+        if (true === SearchPos.Found) {
+            return;
+        }
+        CurPos++;
+        var Count = this.Content.length;
+        while (CurPos < Count) {
+            this.Content[CurPos].Get_WordEndPos(SearchPos, ContentPos, Depth + 1, false, StepEnd);
+            if (true === SearchPos.UpdatePos) {
+                SearchPos.Pos.Update(CurPos, Depth);
+            }
+            if (true === SearchPos.Found) {
+                return;
+            }
+            CurPos++;
+        }
+        if (true === SearchPos.Shift) {
+            SearchPos.Found = true;
+        }
+    },
+    Get_EndRangePos: function (SearchPos, ContentPos) {
+        var LinePos = this.Get_ParaPosByContentPos(ContentPos);
+        var CurLine = LinePos.Line;
+        var CurRange = LinePos.Range;
+        var Range = this.Lines[CurLine].Ranges[CurRange];
+        var StartPos = Range.StartPos;
+        var EndPos = Range.EndPos;
+        SearchPos.Line = CurLine;
+        SearchPos.Range = CurRange;
+        for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+            var Item = this.Content[CurPos];
+            if (true === Item.Get_EndRangePos(CurLine, CurRange, SearchPos, 1)) {
+                SearchPos.Pos.Update(CurPos, 0);
+            }
+        }
+    },
+    Get_StartRangePos: function (SearchPos, ContentPos) {
+        var LinePos = this.Get_ParaPosByContentPos(ContentPos);
+        var CurLine = LinePos.Line;
+        var CurRange = LinePos.Range;
+        var Range = this.Lines[CurLine].Ranges[CurRange];
+        var StartPos = Range.StartPos;
+        var EndPos = Range.EndPos;
+        SearchPos.Line = CurLine;
+        SearchPos.Range = CurRange;
+        for (var CurPos = EndPos; CurPos >= StartPos; CurPos--) {
+            var Item = this.Content[CurPos];
+            if (true === Item.Get_StartRangePos(CurLine, CurRange, SearchPos, 1)) {
+                SearchPos.Pos.Update(CurPos, 0);
+            }
+        }
+    },
+    Get_StartRangePos2: function (CurLine, CurRange) {
+        var ContentPos = new CParagraphContentPos();
+        var Depth = 0;
+        var Pos = this.Lines[CurLine].Ranges[CurRange].StartPos;
+        ContentPos.Update(Pos, Depth);
+        this.Content[Pos].Get_StartRangePos2(CurLine, CurRange, ContentPos, Depth + 1);
+        return ContentPos;
+    },
+    Get_StartPos: function () {
+        var ContentPos = new CParagraphContentPos();
+        var Depth = 0;
+        ContentPos.Update(0, Depth);
+        this.Content[0].Get_StartPos(ContentPos, Depth + 1);
+        return ContentPos;
+    },
+    Get_EndPos: function (BehindEnd) {
+        var ContentPos = new CParagraphContentPos();
+        var Depth = 0;
+        var ContentLen = this.Content.length;
+        ContentPos.Update(ContentLen - 1, Depth);
+        this.Content[ContentLen - 1].Get_EndPos(BehindEnd, ContentPos, Depth + 1);
+        return ContentPos;
+    },
+    Get_NextRunElements: function (RunElements) {
+        var ContentPos = RunElements.ContentPos;
+        var CurPos = ContentPos.Get(0);
+        var ContentLen = this.Content.length;
+        this.Content[CurPos].Get_NextRunElements(RunElements, true, 1);
+        if (RunElements.Count <= 0) {
+            return;
+        }
+        CurPos++;
+        while (CurPos < ContentLen) {
+            this.Content[CurPos].Get_NextRunElements(RunElements, false, 1);
+            if (RunElements.Count <= 0) {
+                break;
+            }
+            CurPos++;
+        }
+    },
+    Get_PrevRunElements: function (RunElements) {
+        var ContentPos = RunElements.ContentPos;
+        var CurPos = ContentPos.Get(0);
+        this.Content[CurPos].Get_PrevRunElements(RunElements, true, 1);
+        if (RunElements.Count <= 0) {
+            return;
+        }
+        CurPos--;
+        while (CurPos >= 0) {
+            this.Content[CurPos].Get_PrevRunElements(RunElements, false, 1);
+            if (RunElements.Count <= 0) {
+                break;
+            }
+            CurPos--;
+        }
+    },
+    Cursor_MoveUp: function (Count, AddToSelect) {
         var Result = true;
         if (true === this.Selection.Use) {
+            var SelectionStartPos = this.Get_ParaContentPos(true, true);
+            var SelectionEndPos = this.Get_ParaContentPos(true, false);
             if (true === AddToSelect) {
-                this.Set_ContentPos(this.Selection.EndPos, true, -1);
-                CurLine = this.Internal_Get_ParaPos_By_Pos(this.CurPos.ContentPos).Line;
-                this.RecalculateCurPos();
-                this.CurPos.RealY = this.CurPos.Y;
+                var LinePos = this.Get_ParaPosByContentPos(SelectionEndPos);
+                var CurLine = LinePos.Line;
                 if (0 == CurLine) {
+                    EndPos = this.Get_StartPos();
                     Result = false;
-                    this.Selection.EndPos = this.Internal_GetStartPos();
                 } else {
                     this.Cursor_MoveAt(this.CurPos.RealX, CurLine - 1, true, true);
-                    this.CurPos.RealY = this.CurPos.Y;
-                    this.Selection.EndPos = this.CurPos.ContentPos;
+                    EndPos = this.Get_ParaContentPos(false, false);
                 }
-                if (this.Selection.StartPos == this.Selection.EndPos) {
-                    this.Selection_Remove();
-                    this.Selection.Use = false;
-                    this.Set_ContentPos(Math.max(CursorPos_min, Math.min(this.Selection.EndPos, CursorPos_max)), true, -1);
-                    this.RecalculateCurPos();
-                    return Result;
-                }
+                this.Selection.Use = true;
+                this.Set_SelectionContentPos(SelectionStartPos, EndPos);
             } else {
-                var StartPos = this.Selection.StartPos;
-                var EndPos = this.Selection.EndPos;
-                if (StartPos > EndPos) {
-                    var Temp = EndPos;
-                    EndPos = StartPos;
-                    StartPos = Temp;
+                var TopPos = SelectionStartPos;
+                if (SelectionStartPos.Compare(SelectionEndPos) > 0) {
+                    TopPos = SelectionEndPos;
                 }
-                this.Set_ContentPos(StartPos, true, -1);
-                this.Selection_Remove();
-                CurLine = this.Internal_Get_ParaPos_By_Pos(this.CurPos.ContentPos).Line;
-                this.Internal_Recalculate_CurPos(this.CurPos.ContentPos, true, false, false);
+                var LinePos = this.Get_ParaPosByContentPos(TopPos);
+                var CurLine = LinePos.Line;
+                var CurRange = LinePos.Range;
+                this.Set_ParaContentPos(TopPos, false, CurLine, CurRange);
+                this.Internal_Recalculate_CurPos(0, true, false, false);
                 this.CurPos.RealX = this.CurPos.X;
                 this.CurPos.RealY = this.CurPos.Y;
+                this.Selection_Remove();
                 if (0 == CurLine) {
-                    Result = false;
+                    return false;
                 } else {
                     this.Cursor_MoveAt(this.CurPos.RealX, CurLine - 1, true, true);
-                    this.CurPos.RealX = this.CurPos.X;
-                    this.CurPos.RealY = this.CurPos.Y;
                 }
             }
         } else {
+            var LinePos = this.Get_CurrentParaPos();
+            var CurLine = LinePos.Line;
             if (true === AddToSelect) {
-                this.Selection.Use = true;
-                this.Selection.StartPos = this.CurPos.ContentPos;
-                CurLine = this.Internal_Get_ParaPos_By_Pos(this.CurPos.ContentPos).Line;
-                this.RecalculateCurPos();
-                this.CurPos.RealY = this.CurPos.Y;
+                var StartPos = this.Get_ParaContentPos(false, false);
+                var EndPos = null;
                 if (0 == CurLine) {
+                    EndPos = this.Get_StartPos();
                     Result = false;
-                    this.Selection.EndPos = this.Internal_GetStartPos();
                 } else {
                     this.Cursor_MoveAt(this.CurPos.RealX, CurLine - 1, true, true);
-                    this.CurPos.RealY = this.CurPos.Y;
-                    this.Selection.EndPos = this.CurPos.ContentPos;
+                    EndPos = this.Get_ParaContentPos(false, false);
                 }
-                if (this.Selection.StartPos == this.Selection.EndPos) {
-                    this.Selection_Remove();
-                    this.Selection.Use = false;
-                    this.Set_ContentPos(Math.max(CursorPos_min, Math.min(this.Selection.EndPos, CursorPos_max)), true, -1);
-                    this.RecalculateCurPos();
-                    return Result;
-                }
+                this.Selection.Use = true;
+                this.Set_SelectionContentPos(StartPos, EndPos);
             } else {
                 if (0 == CurLine) {
                     return false;
                 } else {
                     this.Cursor_MoveAt(this.CurPos.RealX, CurLine - 1, true, true);
-                    this.CurPos.RealY = this.CurPos.Y;
                 }
             }
         }
         return Result;
     },
     Cursor_MoveDown: function (Count, AddToSelect) {
-        var CursorPos_max = this.Internal_GetEndPos();
-        var CursorPos_min = this.Internal_GetStartPos();
-        if (this.CurPos.ContentPos < 0) {
-            return false;
-        }
-        if (!Count || 0 == Count) {
-            return;
-        }
-        var absCount = (Count < 0 ? -Count : Count);
-        var CurLine = this.Internal_Get_ParaPos_By_Pos(this.CurPos.ContentPos).Line;
         var Result = true;
         if (true === this.Selection.Use) {
+            var SelectionStartPos = this.Get_ParaContentPos(true, true);
+            var SelectionEndPos = this.Get_ParaContentPos(true, false);
             if (true === AddToSelect) {
-                this.Set_ContentPos(this.Selection.EndPos, true, -1);
-                CurLine = this.Internal_Get_ParaPos_By_Pos(this.CurPos.ContentPos).Line;
-                this.RecalculateCurPos();
-                this.CurPos.RealY = this.CurPos.Y;
+                var LinePos = this.Get_ParaPosByContentPos(SelectionEndPos);
+                var CurLine = LinePos.Line;
                 if (this.Lines.length - 1 == CurLine) {
+                    EndPos = this.Get_EndPos(true);
                     Result = false;
-                    this.Selection.EndPos = this.Content.length - 1;
                 } else {
                     this.Cursor_MoveAt(this.CurPos.RealX, CurLine + 1, true, true);
-                    this.CurPos.RealY = this.CurPos.Y;
-                    this.Selection.EndPos = this.CurPos.ContentPos;
+                    EndPos = this.Get_ParaContentPos(false, false);
                 }
-                if (this.Selection.StartPos == this.Selection.EndPos) {
-                    this.Selection_Remove();
-                    this.Selection.Use = false;
-                    this.Set_ContentPos(Math.max(CursorPos_min, Math.min(this.Selection.EndPos, CursorPos_max)), true, -1);
-                    this.RecalculateCurPos();
-                    return Result;
-                }
+                this.Selection.Use = true;
+                this.Set_SelectionContentPos(SelectionStartPos, EndPos);
             } else {
-                var StartPos = this.Selection.StartPos;
-                var EndPos = this.Selection.EndPos;
-                if (StartPos > EndPos) {
-                    var Temp = EndPos;
-                    EndPos = StartPos;
-                    StartPos = Temp;
+                var BottomPos = SelectionEndPos;
+                if (SelectionStartPos.Compare(SelectionEndPos) > 0) {
+                    BottomPos = SelectionStartPos;
                 }
-                this.Set_ContentPos(Math.max(CursorPos_min, Math.min(EndPos, CursorPos_max)), true, -1);
-                this.Selection_Remove();
-                CurLine = this.Internal_Get_ParaPos_By_Pos(this.CurPos.ContentPos).Line;
-                this.Internal_Recalculate_CurPos(this.CurPos.ContentPos, true, false, false);
+                var LinePos = this.Get_ParaPosByContentPos(BottomPos);
+                var CurLine = LinePos.Line;
+                var CurRange = LinePos.Range;
+                this.Set_ParaContentPos(BottomPos, false, CurLine, CurRange);
+                this.Internal_Recalculate_CurPos(0, true, false, false);
                 this.CurPos.RealX = this.CurPos.X;
                 this.CurPos.RealY = this.CurPos.Y;
+                this.Selection_Remove();
                 if (this.Lines.length - 1 == CurLine) {
-                    Result = false;
+                    return false;
                 } else {
                     this.Cursor_MoveAt(this.CurPos.RealX, CurLine + 1, true, true);
-                    this.CurPos.RealX = this.CurPos.X;
-                    this.CurPos.RealY = this.CurPos.Y;
                 }
             }
         } else {
-            if (AddToSelect) {
-                this.Selection.Use = true;
-                this.Selection.StartPos = this.CurPos.ContentPos;
-                CurLine = this.Internal_Get_ParaPos_By_Pos(this.CurPos.ContentPos).Line;
-                this.RecalculateCurPos();
-                this.CurPos.RealY = this.CurPos.Y;
+            var LinePos = this.Get_CurrentParaPos();
+            var CurLine = LinePos.Line;
+            if (true === AddToSelect) {
+                var StartPos = this.Get_ParaContentPos(false, false);
+                var EndPos = null;
                 if (this.Lines.length - 1 == CurLine) {
+                    EndPos = this.Get_EndPos(true);
                     Result = false;
-                    this.Selection.EndPos = this.Content.length - 1;
                 } else {
                     this.Cursor_MoveAt(this.CurPos.RealX, CurLine + 1, true, true);
-                    this.CurPos.RealY = this.CurPos.Y;
-                    this.Selection.EndPos = this.CurPos.ContentPos;
+                    EndPos = this.Get_ParaContentPos(false, false);
                 }
-                if (this.Selection.StartPos == this.Selection.EndPos) {
-                    this.Selection_Remove();
-                    this.Selection.Use = false;
-                    this.Set_ContentPos(Math.max(CursorPos_min, Math.min(this.Selection.EndPos, CursorPos_max)), true, -1);
-                    this.RecalculateCurPos();
-                    return Result;
-                }
+                this.Selection.Use = true;
+                this.Set_SelectionContentPos(StartPos, EndPos);
             } else {
                 if (this.Lines.length - 1 == CurLine) {
                     return false;
                 } else {
                     this.Cursor_MoveAt(this.CurPos.RealX, CurLine + 1, true, true);
-                    this.CurPos.RealY = this.CurPos.Y;
                 }
             }
         }
         return Result;
     },
     Cursor_MoveEndOfLine: function (AddToSelect) {
-        var CursorPos_max = this.Internal_GetEndPos();
-        var CursorPos_min = this.Internal_GetStartPos();
-        if (this.CurPos.ContentPos < 0) {
-            return false;
-        }
         if (true === this.Selection.Use) {
+            var EndSelectionPos = this.Get_ParaContentPos(true, false);
+            var StartSelectionPos = this.Get_ParaContentPos(true, true);
             if (true === AddToSelect) {
-                this.Set_ContentPos(this.Selection.EndPos, true, -1);
+                var SearchPos = new CParagraphSearchPos();
+                this.Get_EndRangePos(SearchPos, EndSelectionPos);
+                this.Set_SelectionContentPos(StartSelectionPos, SearchPos.Pos);
             } else {
-                this.Set_ContentPos(Math.max(CursorPos_min, Math.min(CursorPos_max, (this.Selection.EndPos >= this.Selection.StartPos ? this.Selection.EndPos : this.Selection.StartPos))), true, -1);
+                var RightPos = EndSelectionPos;
+                if (EndSelectionPos.Compare(StartSelectionPos) < 0) {
+                    RightPos = StartSelectionPos;
+                }
+                var SearchPos = new CParagraphSearchPos();
+                this.Get_EndRangePos(SearchPos, RightPos);
                 this.Selection_Remove();
-            }
-        }
-        var CurLine = this.Internal_Get_ParaPos_By_Pos(this.CurPos.ContentPos).Line;
-        var LineEndPos = (CurLine >= this.Lines.length - 1 ? this.Internal_GetEndPos() : this.Lines[CurLine + 1].StartPos - 1);
-        if (true === this.Selection.Use && true === AddToSelect) {
-            this.Selection.EndPos = LineEndPos;
-            if (this.Selection.StartPos == this.Selection.EndPos) {
-                this.Selection_Remove();
-                this.Selection.Use = false;
-                this.Set_ContentPos(Math.max(CursorPos_min, Math.min(this.Selection.EndPos, CursorPos_max)), true, -1);
-                this.RecalculateCurPos();
-                return;
+                this.Set_ParaContentPos(SearchPos.Pos, false, SearchPos.Line, SearchPos.Range);
             }
         } else {
-            if (AddToSelect) {
-                this.Selection.StartPos = this.CurPos.ContentPos;
+            var SearchPos = new CParagraphSearchPos();
+            var ContentPos = this.Get_ParaContentPos(false, false);
+            this.Get_EndRangePos(SearchPos, ContentPos);
+            if (true === AddToSelect) {
                 this.Selection.Use = true;
-                this.Selection.EndPos = LineEndPos;
-                if (this.Selection.StartPos == this.Selection.EndPos) {
-                    this.Selection_Remove();
-                    this.Selection.Use = false;
-                    this.Set_ContentPos(Math.max(CursorPos_min, Math.min(this.Selection.EndPos, CursorPos_max)), true, -1);
-                    this.RecalculateCurPos();
-                    return;
-                }
+                this.Set_SelectionContentPos(ContentPos, SearchPos.Pos);
             } else {
-                this.Set_ContentPos(LineEndPos, true, -1);
-                this.RecalculateCurPos();
-                this.CurPos.RealX = this.CurPos.X;
-                this.CurPos.RealY = this.CurPos.Y;
+                this.Set_ParaContentPos(SearchPos.Pos, false, SearchPos.Line, SearchPos.Range);
             }
         }
+        if (true === this.Selection.Use) {
+            var SelectionEndPos = this.Get_ParaContentPos(true, false);
+            this.Set_ParaContentPos(SelectionEndPos, false, -1, -1);
+        }
+        this.Internal_Recalculate_CurPos(this.CurPos.ContentPos, true, false, false);
+        this.CurPos.RealX = this.CurPos.X;
+        this.CurPos.RealY = this.CurPos.Y;
     },
     Cursor_MoveStartOfLine: function (AddToSelect) {
-        var CursorPos_max = this.Internal_GetEndPos();
-        var CursorPos_min = this.Internal_GetStartPos();
-        if (this.CurPos.ContentPos < 0) {
-            return false;
-        }
         if (true === this.Selection.Use) {
+            var EndSelectionPos = this.Get_ParaContentPos(true, false);
+            var StartSelectionPos = this.Get_ParaContentPos(true, true);
             if (true === AddToSelect) {
-                this.Set_ContentPos(this.Selection.EndPos, true, -1);
+                var SearchPos = new CParagraphSearchPos();
+                this.Get_StartRangePos(SearchPos, EndSelectionPos);
+                this.Set_SelectionContentPos(StartSelectionPos, SearchPos.Pos);
             } else {
-                this.Set_ContentPos((this.Selection.StartPos <= this.Selection.EndPos ? this.Selection.StartPos : this.Selection.EndPos), true, -1);
+                var LeftPos = StartSelectionPos;
+                if (StartSelectionPos.Compare(EndSelectionPos) > 0) {
+                    LeftPos = EndSelectionPos;
+                }
+                var SearchPos = new CParagraphSearchPos();
+                this.Get_StartRangePos(SearchPos, LeftPos);
                 this.Selection_Remove();
-            }
-        }
-        var CurLine = this.Internal_Get_ParaPos_By_Pos(this.CurPos.ContentPos).Line;
-        var LineStartPos = this.Lines[CurLine].StartPos;
-        if (true === this.Selection.Use && true === AddToSelect) {
-            this.Selection.EndPos = LineStartPos;
-            if (this.Selection.StartPos == this.Selection.EndPos) {
-                this.Selection_Remove();
-                this.Selection.Use = false;
-                this.Set_ContentPos(Math.max(CursorPos_min, Math.min(this.Selection.EndPos, CursorPos_max)), true, -1);
-                this.RecalculateCurPos();
-                return;
+                this.Set_ParaContentPos(SearchPos.Pos, false, SearchPos.Line, SearchPos.Range);
             }
         } else {
-            if (AddToSelect) {
-                this.Selection.EndPos = LineStartPos;
-                this.Selection.StartPos = this.CurPos.ContentPos;
+            var SearchPos = new CParagraphSearchPos();
+            var ContentPos = this.Get_ParaContentPos(false, false);
+            this.Get_StartRangePos(SearchPos, ContentPos);
+            if (true === AddToSelect) {
                 this.Selection.Use = true;
-                if (this.Selection.StartPos == this.Selection.EndPos) {
-                    this.Selection_Remove();
-                    this.Selection.Use = false;
-                    this.Set_ContentPos(Math.max(CursorPos_min, Math.min(this.Selection.EndPos, CursorPos_max)), true, -1);
-                    this.RecalculateCurPos();
-                    return;
-                }
+                this.Set_SelectionContentPos(ContentPos, SearchPos.Pos);
             } else {
-                this.Set_ContentPos(LineStartPos, true, -1);
-                this.RecalculateCurPos();
-                this.CurPos.RealX = this.CurPos.X;
-                this.CurPos.RealY = this.CurPos.Y;
+                this.Set_ParaContentPos(SearchPos.Pos, false, SearchPos.Line, SearchPos.Range);
+            }
+        }
+        if (true === this.Selection.Use) {
+            var SelectionEndPos = this.Get_ParaContentPos(true, false);
+            this.Set_ParaContentPos(SelectionEndPos, false, -1, -1);
+        }
+        this.Internal_Recalculate_CurPos(this.CurPos.ContentPos, true, false, false);
+        this.CurPos.RealX = this.CurPos.X;
+        this.CurPos.RealY = this.CurPos.Y;
+    },
+    Cursor_MoveToStartPos: function (AddToSelect) {
+        if (true === AddToSelect) {
+            var StartPos = null;
+            if (true === this.Selection.Use) {
+                StartPos = this.Get_ParaContentPos(true, true);
+            } else {
+                StartPos = this.Get_ParaContentPos(false, false);
+            }
+            var EndPos = this.Get_StartPos();
+            this.Selection.Use = true;
+            this.Selection.Start = false;
+            this.Set_SelectionContentPos(StartPos, EndPos);
+        } else {
+            this.Selection_Remove();
+            this.CurPos.ContentPos = 0;
+            this.Content[0].Cursor_MoveToStartPos();
+            this.Correct_ContentPos(false);
+            this.Correct_ContentPos2();
+        }
+    },
+    Cursor_MoveToEndPos: function (AddToSelect, StartSelectFromEnd) {
+        if (true === AddToSelect) {
+            var StartPos = null;
+            if (true === this.Selection.Use) {
+                StartPos = this.Get_ParaContentPos(true, true);
+            } else {
+                StartPos = this.Get_ParaContentPos(false, false);
+            }
+            var EndPos = this.Get_EndPos(true);
+            this.Selection.Use = true;
+            this.Selection.Start = false;
+            this.Set_SelectionContentPos(StartPos, EndPos);
+        } else {
+            if (true === StartSelectFromEnd) {
+                this.Selection.Use = true;
+                this.Selection.Start = false;
+                this.Selection.StartPos = this.Content.length - 1;
+                this.Selection.EndPos = this.Content.length - 1;
+                this.CurPos.ContentPos = this.Content.length - 1;
+                this.Content[this.CurPos.ContentPos].Cursor_MoveToEndPos(true);
+            } else {
+                this.Selection_Remove();
+                this.CurPos.ContentPos = this.Content.length - 1;
+                this.Content[this.CurPos.ContentPos].Cursor_MoveToEndPos();
+                this.Correct_ContentPos(false);
+                this.Correct_ContentPos2();
             }
         }
     },
-    Cursor_MoveToStartPos: function () {
-        this.Selection.Use = false;
-        this.Set_ContentPos(this.Internal_GetStartPos(), true, -1);
-    },
-    Cursor_MoveToEndPos: function () {
-        this.Selection.Use = false;
-        this.Set_ContentPos(this.Internal_GetEndPos(), true, -1);
+    Cursor_MoveToNearPos: function (NearPos) {
+        this.Set_ParaContentPos(NearPos.ContentPos, true, -1, -1);
+        this.Selection.Use = true;
+        this.Set_SelectionContentPos(NearPos.ContentPos, NearPos.ContentPos);
+        var SelectionStartPos = this.Get_ParaContentPos(true, true);
+        var SelectionEndPos = this.Get_ParaContentPos(true, false);
+        if (0 === SelectionStartPos.Compare(SelectionEndPos)) {
+            this.Selection_Remove();
+        }
     },
     Cursor_MoveUp_To_LastRow: function (X, Y, AddToSelect) {
         this.CurPos.RealX = X;
@@ -4680,42 +3323,48 @@ Paragraph.prototype = {
         if (true === AddToSelect) {
             if (false === this.Selection.Use) {
                 this.Selection.Use = true;
-                this.Selection.StartPos = this.Content.length - 1;
+                this.Set_SelectionContentPos(this.Get_EndPos(true), this.Get_ParaContentPos(false, false));
+            } else {
+                this.Set_SelectionContentPos(this.Get_ParaContentPos(true, true), this.Get_ParaContentPos(false, false));
             }
-            this.Selection.EndPos = this.CurPos.ContentPos;
         }
     },
     Cursor_MoveDown_To_FirstRow: function (X, Y, AddToSelect) {
         this.CurPos.RealX = X;
         this.CurPos.RealY = Y;
-        this.Cursor_MoveAt(X, 0, true, true, this.PageNum);
+        var CurContentPos = this.Cursor_MoveAt(X, 0, true, true, this.PageNum);
         if (true === AddToSelect) {
             if (false === this.Selection.Use) {
                 this.Selection.Use = true;
-                this.Selection.StartPos = this.Internal_GetStartPos();
+                this.Set_SelectionContentPos(this.Get_StartPos(), this.Get_ParaContentPos(false, false));
+            } else {
+                this.Set_SelectionContentPos(this.Get_ParaContentPos(true, true), this.Get_ParaContentPos(false, false));
             }
-            this.Selection.EndPos = this.CurPos.ContentPos;
         }
     },
     Cursor_MoveTo_Drawing: function (Id, bBefore) {
         if (undefined === bBefore) {
             bBefore = true;
         }
-        var Pos = -1;
-        var Count = this.Content.length;
-        for (var Index = 0; Index < Count; Index++) {
-            var Item = this.Content[Index];
-            if (para_Drawing === Item.Type && Id === Item.Get_Id()) {
-                Pos = Index;
+        var ContentPos = new CParagraphContentPos();
+        var ContentLen = this.Content.length;
+        var bFind = false;
+        for (var CurPos = 0; CurPos < ContentLen; CurPos++) {
+            var Element = this.Content[CurPos];
+            ContentPos.Update(CurPos, 0);
+            if (true === Element.Get_PosByDrawing(Id, ContentPos, 1)) {
+                bFind = true;
+                break;
             }
         }
-        if (-1 === Pos) {
+        if (false === bFind || ContentPos.Depth <= 0) {
             return;
         }
         if (true != bBefore) {
-            Pos = Pos + 1;
+            ContentPos.Data[ContentPos.Depth - 1]++;
         }
-        this.Set_ContentPos(Pos, false, -1);
+        this.Selection_Remove();
+        this.Set_ParaContentPos(ContentPos, false, -1, -1);
         this.RecalculateCurPos();
         this.CurPos.RealX = this.CurPos.X;
         this.CurPos.RealY = this.CurPos.Y;
@@ -4738,7 +3387,7 @@ Paragraph.prototype = {
         while (CurPos < Count - 1) {
             var Item = this.Content[CurPos];
             var ItemType = Item.Type;
-            if (para_Text === ItemType || para_Space === ItemType || para_End === ItemType || para_Tab === ItemType || (para_Drawing === ItemType && true === Item.Is_Inline()) || para_PageNum === ItemType || para_NewLine === ItemType || para_HyperlinkStart === ItemType) {
+            if (para_Text === ItemType || para_Space === ItemType || para_End === ItemType || para_Tab === ItemType || (para_Drawing === ItemType && true === Item.Is_Inline()) || para_PageNum === ItemType || para_NewLine === ItemType || para_HyperlinkStart === ItemType || para_Math === ItemType) {
                 break;
             }
             CurPos++;
@@ -4748,7 +3397,7 @@ Paragraph.prototype = {
             var Item = this.Content[CurPos];
             var ItemType = Item.Type;
             var bEnd = false;
-            if (para_Text === ItemType || para_Space === ItemType || para_End === ItemType || para_Tab === ItemType || (para_Drawing === ItemType && true === Item.Is_Inline()) || para_PageNum === ItemType || para_NewLine === ItemType) {
+            if (para_Text === ItemType || para_Space === ItemType || para_End === ItemType || para_Tab === ItemType || (para_Drawing === ItemType && true === Item.Is_Inline()) || para_PageNum === ItemType || para_NewLine === ItemType || para_Math === ItemType) {
                 this.CurPos.ContentPos = CurPos + 1;
                 bEnd = true;
             } else {
@@ -4790,7 +3439,7 @@ Paragraph.prototype = {
         return this.Selection.Use;
     },
     Internal_GetStartPos: function () {
-        var oPos = this.Internal_FindForward(0, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine, para_End]);
+        var oPos = this.Internal_FindForward(0, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine, para_End, para_Math]);
         if (true === oPos.Found) {
             return oPos.LetterPos;
         }
@@ -4803,824 +3452,326 @@ Paragraph.prototype = {
         }
         return 0;
     },
-    Internal_MoveCursorBackward: function (AddToSelect, Word) {
-        var CursorPos_max = this.Internal_GetEndPos();
-        var CursorPos_min = this.Internal_GetStartPos();
-        if (true === this.Selection.Use) {
-            if (true === AddToSelect) {
-                this.Set_ContentPos(this.Selection.EndPos, true, -1);
+    Correct_Content: function (_StartPos, _EndPos) {
+        var StartPos = (undefined === _StartPos ? 0 : Math.max(_StartPos - 1, 0));
+        var EndPos = (undefined === _EndPos ? this.Content.length - 1 : Math.min(_EndPos + 1, this.Content.length - 1));
+        var CommentsToDelete = [];
+        for (var CurPos = EndPos; CurPos >= StartPos; CurPos--) {
+            var CurElement = this.Content[CurPos];
+            if ((para_Hyperlink === CurElement.Type || para_Math === CurElement.Type) && true === CurElement.Is_Empty() && true !== CurElement.Is_CheckingNearestPos()) {
+                this.Internal_Content_Remove(CurPos);
+                CurPos++;
             } else {
-                var StartPos = this.Selection.StartPos;
-                var EndPos = this.Selection.EndPos;
-                if (StartPos > EndPos) {
-                    var Temp = EndPos;
-                    EndPos = StartPos;
-                    StartPos = Temp;
-                }
-                this.Selection_Remove();
-                this.Set_ContentPos(StartPos, true, -1);
-                return;
-            }
-        }
-        if (true === this.Selection.Use) {
-            var oPos;
-            if (true != Word) {
-                oPos = this.Internal_FindBackward(this.CurPos.ContentPos - 1, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine, para_End]);
-            } else {
-                oPos = this.Internal_FindWordStart(this.CurPos.ContentPos - 1, CursorPos_min);
-            }
-            if (oPos.Found) {
-                this.Selection.EndPos = oPos.LetterPos;
-                if (this.Selection.StartPos == this.Selection.EndPos) {
-                    this.Selection_Remove();
-                    this.Selection.Use = false;
-                    this.Set_ContentPos(Math.max(CursorPos_min, Math.min(this.Selection.EndPos, CursorPos_max)), true, -1);
-                    this.RecalculateCurPos();
-                    return true;
-                }
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if (true == AddToSelect) {
-                var oPos;
-                if (true != Word) {
-                    oPos = this.Internal_FindBackward(this.CurPos.ContentPos - 1, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine, para_End]);
-                } else {
-                    oPos = this.Internal_FindWordStart(this.CurPos.ContentPos - 1, CursorPos_min);
-                }
-                this.Selection.StartPos = this.CurPos.ContentPos;
-                this.Selection.Use = true;
-                if (oPos.Found) {
-                    this.Selection.EndPos = oPos.LetterPos;
-                    return true;
-                } else {
-                    this.Selection.Use = false;
-                    return false;
-                }
-            } else {
-                var oPos;
-                if (true != Word) {
-                    oPos = this.Internal_FindBackward(this.CurPos.ContentPos - 1, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine]);
-                } else {
-                    oPos = this.Internal_FindWordStart(this.CurPos.ContentPos - 1, CursorPos_min);
-                }
-                if (oPos.Found) {
-                    this.Set_ContentPos(oPos.LetterPos, true, -1);
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        }
-    },
-    Internal_FindWordStart: function (Pos, Pos_min) {
-        var LetterPos = Pos;
-        if (Pos < Pos_min || Pos >= this.Content.length) {
-            return {
-                Found: false
-            };
-        }
-        while (true) {
-            var Item = this.Content[LetterPos];
-            var Type = Item.Type;
-            var bSpace = false;
-            if (para_TextPr === Type || para_Space === Type || para_HyperlinkStart === Type || para_HyperlinkEnd === Type || para_Tab === Type || para_Empty === Type || para_CommentStart === Type || para_CommentEnd === Type || para_CollaborativeChangesEnd === Type || para_CollaborativeChangesStart === Type || (para_Text === Type && true === Item.Is_NBSP())) {
-                bSpace = true;
-            }
-            if (true === bSpace) {
-                LetterPos--;
-                if (LetterPos < 0) {
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
-        if (LetterPos <= Pos_min) {
-            return {
-                LetterPos: Pos_min,
-                Found: true,
-                Type: this.Content[Pos_min].Type
-            };
-        }
-        if (para_Text != this.Content[LetterPos].Type) {
-            return {
-                LetterPos: LetterPos,
-                Found: true,
-                Type: this.Content[LetterPos].Type
-            };
-        } else {
-            var bPunctuation = this.Content[LetterPos].Is_Punctuation();
-            var TempPos = LetterPos;
-            while (TempPos > Pos_min) {
-                TempPos--;
-                var Item = this.Content[TempPos];
-                var TempType = Item.Type;
-                if (! (true != Item.Is_RealContent() || para_TextPr === TempType || (para_Text === TempType && true != Item.Is_NBSP() && ((true === bPunctuation && true === Item.Is_Punctuation()) || (false === bPunctuation && false === Item.Is_Punctuation()))) || para_CommentStart === TempType || para_CommentEnd === TempType || para_HyperlinkEnd === TempType || para_HyperlinkEnd === TempType)) {
-                    break;
-                } else {
-                    LetterPos = TempPos;
-                }
-            }
-            return {
-                LetterPos: LetterPos,
-                Found: true,
-                Type: this.Content[LetterPos].Type
-            };
-        }
-        return {
-            Found: false
-        };
-    },
-    Internal_FindWordEnd: function (Pos, Pos_max) {
-        var LetterPos = Pos;
-        if (Pos > Pos_max || Pos >= this.Content.length) {
-            return {
-                Found: false
-            };
-        }
-        var bFirst = true;
-        var bFirstPunctuation = false;
-        while (true) {
-            var Item = this.Content[LetterPos];
-            var Type = Item.Type;
-            var bText = false;
-            if (para_TextPr === Type || para_HyperlinkStart === Type || para_HyperlinkEnd === Type || para_Empty === Type || (para_Text === Type && true != Item.Is_NBSP() && (true === bFirst || (bFirstPunctuation === Item.Is_Punctuation()))) || para_CommentStart === Type || para_CommentEnd === Type || para_CollaborativeChangesEnd === Type || para_CollaborativeChangesStart === Type) {
-                bText = true;
-            }
-            if (true === bText) {
-                if (true === bFirst && para_Text === Type) {
-                    bFirst = false;
-                    bFirstPunctuation = Item.Is_Punctuation();
-                }
-                LetterPos++;
-                if (LetterPos > Pos_max || LetterPos >= this.Content.length) {
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
-        if (true === bFirst) {
-            LetterPos++;
-        }
-        if (LetterPos > Pos_max) {
-            return {
-                Found: false
-            };
-        }
-        if (! (para_Space === this.Content[LetterPos].Type || (para_Text === this.Content[LetterPos].Type && true === this.Content[LetterPos].Is_NBSP()))) {
-            return {
-                LetterPos: LetterPos,
-                Found: true,
-                Type: this.Content[LetterPos].Type
-            };
-        } else {
-            var TempPos = LetterPos;
-            while (TempPos < Pos_max) {
-                TempPos++;
-                var Item = this.Content[TempPos];
-                var TempType = Item.Type;
-                if (! (true != Item.Is_RealContent() || para_TextPr === TempType || para_Space === this.Content[LetterPos].Type || (para_Text === this.Content[LetterPos].Type && true === this.Content[LetterPos].Is_NBSP()) || para_CommentStart === TempType || para_CommentEnd === TempType || para_HyperlinkEnd === TempType || para_HyperlinkEnd === TempType)) {
-                    break;
-                } else {
-                    LetterPos = TempPos;
-                }
-            }
-            return {
-                LetterPos: LetterPos,
-                Found: true,
-                Type: this.Content[LetterPos].Type
-            };
-        }
-        return {
-            Found: false
-        };
-    },
-    Internal_MoveCursorForward: function (AddToSelect, Word) {
-        var CursorPos_max = this.Internal_GetEndPos();
-        var CursorPos_min = this.Internal_GetStartPos();
-        if (true === this.Selection.Use) {
-            if (true === AddToSelect) {
-                this.Set_ContentPos(this.Selection.EndPos, false, -1);
-            } else {
-                var StartPos = this.Selection.StartPos;
-                var EndPos = this.Selection.EndPos;
-                if (StartPos > EndPos) {
-                    var Temp = EndPos;
-                    EndPos = StartPos;
-                    StartPos = Temp;
-                }
-                this.Selection_Remove();
-                this.Set_ContentPos(Math.max(CursorPos_min, Math.min(EndPos, CursorPos_max)), true, -1);
-                return true;
-            }
-        }
-        if (true == this.Selection.Use && true == AddToSelect) {
-            var oPos;
-            if (true != Word) {
-                oPos = this.Internal_FindForward(this.CurPos.ContentPos + 1, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine, para_End, para_Empty]);
-            } else {
-                oPos = this.Internal_FindWordEnd(this.CurPos.ContentPos, CursorPos_max + 1);
-            }
-            if (oPos.Found) {
-                this.Selection.EndPos = oPos.LetterPos;
-                if (this.Selection.StartPos == this.Selection.EndPos) {
-                    this.Selection_Remove();
-                    this.Selection.Use = false;
-                    this.Set_ContentPos(Math.max(CursorPos_min, Math.min(this.Selection.EndPos, CursorPos_max)), true, -1);
-                    this.RecalculateCurPos();
-                    return;
-                }
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if (true == AddToSelect) {
-                var oPos;
-                if (true != Word) {
-                    oPos = this.Internal_FindForward(this.CurPos.ContentPos + 1, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine, para_End, para_Empty]);
-                } else {
-                    oPos = this.Internal_FindWordEnd(this.CurPos.ContentPos, CursorPos_max + 1);
-                }
-                this.Selection.StartPos = this.CurPos.ContentPos;
-                this.Selection.Use = true;
-                if (oPos.Found) {
-                    this.Selection.EndPos = oPos.LetterPos;
-                    return true;
-                } else {
-                    this.Selection.Use = false;
-                    return false;
-                }
-            } else {
-                var oPos;
-                if (true != Word) {
-                    oPos = this.Internal_FindForward(this.CurPos.ContentPos, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine]);
-                    if (oPos.Found) {
-                        oPos.LetterPos++;
+                if (para_Comment === CurElement.Type && false === CurElement.Start) {
+                    var CommentId = CurElement.CommentId;
+                    for (var CurPos2 = CurPos - 1; CurPos2 >= 0; CurPos2--) {
+                        var CurElement2 = this.Content[CurPos2];
+                        if (para_Comment === CurElement2.Type && CommentId === CurElement2.CommentId) {
+                            CommentsToDelete.push(CommentId);
+                            break;
+                        } else {
+                            if (true !== CurElement2.Is_Empty()) {
+                                break;
+                            }
+                        }
                     }
                 } else {
-                    oPos = this.Internal_FindWordEnd(this.CurPos.ContentPos, CursorPos_max);
-                }
-                if (oPos.Found) {
-                    this.Set_ContentPos(oPos.LetterPos, true, -1);
-                    return true;
-                } else {
-                    return false;
+                    if (para_Run !== CurElement.Type) {
+                        if (CurPos === this.Content.length - 1 || para_Run !== this.Content[CurPos + 1].Type || CurPos === this.Content.length - 2) {
+                            var NewRun = new ParaRun(this);
+                            this.Internal_Content_Add(CurPos + 1, NewRun);
+                        }
+                        if (StartPos === CurPos && (0 === CurPos || para_Run !== this.Content[CurPos - 1].Type)) {
+                            var NewRun = new ParaRun(this);
+                            this.Internal_Content_Add(CurPos, NewRun);
+                        }
+                    } else {
+                        if (true === CurElement.Is_Empty() && (0 < CurPos || para_Run !== this.Content[CurPos].Type) && CurPos < this.Content.length - 1 && para_Run === this.Content[CurPos + 1].Type) {
+                            this.Internal_Content_Remove(CurPos);
+                        }
+                    }
                 }
             }
         }
+        var CommentsCount = CommentsToDelete.length;
+        for (var CommentIndex = 0; CommentIndex < CommentsCount; CommentIndex++) {
+            this.LogicDocument.Remove_Comment(CommentsToDelete[CommentIndex], true, false);
+        }
+        if (1 === this.Content.length || para_Run !== this.Content[this.Content.length - 2].Type) {
+            var NewRun = new ParaRun(this);
+            NewRun.Set_Pr(this.TextPr.Value.Copy());
+            this.Internal_Content_Add(this.Content.length - 1, NewRun);
+        }
+        this.Correct_ContentPos2();
     },
-    Internal_Clear_EmptyTextPr: function () {
-        var Count = this.Content.length;
-        for (var Pos = 0; Pos < Count - 1; Pos++) {
-            if (para_TextPr === this.Content[Pos].Type && para_TextPr === this.Content[Pos + 1].Type) {
-                this.Internal_Content_Remove(Pos);
-                Pos--;
-                Count--;
-            }
-        }
-    },
-    Internal_AddTextPr: function (TextPr) {
-        this.Internal_Clear_EmptyTextPr();
-        if (undefined != TextPr.FontFamily) {
-            var FName = TextPr.FontFamily.Name;
-            var FIndex = TextPr.FontFamily.Index;
-            TextPr.RFonts = new CRFonts();
-            TextPr.RFonts.Ascii = {
-                Name: FName,
-                Index: FIndex
-            };
-            TextPr.RFonts.EastAsia = {
-                Name: FName,
-                Index: FIndex
-            };
-            TextPr.RFonts.HAnsi = {
-                Name: FName,
-                Index: FIndex
-            };
-            TextPr.RFonts.CS = {
-                Name: FName,
-                Index: FIndex
-            };
-        }
-        if (true === this.ApplyToAll) {
-            this.Internal_Content_Add(0, new ParaTextPr(TextPr));
-            for (var Pos = 0; Pos < this.Content.length; Pos++) {
-                if (this.Content[Pos].Type == para_TextPr) {
-                    this.Content[Pos].Apply_TextPr(TextPr);
-                }
-            }
-            this.TextPr.Apply_TextPr(TextPr);
-            return;
-        }
-        var Line = this.Content;
-        var CurPos = this.CurPos.ContentPos;
+    Apply_TextPr: function (TextPr, IncFontSize) {
         if (true === this.Selection.Use) {
             var StartPos = this.Selection.StartPos;
             var EndPos = this.Selection.EndPos;
-            if (StartPos > EndPos) {
-                var Temp = EndPos;
-                EndPos = StartPos;
-                StartPos = Temp;
-            }
-            var LastPos = this.Internal_GetEndPos();
-            var bEnd = false;
-            if (EndPos > LastPos) {
-                EndPos = LastPos;
-                bEnd = true;
-            }
-            var TextPr_end = this.Internal_GetTextPr(EndPos);
-            var TextPr_start = this.Internal_GetTextPr(StartPos);
-            TextPr_start.Merge(TextPr);
-            this.Internal_Content_Add(StartPos, new ParaTextPr(TextPr_start));
-            if (false === bEnd) {
-                this.Internal_Content_Add(EndPos + 1, new ParaTextPr(TextPr_end));
+            if (StartPos === EndPos) {
+                var NewElements = this.Content[EndPos].Apply_TextPr(TextPr, IncFontSize, false);
+                if (para_Run === this.Content[EndPos].Type) {
+                    var CenterRunPos = this.Internal_ReplaceRun(EndPos, NewElements);
+                    if (StartPos === this.CurPos.ContentPos) {
+                        this.CurPos.ContentPos = CenterRunPos;
+                    }
+                    this.Selection.StartPos = CenterRunPos;
+                    this.Selection.EndPos = CenterRunPos;
+                }
             } else {
-                this.TextPr.Apply_TextPr(TextPr);
-            }
-            for (var Pos = StartPos + 1; Pos < EndPos; Pos++) {
-                if (this.Content[Pos].Type == para_TextPr) {
-                    this.Content[Pos].Apply_TextPr(TextPr);
+                var Direction = 1;
+                if (StartPos > EndPos) {
+                    var Temp = StartPos;
+                    StartPos = EndPos;
+                    EndPos = Temp;
+                    Direction = -1;
+                }
+                for (var CurPos = StartPos + 1; CurPos < EndPos; CurPos++) {
+                    this.Content[CurPos].Apply_TextPr(TextPr, IncFontSize, false);
+                }
+                var bCorrectContent = false;
+                var NewElements = this.Content[EndPos].Apply_TextPr(TextPr, IncFontSize, false);
+                if (para_Run === this.Content[EndPos].Type) {
+                    this.Internal_ReplaceRun(EndPos, NewElements);
+                    bCorrectContent = true;
+                }
+                var NewElements = this.Content[StartPos].Apply_TextPr(TextPr, IncFontSize, false);
+                if (para_Run === this.Content[StartPos].Type) {
+                    this.Internal_ReplaceRun(StartPos, NewElements);
+                    bCorrectContent = true;
+                }
+                if (true === bCorrectContent) {
+                    this.Correct_Content();
                 }
             }
-            return;
-        }
-        var oEnd = this.Internal_FindForward(CurPos, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_End, para_NewLine]);
-        var oStart = this.Internal_FindBackward(CurPos - 1, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine]);
-        var CurType = this.Content[CurPos].Type;
-        if (!oEnd.Found) {
-            return;
-        }
-        if (para_End == oEnd.Type) {
-            var Pos = oEnd.LetterPos;
-            var TextPr_start = this.Internal_GetTextPr(Pos);
-            TextPr_start.Merge(TextPr);
-            this.Internal_Content_Add(Pos, new ParaTextPr(TextPr_start));
-            this.Set_ContentPos(Pos + 1, false, -1);
-            if (true === this.IsEmpty() && undefined === this.Numbering_Get()) {
-                this.TextPr.Apply_TextPr(TextPr);
-            }
         } else {
-            if (para_PageNum === CurType || para_Drawing === CurType || para_Tab == CurType || para_Space == CurType || para_NewLine == CurType || !oStart.Found || para_NewLine == oEnd.Type || para_Space == oEnd.Type || para_NewLine == oStart.Type || para_Space == oStart.Type || para_Tab == oEnd.Type || para_Tab == oStart.Type || para_Drawing == oEnd.Type || para_Drawing == oStart.Type || para_PageNum == oEnd.Type || para_PageNum == oStart.Type) {
-                var TextPr_old = this.Internal_GetTextPr(CurPos);
-                var TextPr_new = TextPr_old.Copy();
-                TextPr_new.Merge(TextPr);
-                this.Internal_Content_Add(CurPos, new ParaTextPr(TextPr_old));
-                this.Internal_Content_Add(CurPos, new ParaTextPr(TextPr_new));
-                this.Set_ContentPos(CurPos + 1, false, -1);
-                this.RecalculateCurPos();
-            } else {
-                var oWordStart = this.Internal_FindBackward(CurPos, [para_PageNum, para_Drawing, para_Tab, para_Space, para_NewLine]);
-                if (!oWordStart.Found) {
-                    oWordStart = this.Internal_FindForward(0, [para_Text]);
+            var Pos = this.CurPos.ContentPos;
+            var Element = this.Content[Pos];
+            var NewElements = Element.Apply_TextPr(TextPr, IncFontSize, false);
+            if (para_Run === Element.Type) {
+                var CenterRunPos = this.Internal_ReplaceRun(Pos, NewElements);
+                this.CurPos.ContentPos = CenterRunPos;
+                this.CurPos.Line = -1;
+            }
+            if (true === this.Cursor_IsEnd()) {
+                if (undefined === IncFontSize) {
+                    this.TextPr.Apply_TextPr(TextPr);
                 } else {
-                    oWordStart.LetterPos++;
+                    var EndTextPr = this.Get_CompiledPr2(false).TextPr.Copy();
+                    EndTextPr.Merge(this.TextPr.Value);
+                    this.TextPr.Set_FontSize(FontSize_IncreaseDecreaseValue(IncFontSize, EndTextPr.FontSize));
                 }
-                var oWordEnd = this.Internal_FindForward(CurPos, [para_PageNum, para_Drawing, para_Tab, para_Space, para_End, para_NewLine]);
-                if (!oWordStart.Found || !oWordEnd.Found) {
-                    return;
-                }
-                var TextPr_end = this.Internal_GetTextPr(oWordEnd.LetterPos);
-                var TextPr_start = this.Internal_GetTextPr(oWordStart.LetterPos);
-                TextPr_start.Merge(TextPr);
-                this.Internal_Content_Add(oWordStart.LetterPos, new ParaTextPr(TextPr_start));
-                this.Internal_Content_Add(oWordEnd.LetterPos + 1, new ParaTextPr(TextPr_end));
-                this.Set_ContentPos(CurPos + 1, false, -1);
-                for (var Pos = oWordStart.LetterPos + 1; Pos < oWordEnd.LetterPos; Pos++) {
-                    if (this.Content[Pos].Type == para_TextPr) {
-                        this.Content[Pos].Apply_TextPr(TextPr);
-                    }
+                var LastElement = this.Content[this.Content.length - 1];
+                if (para_Run === Element.Type) {
+                    LastElement.Set_Pr(this.TextPr.Value.Copy());
                 }
             }
         }
     },
-    Internal_AddHyperlink: function (Hyperlink_start) {
-        var Hyperlink_end = new ParaHyperlinkEnd();
-        var RStyle = editor.WordControl.m_oLogicDocument.Get_Styles().Get_Default_Hyperlink();
-        if (true === this.ApplyToAll) {
-            return;
+    Internal_ReplaceRun: function (Pos, NewRuns) {
+        var LRun = NewRuns[0];
+        var CRun = NewRuns[1];
+        var RRun = NewRuns[2];
+        var CenterRunPos = Pos;
+        if (null !== LRun) {
+            this.Internal_Content_Add(Pos + 1, CRun);
+            CenterRunPos = Pos + 1;
+        } else {}
+        if (null !== RRun) {
+            this.Internal_Content_Add(CenterRunPos + 1, RRun);
         }
-        var CurPos = this.CurPos.ContentPos;
-        if (true === this.Selection.Use) {
-            var StartPos = this.Selection.StartPos;
-            var EndPos = this.Selection.EndPos;
-            if (StartPos > EndPos) {
-                var Temp = EndPos;
-                EndPos = StartPos;
-                StartPos = Temp;
-            }
-            var LastPos = this.Internal_GetEndPos();
-            if (EndPos > LastPos) {
-                EndPos = LastPos;
-            }
-            var TextPr_end = this.Internal_GetTextPr(EndPos);
-            var TextPr_start = this.Internal_GetTextPr(StartPos);
-            TextPr_start.RStyle = RStyle;
-            TextPr_start.Underline = undefined;
-            TextPr_start.Color = undefined;
-            this.Internal_Content_Add(EndPos, new ParaTextPr(TextPr_end));
-            this.Internal_Content_Add(EndPos, Hyperlink_end);
-            this.Internal_Content_Add(StartPos, new ParaTextPr(TextPr_start));
-            this.Internal_Content_Add(StartPos, Hyperlink_start);
-            for (var Pos = StartPos + 2; Pos < EndPos + 1; Pos++) {
-                if (this.Content[Pos].Type == para_TextPr) {
-                    var Item = this.Content[Pos];
-                    Item.Set_RStyle(RStyle);
-                    Item.Set_Underline(undefined);
-                    Item.Set_Color(undefined);
-                }
-            }
-            return;
-        }
-        return;
-        var oEnd = this.Internal_FindForward(CurPos, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_End, para_NewLine]);
-        var oStart = this.Internal_FindBackward(CurPos - 1, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine]);
-        var CurType = this.Content[CurPos].Type;
-        if (!oEnd.Found) {
-            return;
-        }
-        if (para_End == oEnd.Type) {
-            var Pos = oEnd.LetterPos;
-            var TextPr_start = this.Internal_GetTextPr(Pos);
-            TextPr_start.Merge(TextPr);
-            this.Internal_Content_Add(Pos, new ParaTextPr(TextPr_start));
-            this.Set_ContentPos(Pos + 1, false, -1);
-        } else {
-            if (para_PageNum === CurType || para_Drawing === CurType || para_Tab == CurType || para_Space == CurType || para_NewLine == CurType || !oStart.Found || para_NewLine == oEnd.Type || para_Space == oEnd.Type || para_NewLine == oStart.Type || para_Space == oStart.Type || para_Tab == oEnd.Type || para_Tab == oStart.Type || para_Drawing == oEnd.Type || para_Drawing == oStart.Type || para_PageNum == oEnd.Type || para_PageNum == oStart.Type) {
-                var TextPr_old = this.Internal_GetTextPr(CurPos);
-                var TextPr_new = TextPr_old.Copy();
-                TextPr_new.Merge(TextPr);
-                this.Internal_Content_Add(CurPos, new ParaTextPr(TextPr_old));
-                this.Internal_Content_Add(CurPos, new ParaTextPr(TextPr_new));
-                this.Set_ContentPos(CurPos + 1, false, -1);
-                this.RecalculateCurPos();
-            } else {
-                var oWordStart = this.Internal_FindBackward(CurPos, [para_PageNum, para_Drawing, para_Tab, para_Space, para_NewLine]);
-                if (!oWordStart.Found) {
-                    oWordStart = this.Internal_FindForward(0, [para_Text]);
-                } else {
-                    oWordStart.LetterPos++;
-                }
-                var oWordEnd = this.Internal_FindForward(CurPos, [para_PageNum, para_Drawing, para_Tab, para_Space, para_End, para_NewLine]);
-                if (!oWordStart.Found || !oWordEnd.Found) {
-                    return;
-                }
-                var TextPr_end = this.Internal_GetTextPr(oWordEnd.LetterPos);
-                var TextPr_start = this.Internal_GetTextPr(oWordStart.LetterPos);
-                TextPr_start.Merge(TextPr);
-                this.Internal_Content_Add(oWordStart.LetterPos, new ParaTextPr(TextPr_start));
-                this.Internal_Content_Add(oWordEnd.LetterPos + 1, new ParaTextPr(TextPr_end));
-                this.Set_ContentPos(CurPos + 1, false, -1);
-                for (var Pos = oWordStart.LetterPos + 1; Pos < oWordEnd.LetterPos; Pos++) {
-                    if (this.Content[Pos].Type == para_TextPr) {
-                        this.Content[Pos].Apply_TextPr(TextPr);
-                    }
-                }
-            }
-        }
-    },
-    Internal_GetContentPosByXY: function (X, Y, bLine, PageNum, bCheckNumbering) {
-        if (this.Lines.length <= 0) {
-            return {
-                Pos: 0,
-                End: false,
-                InText: false
-            };
-        }
-        var PNum = 0;
-        if ("number" == typeof(PageNum)) {
-            PNum = PageNum - this.PageNum;
-        } else {
-            PNum = 0;
-        }
-        if (PNum >= this.Pages.length) {
-            PNum = this.Pages.length - 1;
-            bLine = true;
-            Y = this.Lines.length - 1;
-        } else {
-            if (PNum < 0) {
-                PNum = 0;
-                bLine = true;
-                Y = 0;
-            }
-        }
-        var bFindY = false;
-        var CurLine = this.Pages[PNum].FirstLine;
-        var CurLineY = this.Pages[PNum].Y + this.Lines[CurLine].Y + this.Lines[CurLine].Metrics.Descent + this.Lines[CurLine].Metrics.LineGap;
-        var LastLine = (PNum >= this.Pages.length - 1 ? this.Lines.length - 1 : this.Pages[PNum + 1].FirstLine - 1);
-        if (true === bLine) {
-            CurLine = Y;
-        } else {
-            while (!bFindY) {
-                if (Y < CurLineY) {
-                    break;
-                }
-                if (CurLine >= LastLine) {
-                    break;
-                }
-                CurLine++;
-                CurLineY = this.Lines[CurLine].Y + this.Pages[PNum].Y + this.Lines[CurLine].Metrics.Descent + this.Lines[CurLine].Metrics.LineGap;
-            }
-        }
-        var CurRange = 0;
-        var CurX = this.Lines[CurLine].Ranges[CurRange].XVisible;
-        var DiffX = 1000000;
-        var NumberingDiffX = 1000000;
-        var DiffPos = -1;
-        var bEnd = false;
-        var bInText = false;
-        var Result = {
-            Pos: 0,
-            End: false
-        };
-        var StartPos = this.Lines[CurLine].StartPos;
-        var ResultLine = -1;
-        for (var ItemNum = StartPos; ItemNum < this.Content.length; ItemNum++) {
-            var Item = this.Content[ItemNum];
-            if (undefined != Item.CurLine) {
-                if (CurLine != Item.CurLine) {
-                    break;
-                }
-                if (CurRange != Item.CurRange) {
-                    CurRange = Item.CurRange;
-                    CurX = this.Lines[CurLine].Ranges[CurRange].XVisible;
-                }
-            }
-            var TempDx = 0;
-            var bCheck = false;
-            if (ItemNum === this.Numbering.Pos) {
-                if (para_Numbering === this.Numbering.Type) {
-                    var NumberingItem = this.Numbering;
-                    var NumPr = this.Numbering_Get();
-                    var NumJc = this.Parent.Get_Numbering().Get_AbstractNum(NumPr.NumId).Lvl[NumPr.Lvl].Jc;
-                    var NumX0 = CurX;
-                    var NumX1 = CurX;
-                    switch (NumJc) {
-                    case align_Right:
-                        NumX0 -= NumberingItem.WidthNum;
-                        break;
-                    case align_Center:
-                        NumX0 -= NumberingItem.WidthNum / 2;
-                        NumX1 += NumberingItem.WidthNum / 2;
-                        break;
-                    case align_Left:
-                        default:
-                        NumX1 += NumberingItem.WidthNum;
-                        break;
-                    }
-                    if (X >= NumX0 && X <= NumX1) {
-                        NumberingDiffX = 0;
-                    }
-                }
-                CurX += this.Numbering.WidthVisible;
-                if (-1 != DiffPos) {
-                    DiffX = Math.abs(X - CurX);
-                    DiffPos = ItemNum;
-                }
-            }
-            switch (Item.Type) {
-            case para_Drawing:
-                if (Item.DrawingType != drawing_Inline) {
-                    bCheck = false;
-                    TempDx = 0;
-                } else {
-                    TempDx = Item.WidthVisible;
-                    bCheck = true;
-                }
-                break;
-            case para_PageNum:
-                case para_Text:
-                TempDx = Item.WidthVisible;
-                bCheck = true;
-                break;
-            case para_Space:
-                TempDx = Item.WidthVisible;
-                bCheck = true;
-                break;
-            case para_Tab:
-                TempDx = Item.WidthVisible;
-                bCheck = true;
-                break;
-            case para_NewLine:
-                bCheck = true;
-                TempDx = Item.WidthVisible;
-                break;
-            case para_End:
-                bEnd = true;
-                bCheck = true;
-                TempDx = Item.WidthVisible;
-                break;
-            case para_TextPr:
-                case para_CommentEnd:
-                case para_CommentStart:
-                case para_CollaborativeChangesEnd:
-                case para_CollaborativeChangesStart:
-                case para_HyperlinkEnd:
-                case para_HyperlinkStart:
-                bCheck = true;
-                TempDx = 0;
-                break;
-            }
-            if (bCheck) {
-                if (Math.abs(X - CurX) < DiffX + 0.001) {
-                    DiffX = Math.abs(X - CurX);
-                    DiffPos = ItemNum;
-                }
-                if (true != bEnd && ItemNum === this.Lines[CurLine].EndPos && X > CurX + TempDx && para_NewLine != Item.Type) {
-                    ResultLine = CurLine;
-                    DiffPos = ItemNum + 1;
-                }
-                if (bEnd) {
-                    CurX += TempDx;
-                    if (Math.abs(X - CurX) < DiffX) {
-                        Result.End = true;
-                    }
-                    break;
-                }
-            }
-            if (X >= CurX - 0.001 && X <= CurX + TempDx + 0.001) {
-                bInText = true;
-            }
-            CurX += TempDx;
-        }
-        if (true === bInText && Y >= this.Pages[PNum].Y + this.Lines[CurLine].Y - this.Lines[CurLine].Metrics.Ascent - 0.01 && Y <= this.Pages[PNum].Y + this.Lines[CurLine].Y + this.Lines[CurLine].Metrics.Descent + this.Lines[CurLine].Metrics.LineGap + 0.01) {
-            Result.InText = true;
-        } else {
-            Result.InText = false;
-        }
-        if (NumberingDiffX <= DiffX) {
-            Result.Numbering = true;
-        } else {
-            Result.Numbering = false;
-        }
-        Result.Pos = DiffPos;
-        Result.Line = ResultLine;
-        return Result;
-    },
-    Internal_GetXYByContentPos: function (Pos) {
-        return this.Internal_Recalculate_CurPos(Pos, false, false, false);
-    },
-    Internal_Selection_CheckHyperlink: function () {
-        var Direction = 1;
-        var StartPos = this.Selection.StartPos;
-        var EndPos = this.Selection.EndPos;
-        if (StartPos > EndPos) {
-            StartPos = this.Selection.EndPos;
-            EndPos = this.Selection.StartPos;
-            Direction = -1;
-        }
-        var Hyperlink_start = this.Check_Hyperlink2(StartPos);
-        var Hyperlink_end = this.Check_Hyperlink2(EndPos);
-        if (null != Hyperlink_start && Hyperlink_end != Hyperlink_start) {
-            StartPos = this.Internal_FindBackward(StartPos, [para_HyperlinkStart]).LetterPos;
-        }
-        if (null != Hyperlink_end && Hyperlink_end != Hyperlink_start) {
-            EndPos = this.Internal_FindForward(EndPos, [para_HyperlinkEnd]).LetterPos + 1;
-        }
-        if (Direction > 0) {
-            this.Selection.StartPos = StartPos;
-            this.Selection.EndPos = EndPos;
-        } else {
-            this.Selection.StartPos = EndPos;
-            this.Selection.EndPos = StartPos;
-        }
+        return CenterRunPos;
     },
     Check_Hyperlink: function (X, Y, PageNum) {
-        var Result = this.Internal_GetContentPosByXY(X, Y, false, PageNum, false);
-        if (-1 != Result.Pos && true === Result.InText) {
-            var Find = this.Internal_FindBackward(Result.Pos, [para_HyperlinkStart, para_HyperlinkEnd]);
-            if (true === Find.Found && para_HyperlinkStart === Find.Type) {
-                return this.Content[Find.LetterPos];
-            }
+        var SearchPosXY = this.Get_ParaContentPosByXY(X, Y, PageNum, false, false);
+        var CurPos = SearchPosXY.Pos.Get(0);
+        if (true === SearchPosXY.InText && para_Hyperlink === this.Content[CurPos].Type) {
+            return this.Content[CurPos];
         }
         return null;
-    },
-    Check_Hyperlink2: function (Pos, bCheckEnd, bNoSelectCheck) {
-        if (undefined === bNoSelectCheck) {
-            bNoSelectCheck = false;
-        }
-        if (undefined === bCheckEnd) {
-            bCheckEnd = true;
-        }
-        if (true === bCheckEnd && Pos > 0) {
-            while (this.Content[Pos - 1].Type === para_TextPr || this.Content[Pos - 1].Type === para_HyperlinkEnd || this.Content[Pos - 1].Type === para_CollaborativeChangesStart || this.Content[Pos - 1].Type === para_CollaborativeChangesEnd) {
-                Pos--;
-                if (Pos <= 0) {
-                    return null;
-                }
-            }
-        }
-        if (true === bNoSelectCheck) {
-            Pos = this.Internal_Correct_HyperlinkPos(Pos);
-        }
-        var Find = this.Internal_FindBackward(Pos - 1, [para_HyperlinkStart, para_HyperlinkEnd]);
-        if (true === Find.Found && para_HyperlinkStart === Find.Type) {
-            return this.Content[Find.LetterPos];
-        }
-        return null;
-    },
-    Internal_Correct_HyperlinkPos: function (_Pos) {
-        var Pos = _Pos;
-        var Count = this.Content.length;
-        while (Pos < Count) {
-            var TempType = this.Content[Pos].Type;
-            if (para_HyperlinkStart === TempType || para_TextPr === TempType || para_CollaborativeChangesEnd === TempType || para_CollaborativeChangesStart === TempType) {
-                Pos++;
-            } else {
-                break;
-            }
-        }
-        return Pos;
     },
     Hyperlink_Add: function (HyperProps) {
-        var Hyperlink = new ParaHyperlinkStart();
-        Hyperlink.Set_Value(HyperProps.Value);
-        if ("undefined" != typeof(HyperProps.ToolTip) && null != HyperProps.ToolTip) {
-            Hyperlink.Set_ToolTip(HyperProps.ToolTip);
-        }
         if (true === this.Selection.Use) {
-            this.Add(Hyperlink);
+            var Hyperlink = new ParaHyperlink();
+            if (undefined != HyperProps.Value && null != HyperProps.Value) {
+                Hyperlink.Set_Value(HyperProps.Value);
+            }
+            if (undefined != HyperProps.ToolTip && null != HyperProps.ToolTip) {
+                Hyperlink.Set_ToolTip(HyperProps.ToolTip);
+            }
+            var StartContentPos = this.Get_ParaContentPos(true, true);
+            var EndContentPos = this.Get_ParaContentPos(true, false);
+            if (StartContentPos.Compare(EndContentPos) > 0) {
+                var Temp = StartContentPos;
+                StartContentPos = EndContentPos;
+                EndContentPos = Temp;
+            }
+            var StartPos = StartContentPos.Get(0);
+            var EndPos = EndContentPos.Get(0);
+            var CommentsToDelete = {};
+            for (var Pos = StartPos; Pos <= EndPos; Pos++) {
+                var Item = this.Content[Pos];
+                if (para_Comment === Item.Type) {
+                    CommentsToDelete[Item.CommentId] = true;
+                }
+            }
+            for (var CommentId in CommentsToDelete) {
+                this.LogicDocument.Remove_Comment(CommentId, true, false);
+            }
+            StartContentPos = this.Get_ParaContentPos(true, true);
+            EndContentPos = this.Get_ParaContentPos(true, false);
+            if (StartContentPos.Compare(EndContentPos) > 0) {
+                var Temp = StartContentPos;
+                StartContentPos = EndContentPos;
+                EndContentPos = Temp;
+            }
+            StartPos = StartContentPos.Get(0);
+            EndPos = EndContentPos.Get(0);
+            if (this.Content.length - 1 === EndPos && true === this.Selection_CheckParaEnd()) {
+                EndContentPos = this.Get_EndPos(false);
+                EndPos = EndContentPos.Get(0);
+            }
+            var NewElementE = this.Content[EndPos].Split(EndContentPos, 1);
+            var NewElementS = this.Content[StartPos].Split(StartContentPos, 1);
+            var HyperPos = 0;
+            Hyperlink.Add_ToContent(HyperPos++, NewElementS);
+            for (var CurPos = StartPos + 1; CurPos <= EndPos; CurPos++) {
+                Hyperlink.Add_ToContent(HyperPos++, this.Content[CurPos]);
+            }
+            this.Internal_Content_Remove2(StartPos + 1, EndPos - StartPos);
+            this.Internal_Content_Add(StartPos + 1, Hyperlink);
+            this.Internal_Content_Add(StartPos + 2, NewElementE);
+            this.Selection.StartPos = StartPos + 1;
+            this.Selection.EndPos = StartPos + 1;
+            Hyperlink.Select_All();
+            var TextPr = new CTextPr();
+            TextPr.Color = null;
+            TextPr.Underline = null;
+            TextPr.RStyle = editor && editor.isDocumentEditor ? editor.WordControl.m_oLogicDocument.Get_Styles().Get_Default_Hyperlink() : null;
+            if (!this.bFromDocument) {
+                TextPr.Unifill = CreateUniFillSchemeColorWidthTint(11, 0);
+                TextPr.Underline = true;
+            }
+            Hyperlink.Apply_TextPr(TextPr, undefined, false);
         } else {
-            if (null != HyperProps.Text && "" != HyperProps.Text) {
-                var TextPr_hyper = this.Internal_GetTextPr(this.CurPos.ContentPos);
-                var Styles = editor.WordControl.m_oLogicDocument.Get_Styles();
-                TextPr_hyper.RStyle = Styles.Get_Default_Hyperlink();
-                TextPr_hyper.Color = undefined;
-                TextPr_hyper.Underline = undefined;
-                var TextPr_old = this.Internal_GetTextPr(this.CurPos.ContentPos);
-                var Pos = this.CurPos.ContentPos;
-                this.Internal_Content_Add(Pos, new ParaTextPr(TextPr_old));
-                this.Internal_Content_Add(Pos, new ParaHyperlinkEnd());
-                this.Internal_Content_Add(Pos, new ParaTextPr(TextPr_hyper));
-                this.Internal_Content_Add(Pos, Hyperlink);
+            if (null !== HyperProps.Text && "" !== HyperProps.Text) {
+                var ContentPos = this.Get_ParaContentPos(false, false);
+                var CurPos = ContentPos.Get(0);
+                var TextPr = this.Get_TextPr(ContentPos);
+                if (undefined !== HyperProps.TextPr && null !== HyperProps.TextPr) {
+                    TextPr = HyperProps.TextPr;
+                }
+                var Hyperlink = new ParaHyperlink();
+                if (undefined != HyperProps.Value && null != HyperProps.Value) {
+                    Hyperlink.Set_Value(HyperProps.Value);
+                }
+                if (undefined != HyperProps.ToolTip && null != HyperProps.ToolTip) {
+                    Hyperlink.Set_ToolTip(HyperProps.ToolTip);
+                }
+                var HyperRun = new ParaRun(this);
+                Hyperlink.Add_ToContent(0, HyperRun, false);
+                if (this.bFromDocument) {
+                    var Styles = editor.WordControl.m_oLogicDocument.Get_Styles();
+                    HyperRun.Set_Pr(TextPr.Copy());
+                    HyperRun.Set_Color(undefined);
+                    HyperRun.Set_Underline(undefined);
+                    HyperRun.Set_RStyle(Styles.Get_Default_Hyperlink());
+                } else {
+                    HyperRun.Set_Pr(TextPr.Copy());
+                    HyperRun.Set_Color(undefined);
+                    HyperRun.Set_Unifill(CreateUniFillSchemeColorWidthTint(11, 0));
+                    HyperRun.Set_Underline(true);
+                }
                 for (var NewPos = 0; NewPos < HyperProps.Text.length; NewPos++) {
                     var Char = HyperProps.Text.charAt(NewPos);
                     if (" " == Char) {
-                        this.Internal_Content_Add(Pos + 2 + NewPos, new ParaSpace());
+                        HyperRun.Add_ToContent(NewPos, new ParaSpace(), false);
                     } else {
-                        this.Internal_Content_Add(Pos + 2 + NewPos, new ParaText(Char));
+                        HyperRun.Add_ToContent(NewPos, new ParaText(Char), false);
                     }
                 }
-                this.Set_ContentPos(Pos + 2, false, -1);
+                var NewElement = this.Content[CurPos].Split(ContentPos, 1);
+                if (null !== NewElement) {
+                    this.Internal_Content_Add(CurPos + 1, NewElement);
+                }
+                this.Internal_Content_Add(CurPos + 1, Hyperlink);
+                this.CurPos.ContentPos = CurPos + 1;
+                Hyperlink.Cursor_MoveToEndPos(false);
             }
         }
+        this.Correct_Content();
     },
     Hyperlink_Modify: function (HyperProps) {
-        var Hyperlink = null;
-        var Pos = -1;
+        var HyperPos = -1;
         if (true === this.Selection.Use) {
-            var Hyper_start = this.Check_Hyperlink2(this.Selection.StartPos);
-            var Hyper_end = this.Check_Hyperlink2(this.Selection.EndPos);
-            if (null != Hyper_start && Hyper_start === Hyper_end) {
-                Hyperlink = Hyper_start;
-                Pos = this.Selection.StartPos;
+            var StartPos = this.Selection.StartPos;
+            var EndPos = this.Selection.EndPos;
+            if (StartPos > EndPos) {
+                StartPos = this.Selection.EndPos;
+                EndPos = this.Selection.StartPos;
+            }
+            for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+                var Element = this.Content[CurPos];
+                if (true !== Element.Selection_IsEmpty() && para_Hyperlink !== Element.Type) {
+                    break;
+                } else {
+                    if (true !== Element.Selection_IsEmpty() && para_Hyperlink === Element.Type) {
+                        if (-1 === HyperPos) {
+                            HyperPos = CurPos;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+            if (this.Selection.StartPos === this.Selection.EndPos && para_Hyperlink === this.Content[this.Selection.StartPos].Type) {
+                HyperPos = this.Selection.StartPos;
             }
         } else {
-            Hyperlink = this.Check_Hyperlink2(this.CurPos.ContentPos, false, true);
-            Pos = this.Internal_Correct_HyperlinkPos(this.CurPos.ContentPos);
+            if (para_Hyperlink === this.Content[this.CurPos.ContentPos].Type) {
+                HyperPos = this.CurPos.ContentPos;
+            }
         }
-        if (null != Hyperlink) {
-            if ("undefined" != typeof(HyperProps.Value) && null != HyperProps.Value) {
+        if (-1 != HyperPos) {
+            var Hyperlink = this.Content[HyperPos];
+            if (undefined != HyperProps.Value && null != HyperProps.Value) {
                 Hyperlink.Set_Value(HyperProps.Value);
             }
-            if ("undefined" != typeof(HyperProps.ToolTip) && null != HyperProps.ToolTip) {
+            if (undefined != HyperProps.ToolTip && null != HyperProps.ToolTip) {
                 Hyperlink.Set_ToolTip(HyperProps.ToolTip);
             }
             if (null != HyperProps.Text) {
-                var Find = this.Internal_FindBackward(Pos, [para_HyperlinkStart, para_HyperlinkEnd]);
-                if (true != Find.Found || para_HyperlinkStart != Find.Type) {
-                    return false;
+                var TextPr = Hyperlink.Get_TextPr();
+                Hyperlink.Remove_FromContent(0, Hyperlink.Content.length);
+                var HyperRun = new ParaRun(this);
+                Hyperlink.Add_ToContent(0, HyperRun, false);
+                if (this.bFromDocument) {
+                    var Styles = editor.WordControl.m_oLogicDocument.Get_Styles();
+                    HyperRun.Set_Pr(TextPr.Copy());
+                    HyperRun.Set_Color(undefined);
+                    HyperRun.Set_Underline(undefined);
+                    HyperRun.Set_RStyle(Styles.Get_Default_Hyperlink());
+                } else {
+                    HyperRun.Set_Pr(TextPr.Copy());
+                    HyperRun.Set_Color(undefined);
+                    HyperRun.Set_Unifill(CreateUniFillSchemeColorWidthTint(11, 0));
+                    HyperRun.Set_Underline(true);
                 }
-                var Start = Find.LetterPos;
-                var Find = this.Internal_FindForward(Pos, [para_HyperlinkStart, para_HyperlinkEnd]);
-                if (true != Find.Found || para_HyperlinkEnd != Find.Type) {
-                    return false;
-                }
-                var End = Find.LetterPos;
-                var TextPr = this.Internal_GetTextPr(End);
-                TextPr.RStyle = editor.WordControl.m_oLogicDocument.Get_Styles().Get_Default_Hyperlink();
-                TextPr.Color = undefined;
-                TextPr.Underline = undefined;
-                this.Internal_Content_Remove2(Start + 1, End - Start - 1);
-                this.Internal_Content_Add(Start + 1, new ParaTextPr(TextPr));
                 for (var NewPos = 0; NewPos < HyperProps.Text.length; NewPos++) {
                     var Char = HyperProps.Text.charAt(NewPos);
                     if (" " == Char) {
-                        this.Internal_Content_Add(Start + 2 + NewPos, new ParaSpace());
+                        HyperRun.Add_ToContent(NewPos, new ParaSpace(), false);
                     } else {
-                        this.Internal_Content_Add(Start + 2 + NewPos, new ParaText(Char));
+                        HyperRun.Add_ToContent(NewPos, new ParaText(Char), false);
                     }
                 }
                 if (true === this.Selection.Use) {
-                    this.Selection.StartPos = Start + 1;
-                    this.Selection.EndPos = Start + 2 + HyperProps.Text.length;
-                    this.Set_ContentPos(this.Selection.EndPos);
+                    this.Selection.StartPos = HyperPos;
+                    this.Selection.EndPos = HyperPos;
+                    Hyperlink.Select_All();
                 } else {
-                    this.Set_ContentPos(Start + 2, false);
+                    this.CurPos.ContentPos = HyperPos;
+                    Hyperlink.Cursor_MoveToEndPos(false);
                 }
                 return true;
             }
@@ -5629,40 +3780,56 @@ Paragraph.prototype = {
         return false;
     },
     Hyperlink_Remove: function () {
-        var Pos = -1;
+        var HyperPos = -1;
         if (true === this.Selection.Use) {
-            var Hyper_start = this.Check_Hyperlink2(this.Selection.StartPos);
-            var Hyper_end = this.Check_Hyperlink2(this.Selection.EndPos);
-            if (null != Hyper_start && Hyper_start === Hyper_end) {
-                Pos = (this.Selection.StartPos <= this.Selection.EndPos ? this.Selection.StartPos : this.Selection.EndPos);
+            var StartPos = this.Selection.StartPos;
+            var EndPos = this.Selection.EndPos;
+            if (StartPos > EndPos) {
+                StartPos = this.Selection.EndPos;
+                EndPos = this.Selection.StartPos;
             }
-        } else {
-            var Hyper_cur = this.Check_Hyperlink2(this.CurPos.ContentPos, false, true);
-            if (null != Hyper_cur) {
-                Pos = this.Internal_Correct_HyperlinkPos(this.CurPos.ContentPos);
-            }
-        }
-        if (-1 != Pos) {
-            var Find = this.Internal_FindForward(Pos, [para_HyperlinkStart, para_HyperlinkEnd]);
-            if (true === Find.Found && para_HyperlinkEnd === Find.Type) {
-                this.Internal_Content_Remove(Find.LetterPos);
-            }
-            var EndPos = Find.LetterPos - 2;
-            Find = this.Internal_FindBackward(Pos, [para_HyperlinkStart, para_HyperlinkEnd]);
-            if (true === Find.Found && para_HyperlinkStart === Find.Type) {
-                this.Internal_Content_Remove(Find.LetterPos);
-            }
-            var StartPos = Find.LetterPos;
-            var RStyle = editor.WordControl.m_oLogicDocument.Get_Styles().Get_Default_Hyperlink();
-            for (var Index = StartPos; Index <= EndPos; Index++) {
-                var Item = this.Content[Index];
-                if (para_TextPr === Item.Type && Item.Value.RStyle === RStyle) {
-                    Item.Set_RStyle(undefined);
+            for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+                var Element = this.Content[CurPos];
+                if (true !== Element.Selection_IsEmpty() && para_Hyperlink !== Element.Type) {
+                    break;
+                } else {
+                    if (true !== Element.Selection_IsEmpty() && para_Hyperlink === Element.Type) {
+                        if (-1 === HyperPos) {
+                            HyperPos = CurPos;
+                        } else {
+                            break;
+                        }
+                    }
                 }
             }
-            this.RecalcInfo.Set_Type_0(pararecalc_0_All);
-            this.Internal_Recalculate_0();
-            this.ReDraw();
+            if (this.Selection.StartPos === this.Selection.EndPos && para_Hyperlink === this.Content[this.Selection.StartPos].Type) {
+                HyperPos = this.Selection.StartPos;
+            }
+        } else {
+            if (para_Hyperlink === this.Content[this.CurPos.ContentPos].Type) {
+                HyperPos = this.CurPos.ContentPos;
+            }
+        }
+        if (-1 !== HyperPos) {
+            var Hyperlink = this.Content[HyperPos];
+            var ContentLen = Hyperlink.Content.length;
+            this.Internal_Content_Remove(HyperPos);
+            var TextPr = new CTextPr();
+            TextPr.RStyle = null;
+            TextPr.Underline = null;
+            TextPr.Color = null;
+            TextPr.Unifill = null;
+            for (var CurPos = 0; CurPos < ContentLen; CurPos++) {
+                var Element = Hyperlink.Content[CurPos];
+                this.Internal_Content_Add(HyperPos + CurPos, Element);
+                Element.Apply_TextPr(TextPr, undefined, true);
+            }
+            if (true === this.Selection.Use) {
+                this.Selection.StartPos = HyperPos + Hyperlink.State.Selection.StartPos;
+                this.Selection.EndPos = HyperPos + Hyperlink.State.Selection.EndPos;
+            } else {
+                this.CurPos.ContentPos = HyperPos + Hyperlink.State.ContentPos;
+            }
             return true;
         }
         return false;
@@ -5676,23 +3843,16 @@ Paragraph.prototype = {
                     StartPos = this.Selection.EndPos;
                     EndPos = this.Selection.StartPos;
                 }
-                var Find = this.Internal_FindBackward(StartPos, [para_HyperlinkStart, para_HyperlinkEnd]);
-                if (true === Find.Found && para_HyperlinkStart === Find.Type) {
-                    return false;
-                }
-                for (var Pos = StartPos; Pos < EndPos; Pos++) {
-                    var Item = this.Content[Pos];
-                    switch (Item.Type) {
-                    case para_HyperlinkStart:
-                        case para_HyperlinkEnd:
-                        case para_End:
+                for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+                    var Element = this.Content[CurPos];
+                    if (para_Hyperlink === Element.Type || para_Math === Element.Type) {
                         return false;
                     }
                 }
                 return true;
             } else {
-                var Hyper_cur = this.Check_Hyperlink2(this.CurPos.ContentPos);
-                if (null != Hyper_cur) {
+                var CurType = this.Content[this.CurPos.ContentPos].Type;
+                if (para_Hyperlink === CurType || para_Math === CurType) {
                     return false;
                 } else {
                     return true;
@@ -5707,184 +3867,143 @@ Paragraph.prototype = {
                     EndPos = this.Selection.StartPos;
                 }
                 var bHyper = false;
-                for (var Pos = StartPos; Pos < EndPos; Pos++) {
-                    var Item = this.Content[Pos];
-                    switch (Item.Type) {
-                    case para_HyperlinkStart:
-                        if (true === bHyper) {
-                            return false;
-                        }
-                        bHyper = true;
-                        break;
-                    case para_HyperlinkEnd:
-                        bHyper = true;
-                        break;
-                    case para_End:
+                for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+                    var Element = this.Content[CurPos];
+                    if ((true === bHyper && para_Hyperlink === Element.Type) || para_Math === Element.Type) {
                         return false;
+                    } else {
+                        if (true !== bHyper && para_Hyperlink === Element.Type) {
+                            bHyper = true;
+                        }
                     }
                 }
                 return true;
             } else {
-                return true;
+                var CurType = this.Content[this.CurPos.ContentPos].Type;
+                if (para_Math === CurType) {
+                    return false;
+                } else {
+                    return true;
+                }
             }
         }
     },
     Hyperlink_Check: function (bCheckEnd) {
-        if (true === this.Selection.Use) {
-            var Hyper_start = this.Check_Hyperlink2(this.Selection.StartPos);
-            var Hyper_end = this.Check_Hyperlink2(this.Selection.EndPos);
-            if (Hyper_start === Hyper_end && null != Hyper_start) {
-                return Hyper_start;
-            }
-        } else {
-            var Hyper_cur = this.Check_Hyperlink2(this.CurPos.ContentPos, bCheckEnd);
-            if (null != Hyper_cur) {
-                return Hyper_cur;
+        var Hyper = null;
+        if (true === this.Selection.Use) {} else {
+            var Element = this.Content[this.CurPos.ContentPos];
+            if (para_Hyperlink === Element.Type) {
+                Hyper = Element;
             }
         }
-        return null;
-    },
-    Cursor_MoveAt: function (X, Y, bLine, bDontChangeRealPos, PageNum) {
-        var TempPos = this.Internal_GetContentPosByXY(X, Y, bLine, PageNum);
-        var Pos = TempPos.Pos;
-        var Line = TempPos.Line;
-        if (-1 != Pos) {
-            this.Set_ContentPos(Pos, true, Line);
-        }
-        this.Internal_Recalculate_CurPos(Pos, false, false, false);
-        if (bDontChangeRealPos != true) {
-            this.CurPos.RealX = this.CurPos.X;
-            this.CurPos.RealY = this.CurPos.Y;
-        }
-        if (true != bLine) {
-            this.CurPos.RealX = X;
-            this.CurPos.RealY = Y;
-        }
+        return Hyper;
     },
     Selection_SetStart: function (X, Y, PageNum, bTableBorder) {
-        var Pos = this.Internal_GetContentPosByXY(X, Y, false, PageNum);
-        if (-1 != Pos.Pos) {
-            if (true === Pos.End) {
-                this.Selection.StartPos = Pos.Pos + 1;
-            } else {
-                this.Selection.StartPos = Pos.Pos;
-            }
-            this.Set_ContentPos(Pos.Pos, true, Pos.Line);
-            this.Selection.Use = true;
-            this.Selection.Start = true;
-            this.Selection.Flag = selectionflag_Common;
+        if (true === this.Selection.Use) {
+            this.Selection_Remove();
         }
+        var SearchPosXY = this.Get_ParaContentPosByXY(X, Y, PageNum, false, true);
+        var SearchPosXY2 = this.Get_ParaContentPosByXY(X, Y, PageNum, false, false);
+        this.Selection.Use = true;
+        this.Selection.Start = true;
+        this.Selection.Flag = selectionflag_Common;
+        this.Selection.StartManually = true;
+        this.Set_ParaContentPos(SearchPosXY2.Pos, true, SearchPosXY2.Line, SearchPosXY2.Range);
+        this.Set_SelectionContentPos(SearchPosXY.Pos, SearchPosXY.Pos);
     },
     Selection_SetEnd: function (X, Y, PageNum, MouseEvent, bTableBorder) {
         var PagesCount = this.Pages.length;
-        if (false === editor.isViewMode && null === this.Parent.Is_HdrFtr(true) && null == this.Get_DocumentNext() && PageNum - this.PageNum >= PagesCount - 1 && Y > this.Pages[PagesCount - 1].Bounds.Bottom && MouseEvent.ClickCount >= 2) {
+        if (this.bFromDocument && false === editor.isViewMode && null === this.Parent.Is_HdrFtr(true) && null == this.Get_DocumentNext() && PageNum - this.PageNum >= PagesCount - 1 && Y > this.Pages[PagesCount - 1].Bounds.Bottom && MouseEvent.ClickCount >= 2) {
             return this.Parent.Extend_ToPos(X, Y);
         }
         this.CurPos.RealX = X;
         this.CurPos.RealY = Y;
-        var Temp = this.Internal_GetContentPosByXY(X, Y, false, PageNum);
-        var Pos = Temp.Pos;
-        if (-1 != Pos) {
-            this.Set_ContentPos(Pos, true, Temp.Line);
-            if (true === Temp.End) {
-                if (PageNum - this.PageNum >= PagesCount - 1 && X > this.Lines[this.Lines.length - 1].Ranges[this.Lines[this.Lines.length - 1].Ranges.length - 1].W && MouseEvent.ClickCount >= 2 && Y <= this.Pages[PagesCount - 1].Bounds.Bottom) {
-                    if (false === editor.isViewMode && false === editor.WordControl.m_oLogicDocument.Document_Is_SelectionLocked(changestype_None, {
-                        Type: changestype_2_Element_and_Type,
-                        Element: this,
-                        CheckType: changestype_Paragraph_Content
-                    })) {
-                        History.Create_NewPoint();
-                        History.Set_Additional_ExtendDocumentToPos();
-                        this.Extend_ToPos(X);
+        this.Selection.EndManually = true;
+        var SearchPosXY = this.Get_ParaContentPosByXY(X, Y, PageNum, false, true);
+        var SearchPosXY2 = this.Get_ParaContentPosByXY(X, Y, PageNum, false, false);
+        this.Set_ParaContentPos(SearchPosXY2.Pos, true, SearchPosXY2.Line, SearchPosXY2.Range);
+        if (true === SearchPosXY.End || true === this.Is_Empty()) {
+            var LastRange = this.Lines[this.Lines.length - 1].Ranges[this.Lines[this.Lines.length - 1].Ranges.length - 1];
+            if (PageNum - this.PageNum >= PagesCount - 1 && X > LastRange.W && MouseEvent.ClickCount >= 2 && Y <= this.Pages[PagesCount - 1].Bounds.Bottom) {
+                if (this.bFromDocument && false === editor.isViewMode && false === editor.WordControl.m_oLogicDocument.Document_Is_SelectionLocked(changestype_None, {
+                    Type: changestype_2_Element_and_Type,
+                    Element: this,
+                    CheckType: changestype_Paragraph_Content
+                })) {
+                    History.Create_NewPoint(historydescription_Document_ParagraphExtendToPos);
+                    History.Set_Additional_ExtendDocumentToPos();
+                    if (true === this.Extend_ToPos(X)) {
                         this.Cursor_MoveToEndPos();
-                        this.Document_SetThisElementCurrent();
+                        this.Document_SetThisElementCurrent(true);
                         editor.WordControl.m_oLogicDocument.Recalculate();
                         return;
-                    }
-                }
-                this.Selection.EndPos = Pos + 1;
-            } else {
-                this.Selection.EndPos = Pos;
-            }
-            if (this.Selection.EndPos == this.Selection.StartPos && g_mouse_event_type_up === MouseEvent.Type) {
-                var NumPr = this.Numbering_Get();
-                if (true === Temp.Numbering && undefined != NumPr) {
-                    this.Set_ContentPos(0, true, -1);
-                    this.Parent.Document_SelectNumbering(NumPr);
-                } else {
-                    var Temp2 = MouseEvent.ClickCount % 2;
-                    if (1 >= MouseEvent.ClickCount) {
-                        this.Selection_Remove();
-                        this.Selection.Use = false;
-                        this.Set_ContentPos(Pos, true, Temp.Line);
-                        this.RecalculateCurPos();
-                        return;
                     } else {
-                        if (0 == Temp2) {
-                            var oStart;
-                            if (this.Content[Pos].Type == para_Space) {
-                                oStart = this.Internal_FindBackward(Pos, [para_Text, para_NewLine]);
-                                if (!oStart.Found) {
-                                    oStart.LetterPos = this.Internal_GetStartPos();
-                                } else {
-                                    if (oStart.Type == para_NewLine) {
-                                        oStart.LetterPos++;
-                                    } else {
-                                        oStart = this.Internal_FindBackward(oStart.LetterPos, [para_Tab, para_Space, para_NewLine]);
-                                        if (!oStart.Found) {
-                                            oStart.LetterPos = this.Internal_GetStartPos();
-                                        } else {
-                                            oStart = this.Internal_FindForward(oStart.LetterPos, [para_Text]);
-                                            if (!oStart.Found) {
-                                                oStart.LetterPos = this.Internal_GetStartPos();
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                oStart = this.Internal_FindBackward(Pos, [para_Tab, para_Space, para_NewLine]);
-                                if (!oStart.Found) {
-                                    oStart.LetterPos = this.Internal_GetStartPos();
-                                } else {
-                                    oStart = this.Internal_FindForward(oStart.LetterPos, [para_Text, para_NewLine]);
-                                    if (!oStart.Found) {
-                                        oStart.LetterPos = this.Internal_GetStartPos();
-                                    }
-                                }
-                            }
-                            var oEnd = this.Internal_FindForward(Pos, [para_Tab, para_Space, para_NewLine]);
-                            if (!oEnd.Found) {
-                                oEnd.LetterPos = this.Content.length - 1;
-                            } else {
-                                if (oEnd.Type != para_NewLine) {
-                                    oEnd = this.Internal_FindForward(oEnd.LetterPos, [para_Text]);
-                                    if (!oEnd.Found) {
-                                        oEnd.LetterPos = this.Content.length - 1;
-                                    }
-                                }
-                            }
-                            this.Selection.StartPos = oStart.LetterPos;
-                            this.Selection.EndPos = oEnd.LetterPos;
-                            this.Selection.Use = true;
-                        } else {
-                            this.Selection.StartPos = this.Internal_GetStartPos();
-                            this.Selection.EndPos = this.Content.length - 1;
-                            this.Selection.Use = true;
-                        }
+                        History.Remove_LastPoint();
                     }
                 }
             }
         }
-        if (-1 === this.Selection.EndPos) {
-            return;
+        this.Set_SelectionContentPos(this.Get_ParaContentPos(true, true), SearchPosXY.Pos);
+        var SelectionStartPos = this.Get_ParaContentPos(true, true);
+        var SelectionEndPos = this.Get_ParaContentPos(true, false);
+        if (0 === SelectionStartPos.Compare(SelectionEndPos) && g_mouse_event_type_up === MouseEvent.Type) {
+            var NumPr = this.Numbering_Get();
+            if (true === SearchPosXY.Numbering && undefined != NumPr) {
+                this.Set_ParaContentPos(this.Get_StartPos(), true, -1, -1);
+                this.Parent.Update_ConentIndexing();
+                this.Parent.Document_SelectNumbering(NumPr, this.Index);
+            } else {
+                var ClickCounter = MouseEvent.ClickCount % 2;
+                if (1 >= MouseEvent.ClickCount) {
+                    this.Selection_Remove();
+                } else {
+                    if (0 == ClickCounter) {
+                        var SearchPosS = new CParagraphSearchPos();
+                        var SearchPosE = new CParagraphSearchPos();
+                        this.Get_WordEndPos(SearchPosE, SearchPosXY.Pos);
+                        this.Get_WordStartPos(SearchPosS, SearchPosE.Pos);
+                        var StartPos = (true === SearchPosS.Found ? SearchPosS.Pos : this.Get_StartPos());
+                        var EndPos = (true === SearchPosE.Found ? SearchPosE.Pos : this.Get_EndPos(false));
+                        this.Selection.Use = true;
+                        this.Set_SelectionContentPos(StartPos, EndPos);
+                    } else {
+                        this.Select_All(1);
+                    }
+                }
+            }
         }
     },
     Selection_Stop: function (X, Y, PageNum, MouseEvent) {
         this.Selection.Start = false;
+        var StartPos = this.Selection.StartPos;
+        var EndPos = this.Selection.EndPos;
+        if (StartPos > EndPos) {
+            StartPos = this.Selection.EndPos;
+            EndPos = this.Selection.StartPos;
+        }
+        for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+            this.Content[CurPos].Selection_Stop();
+        }
     },
     Selection_Remove: function () {
+        if (true === this.Selection.Use) {
+            var StartPos = this.Selection.StartPos;
+            var EndPos = this.Selection.EndPos;
+            if (StartPos > EndPos) {
+                StartPos = this.Selection.EndPos;
+                EndPos = this.Selection.StartPos;
+            }
+            StartPos = Math.max(0, StartPos);
+            EndPos = Math.min(this.Content.length - 1, EndPos);
+            for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+                this.Content[CurPos].Selection_Remove();
+            }
+        }
         this.Selection.Use = false;
+        this.Selection.Start = false;
         this.Selection.Flag = selectionflag_Common;
+        this.Selection.StartPos = 0;
+        this.Selection.EndPos = 0;
         this.Selection_Clear();
     },
     Selection_Clear: function () {},
@@ -5904,89 +4023,77 @@ Paragraph.prototype = {
             var StartPos = this.Selection.StartPos;
             var EndPos = this.Selection.EndPos;
             if (StartPos > EndPos) {
-                var Temp = EndPos;
-                EndPos = StartPos;
-                StartPos = Temp;
+                StartPos = this.Selection.EndPos;
+                EndPos = this.Selection.StartPos;
             }
             var _StartLine = this.Pages[CurPage].StartLine;
             var _EndLine = this.Pages[CurPage].EndLine;
-            if (StartPos > this.Lines[_EndLine].EndPos + 1 || EndPos < this.Lines[_StartLine].StartPos) {
+            if (StartPos > this.Lines[_EndLine].Get_EndPos() || EndPos < this.Lines[_StartLine].Get_StartPos()) {
                 return;
             } else {
-                StartPos = Math.max(StartPos, this.Lines[_StartLine].StartPos);
-                EndPos = Math.min(EndPos, (_EndLine != this.Lines.length - 1 ? this.Lines[_EndLine].EndPos + 1 : this.Content.length - 1));
+                StartPos = Math.max(StartPos, this.Lines[_StartLine].Get_StartPos());
+                EndPos = Math.min(EndPos, (_EndLine != this.Lines.length - 1 ? this.Lines[_EndLine].Get_EndPos() : this.Content.length - 1));
             }
-            var StartParaPos = this.Internal_Get_ParaPos_By_Pos(StartPos);
-            var CurLine = StartParaPos.Line;
-            var CurRange = StartParaPos.Range;
-            var PNum = StartParaPos.Page;
-            var StartX = this.Lines[CurLine].Ranges[CurRange].XVisible;
-            var Pos, Item;
-            if (this.Numbering.Pos >= this.Lines[CurLine].Ranges[CurRange].StartPos) {
-                StartX += this.Numbering.WidthVisible;
-            }
-            for (Pos = this.Lines[CurLine].Ranges[CurRange].StartPos; Pos <= StartPos - 1; Pos++) {
-                Item = this.Content[Pos];
-                if (undefined != Item.WidthVisible && (para_Drawing != Item.Type || drawing_Inline === Item.DrawingType)) {
-                    StartX += Item.WidthVisible;
-                }
-            }
-            if (this.Pages[PNum].StartLine > CurLine) {
-                CurLine = this.Pages[PNum].StartLine;
-                CurRange = 0;
-                StartX = this.Lines[CurLine].Ranges[CurRange].XVisible;
-                StartPos = this.Lines[this.Pages[PNum].StartLine].StartPos;
-            }
-            var StartY = this.Pages[PNum].Y + this.Lines[CurLine].Top;
-            var H = this.Lines[CurLine].Bottom - this.Lines[CurLine].Top;
-            var W = 0;
-            for (Pos = StartPos; Pos < EndPos; Pos++) {
-                Item = this.Content[Pos];
-                if (undefined != Item.CurPage) {
-                    if (CurLine < Item.CurLine) {
+            var DrawSelection = new CParagraphDrawSelectionRange();
+            var bInline = this.Is_Inline();
+            for (var CurLine = _StartLine; CurLine <= _EndLine; CurLine++) {
+                var Line = this.Lines[CurLine];
+                var RangesCount = Line.Ranges.length;
+                DrawSelection.StartY = this.Pages[CurPage].Y + this.Lines[CurLine].Top;
+                DrawSelection.H = this.Lines[CurLine].Bottom - this.Lines[CurLine].Top;
+                for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
+                    var Range = Line.Ranges[CurRange];
+                    var RStartPos = Range.StartPos;
+                    var REndPos = Range.EndPos;
+                    if (StartPos > REndPos || EndPos < RStartPos) {
+                        continue;
+                    }
+                    DrawSelection.StartX = this.Lines[CurLine].Ranges[CurRange].XVisible;
+                    DrawSelection.W = 0;
+                    DrawSelection.FindStart = true;
+                    if (CurLine === this.Numbering.Line && CurRange === this.Numbering.Range) {
+                        DrawSelection.StartX += this.Numbering.WidthVisible;
+                    }
+                    for (var CurPos = RStartPos; CurPos <= REndPos; CurPos++) {
+                        var Item = this.Content[CurPos];
+                        Item.Selection_DrawRange(CurLine, CurRange, DrawSelection);
+                    }
+                    var StartX = DrawSelection.StartX;
+                    var W = DrawSelection.W;
+                    var StartY = DrawSelection.StartY;
+                    var H = DrawSelection.H;
+                    if (true !== bInline) {
+                        var Frame_X_min = this.CalculatedFrame.L2;
+                        var Frame_Y_min = this.CalculatedFrame.T2;
+                        var Frame_X_max = this.CalculatedFrame.L2 + this.CalculatedFrame.W2;
+                        var Frame_Y_max = this.CalculatedFrame.T2 + this.CalculatedFrame.H2;
+                        StartX = Math.min(Math.max(Frame_X_min, StartX), Frame_X_max);
+                        StartY = Math.min(Math.max(Frame_Y_min, StartY), Frame_Y_max);
+                        W = Math.min(W, Frame_X_max - StartX);
+                        H = Math.min(H, Frame_Y_max - StartY);
+                    }
+                    if (W > 0.001) {
                         this.DrawingDocument.AddPageSelection(Page_abs, StartX, StartY, W, H);
-                        CurLine = Item.CurLine;
-                        CurRange = Item.CurRange;
-                        StartX = this.Lines[CurLine].Ranges[CurRange].XVisible;
-                        StartY = this.Pages[PNum].Y + this.Lines[CurLine].Top;
-                        H = this.Lines[CurLine].Bottom - this.Lines[CurLine].Top;
-                        W = 0;
-                    } else {
-                        if (CurRange < Item.CurRange) {
-                            this.DrawingDocument.AddPageSelection(Page_abs, StartX, StartY, W, H);
-                            CurRange = Item.CurRange;
-                            StartX = this.Lines[CurLine].Ranges[CurRange].XVisible;
-                            W = 0;
-                        }
                     }
-                }
-                if (undefined != Item.WidthVisible) {
-                    if (para_Drawing != Item.Type || drawing_Inline === Item.DrawingType) {
-                        W += Item.WidthVisible;
-                    } else {
-                        Item.Draw_Selection();
-                    }
-                }
-                if (Pos == EndPos - 1) {
-                    this.DrawingDocument.AddPageSelection(Page_abs, StartX, StartY, W, H);
                 }
             }
             break;
         case selectionflag_Numbering:
             var ParaNum = this.Numbering;
-            var NumberingPos = this.Numbering.Pos;
-            if (-1 === NumberingPos) {
+            var NumberingRun = ParaNum.Run;
+            if (null === NumberingRun) {
                 break;
             }
-            var ParaNumPos = this.Internal_Get_ParaPos_By_Pos(NumberingPos);
-            if (ParaNumPos.Page != CurPage) {
+            var CurLine = ParaNum.Line;
+            var CurRange = ParaNum.Range;
+            if (CurLine < this.Pages[CurPage].StartLine || CurLine > this.Pages[CurPage].EndLine) {
                 break;
             }
-            var CurRange = ParaNumPos.Range;
-            var CurLine = ParaNumPos.Line;
-            var NumPr = this.Numbering_Get();
+            var SelectY = this.Lines[CurLine].Top + this.Pages[CurPage].Y;
             var SelectX = this.Lines[CurLine].Ranges[CurRange].XVisible;
             var SelectW = ParaNum.WidthVisible;
+            var SelectH = this.Lines[CurLine].Bottom - this.Lines[CurLine].Top;
+            var NumPr = this.Numbering_Get();
             var NumJc = this.Parent.Get_Numbering().Get_AbstractNum(NumPr.NumId).Lvl[NumPr.Lvl].Jc;
             switch (NumJc) {
             case align_Center:
@@ -6003,25 +4110,51 @@ Paragraph.prototype = {
                 SelectW = ParaNum.WidthVisible;
                 break;
             }
-            this.DrawingDocument.AddPageSelection(Page_abs, SelectX, this.Lines[CurLine].Top + this.Pages[CurPage].Y, SelectW, this.Lines[CurLine].Bottom - this.Lines[CurLine].Top);
+            this.DrawingDocument.AddPageSelection(Page_abs, SelectX, SelectY, SelectW, SelectH);
             break;
         }
     },
-    Selection_Check: function (X, Y, Page_Abs) {
-        var PageIndex = Page_Abs - this.Get_StartPage_Absolute();
-        if (PageIndex < 0 || PageIndex >= this.Pages.length || true != this.Selection.Use) {
+    Selection_CheckParaEnd: function () {
+        if (true !== this.Selection.Use) {
             return false;
         }
-        var Start = this.Selection.StartPos;
-        var End = this.Selection.EndPos;
-        if (Start > End) {
-            Start = this.Selection.EndPos;
-            End = this.Selection.StartPos;
+        var EndPos = (this.Selection.StartPos > this.Selection.EndPos ? this.Selection.StartPos : this.Selection.EndPos);
+        return this.Content[EndPos].Selection_CheckParaEnd();
+    },
+    Selection_Check: function (X, Y, Page_Abs, NearPos) {
+        var SelSP = this.Get_ParaContentPos(true, true);
+        var SelEP = this.Get_ParaContentPos(true, false);
+        if (SelSP.Compare(SelEP) > 0) {
+            var Temp = SelSP;
+            SelSP = SelEP;
+            SelEP = Temp;
         }
-        var ContentPos = this.Internal_GetContentPosByXY(X, Y, false, PageIndex + this.PageNum, false);
-        if (-1 != ContentPos.Pos && Start <= ContentPos.Pos && End >= ContentPos.Pos) {
-            return true;
+        if (undefined !== NearPos) {
+            if (this === NearPos.Paragraph && ((true === this.Selection.Use && true === this.Selection_CheckParaContentPos(NearPos.ContentPos)) || true === this.ApplyToAll)) {
+                return true;
+            }
+            return false;
+        } else {
+            var PageIndex = Page_Abs - this.Get_StartPage_Absolute();
+            if (PageIndex < 0 || PageIndex >= this.Pages.length || true != this.Selection.Use) {
+                return false;
+            }
+            var SearchPosXY = this.Get_ParaContentPosByXY(X, Y, PageIndex + this.PageNum, false, false, false);
+            if (true === SearchPosXY.InText) {
+                return this.Selection_CheckParaContentPos(SearchPosXY.InTextPos);
+            }
+            return false;
         }
+        return false;
+    },
+    Selection_CheckParaContentPos: function (ContentPos) {
+        var CurPos = ContentPos.Get(0);
+        if (this.Selection.StartPos <= CurPos && CurPos <= this.Selection.EndPos) {
+            return this.Content[CurPos].Selection_CheckParaContentPos(ContentPos, 1, this.Selection.StartPos === CurPos, CurPos === this.Selection.EndPos);
+        } else {
+            (this.Selection.EndPos <= CurPos && CurPos <= this.Selection.StartPos);
+        }
+        return this.Content[CurPos].Selection_CheckParaContentPos(ContentPos, 1, this.Selection.EndPos === CurPos, CurPos === this.Selection.StartPos);
         return false;
     },
     Selection_CalculateTextPr: function () {
@@ -6077,85 +4210,442 @@ Paragraph.prototype = {
             this.Selection.Flag = selectionflag_Numbering;
         }
     },
-    Select_All: function () {
-        this.Selection.Use = true;
-        this.Selection.StartPos = this.Internal_GetStartPos();
-        this.Selection.EndPos = this.Content.length - 1;
-    },
-    Get_SelectedText: function (bClearText) {
-        if (true === this.ApplyToAll) {
-            var Str = "";
-            var Count = this.Content.length;
-            for (var Pos = 0; Pos < Count; Pos++) {
-                var Item = this.Content[Pos];
-                switch (Item.Type) {
-                case para_Drawing:
-                    case para_End:
-                    case para_Numbering:
-                    case para_PresentationNumbering:
-                    case para_PageNum:
-                    if (true === bClearText) {
-                        return null;
-                    }
-                    break;
-                case para_Text:
-                    Str += Item.Value;
-                    break;
-                case para_Space:
-                    case para_Tab:
-                    Str += " ";
-                    break;
-                }
-            }
-            return Str;
+    Selection_SetBegEnd: function (StartSelection, StartPara) {
+        var ContentPos = (true === StartPara ? this.Get_StartPos() : this.Get_EndPos(true));
+        if (true === StartSelection) {
+            this.Selection.StartManually = false;
+            this.Set_SelectionContentPos(ContentPos, this.Get_ParaContentPos(true, false));
+        } else {
+            this.Selection.EndManually = false;
+            this.Set_SelectionContentPos(this.Get_ParaContentPos(true, true), ContentPos);
         }
+    },
+    Select_All: function (Direction) {
+        var Count = this.Content.length;
+        this.Selection.Use = true;
+        var StartPos = null,
+        EndPos = null;
+        if (-1 === Direction) {
+            StartPos = this.Get_EndPos(true);
+            EndPos = this.Get_StartPos();
+        } else {
+            StartPos = this.Get_StartPos();
+            EndPos = this.Get_EndPos(true);
+        }
+        this.Selection.StartManually = false;
+        this.Selection.EndManually = false;
+        this.Set_SelectionContentPos(StartPos, EndPos);
+    },
+    Select_Math: function (ParaMath) {
+        for (var nPos = 0, nCount = this.Content.length; nPos < nCount; nPos++) {
+            if (this.Content[nPos] === ParaMath) {
+                this.Selection.Use = true;
+                this.Selection.StartManually = false;
+                this.Selection.EndManually = false;
+                this.Selection.StartPos = nPos;
+                this.Selection.EndPos = nPos;
+                this.Selection.Flag = selectionflag_Common;
+                this.Document_SetThisElementCurrent(false);
+                return;
+            }
+        }
+    },
+    Get_SelectionBounds: function () {
+        var X0 = this.X,
+        X1 = this.XLimit,
+        Y = this.Y,
+        Page = this.Get_StartPage_Absolute();
+        var BeginRect = null;
+        var EndRect = null;
+        var StartPage_abs = this.Get_StartPage_Absolute();
+        var StartPage = 0,
+        EndPage = 0;
+        var _StartX = null,
+        _StartY = null,
+        _EndX = null,
+        _EndY = null;
         if (true === this.Selection.Use) {
             var StartPos = this.Selection.StartPos;
             var EndPos = this.Selection.EndPos;
-            if (EndPos < StartPos) {
+            if (StartPos > EndPos) {
                 StartPos = this.Selection.EndPos;
                 EndPos = this.Selection.StartPos;
             }
-            var Str = "";
-            for (var Pos = StartPos; Pos < EndPos; Pos++) {
-                var Item = this.Content[Pos];
-                switch (Item.Type) {
-                case para_Drawing:
-                    case para_End:
-                    case para_Numbering:
-                    case para_PresentationNumbering:
-                    case para_PageNum:
-                    if (true === bClearText) {
-                        return null;
-                    }
-                    break;
-                case para_Text:
-                    Str += Item.Value;
-                    break;
-                case para_Space:
-                    case para_Tab:
-                    Str += " ";
-                    break;
+            var LinesCount = this.Lines.length;
+            var StartLine = -1;
+            var EndLine = -1;
+            for (var CurLine = 0; CurLine < LinesCount; CurLine++) {
+                if (-1 === StartLine && StartPos >= this.Lines[CurLine].Get_StartPos() && StartPos <= this.Lines[CurLine].Get_EndPos()) {
+                    StartLine = CurLine;
+                }
+                if (EndPos >= this.Lines[CurLine].Get_StartPos() && EndPos <= this.Lines[CurLine].Get_EndPos()) {
+                    EndLine = CurLine;
                 }
             }
-            return Str;
+            StartLine = Math.min(Math.max(0, StartLine), LinesCount - 1);
+            EndLine = Math.min(Math.max(0, EndLine), LinesCount - 1);
+            StartPage = this.private_GetPageByLine(StartLine);
+            EndPage = this.private_GetPageByLine(EndLine);
+            var PagesCount = this.Pages.length;
+            var DrawSelection = new CParagraphDrawSelectionRange();
+            DrawSelection.Draw = false;
+            for (var CurLine = StartLine; CurLine <= EndLine; CurLine++) {
+                var Line = this.Lines[CurLine];
+                var RangesCount = Line.Ranges.length;
+                var CurPage = this.private_GetPageByLine(CurLine);
+                DrawSelection.StartY = this.Pages[CurPage].Y + this.Lines[CurLine].Top;
+                DrawSelection.H = this.Lines[CurLine].Bottom - this.Lines[CurLine].Top;
+                var Result = null;
+                for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
+                    var Range = Line.Ranges[CurRange];
+                    var RStartPos = Range.StartPos;
+                    var REndPos = Range.EndPos;
+                    if (StartPos > REndPos || EndPos < RStartPos) {
+                        continue;
+                    }
+                    DrawSelection.StartX = this.Lines[CurLine].Ranges[CurRange].XVisible;
+                    DrawSelection.W = 0;
+                    DrawSelection.FindStart = true;
+                    if (CurLine === this.Numbering.Line && CurRange === this.Numbering.Range) {
+                        DrawSelection.StartX += this.Numbering.WidthVisible;
+                    }
+                    for (var CurPos = RStartPos; CurPos <= REndPos; CurPos++) {
+                        var Item = this.Content[CurPos];
+                        Item.Selection_DrawRange(CurLine, CurRange, DrawSelection);
+                    }
+                    var StartX = DrawSelection.StartX;
+                    var W = DrawSelection.W;
+                    var StartY = DrawSelection.StartY;
+                    var H = DrawSelection.H;
+                    if (W > 0.001) {
+                        X0 = StartX;
+                        X1 = StartX + W;
+                        Y = StartY;
+                        Page = CurPage + StartPage_abs;
+                        if (null === BeginRect) {
+                            BeginRect = {
+                                X: StartX,
+                                Y: StartY,
+                                W: W,
+                                H: H,
+                                Page: Page
+                            };
+                        }
+                        EndRect = {
+                            X: StartX,
+                            Y: StartY,
+                            W: W,
+                            H: H,
+                            Page: Page
+                        };
+                    }
+                    if (null === _StartX) {
+                        _StartX = StartX;
+                        _StartY = StartY;
+                    }
+                    _EndX = StartX;
+                    _EndY = StartY;
+                }
+            }
         }
-        return "";
+        if (null === BeginRect) {
+            BeginRect = {
+                X: _StartX === null ? this.Pages[StartPage].X : _StartX,
+                Y: _StartY === null ? this.Pages[StartPage].Y : _StartY,
+                W: 0,
+                H: 0,
+                Page: StartPage_abs + StartPage
+            };
+        }
+        if (null === EndRect) {
+            EndRect = {
+                X: _EndX === null ? this.Pages[StartPage].X : _EndX,
+                Y: _EndY === null ? this.Pages[StartPage].Y : _EndY,
+                W: 0,
+                H: 0,
+                Page: StartPage_abs + EndPage
+            };
+        }
+        return {
+            Start: BeginRect,
+            End: EndRect,
+            Direction: this.Get_SelectionDirection()
+        };
+    },
+    Get_SelectionDirection: function () {
+        if (true !== this.Selection.Use) {
+            return 0;
+        }
+        if (this.Selection.StartPos < this.Selection.EndPos) {
+            return 1;
+        } else {
+            if (this.Selection.StartPos > this.Selection.EndPos) {
+                return -1;
+            }
+        }
+        return this.Content[this.Selection.StartPos].Get_SelectionDirection();
+    },
+    Get_SelectionAnchorPos: function () {
+        var X0 = this.X,
+        X1 = this.XLimit,
+        Y = this.Y,
+        Page = this.Get_StartPage_Absolute();
+        if (true === this.ApplyToAll) {} else {
+            if (true === this.Selection.Use) {
+                var StartPos = this.Selection.StartPos;
+                var EndPos = this.Selection.EndPos;
+                if (StartPos > EndPos) {
+                    StartPos = this.Selection.EndPos;
+                    EndPos = this.Selection.StartPos;
+                }
+                var LinesCount = this.Lines.length;
+                var StartLine = -1;
+                var EndLine = -1;
+                for (var CurLine = 0; CurLine < LinesCount; CurLine++) {
+                    if (-1 === StartLine && StartPos >= this.Lines[CurLine].Get_StartPos() && StartPos <= this.Lines[CurLine].Get_EndPos()) {
+                        StartLine = CurLine;
+                    }
+                    if (EndPos >= this.Lines[CurLine].Get_StartPos() && EndPos <= this.Lines[CurLine].Get_EndPos()) {
+                        EndLine = CurLine;
+                    }
+                }
+                StartLine = Math.min(Math.max(0, StartLine), LinesCount - 1);
+                EndLine = Math.min(Math.max(0, EndLine), LinesCount - 1);
+                var PagesCount = this.Pages.length;
+                var DrawSelection = new CParagraphDrawSelectionRange();
+                DrawSelection.Draw = false;
+                for (var CurLine = StartLine; CurLine <= EndLine; CurLine++) {
+                    var Line = this.Lines[CurLine];
+                    var RangesCount = Line.Ranges.length;
+                    var CurPage = 0;
+                    for (; CurPage < PagesCount; CurPage++) {
+                        if (CurLine >= this.Pages[CurPage].StartLine && CurLine <= this.Pages[CurPage].EndLine) {
+                            break;
+                        }
+                    }
+                    CurPage = Math.min(PagesCount - 1, CurPage);
+                    DrawSelection.StartY = this.Pages[CurPage].Y + this.Lines[CurLine].Top;
+                    DrawSelection.H = this.Lines[CurLine].Bottom - this.Lines[CurLine].Top;
+                    var Result = null;
+                    for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
+                        var Range = Line.Ranges[CurRange];
+                        var RStartPos = Range.StartPos;
+                        var REndPos = Range.EndPos;
+                        if (StartPos > REndPos || EndPos < RStartPos) {
+                            continue;
+                        }
+                        DrawSelection.StartX = this.Lines[CurLine].Ranges[CurRange].XVisible;
+                        DrawSelection.W = 0;
+                        DrawSelection.FindStart = true;
+                        if (CurLine === this.Numbering.Line && CurRange === this.Numbering.Range) {
+                            DrawSelection.StartX += this.Numbering.WidthVisible;
+                        }
+                        for (var CurPos = RStartPos; CurPos <= REndPos; CurPos++) {
+                            var Item = this.Content[CurPos];
+                            Item.Selection_DrawRange(CurLine, CurRange, DrawSelection);
+                        }
+                        var StartX = DrawSelection.StartX;
+                        var W = DrawSelection.W;
+                        var StartY = DrawSelection.StartY;
+                        var H = DrawSelection.H;
+                        var StartX = DrawSelection.StartX;
+                        var W = DrawSelection.W;
+                        var StartY = DrawSelection.StartY;
+                        var H = DrawSelection.H;
+                        if (W > 0.001) {
+                            X0 = StartX;
+                            X1 = StartX + W;
+                            Y = StartY;
+                            Page = CurPage + this.Get_StartPage_Absolute();
+                            if (null === Result) {
+                                Result = {
+                                    X0: X0,
+                                    X1: X1,
+                                    Y: Y,
+                                    Page: Page
+                                };
+                            } else {
+                                Result.X0 = Math.min(Result.X0, X0);
+                                Result.X1 = Math.max(Result.X1, X1);
+                            }
+                        }
+                    }
+                    if (null !== Result) {
+                        return Result;
+                    }
+                }
+            } else {
+                X0 = this.CurPos.X;
+                X1 = this.CurPos.X;
+                Y = this.CurPos.Y;
+                Page = this.Get_StartPage_Absolute() + this.CurPos.PagesPos;
+            }
+        }
+        return {
+            X0: X0,
+            X1: X1,
+            Y: Y,
+            Page: this.Get_StartPage_Absolute()
+        };
+    },
+    Get_SelectedText: function (bClearText) {
+        var Str = "";
+        var Count = this.Content.length;
+        for (var Pos = 0; Pos < Count; Pos++) {
+            var _Str = this.Content[Pos].Get_SelectedText(true === this.ApplyToAll, bClearText);
+            if (null === _Str) {
+                return null;
+            }
+            Str += _Str;
+        }
+        return Str;
     },
     Get_SelectedElementsInfo: function (Info) {
         Info.Set_Paragraph(this);
+        if (true === this.Selection.Use && this.Selection.StartPos === this.Selection.EndPos && this.Content[this.Selection.EndPos].Get_SelectedElementsInfo) {
+            this.Content[this.Selection.EndPos].Get_SelectedElementsInfo(Info);
+        } else {
+            if (false === this.Selection.Use && this.Content[this.CurPos.ContentPos].Get_SelectedElementsInfo) {
+                this.Content[this.CurPos.ContentPos].Get_SelectedElementsInfo(Info);
+            }
+        }
     },
-    IsEmpty: function () {
-        var Pos = this.Internal_FindForward(0, [para_Tab, para_Drawing, para_PageNum, para_Text, para_Space, para_NewLine]);
-        return (Pos.Found === true ? false : true);
+    Get_SelectedContent: function (DocContent) {
+        if (true !== this.Selection.Use) {
+            return;
+        }
+        var StartPos = this.Selection.StartPos;
+        var EndPos = this.Selection.EndPos;
+        if (StartPos > EndPos) {
+            StartPos = this.Selection.EndPos;
+            EndPos = this.Selection.StartPos;
+        }
+        var Para = null;
+        if (true === this.Selection_IsFromStart() && true === this.Selection_CheckParaEnd()) {
+            Para = this.Copy(this.Parent);
+            DocContent.Add(new CSelectedElement(Para, true));
+        } else {
+            Para = new Paragraph(this.DrawingDocument, this.Parent, 0, 0, 0, 0, 0, !this.bFromDocument);
+            Para.Set_Pr(this.Pr.Copy());
+            Para.TextPr.Set_Value(this.TextPr.Value.Copy());
+            for (var Pos = StartPos; Pos <= EndPos; Pos++) {
+                var Item = this.Content[Pos];
+                if (StartPos === Pos || EndPos === Pos) {
+                    Para.Internal_Content_Add(Pos - StartPos, Item.Copy(true), false);
+                } else {
+                    Para.Internal_Content_Add(Pos - StartPos, Item.Copy(false), false);
+                }
+            }
+            if (undefined !== this.SectPr) {
+                var SectPr = new CSectionPr(this.SectPr.LogicDocument);
+                SectPr.Copy(this.SectPr);
+                Para.Set_SectionPr(SectPr);
+            }
+            DocContent.Add(new CSelectedElement(Para, false));
+        }
+    },
+    Get_Paragraph_TextPr: function () {
+        var TextPr;
+        if (true === this.ApplyToAll) {
+            this.Select_All(1);
+            var StartPos = 0;
+            var Count = this.Content.length;
+            while (true !== this.Content[StartPos].Is_CursorPlaceable() && StartPos < Count - 1) {
+                StartPos++;
+            }
+            TextPr = this.Content[StartPos].Get_CompiledTextPr(true);
+            var Count = this.Content.length;
+            for (var CurPos = StartPos + 1; CurPos < Count; CurPos++) {
+                var TempTextPr = this.Content[CurPos].Get_CompiledTextPr(false);
+                if (null !== TempTextPr && undefined !== TempTextPr && true !== this.Content[CurPos].Selection_IsEmpty()) {
+                    TextPr = TextPr.Compare(TempTextPr);
+                }
+            }
+            this.Selection_Remove();
+        } else {
+            if (true === this.Selection.Use) {
+                var StartPos = this.Selection.StartPos;
+                var EndPos = this.Selection.EndPos;
+                if (StartPos > EndPos) {
+                    StartPos = this.Selection.EndPos;
+                    EndPos = this.Selection.StartPos;
+                }
+                if (StartPos === EndPos && this.Content.length - 1 === EndPos) {
+                    TextPr = this.Get_CompiledPr2(false).TextPr.Copy();
+                    TextPr.Merge(this.TextPr.Value);
+                } else {
+                    var bCheckParaEnd = false;
+                    if (this.Content.length - 1 === EndPos && true !== this.Content[EndPos].Selection_IsEmpty(true)) {
+                        EndPos--;
+                        bCheckParaEnd = true;
+                    }
+                    var OldStartPos = StartPos;
+                    while (true === this.Content[StartPos].Selection_IsEmpty() && StartPos < EndPos) {
+                        StartPos++;
+                    }
+                    while (true !== this.Content[StartPos].Is_CursorPlaceable() && StartPos > OldStartPos) {
+                        StartPos--;
+                    }
+                    TextPr = this.Content[StartPos].Get_CompiledTextPr(true);
+                    if (null === TextPr) {
+                        TextPr = this.Get_CompiledPr2(false).TextPr.Copy();
+                        TextPr.Merge(this.TextPr.Value);
+                    }
+                    for (var CurPos = StartPos + 1; CurPos <= EndPos; CurPos++) {
+                        var TempTextPr = this.Content[CurPos].Get_CompiledTextPr(false);
+                        if (null === TextPr || undefined === TextPr) {
+                            TextPr = TempTextPr;
+                        } else {
+                            if (null !== TempTextPr && undefined !== TempTextPr && true !== this.Content[CurPos].Selection_IsEmpty()) {
+                                TextPr = TextPr.Compare(TempTextPr);
+                            }
+                        }
+                    }
+                    if (true === bCheckParaEnd) {
+                        var EndTextPr = this.Get_CompiledPr2(false).TextPr.Copy();
+                        EndTextPr.Merge(this.TextPr.Value);
+                        TextPr = TextPr.Compare(EndTextPr);
+                    }
+                }
+            } else {
+                TextPr = this.Content[this.CurPos.ContentPos].Get_CompiledTextPr(true);
+            }
+        }
+        if (null === TextPr || undefined === TextPr) {
+            TextPr = this.TextPr.Value.Copy();
+        }
+        if (undefined !== TextPr.RFonts && null !== TextPr.RFonts) {
+            TextPr.FontFamily = TextPr.RFonts.Ascii;
+        }
+        return TextPr;
+    },
+    IsEmpty: function (Props) {
+        var Pr = {
+            SkipEnd: true
+        };
+        if (undefined !== Props) {
+            if (undefined !== Props.SkipNewLine) {
+                Pr.SkipNewLine = true;
+            }
+        }
+        var ContentLen = this.Content.length;
+        for (var CurPos = 0; CurPos < ContentLen; CurPos++) {
+            if (false === this.Content[CurPos].Is_Empty(Pr)) {
+                return false;
+            }
+        }
+        return true;
+    },
+    Is_Empty: function () {
+        return this.IsEmpty();
     },
     Is_InText: function (X, Y, PageNum_Abs) {
-        var PNum = PageNum_Abs - this.Get_StartPage_Absolute();
-        if (PNum < 0 || PNum >= this.Pages.length) {
+        var PageNum = PageNum_Abs - this.Get_StartPage_Absolute();
+        if (PageNum < 0 || PageNum >= this.Pages.length) {
             return null;
         }
-        var Result = this.Internal_GetContentPosByXY(X, Y, false, PNum + this.PageNum, false);
-        if (true === Result.InText) {
+        var SearchPosXY = this.Get_ParaContentPosByXY(X, Y, PageNum, false, false);
+        if (true === SearchPosXY.InText) {
             return this;
         }
         return null;
@@ -6174,46 +4664,50 @@ Paragraph.prototype = {
             var StartPos = this.Selection.StartPos;
             var EndPos = this.Selection.EndPos;
             if (StartPos > EndPos) {
-                var Temp = EndPos;
-                EndPos = StartPos;
-                StartPos = Temp;
+                EndPos = this.Selection.StartPos;
+                StartPos = this.Selection.EndPos;
             }
-            var CheckArray = [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine];
-            if (true === bCheckHidden) {
-                CheckArray.push(para_End);
+            for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+                if (true !== this.Content[CurPos].Selection_IsEmpty(bCheckHidden)) {
+                    return false;
+                }
             }
-            var Pos = this.Internal_FindForward(StartPos, CheckArray);
-            if (true != Pos.Found) {
-                return true;
+        }
+        return true;
+    },
+    Get_StartTabsCount: function (TabsCounter) {
+        var ContentLen = this.Content.length;
+        for (var Pos = 0; Pos < ContentLen; Pos++) {
+            var Element = this.Content[Pos];
+            if (false === Element.Get_StartTabsCount(TabsCounter)) {
+                return false;
             }
-            if (Pos.LetterPos >= EndPos) {
-                return true;
+        }
+        return true;
+    },
+    Remove_StartTabs: function (TabsCounter) {
+        var ContentLen = this.Content.length;
+        for (var Pos = 0; Pos < ContentLen; Pos++) {
+            var Element = this.Content[Pos];
+            if (false === Element.Remove_StartTabs(TabsCounter)) {
+                return false;
             }
-            return false;
         }
         return true;
     },
     Numbering_Add: function (NumId, Lvl) {
         var ParaPr = this.Get_CompiledPr2(false).ParaPr;
         var NumPr_old = this.Numbering_Get();
-        this.Numbering_Remove();
         var SelectionUse = this.Is_SelectionUse();
-        var SelectedOneElement = this.Parent.Selection_Is_OneElement();
-        var Count = this.Content.length;
-        var TabsCount = 0;
-        var TabsPos = new Array();
-        for (var Pos = 0; Pos < Count; Pos++) {
-            var Item = this.Content[Pos];
-            var ItemType = Item.Type;
-            if (para_Tab === ItemType) {
-                TabsCount++;
-                TabsPos.push(Pos);
-            } else {
-                if (para_Text === ItemType || para_Space === ItemType || (para_Drawing === ItemType && true === Item.Is_Inline()) || para_PageNum === ItemType) {
-                    break;
-                }
-            }
+        var SelectedOneElement = (this.Parent.Selection_Is_OneElement() === 0 ? true : false);
+        if (true === SelectionUse && true !== SelectedOneElement && true === this.Is_Empty()) {
+            return;
         }
+        this.Numbering_Remove();
+        var TabsCounter = new CParagraphTabsCounter();
+        this.Get_StartTabsCount(TabsCounter);
+        var TabsCount = TabsCounter.Count;
+        var TabsPos = TabsCounter.Pos;
         var X = ParaPr.Ind.Left + ParaPr.Ind.FirstLine;
         var LeftX = X;
         if (TabsCount > 0 && ParaPr.Ind.FirstLine < 0) {
@@ -6324,12 +4818,8 @@ Paragraph.prototype = {
                     New: this.Pr.NumPr
                 });
             }
-            TabsCount = TabsPos.length;
-            while (TabsCount) {
-                var Pos = TabsPos[TabsCount - 1];
-                this.Internal_Content_Remove(Pos);
-                TabsCount--;
-            }
+            TabsCounter.Count = TabsCount;
+            this.Remove_StartTabs(TabsCounter);
         } else {
             this.Pr.NumPr = new CNumPr();
             this.Pr.NumPr.Set(NumId, Lvl);
@@ -6354,7 +4844,9 @@ Paragraph.prototype = {
             this.Pr.Ind.Left = Left;
         }
         if (undefined === this.Style_Get()) {
-            this.Style_Add(this.Parent.Get_Styles().Get_Default_ParaList());
+            if (this.bFromDocument) {
+                this.Style_Add(this.Parent.Get_Styles().Get_Default_ParaList());
+            }
         }
         this.CompiledPr.NeedRecalc = true;
     },
@@ -6420,18 +4912,21 @@ Paragraph.prototype = {
                     if (undefined != Lvl && undefined != Lvl.ParaPr.Ind && undefined != Lvl.ParaPr.Ind.Left) {
                         var CurParaPr = this.Get_CompiledPr2(false).ParaPr;
                         var Left = CurParaPr.Ind.Left + CurParaPr.Ind.FirstLine;
+                        var NumLeftCorrection = (undefined != Lvl.ParaPr.Ind.FirstLine ? Math.abs(Lvl.ParaPr.Ind.FirstLine) : 0);
+                        var NewFirstLine = 0;
+                        var NewLeft = Left < 0 ? Left : Math.max(0, Left - NumLeftCorrection);
                         History.Add(this, {
                             Type: historyitem_Paragraph_Ind_Left,
-                            New: Left,
+                            New: NewLeft,
                             Old: this.Pr.Ind.Left
                         });
                         History.Add(this, {
                             Type: historyitem_Paragraph_Ind_First,
-                            New: 0,
+                            New: NewFirstLine,
                             Old: this.Pr.Ind.FirstLine
                         });
-                        this.Pr.Ind.Left = Left;
-                        this.Pr.Ind.FirstLine = 0;
+                        this.Pr.Ind.Left = NewLeft;
+                        this.Pr.Ind.FirstLine = NewFirstLine;
                     }
                 }
             } else {
@@ -6476,15 +4971,17 @@ Paragraph.prototype = {
         return false;
     },
     Add_PresentationNumbering: function (_Bullet) {
-        var Bullet = _Bullet.Copy();
+        var ParaPr = this.Get_CompiledPr2(false).ParaPr;
+        var OldType = ParaPr.Bullet ? ParaPr.Bullet.getBulletType() : numbering_presentationnumfrmt_None;
+        var NewType = _Bullet ? _Bullet.getBulletType() : numbering_presentationnumfrmt_None;
+        var Bullet = _Bullet ? _Bullet.createDuplicate() : undefined;
         History.Add(this, {
             Type: historyitem_Paragraph_PresentationPr_Bullet,
             New: Bullet,
-            Old: this.PresentationPr.Bullet
+            Old: this.Pr.Bullet
         });
-        var OldType = this.PresentationPr.Bullet.Get_Type();
-        var NewType = Bullet.Get_Type();
-        this.PresentationPr.Bullet = Bullet;
+        this.Pr.Bullet = Bullet;
+        this.CompiledPr.NeedRecalc = true;
         if (OldType != NewType) {
             var ParaPr = this.Get_CompiledPr2(false).ParaPr;
             var LeftInd = Math.min(ParaPr.Ind.Left, ParaPr.Ind.Left + ParaPr.Ind.FirstLine);
@@ -6509,27 +5006,59 @@ Paragraph.prototype = {
         }
     },
     Get_PresentationNumbering: function () {
+        this.Get_CompiledPr2(false);
         return this.PresentationPr.Bullet;
     },
     Remove_PresentationNumbering: function () {
-        this.Add_PresentationNumbering(new CPresentationBullet());
+        var Bullet = new CBullet();
+        Bullet.bulletType = new CBulletType();
+        Bullet.bulletType.type = BULLET_TYPE_BULLET_NONE;
+        this.Add_PresentationNumbering(Bullet);
     },
     Set_PresentationLevel: function (Level) {
-        if (this.PresentationPr.Level != Level) {
+        if (this.Pr.Lvl != Level) {
             History.Add(this, {
                 Type: historyitem_Paragraph_PresentationPr_Level,
-                Old: this.PresentationPr.Level,
+                Old: this.Pr.Lvl,
                 New: Level
             });
-            this.PresentationPr.Level = Level;
+            this.Pr.Lvl = Level;
+            this.CompiledPr.NeedRecalc = true;
+            this.Recalc_RunsCompiledPr();
         }
     },
     Get_CompiledPr: function () {
         var Pr = this.Get_CompiledPr2();
         var StyleId = this.Style_Get();
+        var NumPr = this.Numbering_Get();
+        var FramePr = this.Get_FramePr();
         var PrevEl = this.Get_DocumentPrev();
         var NextEl = this.Get_DocumentNext();
-        var NumPr = this.Numbering_Get();
+        if (undefined !== FramePr) {
+            if (null === PrevEl || type_Paragraph !== PrevEl.GetType()) {
+                PrevEl = null;
+            } else {
+                var PrevFramePr = PrevEl.Get_FramePr();
+                if (undefined === PrevFramePr || true !== FramePr.Compare(PrevFramePr)) {
+                    PrevEl = null;
+                }
+            }
+            if (null === NextEl || type_Paragraph !== NextEl.GetType()) {
+                NextEl = null;
+            } else {
+                var NextFramePr = NextEl.Get_FramePr();
+                if (undefined === NextFramePr || true !== FramePr.Compare(NextFramePr)) {
+                    NextEl = null;
+                }
+            }
+        } else {
+            while (null !== PrevEl && type_Paragraph === PrevEl.GetType() && undefined !== PrevEl.Get_FramePr()) {
+                PrevEl = PrevEl.Get_DocumentPrev();
+            }
+            while (null !== NextEl && type_Paragraph === NextEl.GetType() && undefined !== NextEl.Get_FramePr()) {
+                NextEl = NextEl.Get_DocumentNext();
+            }
+        }
         if (null != PrevEl && type_Paragraph === PrevEl.GetType()) {
             var PrevStyle = PrevEl.Style_Get();
             var Prev_Pr = PrevEl.Get_CompiledPr2(false).ParaPr;
@@ -6552,15 +5081,23 @@ Paragraph.prototype = {
                     Pr.ParaPr.Spacing.Before = Math.max(Prev_After, Cur_Before) - Prev_After;
                 }
             }
-            if (false === this.Internal_Is_NullBorders(Pr.ParaPr.Brd) && true === this.Internal_CompareBrd(Prev_Pr, Pr.ParaPr)) {
+            if (false === this.Internal_Is_NullBorders(Pr.ParaPr.Brd) && true === this.Internal_CompareBrd(Prev_Pr, Pr.ParaPr) && undefined === PrevEl.Get_SectionPr()) {
                 Pr.ParaPr.Brd.First = false;
             } else {
                 Pr.ParaPr.Brd.First = true;
             }
         } else {
             if (null === PrevEl) {
-                if (true === Pr.ParaPr.Spacing.BeforeAutoSpacing) {
-                    Pr.ParaPr.Spacing.Before = 0;
+                if (true === this.Parent.Is_TableCellContent() && true === Pr.ParaPr.ContextualSpacing) {
+                    var Cell = this.Parent.Parent;
+                    var PrevEl = Cell.Get_LastParagraphPrevCell();
+                    if ((null !== PrevEl && type_Paragraph === PrevEl.GetType() && PrevEl.Style_Get() === StyleId) || (null === PrevEl && undefined === StyleId)) {
+                        Pr.ParaPr.Spacing.Before = 0;
+                    }
+                } else {
+                    if (true === Pr.ParaPr.Spacing.BeforeAutoSpacing || !(this.bFromDocument === true)) {
+                        Pr.ParaPr.Spacing.Before = 0;
+                    }
                 }
             } else {
                 if (type_Table === PrevEl.GetType()) {
@@ -6588,7 +5125,7 @@ Paragraph.prototype = {
                         Pr.ParaPr.Spacing.After = this.Internal_CalculateAutoSpacing(Cur_After, Cur_AfterAuto, this);
                     }
                 }
-                if (false === this.Internal_Is_NullBorders(Pr.ParaPr.Brd) && true === this.Internal_CompareBrd(Next_Pr, Pr.ParaPr)) {
+                if (false === this.Internal_Is_NullBorders(Pr.ParaPr.Brd) && true === this.Internal_CompareBrd(Next_Pr, Pr.ParaPr) && undefined === this.Get_SectionPr() && (undefined === NextEl.Get_SectionPr() || true !== NextEl.IsEmpty())) {
                     Pr.ParaPr.Brd.Last = false;
                 } else {
                     Pr.ParaPr.Brd.Last = true;
@@ -6613,18 +5150,36 @@ Paragraph.prototype = {
                 }
             }
         } else {
-            Pr.ParaPr.Spacing.After = this.Internal_CalculateAutoSpacing(Pr.ParaPr.Spacing.After, Pr.ParaPr.Spacing.AfterAutoSpacing, this);
+            if (true === this.Parent.Is_TableCellContent() && true === Pr.ParaPr.ContextualSpacing) {
+                var Cell = this.Parent.Parent;
+                var NextEl = Cell.Get_FirstParagraphNextCell();
+                if ((null !== NextEl && type_Paragraph === NextEl.GetType() && NextEl.Style_Get() === StyleId) || (null === NextEl && StyleId === undefined)) {
+                    Pr.ParaPr.Spacing.After = 0;
+                }
+            } else {
+                if (! (this.bFromDocument === true)) {
+                    Pr.ParaPr.Spacing.After = 0;
+                } else {
+                    Pr.ParaPr.Spacing.After = this.Internal_CalculateAutoSpacing(Pr.ParaPr.Spacing.After, Pr.ParaPr.Spacing.AfterAutoSpacing, this);
+                }
+            }
         }
         return Pr;
     },
     Recalc_CompiledPr: function () {
         this.CompiledPr.NeedRecalc = true;
     },
-    Get_CompiledPr2: function (bCopy) {
-        if (true === this.CompiledPr.NeedRecalc) {
-            this.CompiledPr.Pr = this.Internal_CompileParaPr();
-            this.CompiledPr.NeedRecalc = false;
+    Recalc_RunsCompiledPr: function () {
+        var Count = this.Content.length;
+        for (var Pos = 0; Pos < Count; Pos++) {
+            var Element = this.Content[Pos];
+            if (Element.Recalc_RunsCompiledPr) {
+                Element.Recalc_RunsCompiledPr();
+            }
         }
+    },
+    Get_CompiledPr2: function (bCopy) {
+        this.Internal_CompileParaPr();
         if (false === bCopy) {
             return this.CompiledPr.Pr;
         } else {
@@ -6635,46 +5190,96 @@ Paragraph.prototype = {
         }
     },
     Internal_CompileParaPr: function () {
-        var Styles = this.Parent.Get_Styles();
-        var Numbering = this.Parent.Get_Numbering();
-        var TableStyle = this.Parent.Get_TableStyleForPara();
-        var StyleId = this.Style_Get();
-        var Pr = Styles.Get_Pr(StyleId, styletype_Paragraph, TableStyle);
-        if (undefined != Pr.ParaPr.NumPr) {
-            Pr.ParaPr.StyleNumPr = Pr.ParaPr.NumPr.Copy();
-        }
-        var Lvl = -1;
-        if (undefined != this.Pr.NumPr) {
-            if (undefined != this.Pr.NumPr.NumId && 0 != this.Pr.NumPr.NumId) {
-                Lvl = this.Pr.NumPr.Lvl;
-                if (Lvl >= 0 && Lvl <= 8) {
-                    Pr.ParaPr.Merge(Numbering.Get_ParaPr(this.Pr.NumPr.NumId, this.Pr.NumPr.Lvl));
-                } else {
-                    Lvl = -1;
-                    Pr.ParaPr.NumPr = undefined;
+        if (true === this.CompiledPr.NeedRecalc) {
+            if (undefined !== this.Parent && null !== this.Parent) {
+                this.CompiledPr.Pr = this.Internal_CompileParaPr2();
+                if (!this.bFromDocument) {
+                    this.PresentationPr.Level = isRealNumber(this.Pr.Lvl) ? this.Pr.Lvl : 0;
+                    this.PresentationPr.Bullet = this.CompiledPr.Pr.ParaPr.Get_PresentationBullet();
+                    this.Numbering.Bullet = this.PresentationPr.Bullet;
                 }
+                this.CompiledPr.NeedRecalc = false;
+            } else {
+                if (undefined === this.CompiledPr.Pr || null === this.CompiledPr.Pr) {
+                    this.CompiledPr.Pr = {
+                        ParaPr: new CParaPr(),
+                        TextPr: new CTextPr()
+                    };
+                    this.CompiledPr.Pr.ParaPr.Init_Default();
+                    this.CompiledPr.Pr.TextPr.Init_Default();
+                }
+                this.CompiledPr.NeedRecalc = true;
             }
-        } else {
+        }
+    },
+    Internal_CompileParaPr2: function () {
+        if (this.bFromDocument) {
+            var Styles = this.Parent.Get_Styles();
+            var Numbering = this.Parent.Get_Numbering();
+            var TableStyle = this.Parent.Get_TableStyleForPara();
+            var ShapeStyle = this.Parent.Get_ShapeStyleForPara();
+            var StyleId = this.Style_Get();
+            var Pr = Styles.Get_Pr(StyleId, styletype_Paragraph, TableStyle, ShapeStyle);
             if (undefined != Pr.ParaPr.NumPr) {
-                if (undefined != Pr.ParaPr.NumPr.NumId && 0 != Pr.ParaPr.NumPr.NumId) {
-                    var AbstractNum = Numbering.Get_AbstractNum(Pr.ParaPr.NumPr.NumId);
-                    Lvl = AbstractNum.Get_LvlByStyle(StyleId);
-                    if (-1 != Lvl) {} else {
+                Pr.ParaPr.StyleNumPr = Pr.ParaPr.NumPr.Copy();
+            }
+            var Lvl = -1;
+            if (undefined != this.Pr.NumPr) {
+                if (undefined != this.Pr.NumPr.NumId && 0 != this.Pr.NumPr.NumId) {
+                    Lvl = this.Pr.NumPr.Lvl;
+                    if (Lvl >= 0 && Lvl <= 8) {
+                        Pr.ParaPr.Merge(Numbering.Get_ParaPr(this.Pr.NumPr.NumId, this.Pr.NumPr.Lvl));
+                    } else {
+                        Lvl = -1;
                         Pr.ParaPr.NumPr = undefined;
+                    }
+                } else {
+                    if (0 === this.Pr.NumPr.NumId) {
+                        Pr.ParaPr.Ind.Left = 0;
+                        Pr.ParaPr.Ind.FirstLine = 0;
+                    }
+                }
+            } else {
+                if (undefined != Pr.ParaPr.NumPr) {
+                    if (undefined != Pr.ParaPr.NumPr.NumId && 0 != Pr.ParaPr.NumPr.NumId) {
+                        var AbstractNum = Numbering.Get_AbstractNum(Pr.ParaPr.NumPr.NumId);
+                        Lvl = AbstractNum.Get_LvlByStyle(StyleId);
+                        if (-1 != Lvl) {} else {
+                            Pr.ParaPr.NumPr = undefined;
+                        }
                     }
                 }
             }
+            Pr.ParaPr.StyleTabs = (undefined != Pr.ParaPr.Tabs ? Pr.ParaPr.Tabs.Copy() : new CParaTabs());
+            Pr.ParaPr.Merge(this.Pr);
+            if (-1 != Lvl && undefined != Pr.ParaPr.NumPr) {
+                Pr.ParaPr.NumPr.Lvl = Lvl;
+            }
+            if (undefined === this.Pr.FramePr) {
+                Pr.ParaPr.FramePr = undefined;
+            } else {
+                Pr.ParaPr.FramePr = this.Pr.FramePr.Copy();
+            }
+            return Pr;
+        } else {
+            return this.Internal_CompiledParaPrPresentation();
+        }
+    },
+    Internal_CompiledParaPrPresentation: function (Lvl) {
+        var _Lvl = isRealNumber(Lvl) ? Lvl : (isRealNumber(this.Pr.Lvl) ? this.Pr.Lvl : 0);
+        var styleObject = this.Parent.Get_Styles(_Lvl);
+        var Styles = styleObject.styles;
+        var Pr = Styles.Get_Pr(styleObject.lastId, styletype_Paragraph, null);
+        var TableStyle = this.Parent.Get_TableStyleForPara();
+        if (TableStyle && TableStyle.TextPr) {
+            Pr.TextPr.Merge(TableStyle.TextPr);
         }
         Pr.ParaPr.StyleTabs = (undefined != Pr.ParaPr.Tabs ? Pr.ParaPr.Tabs.Copy() : new CParaTabs());
         Pr.ParaPr.Merge(this.Pr);
-        if (-1 != Lvl && undefined != Pr.ParaPr.NumPr) {
-            Pr.ParaPr.NumPr.Lvl = Lvl;
+        if (this.Pr.DefaultRunPr) {
+            Pr.TextPr.Merge(this.Pr.DefaultRunPr);
         }
-        if (undefined === this.Pr.FramePr) {
-            Pr.ParaPr.FramePr = undefined;
-        } else {
-            Pr.ParaPr.FramePr = this.Pr.FramePr.Copy();
-        }
+        Pr.TextPr.Color.Auto = false;
         return Pr;
     },
     Recalc_CompileParaPr: function () {
@@ -6690,6 +5295,35 @@ Paragraph.prototype = {
             }
         }
         return Result;
+    },
+    Get_Paragraph_TextPr_Copy: function () {
+        var TextPr;
+        if (true === this.ApplyToAll) {
+            this.Select_All(1);
+            var Count = this.Content.length;
+            var StartPos = 0;
+            while (true === this.Content[StartPos].Selection_IsEmpty() && StartPos < Count) {
+                StartPos++;
+            }
+            TextPr = this.Content[StartPos].Get_CompiledTextPr(true);
+            this.Selection_Remove();
+        } else {
+            if (true === this.Selection.Use) {
+                var StartPos = this.Selection.StartPos;
+                var EndPos = this.Selection.EndPos;
+                if (StartPos > EndPos) {
+                    StartPos = this.Selection.EndPos;
+                    EndPos = this.Selection.StartPos;
+                }
+                while (true === this.Content[StartPos].Selection_IsEmpty() && StartPos < EndPos) {
+                    StartPos++;
+                }
+                TextPr = this.Content[StartPos].Get_CompiledTextPr(true);
+            } else {
+                TextPr = this.Content[this.CurPos.ContentPos].Get_CompiledTextPr(true);
+            }
+        }
+        return TextPr;
     },
     Get_Paragraph_ParaPr_Copy: function () {
         var ParaPr = this.Pr.Copy();
@@ -6709,10 +5343,10 @@ Paragraph.prototype = {
                     Start = this.Selection.EndPos;
                     End = this.Selection.StartPos;
                 }
-                if (true === this.Internal_FindForward(End, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine, para_End]).Found) {
+                if (true === this.Internal_FindForward(End, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine, para_End, para_Math]).Found) {
                     _ApplyPara = false;
                 } else {
-                    if (true === this.Internal_FindBackward(Start - 1, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine, para_End]).Found) {
+                    if (true === this.Internal_FindBackward(Start - 1, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine, para_End, para_Math]).Found) {
                         _ApplyPara = false;
                     }
                 }
@@ -6742,18 +5376,28 @@ Paragraph.prototype = {
             if (undefined != ParaPr.Shd) {
                 this.Set_Shd(ParaPr.Shd, false);
             }
-            if (undefined != ParaPr.NumPr) {
-                this.Numbering_Set(ParaPr.NumPr.NumId, ParaPr.NumPr.Lvl);
+            if (this.bFromDocument) {
+                if (undefined != ParaPr.NumPr) {
+                    this.Numbering_Set(ParaPr.NumPr.NumId, ParaPr.NumPr.Lvl);
+                } else {
+                    this.Numbering_Remove();
+                }
+                if (undefined != ParaPr.PStyle) {
+                    this.Style_Add(ParaPr.PStyle, true);
+                } else {
+                    this.Style_Remove();
+                }
+                if (undefined != ParaPr.Brd) {
+                    this.Set_Borders(ParaPr.Brd);
+                }
             } else {
-                this.Numbering_Remove();
-            }
-            if (undefined != ParaPr.PStyle) {
-                this.Style_Add(ParaPr.PStyle, true);
-            } else {
-                this.Style_Remove();
-            }
-            if (undefined != ParaPr.Brd) {
-                this.Set_Borders(ParaPr.Brd);
+                History.Add(this, {
+                    Type: historyitem_Paragraph_PresentationPr_Bullet,
+                    New: ParaPr.Bullet,
+                    Old: this.Pr.Bullet
+                });
+                this.Pr.Bullet = ParaPr.Bullet;
+                this.CompiledPr.NeedRecalc = true;
             }
         }
     },
@@ -6783,11 +5427,13 @@ Paragraph.prototype = {
             this.Pr.PStyle = Id;
         }
         this.CompiledPr.NeedRecalc = true;
+        this.Recalc_RunsCompiledPr();
         if (true === bDoNotDeleteProps) {
             return;
         }
         var DefNumId = this.Parent.Get_Styles().Get_Default_ParaList();
         if (Id != DefNumId && (Id_old != DefNumId || Id != this.Parent.Get_Styles().Get_Default_Paragraph())) {
+            this.Numbering_Remove();
             this.Set_ContextualSpacing(undefined);
             this.Set_Ind(new CParaInd(), true);
             this.Set_Align(undefined);
@@ -6804,11 +5450,9 @@ Paragraph.prototype = {
             this.Set_Border(undefined, historyitem_Paragraph_Borders_Right);
             this.Set_Border(undefined, historyitem_Paragraph_Borders_Top);
             for (var Index = 0; Index < this.Content.length; Index++) {
-                var Item = this.Content[Index];
-                if (para_TextPr === Item.Type) {
-                    Item.Clear_Style();
-                }
+                this.Content[Index].Clear_TextPr();
             }
+            this.TextPr.Clear_Style();
         }
     },
     Style_Add_Open: function (Id) {
@@ -6825,24 +5469,23 @@ Paragraph.prototype = {
             this.Pr.PStyle = undefined;
         }
         this.CompiledPr.NeedRecalc = true;
+        this.Recalc_RunsCompiledPr();
     },
-    Cursor_IsEnd: function (ContentPos) {
-        if (undefined === ContentPos) {
-            ContentPos = this.CurPos.ContentPos;
-        }
-        var oPos = this.Internal_FindForward(ContentPos, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine]);
-        if (true === oPos.Found) {
+    Cursor_IsEnd: function (_ContentPos) {
+        var ContentPos = (undefined === _ContentPos ? this.Get_ParaContentPos(false, false) : _ContentPos);
+        var SearchPos = new CParagraphSearchPos();
+        this.Get_RightPos(SearchPos, ContentPos, false);
+        if (true === SearchPos.Found) {
             return false;
         } else {
             return true;
         }
     },
-    Cursor_IsStart: function (ContentPos) {
-        if (undefined === ContentPos) {
-            ContentPos = this.CurPos.ContentPos;
-        }
-        var oPos = this.Internal_FindBackward(ContentPos - 1, [para_PageNum, para_Drawing, para_Tab, para_Text, para_Space, para_NewLine]);
-        if (true === oPos.Found) {
+    Cursor_IsStart: function (_ContentPos) {
+        var ContentPos = (undefined === _ContentPos ? this.Get_ParaContentPos(false, false) : _ContentPos);
+        var SearchPos = new CParagraphSearchPos();
+        this.Get_LeftPos(SearchPos, ContentPos);
+        if (true === SearchPos.Found) {
             return false;
         } else {
             return true;
@@ -6850,7 +5493,11 @@ Paragraph.prototype = {
     },
     Selection_IsFromStart: function () {
         if (true === this.Is_SelectionUse()) {
-            var StartPos = (this.Selection.StartPos > this.Selection.EndPos ? this.Selection.EndPos : this.Selection.StartPos);
+            var StartPos = this.Get_ParaContentPos(true, true);
+            var EndPos = this.Get_ParaContentPos(true, false);
+            if (StartPos.Compare(EndPos) > 0) {
+                StartPos = EndPos;
+            }
             if (true != this.Cursor_IsStart(StartPos)) {
                 return false;
             }
@@ -6859,8 +5506,26 @@ Paragraph.prototype = {
         return false;
     },
     Clear_Formatting: function () {
-        this.Style_Remove();
-        this.Numbering_Remove();
+        if (this.bFromDocument) {
+            var HdrFtr = this.Parent.Is_HdrFtr(true);
+            if (null !== HdrFtr) {
+                var Styles = this.Parent.Get_Styles();
+                var HdrFtrStyle = null;
+                if (hdrftr_Header === HdrFtr.Type) {
+                    HdrFtrStyle = Styles.Get_Default_Header();
+                } else {
+                    HdrFtrStyle = Styles.Get_Default_Footer();
+                }
+                if (null !== HdrFtrStyle) {
+                    this.Style_Add(HdrFtrStyle, true);
+                } else {
+                    this.Style_Remove();
+                }
+            } else {
+                this.Style_Remove();
+            }
+            this.Numbering_Remove();
+        }
         this.Set_ContextualSpacing(undefined);
         this.Set_Ind(new CParaInd(), true);
         this.Set_Align(undefined, false);
@@ -6879,32 +5544,16 @@ Paragraph.prototype = {
         this.CompiledPr.NeedRecalc = true;
     },
     Clear_TextFormatting: function () {
-        var Styles = this.Parent.Get_Styles();
-        var DefHyper = Styles.Get_Default_Hyperlink();
+        var Styles, DefHyper;
+        if (this.bFromDocument) {
+            Styles = this.Parent.Get_Styles();
+            DefHyper = Styles.Get_Default_Hyperlink();
+        }
         for (var Index = 0; Index < this.Content.length; Index++) {
             var Item = this.Content[Index];
-            if (para_TextPr === Item.Type) {
-                Item.Set_Bold(undefined);
-                Item.Set_Italic(undefined);
-                Item.Set_Strikeout(undefined);
-                Item.Set_Underline(undefined);
-                Item.Set_FontFamily(undefined);
-                Item.Set_FontSize(undefined);
-                Item.Set_Color(undefined);
-                Item.Set_VertAlign(undefined);
-                Item.Set_HighLight(undefined);
-                Item.Set_Spacing(undefined);
-                Item.Set_DStrikeout(undefined);
-                Item.Set_Caps(undefined);
-                Item.Set_SmallCaps(undefined);
-                Item.Set_Position(undefined);
-                Item.Set_RFonts2(undefined);
-                Item.Set_Lang(undefined);
-                if (undefined === Item.Value.RStyle || Item.Value.RStyle != DefHyper) {
-                    Item.Set_RStyle(undefined);
-                }
-            }
+            Item.Clear_TextFormatting(DefHyper);
         }
+        this.TextPr.Clear_Style();
     },
     Set_Ind: function (Ind, bDeleteUndefined) {
         if (undefined === this.Pr.Ind) {
@@ -7033,6 +5682,14 @@ Paragraph.prototype = {
                 });
                 this.Pr.Shd.Color = Shd.Color;
             }
+            if (undefined != Shd.Unifill || true === bDeleteUndefined) {
+                History.Add(this, {
+                    Type: historyitem_Paragraph_Shd_Unifill,
+                    New: Shd.Unifill,
+                    Old: (undefined != this.Pr.Shd.Unifill ? this.Pr.Shd.Unifill : undefined)
+                });
+                this.Pr.Shd.Unifill = Shd.Unifill;
+            }
         }
         this.CompiledPr.NeedRecalc = true;
     },
@@ -7127,6 +5784,7 @@ Paragraph.prototype = {
                 NewBorder.Space = (undefined != Borders.Between.Space ? Borders.Between.Space : OldBorders.Between.Space);
                 NewBorder.Size = (undefined != Borders.Between.Size ? Borders.Between.Size : OldBorders.Between.Size);
                 NewBorder.Value = (undefined != Borders.Between.Value ? Borders.Between.Value : OldBorders.Between.Value);
+                NewBorder.Unifill = (undefined != Borders.Between.Unifill ? Borders.Between.Unifill.createDuplicate() : OldBorders.Between.Unifill);
             }
             History.Add(this, {
                 Type: historyitem_Paragraph_Borders_Between,
@@ -7143,6 +5801,7 @@ Paragraph.prototype = {
                 NewBorder.Space = (undefined != Borders.Top.Space ? Borders.Top.Space : OldBorders.Top.Space);
                 NewBorder.Size = (undefined != Borders.Top.Size ? Borders.Top.Size : OldBorders.Top.Size);
                 NewBorder.Value = (undefined != Borders.Top.Value ? Borders.Top.Value : OldBorders.Top.Value);
+                NewBorder.Unifill = (undefined != Borders.Top.Unifill ? Borders.Top.Unifill.createDuplicate() : OldBorders.Top.Unifill);
             }
             History.Add(this, {
                 Type: historyitem_Paragraph_Borders_Top,
@@ -7159,6 +5818,7 @@ Paragraph.prototype = {
                 NewBorder.Space = (undefined != Borders.Right.Space ? Borders.Right.Space : OldBorders.Right.Space);
                 NewBorder.Size = (undefined != Borders.Right.Size ? Borders.Right.Size : OldBorders.Right.Size);
                 NewBorder.Value = (undefined != Borders.Right.Value ? Borders.Right.Value : OldBorders.Right.Value);
+                NewBorder.Unifill = (undefined != Borders.Right.Unifill ? Borders.Right.Unifill.createDuplicate() : OldBorders.Right.Unifill);
             }
             History.Add(this, {
                 Type: historyitem_Paragraph_Borders_Right,
@@ -7175,6 +5835,7 @@ Paragraph.prototype = {
                 NewBorder.Space = (undefined != Borders.Bottom.Space ? Borders.Bottom.Space : OldBorders.Bottom.Space);
                 NewBorder.Size = (undefined != Borders.Bottom.Size ? Borders.Bottom.Size : OldBorders.Bottom.Size);
                 NewBorder.Value = (undefined != Borders.Bottom.Value ? Borders.Bottom.Value : OldBorders.Bottom.Value);
+                NewBorder.Unifill = (undefined != Borders.Bottom.Unifill ? Borders.Bottom.Unifill.createDuplicate() : OldBorders.Bottom.Unifill);
             }
             History.Add(this, {
                 Type: historyitem_Paragraph_Borders_Bottom,
@@ -7191,6 +5852,7 @@ Paragraph.prototype = {
                 NewBorder.Space = (undefined != Borders.Left.Space ? Borders.Left.Space : OldBorders.Left.Space);
                 NewBorder.Size = (undefined != Borders.Left.Size ? Borders.Left.Size : OldBorders.Left.Size);
                 NewBorder.Value = (undefined != Borders.Left.Value ? Borders.Left.Value : OldBorders.Left.Value);
+                NewBorder.Unifill = (undefined != Borders.Left.Unifill ? Borders.Left.Unifill.createDuplicate() : OldBorders.Left.Unifill);
             }
             History.Add(this, {
                 Type: historyitem_Paragraph_Borders_Left,
@@ -7233,16 +5895,22 @@ Paragraph.prototype = {
         this.CompiledPr.NeedRecalc = true;
     },
     Is_StartFromNewPage: function () {
-        if ((this.Pages.length > 1 && 0 === this.Pages[1].FirstLine) || (null === this.Get_DocumentPrev())) {
+        if ((this.Pages.length > 1 && 0 === this.Pages[1].FirstLine) || (1 === this.Pages.length && -1 === this.Pages[0].EndLine) || (null === this.Get_DocumentPrev())) {
             return true;
         }
         return false;
     },
-    Internal_GetPage: function (Pos) {
-        if (undefined === Pos) {
-            Pos = this.CurPos.ContentPos;
+    Get_DrawingObjectRun: function (Id) {
+        var Run = null;
+        var ContentLen = this.Content.length;
+        for (var Index = 0; Index < ContentLen; Index++) {
+            var Element = this.Content[Index];
+            Run = Element.Get_DrawingObjectRun(Id);
+            if (null !== Run) {
+                return Run;
+            }
         }
-        return this.Internal_Get_ParaPos_By_Pos(Pos).Page;
+        return Run;
     },
     Remove_DrawingObject: function (Id) {
         for (var Index = 0; Index < this.Content.length; Index++) {
@@ -7258,7 +5926,19 @@ Paragraph.prototype = {
         }
         return -1;
     },
-    Internal_CorrectAnchorPos: function (Result, Drawing, PageNum) {
+    Get_DrawingObjectContentPos: function (Id) {
+        var ContentPos = new CParagraphContentPos();
+        var ContentLen = this.Content.length;
+        for (var Index = 0; Index < ContentLen; Index++) {
+            var Element = this.Content[Index];
+            if (true === Element.Get_DrawingObjectContentPos(Id, ContentPos, 1)) {
+                ContentPos.Update2(Index, 0);
+                return ContentPos;
+            }
+        }
+        return null;
+    },
+    Internal_CorrectAnchorPos: function (Result, Drawing) {
         var RelH = Drawing.PositionH.RelativeFrom;
         var RelV = Drawing.PositionV.RelativeFrom;
         var ContentPos = 0;
@@ -7268,11 +5948,7 @@ Paragraph.prototype = {
                 var CurPage = Result.Internal.Page;
                 CurLine = this.Pages[CurPage].StartLine;
             }
-            var StartLinesPos = this.Lines[CurLine].StartPos;
-            var EndLinesPos = this.Lines[CurLine].EndPos;
-            var CurRange = this.Internal_Get_ParaPos_By_Pos(StartLinesPos).Range;
-            Result.X = this.Lines[CurLine].Ranges[CurRange].X - 3.8;
-            ContentPos = Math.min(StartLinesPos + 1, EndLinesPos);
+            Result.X = this.Lines[CurLine].Ranges[0].X - 3.8;
         }
         if (c_oAscRelativeFromV.Line != RelV) {
             var CurPage = Result.Internal.Page;
@@ -7280,39 +5956,117 @@ Paragraph.prototype = {
             Result.Y = this.Pages[CurPage].Y + this.Lines[CurLine].Y - this.Lines[CurLine].Metrics.Ascent;
         }
         if (c_oAscRelativeFromH.Character === RelH) {} else {
-            if (c_oAscRelativeFromV.Line === RelV) {
-                var CurLine = this.Internal_Get_ParaPos_By_Pos(Result.ContentPos).Line;
-                Result.ContentPos = this.Lines[CurLine].StartPos;
-            } else {
-                Result.ContentPos = ContentPos;
+            if (c_oAscRelativeFromV.Line === RelV) {} else {
+                if (0 === Result.Internal.Page) {
+                    Result.ContentPos = this.Get_StartPos();
+                }
             }
         }
     },
     Get_NearestPos: function (PageNum, X, Y, bAnchor, Drawing) {
-        var ContentPos = this.Internal_GetContentPosByXY(X, Y, false, PageNum).Pos;
+        var SearchPosXY = this.Get_ParaContentPosByXY(X, Y, PageNum, false, false);
+        this.Set_ParaContentPos(SearchPosXY.Pos, true, SearchPosXY.Line, SearchPosXY.Range);
+        var ContentPos = this.Get_ParaContentPos(false, false);
+        ContentPos = this.private_CorrectNearestPos(ContentPos, bAnchor, Drawing);
         var Result = this.Internal_Recalculate_CurPos(ContentPos, false, false, true);
         Result.ContentPos = ContentPos;
+        Result.SearchPos = SearchPosXY.Pos;
         Result.Paragraph = this;
         if (true === bAnchor && undefined != Drawing && null != Drawing) {
-            this.Internal_CorrectAnchorPos(Result, Drawing, PageNum - this.PageNum);
+            this.Internal_CorrectAnchorPos(Result, Drawing);
         }
         return Result;
     },
+    private_CorrectNearestPos: function (ContentPos, Anchor, Drawing) {
+        if (undefined !== Drawing && null !== Drawing) {
+            var CurPos = ContentPos.Get(0);
+            if (para_Math === this.Content[CurPos].Type) {
+                if (CurPos > 0) {
+                    CurPos--;
+                    ContentPos = new CParagraphContentPos();
+                    ContentPos.Update(CurPos, 0);
+                    this.Content[CurPos].Get_EndPos(false, ContentPos, 1);
+                    this.Set_ParaContentPos(ContentPos, false, -1, -1);
+                } else {
+                    CurPos++;
+                    ContentPos = new CParagraphContentPos();
+                    ContentPos.Update(CurPos, 0);
+                    this.Content[CurPos].Get_StartPos(ContentPos, 1);
+                    this.Set_ParaContentPos(ContentPos, false, -1, -1);
+                }
+            }
+        }
+        return ContentPos;
+    },
+    Check_NearestPos: function (NearPos) {
+        var ParaNearPos = new CParagraphNearPos();
+        ParaNearPos.NearPos = NearPos;
+        var Count = this.NearPosArray.length;
+        for (var Index = 0; Index < Count; Index++) {
+            if (this.NearPosArray[Index].NearPos === NearPos) {
+                return;
+            }
+        }
+        this.NearPosArray.push(ParaNearPos);
+        ParaNearPos.Classes.push(this);
+        var CurPos = NearPos.ContentPos.Get(0);
+        this.Content[CurPos].Check_NearestPos(ParaNearPos, 1);
+    },
+    Clear_NearestPosArray: function () {
+        var ArrayLen = this.NearPosArray.length;
+        for (var Pos = 0; Pos < ArrayLen; Pos++) {
+            var ParaNearPos = this.NearPosArray[Pos];
+            var ArrayLen2 = ParaNearPos.Classes.length;
+            for (var Pos2 = 1; Pos2 < ArrayLen2; Pos2++) {
+                var Class = ParaNearPos.Classes[Pos2];
+                Class.NearPosArray = [];
+            }
+        }
+        this.NearPosArray = [];
+    },
+    Get_ParaNearestPos: function (NearPos) {
+        var ArrayLen = this.NearPosArray.length;
+        for (var Pos = 0; Pos < ArrayLen; Pos++) {
+            var ParaNearPos = this.NearPosArray[Pos];
+            if (NearPos === ParaNearPos.NearPos) {
+                return ParaNearPos;
+            }
+        }
+        return null;
+    },
     Get_Layout: function (ContentPos, Drawing) {
-        var LinePos = this.Internal_Get_ParaPos_By_Pos(ContentPos);
+        var LinePos = this.Get_ParaPosByContentPos(ContentPos);
         var CurLine = LinePos.Line;
         var CurRange = LinePos.Range;
         var CurPage = LinePos.Page;
         var X = this.Lines[CurLine].Ranges[CurRange].XVisible;
         var Y = this.Pages[CurPage].Y + this.Lines[CurLine].Y;
-        var StartPos = this.Lines[CurLine].Ranges[CurRange].StartPos;
-        if (StartPos < this.Numbering.Pos) {
+        if (true === this.Numbering.Check_Range(CurRange, CurLine)) {
             X += this.Numbering.WidthVisible;
         }
-        var LastW = 0;
-        for (var ItemNum = StartPos; ItemNum < this.Content.length; ItemNum++) {
-            var Item = this.Content[ItemNum];
-            if (ItemNum === ContentPos) {
+        var DrawingLayout = new CParagraphDrawingLayout(Drawing, this, X, Y, CurLine, CurRange, CurPage);
+        var StartPos = this.Lines[CurLine].Ranges[CurRange].StartPos;
+        var EndPos = this.Lines[CurLine].Ranges[CurRange].EndPos;
+        var CurContentPos = ContentPos.Get(0);
+        for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+            this.Content[CurPos].Get_Layout(DrawingLayout, (CurPos === CurContentPos ? true : false), ContentPos, 1);
+            if (true === DrawingLayout.Layout) {
+                var LogicDocument = this.LogicDocument;
+                var LD_PageLimits = LogicDocument.Get_PageLimits(CurPage);
+                var LD_PageFields = LogicDocument.Get_PageFields(CurPage);
+                var Page_Width = LD_PageLimits.XLimit;
+                var Page_Height = LD_PageLimits.YLimit;
+                var X_Left_Field = LD_PageFields.X;
+                var Y_Top_Field = LD_PageFields.Y;
+                var X_Right_Field = LD_PageFields.XLimit;
+                var Y_Bottom_Field = LD_PageFields.YLimit;
+                var X_Left_Margin = X_Left_Field;
+                var X_Right_Margin = Page_Width - X_Right_Field;
+                var Y_Bottom_Margin = Page_Height - Y_Bottom_Field;
+                var Y_Top_Margin = Y_Top_Field;
+                var Para = DrawingLayout.Paragraph;
+                var CurPage = DrawingLayout.Page;
+                var Drawing = DrawingLayout.Drawing;
                 var DrawingObjects = this.Parent.DrawingObjects;
                 var PageLimits = this.Parent.Get_PageLimits(this.PageNum + CurPage);
                 var PageFields = this.Parent.Get_PageFields(this.PageNum + CurPage);
@@ -7327,58 +6081,33 @@ Paragraph.prototype = {
                     Page_H = 0;
                 }
                 if (undefined != Drawing && true != Drawing.Use_TextWrap()) {
-                    PageFields.X = X_Left_Field;
-                    PageFields.Y = Y_Top_Field;
-                    PageFields.XLimit = X_Right_Field;
-                    PageFields.YLimit = Y_Bottom_Field;
-                    PageLimits.X = 0;
-                    PageLimits.Y = 0;
-                    PageLimits.XLimit = Page_Width;
-                    PageLimits.YLimit = Page_Height;
+                    PageFields = LD_PageFields;
+                    PageLimits = LD_PageLimits;
                 }
+                var Layout = new CParagraphLayout(DrawingLayout.X, DrawingLayout.Y, this.Get_StartPage_Absolute() + CurPage, DrawingLayout.LastW, ColumnStartX, ColumnEndX, X_Left_Margin, X_Right_Margin, Page_Width, Top_Margin, Bottom_Margin, Page_H, PageFields.X, PageFields.Y, this.Pages[CurPage].Y + this.Lines[CurLine].Y - this.Lines[CurLine].Metrics.Ascent, this.Pages[CurPage].Y);
                 return {
-                    ParagraphLayout: new CParagraphLayout(X, Y, this.Get_StartPage_Absolute() + CurPage, LastW, ColumnStartX, ColumnEndX, X_Left_Margin, X_Right_Margin, Page_Width, Top_Margin, Bottom_Margin, Page_H, PageFields.X, PageFields.Y, this.Pages[CurPage].Y + this.Lines[CurLine].Y - this.Lines[CurLine].Metrics.Ascent, this.Pages[CurPage].Y),
+                    ParagraphLayout: Layout,
                     PageLimits: PageLimits
                 };
             }
-            switch (Item.Type) {
-            case para_Text:
-                case para_Space:
-                case para_PageNum:
-                LastW = Item.WidthVisible;
-                break;
-            case para_Drawing:
-                if (true === Item.Is_Inline() || true === this.Parent.Is_DrawingShape()) {
-                    LastW = Item.WidthVisible;
-                }
-                break;
-            }
-            X += Item.WidthVisible;
         }
-        return undefined;
+        return null;
     },
     Get_AnchorPos: function (Drawing) {
-        var ContentPos = -1;
-        var Count = this.Content.length;
-        for (var Index = 0; Index < Count; Index++) {
-            var Item = this.Content[Index];
-            if (para_Drawing === Item.Type && Item.Get_Id() === Drawing.Get_Id()) {
-                ContentPos = Index;
-                break;
-            }
-        }
-        var CurPage = this.Internal_Get_ParaPos_By_Pos(ContentPos).Page;
-        if (-1 === ContentPos) {
+        var ContentPos = this.Get_DrawingObjectContentPos(Drawing.Get_Id());
+        if (null === ContentPos) {
             return {
                 X: 0,
                 Y: 0,
                 Height: 0
             };
         }
+        var ParaPos = this.Get_ParaPosByContentPos(ContentPos);
+        this.Set_ParaContentPos(ContentPos, false, -1, -1);
         var Result = this.Internal_Recalculate_CurPos(ContentPos, false, false, true);
         Result.Paragraph = this;
         Result.ContentPos = ContentPos;
-        this.Internal_CorrectAnchorPos(Result, Drawing, CurPage);
+        this.Internal_CorrectAnchorPos(Result, Drawing);
         return Result;
     },
     Set_DocumentNext: function (Object) {
@@ -7431,238 +6160,22 @@ Paragraph.prototype = {
         this.Internal_Recalculate_CurPos(this.CurPos.ContentPos, true, false, false);
         return (this.PageNum + this.CurPos.PagesPos);
     },
-    DocumentSearch: function (Str, ElementType) {
-        var Pr = this.Get_CompiledPr();
-        var StartPage = this.Get_StartPage_Absolute();
-        var SearchResults = new Array();
-        for (var Pos = 0; Pos < this.Content.length; Pos++) {
-            var Item = this.Content[Pos];
-            if (para_Numbering === Item.Type || para_PresentationNumbering === Item.Type || para_TextPr === Item.Type) {
-                continue;
-            }
-            if ((" " === Str[0] && para_Space === Item.Type) || (para_Text === Item.Type && (Item.Value).toLowerCase() === Str[0].toLowerCase())) {
-                if (1 === Str.length) {
-                    SearchResults.push({
-                        StartPos: Pos,
-                        EndPos: Pos + 1
-                    });
-                } else {
-                    var bFind = true;
-                    var Pos2 = Pos + 1;
-                    for (var Index = 1; Index < Str.length; Index++) {
-                        while (Pos2 < this.Content.length && (para_TextPr === this.Content[Pos2].Type)) {
-                            Pos2++;
-                        }
-                        if ((Pos2 >= this.Content.length) || (" " === Str[Index] && para_Space != this.Content[Pos2].Type) || (" " != Str[Index] && ((para_Text != this.Content[Pos2].Type) || (para_Text === this.Content[Pos2].Type && this.Content[Pos2].Value.toLowerCase() != Str[Index].toLowerCase())))) {
-                            bFind = false;
-                            break;
-                        }
-                        Pos2++;
-                    }
-                    if (true === bFind) {
-                        SearchResults.push({
-                            StartPos: Pos,
-                            EndPos: Pos2
-                        });
-                    }
-                }
-            }
-        }
-        var MaxShowValue = 100;
-        for (var FoundIndex = 0; FoundIndex < SearchResults.length; FoundIndex++) {
-            var Rects = new Array();
-            var StartPos = SearchResults[FoundIndex].StartPos;
-            var EndPos = SearchResults[FoundIndex].EndPos;
-            var StartParaPos = this.Internal_Get_ParaPos_By_Pos(StartPos);
-            var CurLine = StartParaPos.Line;
-            var CurRange = StartParaPos.Range;
-            var PNum = StartParaPos.Page;
-            var StartX = this.Lines[CurLine].Ranges[CurRange].XVisible;
-            var Pos, Item;
-            for (Pos = this.Lines[CurLine].Ranges[CurRange].StartPos; Pos <= StartPos - 1; Pos++) {
-                Item = this.Content[Pos];
-                if (Pos === this.Numbering.Pos) {
-                    StartX += this.Numbering.WidthVisible;
-                }
-                if (undefined != Item.WidthVisible && (para_Drawing != Item.Type || drawing_Inline === Item.DrawingType)) {
-                    StartX += Item.WidthVisible;
-                }
-            }
-            if (this.Pages[PNum].StartLine > CurLine) {
-                CurLine = this.Pages[PNum].StartLine;
-                CurRange = 0;
-                StartX = this.Lines[CurLine].Ranges[CurRange].XVisible;
-                StartPos = this.Lines[this.Pages[PNum].StartLine].StartPos;
-            }
-            var StartY = (this.Pages[PNum].Y + this.Lines[CurLine].Y - this.Lines[CurLine].Metrics.Ascent);
-            var EndY = (this.Pages[PNum].Y + this.Lines[CurLine].Y + this.Lines[CurLine].Metrics.Descent);
-            if (this.Lines[CurLine].Metrics.LineGap < 0) {
-                EndY += this.Lines[CurLine].Metrics.LineGap;
-            }
-            var W = 0;
-            for (Pos = StartPos; Pos < EndPos; Pos++) {
-                Item = this.Content[Pos];
-                if (undefined != Item.CurPage) {
-                    if (Item.CurPage > PNum) {
-                        PNum = Item.CurPage;
-                    }
-                    if (CurLine < Item.CurLine) {
-                        Rects.push({
-                            PageNum: StartPage + PNum,
-                            X: StartX,
-                            Y: StartY,
-                            W: W,
-                            H: EndY - StartY
-                        });
-                        CurLine = Item.CurLine;
-                        CurRange = Item.CurRange;
-                        StartX = this.Lines[CurLine].Ranges[CurRange].XVisible;
-                        StartY = (this.Pages[PNum].Y + this.Lines[CurLine].Y - this.Lines[CurLine].Metrics.Ascent);
-                        EndY = (this.Pages[PNum].Y + this.Lines[CurLine].Y + this.Lines[CurLine].Metrics.Descent);
-                        if (this.Lines[CurLine].Metrics.LineGap < 0) {
-                            EndY += this.Lines[CurLine].Metrics.LineGap;
-                        }
-                        W = 0;
-                    } else {
-                        if (CurRange < Item.CurRange) {
-                            Rects.push({
-                                PageNum: StartPage + PNum,
-                                X: StartX,
-                                Y: StartY,
-                                W: W,
-                                H: EndY - StartY
-                            });
-                            CurRange = Item.CurRange;
-                            StartX = this.Lines[CurLine].Ranges[CurRange].XVisible;
-                            W = 0;
-                        }
-                    }
-                }
-                if (undefined != Item.WidthVisible) {
-                    W += Item.WidthVisible;
-                }
-                if (Pos == EndPos - 1) {
-                    Rects.push({
-                        PageNum: StartPage + PNum,
-                        X: StartX,
-                        Y: StartY,
-                        W: W,
-                        H: EndY - StartY
-                    });
-                }
-            }
-            var ResultStr = new String();
-            var _Str = "";
-            for (var Pos = StartPos; Pos < EndPos; Pos++) {
-                Item = this.Content[Pos];
-                if (para_Text === Item.Type) {
-                    _Str += Item.Value;
-                } else {
-                    if (para_Space === Item.Type) {
-                        _Str += " ";
-                    }
-                }
-            }
-            if (_Str.length >= MaxShowValue) {
-                ResultStr = "<b>";
-                for (var Index = 0; Index < MaxShowValue - 1; Index++) {
-                    ResultStr += _Str[Index];
-                }
-                ResultStr += "</b>...";
-            } else {
-                ResultStr = "<b>" + _Str + "</b>";
-                var Pos_before = StartPos - 1;
-                var Pos_after = EndPos;
-                var LeaveCount = MaxShowValue - _Str.length;
-                var bAfter = true;
-                while (LeaveCount > 0 && (Pos_before >= 0 || Pos_after < this.Content.length)) {
-                    var TempPos = (true === bAfter ? Pos_after : Pos_before);
-                    var Flag = 0;
-                    while (((TempPos >= 0 && false === bAfter) || (TempPos < this.Content.length && true === bAfter)) && para_Text != this.Content[TempPos].Type && para_Space != this.Content[TempPos].Type) {
-                        if (true === bAfter) {
-                            TempPos++;
-                            if (TempPos >= this.Content.length) {
-                                TempPos = Pos_before;
-                                bAfter = false;
-                                Flag++;
-                            }
-                        } else {
-                            TempPos--;
-                            if (TempPos < 0) {
-                                TempPos = Pos_after;
-                                bAfter = true;
-                                Flag++;
-                            }
-                        }
-                        if (Flag >= 2) {
-                            break;
-                        }
-                    }
-                    if (Flag >= 2 || !((TempPos >= 0 && false === bAfter) || (TempPos < this.Content.length && true === bAfter))) {
-                        break;
-                    }
-                    if (true === bAfter) {
-                        ResultStr += (para_Space === this.Content[TempPos].Type ? " " : this.Content[TempPos].Value);
-                        Pos_after = TempPos + 1;
-                        LeaveCount--;
-                        if (Pos_before >= 0) {
-                            bAfter = false;
-                        }
-                        if (Pos_after >= this.Content.length) {
-                            bAfter = false;
-                        }
-                    } else {
-                        ResultStr = (para_Space === this.Content[TempPos].Type ? " " : this.Content[TempPos].Value) + ResultStr;
-                        Pos_before = TempPos - 1;
-                        LeaveCount--;
-                        if (Pos_after < this.Content.length) {
-                            bAfter = true;
-                        }
-                        if (Pos_before < 0) {
-                            bAfter = true;
-                        }
-                    }
-                }
-            }
-            this.DrawingDocument.AddPageSearch(ResultStr, Rects, ElementType);
-        }
-    },
     DocumentStatistics: function (Stats) {
-        var bEmptyParagraph = true;
-        var bWord = false;
-        for (var Index = 0; Index < this.Content.length; Index++) {
+        var ParaStats = new CParagraphStatistics(Stats);
+        var Count = this.Content.length;
+        for (var Index = 0; Index < Count; Index++) {
             var Item = this.Content[Index];
-            var bSymbol = false;
-            var bSpace = false;
-            var bNewWord = false;
-            if ((para_Text === Item.Type && false === Item.Is_NBSP()) || (para_PageNum === Item.Type)) {
-                if (false === bWord) {
-                    bNewWord = true;
-                }
-                bWord = true;
-                bSymbol = true;
-                bSpace = false;
-                bEmptyParagraph = false;
-            } else {
-                if ((para_Text === Item.Type && true === Item.Is_NBSP()) || para_Space === Item.Type || para_Tab === Item.Type) {
-                    bWord = false;
-                    bSymbol = true;
-                    bSpace = true;
-                }
-            }
-            if (true === bSymbol) {
-                Stats.Add_Symbol(bSpace);
-            }
-            if (true === bNewWord) {
-                Stats.Add_Word();
-            }
+            Item.Collect_DocumentStatistics(ParaStats);
         }
         var NumPr = this.Numbering_Get();
         if (undefined != NumPr) {
-            bEmptyParagraph = false;
-            this.Parent.Get_Numbering().Get_AbstractNum(NumPr.NumId).DocumentStatistics(NumPr.Lvl, Stats);
+            ParaStats.EmptyParagraph = false;
+            var AbstractNum = this.Parent.Get_Numbering().Get_AbstractNum(NumPr.NumId);
+            if (undefined !== AbstractNum && null !== AbstractNum) {
+                AbstractNum.DocumentStatistics(NumPr.Lvl, Stats);
+            }
         }
-        if (false === bEmptyParagraph) {
+        if (false === ParaStats.EmptyParagraph) {
             Stats.Add_Paragraph();
         }
     },
@@ -7678,19 +6191,24 @@ Paragraph.prototype = {
     Get_ApplyToAll: function () {
         return this.ApplyToAll;
     },
+    Get_ParentTextTransform: function () {
+        var CurDocContent = this.Parent;
+        while (CurDocContent.Is_TableCellContent()) {
+            CurDocContent = CurDocContent.Parent.Row.Table.Parent;
+        }
+        if (CurDocContent.Parent && CurDocContent.Parent.transformText) {
+            return CurDocContent.Parent.transformText;
+        }
+        if (CurDocContent.Parent && CurDocContent.Parent.parent && CurDocContent.Parent.parent.transformText) {
+            return CurDocContent.Parent.parent.transformText;
+        }
+        if (CurDocContent.transformText) {
+            return CurDocContent.transformText;
+        }
+        return null;
+    },
     Update_CursorType: function (X, Y, PageIndex) {
-        var text_transform = null;
-        var cur_parent = this.Parent;
-        if (this.Parent.Is_TableCellContent()) {
-            while (isRealObject(cur_parent) && cur_parent.Is_TableCellContent()) {
-                cur_parent = cur_parent.Parent.Row.Table.Parent;
-            }
-        }
-        if (cur_parent.Parent instanceof WordShape) {
-            if (isRealObject(cur_parent.Parent.transformText)) {
-                text_transform = cur_parent.Parent.transformText;
-            }
-        }
+        var text_transform = this.Get_ParentTextTransform();
         var MMData = new CMouseMoveData();
         var Coords = this.DrawingDocument.ConvertCoordsToCursorWR(X, Y, this.Get_StartPage_Absolute() + (PageIndex - this.PageNum), text_transform);
         MMData.X_abs = Coords.X;
@@ -7726,40 +6244,25 @@ Paragraph.prototype = {
     },
     Document_CreateFontMap: function (FontMap) {
         if (true === this.FontMap.NeedRecalc) {
-            this.FontMap.Map = new Object();
-            if (true === this.CompiledPr.NeedRecalc) {
-                this.CompiledPr.Pr = this.Internal_CompileParaPr();
-                this.CompiledPr.NeedRecalc = false;
-            }
+            this.FontMap.Map = {};
+            this.Internal_CompileParaPr();
+            var FontScheme = this.Get_Theme().themeElements.fontScheme;
             var CurTextPr = this.CompiledPr.Pr.TextPr.Copy();
-            CurTextPr.Document_CreateFontMap(this.FontMap.Map);
+            CurTextPr.Document_CreateFontMap(this.FontMap.Map, FontScheme);
             CurTextPr.Merge(this.TextPr.Value);
-            CurTextPr.Document_CreateFontMap(this.FontMap.Map);
-            for (var Index = 0; Index < this.Content.length; Index++) {
-                var Item = this.Content[Index];
-                if (para_TextPr === Item.Type) {
-                    CurTextPr = this.CompiledPr.Pr.TextPr.Copy();
-                    var _CurTextPr = Item.Value;
-                    if (undefined != _CurTextPr.RStyle) {
-                        var Styles = this.Parent.Get_Styles();
-                        var StyleTextPr = Styles.Get_Pr(_CurTextPr.RStyle, styletype_Character).TextPr;
-                        CurTextPr.Merge(StyleTextPr);
-                    }
-                    CurTextPr.Merge(_CurTextPr);
-                    CurTextPr.Document_CreateFontMap(this.FontMap.Map);
-                }
+            CurTextPr.Document_CreateFontMap(this.FontMap.Map, FontScheme);
+            var Count = this.Content.length;
+            for (var Index = 0; Index < Count; Index++) {
+                this.Content[Index].Create_FontMap(this.FontMap.Map);
             }
             this.FontMap.NeedRecalc = false;
         }
-        for (Key in this.FontMap.Map) {
+        for (var Key in this.FontMap.Map) {
             FontMap[Key] = this.FontMap.Map[Key];
         }
     },
     Document_CreateFontCharMap: function (FontCharMap) {
-        if (true === this.CompiledPr.NeedRecalc) {
-            this.CompiledPr.Pr = this.Internal_CompileParaPr();
-            this.CompiledPr.NeedRecalc = false;
-        }
+        this.Internal_CompileParaPr();
         var CurTextPr = this.CompiledPr.Pr.TextPr.Copy();
         FontCharMap.StartFont(CurTextPr.FontFamily.Name, CurTextPr.Bold, CurTextPr.Italic, CurTextPr.FontSize);
         for (var Index = 0; Index < this.Content.length; Index++) {
@@ -7809,20 +6312,12 @@ Paragraph.prototype = {
         this.TextPr.Value.Document_Get_AllFontNames(AllFonts);
         var Count = this.Content.length;
         for (var Index = 0; Index < Count; Index++) {
-            var Item = this.Content[Index];
-            if (para_TextPr === Item.Type) {
-                Item.Value.Document_Get_AllFontNames(AllFonts);
-            } else {
-                if (para_Drawing === Item.Type) {
-                    Item.documentGetAllFontNames(AllFonts);
-                }
-            }
+            this.Content[Index].Get_AllFontNames(AllFonts);
         }
     },
     Document_UpdateRulersState: function () {
-        var FramePr = this.Get_FramePr();
-        if (undefined === FramePr) {
-            this.Parent.DrawingDocument.Set_RulerState_Paragraph(null);
+        if (true === this.Is_Inline()) {
+            this.LogicDocument.Document_UpdateRulersStateBySection();
         } else {
             var Frame = this.CalculatedFrame;
             this.Parent.DrawingDocument.Set_RulerState_Paragraph({
@@ -7832,10 +6327,23 @@ Paragraph.prototype = {
                 B: Frame.T + Frame.H,
                 PageIndex: Frame.PageIndex,
                 Frame: this
-            });
+            },
+            false);
         }
     },
     Document_UpdateInterfaceState: function () {
+        var StartPos, EndPos;
+        if (true === this.Selection.Use) {
+            StartPos = this.Get_ParaContentPos(true, true);
+            EndPos = this.Get_ParaContentPos(true, false);
+        } else {
+            var CurPos = this.Get_ParaContentPos(false, false);
+            StartPos = CurPos;
+            EndPos = CurPos;
+        }
+        if (this.bFromDocument && this.LogicDocument && true === this.LogicDocument.Spelling.Use && selectionflag_Numbering !== this.Selection.Flag) {
+            this.SpellChecker.Document_UpdateInterfaceState(StartPos, EndPos);
+        }
         if (true === this.Selection.Use) {
             var StartPos = this.Selection.StartPos;
             var EndPos = this.Selection.EndPos;
@@ -7843,98 +6351,24 @@ Paragraph.prototype = {
                 StartPos = this.Selection.EndPos;
                 EndPos = this.Selection.StartPos;
             }
-            var Hyper_start = this.Check_Hyperlink2(this.Selection.StartPos);
-            var Hyper_end = this.Check_Hyperlink2(this.Selection.EndPos);
-            if (Hyper_start === Hyper_end && null != Hyper_start) {
-                var Find = this.Internal_FindBackward(this.Selection.StartPos, [para_HyperlinkStart]);
-                if (true != Find.Found) {
-                    return;
+            for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+                var Element = this.Content[CurPos];
+                if (true !== Element.Selection_IsEmpty() && (para_Hyperlink === Element.Type || para_Math === Element.Type)) {
+                    Element.Document_UpdateInterfaceState();
                 }
-                var Str = "";
-                for (var Pos = Find.LetterPos + 1; Pos < this.Content.length; Pos++) {
-                    var Item = this.Content[Pos];
-                    var bBreak = false;
-                    switch (Item.Type) {
-                    case para_Drawing:
-                        case para_End:
-                        case para_Numbering:
-                        case para_PresentationNumbering:
-                        case para_PageNum:
-                        Str = null;
-                        bBreak = true;
-                        break;
-                    case para_Text:
-                        Str += Item.Value;
-                        break;
-                    case para_Space:
-                        case para_Tab:
-                        Str += " ";
-                        break;
-                    case para_HyperlinkEnd:
-                        bBreak = true;
-                        break;
-                    case para_HyperlinkStart:
-                        return;
-                    }
-                    if (true === bBreak) {
-                        break;
-                    }
-                }
-                var HyperProps = new CHyperlinkProperty(Hyper_start);
-                HyperProps.put_Text(Str);
-                editor.sync_HyperlinkPropCallback(HyperProps);
             }
-            this.SpellChecker.Document_UpdateInterfaceState(StartPos, EndPos);
         } else {
-            var Hyper_cur = this.Check_Hyperlink2(this.CurPos.ContentPos, false, true);
-            if (null != Hyper_cur) {
-                var Find = this.Internal_FindBackward(this.CurPos.ContentPos, [para_HyperlinkStart]);
-                if (true != Find.Found) {
-                    return;
-                }
-                var Str = "";
-                for (var Pos = Find.LetterPos + 1; Pos < this.Content.length; Pos++) {
-                    var Item = this.Content[Pos];
-                    var bBreak = false;
-                    switch (Item.Type) {
-                    case para_Drawing:
-                        case para_End:
-                        case para_Numbering:
-                        case para_PresentationNumbering:
-                        case para_PageNum:
-                        Str = null;
-                        bBreak = true;
-                        break;
-                    case para_Text:
-                        Str += Item.Value;
-                        break;
-                    case para_Space:
-                        case para_Tab:
-                        Str += " ";
-                        break;
-                    case para_HyperlinkEnd:
-                        bBreak = true;
-                        break;
-                    case para_HyperlinkStart:
-                        return;
-                    }
-                    if (true === bBreak) {
-                        break;
-                    }
-                }
-                var HyperProps = new CHyperlinkProperty(Hyper_cur);
-                HyperProps.put_Text(Str);
-                editor.sync_HyperlinkPropCallback(HyperProps);
+            var CurType = this.Content[this.CurPos.ContentPos].Type;
+            if (para_Hyperlink === CurType || para_Math === CurType) {
+                this.Content[this.CurPos.ContentPos].Document_UpdateInterfaceState();
             }
-            this.SpellChecker.Document_UpdateInterfaceState(this.CurPos.ContentPos, this.CurPos.ContentPos);
         }
     },
     PreDelete: function () {
-        this.Internal_Remove_CollaborativeMarks(false);
         for (var Index = 0; Index < this.Content.length; Index++) {
             var Item = this.Content[Index];
-            if (para_CommentEnd === Item.Type || para_CommentStart === Item.Type) {
-                editor.WordControl.m_oLogicDocument.Remove_Comment(Item.Id, true);
+            if (para_Comment === Item.Type) {
+                this.LogicDocument.Remove_Comment(Item.CommentId, true, false);
             }
         }
     },
@@ -7944,18 +6378,20 @@ Paragraph.prototype = {
     Get_StartPage_Relative: function () {
         return this.PageNum;
     },
-    Document_SetThisElementCurrent: function () {
-        this.Parent.Set_CurrentElement(this.Index);
+    Document_SetThisElementCurrent: function (bUpdateStates) {
+        this.Parent.Update_ConentIndexing();
+        this.Parent.Set_CurrentElement(this.Index, bUpdateStates);
     },
     Is_ThisElementCurrent: function () {
         var Parent = this.Parent;
-        if (docpostype_Content === Parent.CurPos.Type && false === Parent.Selection.Use && this.Index === Parent.CurPos.ContentPos) {
+        Parent.Update_ConentIndexing();
+        if (docpostype_Content === Parent.CurPos.Type && false === Parent.Selection.Use && this.Index === Parent.CurPos.ContentPos && Parent.Content[this.Index] === this) {
             return this.Parent.Is_ThisElementCurrent();
         }
         return false;
     },
     Is_Inline: function () {
-        if (undefined != this.Pr.FramePr) {
+        if (undefined != this.Pr.FramePr && c_oAscYAlign.Inline !== this.Pr.FramePr.YAlign) {
             return false;
         }
         return true;
@@ -7991,7 +6427,8 @@ Paragraph.prototype = {
                 if (null === AnchorPara || AnchorPara.Lines.length <= 0) {
                     return;
                 }
-                var LineH = AnchorPara.Lines[0].Bottom - AnchorPara.Lines[0].Top;
+                var Before = AnchorPara.Get_CompiledPr().ParaPr.Spacing.Before;
+                var LineH = AnchorPara.Lines[0].Bottom - AnchorPara.Lines[0].Top - Before;
                 var LineTA = AnchorPara.Lines[0].Metrics.TextAscent2;
                 var LineTD = AnchorPara.Lines[0].Metrics.TextDescent + AnchorPara.Lines[0].Metrics.LineGap;
                 this.Set_Spacing({
@@ -7999,7 +6436,8 @@ Paragraph.prototype = {
                     Line: FramePr.Lines * LineH
                 },
                 false);
-                this.Update_DropCapByLines(this.Internal_CalculateTextPr(this.Internal_GetStartPos()), FramePr.Lines, LineH, LineTA, LineTD);
+                this.Update_DropCapByLines(this.Internal_CalculateTextPr(this.Internal_GetStartPos()), FramePr.Lines, LineH, LineTA, LineTD, Before);
+                NewFramePr.Lines = FramePr.Lines;
             }
             if (undefined != FramePr.FontFamily) {
                 var FF = new ParaTextPr({
@@ -8042,20 +6480,32 @@ Paragraph.prototype = {
                 NewFramePr.VSpace = FramePr.VSpace;
             }
             NewFramePr.W = FramePr.W;
-            if (undefined != FramePr.Wrap) {
-                NewFramePr.Wrap = FramePr.Wrap;
-            }
             if (undefined != FramePr.X) {
                 NewFramePr.X = FramePr.X;
+                NewFramePr.XAlign = undefined;
             }
             if (undefined != FramePr.XAlign) {
                 NewFramePr.XAlign = FramePr.XAlign;
+                NewFramePr.X = undefined;
             }
             if (undefined != FramePr.Y) {
                 NewFramePr.Y = FramePr.Y;
+                NewFramePr.YAlign = undefined;
             }
             if (undefined != FramePr.YAlign) {
                 NewFramePr.YAlign = FramePr.YAlign;
+                NewFramePr.Y = undefined;
+            }
+            if (undefined !== FramePr.Wrap) {
+                if (false === FramePr.Wrap) {
+                    NewFramePr.Wrap = wrap_NotBeside;
+                } else {
+                    if (true === FramePr.Wrap) {
+                        NewFramePr.Wrap = wrap_Around;
+                    } else {
+                        NewFramePr.Wrap = FramePr.Wrap;
+                    }
+                }
             }
             this.Pr.FramePr = NewFramePr;
         }
@@ -8089,8 +6539,16 @@ Paragraph.prototype = {
     },
     Set_FrameParaPr: function (Para) {
         Para.CopyPr(this);
+        Para.Set_Ind({
+            FirstLine: 0
+        },
+        false);
         this.Set_Spacing({
             After: 0
+        },
+        false);
+        this.Set_Ind({
+            Right: 0
         },
         false);
         this.Numbering_Remove();
@@ -8156,8 +6614,11 @@ Paragraph.prototype = {
         this.CalculatedFrame.H2 = H2;
         this.CalculatedFrame.PageIndex = PageIndex;
     },
+    Get_CalculatedFrame: function () {
+        return this.CalculatedFrame;
+    },
     Internal_Get_FrameParagraphs: function () {
-        var FrameParas = new Array();
+        var FrameParas = [];
         var FramePr = this.Get_FramePr();
         if (undefined === FramePr) {
             return FrameParas;
@@ -8218,7 +6679,7 @@ Paragraph.prototype = {
             Elements: FrameParas,
             CheckType: changestype_Paragraph_Content
         })) {
-            History.Create_NewPoint();
+            History.Create_NewPoint(historydescription_Document_ParagraphChangeFrame);
             var NewFramePr = FramePr.Copy();
             if (Math.abs(X - this.CalculatedFrame.L) > 0.001) {
                 NewFramePr.X = X;
@@ -8235,9 +6696,11 @@ Paragraph.prototype = {
             }
             if (Math.abs(H - this.CalculatedFrame.H) > 0.001) {
                 if (undefined != FramePr.DropCap && dropcap_None != FramePr.DropCap && 1 === FrameParas.length) {
-                    var _H = Math.min(H, Page_Height);
+                    var PageH = this.LogicDocument.Get_PageLimits(PageIndex).YLimit;
+                    var _H = Math.min(H, PageH);
                     NewFramePr.Lines = this.Update_DropCapByHeight(_H);
-                    NewFramePr.HRule = linerule_Auto;
+                    NewFramePr.HRule = linerule_Exact;
+                    NewFramePr.H = H;
                 } else {
                     if (H <= this.CalculatedFrame.H) {
                         NewFramePr.HRule = linerule_Exact;
@@ -8254,6 +6717,7 @@ Paragraph.prototype = {
             }
             LogicDocument.Recalculate();
             LogicDocument.Document_UpdateInterfaceState();
+            LogicDocument.Document_UpdateRulersState();
         }
     },
     Supplement_FramePr: function (FramePr) {
@@ -8274,7 +6738,10 @@ Paragraph.prototype = {
                     break;
                 }
             }
-            var TextPr = FirstFramePara.Internal_CalculateTextPr(0);
+            var TextPr = FirstFramePara.Get_FirstRunPr();
+            if (undefined === TextPr.RFonts || undefined === TextPr.RFonts.Ascii) {
+                TextPr = this.Get_CompiledPr2(false).TextPr;
+            }
             FramePr.FontFamily = {
                 Name: TextPr.RFonts.Ascii.Name,
                 Index: TextPr.RFonts.Ascii.Index
@@ -8293,59 +6760,63 @@ Paragraph.prototype = {
     Can_AddDropCap: function () {
         var Count = this.Content.length;
         for (var Pos = 0; Pos < Count; Pos++) {
-            if (para_Text === this.Content[Pos].Type) {
-                return true;
+            var TempRes = this.Content[Pos].Can_AddDropCap();
+            if (null !== TempRes) {
+                return TempRes;
             }
         }
         return false;
     },
-    Split_DropCap: function (NewParagraph) {
-        var Count = this.Content.length;
-        var EndPos = this.Selection.StartPos > this.Selection.EndPos ? this.Selection.StartPos : this.Selection.EndPos;
-        var bSelection = false;
-        var LastTextPr = null;
-        if (true === this.Selection.Use) {
-            var EndPos = Math.min(this.Selection.StartPos > this.Selection.EndPos ? this.Selection.StartPos : this.Selection.EndPos, this.Content.length);
-            bSelection = true;
-            for (var Pos = 0; Pos < EndPos; Pos++) {
-                var Type = this.Content[Pos].Type;
-                if (para_Text != Type && para_TextPr != Type && para_Tab != Type) {
-                    bSelection = false;
-                    break;
-                } else {
-                    if (para_TextPr === Type) {
-                        LastTextPr = this.Content[Pos];
-                    }
-                }
+    Get_TextForDropCap: function (DropCapText, UseContentPos, ContentPos, Depth) {
+        var EndPos = (true === UseContentPos ? ContentPos.Get(Depth) : this.Content.length - 1);
+        for (var Pos = 0; Pos <= EndPos; Pos++) {
+            this.Content[Pos].Get_TextForDropCap(DropCapText, (true === UseContentPos && Pos === EndPos ? true : false), ContentPos, Depth + 1);
+            if (true === DropCapText.Mixed && (true === DropCapText.Check || DropCapText.Runs.length > 0)) {
+                return;
             }
         }
-        if (false === bSelection) {
-            var Pos = 0;
-            for (; Pos < Count; Pos++) {
-                var Type = this.Content[Pos].Type;
-                if (para_Text === Type) {
-                    break;
-                } else {
-                    if (para_TextPr === Type) {
-                        LastTextPr = this.Content[Pos];
-                    }
-                }
-            }
-            EndPos = Pos + 1;
-        }
-        for (var Pos = 0; Pos < EndPos; Pos++) {
-            NewParagraph.Internal_Content_Add(Pos, this.Content[Pos]);
-        }
-        var TextPr = this.Internal_CalculateTextPr(EndPos);
-        this.Internal_Content_Remove2(0, EndPos);
-        if (null != LastTextPr) {
-            this.Internal_Content_Add(0, new ParaTextPr(LastTextPr.Value));
-        }
-        return TextPr;
     },
-    Update_DropCapByLines: function (TextPr, Count, LineH, LineTA, LineTD) {
+    Split_DropCap: function (NewParagraph) {
+        var DropCapText = new CParagraphGetDropCapText();
+        if (true == this.Selection.Use && 0 === this.Parent.Selection_Is_OneElement()) {
+            var SelSP = this.Get_ParaContentPos(true, true);
+            var SelEP = this.Get_ParaContentPos(true, false);
+            if (0 <= SelSP.Compare(SelEP)) {
+                SelEP = SelSP;
+            }
+            DropCapText.Check = true;
+            this.Get_TextForDropCap(DropCapText, true, SelEP, 0);
+            DropCapText.Check = false;
+            this.Get_TextForDropCap(DropCapText, true, SelEP, 0);
+        } else {
+            DropCapText.Mixed = true;
+            DropCapText.Check = false;
+            this.Get_TextForDropCap(DropCapText, false);
+        }
+        var Count = DropCapText.Text.length;
+        var PrevRun = null;
+        var CurrRun = null;
+        for (var Pos = 0, ParaPos = 0, RunPos = 0; Pos < Count; Pos++) {
+            if (PrevRun !== DropCapText.Runs[Pos]) {
+                PrevRun = DropCapText.Runs[Pos];
+                CurrRun = new ParaRun(NewParagraph);
+                CurrRun.Set_Pr(DropCapText.Runs[Pos].Pr.Copy());
+                NewParagraph.Internal_Content_Add(ParaPos++, CurrRun, false);
+                RunPos = 0;
+            }
+            CurrRun.Add_ToContent(RunPos++, DropCapText.Text[Pos], false);
+        }
+        if (Count > 0) {
+            return DropCapText.Runs[Count - 1].Get_CompiledPr(true);
+        }
+        return null;
+    },
+    Update_DropCapByLines: function (TextPr, Count, LineH, LineTA, LineTD, Before) {
+        if (null === TextPr) {
+            return;
+        }
         this.Set_Spacing({
-            Before: 0,
+            Before: Before,
             After: 0,
             LineRule: linerule_Exact,
             Line: Count * LineH - 0.001
@@ -8353,23 +6824,15 @@ Paragraph.prototype = {
         false);
         var FontSize = 72;
         TextPr.FontSize = FontSize;
-        g_oTextMeasurer.SetTextPr(TextPr);
+        g_oTextMeasurer.SetTextPr(TextPr, this.Get_Theme());
         g_oTextMeasurer.SetFontSlot(fontslot_ASCII, 1);
-        var TDescent = null;
-        var TAscent = null;
-        var TempCount = this.Content.length;
-        for (var Index = 0; Index < TempCount; Index++) {
-            var Item = this.Content[Index];
-            if (para_Text === Item.Type) {
-                var Temp = g_oTextMeasurer.Measure2(Item.Value);
-                if (null === TAscent || TAscent < Temp.Ascent) {
-                    TAscent = Temp.Ascent;
-                }
-                if (null === TDescent || TDescent > Temp.Ascent - Temp.Height) {
-                    TDescent = Temp.Ascent - Temp.Height;
-                }
-            }
-        }
+        var TMetrics = {
+            Ascent: null,
+            Descent: null
+        };
+        this.private_RecalculateTextMetrics(TMetrics);
+        var TDescent = TMetrics.Descent;
+        var TAscent = TMetrics.Ascent;
         var THeight = 0;
         if (null === TAscent || null === TDescent) {
             THeight = g_oTextMeasurer.GetHeight();
@@ -8381,23 +6844,15 @@ Paragraph.prototype = {
         var Koef = NewEmHeight / EmHeight;
         var NewFontSize = TextPr.FontSize * Koef;
         TextPr.FontSize = parseInt(NewFontSize * 2) / 2;
-        g_oTextMeasurer.SetTextPr(TextPr);
+        g_oTextMeasurer.SetTextPr(TextPr, this.Get_Theme());
         g_oTextMeasurer.SetFontSlot(fontslot_ASCII, 1);
-        var TNewDescent = null;
-        var TNewAscent = null;
-        var TempCount = this.Content.length;
-        for (var Index = 0; Index < TempCount; Index++) {
-            var Item = this.Content[Index];
-            if (para_Text === Item.Type) {
-                var Temp = g_oTextMeasurer.Measure2(Item.Value);
-                if (null === TNewAscent || TNewAscent < Temp.Ascent) {
-                    TNewAscent = Temp.Ascent;
-                }
-                if (null === TNewDescent || TNewDescent > Temp.Ascent - Temp.Height) {
-                    TNewDescent = Temp.Ascent - Temp.Height;
-                }
-            }
-        }
+        var TNewMetrics = {
+            Ascent: null,
+            Descent: null
+        };
+        this.private_RecalculateTextMetrics(TNewMetrics);
+        var TNewDescent = TNewMetrics.Descent;
+        var TNewAscent = TNewMetrics.Ascent;
         var TNewHeight = 0;
         if (null === TNewAscent || null === TNewDescent) {
             TNewHeight = g_oTextMeasurer.GetHeight();
@@ -8421,38 +6876,32 @@ Paragraph.prototype = {
         this.Add(PTextPr);
         this.Selection_Remove();
     },
-    Update_DropCapByHeight: function (Height) {
+    Update_DropCapByHeight: function (_Height) {
         var AnchorPara = this.Get_FrameAnchorPara();
         if (null === AnchorPara || AnchorPara.Lines.length <= 0) {
             return 1;
         }
+        var Before = AnchorPara.Get_CompiledPr().ParaPr.Spacing.Before;
+        var LineH = AnchorPara.Lines[0].Bottom - AnchorPara.Lines[0].Top - Before;
+        var LineTA = AnchorPara.Lines[0].Metrics.TextAscent2;
+        var LineTD = AnchorPara.Lines[0].Metrics.TextDescent + AnchorPara.Lines[0].Metrics.LineGap;
+        var Height = _Height - Before;
         this.Set_Spacing({
             LineRule: linerule_Exact,
             Line: Height
         },
         false);
-        var LineH = AnchorPara.Lines[0].Bottom - AnchorPara.Lines[0].Top;
-        var LineTA = AnchorPara.Lines[0].Metrics.TextAscent2;
-        var LineTD = AnchorPara.Lines[0].Metrics.TextDescent + AnchorPara.Lines[0].Metrics.LineGap;
         var LinesCount = Math.ceil(Height / LineH);
         var TextPr = this.Internal_CalculateTextPr(this.Internal_GetStartPos());
-        g_oTextMeasurer.SetTextPr(TextPr);
+        g_oTextMeasurer.SetTextPr(TextPr, this.Get_Theme());
         g_oTextMeasurer.SetFontSlot(fontslot_ASCII, 1);
-        var TDescent = null;
-        var TAscent = null;
-        var TempCount = this.Content.length;
-        for (var Index = 0; Index < TempCount; Index++) {
-            var Item = this.Content[Index];
-            if (para_Text === Item.Type) {
-                var Temp = g_oTextMeasurer.Measure2(Item.Value);
-                if (null === TAscent || TAscent < Temp.Ascent) {
-                    TAscent = Temp.Ascent;
-                }
-                if (null === TDescent || TDescent > Temp.Ascent - Temp.Height) {
-                    TDescent = Temp.Ascent - Temp.Height;
-                }
-            }
-        }
+        var TMetrics = {
+            Ascent: null,
+            Descent: null
+        };
+        this.private_RecalculateTextMetrics(TMetrics);
+        var TDescent = TMetrics.Descent;
+        var TAscent = TMetrics.Ascent;
         var THeight = 0;
         if (null === TAscent || null === TDescent) {
             THeight = g_oTextMeasurer.GetHeight();
@@ -8462,23 +6911,15 @@ Paragraph.prototype = {
         var Koef = (Height - LineTD) / THeight;
         var NewFontSize = TextPr.FontSize * Koef;
         TextPr.FontSize = parseInt(NewFontSize * 2) / 2;
-        g_oTextMeasurer.SetTextPr(TextPr);
+        g_oTextMeasurer.SetTextPr(TextPr, this.Get_Theme());
         g_oTextMeasurer.SetFontSlot(fontslot_ASCII, 1);
-        var TNewDescent = null;
-        var TNewAscent = null;
-        var TempCount = this.Content.length;
-        for (var Index = 0; Index < TempCount; Index++) {
-            var Item = this.Content[Index];
-            if (para_Text === Item.Type) {
-                var Temp = g_oTextMeasurer.Measure2(Item.Value);
-                if (null === TNewAscent || TNewAscent < Temp.Ascent) {
-                    TNewAscent = Temp.Ascent;
-                }
-                if (null === TNewDescent || TNewDescent > Temp.Ascent - Temp.Height) {
-                    TNewDescent = Temp.Ascent - Temp.Height;
-                }
-            }
-        }
+        var TNewMetrics = {
+            Ascent: null,
+            Descent: null
+        };
+        this.private_RecalculateTextMetrics(TNewMetrics);
+        var TNewDescent = TNewMetrics.Descent;
+        var TNewAscent = TNewMetrics.Ascent;
         var TNewHeight = 0;
         if (null === TNewAscent || null === TNewDescent) {
             TNewHeight = g_oTextMeasurer.GetHeight();
@@ -8521,60 +6962,86 @@ Paragraph.prototype = {
         return Next;
     },
     Split: function (NewParagraph, Pos) {
-        if ("undefined" === typeof(Pos) || null === Pos) {
-            Pos = this.CurPos.ContentPos;
-        }
-        var Hyperlink = this.Check_Hyperlink2(Pos, false);
-        var TextPr = this.Internal_CalculateTextPr(Pos);
         NewParagraph.DeleteCommentOnRemove = false;
-        NewParagraph.Internal_Content_Remove2(0, NewParagraph.Content.length);
-        NewParagraph.Internal_Content_Concat(this.Content.slice(Pos));
-        NewParagraph.Internal_Content_Add(0, new ParaTextPr(TextPr));
-        NewParagraph.Set_ContentPos(0);
-        NewParagraph.DeleteCommentOnRemove = true;
-        NewParagraph.TextPr.Value = this.TextPr.Value.Copy();
-        if (null != Hyperlink) {
-            NewParagraph.Internal_Content_Add(1, Hyperlink.Copy());
-        }
         this.DeleteCommentOnRemove = false;
-        this.Internal_Content_Remove2(Pos, this.Content.length - Pos);
-        this.Internal_Remove_CollaborativeMarks(false);
-        this.DeleteCommentOnRemove = true;
-        if (null != Hyperlink) {
-            this.Internal_Content_Add(this.Content.length, new ParaHyperlinkEnd());
-            this.Internal_Content_Add(this.Content.length, new ParaTextPr());
+        this.Selection_Remove();
+        NewParagraph.Selection_Remove();
+        var ContentPos = this.Get_ParaContentPos(false, false);
+        var CurPos = ContentPos.Get(0);
+        var TextPr = this.Get_TextPr(ContentPos);
+        var NewElement = this.Content[CurPos].Split(ContentPos, 1);
+        if (null === NewElement) {
+            NewElement = new ParaRun(NewParagraph);
+            NewElement.Set_Pr(TextPr.Copy());
         }
-        this.Internal_Content_Add(this.Content.length, new ParaEnd());
-        this.Internal_Content_Add(this.Content.length, new ParaEmpty());
+        var NewContent = this.Content.slice(CurPos + 1);
+        this.Internal_Content_Remove2(CurPos + 1, this.Content.length - CurPos - 1);
+        var EndRun = new ParaRun(this);
+        EndRun.Add_ToContent(0, new ParaEnd());
+        this.Internal_Content_Add(this.Content.length, EndRun);
+        NewParagraph.Internal_Content_Remove2(0, NewParagraph.Content.length);
+        NewParagraph.Internal_Content_Concat(NewContent);
+        NewParagraph.Internal_Content_Add(0, NewElement);
+        NewParagraph.Correct_Content();
+        NewParagraph.TextPr.Value = this.TextPr.Value.Copy();
         this.CopyPr(NewParagraph);
-        this.RecalcInfo.Set_Type_0(pararecalc_0_All);
-        NewParagraph.RecalcInfo.Set_Type_0(pararecalc_0_All);
+        var SectPr = this.Get_SectionPr();
+        if (undefined !== SectPr) {
+            this.Set_SectionPr(undefined);
+            NewParagraph.Set_SectionPr(SectPr);
+        }
+        this.Cursor_MoveToEndPos(false, false);
+        NewParagraph.Cursor_MoveToStartPos(false);
+        NewParagraph.DeleteCommentOnRemove = true;
+        this.DeleteCommentOnRemove = true;
     },
     Concat: function (Para) {
         this.DeleteCommentOnRemove = false;
-        this.Internal_Content_Remove2(this.Content.length - 2, 2);
+        Para.DeleteCommentOnRemove = false;
+        this.Remove_ParaEnd();
+        var NearPosCount = Para.NearPosArray.length;
+        for (var Pos = 0; Pos < NearPosCount; Pos++) {
+            var ParaNearPos = Para.NearPosArray[Pos];
+            ParaNearPos.Classes[0] = this;
+            ParaNearPos.NearPos.Paragraph = this;
+            ParaNearPos.NearPos.ContentPos.Data[0] += this.Content.length;
+            this.NearPosArray.push(ParaNearPos);
+        }
+        var NewContent = Para.Content.slice(0);
+        this.Internal_Content_Concat(NewContent);
+        Para.Internal_Content_Remove2(0, Para.Content.length);
+        this.Set_SectionPr(undefined);
+        var SectPr = Para.Get_SectionPr();
+        if (undefined !== SectPr) {
+            Para.Set_SectionPr(undefined);
+            this.Set_SectionPr(SectPr);
+        }
         this.DeleteCommentOnRemove = true;
-        Para.Numbering_Remove();
-        Para.Remove_PresentationNumbering();
-        this.Internal_Content_Concat(Para.Content);
-        this.RecalcInfo.Set_Type_0(pararecalc_0_All);
+        Para.DeleteCommentOnRemove = true;
     },
     Continue: function (NewParagraph) {
         this.CopyPr(NewParagraph);
-        var TextPr = this.Internal_CalculateTextPr(this.Internal_GetEndPos());
-        NewParagraph.Internal_Content_Add(0, new ParaTextPr(TextPr));
+        var TextPr = this.Get_TextPr(this.Get_EndPos(false));
+        NewParagraph.Internal_Content_Add(0, new ParaRun(NewParagraph));
+        NewParagraph.Correct_Content();
+        NewParagraph.Cursor_MoveToStartPos(false);
+        for (var Pos = 0, Count = NewParagraph.Content.length; Pos < Count; Pos++) {
+            if (para_Run === NewParagraph.Content[Pos].Type) {
+                NewParagraph.Content[Pos].Set_Pr(TextPr.Copy());
+            }
+        }
         NewParagraph.TextPr.Value = this.TextPr.Value.Copy();
     },
     Undo: function (Data) {
         var Type = Data.Type;
         switch (Type) {
         case historyitem_Paragraph_AddItem:
-            var StartPos = this.Internal_Get_RealPos(Data.Pos);
-            var EndPos = this.Internal_Get_RealPos(Data.EndPos);
+            var StartPos = Data.Pos;
+            var EndPos = Data.EndPos;
             this.Content.splice(StartPos, EndPos - StartPos + 1);
             break;
         case historyitem_Paragraph_RemoveItem:
-            var Pos = this.Internal_Get_RealPos(Data.Pos);
+            var Pos = Data.Pos;
             var Array_start = this.Content.slice(0, Pos);
             var Array_end = this.Content.slice(Pos);
             this.Content = Array_start.concat(Data.Items, Array_end);
@@ -8689,6 +7156,15 @@ Paragraph.prototype = {
             }
             this.CompiledPr.NeedRecalc = true;
             break;
+        case historyitem_Paragraph_Shd_Unifill:
+            if (undefined != Data.Old && undefined === this.Pr.Shd) {
+                this.Pr.Shd = new CDocumentShd();
+            }
+            if (undefined != Data.Old) {
+                this.Pr.Shd.Unifill = Data.Old;
+            }
+            this.CompiledPr.NeedRecalc = true;
+            break;
         case historyitem_Paragraph_Shd:
             this.Pr.Shd = Data.Old;
             this.CompiledPr.NeedRecalc = true;
@@ -8709,6 +7185,7 @@ Paragraph.prototype = {
                 this.Pr.PStyle = undefined;
             }
             this.CompiledPr.NeedRecalc = true;
+            this.Recalc_RunsCompiledPr();
             break;
         case historyitem_Paragraph_DocNext:
             this.Next = Data.Old;
@@ -8749,14 +7226,21 @@ Paragraph.prototype = {
             this.CompiledPr.NeedRecalc = true;
             break;
         case historyitem_Paragraph_PresentationPr_Bullet:
-            this.PresentationPr.Bullet = Data.Old;
+            this.Pr.Bullet = Data.Old;
+            this.CompiledPr.NeedRecalc = true;
             break;
         case historyitem_Paragraph_PresentationPr_Level:
-            this.PresentationPr.Level = Data.Old;
+            this.Pr.Lvl = Data.Old;
+            this.CompiledPr.NeedRecalc = true;
+            this.Recalc_RunsCompiledPr();
             break;
         case historyitem_Paragraph_FramePr:
             this.Pr.FramePr = Data.Old;
             this.CompiledPr.NeedRecalc = true;
+            break;
+        case historyitem_Paragraph_SectionPr:
+            this.SectPr = Data.Old;
+            this.LogicDocument.Update_SectionsInfo();
             break;
         }
         this.RecalcInfo.Set_Type_0(pararecalc_0_All);
@@ -8766,14 +7250,14 @@ Paragraph.prototype = {
         var Type = Data.Type;
         switch (Type) {
         case historyitem_Paragraph_AddItem:
-            var Pos = this.Internal_Get_RealPos(Data.Pos);
+            var Pos = Data.Pos;
             var Array_start = this.Content.slice(0, Pos);
             var Array_end = this.Content.slice(Pos);
             this.Content = Array_start.concat(Data.Items, Array_end);
             break;
         case historyitem_Paragraph_RemoveItem:
-            var StartPos = this.Internal_Get_RealPos(Data.Pos);
-            var EndPos = this.Internal_Get_RealPos(Data.EndPos);
+            var StartPos = Data.Pos;
+            var EndPos = Data.EndPos;
             this.Content.splice(StartPos, EndPos - StartPos + 1);
             break;
         case historyitem_Paragraph_Numbering:
@@ -8886,6 +7370,15 @@ Paragraph.prototype = {
             }
             this.CompiledPr.NeedRecalc = true;
             break;
+        case historyitem_Paragraph_Shd_Unifill:
+            if (undefined != Data.New && undefined === this.Pr.Shd) {
+                this.Pr.Shd = new CDocumentShd();
+            }
+            if (undefined != Data.New) {
+                this.Pr.Shd.Unifill = Data.New;
+            }
+            this.CompiledPr.NeedRecalc = true;
+            break;
         case historyitem_Paragraph_Shd:
             this.Pr.Shd = Data.New;
             this.CompiledPr.NeedRecalc = true;
@@ -8906,6 +7399,7 @@ Paragraph.prototype = {
                 this.Pr.PStyle = undefined;
             }
             this.CompiledPr.NeedRecalc = true;
+            this.Recalc_RunsCompiledPr();
             break;
         case historyitem_Paragraph_DocNext:
             this.Next = Data.New;
@@ -8946,26 +7440,33 @@ Paragraph.prototype = {
             this.CompiledPr.NeedRecalc = true;
             break;
         case historyitem_Paragraph_PresentationPr_Bullet:
-            this.PresentationPr.Bullet = Data.New;
+            this.Pr.Bullet = Data.New;
+            this.CompiledPr.NeedRecalc = true;
             break;
         case historyitem_Paragraph_PresentationPr_Level:
-            this.PresentationPr.Level = Data.New;
+            this.Pr.Lvl = Data.New;
+            this.CompiledPr.NeedRecalc = true;
+            this.Recalc_RunsCompiledPr();
             break;
         case historyitem_Paragraph_FramePr:
             this.Pr.FramePr = Data.New;
             this.CompiledPr.NeedRecalc = true;
+            break;
+        case historyitem_Paragraph_SectionPr:
+            this.SectPr = Data.New;
+            this.LogicDocument.Update_SectionsInfo();
             break;
         }
         this.RecalcInfo.Set_Type_0(pararecalc_0_All);
         this.RecalcInfo.Set_Type_0_Spell(pararecalc_0_Spell_All);
     },
     Get_SelectionState: function () {
-        var ParaState = new Object();
+        var ParaState = {};
         ParaState.CurPos = {
             X: this.CurPos.X,
             Y: this.CurPos.Y,
             Line: this.CurPos.Line,
-            ContentPos: this.Internal_Get_ClearPos(this.CurPos.ContentPos),
+            ContentPos: this.Get_ParaContentPos(false, false),
             RealX: this.CurPos.RealX,
             RealY: this.CurPos.RealY,
             PagesPos: this.CurPos.PagesPos
@@ -8973,10 +7474,14 @@ Paragraph.prototype = {
         ParaState.Selection = {
             Start: this.Selection.Start,
             Use: this.Selection.Use,
-            StartPos: this.Internal_Get_ClearPos(this.Selection.StartPos),
-            EndPos: this.Internal_Get_ClearPos(this.Selection.EndPos),
+            StartPos: 0,
+            EndPos: 0,
             Flag: this.Selection.Flag
         };
+        if (true === this.Selection.Use) {
+            ParaState.Selection.StartPos = this.Get_ParaContentPos(true, true);
+            ParaState.Selection.EndPos = this.Get_ParaContentPos(true, false);
+        }
         return [ParaState];
     },
     Set_SelectionState: function (State, StateIndex) {
@@ -8984,29 +7489,23 @@ Paragraph.prototype = {
             return;
         }
         var ParaState = State[StateIndex];
-        this.CurPos = {
-            X: ParaState.CurPos.X,
-            Y: ParaState.CurPos.Y,
-            Line: ParaState.CurPos.Line,
-            ContentPos: this.Internal_Get_RealPos(ParaState.CurPos.ContentPos),
-            RealX: ParaState.CurPos.RealX,
-            RealY: ParaState.CurPos.RealY,
-            PagesPos: ParaState.CurPos.PagesPos
-        };
-        this.Selection = {
-            Start: ParaState.Selection.Start,
-            Use: ParaState.Selection.Use,
-            StartPos: this.Internal_Get_RealPos(ParaState.Selection.StartPos),
-            EndPos: this.Internal_Get_RealPos(ParaState.Selection.EndPos),
-            Flag: ParaState.Selection.Flag
-        };
-        var CursorPos_max = this.Internal_GetEndPos();
-        var CursorPos_min = this.Internal_GetStartPos();
-        this.Set_ContentPos(Math.max(CursorPos_min, Math.min(CursorPos_max, this.CurPos.ContentPos)));
-        this.Selection.StartPos = Math.max(CursorPos_min, Math.min(CursorPos_max, this.Selection.StartPos));
-        this.Selection.EndPos = Math.max(CursorPos_min, Math.min(CursorPos_max, this.Selection.EndPos));
+        this.CurPos.X = ParaState.CurPos.X;
+        this.CurPos.Y = ParaState.CurPos.Y;
+        this.CurPos.Line = ParaState.CurPos.Line;
+        this.CurPos.RealX = ParaState.CurPos.RealX;
+        this.CurPos.RealY = ParaState.CurPos.RealY;
+        this.CurPos.PagesPos = ParaState.CurPos.PagesPos;
+        this.Set_ParaContentPos(ParaState.CurPos.ContentPos, true, -1, -1);
+        this.Selection_Remove();
+        this.Selection.Start = ParaState.Selection.Start;
+        this.Selection.Use = ParaState.Selection.Use;
+        this.Selection.Flag = ParaState.Selection.Flag;
+        if (true === this.Selection.Use) {
+            this.Set_SelectionContentPos(ParaState.Selection.StartPos, ParaState.Selection.EndPos);
+        }
     },
     Get_ParentObject_or_DocumentPos: function () {
+        this.Parent.Update_ConentIndexing();
         return this.Parent.Get_ParentObject_or_DocumentPos(this.Index);
     },
     Refresh_RecalcData: function (Data) {
@@ -9017,7 +7516,7 @@ Paragraph.prototype = {
         case historyitem_Paragraph_AddItem:
             case historyitem_Paragraph_RemoveItem:
             for (CurPage = this.Pages.length - 1; CurPage > 0; CurPage--) {
-                if (Data.Pos > this.Lines[this.Pages[CurPage].StartLine].StartPos) {
+                if (Data.Pos > this.Lines[this.Pages[CurPage].StartLine].Get_StartPos()) {
                     break;
                 }
             }
@@ -9059,6 +7558,7 @@ Paragraph.prototype = {
             break;
         case historyitem_Paragraph_Shd_Value:
             case historyitem_Paragraph_Shd_Color:
+            case historyitem_Paragraph_Shd_Unifill:
             case historyitem_Paragraph_Shd:
             case historyitem_Paragraph_DocNext:
             case historyitem_Paragraph_DocPrev:
@@ -9080,86 +7580,6 @@ Paragraph.prototype = {
             this.Parent.Refresh_RecalcData2(this.Index, this.PageNum + CurPage);
         }
     },
-    Check_HistoryUninon: function (Data1, Data2) {
-        var Type1 = Data1.Type;
-        var Type2 = Data2.Type;
-        if (historyitem_Paragraph_AddItem === Type1 && historyitem_Paragraph_AddItem === Type2) {
-            if (1 === Data1.Items.length && 1 === Data2.Items.length && Data1.Pos === Data2.Pos - 1 && para_Text === Data1.Items[0].Type && para_Text === Data2.Items[0].Type) {
-                return true;
-            }
-        }
-        return false;
-    },
-    Document_Is_SelectionLocked: function (CheckType) {
-        switch (CheckType) {
-        case changestype_Paragraph_Content:
-            case changestype_Paragraph_Properties:
-            case changestype_Document_Content:
-            case changestype_Document_Content_Add:
-            case changestype_Image_Properties:
-            this.Lock.Check(this.Get_Id());
-            break;
-        case changestype_Remove:
-            if (true != this.Selection.Use && true == this.Cursor_IsStart()) {
-                var Pr = this.Get_CompiledPr2(false).ParaPr;
-                if (undefined != this.Numbering_Get() || Math.abs(Pr.Ind.FirstLine) > 0.001 || Math.abs(Pr.Ind.Left) > 0.001) {} else {
-                    var Prev = this.Get_DocumentPrev();
-                    if (null != Prev && type_Paragraph === Prev.GetType()) {
-                        Prev.Lock.Check(Prev.Get_Id());
-                    }
-                }
-            } else {
-                if (true === this.Selection.Use) {
-                    var StartPos = this.Selection.StartPos;
-                    var EndPos = this.Selection.EndPos;
-                    if (StartPos > EndPos) {
-                        var Temp = EndPos;
-                        EndPos = StartPos;
-                        StartPos = Temp;
-                    }
-                    if (EndPos >= this.Content.length - 1 && StartPos > this.Internal_GetStartPos()) {
-                        var Next = this.Get_DocumentNext();
-                        if (null != Next && type_Paragraph === Next.GetType()) {
-                            Next.Lock.Check(Next.Get_Id());
-                        }
-                    }
-                }
-            }
-            this.Lock.Check(this.Get_Id());
-            break;
-        case changestype_Delete:
-            if (true != this.Selection.Use && true === this.Cursor_IsEnd()) {
-                var Next = this.Get_DocumentNext();
-                if (null != Next && type_Paragraph === Next.GetType()) {
-                    Next.Lock.Check(Next.Get_Id());
-                }
-            } else {
-                if (true === this.Selection.Use) {
-                    var StartPos = this.Selection.StartPos;
-                    var EndPos = this.Selection.EndPos;
-                    if (StartPos > EndPos) {
-                        var Temp = EndPos;
-                        EndPos = StartPos;
-                        StartPos = Temp;
-                    }
-                    if (EndPos >= this.Content.length - 1 && StartPos > this.Internal_GetStartPos()) {
-                        var Next = this.Get_DocumentNext();
-                        if (null != Next && type_Paragraph === Next.GetType()) {
-                            Next.Lock.Check(Next.Get_Id());
-                        }
-                    }
-                }
-            }
-            this.Lock.Check(this.Get_Id());
-            break;
-        case changestype_Document_SectPr:
-            case changestype_Table_Properties:
-            case changestype_Table_RemoveCells:
-            case changestype_HdrFtr:
-            CollaborativeEditing.Add_CheckLock(true);
-            break;
-        }
-    },
     Save_Changes: function (Data, Writer) {
         Writer.WriteLong(historyitem_type_Paragraph);
         var Type = Data.Type;
@@ -9175,7 +7595,7 @@ Paragraph.prototype = {
                 } else {
                     Writer.WriteLong(Data.Pos + Index);
                 }
-                Data.Items[Index].Write_ToBinary(Writer);
+                Writer.WriteString2(Data.Items[Index].Get_Id());
             }
             break;
         case historyitem_Paragraph_RemoveItem:
@@ -9254,6 +7674,7 @@ Paragraph.prototype = {
             }
             break;
         case historyitem_Paragraph_Shd_Color:
+            case historyitem_Paragraph_Shd_Unifill:
             var New = Data.New;
             if (undefined != New) {
                 Writer.WriteBool(false);
@@ -9290,11 +7711,6 @@ Paragraph.prototype = {
         case historyitem_Paragraph_DocNext:
             case historyitem_Paragraph_DocPrev:
             case historyitem_Paragraph_Parent:
-            if (null != Data.New) {
-                Writer.WriteString2(Data.New.Get_Id());
-            } else {
-                Writer.WriteString2("");
-            }
             break;
         case historyitem_Paragraph_Borders_Between:
             case historyitem_Paragraph_Borders_Bottom:
@@ -9317,7 +7733,12 @@ Paragraph.prototype = {
             }
             break;
         case historyitem_Paragraph_PresentationPr_Bullet:
-            Data.New.Write_ToBinary(Writer);
+            if (Data.New) {
+                Writer.WriteBool(true);
+                Data.New.Write_ToBinary(Writer);
+            } else {
+                Writer.WriteBool(false);
+            }
             break;
         case historyitem_Paragraph_PresentationPr_Level:
             Writer.WriteLong(Data.New);
@@ -9328,6 +7749,14 @@ Paragraph.prototype = {
             } else {
                 Writer.WriteBool(false);
                 Data.New.Write_ToBinary(Writer);
+            }
+            break;
+        case historyitem_Paragraph_SectionPr:
+            if (undefined === Data.New) {
+                Writer.WriteBool(true);
+            } else {
+                Writer.WriteBool(false);
+                Writer.WriteString2(Data.New.Get_Id());
             }
             break;
         }
@@ -9343,29 +7772,27 @@ Paragraph.prototype = {
         case historyitem_Paragraph_AddItem:
             var Count = Reader.GetLong();
             for (var Index = 0; Index < Count; Index++) {
-                var Pos = this.Internal_Get_RealPos(this.m_oContentChanges.Check(contentchanges_Add, Reader.GetLong()));
-                var Element = ParagraphContent_Read_FromBinary(Reader);
+                var Pos = this.m_oContentChanges.Check(contentchanges_Add, Reader.GetLong());
+                var Element = g_oTableId.Get_ById(Reader.GetString2());
                 if (null != Element) {
-                    if (Element instanceof ParaCommentStart) {
-                        var Comment = g_oTableId.Get_ById(Element.Id);
-                        if (null != Comment) {
-                            Comment.Set_StartInfo(0, 0, 0, 0, this.Get_Id());
-                        }
-                    } else {
-                        if (Element instanceof ParaCommentEnd) {
-                            var Comment = g_oTableId.Get_ById(Element.Id);
-                            if (null != Comment) {
-                                Comment.Set_EndInfo(0, 0, 0, 0, this.Get_Id());
+                    if (para_Comment === Element.Type) {
+                        var Comment = g_oTableId.Get_ById(Element.CommentId);
+                        if (null != Comment && Comment instanceof CComment) {
+                            if (true === Element.Start) {
+                                Comment.Set_StartId(this.Get_Id());
+                            } else {
+                                Comment.Set_EndId(this.Get_Id());
                             }
                         }
+                        Element.Set_Paragraph(this);
                     }
-                    this.Content.splice(Pos, 0, new ParaCollaborativeChangesEnd());
                     this.Content.splice(Pos, 0, Element);
-                    this.Content.splice(Pos, 0, new ParaCollaborativeChangesStart());
-                    CollaborativeEditing.Add_ChangedClass(this);
+                    if (Element.Recalc_RunsCompiledPr) {
+                        Element.Recalc_RunsCompiledPr();
+                    }
                 }
             }
-            this.DeleteCollaborativeMarks = false;
+            this.private_ResetSelection();
             break;
         case historyitem_Paragraph_RemoveItem:
             var Count = Reader.GetLong();
@@ -9374,9 +7801,9 @@ Paragraph.prototype = {
                 if (false === ChangesPos) {
                     continue;
                 }
-                var Pos = this.Internal_Get_RealPos(ChangesPos);
-                this.Content.splice(Pos, 1);
+                this.Content.splice(ChangesPos, 1);
             }
+            this.private_ResetSelection();
             break;
         case historyitem_Paragraph_Numbering:
             if (true === Reader.GetBool()) {
@@ -9446,7 +7873,7 @@ Paragraph.prototype = {
             break;
         case historyitem_Paragraph_KeepNext:
             if (false === Reader.GetBool()) {
-                this.Pr.KeepNext = Reader.GetLong();
+                this.Pr.KeepNext = Reader.GetBool();
             } else {
                 this.Pr.KeepNext = undefined;
             }
@@ -9553,6 +7980,20 @@ Paragraph.prototype = {
             }
             this.CompiledPr.NeedRecalc = true;
             break;
+        case historyitem_Paragraph_Shd_Unifill:
+            if (false === Reader.GetBool()) {
+                if (undefined === this.Pr.Shd) {
+                    this.Pr.Shd = new CDocumentShd();
+                }
+                this.Pr.Shd.Unifill = new CUniFill();
+                this.Pr.Shd.Unifill.Read_FromBinary(Reader);
+            } else {
+                if (undefined != this.Pr.Shd) {
+                    this.Pr.Shd.Unifill = undefined;
+                }
+            }
+            this.CompiledPr.NeedRecalc = true;
+            break;
         case historyitem_Paragraph_Shd:
             if (false === Reader.GetBool()) {
                 this.Pr.Shd = new CDocumentShd();
@@ -9586,13 +8027,13 @@ Paragraph.prototype = {
                 this.Pr.PStyle = undefined;
             }
             this.CompiledPr.NeedRecalc = true;
+            this.Recalc_RunsCompiledPr();
             break;
         case historyitem_Paragraph_DocNext:
             break;
         case historyitem_Paragraph_DocPrev:
             break;
         case historyitem_Paragraph_Parent:
-            this.Parent = g_oTableId.Get_ById(Reader.GetString2());
             break;
         case historyitem_Paragraph_Borders_Between:
             if (false === Reader.GetBool()) {
@@ -9649,12 +8090,18 @@ Paragraph.prototype = {
             this.CompiledPr.NeedRecalc = true;
             break;
         case historyitem_Paragraph_PresentationPr_Bullet:
-            var Bullet = new CPresentationBullet();
-            Bullet.Read_FromBinary(Reader);
-            this.PresentationPr.Bullet = Bullet;
+            if (Reader.GetBool()) {
+                this.Pr.Bullet = new CBullet();
+                this.Pr.Bullet.Read_FromBinary(Reader);
+            } else {
+                this.Pr.Bullet = undefined;
+            }
+            this.CompiledPr.NeedRecalc = true;
             break;
         case historyitem_Paragraph_PresentationPr_Level:
-            this.PresentationPr.Level = Reader.GetLong();
+            this.Pr.Lvl = Reader.GetLong();
+            this.CompiledPr.NeedRecalc = true;
+            this.Recalc_RunsCompiledPr();
             break;
         case historyitem_Paragraph_FramePr:
             if (false === Reader.GetBool()) {
@@ -9665,6 +8112,10 @@ Paragraph.prototype = {
             }
             this.CompiledPr.NeedRecalc = true;
             break;
+        case historyitem_Paragraph_SectionPr:
+            this.SectPr = (true === Reader.GetBool() ? undefined : g_oTableId.Get_ById(Reader.GetString2()));
+            this.LogicDocument.Update_SectionsInfo();
+            break;
         }
         this.RecalcInfo.Set_Type_0(pararecalc_0_All);
         this.RecalcInfo.Set_Type_0_Spell(pararecalc_0_Spell_All);
@@ -9672,166 +8123,194 @@ Paragraph.prototype = {
     Write_ToBinary2: function (Writer) {
         Writer.WriteLong(historyitem_type_Paragraph);
         Writer.WriteString2("" + this.Id);
-        Writer.WriteString2(this.Parent.Get_Id());
-        this.Pr.Write_ToBinary(Writer);
-        Writer.WriteString2(this.TextPr.Get_Id());
-        var StartPos = Writer.GetCurPosition();
-        Writer.Skip(4);
-        var Len = this.Content.length;
-        var Count = 0;
-        for (var Index = 0; Index < Len; Index++) {
-            var Item = this.Content[Index];
-            if (true === Item.Is_RealContent()) {
-                Item.Write_ToBinary(Writer);
-                Count++;
-            }
+        var PrForWrite, TextPrForWrite;
+        if (this.StartState) {
+            PrForWrite = this.StartState.Pr;
+            TextPrForWrite = this.StartState.TextPr;
+        } else {
+            PrForWrite = this.Pr;
+            TextPrForWrite = this.TextPr;
         }
-        var EndPos = Writer.GetCurPosition();
-        Writer.Seek(StartPos);
+        PrForWrite.Write_ToBinary(Writer);
+        Writer.WriteString2("" + TextPrForWrite.Get_Id());
+        var Count = this.Content.length;
         Writer.WriteLong(Count);
-        Writer.Seek(EndPos);
+        for (var Index = 0; Index < Count; Index++) {
+            Writer.WriteString2("" + this.Content[Index].Get_Id());
+        }
+        Writer.WriteBool(this.bFromDocument);
     },
     Read_FromBinary2: function (Reader) {
         this.Id = Reader.GetString2();
-        this.DrawingDocument = editor.WordControl.m_oLogicDocument.DrawingDocument;
-        var LinkData = new Object();
-        LinkData.Parent = Reader.GetString2();
         this.Pr = new CParaPr();
         this.Pr.Read_FromBinary(Reader);
-        LinkData.TextPr = Reader.GetString2();
-        CollaborativeEditing.Add_LinkData(this, LinkData);
-        this.Content = new Array();
+        this.TextPr = g_oTableId.Get_ById(Reader.GetString2());
+        this.Content = [];
         var Count = Reader.GetLong();
         for (var Index = 0; Index < Count; Index++) {
-            var Element = ParagraphContent_Read_FromBinary(Reader);
+            var Element = g_oTableId.Get_ById(Reader.GetString2());
             if (null != Element) {
                 this.Content.push(Element);
             }
         }
         CollaborativeEditing.Add_NewObject(this);
+        this.bFromDocument = Reader.GetBool();
+        if (!this.bFromDocument) {
+            this.Numbering = new ParaPresentationNumbering();
+        }
+        if (this.bFromDocument || (editor && editor.WordControl && editor.WordControl.m_oDrawingDocument)) {
+            var DrawingDocument = editor.WordControl.m_oDrawingDocument;
+            if (undefined !== DrawingDocument && null !== DrawingDocument) {
+                this.DrawingDocument = DrawingDocument;
+                this.LogicDocument = this.bFromDocument ? this.DrawingDocument.m_oLogicDocument : null;
+            }
+        } else {
+            CollaborativeEditing.Add_LinkData(this, {});
+        }
     },
     Load_LinkData: function (LinkData) {
-        if ("undefined" != typeof(LinkData.Parent)) {
-            this.Parent = g_oTableId.Get_ById(LinkData.Parent);
-        }
-        if ("undefined" != typeof(LinkData.TextPr)) {
-            this.TextPr = g_oTableId.Get_ById(LinkData.TextPr);
+        if (this.Parent && this.Parent.Parent && this.Parent.Parent.getDrawingDocument) {
+            this.DrawingDocument = this.Parent.Parent.getDrawingDocument();
         }
     },
-    Clear_CollaborativeMarks: function () {
-        for (var Pos = 0; Pos < this.Content.length; Pos++) {
-            var Item = this.Content[Pos];
-            if (Item.Type == para_CollaborativeChangesEnd || Item.Type == para_CollaborativeChangesStart) {
-                this.Internal_Content_Remove(Pos);
-                Pos--;
-            }
+    Clear_CollaborativeMarks: function () {},
+    Get_SelectionState2: function () {
+        var ParaState = {};
+        ParaState.Id = this.Get_Id();
+        ParaState.CurPos = {
+            X: this.CurPos.X,
+            Y: this.CurPos.Y,
+            Line: this.CurPos.Line,
+            ContentPos: this.Get_ParaContentPos(false, false),
+            RealX: this.CurPos.RealX,
+            RealY: this.CurPos.RealY,
+            PagesPos: this.CurPos.PagesPos
+        };
+        ParaState.Selection = {
+            Start: this.Selection.Start,
+            Use: this.Selection.Use,
+            StartPos: 0,
+            EndPos: 0,
+            Flag: this.Selection.Flag
+        };
+        if (true === this.Selection.Use) {
+            ParaState.Selection.StartPos = this.Get_ParaContentPos(true, true);
+            ParaState.Selection.EndPos = this.Get_ParaContentPos(true, false);
+        }
+        return ParaState;
+    },
+    Set_SelectionState2: function (ParaState) {
+        this.CurPos.X = ParaState.CurPos.X;
+        this.CurPos.Y = ParaState.CurPos.Y;
+        this.CurPos.Line = ParaState.CurPos.Line;
+        this.CurPos.RealX = ParaState.CurPos.RealX;
+        this.CurPos.RealY = ParaState.CurPos.RealY;
+        this.CurPos.PagesPos = ParaState.CurPos.PagesPos;
+        this.Set_ParaContentPos(ParaState.CurPos.ContentPos, true, -1, -1);
+        this.Selection_Remove();
+        this.Selection.Start = ParaState.Selection.Start;
+        this.Selection.Use = ParaState.Selection.Use;
+        this.Selection.Flag = ParaState.Selection.Flag;
+        if (true === this.Selection.Use) {
+            this.Set_SelectionContentPos(ParaState.Selection.StartPos, ParaState.Selection.EndPos);
         }
     },
     Add_Comment: function (Comment, bStart, bEnd) {
-        var CursorPos_max = this.Internal_GetEndPos();
-        var CursorPos_min = this.Internal_GetStartPos();
-        if (true === this.ApplyToAll) {
+        if (true == this.ApplyToAll) {
             if (true === bEnd) {
-                var PagePos = this.Internal_GetXYByContentPos(CursorPos_max);
-                var Line = this.Lines[PagePos.Internal.Line];
-                var LineA = Line.Metrics.Ascent;
-                var LineH = Line.Bottom - Line.Top;
-                Comment.Set_EndInfo(PagePos.PageNum, PagePos.X, PagePos.Y - LineA, LineH, this.Get_Id());
-                var Item = new ParaCommentEnd(Comment.Get_Id());
-                this.Internal_Content_Add(CursorPos_max, Item);
+                var EndContentPos = this.Get_EndPos(false);
+                var CommentEnd = new ParaComment(false, Comment.Get_Id());
+                var EndPos = EndContentPos.Get(0);
+                if (para_Run === this.Content[EndPos].Type) {
+                    var NewElement = this.Content[EndPos].Split(EndContentPos, 1);
+                    if (null !== NewElement) {
+                        this.Internal_Content_Add(EndPos + 1, NewElement);
+                    }
+                }
+                this.Internal_Content_Add(EndPos + 1, CommentEnd);
             }
             if (true === bStart) {
-                var PagePos = this.Internal_GetXYByContentPos(CursorPos_min);
-                var Line = this.Lines[PagePos.Internal.Line];
-                var LineA = Line.Metrics.Ascent;
-                var LineH = Line.Bottom - Line.Top;
-                Comment.Set_StartInfo(PagePos.PageNum, PagePos.X, PagePos.Y - LineA, LineH, this.Get_Id());
-                var Item = new ParaCommentStart(Comment.Get_Id());
-                this.Internal_Content_Add(CursorPos_min, Item);
+                var StartContentPos = this.Get_StartPos();
+                var CommentStart = new ParaComment(true, Comment.Get_Id());
+                var StartPos = StartContentPos.Get(0);
+                if (para_Run === this.Content[StartPos].Type) {
+                    var NewElement = this.Content[StartPos].Split(StartContentPos, 1);
+                    if (null !== NewElement) {
+                        this.Internal_Content_Add(StartPos + 1, NewElement);
+                    }
+                    this.Internal_Content_Add(StartPos + 1, CommentStart);
+                } else {
+                    this.Internal_Content_Add(StartPos, CommentStart);
+                }
             }
         } else {
             if (true === this.Selection.Use) {
-                var StartPos, EndPos;
-                if (this.Selection.StartPos < this.Selection.EndPos) {
-                    StartPos = this.Selection.StartPos;
-                    EndPos = this.Selection.EndPos;
-                } else {
-                    StartPos = this.Selection.EndPos;
-                    EndPos = this.Selection.StartPos;
+                var StartContentPos = this.Get_ParaContentPos(true, true);
+                var EndContentPos = this.Get_ParaContentPos(true, false);
+                if (StartContentPos.Compare(EndContentPos) > 0) {
+                    var Temp = StartContentPos;
+                    StartContentPos = EndContentPos;
+                    EndContentPos = Temp;
                 }
                 if (true === bEnd) {
-                    EndPos = Math.max(CursorPos_min, Math.min(CursorPos_max, EndPos));
-                    var PagePos = this.Internal_GetXYByContentPos(EndPos);
-                    var Line = this.Lines[PagePos.Internal.Line];
-                    var LineA = Line.Metrics.Ascent;
-                    var LineH = Line.Bottom - Line.Top;
-                    Comment.Set_EndInfo(PagePos.PageNum, PagePos.X, PagePos.Y - LineA, LineH, this.Get_Id());
-                    var Item = new ParaCommentEnd(Comment.Get_Id());
-                    this.Internal_Content_Add(EndPos, Item);
+                    var CommentEnd = new ParaComment(false, Comment.Get_Id());
+                    var EndPos = EndContentPos.Get(0);
+                    if (para_Run === this.Content[EndPos].Type) {
+                        var NewElement = this.Content[EndPos].Split(EndContentPos, 1);
+                        if (null !== NewElement) {
+                            this.Internal_Content_Add(EndPos + 1, NewElement);
+                        }
+                    }
+                    this.Internal_Content_Add(EndPos + 1, CommentEnd);
+                    this.Selection.EndPos = EndPos + 1;
                 }
                 if (true === bStart) {
-                    StartPos = Math.max(CursorPos_min, Math.min(CursorPos_max, StartPos));
-                    var PagePos = this.Internal_GetXYByContentPos(StartPos);
-                    var Line = this.Lines[PagePos.Internal.Line];
-                    var LineA = Line.Metrics.Ascent;
-                    var LineH = Line.Bottom - Line.Top;
-                    Comment.Set_StartInfo(PagePos.PageNum, PagePos.X, PagePos.Y - LineA, LineH, this.Get_Id());
-                    var Item = new ParaCommentStart(Comment.Get_Id());
-                    this.Internal_Content_Add(StartPos, Item);
+                    var CommentStart = new ParaComment(true, Comment.Get_Id());
+                    var StartPos = StartContentPos.Get(0);
+                    if (para_Run === this.Content[StartPos].Type) {
+                        var NewElement = this.Content[StartPos].Split(StartContentPos, 1);
+                        if (null !== NewElement) {
+                            this.Internal_Content_Add(StartPos + 1, NewElement);
+                            NewElement.Select_All();
+                        }
+                        this.Internal_Content_Add(StartPos + 1, CommentStart);
+                        this.Selection.StartPos = StartPos + 1;
+                    } else {
+                        this.Internal_Content_Add(StartPos, CommentStart);
+                        this.Selection.StartPos = StartPos;
+                    }
                 }
             } else {
+                var ContentPos = this.Get_ParaContentPos(false, false);
                 if (true === bEnd) {
-                    var Pos = Math.max(CursorPos_min, Math.min(CursorPos_max, this.CurPos.ContentPos));
-                    var PagePos = this.Internal_GetXYByContentPos(Pos);
-                    var Line = this.Lines[PagePos.Internal.Line];
-                    var LineA = Line.Metrics.Ascent;
-                    var LineH = Line.Bottom - Line.Top;
-                    Comment.Set_EndInfo(PagePos.PageNum, PagePos.X, PagePos.Y - LineA, LineH, this.Get_Id());
-                    var Item = new ParaCommentEnd(Comment.Get_Id());
-                    this.Internal_Content_Add(Pos, Item);
+                    var CommentEnd = new ParaComment(false, Comment.Get_Id());
+                    var EndPos = ContentPos.Get(0);
+                    if (para_Run === this.Content[EndPos].Type) {
+                        var NewElement = this.Content[EndPos].Split(ContentPos, 1);
+                        if (null !== NewElement) {
+                            this.Internal_Content_Add(EndPos + 1, NewElement);
+                        }
+                    }
+                    this.Internal_Content_Add(EndPos + 1, CommentEnd);
                 }
                 if (true === bStart) {
-                    var Pos = Math.max(CursorPos_min, Math.min(CursorPos_max, this.CurPos.ContentPos));
-                    var PagePos = this.Internal_GetXYByContentPos(Pos);
-                    var Line = this.Lines[PagePos.Internal.Line];
-                    var LineA = Line.Metrics.Ascent;
-                    var LineH = Line.Bottom - Line.Top;
-                    Comment.Set_StartInfo(PagePos.PageNum, PagePos.X, PagePos.Y - LineA, LineH, this.Get_Id());
-                    var Item = new ParaCommentStart(Comment.Get_Id());
-                    this.Internal_Content_Add(Pos, Item);
+                    var CommentStart = new ParaComment(true, Comment.Get_Id());
+                    var StartPos = ContentPos.Get(0);
+                    if (para_Run === this.Content[StartPos].Type) {
+                        var NewElement = this.Content[StartPos].Split(ContentPos, 1);
+                        if (null !== NewElement) {
+                            this.Internal_Content_Add(StartPos + 1, NewElement);
+                        }
+                        this.Internal_Content_Add(StartPos + 1, CommentStart);
+                    } else {
+                        this.Internal_Content_Add(StartPos, CommentStart);
+                    }
                 }
             }
         }
+        this.Correct_Content();
     },
-    Add_Comment2: function (Comment, ObjectId) {
-        var Pos = -1;
-        var Count = this.Content.length;
-        for (var Index = 0; Index < Count; Index++) {
-            var Item = this.Content[Index];
-            if (para_Drawing === Item.Type) {
-                Pos = Index;
-                break;
-            }
-        }
-        if (-1 != Pos) {
-            var StartPos = Pos;
-            var EndPos = Pos + 1;
-            var PagePos = this.Internal_GetXYByContentPos(EndPos);
-            var Line = this.Lines[PagePos.Internal.Line];
-            var LineA = Line.Metrics.Ascent;
-            var LineH = Line.Bottom - Line.Top;
-            Comment.Set_EndInfo(PagePos.PageNum, PagePos.X, PagePos.Y - LineA, LineH, this.Get_Id());
-            var Item = new ParaCommentEnd(Comment.Get_Id());
-            this.Internal_Content_Add(EndPos, Item);
-            var PagePos = this.Internal_GetXYByContentPos(StartPos);
-            var Line = this.Lines[PagePos.Internal.Line];
-            var LineA = Line.Metrics.Ascent;
-            var LineH = Line.Bottom - Line.Top;
-            Comment.Set_StartInfo(PagePos.PageNum, PagePos.X, PagePos.Y - LineA, LineH, this.Get_Id());
-            var Item = new ParaCommentStart(Comment.Get_Id());
-            this.Internal_Content_Add(StartPos, Item);
-        }
-    },
+    Add_Comment2: function (Comment, ObjectId) {},
     CanAdd_Comment: function () {
         if (true === this.Selection.Use && true != this.Selection_IsEmpty()) {
             return true;
@@ -9839,16 +8318,10 @@ Paragraph.prototype = {
         return false;
     },
     Remove_CommentMarks: function (Id) {
-        var DocumentComments = editor.WordControl.m_oLogicDocument.Comments;
         var Count = this.Content.length;
         for (var Pos = 0; Pos < Count; Pos++) {
             var Item = this.Content[Pos];
-            if ((para_CommentStart === Item.Type || para_CommentEnd === Item.Type) && Id === Item.Id) {
-                if (para_CommentStart === Item.Type) {
-                    DocumentComments.Set_StartInfo(Item.Id, 0, 0, 0, 0, null);
-                } else {
-                    DocumentComments.Set_EndInfo(Item.Id, 0, 0, 0, 0, null);
-                }
+            if (para_Comment === Item.Type && Id === Item.CommentId) {
                 this.Internal_Content_Remove(Pos);
                 Pos--;
                 Count--;
@@ -9857,30 +8330,162 @@ Paragraph.prototype = {
     },
     Replace_MisspelledWord: function (Word, WordId) {
         var Element = this.SpellChecker.Elements[WordId];
-        var StartPos = Element.StartPos;
-        var EndPos = Element.EndPos;
-        for (var Pos = EndPos; Pos >= StartPos; Pos--) {
-            var ItemType = this.Content[Pos].Type;
-            if (para_TextPr != ItemType) {
-                this.Internal_Content_Remove(Pos);
-            }
+        var Class = Element.StartRun;
+        if (para_Run !== Class.Type || Element.StartPos.Data.Depth <= 0) {
+            return;
         }
+        var RunPos = Element.StartPos.Data[Element.StartPos.Depth - 1];
         var Len = Word.length;
         for (var Pos = 0; Pos < Len; Pos++) {
-            this.Internal_Content_Add(StartPos + Pos, new ParaText(Word[Pos]));
+            Class.Add_ToContent(RunPos + Pos, (32 === Word.charCodeAt(Pos) ? new ParaSpace() : new ParaText(Word[Pos])));
         }
+        var StartPos = Element.StartPos;
+        var EndPos = Element.EndPos;
+        var CommentsToDelete = {};
+        var EPos = EndPos.Get(0);
+        var SPos = StartPos.Get(0);
+        for (var Pos = SPos; Pos <= EPos; Pos++) {
+            var Item = this.Content[Pos];
+            if (para_Comment === Item.Type) {
+                CommentsToDelete[Item.CommentId] = true;
+            }
+        }
+        for (var CommentId in CommentsToDelete) {
+            this.LogicDocument.Remove_Comment(CommentId, true, false);
+        }
+        this.Set_SelectionContentPos(StartPos, EndPos);
+        this.Selection.Use = true;
+        this.Selection.Flag = selectionflag_Common;
+        this.Remove();
+        this.Selection_Remove();
+        this.Set_ParaContentPos(StartPos, true, -1, -1);
         this.RecalcInfo.Set_Type_0(pararecalc_0_All);
-        this.Selection.Use = false;
-        this.Selection.Start = false;
-        this.Selection.StartPos = EndPos;
-        this.Selection.EndPos = EndPos;
-        this.Set_ContentPos(EndPos);
+        Element.Checked = null;
     },
     Ignore_MisspelledWord: function (WordId) {
         var Element = this.SpellChecker.Elements[WordId];
         Element.Checked = true;
         this.ReDraw();
+    },
+    Get_SectionPr: function () {
+        return this.SectPr;
+    },
+    Set_SectionPr: function (SectPr) {
+        if (this.LogicDocument !== this.Parent) {
+            return;
+        }
+        if (SectPr !== this.SectPr) {
+            History.Add(this, {
+                Type: historyitem_Paragraph_SectionPr,
+                Old: this.SectPr,
+                New: SectPr
+            });
+            this.SectPr = SectPr;
+            this.LogicDocument.Update_SectionsInfo();
+            if (this.Content.length > 0 && para_Run === this.Content[this.Content.length - 1].Type) {
+                var LastRun = this.Content[this.Content.length - 1];
+                LastRun.RecalcInfo.Measure = true;
+            }
+        }
+    },
+    Get_LastRangeVisibleBounds: function () {
+        var CurLine = this.Lines.length - 1;
+        var CurPage = this.Pages.length - 1;
+        var Line = this.Lines[CurLine];
+        var RangesCount = Line.Ranges.length;
+        var RangeW = new CParagraphRangeVisibleWidth();
+        var CurRange = 0;
+        for (; CurRange < RangesCount; CurRange++) {
+            var Range = Line.Ranges[CurRange];
+            var StartPos = Range.StartPos;
+            var EndPos = Range.EndPos;
+            RangeW.W = 0;
+            RangeW.End = false;
+            if (true === this.Numbering.Check_Range(CurRange, CurLine)) {
+                RangeW.W += this.Numbering.WidthVisible;
+            }
+            for (var Pos = StartPos; Pos <= EndPos; Pos++) {
+                var Item = this.Content[Pos];
+                Item.Get_Range_VisibleWidth(RangeW, CurLine, CurRange);
+            }
+            if (true === RangeW.End || CurRange === RangesCount - 1) {
+                break;
+            }
+        }
+        var Y = this.Pages[CurPage].Y + this.Lines[CurLine].Top;
+        var H = this.Lines[CurLine].Bottom - this.Lines[CurLine].Top;
+        var X = this.Lines[CurLine].Ranges[CurRange].XVisible;
+        var W = RangeW.W;
+        var B = this.Lines[CurLine].Y - this.Lines[CurLine].Top;
+        var XLimit = this.XLimit - this.Get_CompiledPr2(false).ParaPr.Ind.Right;
+        return {
+            X: X,
+            Y: Y,
+            W: W,
+            H: H,
+            BaseLine: B,
+            XLimit: XLimit
+        };
     }
+};
+Paragraph.prototype.private_ResetSelection = function () {
+    this.Selection.StartPos = 0;
+    this.Selection.EndPos = 0;
+    this.Selection.StartManually = false;
+    this.Selection.EndManually = false;
+    this.CurPos.ContentPos = 0;
+};
+Paragraph.prototype.private_CorrectCurPosRangeLine = function () {
+    if (-1 !== this.CurPos.Line) {
+        return;
+    }
+    var ParaCurPos = this.Get_ParaContentPos(false, false);
+    var Ranges = this.Get_RangesByPos(ParaCurPos);
+    this.CurPos.Line = -1;
+    this.CurPos.Range = -1;
+    for (var Index = 0, Count = Ranges.length; Index < Count; Index++) {
+        var RangeIndex = Ranges[Index].Range;
+        var LineIndex = Ranges[Index].Line;
+        if (undefined !== this.Lines[LineIndex] && undefined !== this.Lines[LineIndex].Ranges[RangeIndex]) {
+            var Range = this.Lines[LineIndex].Ranges[RangeIndex];
+            if (Range.W > 0) {
+                this.CurPos.Line = LineIndex;
+                this.CurPos.Range = RangeIndex;
+                break;
+            }
+        }
+    }
+};
+Paragraph.prototype.Get_RangesByPos = function (ContentPos) {
+    var Run = this.Get_ElementByPos(ContentPos);
+    if (null === Run || para_Run !== Run.Type) {
+        return [];
+    }
+    return Run.Get_RangesByPos(ContentPos.Get(ContentPos.Depth - 1));
+};
+Paragraph.prototype.Get_ElementByPos = function (ContentPos) {
+    if (ContentPos.Depth <= 1) {
+        return this;
+    }
+    var CurPos = ContentPos.Get(0);
+    return this.Content[CurPos].Get_ElementByPos(ContentPos, 1);
+};
+Paragraph.prototype.private_RecalculateTextMetrics = function (TextMetrics) {
+    for (var Index = 0, Count = this.Content.length; Index < Count; Index++) {
+        if (this.Content[Index].Recalculate_Measure2) {
+            this.Content[Index].Recalculate_Measure2(TextMetrics);
+        }
+    }
+};
+Paragraph.prototype.private_GetPageByLine = function (CurLine) {
+    var CurPage = 0;
+    var PagesCount = this.Pages.length;
+    for (; CurPage < PagesCount; CurPage++) {
+        if (CurLine >= this.Pages[CurPage].StartLine && CurLine <= this.Pages[CurPage].EndLine) {
+            break;
+        }
+    }
+    return Math.min(PagesCount - 1, CurPage);
 };
 var pararecalc_0_All = 0;
 var pararecalc_0_None = 1;
@@ -9952,275 +8557,6 @@ CParaRecalcInfo.prototype = {
         }
     }
 };
-function CParaLineRange(X, XEnd) {
-    this.X = X;
-    this.XVisible = 0;
-    this.W = 0;
-    this.Words = 0;
-    this.Spaces = 0;
-    this.XEnd = XEnd;
-    this.StartPos = 0;
-    this.SpacePos = -1;
-    this.StartPos2 = -1;
-    this.EndPos2 = -1;
-}
-CParaLineRange.prototype = {
-    Shift: function (Dx, Dy) {
-        this.X += Dx;
-        this.XEnd += Dx;
-        this.XVisible += Dx;
-    }
-};
-function CParaLineMetrics() {
-    this.Ascent = 0;
-    this.Descent = 0;
-    this.TextAscent = 0;
-    this.TextAscent2 = 0;
-    this.TextDescent = 0;
-    this.LineGap = 0;
-}
-CParaLineMetrics.prototype = {
-    Update: function (TextAscent, TextAscent2, TextDescent, Ascent, Descent, ParaPr) {
-        if (TextAscent > this.TextAscent) {
-            this.TextAscent = TextAscent;
-        }
-        if (TextAscent2 > this.TextAscent2) {
-            this.TextAscent2 = TextAscent2;
-        }
-        if (TextDescent > this.TextDescent) {
-            this.TextDescent = TextDescent;
-        }
-        if (Ascent > this.Ascent) {
-            this.Ascent = Ascent;
-        }
-        if (Descent > this.Descent) {
-            this.Descent = Descent;
-        }
-        if (this.Ascent < this.TextAscent) {
-            this.TextAscent = this.Ascent;
-        }
-        if (this.Descent < this.TextDescent) {
-            this.TextDescent = this.Descent;
-        }
-        this.LineGap = this.Recalculate_LineGap(ParaPr, this.TextAscent, this.TextDescent);
-    },
-    Recalculate_LineGap: function (ParaPr, TextAscent, TextDescent) {
-        var LineGap = 0;
-        switch (ParaPr.Spacing.LineRule) {
-        case linerule_Auto:
-            LineGap = (TextAscent + TextDescent) * (ParaPr.Spacing.Line - 1);
-            break;
-        case linerule_Exact:
-            var ExactValue = Math.max(1, ParaPr.Spacing.Line);
-            LineGap = ExactValue - (TextAscent + TextDescent);
-            var Gap = this.Ascent + this.Descent - ExactValue;
-            if (Gap > 0) {
-                var DescentDiff = this.Descent - this.TextDescent;
-                if (DescentDiff > 0) {
-                    if (DescentDiff < Gap) {
-                        this.Descent = this.TextDescent;
-                        Gap -= DescentDiff;
-                    } else {
-                        this.Descent -= Gap;
-                        Gap = 0;
-                    }
-                }
-                var AscentDiff = this.Ascent - this.TextAscent;
-                if (AscentDiff > 0) {
-                    if (AscentDiff < Gap) {
-                        this.Ascent = this.TextAscent;
-                        Gap -= AscentDiff;
-                    } else {
-                        this.Ascent -= Gap;
-                        Gap = 0;
-                    }
-                }
-                if (Gap > 0) {
-                    var OldTA = this.TextAscent;
-                    var OldTD = this.TextDescent;
-                    var Sum = OldTA + OldTD;
-                    this.Ascent = OldTA * (Sum - Gap) / Sum;
-                    this.Descent = OldTD * (Sum - Gap) / Sum;
-                }
-            } else {
-                this.Ascent -= Gap;
-            }
-            LineGap = 0;
-            break;
-        case linerule_AtLeast:
-            var LineGap1 = ParaPr.Spacing.Line;
-            var LineGap2 = TextAscent + TextDescent;
-            LineGap = Math.max(LineGap1, LineGap2) - (TextAscent + TextDescent);
-            break;
-        }
-        return LineGap;
-    }
-};
-function CParaLine(StartPos) {
-    this.Y = 0;
-    this.W = 0;
-    this.Top = 0;
-    this.Bottom = 0;
-    this.Words = 0;
-    this.Spaces = 0;
-    this.Metrics = new CParaLineMetrics();
-    this.Ranges = new Array();
-    this.RangeY = false;
-    this.StartPos = StartPos;
-    this.EndPos = StartPos;
-}
-CParaLine.prototype = {
-    Add_Range: function (X, XEnd) {
-        this.Ranges.push(new CParaLineRange(X, XEnd));
-    },
-    Shift: function (Dx, Dy) {
-        var RangesCount = this.Ranges.length;
-        for (var Index = 0; Index < RangesCount; Index++) {
-            this.Ranges[Index].Shift(Dx, Dy);
-        }
-    },
-    Set_RangeStartPos: function (CurRange, StartPos) {
-        if (0 === CurRange) {
-            this.StartPos = StartPos;
-        }
-        this.Ranges[CurRange].StartPos = StartPos;
-    },
-    Reset: function (StartPos) {
-        this.Top = 0;
-        this.Bottom = 0;
-        this.Words = 0;
-        this.Spaces = 0;
-        this.Metrics = new CParaLineMetrics();
-        this.Ranges = new Array();
-        this.StartPos = StartPos;
-    },
-    Set_EndPos: function (EndPos, Paragraph) {
-        this.EndPos = EndPos;
-        var Content = Paragraph.Content;
-        var RangesCount = this.Ranges.length;
-        for (var CurRange = 0; CurRange < RangesCount; CurRange++) {
-            var Range = this.Ranges[CurRange];
-            var StartRangePos = Range.StartPos;
-            var EndRangePos = (CurRange === RangesCount - 1 ? EndPos : this.Ranges[CurRange + 1].StartPos - 1);
-            var nSpacesCount = 0;
-            var bWord = false;
-            var nSpaceLen = 0;
-            var nSpacePos = -1;
-            var nStartPos2 = -1;
-            var nEndPos2 = -1;
-            Range.W = 0;
-            Range.Words = 0;
-            Range.Spaces = 0;
-            for (var Pos = StartRangePos; Pos <= EndRangePos; Pos++) {
-                var Item = Content[Pos];
-                if (Pos === Paragraph.Numbering.Pos) {
-                    Range.W += Paragraph.Numbering.WidthVisible;
-                }
-                switch (Item.Type) {
-                case para_Text:
-                    if (true != bWord) {
-                        bWord = true;
-                        Range.Words++;
-                    }
-                    Range.W += Item.Width;
-                    if (true === Item.SpaceAfter) {
-                        Range.W += nSpaceLen;
-                        if (Range.Words > 1) {
-                            Range.Spaces += nSpacesCount;
-                        }
-                        bWord = false;
-                        nSpaceLen = 0;
-                        nSpacesCount = 0;
-                    }
-                    if (EndRangePos === Pos) {
-                        Range.W += nSpaceLen;
-                    }
-                    if (-1 === nSpacePos) {
-                        nSpacePos = Pos;
-                    }
-                    if (-1 === nStartPos2) {
-                        nStartPos2 = Pos;
-                    }
-                    nEndPos2 = Pos;
-                    break;
-                case para_Space:
-                    if (true === bWord) {
-                        Range.W += nSpaceLen;
-                        if (Range.Words > 1) {
-                            Range.Spaces += nSpacesCount;
-                        }
-                        bWord = false;
-                        nSpacesCount = 1;
-                        nSpaceLen = 0;
-                    } else {
-                        nSpacesCount++;
-                    }
-                    nSpaceLen += Item.Width;
-                    break;
-                case para_Drawing:
-                    Range.Words++;
-                    Range.W += nSpaceLen;
-                    Range.Spaces += nSpacesCount;
-                    bWord = false;
-                    nSpacesCount = 0;
-                    nSpaceLen = 0;
-                    if (true === Item.Is_Inline() || true === Paragraph.Parent.Is_DrawingShape()) {
-                        Range.W += Item.Width;
-                        if (-1 === nSpacePos) {
-                            nSpacePos = Pos;
-                        }
-                        if (-1 === nStartPos2) {
-                            nStartPos2 = Pos;
-                        }
-                        nEndPos2 = Pos;
-                    }
-                    break;
-                case para_PageNum:
-                    Range.Words++;
-                    Range.W += nSpaceLen;
-                    Range.Spaces += nSpacesCount;
-                    bWord = false;
-                    nSpacesCount = 0;
-                    nSpaceLen = 0;
-                    Range.W += Item.Width;
-                    if (-1 === nSpacePos) {
-                        nSpacePos = Pos;
-                    }
-                    if (-1 === nStartPos2) {
-                        nStartPos2 = Pos;
-                    }
-                    nEndPos2 = Pos;
-                    break;
-                case para_Tab:
-                    Range.W += Item.Width;
-                    Range.W += nSpaceLen;
-                    Range.Words = 0;
-                    Range.Spaces = 0;
-                    nSpaceLen = 0;
-                    nSpacesCount = 0;
-                    bWord = false;
-                    nSpacePos = -1;
-                    break;
-                case para_NewLine:
-                    if (bWord && Range.Words > 1) {
-                        Range.Spaces += nSpacesCount;
-                    }
-                    nSpacesCount = 0;
-                    bWord = false;
-                    break;
-                case para_End:
-                    if (true === bWord) {
-                        Range.Spaces += nSpacesCount;
-                    }
-                    break;
-                }
-            }
-            Range.SpacePos = nSpacePos;
-            Range.StartPos2 = (nStartPos2 === -1 ? StartRangePos : nStartPos2);
-            Range.EndPos2 = (nEndPos2 === -1 ? EndRangePos : nEndPos2);
-        }
-    }
-};
 function CDocumentBounds(Left, Top, Right, Bottom) {
     this.Bottom = Bottom;
     this.Left = Left;
@@ -10233,38 +8569,26 @@ CDocumentBounds.prototype = {
         this.Top += Dy;
         this.Left += Dx;
         this.Right += Dx;
+    },
+    Compare: function (Other) {
+        if (Math.abs(Other.Bottom - this.Bottom) > 0.001 || Math.abs(Other.Top - this.Top) > 0.001 || Math.abs(Other.Left - this.Left) > 0.001 || Math.abs(Other.Right - this.Right)) {
+            return false;
+        }
+        return true;
     }
 };
-function CParaPage(X, Y, XLimit, YLimit, FirstLine) {
-    this.X = X;
-    this.Y = Y;
-    this.XLimit = XLimit;
-    this.YLimit = YLimit;
-    this.FirstLine = FirstLine;
-    this.Bounds = new CDocumentBounds(X, Y, XLimit, Y);
-    this.StartLine = FirstLine;
-    this.EndLine = FirstLine;
-    this.TextPr = null;
+function CParagraphPageEndInfo() {
+    this.Comments = [];
+    this.RunRecalcInfo = null;
 }
-CParaPage.prototype = {
-    Reset: function (X, Y, XLimit, YLimit, FirstLine) {
-        this.X = X;
-        this.Y = Y;
-        this.XLimit = XLimit;
-        this.YLimit = YLimit;
-        this.FirstLine = FirstLine;
-        this.Bounds = new CDocumentBounds(X, Y, XLimit, Y);
-        this.StartLine = FirstLine;
-    },
-    Shift: function (Dx, Dy) {
-        this.X += Dx;
-        this.Y += Dy;
-        this.XLimit += Dx;
-        this.YLimit += Dy;
-        this.Bounds.Shift(Dx, Dy);
-    },
-    Set_EndLine: function (EndLine) {
-        this.EndLine = EndLine;
+CParagraphPageEndInfo.prototype = {
+    Copy: function () {
+        var NewPageEndInfo = new CParagraphPageEndInfo();
+        var CommentsCount = this.Comments.length;
+        for (var Index = 0; Index < CommentsCount; Index++) {
+            NewPageEndInfo.Comments.push(this.Comments[Index]);
+        }
+        return NewPageEndInfo;
     }
 };
 function CParaPos(Range, Line, Page, Pos) {
@@ -10285,11 +8609,11 @@ function CParaDrawingRangeLinesElement(y0, y1, x0, x1, w, r, g, b, Additional) {
     this.Additional = Additional;
 }
 function CParaDrawingRangeLines() {
-    this.Elements = new Array();
+    this.Elements = [];
 }
 CParaDrawingRangeLines.prototype = {
     Clear: function () {
-        this.Elements = new Array();
+        this.Elements = [];
     },
     Add: function (y0, y1, x0, x1, w, r, g, b, Additional) {
         this.Elements.push(new CParaDrawingRangeLinesElement(y0, y1, x0, x1, w, r, g, b, Additional));
@@ -10303,7 +8627,7 @@ CParaDrawingRangeLines.prototype = {
         Count--;
         while (Count > 0) {
             var PrevEl = this.Elements[Count - 1];
-            if (Math.abs(PrevEl.y0 - Element.y0) < 0.001 && Math.abs(PrevEl.y1 - Element.y1) < 0.001 && Math.abs(PrevEl.x1 - Element.x0) < 0.001 && Math.abs(PrevEl.w - Element.w) < 0.001 && PrevEl.r === Element.r && PrevEl.g === Element.g && PrevEl.b === Element.b) {
+            if (Math.abs(PrevEl.y0 - Element.y0) < 0.001 && Math.abs(PrevEl.y1 - Element.y1) < 0.001 && Math.abs(PrevEl.x1 - Element.x0) < 0.001 && Math.abs(PrevEl.w - Element.w) < 0.001 && PrevEl.r === Element.r && PrevEl.g === Element.g && PrevEl.b === Element.b && ((undefined === PrevEl.Additional && undefined === Element.Additional) || (undefined !== PrevEl.Additional && undefined !== Element.Additional && PrevEl.Additional.Active === Element.Additional.Active))) {
                 Element.x0 = PrevEl.x0;
                 Count--;
             } else {
@@ -10318,7 +8642,7 @@ CParaDrawingRangeLines.prototype = {
         if (Count <= 0) {
             return;
         }
-        var CurElements = new Array();
+        var CurElements = [];
         for (var Index = 0; Index < Count; Index++) {
             var Element = this.Elements[Index];
             var CurCount = CurElements.length;
@@ -10343,3 +8667,496 @@ CParaDrawingRangeLines.prototype = {
         }
     }
 };
+function CParagraphSelection() {
+    this.Start = false;
+    this.Use = false;
+    this.StartPos = 0;
+    this.EndPos = 0;
+    this.Flag = selectionflag_Common;
+    this.StartManually = true;
+    this.EndManually = true;
+}
+CParagraphSelection.prototype = {
+    Set_StartPos: function (Pos1, Pos2) {
+        this.StartPos = Pos1;
+    },
+    Set_EndPos: function (Pos1, Pos2) {
+        this.EndPos = Pos1;
+    }
+};
+function CParagraphContentPos() {
+    this.Data = [0, 0, 0];
+    this.Depth = 0;
+    this.bPlaceholder = false;
+}
+CParagraphContentPos.prototype = {
+    Add: function (Pos) {
+        this.Data[this.Depth] = Pos;
+        this.Depth++;
+    },
+    Update: function (Pos, Depth) {
+        this.Data[Depth] = Pos;
+        this.Depth = Depth + 1;
+    },
+    Update2: function (Pos, Depth) {
+        this.Data[Depth] = Pos;
+    },
+    Set: function (OtherPos) {
+        var Len = OtherPos.Depth;
+        for (var Pos = 0; Pos < Len; Pos++) {
+            this.Data[Pos] = OtherPos.Data[Pos];
+        }
+        this.Depth = OtherPos.Depth;
+        if (this.Data.length > this.Depth) {
+            this.Data.length = this.Depth;
+        }
+    },
+    Get: function (Depth) {
+        return this.Data[Depth];
+    },
+    Get_Depth: function () {
+        return this.Depth - 1;
+    },
+    Copy: function () {
+        var PRPos = new CParagraphContentPos();
+        var Count = this.Data.length;
+        for (var Index = 0; Index < Count; Index++) {
+            PRPos.Add(this.Data[Index]);
+        }
+        PRPos.Depth = this.Depth;
+        return PRPos;
+    },
+    Copy_FromDepth: function (ContentPos, Depth) {
+        var Count = ContentPos.Data.length;
+        for (var CurDepth = Depth; CurDepth < Count; CurDepth++) {
+            this.Update2(ContentPos.Data[CurDepth], CurDepth);
+        }
+        this.Depth = ContentPos.Depth;
+    },
+    Compare: function (Pos) {
+        var CurDepth = 0;
+        var Len1 = this.Data.length;
+        var Len2 = Pos.Data.length;
+        var LenMin = Math.min(Len1, Len2);
+        while (CurDepth < LenMin) {
+            if (this.Data[CurDepth] === Pos.Data[CurDepth]) {
+                CurDepth++;
+                continue;
+            } else {
+                if (this.Data[CurDepth] > Pos.Data[CurDepth]) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }
+        }
+        if (Len1 !== Len2) {
+            return -1;
+        }
+        return 0;
+    }
+};
+function CParagraphDrawStateHightlights() {
+    this.Page = 0;
+    this.Line = 0;
+    this.Range = 0;
+    this.CurPos = new CParagraphContentPos();
+    this.DrawColl = false;
+    this.High = new CParaDrawingRangeLines();
+    this.Coll = new CParaDrawingRangeLines();
+    this.Find = new CParaDrawingRangeLines();
+    this.Comm = new CParaDrawingRangeLines();
+    this.Shd = new CParaDrawingRangeLines();
+    this.DrawComments = true;
+    this.Comments = [];
+    this.CommentsFlag = comments_NoComment;
+    this.SearchCounter = 0;
+    this.Paragraph = undefined;
+    this.Graphics = undefined;
+    this.X = 0;
+    this.Y0 = 0;
+    this.Y1 = 0;
+    this.Spaces = 0;
+}
+CParagraphDrawStateHightlights.prototype = {
+    Reset: function (Paragraph, Graphics, DrawColl, DrawFind, DrawComments, PageEndInfo) {
+        this.Paragraph = Paragraph;
+        this.Graphics = Graphics;
+        this.DrawColl = DrawColl;
+        this.DrawFind = DrawFind;
+        this.CurPos = new CParagraphContentPos();
+        this.SearchCounter = 0;
+        this.DrawComments = DrawComments;
+        if (null !== PageEndInfo) {
+            this.Comments = PageEndInfo.Comments;
+        } else {
+            this.Comments = [];
+        }
+        this.Check_CommentsFlag();
+    },
+    Reset_Range: function (Page, Line, Range, X, Y0, Y1, SpacesCount) {
+        this.Page = Page;
+        this.Line = Line;
+        this.Range = Range;
+        this.High.Clear();
+        this.Coll.Clear();
+        this.Find.Clear();
+        this.Comm.Clear();
+        this.X = X;
+        this.Y0 = Y0;
+        this.Y1 = Y1;
+        this.Spaces = SpacesCount;
+    },
+    Add_Comment: function (Id) {
+        if (true === this.DrawComments) {
+            this.Comments.push(Id);
+            this.Check_CommentsFlag();
+        }
+    },
+    Remove_Comment: function (Id) {
+        if (true === this.DrawComments) {
+            var CommentsLen = this.Comments.length;
+            for (var CurPos = 0; CurPos < CommentsLen; CurPos++) {
+                if (this.Comments[CurPos] === Id) {
+                    this.Comments.splice(CurPos, 1);
+                    break;
+                }
+            }
+            this.Check_CommentsFlag();
+        }
+    },
+    Check_CommentsFlag: function () {
+        var Para = this.Paragraph;
+        var DocumentComments = Para.LogicDocument.Comments;
+        var CurComment = DocumentComments.Get_CurrentId();
+        var CommLen = this.Comments.length;
+        this.CommentsFlag = (CommLen > 0 ? comments_NonActiveComment : comments_NoComment);
+        for (var CurPos = 0; CurPos < CommLen; CurPos++) {
+            if (CurComment === this.Comments[CurPos]) {
+                this.CommentsFlag = comments_ActiveComment;
+                break;
+            }
+        }
+    },
+    Save_Coll: function () {
+        var Coll = this.Coll;
+        this.Coll = new CParaDrawingRangeLines();
+        return Coll;
+    },
+    Save_Comm: function () {
+        var Comm = this.Comm;
+        this.Comm = new CParaDrawingRangeLines();
+        return Comm;
+    },
+    Load_Coll: function (Coll) {
+        this.Coll = Coll;
+    },
+    Load_Comm: function (Comm) {
+        this.Comm = Comm;
+    }
+};
+function CParagraphDrawStateElements() {
+    this.Paragraph = undefined;
+    this.Graphics = undefined;
+    this.BgColor = undefined;
+    this.Theme = undefined;
+    this.ColorMap = undefined;
+    this.CurPos = new CParagraphContentPos();
+    this.VisitedHyperlink = false;
+    this.Page = 0;
+    this.Line = 0;
+    this.Range = 0;
+    this.X = 0;
+    this.Y = 0;
+}
+CParagraphDrawStateElements.prototype = {
+    Reset: function (Paragraph, Graphics, BgColor, Theme, ColorMap) {
+        this.Paragraph = Paragraph;
+        this.Graphics = Graphics;
+        this.BgColor = BgColor;
+        this.Theme = Theme;
+        this.ColorMap = ColorMap;
+        this.VisitedHyperlink = false;
+        this.CurPos = new CParagraphContentPos();
+    },
+    Reset_Range: function (Page, Line, Range, X, Y) {
+        this.Page = Page;
+        this.Line = Line;
+        this.Range = Range;
+        this.X = X;
+        this.Y = Y;
+    }
+};
+function CParagraphDrawStateLines() {
+    this.Paragraph = undefined;
+    this.Graphics = undefined;
+    this.BgColor = undefined;
+    this.CurPos = new CParagraphContentPos();
+    this.VisitedHyperlink = false;
+    this.Strikeout = new CParaDrawingRangeLines();
+    this.DStrikeout = new CParaDrawingRangeLines();
+    this.Underline = new CParaDrawingRangeLines();
+    this.Spelling = new CParaDrawingRangeLines();
+    this.SpellingCounter = 0;
+    this.Page = 0;
+    this.Line = 0;
+    this.Range = 0;
+    this.X = 0;
+    this.BaseLine = 0;
+    this.UnderlineOffset = 0;
+    this.Spaces = 0;
+}
+CParagraphDrawStateLines.prototype = {
+    Reset: function (Paragraph, Graphics, BgColor) {
+        this.Paragraph = Paragraph;
+        this.Graphics = Graphics;
+        this.BgColor = BgColor;
+        this.VisitedHyperlink = false;
+        this.CurPos = new CParagraphContentPos();
+        this.SpellingCounter = 0;
+    },
+    Reset_Line: function (Page, Line, Baseline, UnderlineOffset) {
+        this.Page = Page;
+        this.Line = Line;
+        this.Baseline = Baseline;
+        this.UnderlineOffset = UnderlineOffset;
+        this.Strikeout.Clear();
+        this.DStrikeout.Clear();
+        this.Underline.Clear();
+        this.Spelling.Clear();
+    },
+    Reset_Range: function (Range, X, Spaces) {
+        this.Range = Range;
+        this.X = X;
+        this.Spaces = Spaces;
+    }
+};
+var g_oPDSH = new CParagraphDrawStateHightlights();
+var g_oPDSL = new CParagraphDrawStateLines();
+function CParagraphSearchPos() {
+    this.Pos = new CParagraphContentPos();
+    this.Found = false;
+    this.Line = -1;
+    this.Range = -1;
+    this.Stage = 0;
+    this.Shift = false;
+    this.Punctuation = false;
+    this.First = true;
+    this.UpdatePos = false;
+    this.ForSelection = false;
+}
+function CParagraphSearchPosXY() {
+    this.Pos = new CParagraphContentPos();
+    this.InTextPos = new CParagraphContentPos();
+    this.CenterMode = true;
+    this.CurX = 0;
+    this.CurY = 0;
+    this.X = 0;
+    this.Y = 0;
+    this.DiffX = 1000000;
+    this.NumberingDiffX = 1000000;
+    this.Line = 0;
+    this.Range = 0;
+    this.InText = false;
+    this.Numbering = false;
+    this.End = false;
+}
+function CParagraphDrawSelectionRange() {
+    this.StartX = 0;
+    this.W = 0;
+    this.StartY = 0;
+    this.H = 0;
+    this.FindStart = true;
+    this.Draw = true;
+}
+function CParagraphCheckPageBreakEnd(PageBreak) {
+    this.PageBreak = PageBreak;
+    this.FindPB = true;
+}
+function CParagraphGetText() {
+    this.Text = "";
+}
+function CParagraphNearPos() {
+    this.NearPos = null;
+    this.Classes = [];
+}
+function CParagraphElementNearPos() {
+    this.NearPos = null;
+    this.Depth = 0;
+}
+function CParagraphDrawingLayout(Drawing, Paragraph, X, Y, Line, Range, Page) {
+    this.Paragraph = Paragraph;
+    this.Drawing = Drawing;
+    this.Line = Line;
+    this.Range = Range;
+    this.Page = Page;
+    this.X = X;
+    this.Y = Y;
+    this.LastW = 0;
+    this.Layout = false;
+}
+function CParagraphGetDropCapText() {
+    this.Runs = [];
+    this.Text = [];
+    this.Mixed = false;
+    this.Check = true;
+}
+function CRunRecalculateObject(StartLine, StartRange) {
+    this.StartLine = StartLine;
+    this.StartRange = StartRange;
+    this.Lines = [];
+    this.Content = [];
+}
+CRunRecalculateObject.prototype = {
+    Save_Lines: function (Obj, Copy) {
+        if (true === Copy) {
+            var Lines = Obj.Lines;
+            var Count = Obj.Lines.length;
+            for (var Index = 0; Index < Count; Index++) {
+                this.Lines[Index] = Lines[Index];
+            }
+        } else {
+            this.Lines = Obj.Lines;
+        }
+    },
+    Save_Content: function (Obj, Copy) {
+        var Content = Obj.Content;
+        var ContentLen = Content.length;
+        for (var Index = 0; Index < ContentLen; Index++) {
+            this.Content[Index] = Content[Index].Save_RecalculateObject(Copy);
+        }
+    },
+    Load_Lines: function (Obj) {
+        Obj.StartLine = this.StartLine;
+        Obj.StartRange = this.StartRange;
+        Obj.Lines = this.Lines;
+    },
+    Load_Content: function (Obj) {
+        var Count = Obj.Content.length;
+        for (var Index = 0; Index < Count; Index++) {
+            Obj.Content[Index].Load_RecalculateObject(this.Content[Index]);
+        }
+    },
+    Save_RunContent: function (Run, Copy) {
+        var ContentLen = Run.Content.length;
+        for (var Index = 0, Index2 = 0; Index < ContentLen; Index++) {
+            var Item = Run.Content[Index];
+            if (para_PageNum === Item.Type || para_Drawing === Item.Type) {
+                this.Content[Index2++] = Item.Save_RecalculateObject(Copy);
+            }
+        }
+    },
+    Load_RunContent: function (Run) {
+        var Count = Run.Content.length;
+        for (var Index = 0, Index2 = 0; Index < Count; Index++) {
+            var Item = Run.Content[Index];
+            if (para_PageNum === Item.Type || para_Drawing === Item.Type) {
+                Item.Load_RecalculateObject(this.Content[Index2++]);
+            }
+        }
+    },
+    Get_DrawingFlowPos: function (FlowPos) {
+        var Count = this.Content.length;
+        for (var Index = 0, Index2 = 0; Index < Count; Index++) {
+            var Item = this.Content[Index];
+            if (para_Drawing === Item.Type && undefined !== Item.FlowPos) {
+                FlowPos.push(Item.FlowPos);
+            }
+        }
+    },
+    Compare: function (_CurLine, _CurRange, OtherLinesInfo) {
+        var OLI = OtherLinesInfo;
+        var CurLine = _CurLine - this.StartLine;
+        var CurRange = (0 === CurLine ? _CurRange - this.StartRange : _CurRange);
+        if ((0 === this.Lines.length || 0 === this.LinesLength) && (0 === OLI.Lines.length || 0 === OLI.LinesLength)) {
+            return true;
+        }
+        if (this.StartLine !== OLI.StartLine || this.StartRange !== OLI.StartRange || CurLine < 0 || CurLine >= this.private_Get_LinesCount() || CurLine >= OLI.protected_GetLinesCount() || CurRange < 0 || CurRange >= this.private_Get_RangesCount(CurLine) || CurRange >= OLI.protected_GetRangesCount(CurLine)) {
+            return false;
+        }
+        var ThisSP = this.private_Get_RangeStartPos(CurLine, CurRange);
+        var ThisEP = this.private_Get_RangeEndPos(CurLine, CurRange);
+        var OtherSP = OLI.protected_GetRangeStartPos(CurLine, CurRange);
+        var OtherEP = OLI.protected_GetRangeEndPos(CurLine, CurRange);
+        if (ThisSP !== OtherSP || ThisEP !== OtherEP) {
+            return false;
+        }
+        if (((OLI.Content === undefined || para_Run === OLI.Type) && this.Content.length > 0) || (OLI.Content !== undefined && para_Run !== OLI.Type && OLI.Content.length !== this.Content.length)) {
+            return false;
+        }
+        var ContentLen = this.Content.length;
+        var StartPos = ThisSP;
+        var EndPos = Math.min(ContentLen - 1, ThisEP);
+        for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+            if (false === this.Content[CurPos].Compare(_CurLine, _CurRange, OLI.Content[CurPos])) {
+                return false;
+            }
+        }
+        return true;
+    },
+    private_Get_RangeOffset: function (LineIndex, RangeIndex) {
+        return (1 + this.Lines[0] + this.Lines[1 + LineIndex] + RangeIndex * 2);
+    },
+    private_Get_RangeStartPos: function (LineIndex, RangeIndex) {
+        return this.Lines[this.private_Get_RangeOffset(LineIndex, RangeIndex)];
+    },
+    private_Get_RangeEndPos: function (LineIndex, RangeIndex) {
+        return this.Lines[this.private_Get_RangeOffset(LineIndex, RangeIndex) + 1];
+    },
+    private_Get_LinesCount: function () {
+        return this.Lines[0];
+    },
+    private_Get_RangesCount: function (LineIndex) {
+        if (LineIndex === this.Lines[0] - 1) {
+            return (this.Lines.length - this.Lines[1 + LineIndex]) / 2;
+        } else {
+            return (this.Lines[1 + LineIndex + 1] - this.Lines[1 + LineIndex]) / 2;
+        }
+    }
+};
+function CParagraphRunElements(ContentPos, Count) {
+    this.ContentPos = ContentPos;
+    this.Elements = [];
+    this.Count = Count;
+}
+function CParagraphStatistics(Stats) {
+    this.Stats = Stats;
+    this.EmptyParagraph = true;
+    this.Word = false;
+    this.Symbol = false;
+    this.Space = false;
+    this.NewWord = false;
+}
+function CParagraphMinMaxContentWidth() {
+    this.bWord = false;
+    this.nWordLen = 0;
+    this.nSpaceLen = 0;
+    this.nMinWidth = 0;
+    this.nMaxWidth = 0;
+    this.nCurMaxWidth = 0;
+}
+function CParagraphRangeVisibleWidth() {
+    this.End = false;
+    this.W = 0;
+}
+function CParagraphMathRangeChecker() {
+    this.Math = null;
+    this.Result = true;
+}
+function CParagraphMathParaChecker() {
+    this.Found = false;
+    this.Result = true;
+    this.Direction = 0;
+}
+function CParagraphStartState(Paragraph) {
+    this.Pr = Paragraph.Pr.Copy();
+    this.TextPr = Paragraph.TextPr;
+    this.Content = [];
+    for (var i = 0; i < Paragraph.Content.length; ++i) {
+        this.Content.push(Paragraph.Content[i]);
+    }
+}
+function CParagraphTabsCounter() {
+    this.Count = 0;
+    this.Pos = [];
+}

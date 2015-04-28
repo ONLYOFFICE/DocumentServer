@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- (function (global) {
+ "use strict";
+(function (global) {
     var CSpellCheckApi = function (options) {
         this._SpellCheckApi = new SpellCheckApi();
         this._onlineWork = false;
@@ -151,7 +152,11 @@
         sockjs.onmessage = function (e) {
             var dataObject = JSON.parse(e.data);
             var type = dataObject.type;
-            docsCoApi.dataHandler[type](dataObject);
+            switch (type) {
+            case "spellCheck":
+                docsCoApi._onSpellCheck(dataObject);
+                break;
+            }
         };
         sockjs.onclose = function (evt) {
             docsCoApi._state = -1;
@@ -187,11 +192,6 @@
         var docsCoApi = this;
         this.sockjs_url = this._url + "/doc/" + docid + "/c";
         this.sockjs = initSocksJs(this.sockjs_url, this);
-        this.dataHandler = {
-            "spellCheck": function (data) {
-                docsCoApi._onSpellCheck(data);
-            }
-        };
     };
     global["CSpellCheckApi"] = CSpellCheckApi;
-})(this);
+})(window);

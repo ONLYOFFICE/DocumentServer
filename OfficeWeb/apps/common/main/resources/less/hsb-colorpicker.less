@@ -1,0 +1,109 @@
+.hsb-colorpicker {
+    .top-panel {
+        height: 22px;
+        margin: 0 0 10px;
+    }
+
+    .color-value {
+        width: 22px;
+        height: 22px;
+        float: left;
+        border: 1px solid #C4C4C4;
+        background-image: none;
+        background-position: 0 -206px;
+        background-repeat: no-repeat;
+
+        .transparent-color {
+            width: 22px;
+            height: 22px;
+            float: left;
+            .background-ximage('@{common-image-path}/hsbcolorpicker/hsb-colorpicker.png', '@{common-image-path}/hsbcolorpicker/hsb-colorpicker@2x.png', 205px);
+            background-position: 0 -206px;
+            background-repeat: no-repeat;
+        }
+    }
+
+    .color-text {
+        color: #464646;
+        height: 22px;
+        padding: 4px 32px;
+        cursor: default;
+    }
+
+    .cnt-hb {
+        display: inline-block;
+        overflow: hidden;
+        width: 195px;
+        height: 196px;
+        position: relative;
+        border: 1px solid #C4C4C4;
+        .background-ximage('@{common-image-path}/hsbcolorpicker/hsb-colorpicker.png', '@{common-image-path}/hsbcolorpicker/hsb-colorpicker@2x.png', 205px);
+        background-position: 0 0;
+        background-repeat: no-repeat;
+    }
+
+    .cnt-root {
+        display: inline-block;
+        width: 10px;
+        height: 196px;
+        margin: 0 8px;
+    }
+
+    .cnt-sat {
+        width: 10px;
+        height: 100%;
+        position: relative;
+        border: 1px solid #C4C4C4;
+        .background-ximage('@{common-image-path}/hsbcolorpicker/hsb-colorpicker.png', '@{common-image-path}/hsbcolorpicker/hsb-colorpicker@2x.png', 205px);
+        background-position: -195px 0;
+        background-repeat: no-repeat;
+    }
+
+    .cnt-hb-arrow {
+        width: 9px;
+        height: 9px;
+        margin: -4px;
+        position: absolute;
+        .background-ximage('@{common-image-path}/hsbcolorpicker/hsb-colorpicker.png', '@{common-image-path}/hsbcolorpicker/hsb-colorpicker@2x.png', 205px);
+        background-position: 0 -196px;
+        background-repeat: no-repeat;
+    }
+
+    .cnt-sat-arrow {
+        width: 14px;
+        height: 9px;
+        margin: -4px -3px;
+        position: absolute;
+        .background-ximage('@{common-image-path}/hsbcolorpicker/hsb-colorpicker.png', '@{common-image-path}/hsbcolorpicker/hsb-colorpicker@2x.png', 205px);
+        background-position: -11px -196px;
+        background-repeat: no-repeat;
+    }
+
+    .empty-color {
+        color: #464646;
+        height: 16px;
+        margin: 5px 0;
+
+        &:hover {
+            cursor: pointer;
+            background-color: #efefef;
+        }
+
+        &:active {
+            background-color: #cecece;
+        }
+
+        &:before {
+            content: "";
+            .background-ximage('@{common-image-path}/hsbcolorpicker/hsb-colorpicker.png', '@{common-image-path}/hsbcolorpicker/hsb-colorpicker@2x.png', 205px);
+            background-position: -26px -196px;
+            background-repeat: no-repeat;
+            float: left;
+            width: 10px;
+            height: 10px;
+            margin-right: 5px;
+            margin-top: 1px;
+            border: 1px solid #C4C4C4;
+        }
+    }
+}

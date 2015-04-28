@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -44,7 +44,7 @@
         Common.Gateway.reportError(undefined, "Your browser is not supported.");
         return;
     }
-    ZeroClipboard.setMoviePath("../../../3rdparty/ZeroClipboard/ZeroClipboard10.swf");
+    ZeroClipboard.setMoviePath("../../../vendor/ZeroClipboard/ZeroClipboard10.swf");
     var clipShortUrl = new ZeroClipboard.Client();
     var clipEmbedObj = new ZeroClipboard.Client();
     clipShortUrl.zIndex = maxZIndex;
@@ -487,6 +487,7 @@
         if (api) {
             api.CreateComponents();
             api.SetFontsPath("../../../sdk/Fonts/");
+            api.SetThemesPath("../../../sdk/PowerPoint/themes/");
             api.Init();
             api.asc_registerCallback("asc_onError", onError);
             api.asc_registerCallback("asc_onDocumentContentReady", onDocumentContentReady);

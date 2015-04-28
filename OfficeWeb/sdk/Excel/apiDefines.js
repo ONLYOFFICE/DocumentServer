@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var c_oAscError = {
+ "use strict";
+var c_oAscError = {
     Level: {
         Critical: -1,
         NoCritical: 0
@@ -69,9 +70,13 @@
         FrmlAnotherParsingError: -35,
         FrmlWrongArgumentRange: -36,
         FrmlOperandExpected: -37,
-        AutoFilterDataRangeError: -38,
-        AutoFilterChangeFormatTableError: -39,
-        AutoFilterChangeError: -40
+        FrmlParenthesesCorrectCount: -38,
+        AutoFilterDataRangeError: -50,
+        AutoFilterChangeFormatTableError: -51,
+        AutoFilterChangeError: -52,
+        MaxDataSeriesError: -80,
+        CannotFillRange: -81,
+        UserDrop: -100
     }
 };
 var c_oAscConfirm = {
@@ -103,8 +108,7 @@ var c_oAscAsyncAction = {
     Print: 7,
     UploadImage: 8,
     Recalc: 9,
-    SlowOperation: 10,
-    PrepareToSave: 11
+    SlowOperation: 10
 };
 var c_oAscAlignType = {
     NONE: "none",
@@ -154,19 +158,6 @@ var c_oAscDeleteOptions = {
     DeleteColumns: 3,
     DeleteRows: 4
 };
-var c_oAscFormatOptions = {
-    General: "General",
-    Number: "0.00",
-    Currency: "$#,##0.00",
-    Accounting: '_($* #,##0.00_);_($* (#,##0.00);_($* "-"??_);_(@_)',
-    DateShort: "m/d/yyyy",
-    DateLong: "[$-F800]dddd, mmmm dd, yyyy",
-    Time: "[$-F400]h:mm:ss AM/PM",
-    Percentage: "0%",
-    Fraction: "# ?/?",
-    Scientific : "0.00E+00",
-    Text : "@"
-};
 var c_oAscBorderOptions = {
     Top: 0,
     Right: 1,
@@ -177,33 +168,13 @@ var c_oAscBorderOptions = {
     InnerV: 6,
     InnerH: 7
 };
-var c_oAscBorderWidth = {
-    None: 0,
-    Thin: 1,
-    Medium: 2,
-    Thick: 3
-};
-var c_oAscBorderStyles = {
-    None: 0,
-    Double: 1,
-    Hair: 2,
-    DashDotDot: 3,
-    DashDot: 4,
-    Dotted: 5,
-    Dashed: 6,
-    Thin: 7,
-    MediumDashDotDot: 8,
-    SlantDashDot: 9,
-    MediumDashDot: 10,
-    MediumDashed: 11,
-    Medium: 12,
-    Thick: 13
-};
 var c_oAscCleanOptions = {
     All: 0,
     Text: 1,
     Format: 2,
-    Formula: 4
+    Formula: 4,
+    Comments: 5,
+    Hyperlinks: 6
 };
 var c_oAscDrawDepOptions = {
     Master: 0,
@@ -218,16 +189,18 @@ var c_oAscSelectionType = {
     RangeImage: 5,
     RangeChart: 6,
     RangeShape: 7,
-    RangeShapeText: 8
+    RangeShapeText: 8,
+    RangeChartText: 9,
+    RangeFrozen: 10
+};
+var c_oAscSelectionDialogType = {
+    None: 0,
+    FormatTable: 1,
+    Chart: 2
 };
 var c_oAscGraphicOption = {
     ScrollVertical: 1,
-    ScrollHorizontal: 2,
-    AddText: 3
-};
-var c_oAscLegendMarkerType = {
-    Line: 0,
-    Square: 1
+    ScrollHorizontal: 2
 };
 var c_oAscHyperlinkType = {
     WebLink: 1,
@@ -237,7 +210,9 @@ var c_oAscMouseMoveType = {
     None: 0,
     Hyperlink: 1,
     Comment: 2,
-    LockedObject: 3
+    LockedObject: 3,
+    ResizeColumn: 4,
+    ResizeRow: 5
 };
 var c_oAscMouseMoveLockedObjectType = {
     None: -1,
@@ -250,10 +225,6 @@ var c_oAscColor = {
     COLOR_TYPE_PRST: 2,
     COLOR_TYPE_SCHEME: 3
 };
-var c_oAscPageOrientation = {
-    PagePortrait: 1,
-    PageLandscape: 2
-};
 var c_oAscPrintDefaultSettings = {
     PageWidth: 210,
     PageHeight: 297,
@@ -264,13 +235,6 @@ var c_oAscPrintDefaultSettings = {
     PageBottomField: 19.1,
     PageGridLines: 0,
     PageHeadings: 0
-};
-var c_oAscLockTypes = {
-    kLockTypeNone: 1,
-    kLockTypeMine: 2,
-    kLockTypeOther: 3,
-    kLockTypeOther2: 4,
-    kLockTypeOther3: 5
 };
 var c_oAscLockTypeElem = {
     Range: 1,
@@ -299,11 +263,11 @@ var c_oAscLayoutPageType = {
 };
 var c_oAscCustomAutoFilter = {
     equals: 1,
-    doesNotEqual: 6,
     isGreaterThan: 2,
     isGreaterThanOrEqualTo: 3,
     isLessThan: 4,
     isLessThanOrEqualTo: 5,
+    doesNotEqual: 6,
     beginsWith: 7,
     doesNotBeginWith: 8,
     endsWith: 9,
@@ -412,19 +376,38 @@ var c_oAscChartSubType = {
     stacked: "stacked",
     stackedPer: "stackedPer"
 };
-var c_oAscChartStyle = {
-    Dark: 1,
-    Standart: 2,
-    Accent1: 3,
-    Accent2: 4,
-    Accent3: 5,
-    Accent4: 6,
-    Accent5: 7,
-    Accent6: 8
+var c_oAscPaneState = {
+    Frozen: "frozen",
+    FrozenSplit: "frozenSplit"
 };
-var c_oAscCoAuthoringMeBorderColor = "rgba(22,156,0,1)";
-var c_oAscCoAuthoringOtherBorderColor = "rgba(238,53,37,1)";
-var c_oAscCoAuthoringLockTablePropertiesBorderColor = "rgba(255,144,0,1)";
+var c_oAscFindLookIn = {
+    Formulas: 1,
+    Value: 2,
+    Annotations: 3
+};
+var c_oTargetType = {
+    None: 0,
+    ColumnResize: 1,
+    RowResize: 2,
+    FillHandle: 3,
+    MoveRange: 4,
+    MoveResizeRange: 5,
+    FilterObject: 6,
+    ColumnHeader: 7,
+    RowHeader: 8,
+    Corner: 9,
+    Hyperlink: 10,
+    Cells: 11,
+    Shape: 12,
+    FrozenAnchorH: 14,
+    FrozenAnchorV: 15
+};
+var c_oAscCoAuthoringMeBorderColor = new window.CColor(22, 156, 0);
+var c_oAscCoAuthoringOtherBorderColor = new window.CColor(238, 53, 37);
+var c_oAscCoAuthoringLockTablePropertiesBorderColor = new window.CColor(255, 144, 0);
 var c_oAscCoAuthoringDottedWidth = 2;
 var c_oAscCoAuthoringDottedDistance = 2;
-var FONT_THUMBNAIL_HEIGHT = parseInt(7 * 96 / 25.4);
+var c_oAscFormulaRangeBorderColor = [new window.CColor(95, 140, 237), new window.CColor(235, 94, 96), new window.CColor(141, 97, 194), new window.CColor(45, 150, 57), new window.CColor(191, 76, 145), new window.CColor(227, 130, 34), new window.CColor(55, 127, 158)];
+var c_oAscLockNameFrozenPane = "frozenPane";
+var c_oAscLockNameTabColor = "tabColor";
+var FONT_THUMBNAIL_HEIGHT = (7 * 96 / 25.4) >> 0;

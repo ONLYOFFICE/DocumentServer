@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,628 +29,192 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("DE.view.ParagraphSettingsAdvanced", {
-    extend: "Ext.window.Window",
-    alias: "widget.deparagraphsettingsadvanced",
-    requires: ["Ext.Array", "Ext.form.field.ComboBox", "Ext.window.Window", "Common.component.ThemeColorPalette", "Common.component.MetricSpinner", "DE.component.TableStyler", "Common.component.IndeterminateCheckBox", "Common.plugin.GridScrollPane", "Ext.grid.Panel", "Common.plugin.ComboBoxScrollPane"],
-    cls: "asc-advanced-settings-window",
-    modal: true,
-    resizable: false,
-    plain: true,
-    constrain: true,
-    height: 390,
-    width: 516,
-    layout: {
-        type: "vbox",
-        align: "stretch"
-    },
-    initComponent: function () {
-        var me = this;
-        this.addEvents("onmodalresult");
-        this.Borders = {};
-        this.BorderSize = {
-            ptValue: 0,
-            pxValue: 0
-        };
-        this.paragraphShade = "transparent";
-        this._changedProps = null;
-        this.ChangedBorders = undefined;
-        this.checkGroup = 0;
-        this._noApply = true;
-        this._tabListChanged = false;
-        this.Margins = undefined;
-        this.ThemeValues = [6, 15, 7, 16, 0, 1, 2, 3, 4, 5];
-        this.numFirstLine = Ext.create("Common.component.MetricSpinner", {
-            id: "paragraphadv-spin-first-line",
-            readOnly: false,
-            step: 0.1,
-            width: 85,
-            defaultUnit: "cm",
-            value: "0 cm",
-            maxValue: 55.87,
-            minValue: -55.87,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        if (this._changedProps.get_Ind() === null || this._changedProps.get_Ind() === undefined) {
-                            this._changedProps.put_Ind(new CParagraphInd());
-                        }
-                        this._changedProps.get_Ind().put_FirstLine(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                    }
+ define(["text!documenteditor/main/app/template/ParagraphSettingsAdvanced.template", "common/main/lib/view/AdvancedSettingsWindow", "common/main/lib/component/MetricSpinner", "common/main/lib/component/CheckBox", "common/main/lib/component/RadioBox", "common/main/lib/component/ThemeColorPalette", "common/main/lib/component/ColorButton", "common/main/lib/component/ListView", "common/main/lib/component/TableStyler"], function (contentTemplate) {
+    DE.Views.ParagraphSettingsAdvanced = Common.Views.AdvancedSettingsWindow.extend(_.extend({
+        options: {
+            contentWidth: 325,
+            height: 390,
+            toggleGroup: "paragraph-adv-settings-group"
+        },
+        initialize: function (options) {
+            _.extend(this.options, {
+                title: this.textTitle,
+                items: [{
+                    panelId: "id-adv-paragraph-indents",
+                    panelCaption: this.strParagraphIndents
                 },
-                this)
-            }
-        });
-        this.numIndentsLeft = Ext.widget("commonmetricspinner", {
-            id: "paragraphadv-spin-indent-left",
-            readOnly: false,
-            step: 0.1,
-            width: 85,
-            defaultUnit: "cm",
-            value: "0 cm",
-            maxValue: 55.87,
-            minValue: -55.87,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        if (this._changedProps.get_Ind() === null || this._changedProps.get_Ind() === undefined) {
-                            this._changedProps.put_Ind(new CParagraphInd());
-                        }
-                        this._changedProps.get_Ind().put_Left(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                    }
+                {
+                    panelId: "id-adv-paragraph-borders",
+                    panelCaption: this.strBorders
                 },
-                this)
-            }
-        });
-        this.numIndentsRight = Ext.widget("commonmetricspinner", {
-            id: "paragraphadv-spin-indent-right",
-            readOnly: false,
-            step: 0.1,
-            width: 85,
-            defaultUnit: "cm",
-            value: "0 cm",
-            maxValue: 55.87,
-            minValue: -55.87,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        if (this._changedProps.get_Ind() === null || this._changedProps.get_Ind() === undefined) {
-                            this._changedProps.put_Ind(new CParagraphInd());
-                        }
-                        this._changedProps.get_Ind().put_Right(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                    }
+                {
+                    panelId: "id-adv-paragraph-font",
+                    panelCaption: this.strParagraphFont
                 },
-                this)
-            }
-        });
-        this._spacer = Ext.create("Ext.toolbar.Spacer", {
-            width: "100%",
-            height: 10,
-            html: '<div style="width: 100%; height: 40%; border-bottom: 1px solid #C7C7C7"></div>'
-        });
-        this.chBreakBefore = Ext.create("Common.component.IndeterminateCheckBox", {
-            id: "paragraphadv-checkbox-break-before",
-            boxLabel: this.strBreakBefore,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_PageBreakBefore(field.getValue() == "checked");
-                    }
+                {
+                    panelId: "id-adv-paragraph-tabs",
+                    panelCaption: this.strTabs
                 },
-                this)
-            }
-        });
-        this.chKeepLines = Ext.create("Common.component.IndeterminateCheckBox", {
-            id: "paragraphadv-checkbox-keep-lines",
-            boxLabel: this.strKeepLines,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_KeepLines(field.getValue() == "checked");
-                    }
-                },
-                this)
-            }
-        });
-        this.chOrphan = Ext.create("Common.component.IndeterminateCheckBox", {
-            id: "paragraphadv-checkbox-orphan",
-            boxLabel: this.strOrphan,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_WidowControl(field.getValue() == "checked");
-                    }
-                },
-                this)
-            }
-        });
-        this.chKeepNext = Ext.create("Common.component.IndeterminateCheckBox", {
-            id: "paragraphadv-checkbox-keep-next",
-            boxLabel: this.strKeepNext,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_KeepNext(field.getValue() == "checked");
-                    }
-                },
-                this)
-            }
-        });
-        var _arrBorderPresets = [[c_tableBorder.BORDER_OUTER, "lrtb", "asc-advanced-settings-position-btn btn-adv-paragraph-outer", "paragraphadv-button-border-outer", this.tipOuter], [c_tableBorder.BORDER_ALL, "lrtbm", "asc-advanced-settings-position-btn btn-adv-paragraph-all", "paragraphadv-button-border-all", this.tipAll], [c_tableBorder.BORDER_NONE, "", "asc-advanced-settings-position-btn btn-adv-paragraph-none", "paragraphadv-button-border-none", this.tipNone], [c_tableBorder.BORDER_VERTICAL_LEFT, "l", "asc-advanced-settings-position-btn btn-adv-paragraph-left", "paragraphadv-button-border-left", this.tipLeft], [c_tableBorder.BORDER_VERTICAL_RIGHT, "r", "asc-advanced-settings-position-btn btn-adv-paragraph-right", "paragraphadv-button-border-right", this.tipRight], [c_tableBorder.BORDER_HORIZONTAL_TOP, "t", "asc-advanced-settings-position-btn btn-adv-paragraph-top", "paragraphadv-button-border-top", this.tipTop], [c_tableBorder.BORDER_HORIZONTAL_CENTER, "m", "asc-advanced-settings-position-btn btn-adv-paragraph-inner-hor", "paragraphadv-button-border-inner-hor", this.tipInner], [c_tableBorder.BORDER_HORIZONTAL_BOTTOM, "b", "asc-advanced-settings-position-btn btn-adv-paragraph-bottom", "paragraphadv-button-border-bottom", this.tipBottom]];
-        this._btnsBorderPosition = [];
-        Ext.Array.forEach(_arrBorderPresets, function (item, index) {
-            var _btn = Ext.create("Ext.Button", {
-                id: item[3],
-                cls: item[2],
-                posId: item[0],
-                strId: item[1],
-                text: "",
-                tooltip: item[4],
-                listeners: {
-                    click: Ext.bind(function (btn, eOpts) {
-                        this._ApplyBorderPreset(btn.strId);
-                    },
-                    this)
-                }
+                {
+                    panelId: "id-adv-paragraph-margins",
+                    panelCaption: this.strMargins
+                }],
+                contentTemplate: _.template(contentTemplate)({
+                    scope: this
+                })
+            },
+            options);
+            Common.Views.AdvancedSettingsWindow.prototype.initialize.call(this, this.options);
+            this.Borders = {};
+            this.BorderSize = {
+                ptValue: 0,
+                pxValue: 0
+            };
+            this.paragraphShade = "transparent";
+            this._changedProps = null;
+            this.ChangedBorders = undefined;
+            this.checkGroup = 0;
+            this._noApply = true;
+            this._tabListChanged = false;
+            this.Margins = undefined;
+            this.spinners = [];
+            this.tableStylerRows = this.options.tableStylerRows;
+            this.tableStylerColumns = this.options.tableStylerColumns;
+            this.borderProps = this.options.borderProps;
+            this.api = this.options.api;
+            this._originalProps = new CParagraphProp(this.options.paragraphProps);
+            this.isChart = this.options.isChart;
+        },
+        render: function () {
+            Common.Views.AdvancedSettingsWindow.prototype.render.call(this);
+            var me = this;
+            this.numFirstLine = new Common.UI.MetricSpinner({
+                el: $("#paragraphadv-spin-first-line"),
+                step: 0.1,
+                width: 85,
+                defaultUnit: "cm",
+                defaultValue: 0,
+                value: "0 cm",
+                maxValue: 55.87,
+                minValue: -55.87
             });
-            this._btnsBorderPosition.push(_btn);
-        },
-        this);
-        this._BordersImage = Ext.widget("detablestyler", {
-            id: "id-deparagraphstyler",
-            width: 200,
-            height: 170,
-            rows: this.tableStylerRows,
-            columns: this.tableStylerColumns,
-            spacingMode: false
-        });
-        var dataBorders = [{
-            borderstyle: "",
-            text: this.txtNoBorders,
-            value: 0,
-            offsety: 0
-        },
-        {
-            text: "0.5 pt",
-            value: 0.5,
-            pxValue: 0.5,
-            offsety: 0
-        },
-        {
-            text: "1 pt",
-            value: 1,
-            pxValue: 1,
-            offsety: 20
-        },
-        {
-            text: "1.5 pt",
-            value: 1.5,
-            pxValue: 2,
-            offsety: 40
-        },
-        {
-            text: "2.25 pt",
-            value: 2.25,
-            pxValue: 3,
-            offsety: 60
-        },
-        {
-            text: "3 pt",
-            value: 3,
-            pxValue: 4,
-            offsety: 80
-        },
-        {
-            text: "4.5 pt",
-            value: 4.5,
-            pxValue: 5,
-            offsety: 100
-        },
-        {
-            text: "6 pt",
-            value: 6,
-            pxValue: 6,
-            offsety: 120
-        }];
-        for (var i = 1; i < dataBorders.length; i++) {
-            dataBorders[i].borderstyle = Ext.String.format("background:url({0}) 0 {1}px; width:69px; height:20px; margin-right:5px;", "resources/img/right-panels/BorderSize.png", -dataBorders[i].offsety);
-        }
-        var fieldStore = Ext.create("Ext.data.Store", {
-            model: "DE.model.ModelBorders",
-            data: dataBorders
-        });
-        var item_tpl = Ext.create("Ext.XTemplate", '<tpl for=".">' + '<span style="display: inline-block; margin-top: 3px; font-size: 11px; height: 17px;">{text}</span>' + '<img src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" align="right" style="{borderstyle}">' + "</tpl>");
-        this.cmbBorderSize = Ext.create("Ext.form.field.ComboBox", {
-            width: 93,
-            height: 21,
-            editable: false,
-            queryMode: "local",
-            matchFieldWidth: false,
-            displayField: "text",
-            store: fieldStore,
-            listConfig: {
-                mode: "local",
-                width: 145,
-                itemTpl: item_tpl
-            },
-            listeners: {
-                select: Ext.bind(function (combo, records, eOpts) {
-                    this.BorderSize = {
-                        ptValue: records[0].data.value,
-                        pxValue: records[0].data.pxValue
-                    };
-                    this._BordersImage.setVirtualBorderSize(this.BorderSize.pxValue);
-                    if (combo.inputEl) {
-                        if (records[0].data.value > 0) {
-                            combo.inputEl.set({
-                                type: "image"
-                            });
-                            combo.inputEl.set({
-                                src: "data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
-                            });
-                            var style = Ext.String.format("background:url({0}) no-repeat scroll 0 {1}px, url({2}) repeat scroll 0 0 white", "resources/img/right-panels/BorderSize.png", -records[0].data.offsety, "resources/img/controls/text-bg.gif");
-                            Ext.DomHelper.applyStyles(combo.inputEl, style);
-                        } else {
-                            var style = Ext.String.format("background: url({0}) repeat scroll 0 0 white", "resources/img/controls/text-bg.gif");
-                            Ext.DomHelper.applyStyles(combo.inputEl, style);
-                            combo.inputEl.set({
-                                type: "text"
-                            });
-                            combo.inputEl.set({
-                                value: me.txtNoBorders
-                            });
-                            combo.onItemClick(combo.picker, records[0]);
-                        }
+            this.numFirstLine.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (this._changedProps) {
+                    if (this._changedProps.get_Ind() === null || this._changedProps.get_Ind() === undefined) {
+                        this._changedProps.put_Ind(new CParagraphInd());
                     }
-                },
-                this),
-                afterRender: function () {
-                    if (this.inputEl) {
-                        Ext.DomHelper.applyStyles(this.inputEl, "padding-left:7px");
-                        this.inputEl.set({
-                            type: "image"
-                        });
-                        this.inputEl.set({
-                            src: "data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
-                        });
-                        var style = Ext.String.format("background:url({0}) repeat scroll 0 {1}px, url({2}) repeat scroll 0 0 white", "resources/img/right-panels/BorderSize.png", -20, "resources/img/controls/text-bg.gif");
-                        Ext.DomHelper.applyStyles(this.inputEl, style);
-                    }
+                    this._changedProps.get_Ind().put_FirstLine(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
                 }
             },
-            plugins: [{
-                ptype: "comboboxscrollpane",
-                pluginId: "scrollpane",
-                settings: {
-                    enableKeyboardNavigation: true
-                }
-            }]
-        });
-        var rec = this.cmbBorderSize.getStore().getAt(2);
-        this.cmbBorderSize.select(rec);
-        this.BorderSize = {
-            ptValue: rec.data.value,
-            pxValue: rec.data.pxValue
-        };
-        this._btnBorderColor = Ext.create("Ext.button.Button", {
-            id: "paragraphadv-button-border-color",
-            arrowCls: "",
-            width: 45,
-            height: 22,
-            color: "000000",
-            menu: {
-                showSeparator: false,
-                items: [this.colorsBorder = Ext.create("Common.component.ThemeColorPalette", {
-                    value: "000000",
-                    width: 165,
-                    height: 214,
-                    dynamiccolors: true,
-                    dyncolorscount: 10,
-                    colors: [this.textThemeColors, "-", {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 3
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 4
-                    },
-                    {
-                        color: "000000",
-                        effectId: 5
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 3
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 4
-                    },
-                    "-", {
-                        color: "3D55FE",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 3
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 4
-                    },
-                    {
-                        color: "000000",
-                        effectId: 5
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    {
-                        color: "FFFFFF",
-                        effectId: 2
-                    },
-                    {
-                        color: "000000",
-                        effectId: 1
-                    },
-                    "-", "--", "-", this.textStandartColors, "-", "3D55FE", "5301B3", "980ABD", "B2275F", "F83D26", "F86A1D", "F7AC16", "F7CA12", "FAFF44", "D6EF39", "-", "--"],
-                    listeners: {
-                        select: {
-                            fn: function (picker, color, eOpts, id) {
-                                Ext.menu.Manager.hideAll();
-                                var colorstr = Ext.String.format("#{0}", (typeof(color) == "object") ? color.color : color);
-                                me._btnBorderColor.color = color;
-                                me._BordersImage.setVirtualBorderColor(colorstr);
-                                if (me._btnBorderColor.btnEl) {
-                                    Ext.DomHelper.applyStyles(me._btnBorderColor.btnEl, {
-                                        "background-color": colorstr
-                                    });
-                                }
-                            }
-                        }
+            this));
+            this.spinners.push(this.numFirstLine);
+            this.numIndentsLeft = new Common.UI.MetricSpinner({
+                el: $("#paragraphadv-spin-indent-left"),
+                step: 0.1,
+                width: 85,
+                defaultUnit: "cm",
+                defaultValue: 0,
+                value: "0 cm",
+                maxValue: 55.87,
+                minValue: -55.87
+            });
+            this.numIndentsLeft.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (this._changedProps) {
+                    if (this._changedProps.get_Ind() === null || this._changedProps.get_Ind() === undefined) {
+                        this._changedProps.put_Ind(new CParagraphInd());
                     }
-                }), {
-                    cls: "menu-item-noicon menu-item-color-palette-theme",
-                    text: this.textNewColor,
-                    listeners: {
-                        click: function (item, event) {
-                            me.colorsBorder.addNewColor();
-                        }
-                    }
-                }]
-            },
-            listeners: {
-                render: function (c) {
-                    var colorStyle = Ext.String.format("background-color:#{0}", (typeof(c.color) == "object") ? c.color.color : c.color);
-                    Ext.DomHelper.applyStyles(c.btnEl, colorStyle);
+                    this._changedProps.get_Ind().put_Left(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
                 }
             },
-            setColor: function (newcolor) {
-                var border, clr;
-                this.color = newcolor;
-                if (newcolor == "transparent" || newcolor.color == "transparent") {
-                    border = "1px solid #BEBEBE";
-                    clr = newcolor;
-                } else {
-                    border = "none";
-                    clr = Ext.String.format("#{0}", (typeof(newcolor) == "object") ? newcolor.color : newcolor);
+            this));
+            this.spinners.push(this.numIndentsLeft);
+            this.numIndentsRight = new Common.UI.MetricSpinner({
+                el: $("#paragraphadv-spin-indent-right"),
+                step: 0.1,
+                width: 85,
+                defaultUnit: "cm",
+                defaultValue: 0,
+                value: "0 cm",
+                maxValue: 55.87,
+                minValue: -55.87
+            });
+            this.numIndentsRight.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (this._changedProps) {
+                    if (this._changedProps.get_Ind() === null || this._changedProps.get_Ind() === undefined) {
+                        this._changedProps.put_Ind(new CParagraphInd());
+                    }
+                    this._changedProps.get_Ind().put_Right(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
                 }
-                if (this.btnEl !== undefined) {
-                    Ext.DomHelper.applyStyles(this.btnEl, {
-                        "background-color": clr,
-                        "border": border
-                    });
+            },
+            this));
+            this.spinners.push(this.numIndentsRight);
+            this.chBreakBefore = new Common.UI.CheckBox({
+                el: $("#paragraphadv-checkbox-break-before"),
+                labelText: this.strBreakBefore
+            });
+            this.chBreakBefore.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (this._changedProps) {
+                    this._changedProps.put_PageBreakBefore(field.getValue() == "checked");
                 }
-            }
-        });
-        this._btnBackColor = Ext.create("Ext.button.Button", {
-            id: "paragraphadv-button-back-color",
-            arrowCls: "",
-            width: 50,
-            height: 22,
-            color: "transparent",
-            menu: {
-                showSeparator: false,
-                items: [this.colorsBack = Ext.create("Common.component.ThemeColorPalette", {
-                    value: "000000",
-                    width: 165,
-                    height: 214,
-                    dynamiccolors: true,
-                    dyncolorscount: 10,
-                    colors: [this.textThemeColors, "-", {
+            },
+            this));
+            this.chKeepLines = new Common.UI.CheckBox({
+                el: $("#paragraphadv-checkbox-keep-lines"),
+                labelText: this.strKeepLines
+            });
+            this.chKeepLines.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (this._changedProps) {
+                    this._changedProps.put_KeepLines(field.getValue() == "checked");
+                }
+            },
+            this));
+            this.chOrphan = new Common.UI.CheckBox({
+                el: $("#paragraphadv-checkbox-orphan"),
+                labelText: this.strOrphan
+            });
+            this.chOrphan.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (this._changedProps) {
+                    this._changedProps.put_WidowControl(field.getValue() == "checked");
+                }
+            },
+            this));
+            this.chKeepNext = new Common.UI.CheckBox({
+                el: $("#paragraphadv-checkbox-keep-next"),
+                labelText: this.strKeepNext
+            });
+            this.chKeepNext.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (this._changedProps) {
+                    this._changedProps.put_KeepNext(field.getValue() == "checked");
+                }
+            },
+            this));
+            this.cmbBorderSize = new Common.UI.ComboBorderSize({
+                el: $("#paragraphadv-combo-border-size"),
+                style: "width: 93px;"
+            });
+            var rec = this.cmbBorderSize.store.at(2);
+            this.BorderSize = {
+                ptValue: rec.get("value"),
+                pxValue: rec.get("pxValue")
+            };
+            this.cmbBorderSize.setValue(this.BorderSize.ptValue);
+            this.cmbBorderSize.on("selected", _.bind(this.onBorderSizeSelect, this));
+            this.btnBorderColor = new Common.UI.ColorButton({
+                style: "width:45px;",
+                menu: new Common.UI.Menu({
+                    items: [{
+                        template: _.template('<div id="paragraphadv-border-color-menu" style="width: 165px; height: 220px; margin: 10px;"></div>')
+                    },
+                    {
+                        template: _.template('<a id="paragraphadv-border-color-new" style="padding-left:12px;">' + me.textNewColor + "</a>")
+                    }]
+                })
+            });
+            this.btnBorderColor.on("render:after", function (btn) {
+                me.colorsBorder = new Common.UI.ThemeColorPalette({
+                    el: $("#paragraphadv-border-color-menu"),
+                    dynamiccolors: 10,
+                    colors: [me.textThemeColors, "-", {
                         color: "3366FF",
                         effectId: 1
                     },
@@ -890,1674 +454,1144 @@
                         color: "000000",
                         effectId: 1
                     },
-                    "-", "--", "-", this.textStandartColors, "-", "transparent", "5301B3", "980ABD", "B2275F", "F83D26", "F86A1D", "F7AC16", "F7CA12", "FAFF44", "D6EF39", "-", "--"],
-                    listeners: {
-                        select: {
-                            fn: function (picker, color, eOpts, id) {
-                                Ext.menu.Manager.hideAll();
-                                var clr, border;
-                                me._btnBackColor.color = color;
-                                if (color == "transparent") {
-                                    clr = "transparent";
-                                    border = "1px solid #BEBEBE";
-                                } else {
-                                    clr = Ext.String.format("#{0}", (typeof(color) == "object") ? color.color : color);
-                                    border = "none";
-                                }
-                                if (me._btnBackColor.btnEl) {
-                                    Ext.DomHelper.applyStyles(me._btnBackColor.btnEl, {
-                                        "background-color": clr,
-                                        "border": border
-                                    });
-                                }
-                                me.paragraphShade = me._btnBackColor.color;
-                                if (me._changedProps) {
-                                    if (me._changedProps.get_Shade() === undefined || me._changedProps.get_Shade() === null) {
-                                        me._changedProps.put_Shade(new CParagraphShd());
-                                    }
-                                    if (me._btnBackColor.color == "transparent") {
-                                        me._changedProps.get_Shade().put_Value(shd_Nil);
-                                    } else {
-                                        me._changedProps.get_Shade().put_Value(shd_Clear);
-                                        me._changedProps.get_Shade().put_Color(me.getRgbColor(me._btnBackColor.color));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }), {
-                    cls: "menu-item-noicon menu-item-color-palette-theme",
-                    text: me.textNewColor,
-                    listeners: {
-                        click: function (item, event) {
-                            me.colorsBack.addNewColor();
-                        }
-                    }
-                }]
-            },
-            listeners: {
-                render: function (c) {
-                    var border, clr;
-                    if (c.color == "transparent") {
-                        border = "1px solid #BEBEBE";
-                        clr = c.color;
-                    } else {
-                        border = "none";
-                        clr = Ext.String.format("#{0}", (typeof(c.color) == "object") ? c.color.color : c.color);
-                    }
-                    Ext.DomHelper.applyStyles(c.btnEl, {
-                        "background-color": clr,
-                        "border": border
-                    });
-                }
-            },
-            setColor: function (newcolor) {
-                var border, clr;
-                this.color = newcolor;
-                if (newcolor == "transparent") {
-                    border = "1px solid #BEBEBE";
-                    clr = newcolor;
-                } else {
-                    border = "none";
-                    clr = Ext.String.format("#{0}", (typeof(newcolor) == "object") ? newcolor.color : newcolor);
-                }
-                if (this.btnEl !== undefined) {
-                    Ext.DomHelper.applyStyles(this.btnEl, {
-                        "background-color": clr,
-                        "border": border
-                    });
-                }
-            }
-        });
-        this.chStrike = Ext.create("Common.component.IndeterminateCheckBox", {
-            id: "paragraphadv-checkbox-strike",
-            width: 140,
-            boxLabel: this.strStrike,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps && this.checkGroup != 1) {
-                        this._changedProps.put_Strikeout(field.getValue() == "checked");
-                    }
-                    this.checkGroup = 0;
-                    if (field.getValue() == "checked") {
-                        this.checkGroup = 1;
-                        this.chDoubleStrike.setValue(0);
-                        if (this._changedProps) {
-                            this._changedProps.put_DStrikeout(false);
-                        }
-                        this.checkGroup = 0;
-                    }
-                    if (this.api && !this._noApply) {
-                        var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
-                        properties.put_Strikeout(field.getValue() == "checked");
-                        properties.put_DStrikeout(this.chDoubleStrike.getValue() == "checked");
-                        this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
-                    }
-                },
-                this)
-            }
-        });
-        this.chDoubleStrike = Ext.create("Common.component.IndeterminateCheckBox", {
-            id: "paragraphadv-checkbox-double-strike",
-            width: 140,
-            boxLabel: this.strDoubleStrike,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps && this.checkGroup != 1) {
-                        this._changedProps.put_DStrikeout(field.getValue() == "checked");
-                    }
-                    this.checkGroup = 0;
-                    if (field.getValue() == "checked") {
-                        this.checkGroup = 1;
-                        this.chStrike.setValue(0);
-                        if (this._changedProps) {
-                            this._changedProps.put_Strikeout(false);
-                        }
-                        this.checkGroup = 0;
-                    }
-                    if (this.api && !this._noApply) {
-                        var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
-                        properties.put_DStrikeout(field.getValue() == "checked");
-                        properties.put_Strikeout(this.chStrike.getValue() == "checked");
-                        this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
-                    }
-                },
-                this)
-            }
-        });
-        this.chSuperscript = Ext.create("Common.component.IndeterminateCheckBox", {
-            id: "paragraphadv-checkbox-superscript",
-            width: 140,
-            boxLabel: this.strSuperscript,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps && this.checkGroup != 2) {
-                        this._changedProps.put_Superscript(field.getValue() == "checked");
-                    }
-                    this.checkGroup = 0;
-                    if (field.getValue() == "checked") {
-                        this.checkGroup = 2;
-                        this.chSubscript.setValue(0);
-                        if (this._changedProps) {
-                            this._changedProps.put_Subscript(false);
-                        }
-                        this.checkGroup = 0;
-                    }
-                    if (this.api && !this._noApply) {
-                        var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
-                        properties.put_Superscript(field.getValue() == "checked");
-                        properties.put_Subscript(this.chSubscript.getValue() == "checked");
-                        this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
-                    }
-                },
-                this)
-            }
-        });
-        this.chSubscript = Ext.create("Common.component.IndeterminateCheckBox", {
-            id: "paragraphadv-checkbox-subscript",
-            width: 140,
-            boxLabel: this.strSubscript,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps && this.checkGroup != 2) {
-                        this._changedProps.put_Subscript(field.getValue() == "checked");
-                    }
-                    this.checkGroup = 0;
-                    if (field.getValue() == "checked") {
-                        this.checkGroup = 2;
-                        this.chSuperscript.setValue(0);
-                        if (this._changedProps) {
-                            this._changedProps.put_Superscript(false);
-                        }
-                        this.checkGroup = 0;
-                    }
-                    if (this.api && !this._noApply) {
-                        var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
-                        properties.put_Subscript(field.getValue() == "checked");
-                        properties.put_Superscript(this.chSuperscript.getValue() == "checked");
-                        this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
-                    }
-                },
-                this)
-            }
-        });
-        this.chSmallCaps = Ext.create("Common.component.IndeterminateCheckBox", {
-            id: "paragraphadv-checkbox-small-caps",
-            width: 140,
-            boxLabel: this.strSmallCaps,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps && this.checkGroup != 3) {
-                        this._changedProps.put_SmallCaps(field.getValue() == "checked");
-                    }
-                    this.checkGroup = 0;
-                    if (field.getValue() == "checked") {
-                        this.checkGroup = 3;
-                        this.chAllCaps.setValue(0);
-                        if (this._changedProps) {
-                            this._changedProps.put_AllCaps(false);
-                        }
-                        this.checkGroup = 0;
-                    }
-                    if (this.api && !this._noApply) {
-                        var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
-                        properties.put_SmallCaps(field.getValue() == "checked");
-                        properties.put_AllCaps(this.chAllCaps.getValue() == "checked");
-                        this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
-                    }
-                },
-                this)
-            }
-        });
-        this.chAllCaps = Ext.create("Common.component.IndeterminateCheckBox", {
-            id: "paragraphadv-checkbox-all-caps",
-            width: 140,
-            boxLabel: this.strAllCaps,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps && this.checkGroup != 3) {
-                        this._changedProps.put_AllCaps(field.getValue() == "checked");
-                    }
-                    this.checkGroup = 0;
-                    if (field.getValue() == "checked") {
-                        this.checkGroup = 3;
-                        this.chSmallCaps.setValue(0);
-                        if (this._changedProps) {
-                            this._changedProps.put_SmallCaps(false);
-                        }
-                        this.checkGroup = 0;
-                    }
-                    if (this.api && !this._noApply) {
-                        var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
-                        properties.put_AllCaps(field.getValue() == "checked");
-                        properties.put_SmallCaps(this.chSmallCaps.getValue() == "checked");
-                        this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
-                    }
-                },
-                this)
-            }
-        });
-        this.numSpacing = Ext.create("Common.component.MetricSpinner", {
-            id: "paragraphadv-spin-spacing",
-            readOnly: false,
-            step: 0.01,
-            width: 100,
-            defaultUnit: "cm",
-            value: "0 cm",
-            maxValue: 55.87,
-            minValue: -55.87,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_TextSpacing(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                    }
-                    if (this.api && !this._noApply) {
-                        var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
-                        properties.put_TextSpacing(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                        this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
-                    }
-                },
-                this)
-            }
-        });
-        this.numPosition = Ext.widget("commonmetricspinner", {
-            id: "paragraphadv-spin-position",
-            readOnly: false,
-            step: 0.01,
-            width: 100,
-            defaultUnit: "cm",
-            value: "0 cm",
-            maxValue: 55.87,
-            minValue: -55.87,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_Position(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                    }
-                    if (this.api && !this._noApply) {
-                        var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
-                        properties.put_Position(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                        this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
-                    }
-                },
-                this)
-            }
-        });
-        this.fontImage = Ext.create("Ext.container.Container", {
-            id: "paragraphadv-font-img",
-            width: "100%",
-            height: 80,
-            style: "background-color:#ffffff; border:1px solid #CDCDCD;"
-        });
-        this.numTab = Ext.widget("commonmetricspinner", {
-            id: "paragraphadv-spin-tab",
-            readOnly: false,
-            step: 0.1,
-            width: 180,
-            defaultUnit: "cm",
-            value: "1.25 cm",
-            maxValue: 55.87,
-            minValue: 0
-        });
-        this.numDefaultTab = Ext.widget("commonmetricspinner", {
-            id: "paragraphadv-spin-default-tab",
-            readOnly: false,
-            step: 0.1,
-            width: 107,
-            defaultUnit: "cm",
-            value: "1.25 cm",
-            maxValue: 55.87,
-            minValue: 0,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        this._changedProps.put_DefaultTab(parseFloat(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()).toFixed(1)));
-                    }
-                },
-                this)
-            }
-        });
-        this.btnAddTab = Ext.create("Ext.Button", {
-            width: 90,
-            text: this.textSet,
-            enableToggle: false,
-            listeners: {
-                click: Ext.bind(function (btn, eOpts) {
-                    var val = this.numTab.getNumberValue();
-                    var align = this.radioLeft.getValue() ? 1 : (this.radioCenter.getValue() ? 3 : 2);
-                    var idx = fieldStore.findBy(function (record, id) {
-                        return (Math.abs(record.data.tabPos - val) < 0.001);
-                    },
-                    this);
-                    if (idx < 0) {
-                        var rec = fieldStore.add({
-                            tabPos: val,
-                            tabStr: val + " " + Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()],
-                            tabAlign: align
-                        });
-                        fieldStore.sort();
-                        this.tabList.getSelectionModel().select(rec);
-                    } else {
-                        var rec = fieldStore.getAt(idx);
-                        rec.set("tabAlign", align);
-                    }
-                },
-                this)
-            }
-        });
-        this.btnRemoveTab = Ext.create("Ext.Button", {
-            width: 90,
-            text: this.textRemove,
-            enableToggle: false,
-            listeners: {
-                click: Ext.bind(function (btn, eOpts) {
-                    var rec = this.tabList.getSelectionModel().getSelection();
-                    if (rec.length > 0) {
-                        var idx = rec[0].index;
-                        fieldStore.remove(rec);
-                        if (idx > fieldStore.count() - 1) {
-                            idx = fieldStore.count() - 1;
-                        }
-                        if (idx > -1) {
-                            this.tabList.getSelectionModel().select(idx);
-                        }
-                    }
-                },
-                this)
-            }
-        });
-        this.btnRemoveAll = Ext.create("Ext.Button", {
-            width: 90,
-            text: this.textRemoveAll,
-            enableToggle: false,
-            listeners: {
-                click: Ext.bind(function (btn, eOpts) {
-                    fieldStore.removeAll();
-                },
-                this)
-            }
-        });
-        this.radioLeft = Ext.create("Ext.form.field.Radio", {
-            boxLabel: this.textTabLeft,
-            name: "asc-radio-tab",
-            checked: true
-        });
-        this.radioCenter = Ext.create("Ext.form.field.Radio", {
-            boxLabel: this.textTabCenter,
-            name: "asc-radio-tab",
-            checked: false
-        });
-        this.radioRight = Ext.create("Ext.form.field.Radio", {
-            boxLabel: this.textTabRight,
-            name: "asc-radio-tab",
-            checked: false
-        });
-        Ext.define("DE.model.TabDataModel", {
-            extend: "Ext.data.Model",
-            fields: [{
-                name: "tabPos",
-                name: "tabStr",
-                name: "tabAlign"
-            }]
-        });
-        var fieldStore = Ext.create("Ext.data.Store", {
-            model: "DE.model.TabDataModel",
-            data: [],
-            sorters: ["tabPos"],
-            listeners: {
-                datachanged: Ext.bind(function (btn, eOpts) {
-                    if (!this._noApply) {
-                        this._tabListChanged = true;
-                    }
-                },
-                this),
-                update: Ext.bind(function (btn, eOpts) {
-                    if (!this._noApply) {
-                        this._tabListChanged = true;
-                    }
-                },
-                this),
-                clear: Ext.bind(function (btn, eOpts) {
-                    if (!this._noApply) {
-                        this._tabListChanged = true;
-                    }
-                },
-                this)
-            }
-        });
-        this.tabList = Ext.create("Ext.grid.Panel", {
-            activeItem: 0,
-            id: "paragraphadv-tab-list",
-            store: fieldStore,
-            mode: "local",
-            scroll: false,
-            columns: [{
-                flex: 1,
-                dataIndex: "tabStr"
-            }],
-            height: 80,
-            width: 180,
-            hideHeaders: true,
-            viewConfig: {
-                stripeRows: false
-            },
-            plugins: [{
-                pluginId: "scrollpane",
-                ptype: "gridscrollpane"
-            }],
-            listeners: {
-                select: function (o, record, index, eOpts) {
-                    this.numTab.setValue(record.data.tabPos);
-                    (record.data.tabAlign == 1) ? this.radioLeft.setValue(true) : ((record.data.tabAlign == 3) ? this.radioCenter.setValue(true) : this.radioRight.setValue(true));
-                },
-                scope: this
-            }
-        });
-        this._spnMarginTop = Ext.create("Common.component.MetricSpinner", {
-            id: "paraadv-number-margin-top",
-            readOnly: false,
-            maxValue: 55.87,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0 cm",
-            width: 100,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (!this._noApply) {
-                        if (this.Margins === undefined) {
-                            this.Margins = {};
-                        }
-                        this.Margins.Top = Common.MetricSettings.fnRecalcToMM(field.getNumberValue());
-                    }
-                },
-                this)
-            }
-        });
-        this._spnMarginBottom = Ext.create("Common.component.MetricSpinner", {
-            id: "paraadv-number-margin-bottom",
-            readOnly: false,
-            maxValue: 55.87,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0 cm",
-            width: 100,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (!this._noApply) {
-                        if (this.Margins === undefined) {
-                            this.Margins = {};
-                        }
-                        this.Margins.Bottom = Common.MetricSettings.fnRecalcToMM(field.getNumberValue());
-                    }
-                },
-                this)
-            }
-        });
-        this._spnMarginLeft = Ext.create("Common.component.MetricSpinner", {
-            id: "paraadv-number-margin-left",
-            readOnly: false,
-            maxValue: 9.34,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0.19 cm",
-            width: 100,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (!this._noApply) {
-                        if (this.Margins === undefined) {
-                            this.Margins = {};
-                        }
-                        this.Margins.Left = Common.MetricSettings.fnRecalcToMM(field.getNumberValue());
-                    }
-                },
-                this)
-            }
-        });
-        this._spnMarginRight = Ext.create("Common.component.MetricSpinner", {
-            id: "paraadv-number-margin-right",
-            readOnly: false,
-            maxValue: 9.34,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0.19 cm",
-            width: 100,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (!this._noApply) {
-                        if (this.Margins === undefined) {
-                            this.Margins = {};
-                        }
-                        this.Margins.Right = Common.MetricSettings.fnRecalcToMM(field.getNumberValue());
-                    }
-                },
-                this)
-            }
-        });
-        this.btnIndents = Ext.widget("button", {
-            width: 160,
-            height: 27,
-            cls: "asc-dialogmenu-btn",
-            text: this.strParagraphIndents,
-            textAlign: "right",
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "advtablecardGroup",
-            pressed: true,
-            listeners: {
-                click: function (btn) {
-                    if (btn.pressed) {
-                        this.mainCard.getLayout().setActiveItem("card-indents");
-                    }
-                },
-                scope: this
-            }
-        });
-        this.btnFont = Ext.widget("button", {
-            width: 160,
-            height: 27,
-            cls: "asc-dialogmenu-btn",
-            text: this.strParagraphFont,
-            textAlign: "right",
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "advtablecardGroup",
-            listeners: {
-                click: function (btn) {
-                    if (btn.pressed) {
-                        this.mainCard.getLayout().setActiveItem("card-font");
-                    }
-                },
-                scope: this
-            }
-        });
-        this.btnBorders = Ext.widget("button", {
-            width: 160,
-            height: 27,
-            cls: "asc-dialogmenu-btn",
-            textAlign: "right",
-            text: this.strBorders,
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "advtablecardGroup",
-            listeners: {
-                click: function (btn) {
-                    if (btn.pressed) {
-                        this.mainCard.getLayout().setActiveItem("card-borders");
-                    }
-                },
-                scope: this
-            }
-        });
-        this.btnTabs = Ext.widget("button", {
-            width: 160,
-            height: 27,
-            cls: "asc-dialogmenu-btn",
-            textAlign: "right",
-            text: this.strTabs,
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "advtablecardGroup",
-            listeners: {
-                click: function (btn) {
-                    if (btn.pressed) {
-                        this.mainCard.getLayout().setActiveItem("card-tabs");
-                        this.tabList.getPlugin("scrollpane").updateScrollPane();
-                    }
-                },
-                scope: this
-            }
-        });
-        this.btnMargins = Ext.widget("button", {
-            width: 160,
-            height: 27,
-            cls: "asc-dialogmenu-btn",
-            textAlign: "right",
-            text: this.strMargins,
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "advtablecardGroup",
-            listeners: {
-                click: function (btn) {
-                    if (btn.pressed) {
-                        this.mainCard.getLayout().setActiveItem("card-margins");
-                    }
-                },
-                scope: this
-            }
-        });
-        this._BordersContainer = {
-            xtype: "container",
-            itemId: "card-borders",
-            layout: {
-                type: "vbox",
-                align: "stretch"
-            },
-            height: 285,
-            items: [{
-                xtype: "container",
-                layout: {
-                    type: "hbox",
-                    align: "middle"
-                },
-                height: 28,
-                padding: "2px 10px 0 10px",
-                style: "vertical-align: middle;",
-                items: [{
-                    xtype: "label",
-                    text: this.textBorderWidth
-                },
-                {
-                    xtype: "tbspacer",
-                    width: 4
-                },
-                this.cmbBorderSize, {
-                    xtype: "tbspacer",
-                    flex: 1
-                },
-                {
-                    xtype: "label",
-                    text: this.textBorderColor
-                },
-                {
-                    xtype: "tbspacer",
-                    width: 4
-                },
-                this._btnBorderColor]
-            },
-            {
-                xtype: "tbspacer",
-                height: 10
-            },
-            {
-                xtype: "label",
-                text: this.textBorderDesc,
-                style: "padding-left:10px;height:13px;"
-            },
-            {
-                xtype: "tbspacer",
-                height: 20
-            },
-            {
-                xtype: "container",
-                layout: {
-                    type: "hbox",
-                    align: "top"
-                },
-                height: 180,
+                    "-", "--", "-", me.textStandartColors, "-", "3D55FE", "5301B3", "980ABD", "B2275F", "F83D26", "F86A1D", "F7AC16", "F7CA12", "FAFF44", "D6EF39", "-", "--"]
+                });
+                me.colorsBorder.on("select", _.bind(me.onColorsBorderSelect, me));
+            });
+            this.btnBorderColor.render($("#paragraphadv-border-color-btn"));
+            this.btnBorderColor.setColor("000000");
+            $("#paragraphadv-border-color-new").on("click", _.bind(this.addNewColor, this, this.colorsBorder, this.btnBorderColor));
+            this.BordersImage = new Common.UI.TableStyler({
+                el: $("#id-deparagraphstyler"),
                 width: 200,
-                padding: "0 10",
-                style: "vertical-align: top;",
-                items: [this.bordersImagePanel = Ext.create("Ext.container.Container", {
-                    layout: "card",
-                    activeItem: 0,
-                    width: 200,
-                    height: 180,
-                    style: "padding-bottom:10px;",
-                    items: [this._BordersImage]
-                }), {
-                    xtype: "tbspacer",
-                    width: 25
-                },
-                {
-                    xtype: "container",
-                    layout: "hbox",
-                    height: 180,
-                    width: 100,
-                    items: [this._PresetsContainer = Ext.create("Ext.container.Container", {
-                        height: 180,
-                        width: 100,
-                        layout: {
-                            type: "table",
-                            columns: 2,
-                            tdAttrs: {
-                                style: "padding-right: 10px; padding-bottom: 4px; vertical-align: middle;"
-                            }
-                        },
-                        items: [{
-                            xtype: "tbspacer",
-                            height: 5
-                        },
-                        {
-                            xtype: "tbspacer",
-                            height: 5
-                        },
-                        this._btnsBorderPosition[5], this._btnsBorderPosition[6], this._btnsBorderPosition[7], this._btnsBorderPosition[0], this._btnsBorderPosition[3], this._btnsBorderPosition[1], this._btnsBorderPosition[4], this._btnsBorderPosition[2]]
-                    })]
-                }]
+                height: 170,
+                rows: this.tableStylerRows,
+                columns: this.tableStylerColumns,
+                spacingMode: false
+            });
+            var _arrBorderPresets = [["lrtb", "btn-borders-large btn-adv-paragraph-outer", "paragraphadv-button-border-outer", this.tipOuter], ["lrtbm", "btn-borders-large btn-adv-paragraph-all", "paragraphadv-button-border-all", this.tipAll], ["", "btn-borders-large btn-adv-paragraph-none", "paragraphadv-button-border-none", this.tipNone], ["l", "btn-borders-large btn-adv-paragraph-left", "paragraphadv-button-border-left", this.tipLeft], ["r", "btn-borders-large btn-adv-paragraph-right", "paragraphadv-button-border-right", this.tipRight], ["t", "btn-borders-large btn-adv-paragraph-top", "paragraphadv-button-border-top", this.tipTop], ["m", "btn-borders-large btn-adv-paragraph-inner-hor", "paragraphadv-button-border-inner-hor", this.tipInner], ["b", "btn-borders-large btn-adv-paragraph-bottom", "paragraphadv-button-border-bottom", this.tipBottom]];
+            this._btnsBorderPosition = [];
+            _.each(_arrBorderPresets, function (item, index, list) {
+                var _btn = new Common.UI.Button({
+                    style: "margin-left: 5px; margin-bottom: 4px;",
+                    cls: "btn-options large",
+                    iconCls: item[1],
+                    strId: item[0],
+                    hint: item[3]
+                });
+                _btn.render($("#" + item[2]));
+                _btn.on("click", _.bind(this._ApplyBorderPreset, this));
+                this._btnsBorderPosition.push(_btn);
             },
-            {
-                xtype: "tbspacer",
-                height: 5
-            },
-            {
-                xtype: "container",
-                height: 23,
-                padding: "0 10",
-                layout: "hbox",
-                items: [this._BackContainer = Ext.create("Ext.container.Container", {
-                    height: 23,
-                    width: 150,
-                    layout: "hbox",
-                    margin: "0 4px 0 0",
+            this);
+            this.btnBackColor = new Common.UI.ColorButton({
+                style: "width:45px;",
+                menu: new Common.UI.Menu({
                     items: [{
-                        xtype: "label",
-                        text: this.textBackColor,
-                        margin: "2px 4px 0 0"
-                    },
-                    this._btnBackColor]
-                })]
-            }]
-        };
-        this._IndentsContainer = {
-            xtype: "container",
-            itemId: "card-indents",
-            width: 340,
-            layout: {
-                type: "vbox",
-                align: "stretch"
-            },
-            items: [{
-                xtype: "container",
-                padding: "0 10",
-                layout: {
-                    type: "table",
-                    columns: 5
-                },
-                defaults: {
-                    xtype: "container",
-                    layout: "vbox",
-                    layoutConfig: {
-                        align: "stretch"
-                    },
-                    height: 40,
-                    style: "float:left;"
-                },
-                items: [{
-                    items: [{
-                        xtype: "label",
-                        text: this.strIndentsFirstLine,
-                        width: 85
+                        template: _.template('<div id="paragraphadv-back-color-menu" style="width: 165px; height: 220px; margin: 10px;"></div>')
                     },
                     {
-                        xtype: "tbspacer",
-                        height: 3
-                    },
-                    this.numFirstLine]
-                },
-                {
-                    xtype: "tbspacer",
-                    width: 23,
-                    height: 3
-                },
-                {
-                    items: [{
-                        xtype: "label",
-                        text: this.strIndentsLeftText,
-                        width: 85
+                        template: _.template('<a id="paragraphadv-back-color-new" style="padding-left:12px;">' + me.textNewColor + "</a>")
+                    }]
+                })
+            });
+            this.btnBackColor.on("render:after", function (btn) {
+                me.colorsBack = new Common.UI.ThemeColorPalette({
+                    el: $("#paragraphadv-back-color-menu"),
+                    dynamiccolors: 10,
+                    colors: [me.textThemeColors, "-", {
+                        color: "3366FF",
+                        effectId: 1
                     },
                     {
-                        xtype: "tbspacer",
-                        height: 3
-                    },
-                    this.numIndentsLeft]
-                },
-                {
-                    xtype: "tbspacer",
-                    width: 23,
-                    height: 3
-                },
-                {
-                    items: [{
-                        xtype: "label",
-                        text: this.strIndentsRightText,
-                        width: 85
+                        color: "0000FF",
+                        effectId: 2
                     },
                     {
-                        xtype: "tbspacer",
-                        height: 3
-                    },
-                    this.numIndentsRight]
-                }]
-            },
-            this._spacer.cloneConfig({
-                style: "margin: 16px 0 11px 0;",
-                height: 6
-            }), {
-                xtype: "container",
-                height: 25,
-                padding: "0 10",
-                layout: {
-                    type: "table",
-                    columns: 3,
-                    tdAttrs: {
-                        style: "vertical-align: middle;"
-                    }
-                },
-                items: [this.chBreakBefore, {
-                    xtype: "tbspacer",
-                    width: 10,
-                    height: 3
-                },
-                this.chKeepLines, this.chOrphan, {
-                    xtype: "tbspacer",
-                    width: 10,
-                    height: 3
-                },
-                this.chKeepNext]
-            }]
-        };
-        this._FontContainer = {
-            xtype: "container",
-            itemId: "card-font",
-            width: 340,
-            layout: {
-                type: "vbox",
-                align: "stretch"
-            },
-            items: [{
-                xtype: "label",
-                style: "font-weight: bold;margin-top: 1px; padding-left:10px;height:13px;",
-                text: this.textEffects
-            },
-            {
-                xtype: "tbspacer",
-                height: 8
-            },
-            {
-                xtype: "container",
-                height: 85,
-                width: "100%",
-                padding: "0 10",
-                layout: {
-                    type: "table",
-                    columns: 3,
-                    tdAttrs: {
-                        style: "vertical-align: middle;"
-                    }
-                },
-                items: [this.chStrike, {
-                    xtype: "tbspacer",
-                    width: 20,
-                    height: 2
-                },
-                this.chSubscript, this.chDoubleStrike, {
-                    xtype: "tbspacer",
-                    width: 20,
-                    height: 2
-                },
-                this.chSmallCaps, this.chSuperscript, {
-                    xtype: "tbspacer",
-                    width: 20,
-                    height: 2
-                },
-                this.chAllCaps]
-            },
-            {
-                xtype: "label",
-                style: "font-weight: bold;margin-top: 1px; padding-left:10px;height:13px;",
-                text: this.textCharacterSpacing
-            },
-            {
-                xtype: "tbspacer",
-                height: 8
-            },
-            {
-                xtype: "container",
-                height: 46,
-                padding: "0 10",
-                layout: {
-                    type: "table",
-                    columns: 3,
-                    tdAttrs: {
-                        style: "vertical-align: middle;"
-                    }
-                },
-                items: [{
-                    xtype: "label",
-                    text: this.textSpacing,
-                    width: 85
-                },
-                {
-                    xtype: "tbspacer",
-                    width: 60,
-                    height: 2
-                },
-                {
-                    xtype: "label",
-                    text: this.textPosition,
-                    width: 85
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                this.numSpacing, {
-                    xtype: "tbspacer",
-                    width: 60,
-                    height: 2
-                },
-                this.numPosition]
-            },
-            {
-                xtype: "tbspacer",
-                height: 10
-            },
-            {
-                xtype: "container",
-                height: 85,
-                padding: "0 10",
-                items: [this.fontImage]
-            }]
-        };
-        this._TabsContainer = {
-            xtype: "container",
-            itemId: "card-tabs",
-            width: 340,
-            layout: {
-                type: "vbox",
-                align: "stretch"
-            },
-            items: [{
-                xtype: "container",
-                padding: "0 0 0 10",
-                layout: {
-                    type: "table",
-                    columns: 3,
-                    tdAttrs: {
-                        style: "padding-right: 7px;"
-                    }
-                },
-                defaults: {
-                    xtype: "container",
-                    layout: "vbox",
-                    layoutConfig: {
-                        align: "stretch"
-                    },
-                    style: "float:left;"
-                },
-                items: [{
-                    height: 50,
-                    colspan: 2,
-                    items: [{
-                        xtype: "label",
-                        text: this.textTabPosition,
-                        width: 85
+                        color: "000090",
+                        effectId: 3
                     },
                     {
-                        xtype: "tbspacer",
-                        height: 3
-                    },
-                    this.numTab]
-                },
-                {
-                    height: 50,
-                    items: [{
-                        xtype: "label",
-                        text: this.textDefault,
-                        width: 107
+                        color: "660066",
+                        effectId: 4
                     },
                     {
-                        xtype: "tbspacer",
-                        height: 3
-                    },
-                    this.numDefaultTab]
-                },
-                {
-                    height: 95,
-                    colspan: 3,
-                    items: [this.tabList]
-                },
-                {
-                    height: 100,
-                    colspan: 3,
-                    items: [{
-                        xtype: "label",
-                        text: this.textAlign,
-                        width: 85
+                        color: "800000",
+                        effectId: 5
                     },
                     {
-                        xtype: "tbspacer",
-                        height: 3
+                        color: "FF0000",
+                        effectId: 1
                     },
-                    this.radioLeft, this.radioCenter, this.radioRight]
-                },
-                this.btnAddTab, this.btnRemoveTab, this.btnRemoveAll]
-            }]
-        };
-        this._MarginsContainer = {
-            xtype: "container",
-            itemId: "card-margins",
-            width: 340,
-            layout: {
-                type: "vbox",
-                align: "stretch"
+                    {
+                        color: "FF6600",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFF00",
+                        effectId: 2
+                    },
+                    {
+                        color: "CCFFCC",
+                        effectId: 3
+                    },
+                    {
+                        color: "008000",
+                        effectId: 4
+                    },
+                    "-", {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 3
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 4
+                    },
+                    {
+                        color: "000000",
+                        effectId: 5
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    {
+                        color: "FFFFFF",
+                        effectId: 2
+                    },
+                    {
+                        color: "000000",
+                        effectId: 1
+                    },
+                    "-", "--", "-", me.textStandartColors, "-", "transparent", "5301B3", "980ABD", "B2275F", "F83D26", "F86A1D", "F7AC16", "F7CA12", "FAFF44", "D6EF39", "-", "--"]
+                });
+                me.colorsBack.on("select", _.bind(me.onColorsBackSelect, me));
+            });
+            this.btnBackColor.render($("#paragraphadv-back-color-btn"));
+            $("#paragraphadv-back-color-new").on("click", _.bind(this.addNewColor, this, this.colorsBack, this.btnBackColor));
+            this.chStrike = new Common.UI.CheckBox({
+                el: $("#paragraphadv-checkbox-strike"),
+                labelText: this.strStrike
+            });
+            this.chStrike.on("change", _.bind(this.onStrikeChange, this));
+            this.chDoubleStrike = new Common.UI.CheckBox({
+                el: $("#paragraphadv-checkbox-double-strike"),
+                labelText: this.strDoubleStrike
+            });
+            this.chDoubleStrike.on("change", _.bind(this.onDoubleStrikeChange, this));
+            this.chSuperscript = new Common.UI.CheckBox({
+                el: $("#paragraphadv-checkbox-superscript"),
+                labelText: this.strSuperscript
+            });
+            this.chSuperscript.on("change", _.bind(this.onSuperscriptChange, this));
+            this.chSubscript = new Common.UI.CheckBox({
+                el: $("#paragraphadv-checkbox-subscript"),
+                labelText: this.strSubscript
+            });
+            this.chSubscript.on("change", _.bind(this.onSubscriptChange, this));
+            this.chSmallCaps = new Common.UI.CheckBox({
+                el: $("#paragraphadv-checkbox-small-caps"),
+                labelText: this.strSmallCaps
+            });
+            this.chSmallCaps.on("change", _.bind(this.onSmallCapsChange, this));
+            this.chAllCaps = new Common.UI.CheckBox({
+                el: $("#paragraphadv-checkbox-all-caps"),
+                labelText: this.strAllCaps
+            });
+            this.chAllCaps.on("change", _.bind(this.onAllCapsChange, this));
+            this.numSpacing = new Common.UI.MetricSpinner({
+                el: $("#paragraphadv-spin-spacing"),
+                step: 0.01,
+                width: 100,
+                defaultUnit: "cm",
+                defaultValue: 0,
+                value: "0 cm",
+                maxValue: 55.87,
+                minValue: -55.87
+            });
+            this.numSpacing.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (this._changedProps) {
+                    this._changedProps.put_TextSpacing(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                }
+                if (this.api && !this._noApply) {
+                    var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
+                    properties.put_TextSpacing(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                    this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
+                }
             },
-            items: [{
-                xtype: "container",
-                padding: "0 10",
-                layout: {
-                    type: "table",
-                    columns: 2,
-                    tdAttrs: {
-                        style: "padding-right: 40px;vertical-align: middle;"
+            this));
+            this.spinners.push(this.numSpacing);
+            this.numPosition = new Common.UI.MetricSpinner({
+                el: $("#paragraphadv-spin-position"),
+                step: 0.01,
+                width: 100,
+                defaultUnit: "cm",
+                defaultValue: 0,
+                value: "0 cm",
+                maxValue: 55.87,
+                minValue: -55.87
+            });
+            this.numPosition.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (this._changedProps) {
+                    this._changedProps.put_Position(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                }
+                if (this.api && !this._noApply) {
+                    var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
+                    properties.put_Position(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                    this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
+                }
+            },
+            this));
+            this.spinners.push(this.numPosition);
+            this.numTab = new Common.UI.MetricSpinner({
+                el: $("#paraadv-spin-tab"),
+                step: 0.1,
+                width: 180,
+                defaultUnit: "cm",
+                value: "1.25 cm",
+                maxValue: 55.87,
+                minValue: 0
+            });
+            this.spinners.push(this.numTab);
+            this.numDefaultTab = new Common.UI.MetricSpinner({
+                el: $("#paraadv-spin-default-tab"),
+                step: 0.1,
+                width: 107,
+                defaultUnit: "cm",
+                value: "1.25 cm",
+                maxValue: 55.87,
+                minValue: 0
+            });
+            this.numDefaultTab.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (this._changedProps) {
+                    this._changedProps.put_DefaultTab(parseFloat(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()).toFixed(1)));
+                }
+            },
+            this));
+            this.spinners.push(this.numDefaultTab);
+            this.tabList = new Common.UI.ListView({
+                el: $("#paraadv-list-tabs"),
+                emptyText: this.noTabs,
+                store: new Common.UI.DataViewStore()
+            });
+            this.tabList.store.comparator = function (rec) {
+                return rec.get("tabPos");
+            };
+            this.tabList.on("item:select", _.bind(this.onSelectTab, this));
+            var storechanged = function () {
+                if (!me._noApply) {
+                    me._tabListChanged = true;
+                }
+            };
+            this.listenTo(this.tabList.store, "add", storechanged);
+            this.listenTo(this.tabList.store, "remove", storechanged);
+            this.listenTo(this.tabList.store, "reset", storechanged);
+            this.radioLeft = new Common.UI.RadioBox({
+                el: $("#paragraphadv-radio-left"),
+                labelText: this.textTabLeft,
+                name: "asc-radio-tab",
+                checked: true
+            });
+            this.radioCenter = new Common.UI.RadioBox({
+                el: $("#paragraphadv-radio-center"),
+                labelText: this.textTabCenter,
+                name: "asc-radio-tab"
+            });
+            this.radioRight = new Common.UI.RadioBox({
+                el: $("#paragraphadv-radio-right"),
+                labelText: this.textTabRight,
+                name: "asc-radio-tab"
+            });
+            this.btnAddTab = new Common.UI.Button({
+                el: $("#paraadv-button-add-tab")
+            });
+            this.btnAddTab.on("click", _.bind(this.addTab, this));
+            this.btnRemoveTab = new Common.UI.Button({
+                el: $("#paraadv-button-remove-tab")
+            });
+            this.btnRemoveTab.on("click", _.bind(this.removeTab, this));
+            this.btnRemoveAll = new Common.UI.Button({
+                el: $("#paraadv-button-remove-all")
+            });
+            this.btnRemoveAll.on("click", _.bind(this.removeAllTabs, this));
+            this.spnMarginTop = new Common.UI.MetricSpinner({
+                el: $("#paraadv-number-margin-top"),
+                step: 0.1,
+                width: 100,
+                defaultUnit: "cm",
+                value: "0 cm",
+                maxValue: 55.87,
+                minValue: 0
+            });
+            this.spnMarginTop.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (!this._noApply) {
+                    if (this.Margins === undefined) {
+                        this.Margins = {};
                     }
-                },
-                items: [{
-                    xtype: "label",
-                    text: this.textTop,
-                    width: 85
-                },
-                {
-                    xtype: "label",
-                    text: this.textLeft,
-                    width: 85
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                this._spnMarginTop, this._spnMarginLeft, {
-                    xtype: "tbspacer",
-                    height: 5
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 5
-                },
-                {
-                    xtype: "label",
-                    text: this.textBottom,
-                    width: 85
-                },
-                {
-                    xtype: "label",
-                    text: this.textRight,
-                    width: 85
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                this._spnMarginBottom, this._spnMarginRight]
-            }]
-        };
-        this.items = [{
-            xtype: "container",
-            height: 300,
-            layout: {
-                type: "hbox",
-                align: "stretch"
+                    this.Margins.Top = Common.Utils.Metric.fnRecalcToMM(field.getNumberValue());
+                }
             },
-            items: [{
-                xtype: "container",
-                width: 160,
-                padding: "5px 0 0 0",
-                layout: {
-                    type: "vbox",
-                    align: "stretch"
-                },
-                defaults: {
-                    xtype: "container",
-                    layout: {
-                        type: "hbox",
-                        align: "middle",
-                        pack: "end"
+            this));
+            this.spinners.push(this.spnMarginTop);
+            this.spnMarginBottom = new Common.UI.MetricSpinner({
+                el: $("#paraadv-number-margin-bottom"),
+                step: 0.1,
+                width: 100,
+                defaultUnit: "cm",
+                value: "0 cm",
+                maxValue: 55.87,
+                minValue: 0
+            });
+            this.spnMarginBottom.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (!this._noApply) {
+                    if (this.Margins === undefined) {
+                        this.Margins = {};
                     }
-                },
-                items: [{
-                    height: 30,
-                    items: [this.btnIndents]
-                },
-                {
-                    height: 30,
-                    items: [this.btnBorders]
-                },
-                {
-                    height: 30,
-                    items: [this.btnFont]
-                },
-                {
-                    height: 30,
-                    items: [this.btnTabs]
-                },
-                {
-                    height: 30,
-                    items: [this.btnMargins]
-                }]
+                    this.Margins.Bottom = Common.Utils.Metric.fnRecalcToMM(field.getNumberValue());
+                }
             },
-            {
-                xtype: "box",
-                cls: "advanced-settings-separator",
-                height: "100%",
-                width: 8
+            this));
+            this.spinners.push(this.spnMarginBottom);
+            this.spnMarginLeft = new Common.UI.MetricSpinner({
+                el: $("#paraadv-number-margin-left"),
+                step: 0.1,
+                width: 100,
+                defaultUnit: "cm",
+                value: "0.19 cm",
+                maxValue: 9.34,
+                minValue: 0
+            });
+            this.spnMarginLeft.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (!this._noApply) {
+                    if (this.Margins === undefined) {
+                        this.Margins = {};
+                    }
+                    this.Margins.Left = Common.Utils.Metric.fnRecalcToMM(field.getNumberValue());
+                }
             },
-            this.mainCard = Ext.create("Ext.container.Container", {
-                height: 300,
-                flex: 1,
-                padding: "12px 18px 0 10px",
-                layout: "card",
-                items: [this._IndentsContainer, this._BordersContainer, this._FontContainer, this._TabsContainer, this._MarginsContainer]
-            })]
+            this));
+            this.spinners.push(this.spnMarginLeft);
+            this.spnMarginRight = new Common.UI.MetricSpinner({
+                el: $("#paraadv-number-margin-right"),
+                step: 0.1,
+                width: 100,
+                defaultUnit: "cm",
+                value: "0.19 cm",
+                maxValue: 9.34,
+                minValue: 0
+            });
+            this.spnMarginRight.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (!this._noApply) {
+                    if (this.Margins === undefined) {
+                        this.Margins = {};
+                    }
+                    this.Margins.Right = Common.Utils.Metric.fnRecalcToMM(field.getNumberValue());
+                }
+            },
+            this));
+            this.spinners.push(this.spnMarginRight);
+            this.TextOnlySettings = $(".text-only");
+            this.afterRender();
         },
-        this._spacer.cloneConfig({
-            style: "margin: 0 18px"
-        }), {
-            xtype: "container",
-            height: 40,
-            layout: {
-                type: "vbox",
-                align: "center",
-                pack: "center"
-            },
-            items: [{
-                xtype: "container",
-                width: 182,
-                height: 24,
-                layout: {
-                    type: "hbox",
-                    align: "middle"
-                },
-                items: [this.btnOk = Ext.widget("button", {
-                    cls: "asc-blue-button",
-                    width: 86,
-                    height: 22,
-                    margin: "0 5px 0 0",
-                    text: this.okButtonText,
-                    listeners: {
-                        click: function (btn) {
-                            this.fireEvent("onmodalresult", this, 1, this.getSettings());
-                            this.close();
-                        },
-                        scope: this
-                    }
-                }), this.btnCancel = Ext.widget("button", {
-                    cls: "asc-darkgray-button",
-                    width: 86,
-                    height: 22,
-                    text: this.cancelButtonText,
-                    listeners: {
-                        click: function (btn) {
-                            this.fireEvent("onmodalresult", this, 0);
-                            this.close();
-                        },
-                        scope: this
-                    }
-                })]
-            }]
-        }];
-        this.callParent(arguments);
-    },
-    afterRender: function () {
-        this.callParent(arguments);
-        this._setDefaults(this._originalProps);
-        if (this.borderProps !== undefined) {
-            this._btnBorderColor.setColor(this.borderProps.borderColor);
-            var colorstr = Ext.String.format("#{0}", (typeof(this.borderProps.borderColor) == "object") ? this.borderProps.borderColor.color : this.borderProps.borderColor);
-            this._BordersImage.setVirtualBorderColor(colorstr);
-            var rec = this.cmbBorderSize.getStore().findRecord("value", this.borderProps.borderSize.ptValue);
-            if (rec) {
-                this.cmbBorderSize.select(rec);
-                this.cmbBorderSize.fireEvent("select", this.cmbBorderSize, [rec]);
+        getSettings: function () {
+            if (this.ChangedBorders === null) {
+                this._changedProps.put_Borders(this.Borders);
+            } else {
+                if (this.ChangedBorders !== undefined) {
+                    this._changedProps.put_Borders(this.ChangedBorders);
+                }
             }
-            this.colorsBorder.select(this.borderProps.borderColor);
-        }
-        this.setTitle(this.textTitle);
-        if (this.colorProps !== undefined) {
-            this.sendThemeColors(this.colorProps[0], this.colorProps[1]);
-        }
-        for (var i = 0; i < this._BordersImage.rows; i++) {
-            for (var j = 0; j < this._BordersImage.columns; j++) {
-                this._BordersImage.getCell(j, i).addListener("borderclick", function (ct, border, size, color) {
-                    if (this.ChangedBorders === undefined) {
-                        this.ChangedBorders = new CParagraphBorders();
+            if (this.Margins) {
+                var borders = this._changedProps.get_Borders();
+                if (borders === undefined || borders === null) {
+                    this._changedProps.put_Borders(new CParagraphBorders());
+                    borders = this._changedProps.get_Borders();
+                }
+                if (this.Margins.Left !== undefined) {
+                    if (borders.get_Left() === undefined || borders.get_Left() === null) {
+                        borders.put_Left(new CBorder(this.Borders.get_Left()));
                     }
-                    this._UpdateCellBordersStyle(ct, border, size, color, this.Borders);
+                    borders.get_Left().put_Space(this.Margins.Left);
+                }
+                if (this.Margins.Top !== undefined) {
+                    if (borders.get_Top() === undefined || borders.get_Top() === null) {
+                        borders.put_Top(new CBorder(this.Borders.get_Top()));
+                    }
+                    borders.get_Top().put_Space(this.Margins.Top);
+                }
+                if (this.Margins.Right !== undefined) {
+                    if (borders.get_Right() === undefined || borders.get_Right() === null) {
+                        borders.put_Right(new CBorder(this.Borders.get_Right()));
+                    }
+                    borders.get_Right().put_Space(this.Margins.Right);
+                }
+                if (this.Margins.Bottom !== undefined) {
+                    if (borders.get_Bottom() === undefined || borders.get_Bottom() === null) {
+                        borders.put_Bottom(new CBorder(this.Borders.get_Bottom()));
+                    }
+                    borders.get_Bottom().put_Space(this.Margins.Bottom);
+                    if (borders.get_Between() === undefined || borders.get_Between() === null) {
+                        borders.put_Between(new CBorder(this.Borders.get_Between()));
+                    }
+                    borders.get_Between().put_Space(this.Margins.Bottom);
+                }
+            }
+            if (this._tabListChanged) {
+                if (this._changedProps.get_Tabs() === null || this._changedProps.get_Tabs() === undefined) {
+                    this._changedProps.put_Tabs(new CParagraphTabs());
+                }
+                this.tabList.store.each(function (item, index) {
+                    var tab = new CParagraphTab(Common.Utils.Metric.fnRecalcToMM(item.get("tabPos")), item.get("tabAlign"));
+                    this._changedProps.get_Tabs().add_Tab(tab);
                 },
                 this);
             }
-        }
-        this._BordersImage.addListener("borderclick", function (ct, border, size, color) {
-            if (this.ChangedBorders === undefined) {
-                this.ChangedBorders = new CParagraphBorders();
-            }
-            this._UpdateTableBordersStyle(ct, border, size, color, this.Borders);
+            return {
+                paragraphProps: this._changedProps,
+                borderProps: {
+                    borderSize: this.BorderSize,
+                    borderColor: this.btnBorderColor.color
+                }
+            };
         },
-        this);
-    },
-    setSettings: function (props) {
-        this._originalProps = new CParagraphProp(props.paragraphProps);
-        this.borderProps = props.borderProps;
-        this.colorProps = props.colorProps;
-        this._changedProps = null;
-        this.api = props.api;
-    },
-    _setDefaults: function (props) {
-        if (props) {
-            this._originalProps = new CParagraphProp(props);
-            this.numFirstLine.setValue((props.get_Ind() !== null && props.get_Ind().get_FirstLine() !== null) ? Common.MetricSettings.fnRecalcFromMM(props.get_Ind().get_FirstLine()) : "");
-            this.numIndentsLeft.setValue((props.get_Ind() !== null && props.get_Ind().get_Left() !== null) ? Common.MetricSettings.fnRecalcFromMM(props.get_Ind().get_Left()) : "");
-            this.numIndentsRight.setValue((props.get_Ind() !== null && props.get_Ind().get_Right() !== null) ? Common.MetricSettings.fnRecalcFromMM(props.get_Ind().get_Right()) : "");
-            this.chKeepLines.setValue((props.get_KeepLines() !== null && props.get_KeepLines() !== undefined) ? props.get_KeepLines() : "indeterminate");
-            this.chBreakBefore.setValue((props.get_PageBreakBefore() !== null && props.get_PageBreakBefore() !== undefined) ? props.get_PageBreakBefore() : "indeterminate");
-            this.chKeepNext.setValue((props.get_KeepNext() !== null && props.get_KeepNext() !== undefined) ? props.get_KeepNext() : "indeterminate");
-            this.chOrphan.setValue((props.get_WidowControl() !== null && props.get_WidowControl() !== undefined) ? props.get_WidowControl() : "indeterminate");
-            this.Borders = new CParagraphBorders(props.get_Borders());
-            if (this.Borders) {
-                var brd = this.Borders.get_Left();
-                var val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.MetricSettings.fnRecalcFromMM(brd.get_Space()) : "";
-                this._spnMarginLeft.setValue(val);
-                brd = this.Borders.get_Top();
-                val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.MetricSettings.fnRecalcFromMM(brd.get_Space()) : "";
-                this._spnMarginTop.setValue(val);
-                brd = this.Borders.get_Right();
-                val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.MetricSettings.fnRecalcFromMM(brd.get_Space()) : "";
-                this._spnMarginRight.setValue(val);
-                brd = this.Borders.get_Bottom();
-                val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.MetricSettings.fnRecalcFromMM(brd.get_Space()) : "";
-                this._spnMarginBottom.setValue(val);
-            }
-            var shd = props.get_Shade();
-            if (shd !== null && shd !== undefined && shd.get_Value() === shd_Clear) {
-                var color = shd.get_Color();
-                if (color) {
-                    if (color.get_type() == c_oAscColor.COLOR_TYPE_SCHEME) {
-                        this.paragraphShade = {
-                            color: this.getHexColor(color.get_r(), color.get_g(), color.get_b()),
-                            effectValue: color.get_value()
-                        };
+        _setDefaults: function (props) {
+            if (props) {
+                this._originalProps = new CParagraphProp(props);
+                this.hideTextOnlySettings(this.isChart);
+                this.numFirstLine.setValue((props.get_Ind() !== null && props.get_Ind().get_FirstLine() !== null) ? Common.Utils.Metric.fnRecalcFromMM(props.get_Ind().get_FirstLine()) : "", true);
+                this.numIndentsLeft.setValue((props.get_Ind() !== null && props.get_Ind().get_Left() !== null) ? Common.Utils.Metric.fnRecalcFromMM(props.get_Ind().get_Left()) : "", true);
+                this.numIndentsRight.setValue((props.get_Ind() !== null && props.get_Ind().get_Right() !== null) ? Common.Utils.Metric.fnRecalcFromMM(props.get_Ind().get_Right()) : "", true);
+                this.chKeepLines.setValue((props.get_KeepLines() !== null && props.get_KeepLines() !== undefined) ? props.get_KeepLines() : "indeterminate", true);
+                this.chBreakBefore.setValue((props.get_PageBreakBefore() !== null && props.get_PageBreakBefore() !== undefined) ? props.get_PageBreakBefore() : "indeterminate", true);
+                this.chKeepNext.setValue((props.get_KeepNext() !== null && props.get_KeepNext() !== undefined) ? props.get_KeepNext() : "indeterminate", true);
+                this.chOrphan.setValue((props.get_WidowControl() !== null && props.get_WidowControl() !== undefined) ? props.get_WidowControl() : "indeterminate", true);
+                this.Borders = new CParagraphBorders(props.get_Borders());
+                if (this.Borders) {
+                    var brd = this.Borders.get_Left();
+                    var val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.Utils.Metric.fnRecalcFromMM(brd.get_Space()) : "";
+                    this.spnMarginLeft.setValue(val, true);
+                    brd = this.Borders.get_Top();
+                    val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.Utils.Metric.fnRecalcFromMM(brd.get_Space()) : "";
+                    this.spnMarginTop.setValue(val, true);
+                    brd = this.Borders.get_Right();
+                    val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.Utils.Metric.fnRecalcFromMM(brd.get_Space()) : "";
+                    this.spnMarginRight.setValue(val, true);
+                    brd = this.Borders.get_Bottom();
+                    val = (null !== brd && undefined !== brd && null !== brd.get_Space() && undefined !== brd.get_Space()) ? Common.Utils.Metric.fnRecalcFromMM(brd.get_Space()) : "";
+                    this.spnMarginBottom.setValue(val, true);
+                }
+                var shd = props.get_Shade();
+                if (shd !== null && shd !== undefined && shd.get_Value() === shd_Clear) {
+                    var color = shd.get_Color();
+                    if (color) {
+                        if (color.get_type() == c_oAscColor.COLOR_TYPE_SCHEME) {
+                            this.paragraphShade = {
+                                color: Common.Utils.ThemeColor.getHexColor(color.get_r(), color.get_g(), color.get_b()),
+                                effectValue: color.get_value()
+                            };
+                        } else {
+                            this.paragraphShade = Common.Utils.ThemeColor.getHexColor(color.get_r(), color.get_g(), color.get_b());
+                        }
                     } else {
-                        this.paragraphShade = this.getHexColor(color.get_r(), color.get_g(), color.get_b());
+                        this.paragraphShade = "transparent";
                     }
                 } else {
                     this.paragraphShade = "transparent";
                 }
-            } else {
-                this.paragraphShade = "transparent";
+                this.btnBackColor.setColor(this.paragraphShade);
+                if (typeof(this.paragraphShade) == "object") {
+                    var isselected = false;
+                    for (var i = 0; i < 10; i++) {
+                        if (Common.Utils.ThemeColor.ThemeValues[i] == this.paragraphShade.effectValue) {
+                            this.colorsBack.select(this.paragraphShade, true);
+                            isselected = true;
+                            break;
+                        }
+                    }
+                    if (!isselected) {
+                        this.colorsBack.clearSelection();
+                    }
+                } else {
+                    this.colorsBack.select(this.paragraphShade, true);
+                }
+                this._UpdateBorders();
+                this._noApply = true;
+                this.chStrike.setValue((props.get_Strikeout() !== null && props.get_Strikeout() !== undefined) ? props.get_Strikeout() : "indeterminate", true);
+                this.chDoubleStrike.setValue((props.get_DStrikeout() !== null && props.get_DStrikeout() !== undefined) ? props.get_DStrikeout() : "indeterminate", true);
+                this.chSubscript.setValue((props.get_Subscript() !== null && props.get_Subscript() !== undefined) ? props.get_Subscript() : "indeterminate", true);
+                this.chSuperscript.setValue((props.get_Superscript() !== null && props.get_Superscript() !== undefined) ? props.get_Superscript() : "indeterminate", true);
+                this.chSmallCaps.setValue((props.get_SmallCaps() !== null && props.get_SmallCaps() !== undefined) ? props.get_SmallCaps() : "indeterminate", true);
+                this.chAllCaps.setValue((props.get_AllCaps() !== null && props.get_AllCaps() !== undefined) ? props.get_AllCaps() : "indeterminate", true);
+                this.numSpacing.setValue((props.get_TextSpacing() !== null && props.get_TextSpacing() !== undefined) ? Common.Utils.Metric.fnRecalcFromMM(props.get_TextSpacing()) : "", true);
+                this.numPosition.setValue((props.get_Position() !== null && props.get_Position() !== undefined) ? Common.Utils.Metric.fnRecalcFromMM(props.get_Position()) : "", true);
+                this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", this._originalProps);
+                this.numDefaultTab.setValue((props.get_DefaultTab() !== null && props.get_DefaultTab() !== undefined) ? Common.Utils.Metric.fnRecalcFromMM(parseFloat(props.get_DefaultTab().toFixed(1))) : "", true);
+                var store = this.tabList.store;
+                var tabs = props.get_Tabs();
+                if (tabs) {
+                    var arr = [];
+                    var count = tabs.get_Count();
+                    for (var i = 0; i < count; i++) {
+                        var tab = tabs.get_Tab(i);
+                        var pos = Common.Utils.Metric.fnRecalcFromMM(parseFloat(tab.get_Pos().toFixed(1)));
+                        var rec = new Common.UI.DataViewModel();
+                        rec.set({
+                            tabPos: pos,
+                            value: parseFloat(pos.toFixed(3)) + " " + Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()],
+                            tabAlign: tab.get_Value()
+                        });
+                        arr.push(rec);
+                    }
+                    store.reset(arr, {
+                        silent: false
+                    });
+                    this.tabList.selectByIndex(0);
+                }
+                this._noApply = false;
+                this._changedProps = new CParagraphProp();
+                this.ChangedBorders = undefined;
             }
-            this._btnBackColor.setColor(this.paragraphShade);
-            if (typeof(this.paragraphShade) == "object") {
-                for (var i = 0; i < 10; i++) {
-                    if (this.ThemeValues[i] == this.paragraphShade.effectValue) {
-                        this.colorsBack.select(this.paragraphShade, true);
-                        break;
+        },
+        updateMetricUnit: function () {
+            if (this.spinners) {
+                for (var i = 0; i < this.spinners.length; i++) {
+                    var spinner = this.spinners[i];
+                    spinner.setDefaultUnit(Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()]);
+                    if (spinner.el.id == "paragraphadv-spin-spacing" || spinner.el.id == "paragraphadv-spin-position") {
+                        spinner.setStep(Common.Utils.Metric.getCurrentMetric() == Common.Utils.Metric.c_MetricUnits.cm ? 0.01 : 1);
+                    } else {
+                        spinner.setStep(Common.Utils.Metric.getCurrentMetric() == Common.Utils.Metric.c_MetricUnits.cm ? 0.1 : 1);
                     }
                 }
-            } else {
-                this.colorsBack.select(this.paragraphShade, true);
             }
-            this._UpdateBorders();
-            this._noApply = true;
-            this.chStrike.setValue((props.get_Strikeout() !== null && props.get_Strikeout() !== undefined) ? props.get_Strikeout() : "indeterminate");
-            this.chDoubleStrike.setValue((props.get_DStrikeout() !== null && props.get_DStrikeout() !== undefined) ? props.get_DStrikeout() : "indeterminate");
-            this.chSubscript.setValue((props.get_Subscript() !== null && props.get_Subscript() !== undefined) ? props.get_Subscript() : "indeterminate");
-            this.chSuperscript.setValue((props.get_Superscript() !== null && props.get_Superscript() !== undefined) ? props.get_Superscript() : "indeterminate");
-            this.chSmallCaps.setValue((props.get_SmallCaps() !== null && props.get_SmallCaps() !== undefined) ? props.get_SmallCaps() : "indeterminate");
-            this.chAllCaps.setValue((props.get_AllCaps() !== null && props.get_AllCaps() !== undefined) ? props.get_AllCaps() : "indeterminate");
-            this.numSpacing.setValue((props.get_TextSpacing() !== null && props.get_TextSpacing() !== undefined) ? Common.MetricSettings.fnRecalcFromMM(props.get_TextSpacing()) : "");
-            this.numPosition.setValue((props.get_Position() !== null && props.get_Position() !== undefined) ? Common.MetricSettings.fnRecalcFromMM(props.get_Position()) : "");
-            this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", this._originalProps);
-            this.numDefaultTab.setValue((props.get_DefaultTab() !== null && props.get_DefaultTab() !== undefined) ? Common.MetricSettings.fnRecalcFromMM(parseFloat(props.get_DefaultTab().toFixed(1))) : "");
-            var tabs = props.get_Tabs();
-            if (tabs) {
-                var arr = [];
-                var count = tabs.get_Count();
-                for (var i = 0; i < count; i++) {
-                    var tab = tabs.get_Tab(i);
-                    var rec = {
-                        tabPos: Common.MetricSettings.fnRecalcFromMM(parseFloat(tab.get_Pos().toFixed(1))),
-                        tabAlign: tab.get_Value()
-                    };
-                    rec.tabStr = parseFloat(Ext.Number.toFixed(rec.tabPos, 3)) + " " + Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()];
-                    arr.push(rec);
+        },
+        updateThemeColors: function () {
+            this.colorsBorder.updateColors(Common.Utils.ThemeColor.getEffectColors(), Common.Utils.ThemeColor.getStandartColors());
+            this.colorsBack.updateColors(Common.Utils.ThemeColor.getEffectColors(), Common.Utils.ThemeColor.getStandartColors());
+        },
+        afterRender: function () {
+            this.updateMetricUnit();
+            this.updateThemeColors();
+            this._setDefaults(this._originalProps);
+            if (this.borderProps !== undefined) {
+                this.btnBorderColor.setColor(this.borderProps.borderColor);
+                this.BordersImage.setVirtualBorderColor((typeof(this.borderProps.borderColor) == "object") ? this.borderProps.borderColor.color : this.borderProps.borderColor);
+                this.cmbBorderSize.setValue(this.borderProps.borderSize.ptValue);
+                var rec = this.cmbBorderSize.getSelectedRecord();
+                if (rec) {
+                    this.onBorderSizeSelect(this.cmbBorderSize, rec);
                 }
-                this.tabList.getStore().loadData(arr);
-                this.tabList.getStore().sort();
-                if (this.tabList.getStore().count() > 0) {
-                    this.tabList.getSelectionModel().select(0);
+                this.colorsBorder.select(this.borderProps.borderColor, true);
+            }
+            for (var i = 0; i < this.BordersImage.rows; i++) {
+                for (var j = 0; j < this.BordersImage.columns; j++) {
+                    this.BordersImage.getCell(j, i).on("borderclick", function (ct, border, size, color) {
+                        if (this.ChangedBorders === undefined) {
+                            this.ChangedBorders = new CParagraphBorders();
+                        }
+                        this._UpdateCellBordersStyle(ct, border, size, color, this.Borders);
+                    },
+                    this);
                 }
             }
-            this._noApply = false;
-            this._changedProps = new CParagraphProp();
-            this.ChangedBorders = undefined;
-        }
-    },
-    getSettings: function () {
-        if (this.ChangedBorders === null) {
-            this._changedProps.put_Borders(this.Borders);
-        } else {
-            if (this.ChangedBorders !== undefined) {
-                this._changedProps.put_Borders(this.ChangedBorders);
-            }
-        }
-        if (this.Margins) {
-            var borders = this._changedProps.get_Borders();
-            if (borders === undefined || borders === null) {
-                this._changedProps.put_Borders(new CParagraphBorders());
-                borders = this._changedProps.get_Borders();
-            }
-            if (this.Margins.Left !== undefined) {
-                if (borders.get_Left() === undefined || borders.get_Left() === null) {
-                    borders.put_Left(new CBorder(this.Borders.get_Left()));
+            this.BordersImage.on("borderclick", function (ct, border, size, color) {
+                if (this.ChangedBorders === undefined) {
+                    this.ChangedBorders = new CParagraphBorders();
                 }
-                borders.get_Left().put_Space(this.Margins.Left);
-            }
-            if (this.Margins.Top !== undefined) {
-                if (borders.get_Top() === undefined || borders.get_Top() === null) {
-                    borders.put_Top(new CBorder(this.Borders.get_Top()));
-                }
-                borders.get_Top().put_Space(this.Margins.Top);
-            }
-            if (this.Margins.Right !== undefined) {
-                if (borders.get_Right() === undefined || borders.get_Right() === null) {
-                    borders.put_Right(new CBorder(this.Borders.get_Right()));
-                }
-                borders.get_Right().put_Space(this.Margins.Right);
-            }
-            if (this.Margins.Bottom !== undefined) {
-                if (borders.get_Bottom() === undefined || borders.get_Bottom() === null) {
-                    borders.put_Bottom(new CBorder(this.Borders.get_Bottom()));
-                }
-                borders.get_Bottom().put_Space(this.Margins.Bottom);
-                if (borders.get_Between() === undefined || borders.get_Between() === null) {
-                    borders.put_Between(new CBorder(this.Borders.get_Between()));
-                }
-                borders.get_Between().put_Space(this.Margins.Bottom);
-            }
-        }
-        if (this._tabListChanged) {
-            if (this._changedProps.get_Tabs() === null || this._changedProps.get_Tabs() === undefined) {
-                this._changedProps.put_Tabs(new CParagraphTabs());
-            }
-            this.tabList.getStore().each(function (item, index) {
-                var tab = new CParagraphTab(Common.MetricSettings.fnRecalcToMM(item.data.tabPos), item.data.tabAlign);
-                this._changedProps.get_Tabs().add_Tab(tab);
+                this._UpdateTableBordersStyle(ct, border, size, color, this.Borders);
             },
             this);
-        }
-        return {
-            paragraphProps: this._changedProps,
-            borderProps: {
-                borderSize: this.BorderSize,
-                borderColor: this._btnBorderColor.color
+        },
+        onStrikeChange: function (field, newValue, oldValue, eOpts) {
+            if (this._changedProps && this.checkGroup != 1) {
+                this._changedProps.put_Strikeout(field.getValue() == "checked");
             }
-        };
-    },
-    _UpdateBorders: function () {
-        var oldSize = this.BorderSize;
-        var oldColor = this._btnBorderColor.color;
-        this._UpdateBorder(this.Borders.get_Left(), "l");
-        this._UpdateBorder(this.Borders.get_Top(), "t");
-        this._UpdateBorder(this.Borders.get_Right(), "r");
-        this._UpdateBorder(this.Borders.get_Bottom(), "b");
-        if (this.Borders.get_Between() !== null) {
-            for (var i = 0; i < this._BordersImage.columns; i++) {
-                this._UpdateCellBorder(this.Borders.get_Between(), "b", this._BordersImage.getCell(i, 0));
-                this._UpdateCellBorder(this.Borders.get_Between(), "t", this._BordersImage.getCell(i, 1));
+            this.checkGroup = 0;
+            if (field.getValue() == "checked") {
+                this.checkGroup = 1;
+                this.chDoubleStrike.setValue(0);
+                if (this._changedProps) {
+                    this._changedProps.put_DStrikeout(false);
+                }
+                this.checkGroup = 0;
             }
-        }
-        this._BordersImage.setVirtualBorderSize(oldSize.pxValue);
-        var colorstr = Ext.String.format("#{0}", (typeof(oldColor) == "object") ? oldColor.color : oldColor);
-        this._BordersImage.setVirtualBorderColor(colorstr);
-    },
-    _UpdateCellBorder: function (BorderParam, borderName, cell) {
-        if (null !== BorderParam && undefined !== BorderParam) {
-            if (null !== BorderParam.get_Value() && null !== BorderParam.get_Size() && null !== BorderParam.get_Color() && 1 == BorderParam.get_Value()) {
-                cell.setBordersSize(borderName, this._BorderPt2Px(BorderParam.get_Size() * 72 / 25.4));
-                cell.setBordersColor(borderName, "rgb(" + BorderParam.get_Color().get_r() + "," + BorderParam.get_Color().get_g() + "," + BorderParam.get_Color().get_b() + ")");
+            if (this.api && !this._noApply) {
+                var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
+                properties.put_Strikeout(field.getValue() == "checked");
+                properties.put_DStrikeout(this.chDoubleStrike.getValue() == "checked");
+                this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
+            }
+        },
+        onDoubleStrikeChange: function (field, newValue, oldValue, eOpts) {
+            if (this._changedProps && this.checkGroup != 1) {
+                this._changedProps.put_DStrikeout(field.getValue() == "checked");
+            }
+            this.checkGroup = 0;
+            if (field.getValue() == "checked") {
+                this.checkGroup = 1;
+                this.chStrike.setValue(0);
+                if (this._changedProps) {
+                    this._changedProps.put_Strikeout(false);
+                }
+                this.checkGroup = 0;
+            }
+            if (this.api && !this._noApply) {
+                var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
+                properties.put_DStrikeout(field.getValue() == "checked");
+                properties.put_Strikeout(this.chStrike.getValue() == "checked");
+                this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
+            }
+        },
+        onSuperscriptChange: function (field, newValue, oldValue, eOpts) {
+            if (this._changedProps && this.checkGroup != 2) {
+                this._changedProps.put_Superscript(field.getValue() == "checked");
+            }
+            this.checkGroup = 0;
+            if (field.getValue() == "checked") {
+                this.checkGroup = 2;
+                this.chSubscript.setValue(0);
+                if (this._changedProps) {
+                    this._changedProps.put_Subscript(false);
+                }
+                this.checkGroup = 0;
+            }
+            if (this.api && !this._noApply) {
+                var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
+                properties.put_Superscript(field.getValue() == "checked");
+                properties.put_Subscript(this.chSubscript.getValue() == "checked");
+                this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
+            }
+        },
+        onSubscriptChange: function (field, newValue, oldValue, eOpts) {
+            if (this._changedProps && this.checkGroup != 2) {
+                this._changedProps.put_Subscript(field.getValue() == "checked");
+            }
+            this.checkGroup = 0;
+            if (field.getValue() == "checked") {
+                this.checkGroup = 2;
+                this.chSuperscript.setValue(0);
+                if (this._changedProps) {
+                    this._changedProps.put_Superscript(false);
+                }
+                this.checkGroup = 0;
+            }
+            if (this.api && !this._noApply) {
+                var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
+                properties.put_Subscript(field.getValue() == "checked");
+                properties.put_Superscript(this.chSuperscript.getValue() == "checked");
+                this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
+            }
+        },
+        onSmallCapsChange: function (field, newValue, oldValue, eOpts) {
+            if (this._changedProps && this.checkGroup != 3) {
+                this._changedProps.put_SmallCaps(field.getValue() == "checked");
+            }
+            this.checkGroup = 0;
+            if (field.getValue() == "checked") {
+                this.checkGroup = 3;
+                this.chAllCaps.setValue(0);
+                if (this._changedProps) {
+                    this._changedProps.put_AllCaps(false);
+                }
+                this.checkGroup = 0;
+            }
+            if (this.api && !this._noApply) {
+                var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
+                properties.put_SmallCaps(field.getValue() == "checked");
+                properties.put_AllCaps(this.chAllCaps.getValue() == "checked");
+                this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
+            }
+        },
+        onAllCapsChange: function (field, newValue, oldValue, eOpts) {
+            if (this._changedProps && this.checkGroup != 3) {
+                this._changedProps.put_AllCaps(field.getValue() == "checked");
+            }
+            this.checkGroup = 0;
+            if (field.getValue() == "checked") {
+                this.checkGroup = 3;
+                this.chSmallCaps.setValue(0);
+                if (this._changedProps) {
+                    this._changedProps.put_SmallCaps(false);
+                }
+                this.checkGroup = 0;
+            }
+            if (this.api && !this._noApply) {
+                var properties = (this._originalProps) ? this._originalProps : new CParagraphProp();
+                properties.put_AllCaps(field.getValue() == "checked");
+                properties.put_SmallCaps(this.chSmallCaps.getValue() == "checked");
+                this.api.SetDrawImagePlaceParagraph("paragraphadv-font-img", properties);
+            }
+        },
+        onBorderSizeSelect: function (combo, record) {
+            this.BorderSize = {
+                ptValue: record.value,
+                pxValue: record.pxValue
+            };
+            this.BordersImage.setVirtualBorderSize(this.BorderSize.pxValue);
+        },
+        addNewColor: function (picker, btn) {
+            picker.addNewColor((typeof(btn.color) == "object") ? btn.color.color : btn.color);
+        },
+        onColorsBorderSelect: function (picker, color) {
+            this.btnBorderColor.setColor(color);
+            this.BordersImage.setVirtualBorderColor((typeof(color) == "object") ? color.color : color);
+        },
+        onColorsBackSelect: function (picker, color) {
+            this.btnBackColor.setColor(color);
+            this.paragraphShade = color;
+            if (this._changedProps) {
+                if (this._changedProps.get_Shade() === undefined || this._changedProps.get_Shade() === null) {
+                    this._changedProps.put_Shade(new CParagraphShd());
+                }
+                if (this.paragraphShade == "transparent") {
+                    this._changedProps.get_Shade().put_Value(shd_Nil);
+                } else {
+                    this._changedProps.get_Shade().put_Value(shd_Clear);
+                    this._changedProps.get_Shade().put_Color(Common.Utils.ThemeColor.getRgbColor(this.paragraphShade));
+                }
+            }
+        },
+        _ApplyBorderPreset: function (btn) {
+            var border = btn.options.strId;
+            this.ChangedBorders = null;
+            this.Borders.put_Left(this._UpdateBorderStyle(this.Borders.get_Left(), (border.indexOf("l") > -1)));
+            this.Borders.put_Top(this._UpdateBorderStyle(this.Borders.get_Top(), (border.indexOf("t") > -1)));
+            this.Borders.put_Right(this._UpdateBorderStyle(this.Borders.get_Right(), (border.indexOf("r") > -1)));
+            this.Borders.put_Bottom(this._UpdateBorderStyle(this.Borders.get_Bottom(), (border.indexOf("b") > -1)));
+            this.Borders.put_Between(this._UpdateBorderStyle(this.Borders.get_Between(), (border.indexOf("m") > -1)));
+            this._UpdateBorders();
+        },
+        _UpdateBorderStyle: function (border, visible) {
+            if (null == border) {
+                border = new CBorder();
+            }
+            if (visible && this.BorderSize.ptValue > 0) {
+                var size = parseFloat(this.BorderSize.ptValue);
+                border.put_Value(1);
+                border.put_Size(size * 25.4 / 72);
+                var color = Common.Utils.ThemeColor.getRgbColor(this.btnBorderColor.color);
+                border.put_Color(color);
+            } else {
+                border.put_Color(new CAscColor());
+                border.put_Value(0);
+            }
+            return border;
+        },
+        _UpdateCellBordersStyle: function (ct, border, size, color, destination) {
+            var updateBorders = destination;
+            if (ct.col == 0 && border.indexOf("l") > -1) {
+                updateBorders.put_Left(this._UpdateBorderStyle(updateBorders.get_Left(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Left(new CBorder(updateBorders.get_Left()));
+                }
+            }
+            if (ct.col == this.tableStylerColumns - 1 && border.indexOf("r") > -1) {
+                updateBorders.put_Right(this._UpdateBorderStyle(updateBorders.get_Right(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Right(new CBorder(updateBorders.get_Right()));
+                }
+            }
+            if (ct.row == 0 && border.indexOf("t") > -1) {
+                updateBorders.put_Top(this._UpdateBorderStyle(updateBorders.get_Top(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Top(new CBorder(updateBorders.get_Top()));
+                }
+            }
+            if (ct.row == this.tableStylerRows - 1 && border.indexOf("b") > -1) {
+                updateBorders.put_Bottom(this._UpdateBorderStyle(updateBorders.get_Bottom(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Bottom(new CBorder(updateBorders.get_Bottom()));
+                }
+            }
+            if (ct.row == 0 && border.indexOf("b") > -1 || ct.row == this.tableStylerRows - 1 && border.indexOf("t") > -1) {
+                updateBorders.put_Between(this._UpdateBorderStyle(updateBorders.get_Between(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Between(new CBorder(updateBorders.get_Between()));
+                }
+            }
+        },
+        _UpdateTableBordersStyle: function (ct, border, size, color, destination) {
+            var updateBorders = destination;
+            if (border.indexOf("l") > -1) {
+                updateBorders.put_Left(this._UpdateBorderStyle(updateBorders.get_Left(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Left(new CBorder(updateBorders.get_Left()));
+                }
+            }
+            if (border.indexOf("t") > -1) {
+                updateBorders.put_Top(this._UpdateBorderStyle(updateBorders.get_Top(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Top(new CBorder(updateBorders.get_Top()));
+                }
+            }
+            if (border.indexOf("r") > -1) {
+                updateBorders.put_Right(this._UpdateBorderStyle(updateBorders.get_Right(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Right(new CBorder(updateBorders.get_Right()));
+                }
+            }
+            if (border.indexOf("b") > -1) {
+                updateBorders.put_Bottom(this._UpdateBorderStyle(updateBorders.get_Bottom(), (size > 0)));
+                if (this.ChangedBorders) {
+                    this.ChangedBorders.put_Bottom(new CBorder(updateBorders.get_Bottom()));
+                }
+            }
+        },
+        _UpdateBorders: function () {
+            var oldSize = this.BorderSize;
+            var oldColor = this.btnBorderColor.color;
+            this._UpdateBorder(this.Borders.get_Left(), "l");
+            this._UpdateBorder(this.Borders.get_Top(), "t");
+            this._UpdateBorder(this.Borders.get_Right(), "r");
+            this._UpdateBorder(this.Borders.get_Bottom(), "b");
+            if (this.Borders.get_Between() !== null) {
+                for (var i = 0; i < this.BordersImage.columns; i++) {
+                    this._UpdateCellBorder(this.Borders.get_Between(), "b", this.BordersImage.getCell(i, 0));
+                    this._UpdateCellBorder(this.Borders.get_Between(), "t", this.BordersImage.getCell(i, 1));
+                }
+            }
+            this.BordersImage.setVirtualBorderSize(oldSize.pxValue);
+            this.BordersImage.setVirtualBorderColor((typeof(oldColor) == "object") ? oldColor.color : oldColor);
+        },
+        _UpdateCellBorder: function (BorderParam, borderName, cell) {
+            if (null !== BorderParam && undefined !== BorderParam) {
+                if (null !== BorderParam.get_Value() && null !== BorderParam.get_Size() && null !== BorderParam.get_Color() && 1 == BorderParam.get_Value()) {
+                    cell.setBordersSize(borderName, this._BorderPt2Px(BorderParam.get_Size() * 72 / 25.4));
+                    cell.setBordersColor(borderName, "rgb(" + BorderParam.get_Color().get_r() + "," + BorderParam.get_Color().get_g() + "," + BorderParam.get_Color().get_b() + ")");
+                } else {
+                    cell.setBordersSize(borderName, 0);
+                }
             } else {
                 cell.setBordersSize(borderName, 0);
             }
-        } else {
-            cell.setBordersSize(borderName, 0);
-        }
-    },
-    _UpdateBorder: function (BorderParam, borderName) {
-        if (null !== BorderParam && undefined !== BorderParam) {
-            if (null !== BorderParam.get_Value() && null !== BorderParam.get_Size() && null !== BorderParam.get_Color() && 1 == BorderParam.get_Value()) {
-                this._BordersImage.setBordersSize(borderName, this._BorderPt2Px(BorderParam.get_Size() * 72 / 25.4));
-                this._BordersImage.setBordersColor(borderName, "rgb(" + BorderParam.get_Color().get_r() + "," + BorderParam.get_Color().get_g() + "," + BorderParam.get_Color().get_b() + ")");
-            } else {
-                this._BordersImage.setBordersSize(borderName, 0);
-            }
-        } else {
-            this._BordersImage.setBordersSize(borderName, 0);
-        }
-    },
-    _BorderPt2Px: function (value) {
-        if (value == 0) {
-            return 0;
-        }
-        if (value < 0.6) {
-            return 0.5;
-        }
-        if (value <= 1) {
-            return 1;
-        }
-        if (value <= 1.5) {
-            return 2;
-        }
-        if (value <= 2.25) {
-            return 3;
-        }
-        if (value <= 3) {
-            return 4;
-        }
-        if (value <= 4.5) {
-            return 5;
-        }
-        return 6;
-    },
-    _ApplyBorderPreset: function (border) {
-        this.ChangedBorders = null;
-        this.Borders.put_Left(this._UpdateBorderStyle(this.Borders.get_Left(), (border.indexOf("l") > -1)));
-        this.Borders.put_Top(this._UpdateBorderStyle(this.Borders.get_Top(), (border.indexOf("t") > -1)));
-        this.Borders.put_Right(this._UpdateBorderStyle(this.Borders.get_Right(), (border.indexOf("r") > -1)));
-        this.Borders.put_Bottom(this._UpdateBorderStyle(this.Borders.get_Bottom(), (border.indexOf("b") > -1)));
-        this.Borders.put_Between(this._UpdateBorderStyle(this.Borders.get_Between(), (border.indexOf("m") > -1)));
-        this._UpdateBorders();
-    },
-    _UpdateBorderStyle: function (border, visible) {
-        if (null == border) {
-            border = new CBorder();
-        }
-        if (visible && this.BorderSize.ptValue > 0) {
-            var size = parseFloat(this.BorderSize.ptValue);
-            border.put_Value(1);
-            border.put_Size(size * 25.4 / 72);
-            var color = this.getRgbColor(this._btnBorderColor.color);
-            border.put_Color(color);
-        } else {
-            border.put_Color(new CColor());
-            border.put_Value(0);
-        }
-        return border;
-    },
-    _UpdateCellBordersStyle: function (ct, border, size, color, destination) {
-        var updateBorders = destination;
-        if (ct.col == 0 && border.indexOf("l") > -1) {
-            updateBorders.put_Left(this._UpdateBorderStyle(updateBorders.get_Left(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Left(new CBorder(updateBorders.get_Left()));
-            }
-        }
-        if (ct.col == this.tableStylerColumns - 1 && border.indexOf("r") > -1) {
-            updateBorders.put_Right(this._UpdateBorderStyle(updateBorders.get_Right(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Right(new CBorder(updateBorders.get_Right()));
-            }
-        }
-        if (ct.row == 0 && border.indexOf("t") > -1) {
-            updateBorders.put_Top(this._UpdateBorderStyle(updateBorders.get_Top(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Top(new CBorder(updateBorders.get_Top()));
-            }
-        }
-        if (ct.row == this.tableStylerRows - 1 && border.indexOf("b") > -1) {
-            updateBorders.put_Bottom(this._UpdateBorderStyle(updateBorders.get_Bottom(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Bottom(new CBorder(updateBorders.get_Bottom()));
-            }
-        }
-        if (ct.row == 0 && border.indexOf("b") > -1 || ct.row == this.tableStylerRows - 1 && border.indexOf("t") > -1) {
-            updateBorders.put_Between(this._UpdateBorderStyle(updateBorders.get_Between(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Between(new CBorder(updateBorders.get_Between()));
-            }
-        }
-    },
-    _UpdateTableBordersStyle: function (ct, border, size, color, destination) {
-        var updateBorders = destination;
-        if (border.indexOf("l") > -1) {
-            updateBorders.put_Left(this._UpdateBorderStyle(updateBorders.get_Left(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Left(new CBorder(updateBorders.get_Left()));
-            }
-        }
-        if (border.indexOf("t") > -1) {
-            updateBorders.put_Top(this._UpdateBorderStyle(updateBorders.get_Top(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Top(new CBorder(updateBorders.get_Top()));
-            }
-        }
-        if (border.indexOf("r") > -1) {
-            updateBorders.put_Right(this._UpdateBorderStyle(updateBorders.get_Right(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Right(new CBorder(updateBorders.get_Right()));
-            }
-        }
-        if (border.indexOf("b") > -1) {
-            updateBorders.put_Bottom(this._UpdateBorderStyle(updateBorders.get_Bottom(), (size > 0)));
-            if (this.ChangedBorders) {
-                this.ChangedBorders.put_Bottom(new CBorder(updateBorders.get_Bottom()));
-            }
-        }
-    },
-    getRgbColor: function (clr) {
-        var color = (typeof(clr) == "object") ? clr.color : clr;
-        color = color.replace(/#/, "");
-        if (color.length == 3) {
-            color = color.replace(/(.)/g, "$1$1");
-        }
-        color = parseInt(color, 16);
-        var c = new CAscColor();
-        c.put_type((typeof(clr) == "object") ? c_oAscColor.COLOR_TYPE_SCHEME : c_oAscColor.COLOR_TYPE_SRGB);
-        c.put_r(color >> 16);
-        c.put_g((color & 65280) >> 8);
-        c.put_b(color & 255);
-        c.put_a(255);
-        if (clr.effectId !== undefined) {
-            c.put_value(clr.effectId);
-        }
-        return c;
-    },
-    getHexColor: function (r, g, b) {
-        r = r.toString(16);
-        g = g.toString(16);
-        b = b.toString(16);
-        if (r.length == 1) {
-            r = "0" + r;
-        }
-        if (g.length == 1) {
-            g = "0" + g;
-        }
-        if (b.length == 1) {
-            b = "0" + b;
-        }
-        return r + g + b;
-    },
-    sendThemeColors: function (effectcolors, standartcolors) {
-        if (standartcolors && effectcolors) {
-            this.colorsBorder.updateColors(effectcolors, standartcolors);
-            this.colorsBack.updateColors(effectcolors, standartcolors);
-        }
-    },
-    updateMetricUnit: function () {
-        var spinners = this.query("commonmetricspinner");
-        if (spinners) {
-            for (var i = 0; i < spinners.length; i++) {
-                var spinner = spinners[i];
-                spinner.setDefaultUnit(Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()]);
-                if (spinner.id == "paragraphadv-spin-spacing" || spinner.id == "paragraphadv-spin-position") {
-                    spinner.setStep(Common.MetricSettings.getCurrentMetric() == Common.MetricSettings.c_MetricUnits.cm ? 0.01 : 1);
+        },
+        _UpdateBorder: function (BorderParam, borderName) {
+            if (null !== BorderParam && undefined !== BorderParam) {
+                if (null !== BorderParam.get_Value() && null !== BorderParam.get_Size() && null !== BorderParam.get_Color() && 1 == BorderParam.get_Value()) {
+                    this.BordersImage.setBordersSize(borderName, this._BorderPt2Px(BorderParam.get_Size() * 72 / 25.4));
+                    this.BordersImage.setBordersColor(borderName, "rgb(" + BorderParam.get_Color().get_r() + "," + BorderParam.get_Color().get_g() + "," + BorderParam.get_Color().get_b() + ")");
                 } else {
-                    spinner.setStep(Common.MetricSettings.getCurrentMetric() == Common.MetricSettings.c_MetricUnits.cm ? 0.1 : 1);
+                    this.BordersImage.setBordersSize(borderName, 0);
+                }
+            } else {
+                this.BordersImage.setBordersSize(borderName, 0);
+            }
+        },
+        _BorderPt2Px: function (value) {
+            if (value == 0) {
+                return 0;
+            }
+            if (value < 0.6) {
+                return 0.5;
+            }
+            if (value <= 1) {
+                return 1;
+            }
+            if (value <= 1.5) {
+                return 2;
+            }
+            if (value <= 2.25) {
+                return 3;
+            }
+            if (value <= 3) {
+                return 4;
+            }
+            if (value <= 4.5) {
+                return 5;
+            }
+            return 6;
+        },
+        addTab: function (btn, eOpts) {
+            var val = this.numTab.getNumberValue();
+            var align = this.radioLeft.getValue() ? 1 : (this.radioCenter.getValue() ? 3 : 2);
+            var store = this.tabList.store;
+            var rec = store.find(function (record) {
+                return (Math.abs(record.get("tabPos") - val) < 0.001);
+            });
+            if (rec) {
+                rec.set("tabAlign", align);
+            } else {
+                rec = new Common.UI.DataViewModel();
+                rec.set({
+                    tabPos: val,
+                    value: val + " " + Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()],
+                    tabAlign: align
+                });
+                store.add(rec);
+            }
+            this.tabList.selectRecord(rec);
+            this.tabList.scrollToRecord(rec);
+        },
+        removeTab: function (btn, eOpts) {
+            var rec = this.tabList.getSelectedRec();
+            if (rec.length > 0) {
+                var store = this.tabList.store;
+                var idx = _.indexOf(store.models, rec[0]);
+                store.remove(rec[0]);
+                if (idx > store.length - 1) {
+                    idx = store.length - 1;
+                }
+                if (store.length > 0) {
+                    this.tabList.selectByIndex(idx);
+                    this.tabList.scrollToRecord(store.at(idx));
                 }
             }
-        }
+        },
+        removeAllTabs: function (btn, eOpts) {
+            this.tabList.store.reset();
+        },
+        onSelectTab: function (lisvView, itemView, record) {
+            var rawData = {},
+            isViewSelect = _.isFunction(record.toJSON);
+            if (isViewSelect) {
+                if (record.get("selected")) {
+                    rawData = record.toJSON();
+                } else {
+                    return;
+                }
+            } else {
+                rawData = record;
+            }
+            this.numTab.setValue(rawData.tabPos);
+            (rawData.tabAlign == 1) ? this.radioLeft.setValue(true) : ((rawData.tabAlign == 3) ? this.radioCenter.setValue(true) : this.radioRight.setValue(true));
+        },
+        hideTextOnlySettings: function (value) {
+            this.TextOnlySettings.toggleClass("hidden", value == true);
+            this.btnsCategory[1].setVisible(!value);
+            this.btnsCategory[4].setVisible(!value);
+        },
+        textTitle: "Paragraph - Advanced Settings",
+        strIndentsFirstLine: "First line",
+        strIndentsLeftText: "Left",
+        strIndentsRightText: "Right",
+        strParagraphIndents: "Indents & Placement",
+        strParagraphPosition: "Placement",
+        strParagraphFont: "Font",
+        strBreakBefore: "Page break before",
+        strKeepLines: "Keep lines together",
+        strBorders: "Borders & Fill",
+        textBorderWidth: "Border Size",
+        textBorderColor: "Border Color",
+        textBackColor: "Background Color",
+        textBorderDesc: "Click on diagramm or use buttons to select borders",
+        cancelButtonText: "Cancel",
+        okButtonText: "Ok",
+        txtNoBorders: "No borders",
+        textNewColor: "Add New Custom Color",
+        textEffects: "Effects",
+        textCharacterSpacing: "Character Spacing",
+        textSpacing: "Spacing",
+        textPosition: "Position",
+        strDoubleStrike: "Double strikethrough",
+        strStrike: "Strikethrough",
+        strSuperscript: "Superscript",
+        strSubscript: "Subscript",
+        strSmallCaps: "Small caps",
+        strAllCaps: "All caps",
+        textThemeColors: "Theme Colors",
+        textStandartColors: "Standart Colors",
+        strOrphan: "Orphan control",
+        strKeepNext: "Keep with next",
+        strTabs: "Tab",
+        textSet: "Specify",
+        textRemove: "Remove",
+        textRemoveAll: "Remove All",
+        textTabLeft: "Left",
+        textTabRight: "Right",
+        textTabCenter: "Center",
+        textAlign: "Alignment",
+        textTabPosition: "Tab Position",
+        textDefault: "Default Tab",
+        textTop: "Top",
+        textLeft: "Left",
+        textBottom: "Bottom",
+        textRight: "Right",
+        strMargins: "Margins",
+        tipTop: "Set Top Border Only",
+        tipLeft: "Set Left Border Only",
+        tipBottom: "Set Bottom Border Only",
+        tipRight: "Set Right Border Only",
+        tipAll: "Set Outer Border and All Inner Lines",
+        tipNone: "Set No Borders",
+        tipInner: "Set Horizontal Inner Lines Only",
+        tipOuter: "Set Outer Border Only",
+        noTabs: "The specified tabs will appear in this field"
     },
-    textTitle: "Paragraph - Advanced Settings",
-    strIndentsFirstLine: "First line",
-    strIndentsLeftText: "Left",
-    strIndentsRightText: "Right",
-    strParagraphIndents: "Indents & Placement",
-    strParagraphPosition: "Placement",
-    strParagraphFont: "Font",
-    strBreakBefore: "Page break before",
-    strKeepLines: "Keep lines together",
-    strBorders: "Borders & Fill",
-    textBorderWidth: "Border Size",
-    textBorderColor: "Border Color",
-    textBackColor: "Background Color",
-    textBorderDesc: "Click on diagramm or use buttons to select borders",
-    cancelButtonText: "Cancel",
-    okButtonText: "Ok",
-    txtNoBorders: "No borders",
-    textNewColor: "Add New Custom Color",
-    textEffects: "Effects",
-    textCharacterSpacing: "Character Spacing",
-    textSpacing: "Spacing",
-    textPosition: "Position",
-    strDoubleStrike: "Double strikethrough",
-    strStrike: "Strikethrough",
-    strSuperscript: "Superscript",
-    strSubscript: "Subscript",
-    strSmallCaps: "Small caps",
-    strAllCaps: "All caps",
-    textThemeColors: "Theme Colors",
-    textStandartColors: "Standart Colors",
-    strOrphan: "Orphan control",
-    strKeepNext: "Keep with next",
-    strTabs: "Tab",
-    textSet: "Specify",
-    textRemove: "Remove",
-    textRemoveAll: "Remove All",
-    textTabLeft: "Left",
-    textTabRight: "Right",
-    textTabCenter: "Center",
-    textAlign: "Alignment",
-    textTabPosition: "Tab Position",
-    textDefault: "Default Tab",
-    textTop: "Top",
-    textLeft: "Left",
-    textBottom: "Bottom",
-    textRight: "Right",
-    strMargins: "Margins",
-    tipTop: "Set Top Border Only",
-    tipLeft: "Set Left Border Only",
-    tipBottom: "Set Bottom Border Only",
-    tipRight: "Set Right Border Only",
-    tipAll: "Set Outer Border and All Inner Lines",
-    tipNone: "Set No Borders",
-    tipInner: "Set Horizontal Inner Lines Only",
-    tipOuter: "Set Outer Border Only"
+    DE.Views.ParagraphSettingsAdvanced || {}));
 });

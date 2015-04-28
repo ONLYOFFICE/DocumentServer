@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,219 +29,306 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("SSE.view.FormulaDialog", {
-    extend: "Ext.window.Window",
-    alias: "widget.sseformuladialog",
-    requires: ["Ext.window.Window", "Common.plugin.GridScrollPane"],
-    modal: true,
-    closable: true,
-    resizable: false,
-    height: 490,
-    width: 300,
-    constrain: true,
-    padding: "10px 20px 0 20px",
-    layout: {
-        type: "vbox",
-        align: "stretch"
-    },
-    initComponent: function () {
-        var gp_store = Ext.create("SSE.store.FormulaGroups");
-        this.cmbGroup = Ext.create("Ext.form.field.ComboBox", {
-            id: "formulas-group-combo",
-            store: gp_store,
-            displayField: "groupname",
-            queryMode: "local",
-            queryDelay: 1000,
-            typeAhead: false,
-            editable: false,
-            listeners: {
-                select: function (combo, records, eOpts) {},
-                specialkey: function (obj, event) {
-                    if (!obj.isExpanded && event.getKey() == Ext.EventObject.ESC) {
-                        this.fireEvent("onmodalresult", this, 0);
-                        this.hide();
-                    }
-                },
-                scope: this
-            }
-        });
-        Ext.create("SSE.store.Formulas", {
-            storeId: "appFormulasStore"
-        });
-        var funcList = Ext.create("Ext.grid.Panel", {
-            activeItem: 0,
-            id: "formulas-list",
-            store: Ext.data.StoreManager.lookup("appFormulasStore"),
-            stateful: true,
-            stateId: "stateGrid",
-            scroll: false,
-            columns: [{
-                flex: 1,
-                sortable: false,
-                dataIndex: "func"
-            }],
-            height: 250,
-            hideHeaders: true,
-            viewConfig: {
-                stripeRows: false
+ define(["common/main/lib/component/Window", "spreadsheeteditor/main/app/collection/FormulaGroups"], function () {
+    SSE.Views = SSE.Views || {};
+    SSE.Views.FormulaDialog = Common.UI.Window.extend(_.extend({
+        applyFunction: undefined,
+        initialize: function (options) {
+            var t = this,
+            _options = {};
+            _.extend(_options, {
+                width: 300,
+                height: 490,
+                contentWidth: 390,
+                header: true,
+                cls: "formula-dlg",
+                contentTemplate: "",
+                title: t.txtTitle,
+                items: []
             },
-            plugins: [{
-                pluginId: "scrollpane",
-                ptype: "gridscrollpane"
-            }],
-            listeners: {
-                itemdblclick: function (o, record, item, index, e, eOpts) {
-                    this.btnOk.fireEvent("click", this.btnOk);
+            options);
+            this.template = options.template || ['<div class="box" style="height:' + (_options.height - 85) + 'px;">', '<div class="content-panel" >', '<label class="header">' + t.textGroupDescription + "</label>", '<div id="formula-dlg-combo-group" class="input-group-nr" style="margin-top: 10px"/>', '<label class="header" style="margin-top:10px">' + t.textListDescription + "</label>", '<div id="formula-dlg-combo-functions" class="combo-functions"/>', '<label id="formula-dlg-args" style="margin-top: 10px">' + "</label>", "</div>", "</div>", '<div class="separator horizontal"/>', '<div class="footer center">', '<button class="btn normal dlg-btn primary" result="ok" style="margin-right: 10px;">' + t.okButtonText + "</button>", '<button class="btn normal dlg-btn" result="cancel">' + t.cancelButtonText + "</button>", "</div>"].join("");
+            this.api = options.api;
+            this.formulasGroups = options.formulasGroups;
+            this.handler = options.handler;
+            _options.tpl = _.template(this.template, _options);
+            Common.UI.Window.prototype.initialize.call(this, _options);
+        },
+        render: function () {
+            Common.UI.Window.prototype.render.call(this);
+            this.$window.find(".dlg-btn").on("click", _.bind(this.onBtnClick, this));
+            this.syntaxLabel = $("#formula-dlg-args");
+            this.fillFormulasGroups();
+            this.fillFunctions("All");
+        },
+        show: function () {
+            if (this.$window) {
+                var main_width, main_height, top, left, win_height = this.initConfig.height;
+                if (window.innerHeight === undefined) {
+                    main_width = document.documentElement.offsetWidth;
+                    main_height = document.documentElement.offsetHeight;
+                } else {
+                    main_width = window.innerWidth;
+                    main_height = window.innerHeight;
+                }
+                top = ((parseInt(main_height, 10) - parseInt(win_height, 10)) / 2) * 0.9;
+                left = (parseInt(main_width, 10) - parseInt(this.initConfig.width, 10)) / 2;
+                this.$window.css("left", Math.floor(left));
+                this.$window.css("top", Math.floor(top));
+            }
+            Common.UI.Window.prototype.show.call(this);
+            this.mask = $(".modals-mask");
+            this.mask.on("mousedown", _.bind(this.onUpdateFocus, this));
+            this.$window.on("mousedown", _.bind(this.onUpdateFocus, this));
+            if (this.cmbListFunctions) {
+                _.delay(function (me) {
+                    me.cmbListFunctions.$el.find(".listview").focus();
                 },
-                select: function (o, record, index, eOpts) {
-                    lblSyntax.setText("Syntax: " + record.data.func + record.data.args);
-                },
-                viewready: function (cmp) {
-                    cmp.getView().on("cellkeydown", function (obj, cell, cellIndex, record, row, rowIndex, e) {
-                        if (e.getKey() == Ext.EventObject.ESC) {
-                            this.fireEvent("onmodalresult", this, 0);
-                            this.hide();
-                            return false;
+                100, this);
+            }
+        },
+        hide: function () {
+            this.mask.off("mousedown", _.bind(this.onUpdateFocus, this));
+            this.$window.off("mousedown", _.bind(this.onUpdateFocus, this));
+            Common.UI.Window.prototype.hide.call(this);
+        },
+        onBtnClick: function (event) {
+            if ("ok" === event.currentTarget.attributes["result"].value) {
+                if (this.handler) {
+                    this.handler.call(this, this.applyFunction);
+                }
+            }
+            this.hide();
+        },
+        onDblClickFunction: function () {
+            if (this.handler) {
+                this.handler.call(this, this.applyFunction);
+            }
+            this.hide();
+        },
+        onSelectGroup: function (combo, record) {
+            if (!_.isUndefined(record) && !_.isUndefined(record.value)) {
+                if (record.value < this.formulasGroups.length) {
+                    this.fillFunctions(this.formulasGroups.at(record.value).get("name"));
+                }
+            }
+            this.onUpdateFocus();
+        },
+        onSelectFunction: function (listView, itemView, record) {
+            var funcId, functions, func;
+            if (this.formulasGroups) {
+                funcId = record.get("id");
+                if (!_.isUndefined(funcId)) {
+                    functions = this.formulasGroups.at(0).get("functions");
+                    if (functions) {
+                        func = _.find(functions, function (f) {
+                            if (f.get("index") === funcId) {
+                                return f;
+                            }
+                            return null;
+                        });
+                        if (func) {
+                            this.applyFunction = func.get("name");
+                            this.syntaxLabel.text(this.syntaxText + ": " + this.applyFunction + func.get("args"));
                         }
-                    },
-                    this);
-                },
-                scope: this
+                    }
+                }
             }
-        });
-        var lblSyntax = Ext.widget("label", {});
-        this.items = [{
-            xtype: "container",
-            layout: {
-                type: "vbox",
-                align: "stretch"
-            },
-            height: 57,
-            width: 260,
-            items: [{
-                xtype: "label",
-                text: this.textGroupDescription,
-                style: "font-weight: bold;margin:0 0 4px 0;"
-            },
-            this.cmbGroup]
         },
-        {
-            xtype: "container",
-            layout: {
-                type: "vbox",
-                align: "stretch"
-            },
-            height: 277,
-            width: 260,
-            items: [{
-                xtype: "label",
-                text: this.textListDescription,
-                style: "font-weight:bold;margin:0 0 4px 0;"
-            },
-            funcList]
+        onPrimary: function (list, record, event) {
+            if (this.handler) {
+                this.handler.call(this, this.applyFunction);
+            }
+            this.hide();
         },
-        {
-            xtype: "container",
-            layout: {
-                type: "vbox",
-                align: "stretch"
+        onUpdateFocus: function () {
+            _.delay(function (me) {
+                me.cmbListFunctions.$el.find(".listview").focus();
             },
-            height: 56,
-            items: [lblSyntax]
+            100, this);
         },
-        {
-            xtype: "tbspacer",
-            height: 8,
-            html: '<div style="width: 100%; height: 40%; border-bottom: 1px solid #C7C7C7"></div>'
-        },
-        {
-            xtype: "container",
-            height: 40,
-            layout: {
-                type: "vbox",
-                align: "center",
-                pack: "center"
-            },
-            items: [{
-                xtype: "container",
-                width: 182,
-                height: 24,
-                layout: {
-                    type: "hbox",
-                    align: "middle"
-                },
-                items: [this.btnOk = Ext.widget("button", {
-                    id: "formulas-button-ok",
-                    cls: "asc-blue-button",
-                    width: 86,
-                    height: 22,
-                    margin: "0 5px 0 0",
-                    text: this.okButtonText,
-                    listeners: {
-                        click: function (btn) {
-                            this.fireEvent("onmodalresult", this, 1, funcList.getSelectionModel().selected.items[0].data.func);
-                        },
-                        scope: this
+        fillFormulasGroups: function () {
+            if (this.formulasGroups) {
+                var descriptions = {
+                    "All": this.sCategoryAll,
+                    "Cube": this.sCategoryCube,
+                    "Database": this.sCategoryDatabase,
+                    "DateAndTime": this.sCategoryDateTime,
+                    "Engineering": this.sCategoryEngineering,
+                    "Financial": this.sCategoryFinancial,
+                    "Information": this.sCategoryInformation,
+                    "Logical": this.sCategoryLogical,
+                    "LookupAndReference": this.sCategoryLookupAndReference,
+                    "Mathematic": this.sCategoryMathematics,
+                    "Statistical": this.sCategoryStatistical,
+                    "TextAndData": this.sCategoryTextData
+                };
+                var i, groupsListItems = [],
+                length = this.formulasGroups.length;
+                for (i = 0; i < length; ++i) {
+                    if (this.formulasGroups.at(i).get("functions").length) {
+                        groupsListItems.push({
+                            value: this.formulasGroups.at(i).get("index"),
+                            displayValue: descriptions[this.formulasGroups.at(i).get("name")]
+                        });
                     }
-                }), this.btnCancel = Ext.widget("button", {
-                    cls: "asc-darkgray-button",
-                    width: 86,
-                    height: 22,
-                    text: this.cancelButtonText,
-                    listeners: {
-                        click: function (btn) {
-                            this.fireEvent("onmodalresult", this, 0);
-                            this.hide();
-                        },
-                        scope: this
+                }
+                if (!this.cmbFuncGroup) {
+                    this.cmbFuncGroup = new Common.UI.ComboBox({
+                        el: $("#formula-dlg-combo-group"),
+                        menuStyle: "min-width: 268px;",
+                        cls: "input-group-nr",
+                        data: groupsListItems,
+                        editable: false
+                    });
+                    this.cmbFuncGroup.setValue(0);
+                    this.cmbFuncGroup.on("selected", _.bind(this.onSelectGroup, this));
+                } else {
+                    this.cmbFuncGroup.setData(groupsListItems);
+                }
+            }
+        },
+        fillFunctions: function (name) {
+            if (this.formulasGroups) {
+                if (!this.cmbListFunctions && !this.functions) {
+                    this.functions = new Common.UI.DataViewStore();
+                    this.cmbListFunctions = new Common.UI.ListView({
+                        el: $("#formula-dlg-combo-functions"),
+                        store: this.functions,
+                        itemTemplate: _.template('<div id="<%= id %>" class="list-item" style="pointer-events:none;"><%= value %></div>')
+                    });
+                    this.cmbListFunctions.on("item:select", _.bind(this.onSelectFunction, this));
+                    this.cmbListFunctions.on("item:dblclick", _.bind(this.onDblClickFunction, this));
+                    this.cmbListFunctions.on("entervalue", _.bind(this.onPrimary, this));
+                    this.cmbListFunctions.onKeyDown = _.bind(this.onKeyDown, this.cmbListFunctions);
+                    this.cmbListFunctions.$el.find(".listview").focus();
+                    this.cmbListFunctions.scrollToRecord = _.bind(this.onScrollToRecordCustom, this.cmbListFunctions);
+                }
+                if (this.functions) {
+                    this.functions.reset();
+                    var i = 0,
+                    length = 0,
+                    functions = null,
+                    group = this.formulasGroups.findWhere({
+                        name: name
+                    });
+                    if (group) {
+                        functions = group.get("functions");
+                        if (functions && functions.length) {
+                            length = functions.length;
+                            for (i = 0; i < length; ++i) {
+                                this.functions.push(new Common.UI.DataViewModel({
+                                    id: functions[i].get("index"),
+                                    selected: i < 1,
+                                    allowSelected: true,
+                                    value: functions[i].get("name")
+                                }));
+                            }
+                            this.applyFunction = functions[0].get("name");
+                            this.syntaxLabel.text(this.syntaxText + ": " + this.applyFunction + functions[0].get("args"));
+                            this.cmbListFunctions.scroller.update({
+                                minScrollbarLength: 40,
+                                alwaysVisibleY: true
+                            });
+                        }
                     }
-                })]
-            }]
-        }];
-        this.listeners = {
-            show: function () {}
-        };
-        this.callParent(arguments);
-        this.setTitle(this.txtTitle);
+                }
+            }
+        },
+        onKeyDown: function (e, event) {
+            var i = 0,
+            record = null,
+            me = this,
+            charVal = "",
+            value = "",
+            firstRecord = null,
+            recSelect = false,
+            innerEl = null,
+            isEqualSelectRecord = false,
+            selectRecord = null,
+            needNextRecord = false;
+            if (this.disabled) {
+                return;
+            }
+            if (_.isUndefined(undefined)) {
+                event = e;
+            }
+            function selectItem(item) {
+                me.selectRecord(item);
+                me.scrollToRecord(item);
+                innerEl = $(me.el).find(".inner");
+                me.scroller.scrollTop(innerEl.scrollTop(), 0);
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            charVal = String.fromCharCode(e.keyCode);
+            if (e.keyCode > 64 && e.keyCode < 91 && charVal && charVal.length) {
+                selectRecord = this.store.findWhere({
+                    selected: true
+                });
+                if (selectRecord) {
+                    value = selectRecord.get("value");
+                    isEqualSelectRecord = (value && value.length && value[0] === charVal);
+                }
+                for (i = 0; i < this.store.length; ++i) {
+                    record = this.store.at(i);
+                    value = record.get("value");
+                    if (value[0] === charVal) {
+                        if (null === firstRecord) {
+                            firstRecord = record;
+                        }
+                        if (isEqualSelectRecord) {
+                            if (selectRecord === record) {
+                                isEqualSelectRecord = false;
+                            }
+                            continue;
+                        }
+                        if (record.get("selected")) {
+                            continue;
+                        }
+                        selectItem(record);
+                        return;
+                    }
+                }
+                if (firstRecord) {
+                    selectItem(firstRecord);
+                    return;
+                }
+            }
+            Common.UI.DataView.prototype.onKeyDown.call(this, e, event);
+        },
+        onScrollToRecordCustom: function (record) {
+            var innerEl = $(this.el).find(".inner");
+            var inner_top = innerEl.offset().top;
+            var div = innerEl.find("#" + record.get("id")).parent();
+            var div_top = div.offset().top;
+            if (div_top < inner_top || div_top + div.height() > inner_top + innerEl.height()) {
+                if (this.scroller) {
+                    this.scroller.scrollTop(innerEl.scrollTop() + div_top - inner_top, 0);
+                } else {
+                    innerEl.scrollTop(innerEl.scrollTop() + div_top - inner_top);
+                }
+            }
+        },
+        cancelButtonText: "Cancel",
+        okButtonText: "Ok",
+        sCategoryAll: "All",
+        sCategoryLogical: "Logical",
+        sCategoryCube: "Cube",
+        sCategoryDatabase: "Database",
+        sCategoryDateTime: "Date and time",
+        sCategoryEngineering: "Engineering",
+        sCategoryFinancial: "Financial",
+        sCategoryInformation: "Information",
+        sCategoryLookupAndReference: "LookupAndReference",
+        sCategoryMathematics: "Math and trigonometry",
+        sCategoryStatistical: "Statistical",
+        sCategoryTextData: "Text and data",
+        textGroupDescription: "Select Function Group",
+        textListDescription: "Select Function",
+        sDescription: "Description",
+        txtTitle: "Insert Function",
+        syntaxText: "Syntax"
     },
-    setGroups: function (arr) {
-        var groupDesc = {
-            "Cube": this.sCategoryCube,
-            "Database": this.sCategoryDatabase,
-            "DateAndTime": this.sCategoryDateTime,
-            "Engineering": this.sCategoryEngineering,
-            "Financial": this.sCategoryFinancial,
-            "Information": this.sCategoryInformation,
-            "Logical": this.sCategoryLogical,
-            "LookupAndReference": this.sCategoryLookupAndReference,
-            "Mathematic": this.sCategoryMathematics,
-            "Statistical": this.sCategoryStatistical,
-            "TextAndData": this.sCategoryTextData
-        };
-        var garr = [[this.sCategoryAll, "all"]];
-        Ext.each(arr, function (item) {
-            garr.push([groupDesc[item], item]);
-        });
-        this.cmbGroup.getStore().removeAll(true);
-        this.cmbGroup.getStore().loadData(garr);
-        this.cmbGroup.select(this.cmbGroup.getStore().getAt(0));
-    },
-    cancelButtonText: "Cancel",
-    okButtonText: "Ok",
-    sCategoryAll: "All",
-    sCategoryLogical: "Logical",
-    sCategoryCube: "Cube",
-    sCategoryDatabase: "Database",
-    sCategoryDateTime: "Date and time",
-    sCategoryEngineering: "Engineering",
-    sCategoryFinancial: "Financial",
-    sCategoryInformation: "Information",
-    sCategoryLookupAndReference: "LookupAndReference",
-    sCategoryMathematics: "Math and trigonometry",
-    sCategoryStatistical: "Statistical",
-    sCategoryTextData: "Text and data",
-    textGroupDescription: "Select Function Group",
-    textListDescription: "Select Function",
-    sDescription: "Description",
-    txtTitle: "Insert Function"
+    SSE.Views.FormulaDialog || {}));
 });

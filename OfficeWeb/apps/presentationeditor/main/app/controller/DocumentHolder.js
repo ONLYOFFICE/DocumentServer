@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,77 +29,59 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("PE.controller.DocumentHolder", {
-    extend: "Ext.app.Controller",
-    views: ["DocumentHolder"],
-    refs: [{
-        ref: "splitterMainMenu",
-        selector: "#main-menu-splitter"
-    },
-    {
-        ref: "mainCanvas",
-        selector: "#id-main"
-    }],
-    init: function () {
-        this.control({
-            "#view-main-menu": {
-                panelbeforeshow: function (fullscreen) {
-                    this._isMenuHided = true;
-                    if (fullscreen !== true) {
-                        this.getSplitterMainMenu().show();
+ var c_paragraphLinerule = {
+    LINERULE_LEAST: 0,
+    LINERULE_AUTO: 1,
+    LINERULE_EXACT: 2
+};
+var c_tableBorder = {
+    BORDER_VERTICAL_LEFT: 0,
+    BORDER_HORIZONTAL_TOP: 1,
+    BORDER_VERTICAL_RIGHT: 2,
+    BORDER_HORIZONTAL_BOTTOM: 3,
+    BORDER_VERTICAL_CENTER: 4,
+    BORDER_HORIZONTAL_CENTER: 5,
+    BORDER_INNER: 6,
+    BORDER_OUTER: 7,
+    BORDER_ALL: 8,
+    BORDER_NONE: 9,
+    BORDER_ALL_TABLE: 10,
+    BORDER_NONE_TABLE: 11,
+    BORDER_INNER_TABLE: 12,
+    BORDER_OUTER_TABLE: 13
+};
+define(["core", "presentationeditor/main/app/view/DocumentHolder"], function () {
+    PE.Controllers.DocumentHolder = Backbone.Controller.extend({
+        models: [],
+        collections: [],
+        views: ["DocumentHolder"],
+        initialize: function () {},
+        onLaunch: function () {
+            this.documentHolder = this.createView("DocumentHolder").render();
+            this.documentHolder.el.tabIndex = -1;
+        },
+        setApi: function (api) {
+            this.api = api;
+        },
+        createDelayedElements: function () {
+            var diagramEditor = this.getApplication().getController("Common.Controllers.ExternalDiagramEditor").getView("Common.Views.ExternalDiagramEditor");
+            if (diagramEditor) {
+                diagramEditor.on("internalmessage", _.bind(function (cmp, message) {
+                    var command = message.data.command;
+                    var data = message.data.data;
+                    if (this.api) {
+                        (diagramEditor.isEditMode()) ? this.api.asc_editChartDrawingObject(data) : this.api.asc_addChartDrawingObject(data);
                     }
                 },
-                panelbeforehide: function () {
-                    this._isMenuHided = true;
+                this));
+                diagramEditor.on("hide", _.bind(function (cmp, message) {
+                    this.documentHolder.fireEvent("editcomplete", this.documentHolder);
+                    if (this.api) {
+                        this.api.asc_enableKeyEvents(true);
+                    }
                 },
-                panelshow: function (panel, fulscreen) {
-                    this._isMenuHided = false;
-                    if (!fulscreen) {}
-                },
-                panelhide: function (panel, fullscreen) {
-                    this._isMenuHided = false;
-                    this.getSplitterMainMenu().hide();
-                }
-            },
-            "#main-menu-splitter": {
-                beforedragstart: function (obj, event) {
-                    return !event.currentTarget.disabled;
-                },
-                move: this._onDocumentSplitterMove
-            },
-            "menuitem[group=popupparagraphvalign]": {
-                click: this._onParagraphVAlign
+                this));
             }
-        });
-    },
-    setApi: function (o) {
-        this.api = o;
-        return this;
-    },
-    _onDocumentSplitterMove: function (obj, x, y) {
-        if (this._isMenuHided) {
-            return;
         }
-        var jsp_container, width_parent = obj.up("container").down("pemainmenu").getWidth();
-        if (width_parent > 40) {
-            width_parent -= 40;
-            Ext.ComponentQuery.query("dataview[group=scrollable]").forEach(function (list) {
-                var nodes = list.getNodes();
-                for (var item in nodes) {
-                    nodes[item].style["width"] = width_parent + "px";
-                }
-                list.getEl().setWidth(width_parent);
-                jsp_container = list.getEl().down(".jspContainer");
-                if (jsp_container) {
-                    jsp_container.setWidth(width_parent);
-                    list.getEl().down(".jspPane").setWidth(width_parent);
-                }
-            });
-        }
-    },
-    _onParagraphVAlign: function (item, e) {
-        var properties = new CAscShapeProp();
-        properties.put_VerticalTextAlign(item.valign);
-        this.api.ShapeApply(properties);
-    }
+    });
 });

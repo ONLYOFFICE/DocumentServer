@@ -1,0 +1,71 @@
+.spinner{
+    @spin-height: 22px;
+    @trigger-width: 17px;
+    position: relative;
+
+    input {
+        height: @spin-height;
+        text-align: right;
+        padding-left: 1px;
+        padding-right: @trigger-width + 2px;
+    }
+
+    button {
+        display: block;
+        position: relative;
+        width: @trigger-width;
+        height: @spin-height/2;
+        padding: 0;
+        margin: 0;
+        border: none;
+        background: none;
+        line-height: 1;
+
+        &.disabled {
+            cursor: default;
+        }
+
+        &:focus {
+            outline: 0;
+            outline-offset: 0;
+        }
+    }
+
+    .spinner-buttons {
+        position: absolute;
+        top: 0;
+        right: 0;
+
+        i {
+            display: inline-block;
+            width: @trigger-width;
+            height: @spin-height/2;
+        }
+
+        button {
+            &.disabled {
+                opacity: .35;
+            }
+        }
+    }
+
+    .spinner-up {
+        i {
+            .background-ximage('@{common-image-path}/@{common-controls}', '@{common-image-path}/@{common-controls2x}', 100px);
+            background-position: @spinner-offset-x @spinner-offset-y;
+        }
+
+        &.over   i { background-position: @spinner-offset-x - @trigger-width @spinner-offset-y; }
+        &.active i { background-position: @spinner-offset-x @spinner-offset-y; }
+    }
+
+    .spinner-down {
+        i {
+            .background-ximage('@{common-image-path}/@{common-controls}', '@{common-image-path}/@{common-controls2x}', 100px);
+            background-position: @spinner-offset-x @spinner-offset-y - @spin-height / 2;
+        }
+
+        &.over   i { background-position: @spinner-offset-x - @trigger-width @spinner-offset-y - @spin-height / 2; }
+        &.active i { background-position: @spinner-offset-x @spinner-offset-y - @spin-height / 2; }
+    }
+}

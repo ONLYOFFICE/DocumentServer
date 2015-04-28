@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,121 +29,122 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("SSE.view.TableOptionsDialog", {
-    extend: "Ext.window.Window",
-    alias: "widget.tableoptionsdialog",
-    requires: ["Ext.window.Window"],
-    closable: true,
-    resizable: false,
-    height: 145,
-    width: 300,
-    padding: "12px 20px 0 20px",
-    constrain: true,
-    layout: {
-        type: "vbox",
-        align: "stretch"
-    },
-    listeners: {
-        show: function () {
-            var options = this.api.asc_getAddFormatTableOptions();
-            this.txtDataRange.setValue(options.asc_getRange());
-            this.chTitle.setValue(options.asc_getIsTitle());
-            this.api.asc_setSelectionDialogMode(true, options.asc_getRange());
+ if (Common === undefined) {
+    var Common = {};
+}
+define(["common/main/lib/component/ComboBox", "common/main/lib/component/CheckBox", "common/main/lib/component/InputField", "common/main/lib/component/Window"], function () {
+    SSE.Views.TableOptionsDialog = Common.UI.Window.extend(_.extend({
+        options: {
+            width: 350,
+            cls: "modal-dlg",
+            modal: false
         },
-        beforedestroy: function () {
-            this.api.asc_setSelectionDialogMode(false);
-        }
-    },
-    initComponent: function () {
-        var me = this;
-        var worksheets = "",
-        names = this.names;
-        if (names) {
-            worksheets = names[0];
-            var i = names.length;
-            while (--i) {
-                worksheets += ("|" + names[i]);
+        initialize: function (options) {
+            _.extend(this.options, {
+                title: this.txtFormat
+            },
+            options);
+            this.template = ['<div class="box">', '<div id="id-dlg-tableoptions-range" class="input-row" style="margin-bottom: 10px;"></div>', '<div class="input-row" id="id-dlg-tableoptions-title"></div>', "</div>", '<div class="footer right">', '<button class="btn normal dlg-btn primary" result="ok" style="margin-right: 10px;">' + this.okButtonText + "</button>", '<button class="btn normal dlg-btn" result="cancel">' + this.cancelButtonText + "</button>", "</div>"].join("");
+            this.options.tpl = _.template(this.template, this.options);
+            Common.UI.Window.prototype.initialize.call(this, this.options);
+        },
+        render: function () {
+            Common.UI.Window.prototype.render.call(this);
+            var $window = this.getChild(),
+            me = this;
+            me.inputRange = new Common.UI.InputField({
+                el: $("#id-dlg-tableoptions-range"),
+                name: "range",
+                style: "width: 100%;",
+                allowBlank: false,
+                blankError: this.txtEmpty,
+                validateOnChange: true
+            });
+            me.cbTitle = new Common.UI.CheckBox({
+                el: $("#id-dlg-tableoptions-title"),
+                labelText: this.txtTitle
+            });
+            $window.find(".dlg-btn").on("click", _.bind(this.onBtnClick, this));
+            me.inputRange.cmpEl.find("input").on("keypress", _.bind(this.onKeyPress, this));
+            this.on("close", _.bind(this.onClose, this));
+        },
+        onPrimary: function () {
+            this._handleInput("ok");
+            return false;
+        },
+        setSettings: function (settings) {
+            var me = this;
+            if (settings.api) {
+                me.api = settings.api;
+                var options = me.api.asc_getAddFormatTableOptions();
+                this.inputRange.setValue(options.asc_getRange());
+                this.cbTitle.setValue(options.asc_getIsTitle());
+                me.api.asc_setSelectionDialogMode(c_oAscSelectionDialogType.FormatTable, options.asc_getRange());
+                me.api.asc_registerCallback("asc_onSelectionRangeChanged", _.bind(me.onApiRangeChanged, me));
+                Common.NotificationCenter.trigger("cells:range", c_oAscSelectionDialogType.FormatTable);
             }
-        }
-        var longRe = new RegExp(worksheets + "![A-Z]+[1-9]\d*:[A-Z]+[1-9]\d*");
-        var shortRe = new RegExp(worksheets + "![A-Z]+[1-9]\d*");
-        this.txtDataRange = Ext.create("Ext.form.Text", {
-            height: 22,
-            msgTarget: "side",
-            validateOnBlur: false,
-            allowBlank: false,
-            value: "",
-            editable: false,
-            check: false,
-            validator: function (value) {
-                if (!this.check) {
-                    return true;
-                }
-                var isvalid = longRe.test(value); ! isvalid && (isvalid = shortRe.test(value));
-                if (isvalid) {
-                    $("#" + this.id + " input").css("color", "black");
-                    return true;
-                } else {
-                    $("#" + this.id + " input").css("color", "red");
-                    return "ERROR! Invalid cells range";
+            me.inputRange.validation = function (value) {
+                var isvalid = me.api.asc_checkDataRange(c_oAscSelectionDialogType.FormatTable, value, false);
+                return (isvalid == c_oAscError.ID.DataRangeError) ? me.txtInvalidRange : true;
+            };
+        },
+        getSettings: function () {
+            var options = this.api.asc_getAddFormatTableOptions();
+            options.asc_setRange(this.inputRange.getValue());
+            options.asc_setIsTitle(this.cbTitle.checked);
+            return options;
+        },
+        onApiRangeChanged: function (info) {
+            this.inputRange.setValue(info);
+            if (this.inputRange.cmpEl.hasClass("error")) {
+                this.inputRange.cmpEl.removeClass("error");
+            }
+        },
+        isRangeValid: function () {
+            var isvalid = this.api.asc_checkDataRange(c_oAscSelectionDialogType.FormatTable, this.inputRange.getValue(), true);
+            if (isvalid == c_oAscError.ID.No) {
+                return true;
+            } else {
+                if (isvalid == c_oAscError.ID.AutoFilterDataRangeError) {
+                    Common.UI.warning({
+                        msg: this.errorAutoFilterDataRange
+                    });
                 }
             }
-        });
-        this.chTitle = Ext.widget("checkbox", {
-            style: "margin: 0 26px 0 0",
-            boxLabel: this.txtTitle
-        });
-        var _btnOk = Ext.create("Ext.Button", {
-            text: Ext.Msg.buttonText.ok,
-            width: 80,
-            style: "margin: 0 6px 0 0;",
-            cls: "asc-blue-button",
-            listeners: {
-                click: function () {
-                    if (me.txtDataRange.validate()) {
-                        me.fireEvent("onmodalresult", me, 1, me.getSettings());
-                        me.close();
+            return false;
+        },
+        onBtnClick: function (event) {
+            this._handleInput(event.currentTarget.attributes["result"].value);
+        },
+        onClose: function (event) {
+            if (this.api) {
+                this.api.asc_setSelectionDialogMode(c_oAscSelectionDialogType.None);
+            }
+            Common.NotificationCenter.trigger("cells:range", c_oAscSelectionDialogType.None);
+            Common.NotificationCenter.trigger("edit:complete", this);
+        },
+        onKeyPress: function (event) {
+            if (event.keyCode == Common.UI.Keys.RETURN) {
+                this._handleInput("ok");
+            }
+        },
+        _handleInput: function (state) {
+            if (this.options.handler) {
+                if (state == "ok") {
+                    if (this.isRangeValid() !== true) {
+                        return;
                     }
                 }
+                this.options.handler.call(this, this, state);
             }
-        });
-        var _btnCancel = Ext.create("Ext.Button", {
-            text: this.textCancel,
-            width: 80,
-            cls: "asc-darkgray-button",
-            listeners: {
-                click: function () {
-                    me.close();
-                }
-            }
-        });
-        this.items = [this.txtDataRange, this.chTitle, {
-            xtype: "container",
-            height: 26,
-            style: "margin: 8px 0 0 0;",
-            layout: {
-                type: "hbox",
-                align: "stretch",
-                pack: "end"
-            },
-            items: [_btnOk, _btnCancel]
-        }];
-        if (this.api) {
-            this.api.asc_registerCallback("asc_onSelectionRangeChanged", Ext.bind(this._onRangeChanged, this));
-        }
-        this.callParent(arguments);
-        this.setTitle(this.txtFormat);
+            this.close();
+        },
+        txtTitle: "Title",
+        txtFormat: "Format as table",
+        textCancel: "Cancel",
+        txtEmpty: "This field is required",
+        txtInvalidRange: "ERROR! Invalid cells range",
+        errorAutoFilterDataRange: "The operation could not be done for the selected range of cells.<br>Select a uniform data range inside or outside the table and try again."
     },
-    _onRangeChanged: function (info) {
-        this.txtDataRange.setValue(info);
-    },
-    getSettings: function () {
-        var options = this.api.asc_getAddFormatTableOptions();
-        options.asc_setRange(this.txtDataRange.getValue());
-        options.asc_setIsTitle(this.chTitle.getValue());
-        return options;
-    },
-    txtTitle: "Title",
-    txtFormat: "Format as table",
-    textCancel: "Cancel"
+    SSE.Views.TableOptionsDialog || {}));
 });

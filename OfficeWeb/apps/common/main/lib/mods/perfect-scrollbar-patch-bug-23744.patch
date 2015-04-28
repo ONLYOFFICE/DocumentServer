@@ -1,0 +1,34 @@
+# HG changeset patch
+# User Alexey Musinov
+# Date 1415710176 -10800
+#      Tue Nov 11 15:49:36 2014 +0300
+# Node ID 784fe548cf4cbfc0a6c96b295ae83c551ce22166
+# Parent  07b43d47bcf8afe8a2dabc8a0bce8c7dab3bd498
+ [Common] в perfect-scrollbar - скролинг над 'textarea' и 'input' передается в эти элементы.
+
+diff -r 07b43d47bcf8 -r 784fe548cf4c apps/common/main/lib/mods/perfect-scrollbar.js
+--- a/apps/common/main/lib/mods/perfect-scrollbar.js	Mon Nov 10 19:37:33 2014 +0300
++++ b/apps/common/main/lib/mods/perfect-scrollbar.js	Tue Nov 11 15:49:36 2014 +0300
+@@ -313,6 +313,22 @@
+           var deltaX = e.deltaX * e.deltaFactor || deprecatedDeltaX,
+               deltaY = e.deltaY * e.deltaFactor || deprecatedDeltaY;
+ 
++            if (e && e.target && (e.target.type === 'textarea' || e.target.type === 'input')) {
++                e.stopImmediatePropagation();
++                e.preventDefault();
++
++                var scroll = $(e.target).scrollTop(), wheelDeltaY = 0;
++                if (e.originalEvent) {
++                    if (e.originalEvent.wheelDelta) wheelDeltaY = e.originalEvent.wheelDelta / -40;
++                    if (e.originalEvent.deltaY) wheelDeltaY = e.originalEvent.deltaY;
++                    if (e.originalEvent.detail) wheelDeltaY = e.originalEvent.detail;
++                }
++
++                $(e.target).scrollTop(scroll - wheelDeltaY);
++
++                return;
++            }
++
+           shouldPrevent = false;
+           if (!settings.useBothWheelAxes) {
+             // deltaX will only be used for horizontal scrolling and deltaY will

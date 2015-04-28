@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,1053 +29,624 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("SSE.view.ShapeSettingsAdvanced", {
-    extend: "Ext.window.Window",
-    alias: "widget.sseshapesettingsadvanced",
-    requires: ["Ext.form.field.ComboBox", "Ext.window.Window", "Ext.data.Model", "Ext.data.Store", "Ext.Array", "Ext.button.Button", "Ext.util.Cookies"],
-    cls: "asc-advanced-settings-window",
-    modal: true,
-    resizable: false,
-    plain: true,
-    constrain: true,
-    height: 340,
-    width: 516,
-    layout: {
-        type: "vbox",
-        align: "stretch"
-    },
-    initComponent: function () {
-        var me = this;
-        this.addEvents("onmodalresult");
-        this._originalProps = null;
-        this._changedProps = null;
-        this._beginSizeIdx = 0;
-        this._endSizeIdx = 0;
-        this._nRatio = 1;
-        this._spnWidth = Ext.create("Common.component.MetricSpinner", {
-            id: "shape-advanced-spin-width",
-            readOnly: false,
-            maxValue: 55.88,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "3 cm",
-            width: 100,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._btnRatio.pressed) {
-                        var w = field.getNumberValue();
-                        var h = w / this._nRatio;
-                        if (h > this._spnHeight.maxValue) {
-                            h = this._spnHeight.maxValue;
-                            w = h * this._nRatio;
-                            this._spnWidth.suspendEvents(false);
-                            this._spnWidth.setValue(w);
-                            this._spnWidth.resumeEvents();
-                        }
-                        this._spnHeight.suspendEvents(false);
-                        this._spnHeight.setValue(h);
-                        this._spnHeight.resumeEvents();
-                    }
-                    if (this._changedProps) {
-                        this._changedProps.asc_putWidth(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                        this._changedProps.asc_putHeight(Common.MetricSettings.fnRecalcToMM(this._spnHeight.getNumberValue()));
-                    }
+ define(["text!spreadsheeteditor/main/app/template/ShapeSettingsAdvanced.template", "common/main/lib/view/AdvancedSettingsWindow", "common/main/lib/component/ComboBox", "common/main/lib/component/MetricSpinner"], function (contentTemplate) {
+    SSE.Views.ShapeSettingsAdvanced = Common.Views.AdvancedSettingsWindow.extend(_.extend({
+        options: {
+            contentWidth: 300,
+            height: 332,
+            toggleGroup: "shape-adv-settings-group",
+            sizeOriginal: {
+                width: 0,
+                height: 0
+            },
+            sizeMax: {
+                width: 55.88,
+                height: 55.88
+            },
+            properties: null
+        },
+        initialize: function (options) {
+            _.extend(this.options, {
+                title: this.textTitle,
+                items: [{
+                    panelId: "id-adv-shape-width",
+                    panelCaption: this.textSize
                 },
-                this)
-            }
-        });
-        this._spnHeight = Ext.create("Common.component.MetricSpinner", {
-            id: "shape-advanced-span-height",
-            readOnly: false,
-            maxValue: 55.88,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "3 cm",
-            width: 100,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    var h = field.getNumberValue(),
-                    w = null;
-                    if (this._btnRatio.pressed) {
+                {
+                    panelId: "id-adv-shape-shape",
+                    panelCaption: this.textWeightArrows
+                },
+                {
+                    panelId: "id-adv-shape-margins",
+                    panelCaption: this.strMargins
+                }],
+                contentTemplate: _.template(contentTemplate)({
+                    scope: this
+                })
+            },
+            options);
+            Common.Views.AdvancedSettingsWindow.prototype.initialize.call(this, this.options);
+            this.spinners = [];
+            this.Margins = undefined;
+            this._nRatio = 1;
+            this._originalProps = this.options.shapeProps;
+            this._changedProps = null;
+        },
+        render: function () {
+            Common.Views.AdvancedSettingsWindow.prototype.render.call(this);
+            var me = this;
+            this.spnWidth = new Common.UI.MetricSpinner({
+                el: $("#shape-advanced-spin-width"),
+                step: 0.1,
+                width: 100,
+                defaultUnit: "cm",
+                value: "3 cm",
+                maxValue: 55.88,
+                minValue: 0
+            });
+            this.spnWidth.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (this.btnRatio.pressed) {
+                    var w = field.getNumberValue();
+                    var h = w / this._nRatio;
+                    if (h > this.spnHeight.options.maxValue) {
+                        h = this.spnHeight.options.maxValue;
                         w = h * this._nRatio;
-                        if (w > this._spnWidth.maxValue) {
-                            w = this._spnWidth.maxValue;
-                            h = w / this._nRatio;
-                            this._spnHeight.suspendEvents(false);
-                            this._spnHeight.setValue(h);
-                            this._spnHeight.resumeEvents();
-                        }
-                        this._spnWidth.suspendEvents(false);
-                        this._spnWidth.setValue(w);
-                        this._spnWidth.resumeEvents();
+                        this.spnWidth.setValue(w, true);
                     }
-                    if (this._changedProps) {
-                        this._changedProps.asc_putHeight(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                        this._changedProps.asc_putWidth(Common.MetricSettings.fnRecalcToMM(this._spnWidth.getNumberValue()));
-                    }
-                },
-                this)
-            }
-        });
-        this._btnRatio = Ext.create("Ext.Button", {
-            id: "shape-advanced-button-ratio",
-            iconCls: "advanced-btn-ratio",
-            enableToggle: true,
-            width: 22,
-            height: 22,
-            style: "margin: 0 0 0 6px;",
-            tooltip: this.textKeepRatio,
-            toggleHandler: Ext.bind(function (btn) {
-                if (btn.pressed && this._spnHeight.getNumberValue() > 0) {
-                    this._nRatio = this._spnWidth.getNumberValue() / this._spnHeight.getNumberValue();
+                    this.spnHeight.setValue(h, true);
+                }
+                if (this._changedProps) {
+                    this._changedProps.asc_putWidth(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                    this._changedProps.asc_putHeight(Common.Utils.Metric.fnRecalcToMM(this.spnHeight.getNumberValue()));
                 }
             },
-            this)
-        });
-        this._arrCapType = [[c_oAscLineCapType.Flat, this.textFlat], [c_oAscLineCapType.Round, this.textRound], [c_oAscLineCapType.Square, this.textSquare]];
-        this.cmbCapType = Ext.create("Ext.form.field.ComboBox", {
-            id: "shape-advanced-cap-type",
-            width: 100,
-            editable: false,
-            store: this._arrCapType,
-            queryMode: "local",
-            triggerAction: "all",
-            listeners: {
-                select: Ext.bind(function (combo, records, eOpts) {
-                    if (this._changedProps) {
-                        if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
-                            this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
-                        }
-                        if (this._changedProps.asc_getShapeProperties().asc_getStroke() === null) {
-                            this._changedProps.asc_getShapeProperties().asc_putStroke(new Asc.asc_CStroke());
-                        }
-                        this._changedProps.asc_getShapeProperties().asc_getStroke().asc_putLinecap(me._arrCapType[records[0].index][0]);
+            this));
+            this.spinners.push(this.spnWidth);
+            this.spnHeight = new Common.UI.MetricSpinner({
+                el: $("#shape-advanced-spin-height"),
+                step: 0.1,
+                width: 100,
+                defaultUnit: "cm",
+                value: "3 cm",
+                maxValue: 55.88,
+                minValue: 0
+            });
+            this.spnHeight.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                var h = field.getNumberValue(),
+                w = null;
+                if (this.btnRatio.pressed) {
+                    w = h * this._nRatio;
+                    if (w > this.spnWidth.options.maxValue) {
+                        w = this.spnWidth.options.maxValue;
+                        h = w / this._nRatio;
+                        this.spnHeight.setValue(h, true);
                     }
-                },
-                this)
-            }
-        });
-        this.cmbCapType.setValue(this._arrCapType[0][1]);
-        this._arrJoinType = [[c_oAscLineJoinType.Round, this.textRound], [c_oAscLineJoinType.Bevel, this.textBevel], [c_oAscLineJoinType.Miter, this.textMiter]];
-        this.cmbJoinType = Ext.create("Ext.form.field.ComboBox", {
-            id: "shape-advanced-join-type",
-            width: 100,
-            editable: false,
-            store: this._arrJoinType,
-            queryMode: "local",
-            triggerAction: "all",
-            listeners: {
-                select: Ext.bind(function (combo, records, eOpts) {
-                    if (this._changedProps) {
-                        if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
-                            this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
-                        }
-                        if (this._changedProps.asc_getShapeProperties().asc_getStroke() === null) {
-                            this._changedProps.asc_getShapeProperties().asc_putStroke(new Asc.asc_CStroke());
-                        }
-                        this._changedProps.asc_getShapeProperties().asc_getStroke().asc_putLinejoin(me._arrJoinType[records[0].index][0]);
-                    }
-                },
-                this)
-            }
-        });
-        this.cmbJoinType.setValue(this._arrJoinType[0][1]);
-        this.styleURL = "resources/img/right-panels/Begin-EndStyle.png";
-        this.styleURL2x = "resources/img/right-panels/Begin-EndStyle@2x.png";
-        var _arrStyles = [],
-        _arrSize = [];
-        var _styleTypes = [c_oAscLineBeginType.None, c_oAscLineBeginType.Triangle, c_oAscLineBeginType.Arrow, c_oAscLineBeginType.Stealth, c_oAscLineBeginType.Diamond, c_oAscLineBeginType.Oval];
-        var _sizeTypes = [c_oAscLineBeginSize.small_small, c_oAscLineBeginSize.small_mid, c_oAscLineBeginSize.small_large, c_oAscLineBeginSize.mid_small, c_oAscLineBeginSize.mid_mid, c_oAscLineBeginSize.mid_large, c_oAscLineBeginSize.large_small, c_oAscLineBeginSize.large_mid, c_oAscLineBeginSize.large_large];
-        for (var i = 0; i < 6; i++) {
-            var item = {
-                value: i,
-                imagewidth: 44,
-                imageheight: 20,
-                offsetx: 80 * i + 10,
-                offsety: 0
-            };
-            item.borderstyle = Ext.String.format("background:url({0}) {3}px {4}px; width:{1}px; height:{2}px; background-image: -webkit-image-set(url({0}) 1x, url({5}) 2x);", this.styleURL, item.imagewidth, item.imageheight, -item.offsetx, -item.offsety, this.styleURL2x);
-            _arrStyles.push(item);
-        }
-        _arrStyles[0].type = c_oAscLineBeginType.None;
-        _arrStyles[1].type = c_oAscLineBeginType.Triangle;
-        _arrStyles[2].type = c_oAscLineBeginType.Arrow;
-        _arrStyles[3].type = c_oAscLineBeginType.Stealth;
-        _arrStyles[4].type = c_oAscLineBeginType.Diamond;
-        _arrStyles[5].type = c_oAscLineBeginType.Oval;
-        for (i = 0; i < 9; i++) {
-            var item = {
-                value: i,
-                imagewidth: 44,
-                imageheight: 20,
-                offsetx: 80 + 10,
-                offsety: 20 * (i + 1)
-            };
-            item.borderstyle = Ext.String.format("background:url({0}) {3}px {4}px; width:{1}px; height:{2}px; background-image: -webkit-image-set(url({0}) 1x, url({5}) 2x);", this.styleURL, item.imagewidth, item.imageheight, -item.offsetx, -item.offsety, this.styleURL2x);
-            _arrSize.push(item);
-        }
-        _arrSize[0].type = c_oAscLineBeginSize.small_small;
-        _arrSize[1].type = c_oAscLineBeginSize.small_mid;
-        _arrSize[2].type = c_oAscLineBeginSize.small_large;
-        _arrSize[3].type = c_oAscLineBeginSize.mid_small;
-        _arrSize[4].type = c_oAscLineBeginSize.mid_mid;
-        _arrSize[5].type = c_oAscLineBeginSize.mid_large;
-        _arrSize[6].type = c_oAscLineBeginSize.large_small;
-        _arrSize[7].type = c_oAscLineBeginSize.large_mid;
-        _arrSize[8].type = c_oAscLineBeginSize.large_large;
-        var beginStyleStore = Ext.create("Ext.data.Store", {
-            model: "SSE.model.ModelBorders",
-            data: _arrStyles
-        });
-        var beginSizeStore = Ext.create("Ext.data.Store", {
-            model: "SSE.model.ModelBorders",
-            data: _arrSize
-        });
-        for (i = 0; i < _arrStyles.length; i++) {
-            var item = _arrStyles[i];
-            item.borderstyle = Ext.String.format("background:url({0}) {3}px {4}px; width:{1}px; height:{2}px; background-image: -webkit-image-set(url({0}) 1x, url({5}) 2x);", this.styleURL, item.imagewidth, item.imageheight, -item.offsetx, -(item.offsety + 200), this.styleURL2x);
-        }
-        for (i = 0; i < _arrSize.length; i++) {
-            var item = _arrSize[i];
-            item.borderstyle = Ext.String.format("background:url({0}) {3}px {4}px; width:{1}px; height:{2}px; background-image: -webkit-image-set(url({0}) 1x, url({5}) 2x);", this.styleURL, item.imagewidth, item.imageheight, -item.offsetx, -(item.offsety + 200), this.styleURL2x);
-        }
-        var endStyleStore = Ext.create("Ext.data.Store", {
-            model: "SSE.model.ModelBorders",
-            data: _arrStyles
-        });
-        var endSizeStore = Ext.create("Ext.data.Store", {
-            model: "SSE.model.ModelBorders",
-            data: _arrSize
-        });
-        this._updateSizeArr = function (sizecombo, record, type, sizeidx) {
-            var style = Ext.String.format("background:url({0}) repeat scroll 0 -1px", "resources/img/controls/text-bg.gif");
-            if (record.data.value > 0) {
-                for (var i = 0; i < _arrSize.length; i++) {
-                    _arrSize[i].offsetx = record.data.value * 80 + 10;
-                    _arrSize[i].borderstyle = Ext.String.format("background:url({0}) {3}px {4}px; width:{1}px; height:{2}px; background-image: -webkit-image-set(url({0}) 1x, url({5}) 2x);", me.styleURL, _arrSize[i].imagewidth, _arrSize[i].imageheight, -_arrSize[i].offsetx, -(_arrSize[i].offsety + 200 * type), this.styleURL2x);
+                    this.spnWidth.setValue(w, true);
                 }
-                sizecombo.menu.picker.store.loadData(_arrSize);
-                sizecombo.setDisabled(false);
+                if (this._changedProps) {
+                    this._changedProps.asc_putHeight(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                    this._changedProps.asc_putWidth(Common.Utils.Metric.fnRecalcToMM(this.spnWidth.getNumberValue()));
+                }
+            },
+            this));
+            this.spinners.push(this.spnHeight);
+            this.btnRatio = new Common.UI.Button({
+                cls: "btn-toolbar btn-toolbar-default",
+                iconCls: "advanced-btn-ratio",
+                style: "margin-bottom: 1px;",
+                enableToggle: true,
+                hint: this.textKeepRatio
+            });
+            this.btnRatio.render($("#shape-advanced-button-ratio"));
+            this.btnRatio.on("click", _.bind(function (btn, e) {
+                if (btn.pressed && this.spnHeight.getNumberValue() > 0) {
+                    this._nRatio = this.spnWidth.getNumberValue() / this.spnHeight.getNumberValue();
+                }
+            },
+            this));
+            this.spnMarginTop = new Common.UI.MetricSpinner({
+                el: $("#shape-margin-top"),
+                step: 0.1,
+                width: 100,
+                defaultUnit: "cm",
+                value: "0 cm",
+                maxValue: 55.87,
+                minValue: 0
+            });
+            this.spnMarginTop.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (this._changedProps) {
+                    if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
+                        this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
+                    }
+                    if (this._changedProps.asc_getShapeProperties().asc_getPaddings() === null) {
+                        this._changedProps.asc_getShapeProperties().asc_putPaddings(new Asc.asc_CPaddings());
+                    }
+                    this._changedProps.asc_getShapeProperties().asc_getPaddings().asc_putTop(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                }
+            },
+            this));
+            this.spinners.push(this.spnMarginTop);
+            this.spnMarginBottom = new Common.UI.MetricSpinner({
+                el: $("#shape-margin-bottom"),
+                step: 0.1,
+                width: 100,
+                defaultUnit: "cm",
+                value: "0 cm",
+                maxValue: 55.87,
+                minValue: 0
+            });
+            this.spnMarginBottom.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (this._changedProps) {
+                    if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
+                        this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
+                    }
+                    if (this._changedProps.asc_getShapeProperties().asc_getPaddings() === null) {
+                        this._changedProps.asc_getShapeProperties().asc_putPaddings(new Asc.asc_CPaddings());
+                    }
+                    this._changedProps.asc_getShapeProperties().asc_getPaddings().asc_putBottom(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                }
+            },
+            this));
+            this.spinners.push(this.spnMarginBottom);
+            this.spnMarginLeft = new Common.UI.MetricSpinner({
+                el: $("#shape-margin-left"),
+                step: 0.1,
+                width: 100,
+                defaultUnit: "cm",
+                value: "0.19 cm",
+                maxValue: 9.34,
+                minValue: 0
+            });
+            this.spnMarginLeft.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (this._changedProps) {
+                    if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
+                        this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
+                    }
+                    if (this._changedProps.asc_getShapeProperties().asc_getPaddings() === null) {
+                        this._changedProps.asc_getShapeProperties().asc_putPaddings(new Asc.asc_CPaddings());
+                    }
+                    this._changedProps.asc_getShapeProperties().asc_getPaddings().asc_putLeft(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                }
+            },
+            this));
+            this.spinners.push(this.spnMarginLeft);
+            this.spnMarginRight = new Common.UI.MetricSpinner({
+                el: $("#shape-margin-right"),
+                step: 0.1,
+                width: 100,
+                defaultUnit: "cm",
+                value: "0.19 cm",
+                maxValue: 9.34,
+                minValue: 0
+            });
+            this.spnMarginRight.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (this._changedProps) {
+                    if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
+                        this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
+                    }
+                    if (this._changedProps.asc_getShapeProperties().asc_getPaddings() === null) {
+                        this._changedProps.asc_getShapeProperties().asc_putPaddings(new Asc.asc_CPaddings());
+                    }
+                    this._changedProps.asc_getShapeProperties().asc_getPaddings().asc_putRight(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                }
+            },
+            this));
+            this.spinners.push(this.spnMarginRight);
+            this._arrCapType = [{
+                displayValue: this.textFlat,
+                value: c_oAscLineCapType.Flat
+            },
+            {
+                displayValue: this.textRound,
+                value: c_oAscLineCapType.Round
+            },
+            {
+                displayValue: this.textSquare,
+                value: c_oAscLineCapType.Square
+            }];
+            this.cmbCapType = new Common.UI.ComboBox({
+                el: $("#shape-advanced-cap-type"),
+                cls: "input-group-nr",
+                menuStyle: "min-width: 100px;",
+                editable: false,
+                data: this._arrCapType
+            });
+            this.cmbCapType.setValue(c_oAscLineCapType.Flat);
+            this.cmbCapType.on("selected", _.bind(function (combo, record) {
+                if (this._changedProps) {
+                    if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
+                        this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
+                    }
+                    if (this._changedProps.asc_getShapeProperties().asc_getStroke() === null) {
+                        this._changedProps.asc_getShapeProperties().asc_putStroke(new Asc.asc_CStroke());
+                    }
+                    this._changedProps.asc_getShapeProperties().asc_getStroke().asc_putLinecap(record.value);
+                }
+            },
+            this));
+            this._arrJoinType = [{
+                displayValue: this.textRound,
+                value: c_oAscLineJoinType.Round
+            },
+            {
+                displayValue: this.textBevel,
+                value: c_oAscLineJoinType.Bevel
+            },
+            {
+                displayValue: this.textMiter,
+                value: c_oAscLineJoinType.Miter
+            }];
+            this.cmbJoinType = new Common.UI.ComboBox({
+                el: $("#shape-advanced-join-type"),
+                cls: "input-group-nr",
+                menuStyle: "min-width: 100px;",
+                editable: false,
+                data: this._arrJoinType
+            });
+            this.cmbJoinType.setValue(c_oAscLineJoinType.Round);
+            this.cmbJoinType.on("selected", _.bind(function (combo, record) {
+                if (this._changedProps) {
+                    if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
+                        this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
+                    }
+                    if (this._changedProps.asc_getShapeProperties().asc_getStroke() === null) {
+                        this._changedProps.asc_getShapeProperties().asc_putStroke(new Asc.asc_CStroke());
+                    }
+                    this._changedProps.asc_getShapeProperties().asc_getStroke().asc_putLinejoin(record.value);
+                }
+            },
+            this));
+            var _arrStyles = [],
+            _arrSize = [];
+            for (var i = 0; i < 6; i++) {
+                _arrStyles.push({
+                    value: i,
+                    offsetx: 80 * i + 10,
+                    offsety: 0
+                });
+            }
+            _arrStyles[0].type = c_oAscLineBeginType.None;
+            _arrStyles[1].type = c_oAscLineBeginType.Triangle;
+            _arrStyles[2].type = c_oAscLineBeginType.Arrow;
+            _arrStyles[3].type = c_oAscLineBeginType.Stealth;
+            _arrStyles[4].type = c_oAscLineBeginType.Diamond;
+            _arrStyles[5].type = c_oAscLineBeginType.Oval;
+            for (i = 0; i < 9; i++) {
+                _arrSize.push({
+                    value: i,
+                    offsetx: 80 + 10,
+                    offsety: 20 * (i + 1)
+                });
+            }
+            _arrSize[0].type = c_oAscLineBeginSize.small_small;
+            _arrSize[1].type = c_oAscLineBeginSize.small_mid;
+            _arrSize[2].type = c_oAscLineBeginSize.small_large;
+            _arrSize[3].type = c_oAscLineBeginSize.mid_small;
+            _arrSize[4].type = c_oAscLineBeginSize.mid_mid;
+            _arrSize[5].type = c_oAscLineBeginSize.mid_large;
+            _arrSize[6].type = c_oAscLineBeginSize.large_small;
+            _arrSize[7].type = c_oAscLineBeginSize.large_mid;
+            _arrSize[8].type = c_oAscLineBeginSize.large_large;
+            this.btnBeginStyle = new Common.UI.ComboBox({
+                el: $("#shape-advanced-begin-style"),
+                template: _.template(['<div class="input-group combobox combo-dataview-menu input-group-nr dropdown-toggle combo-arrow-style"  data-toggle="dropdown">', '<div class="form-control image" style="width: 100px;"></div>', '<div style="display: table-cell;"></div>', '<button type="button" class="btn btn-default"><span class="caret"></span></button>', "</div>"].join(""))
+            });
+            (new Common.UI.Menu({
+                style: "min-width: 105px;",
+                items: [{
+                    template: _.template('<div id="shape-advanced-menu-begin-style" style="width: 105px; margin: 0 5px;"></div>')
+                }]
+            })).render($("#shape-advanced-begin-style"));
+            this.mnuBeginStylePicker = new Common.UI.DataView({
+                el: $("#shape-advanced-menu-begin-style"),
+                parentMenu: me.btnBeginStyle.menu,
+                store: new Common.UI.DataViewStore(_arrStyles),
+                itemTemplate: _.template('<div id="<%= id %>" class="item-arrow" style="background-position: -<%= offsetx %>px -<%= offsety %>px;"></div>')
+            });
+            this.mnuBeginStylePicker.on("item:click", _.bind(this.onSelectBeginStyle, this));
+            this._selectStyleItem(this.btnBeginStyle, null);
+            this.btnBeginSize = new Common.UI.ComboBox({
+                el: $("#shape-advanced-begin-size"),
+                template: _.template(['<div class="input-group combobox combo-dataview-menu input-group-nr dropdown-toggle combo-arrow-style"  data-toggle="dropdown">', '<div class="form-control image" style="width: 100px;"></div>', '<div style="display: table-cell;"></div>', '<button type="button" class="btn btn-default"><span class="caret"></span></button>', "</div>"].join(""))
+            });
+            (new Common.UI.Menu({
+                style: "min-width: 160px;",
+                items: [{
+                    template: _.template('<div id="shape-advanced-menu-begin-size" style="width: 160px; margin: 0 5px;"></div>')
+                }]
+            })).render($("#shape-advanced-begin-size"));
+            this.mnuBeginSizePicker = new Common.UI.DataView({
+                el: $("#shape-advanced-menu-begin-size"),
+                parentMenu: me.btnBeginSize.menu,
+                store: new Common.UI.DataViewStore(_arrSize),
+                itemTemplate: _.template('<div id="<%= id %>" class="item-arrow" style="background-position: -<%= offsetx %>px -<%= offsety %>px;"></div>')
+            });
+            this.mnuBeginSizePicker.on("item:click", _.bind(this.onSelectBeginSize, this));
+            this._selectStyleItem(this.btnBeginSize, null);
+            for (i = 0; i < _arrStyles.length; i++) {
+                _arrStyles[i].offsety += 200;
+            }
+            for (i = 0; i < _arrSize.length; i++) {
+                _arrSize[i].offsety += 200;
+            }
+            this.btnEndStyle = new Common.UI.ComboBox({
+                el: $("#shape-advanced-end-style"),
+                template: _.template(['<div class="input-group combobox combo-dataview-menu input-group-nr dropdown-toggle combo-arrow-style"  data-toggle="dropdown">', '<div class="form-control image" style="width: 100px;"></div>', '<div style="display: table-cell;"></div>', '<button type="button" class="btn btn-default"><span class="caret"></span></button>', "</div>"].join(""))
+            });
+            (new Common.UI.Menu({
+                style: "min-width: 105px;",
+                items: [{
+                    template: _.template('<div id="shape-advanced-menu-end-style" style="width: 105px; margin: 0 5px;"></div>')
+                }]
+            })).render($("#shape-advanced-end-style"));
+            this.mnuEndStylePicker = new Common.UI.DataView({
+                el: $("#shape-advanced-menu-end-style"),
+                parentMenu: me.btnEndStyle.menu,
+                store: new Common.UI.DataViewStore(_arrStyles),
+                itemTemplate: _.template('<div id="<%= id %>" class="item-arrow" style="background-position: -<%= offsetx %>px -<%= offsety %>px;"></div>')
+            });
+            this.mnuEndStylePicker.on("item:click", _.bind(this.onSelectEndStyle, this));
+            this._selectStyleItem(this.btnEndStyle, null);
+            this.btnEndSize = new Common.UI.ComboBox({
+                el: $("#shape-advanced-end-size"),
+                template: _.template(['<div class="input-group combobox combo-dataview-menu input-group-nr dropdown-toggle combo-arrow-style"  data-toggle="dropdown">', '<div class="form-control image" style="width: 100px;"></div>', '<div style="display: table-cell;"></div>', '<button type="button" class="btn btn-default"><span class="caret"></span></button>', "</div>"].join(""))
+            });
+            (new Common.UI.Menu({
+                style: "min-width: 160px;",
+                items: [{
+                    template: _.template('<div id="shape-advanced-menu-end-size" style="width: 160px; margin: 0 5px;"></div>')
+                }]
+            })).render($("#shape-advanced-end-size"));
+            this.mnuEndSizePicker = new Common.UI.DataView({
+                el: $("#shape-advanced-menu-end-size"),
+                parentMenu: me.btnEndSize.menu,
+                store: new Common.UI.DataViewStore(_arrSize),
+                itemTemplate: _.template('<div id="<%= id %>" class="item-arrow" style="background-position: -<%= offsetx %>px -<%= offsety %>px;"></div>')
+            });
+            this.mnuEndSizePicker.on("item:click", _.bind(this.onSelectEndSize, this));
+            this._selectStyleItem(this.btnEndSize, null);
+            this.afterRender();
+        },
+        afterRender: function () {
+            this.updateMetricUnit();
+            this._setDefaults(this._originalProps);
+        },
+        _setDefaults: function (props) {
+            if (props && props.asc_getShapeProperties()) {
+                var shapeprops = props.asc_getShapeProperties();
+                this.spnWidth.setValue(Common.Utils.Metric.fnRecalcFromMM(props.asc_getWidth()).toFixed(2), true);
+                this.spnHeight.setValue(Common.Utils.Metric.fnRecalcFromMM(props.asc_getHeight()).toFixed(2), true);
+                if (props.asc_getHeight() > 0) {
+                    this._nRatio = props.asc_getWidth() / props.asc_getHeight();
+                }
+                var value = window.localStorage.getItem("sse-settings-shaperatio");
+                if (value !== null && parseInt(value) == 1) {
+                    this.btnRatio.toggle(true);
+                }
+                this._setShapeDefaults(shapeprops);
+                var margins = shapeprops.asc_getPaddings();
+                if (margins) {
+                    var val = margins.asc_getLeft();
+                    this.spnMarginLeft.setValue((null !== val && undefined !== val) ? Common.Utils.Metric.fnRecalcFromMM(val) : "", true);
+                    val = margins.asc_getTop();
+                    this.spnMarginTop.setValue((null !== val && undefined !== val) ? Common.Utils.Metric.fnRecalcFromMM(val) : "", true);
+                    val = margins.asc_getRight();
+                    this.spnMarginRight.setValue((null !== val && undefined !== val) ? Common.Utils.Metric.fnRecalcFromMM(val) : "", true);
+                    val = margins.asc_getBottom();
+                    this.spnMarginBottom.setValue((null !== val && undefined !== val) ? Common.Utils.Metric.fnRecalcFromMM(val) : "", true);
+                }
+                this.btnsCategory[2].setDisabled(null === margins);
+                this._changedProps = new Asc.asc_CImgProperty();
+            }
+        },
+        getSettings: function () {
+            window.localStorage.setItem("sse-settings-shaperatio", (this.btnRatio.pressed) ? 1 : 0);
+            return {
+                shapeProps: this._changedProps
+            };
+        },
+        _setShapeDefaults: function (props) {
+            if (props) {
+                var stroke = props.asc_getStroke();
+                if (stroke) {
+                    var value = stroke.asc_getLinejoin();
+                    for (var i = 0; i < this._arrJoinType.length; i++) {
+                        if (value == this._arrJoinType[i].value) {
+                            this.cmbJoinType.setValue(value);
+                            break;
+                        }
+                    }
+                    value = stroke.asc_getLinecap();
+                    for (i = 0; i < this._arrCapType.length; i++) {
+                        if (value == this._arrCapType[i].value) {
+                            this.cmbCapType.setValue(value);
+                            break;
+                        }
+                    }
+                    var canchange = stroke.asc_getCanChangeArrows();
+                    this.btnBeginStyle.setDisabled(!canchange);
+                    this.btnEndStyle.setDisabled(!canchange);
+                    this.btnBeginSize.setDisabled(!canchange);
+                    this.btnEndSize.setDisabled(!canchange);
+                    if (canchange) {
+                        value = stroke.asc_getLinebeginsize();
+                        var rec = this.mnuBeginSizePicker.store.findWhere({
+                            type: value
+                        });
+                        if (rec) {
+                            this._beginSizeIdx = rec.get("value");
+                        } else {
+                            this._beginSizeIdx = null;
+                            this._selectStyleItem(this.btnBeginSize, null);
+                        }
+                        value = stroke.asc_getLinebeginstyle();
+                        rec = this.mnuBeginStylePicker.store.findWhere({
+                            type: value
+                        });
+                        if (rec) {
+                            this.mnuBeginStylePicker.selectRecord(rec, true);
+                            this._updateSizeArr(this.btnBeginSize, this.mnuBeginSizePicker, rec, this._beginSizeIdx);
+                            this._selectStyleItem(this.btnBeginStyle, rec);
+                        } else {
+                            this._selectStyleItem(this.btnBeginStyle, null);
+                        }
+                        value = stroke.asc_getLineendsize();
+                        rec = this.mnuEndSizePicker.store.findWhere({
+                            type: value
+                        });
+                        if (rec) {
+                            this._endSizeIdx = rec.get("value");
+                        } else {
+                            this._endSizeIdx = null;
+                            this._selectStyleItem(this.btnEndSize, null);
+                        }
+                        value = stroke.asc_getLineendstyle();
+                        rec = this.mnuEndStylePicker.store.findWhere({
+                            type: value
+                        });
+                        if (rec) {
+                            this.mnuEndStylePicker.selectRecord(rec, true);
+                            this._updateSizeArr(this.btnEndSize, this.mnuEndSizePicker, rec, this._endSizeIdx);
+                            this._selectStyleItem(this.btnEndStyle, rec);
+                        } else {
+                            this._selectStyleItem(this.btnEndStyle, null);
+                        }
+                    } else {
+                        this._selectStyleItem(this.btnBeginStyle);
+                        this._selectStyleItem(this.btnEndStyle);
+                        this._selectStyleItem(this.btnBeginSize);
+                        this._selectStyleItem(this.btnEndSize);
+                    }
+                }
+            }
+        },
+        updateMetricUnit: function () {
+            if (this.spinners) {
+                for (var i = 0; i < this.spinners.length; i++) {
+                    var spinner = this.spinners[i];
+                    spinner.setDefaultUnit(Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()]);
+                    spinner.setStep(Common.Utils.Metric.getCurrentMetric() == Common.Utils.Metric.c_MetricUnits.cm ? 0.01 : 1);
+                }
+            }
+            this.sizeMax = {
+                width: Common.Utils.Metric.fnRecalcFromMM(this.options.sizeMax.width * 10),
+                height: Common.Utils.Metric.fnRecalcFromMM(this.options.sizeMax.height * 10)
+            };
+            if (this.options.sizeOriginal) {
+                this.sizeOriginal = {
+                    width: Common.Utils.Metric.fnRecalcFromMM(this.options.sizeOriginal.width),
+                    height: Common.Utils.Metric.fnRecalcFromMM(this.options.sizeOriginal.height)
+                };
+            }
+        },
+        _updateSizeArr: function (combo, picker, record, sizeidx) {
+            if (record.get("value") > 0) {
+                picker.store.each(function (rec) {
+                    rec.set({
+                        offsetx: record.get("value") * 80 + 10
+                    });
+                },
+                this);
+                combo.setDisabled(false);
                 if (sizeidx !== null) {
-                    sizecombo.menu.picker.selectByIndex(sizeidx, true);
-                    me._selectStyleItem(sizecombo, sizecombo.menu.picker.store.getAt(sizeidx), type);
+                    picker.selectByIndex(sizeidx, true);
+                    this._selectStyleItem(combo, picker.store.at(sizeidx));
                 } else {
-                    Ext.DomHelper.applyStyles(sizecombo.btnEl, style);
+                    this._selectStyleItem(combo, null);
                 }
             } else {
-                Ext.DomHelper.applyStyles(sizecombo.btnEl, style);
-                sizecombo.setDisabled(true);
+                this._selectStyleItem(combo, null);
+                combo.setDisabled(true);
             }
-        };
-        this._selectStyleItem = function (stylecombo, record, type) {
-            var style;
-            if (stylecombo.btnEl) {
-                style = Ext.String.format("background:url({0}) repeat scroll {1}px {2}px, url({3}) repeat scroll 0 -1px;", me.styleURL, -(record.data.offsetx - 20), -(record.data.offsety + 200 * type), "resources/img/controls/text-bg.gif");
-                style += Ext.String.format("background-image: -webkit-image-set(url({0}) 1x, url({1}) 2x), -webkit-image-set(url({2}) 1x, url({3}) 2x);", me.styleURL, me.styleURL2x, "resources/img/controls/text-bg.gif", "resources/img/controls/text-bg@2x.gif");
-                Ext.DomHelper.applyStyles(stylecombo.btnEl, style);
-            }
-        };
-        var endStyleTpl = Ext.create("Ext.XTemplate", '<tpl for=".">', '<div class="thumb-wrap">', '<img src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" align="left" style="{borderstyle}"" />', "</div>", "</tpl>");
-        this._btnBeginStyle = Ext.create("Ext.button.Button", {
-            width: 100,
-            cls: "btn-combo-style",
-            pressedCls: "",
-            menu: this.BeginStyleMenu = Ext.create("Common.component.MenuDataViewPicker", {
-                width: 115,
-                height: 92,
-                cls: "arrow-view",
-                dataTpl: endStyleTpl,
-                viewData: [],
-                store: beginStyleStore,
-                contentWidth: 95,
-                listeners: {
-                    select: Ext.bind(function (picker, record) {
-                        if (me._changedProps) {
-                            if (me._changedProps.asc_getShapeProperties() === null || me._changedProps.asc_getShapeProperties() === undefined) {
-                                me._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
-                            }
-                            if (me._changedProps.asc_getShapeProperties().asc_getStroke() === null) {
-                                me._changedProps.asc_getShapeProperties().asc_putStroke(new Asc.asc_CStroke());
-                            }
-                            me._changedProps.asc_getShapeProperties().asc_getStroke().asc_putLinebeginstyle(record.data.type);
-                        }
-                        if (me._beginSizeIdx === null || me._beginSizeIdx === undefined) {
-                            me._beginSizeIdx = 4;
-                        }
-                        me._updateSizeArr(me._btnBeginSize, record, 0, me._beginSizeIdx);
-                        me._selectStyleItem(me._btnBeginStyle, record, 0);
-                    },
-                    me),
-                    hide: function () {
-                        me.fireEvent("editcomplete", me);
-                    }
-                }
-            }),
-            listeners: {
-                afterRender: function () {
-                    me._selectStyleItem(this, this.menu.picker.store.getAt(1), 0);
-                }
-            }
-        });
-        this._btnEndStyle = Ext.create("Ext.button.Button", {
-            width: 100,
-            cls: "btn-combo-style",
-            pressedCls: "",
-            menu: this.EndStyleMenu = Ext.create("Common.component.MenuDataViewPicker", {
-                width: 115,
-                height: 92,
-                cls: "arrow-view",
-                dataTpl: endStyleTpl,
-                viewData: [],
-                store: endStyleStore,
-                contentWidth: 95,
-                listeners: {
-                    select: Ext.bind(function (picker, record) {
-                        if (me._changedProps) {
-                            if (me._changedProps.asc_getShapeProperties() === null || me._changedProps.asc_getShapeProperties() === undefined) {
-                                me._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
-                            }
-                            if (me._changedProps.asc_getShapeProperties().asc_getStroke() === null) {
-                                me._changedProps.asc_getShapeProperties().asc_putStroke(new Asc.asc_CStroke());
-                            }
-                            me._changedProps.asc_getShapeProperties().asc_getStroke().asc_putLineendstyle(record.data.type);
-                        }
-                        if (me._endSizeIdx === null || me._endSizeIdx === undefined) {
-                            me._endSizeIdx = 4;
-                        }
-                        me._updateSizeArr(me._btnEndSize, record, 1, me._endSizeIdx);
-                        me._selectStyleItem(me._btnEndStyle, record, 1);
-                    },
-                    me),
-                    hide: function () {
-                        me.fireEvent("editcomplete", me);
-                    }
-                }
-            }),
-            listeners: {
-                afterRender: function () {
-                    me._selectStyleItem(this, this.menu.picker.store.getAt(1), 1);
-                }
-            }
-        });
-        this._btnBeginSize = Ext.create("Ext.button.Button", {
-            width: 100,
-            cls: "btn-combo-style",
-            pressedCls: "",
-            menu: this.BeginSizeMenu = Ext.create("Common.component.MenuDataViewPicker", {
-                width: 167,
-                height: 92,
-                cls: "arrow-view",
-                dataTpl: endStyleTpl,
-                viewData: [],
-                store: beginSizeStore,
-                contentWidth: 147,
-                listeners: {
-                    select: Ext.bind(function (picker, record) {
-                        if (me._changedProps) {
-                            if (me._changedProps.asc_getShapeProperties() === null || me._changedProps.asc_getShapeProperties() === undefined) {
-                                me._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
-                            }
-                            if (me._changedProps.asc_getShapeProperties().asc_getStroke() === null) {
-                                me._changedProps.asc_getShapeProperties().asc_putStroke(new Asc.asc_CStroke());
-                            }
-                            me._changedProps.asc_getShapeProperties().asc_getStroke().asc_putLinebeginsize(record.data.type);
-                        }
-                        me._beginSizeIdx = record.data.value;
-                        me._selectStyleItem(me._btnBeginSize, record, 0);
-                    },
-                    me),
-                    hide: function () {
-                        me.fireEvent("editcomplete", me);
-                    }
-                }
-            }),
-            listeners: {
-                afterRender: function () {
-                    me._selectStyleItem(this, this.menu.picker.store.getAt(1), 0);
-                }
-            }
-        });
-        this._btnEndSize = Ext.create("Ext.button.Button", {
-            width: 100,
-            cls: "btn-combo-style",
-            pressedCls: "",
-            menu: this.BeginSizeMenu = Ext.create("Common.component.MenuDataViewPicker", {
-                width: 167,
-                height: 92,
-                cls: "arrow-view",
-                dataTpl: endStyleTpl,
-                viewData: [],
-                store: endSizeStore,
-                contentWidth: 147,
-                listeners: {
-                    select: Ext.bind(function (picker, record) {
-                        if (me._changedProps) {
-                            if (me._changedProps.asc_getShapeProperties() === null || me._changedProps.asc_getShapeProperties() === undefined) {
-                                me._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
-                            }
-                            if (me._changedProps.asc_getShapeProperties().asc_getStroke() === null) {
-                                me._changedProps.asc_getShapeProperties().asc_putStroke(new Asc.asc_CStroke());
-                            }
-                            me._changedProps.asc_getShapeProperties().asc_getStroke().asc_putLineendsize(record.data.type);
-                        }
-                        me._endSizeIdx = record.data.value;
-                        me._selectStyleItem(me._btnEndSize, record, 1);
-                    },
-                    me),
-                    hide: function () {
-                        me.fireEvent("editcomplete", me);
-                    }
-                }
-            }),
-            listeners: {
-                afterRender: function () {
-                    me._selectStyleItem(this, this.menu.picker.store.getAt(1), 1);
-                }
-            }
-        });
-        this._spnMarginTop = Ext.create("Common.component.MetricSpinner", {
-            id: "shape-advanced-margin-top",
-            readOnly: false,
-            maxValue: 55.87,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0 cm",
-            width: 100,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
-                            this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
-                        }
-                        if (this._changedProps.asc_getShapeProperties().asc_getPaddings() === null) {
-                            this._changedProps.asc_getShapeProperties().asc_putPaddings(new Asc.asc_CPaddings());
-                        }
-                        this._changedProps.asc_getShapeProperties().asc_getPaddings().asc_putTop(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                    }
-                },
-                this)
-            }
-        });
-        this._spnMarginBottom = Ext.create("Common.component.MetricSpinner", {
-            id: "shape-advanced-margin-bottom",
-            readOnly: false,
-            maxValue: 55.87,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0 cm",
-            width: 100,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
-                            this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
-                        }
-                        if (this._changedProps.asc_getShapeProperties().asc_getPaddings() === null) {
-                            this._changedProps.asc_getShapeProperties().asc_putPaddings(new Asc.asc_CPaddings());
-                        }
-                        this._changedProps.asc_getShapeProperties().asc_getPaddings().asc_putBottom(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                    }
-                },
-                this)
-            }
-        });
-        this._spnMarginLeft = Ext.create("Common.component.MetricSpinner", {
-            id: "shape-advanced-margin-left",
-            readOnly: false,
-            maxValue: 9.34,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0.19 cm",
-            width: 100,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
-                            this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
-                        }
-                        if (this._changedProps.asc_getShapeProperties().asc_getPaddings() === null) {
-                            this._changedProps.asc_getShapeProperties().asc_putPaddings(new Asc.asc_CPaddings());
-                        }
-                        this._changedProps.asc_getShapeProperties().asc_getPaddings().asc_putLeft(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                    }
-                },
-                this)
-            }
-        });
-        this._spnMarginRight = Ext.create("Common.component.MetricSpinner", {
-            id: "shape-advanced-margin-right",
-            readOnly: false,
-            maxValue: 9.34,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0.19 cm",
-            width: 100,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (this._changedProps) {
-                        if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
-                            this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
-                        }
-                        if (this._changedProps.asc_getShapeProperties().asc_getPaddings() === null) {
-                            this._changedProps.asc_getShapeProperties().asc_putPaddings(new Asc.asc_CPaddings());
-                        }
-                        this._changedProps.asc_getShapeProperties().asc_getPaddings().asc_putRight(Common.MetricSettings.fnRecalcToMM(field.getNumberValue()));
-                    }
-                },
-                this)
-            }
-        });
-        this._spacer = Ext.create("Ext.toolbar.Spacer", {
-            width: "100%",
-            height: 10,
-            html: '<div style="width: 100%; height: 40%; border-bottom: 1px solid #C7C7C7"></div>'
-        });
-        function _changeCard(btn) {
-            if (btn.pressed) {
-                mainCard.getLayout().setActiveItem(btn.card);
-            }
-        }
-        var btnSize = Ext.widget("button", {
-            width: 160,
-            height: 27,
-            cls: "asc-dialogmenu-btn",
-            text: this.textSize,
-            textAlign: "right",
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "shapeadvanced",
-            pressed: true,
-            card: "card-size",
-            listeners: {
-                click: _changeCard
-            }
-        });
-        this.btnShape = Ext.widget("button", {
-            width: 160,
-            height: 27,
-            cls: "asc-dialogmenu-btn",
-            text: this.textWeightArrows,
-            textAlign: "right",
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "shapeadvanced",
-            card: "card-shape",
-            listeners: {
-                click: _changeCard
-            }
-        });
-        this.btnMargins = Ext.widget("button", {
-            width: 160,
-            height: 27,
-            cls: "asc-dialogmenu-btn",
-            textAlign: "right",
-            text: this.strMargins,
-            enableToggle: true,
-            allowDepress: false,
-            toggleGroup: "shapeadvanced",
-            card: "card-margins",
-            listeners: {
-                click: _changeCard
-            }
-        });
-        var cntrSize = {
-            xtype: "container",
-            itemId: "card-size",
-            width: 330,
-            layout: {
-                type: "vbox",
-                align: "stretch"
-            },
-            items: [{
-                xtype: "container",
-                padding: "0 10",
-                layout: {
-                    type: "table",
-                    columns: 2
-                },
-                defaults: {
-                    xtype: "container",
-                    layout: "vbox",
-                    layoutConfig: {
-                        align: "stretch"
-                    },
-                    height: 43,
-                    style: "float:left;"
-                },
-                items: [{
-                    width: 128,
-                    items: [{
-                        xtype: "label",
-                        text: this.textWidth,
-                        width: 80
-                    },
-                    {
-                        xtype: "tbspacer",
-                        height: 3
-                    },
-                    {
-                        xtype: "container",
-                        width: 128,
-                        layout: {
-                            type: "hbox"
-                        },
-                        items: [this._spnWidth, this._btnRatio]
-                    }]
-                },
-                {
-                    width: 175,
-                    margin: "0 0 0 7",
-                    items: [{
-                        xtype: "label",
-                        text: this.textHeight,
-                        width: 80
-                    },
-                    {
-                        xtype: "tbspacer",
-                        height: 3
-                    },
-                    {
-                        xtype: "container",
-                        width: 175,
-                        layout: {
-                            type: "hbox"
-                        },
-                        items: [this._spnHeight]
-                    }]
-                }]
-            }]
-        };
-        var cntrShape = {
-            xtype: "container",
-            itemId: "card-shape",
-            width: 330,
-            layout: {
-                type: "vbox",
-                align: "stretch"
-            },
-            items: [{
-                xtype: "label",
-                style: "font-weight: bold;margin-top: 1px; padding-left:10px;height:13px;",
-                text: this.textLineStyle
-            },
-            {
-                xtype: "tbspacer",
-                height: 8
-            },
-            {
-                xtype: "container",
-                height: 40,
-                padding: "0 10",
-                layout: {
-                    type: "table",
-                    columns: 2,
-                    tdAttrs: {
-                        style: "padding-right: 40px;vertical-align: middle;"
-                    }
-                },
-                items: [{
-                    xtype: "label",
-                    text: this.textCapType,
-                    width: 85
-                },
-                {
-                    xtype: "label",
-                    text: this.textJoinType,
-                    width: 85
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                this.cmbCapType, this.cmbJoinType]
-            },
-            this._spacer.cloneConfig({
-                style: "margin: 16px 0 11px 0;",
-                height: 6
-            }), {
-                xtype: "label",
-                style: "font-weight: bold;margin-top: 1px; padding-left:10px;height:13px;",
-                text: this.textArrows
-            },
-            {
-                xtype: "tbspacer",
-                height: 8
-            },
-            {
-                xtype: "container",
-                height: 86,
-                padding: "0 10",
-                layout: {
-                    type: "table",
-                    columns: 2,
-                    tdAttrs: {
-                        style: "padding-right: 40px;vertical-align: middle;"
-                    }
-                },
-                items: [{
-                    xtype: "label",
-                    text: this.textBeginStyle,
-                    width: 85
-                },
-                {
-                    xtype: "label",
-                    text: this.textEndStyle,
-                    width: 85
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                this._btnBeginStyle, this._btnEndStyle, {
-                    xtype: "tbspacer",
-                    height: 5
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 5
-                },
-                {
-                    xtype: "label",
-                    text: this.textBeginSize,
-                    width: 85
-                },
-                {
-                    xtype: "label",
-                    text: this.textEndSize,
-                    width: 85
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                this._btnBeginSize, this._btnEndSize]
-            }]
-        };
-        var cntrMargins = {
-            xtype: "container",
-            itemId: "card-margins",
-            width: 330,
-            layout: {
-                type: "vbox",
-                align: "stretch"
-            },
-            items: [{
-                xtype: "container",
-                padding: "0 10",
-                layout: {
-                    type: "table",
-                    columns: 2,
-                    tdAttrs: {
-                        style: "padding-right: 40px;vertical-align: middle;"
-                    }
-                },
-                items: [{
-                    xtype: "label",
-                    text: this.textTop,
-                    width: 85
-                },
-                {
-                    xtype: "label",
-                    text: this.textLeft,
-                    width: 85
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                this._spnMarginTop, this._spnMarginLeft, {
-                    xtype: "tbspacer",
-                    height: 5
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 5
-                },
-                {
-                    xtype: "label",
-                    text: this.textBottom,
-                    width: 85
-                },
-                {
-                    xtype: "label",
-                    text: this.textRight,
-                    width: 85
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                {
-                    xtype: "tbspacer",
-                    height: 2
-                },
-                this._spnMarginBottom, this._spnMarginRight]
-            }]
-        };
-        var mainCard = Ext.create("Ext.container.Container", {
-            height: 330,
-            flex: 1,
-            padding: "12px 18px 0 10px",
-            layout: "card",
-            items: [cntrSize, cntrShape, cntrMargins]
-        });
-        this.items = [{
-            xtype: "container",
-            height: 244,
-            layout: {
-                type: "hbox",
-                align: "stretch"
-            },
-            items: [{
-                xtype: "container",
-                width: 160,
-                padding: "5px 0 0 0",
-                layout: {
-                    type: "vbox",
-                    align: "stretch"
-                },
-                defaults: {
-                    xtype: "container",
-                    layout: {
-                        type: "hbox",
-                        align: "middle",
-                        pack: "end"
-                    }
-                },
-                items: [{
-                    height: 30,
-                    items: btnSize
-                },
-                {
-                    height: 30,
-                    items: this.btnShape
-                },
-                {
-                    height: 30,
-                    items: this.btnMargins
-                }]
-            },
-            {
-                xtype: "box",
-                cls: "advanced-settings-separator",
-                height: "100%",
-                width: 8
-            },
-            mainCard]
         },
-        this._spacer.cloneConfig({
-            style: "margin: 0 18px"
-        }), {
-            xtype: "container",
-            height: 40,
-            layout: {
-                type: "vbox",
-                align: "center",
-                pack: "center"
-            },
-            items: [{
-                xtype: "container",
-                width: 182,
-                height: 24,
-                layout: {
-                    type: "hbox",
-                    align: "middle"
-                },
-                items: [this.btnOk = Ext.widget("button", {
-                    cls: "asc-blue-button",
-                    width: 86,
-                    height: 22,
-                    margin: "0 5px 0 0",
-                    text: this.okButtonText,
-                    listeners: {
-                        click: function (btn) {
-                            this.fireEvent("onmodalresult", this, 1, this.getSettings());
-                            this.close();
-                        },
-                        scope: this
-                    }
-                }), this.btnCancel = Ext.widget("button", {
-                    cls: "asc-darkgray-button",
-                    width: 86,
-                    height: 22,
-                    text: this.cancelButtonText,
-                    listeners: {
-                        click: function (btn) {
-                            this.fireEvent("onmodalresult", this, 0);
-                            this.close();
-                        },
-                        scope: this
-                    }
-                })]
-            }]
-        }];
-        this.callParent(arguments);
-    },
-    afterRender: function () {
-        this.callParent(arguments);
-        this._setDefaults(this._originalProps);
-        this.setTitle(this.textTitle);
-    },
-    setSettings: function (props) {
-        this._originalProps = props;
-        this._changedProps = null;
-    },
-    _setDefaults: function (props) {
-        if (props && props.asc_getShapeProperties()) {
-            var shapeprops = props.asc_getShapeProperties();
-            var stroke = shapeprops.asc_getStroke();
-            if (stroke) {
-                var value = stroke.asc_getLinejoin();
-                for (var i = 0; i < this._arrJoinType.length; i++) {
-                    if (value == this._arrJoinType[i][0]) {
-                        this.cmbJoinType.setValue(this._arrJoinType[i][1]);
-                        break;
-                    }
+        _selectStyleItem: function (combo, record) {
+            var formcontrol = $(combo.el).find(".form-control");
+            formcontrol.css("background-position", ((record) ? (-record.get("offsetx") + 20) + "px" : "0") + " " + ((record) ? "-" + record.get("offsety") + "px" : "-30px"));
+        },
+        onSelectBeginStyle: function (picker, view, record) {
+            if (this._changedProps) {
+                if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
+                    this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
                 }
-                value = stroke.asc_getLinecap();
-                for (i = 0; i < this._arrCapType.length; i++) {
-                    if (value == this._arrCapType[i][0]) {
-                        this.cmbCapType.setValue(this._arrCapType[i][1]);
-                        break;
-                    }
+                if (this._changedProps.asc_getShapeProperties().asc_getStroke() === null) {
+                    this._changedProps.asc_getShapeProperties().asc_putStroke(new Asc.asc_CStroke());
                 }
-                var canchange = stroke.asc_getCanChangeArrows();
-                this._btnBeginStyle.setDisabled(!canchange);
-                this._btnEndStyle.setDisabled(!canchange);
-                this._btnBeginSize.setDisabled(!canchange);
-                this._btnEndSize.setDisabled(!canchange);
-                var style = Ext.String.format("background:url({0}) repeat scroll 0 -1px", "resources/img/controls/text-bg.gif");
-                if (canchange) {
-                    value = stroke.asc_getLinebeginsize();
-                    var rec = this._btnBeginSize.menu.picker.store.findRecord("type", value);
-                    if (rec !== null) {
-                        this._beginSizeIdx = rec.data.value;
-                    } else {
-                        this._beginSizeIdx = null;
-                        Ext.DomHelper.applyStyles(this._btnBeginSize.btnEl, style);
-                    }
-                    value = stroke.asc_getLinebeginstyle();
-                    rec = this._btnBeginStyle.menu.picker.store.findRecord("type", value);
-                    if (rec !== null) {
-                        this._btnBeginStyle.menu.picker.selectByIndex(rec.data.value, false);
-                        this._updateSizeArr(this._btnBeginSize, rec, 0, this._beginSizeIdx);
-                        this._selectStyleItem(this._btnBeginStyle, rec, 0);
-                    } else {
-                        Ext.DomHelper.applyStyles(this._btnBeginStyle.btnEl, style);
-                    }
-                    value = stroke.asc_getLineendsize();
-                    rec = this._btnEndSize.menu.picker.store.findRecord("type", value);
-                    if (rec !== null) {
-                        this._endSizeIdx = rec.data.value;
-                    } else {
-                        this._endSizeIdx = null;
-                        Ext.DomHelper.applyStyles(this._btnEndSize.btnEl, style);
-                    }
-                    value = stroke.asc_getLineendstyle();
-                    rec = this._btnEndStyle.menu.picker.store.findRecord("type", value);
-                    if (rec !== null) {
-                        this._btnEndStyle.menu.picker.selectByIndex(rec.data.value, false);
-                        this._updateSizeArr(this._btnEndSize, rec, 1, this._endSizeIdx);
-                        this._selectStyleItem(this._btnEndStyle, rec, 1);
-                    } else {
-                        Ext.DomHelper.applyStyles(this._btnEndStyle.btnEl, style);
-                    }
-                } else {
-                    Ext.DomHelper.applyStyles(this._btnBeginStyle.btnEl, style);
-                    Ext.DomHelper.applyStyles(this._btnEndStyle.btnEl, style);
-                    Ext.DomHelper.applyStyles(this._btnBeginSize.btnEl, style);
-                    Ext.DomHelper.applyStyles(this._btnEndSize.btnEl, style);
+                this._changedProps.asc_getShapeProperties().asc_getStroke().asc_putLinebeginstyle(record.get("type"));
+            }
+            if (this._beginSizeIdx === null || this._beginSizeIdx === undefined) {
+                this._beginSizeIdx = 4;
+            }
+            this._updateSizeArr(this.btnBeginSize, this.mnuBeginSizePicker, record, this._beginSizeIdx);
+            this._selectStyleItem(this.btnBeginStyle, record);
+        },
+        onSelectBeginSize: function (picker, view, record) {
+            if (this._changedProps) {
+                if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
+                    this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
                 }
+                if (this._changedProps.asc_getShapeProperties().asc_getStroke() === null) {
+                    this._changedProps.asc_getShapeProperties().asc_putStroke(new Asc.asc_CStroke());
+                }
+                this._changedProps.asc_getShapeProperties().asc_getStroke().asc_putLinebeginsize(record.get("type"));
             }
-            this._spnWidth.suspendEvents(false);
-            this._spnHeight.suspendEvents(false);
-            this._spnWidth.setValue(Common.MetricSettings.fnRecalcFromMM(props.asc_getWidth()).toFixed(2));
-            this._spnHeight.setValue(Common.MetricSettings.fnRecalcFromMM(props.asc_getHeight()).toFixed(2));
-            this._spnWidth.resumeEvents();
-            this._spnHeight.resumeEvents();
-            if (props.asc_getHeight() > 0) {
-                this._nRatio = props.asc_getWidth() / props.asc_getHeight();
+            this._beginSizeIdx = record.get("value");
+            this._selectStyleItem(this.btnBeginSize, record);
+        },
+        onSelectEndStyle: function (picker, view, record) {
+            if (this._changedProps) {
+                if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
+                    this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
+                }
+                if (this._changedProps.asc_getShapeProperties().asc_getStroke() === null) {
+                    this._changedProps.asc_getShapeProperties().asc_putStroke(new Asc.asc_CStroke());
+                }
+                this._changedProps.asc_getShapeProperties().asc_getStroke().asc_putLineendstyle(record.get("type"));
             }
-            value = window.localStorage.getItem("sse-settings-shaperatio");
-            if (value !== null && parseInt(value) == 1) {
-                this._btnRatio.toggle(true);
+            if (this._endSizeIdx === null || this._endSizeIdx === undefined) {
+                this._endSizeIdx = 4;
             }
-            var margins = shapeprops.asc_getPaddings();
-            if (margins) {
-                var val = margins.asc_getLeft();
-                this._spnMarginLeft.setValue((null !== val && undefined !== val) ? Common.MetricSettings.fnRecalcFromMM(val) : "");
-                val = margins.asc_getTop();
-                this._spnMarginTop.setValue((null !== val && undefined !== val) ? Common.MetricSettings.fnRecalcFromMM(val) : "");
-                val = margins.asc_getRight();
-                this._spnMarginRight.setValue((null !== val && undefined !== val) ? Common.MetricSettings.fnRecalcFromMM(val) : "");
-                val = margins.asc_getBottom();
-                this._spnMarginBottom.setValue((null !== val && undefined !== val) ? Common.MetricSettings.fnRecalcFromMM(val) : "");
+            this._updateSizeArr(this.btnEndSize, this.mnuEndSizePicker, record, this._endSizeIdx);
+            this._selectStyleItem(this.btnEndStyle, record);
+        },
+        onSelectEndSize: function (picker, view, record) {
+            if (this._changedProps) {
+                if (this._changedProps.asc_getShapeProperties() === null || this._changedProps.asc_getShapeProperties() === undefined) {
+                    this._changedProps.asc_putShapeProperties(new Asc.asc_CShapeProperty());
+                }
+                if (this._changedProps.asc_getShapeProperties().asc_getStroke() === null) {
+                    this._changedProps.asc_getShapeProperties().asc_putStroke(new Asc.asc_CStroke());
+                }
+                this._changedProps.asc_getShapeProperties().asc_getStroke().asc_putLineendsize(record.get("type"));
             }
-        }
-        this._changedProps = new Asc.asc_CImgProperty();
+            this._endSizeIdx = record.get("value");
+            this._selectStyleItem(this.btnEndSize, record);
+        },
+        textTop: "Top",
+        textLeft: "Left",
+        textBottom: "Bottom",
+        textRight: "Right",
+        textSize: "Size",
+        textWidth: "Width",
+        textHeight: "Height",
+        textKeepRatio: "Constant Proportions",
+        cancelButtonText: "Cancel",
+        okButtonText: "Ok",
+        textTitle: "Shape - Advanced Settings",
+        strMargins: "Text Padding",
+        textRound: "Round",
+        textMiter: "Miter",
+        textSquare: "Square",
+        textFlat: "Flat",
+        textBevel: "Bevel",
+        textArrows: "Arrows",
+        textLineStyle: "Line Style",
+        textCapType: "Cap Type",
+        textJoinType: "Join Type",
+        textBeginStyle: "Begin Style",
+        textBeginSize: "Begin Size",
+        textEndStyle: "End Style",
+        textEndSize: "End Size",
+        textWeightArrows: "Weights & Arrows"
     },
-    getSettings: function () {
-        window.localStorage.setItem("sse-settings-shaperatio", (this._btnRatio.pressed) ? 1 : 0);
-        return this._changedProps;
-    },
-    updateMetricUnit: function () {
-        var spinners = this.query("commonmetricspinner");
-        if (spinners) {
-            for (var i = 0; i < spinners.length; i++) {
-                var spinner = spinners[i];
-                spinner.setDefaultUnit(Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()]);
-                spinner.setStep(Common.MetricSettings.getCurrentMetric() == Common.MetricSettings.c_MetricUnits.cm ? 0.01 : 1);
-            }
-        }
-    },
-    textRound: "Round",
-    textMiter: "Miter",
-    textSquare: "Square",
-    textFlat: "Flat",
-    textBevel: "Bevel",
-    textTitle: "Shape - Advanced Settings",
-    cancelButtonText: "Cancel",
-    okButtonText: "Ok",
-    txtNone: "None",
-    textWeightArrows: "Weights & Arrows",
-    textArrows: "Arrows",
-    textLineStyle: "Line Style",
-    textCapType: "Cap Type",
-    textJoinType: "Join Type",
-    textBeginStyle: "Begin Style",
-    textBeginSize: "Begin Size",
-    textEndStyle: "End Style",
-    textEndSize: "End Size",
-    textSize: "Size",
-    textWidth: "Width",
-    textHeight: "Height",
-    textKeepRatio: "Constant Proportions",
-    textTop: "Top",
-    textLeft: "Left",
-    textBottom: "Bottom",
-    textRight: "Right",
-    strMargins: "Margins"
+    SSE.Views.ShapeSettingsAdvanced || {}));
 });

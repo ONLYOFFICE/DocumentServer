@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,371 +29,388 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("SSE.view.DocumentHolder", {
-    extend: "Ext.container.Container",
-    alias: "widget.ssedocumentholder",
-    cls: "sse-documentholder",
-    uses: ["Ext.menu.Menu", "Ext.menu.Manager", "SSE.view.FormulaDialog", "Common.plugin.MenuExpand"],
-    config: {},
-    constructor: function (config) {
-        this.initConfig(config);
-        this.callParent(arguments);
-        return this;
-    },
-    layout: "fit",
-    initComponent: function () {
-        var me = this;
-        this.setApi = function (o) {
-            me.api = o;
-            return me;
-        };
-        var value = window.localStorage.getItem("sse-settings-livecomment");
-        me.isLiveCommenting = !(value !== null && parseInt(value) == 0);
-        me.addEvents("editcomplete");
-        me.callParent(arguments);
-    },
-    createDelayedElements: function () {
-        var me = this;
-        function fixSubmenuPosition(submenu) {
-            if (!submenu.getPosition()[0]) {
-                if (submenu.floatParent) {
-                    var xy = submenu.el.getAlignToXY(submenu.parentItem.getEl(), "tl-tr?"),
-                    region = submenu.floatParent.getTargetEl().getViewRegion();
-                    submenu.setPosition([xy[0] - region.x, xy[1] - region.y]);
-                }
-            }
-        }
-        this.pmiInsertEntire = Ext.widget("menuitem", {
-            action: "insert-entire",
-            text: me.txtInsert
-        });
-        this.pmiInsertCells = Ext.widget("menuitem", {
-            text: me.txtInsert,
-            hideOnClick: false,
-            menu: {
-                action: "insert-cells",
-                showSeparator: false,
-                bodyCls: "no-icons",
-                items: [{
-                    text: me.txtShiftRight,
-                    kind: c_oAscInsertOptions.InsertCellsAndShiftRight
-                },
-                {
-                    text: me.txtShiftDown,
-                    kind: c_oAscInsertOptions.InsertCellsAndShiftDown
-                },
-                {
-                    text: me.txtRow,
-                    kind: c_oAscInsertOptions.InsertRows
-                },
-                {
-                    text: me.txtColumn,
-                    kind: c_oAscInsertOptions.InsertColumns
-                }],
-                plugins: [{
-                    ptype: "menuexpand"
-                }],
-                listeners: {
-                    show: fixSubmenuPosition
-                }
-            }
-        });
-        this.pmiDeleteEntire = Ext.widget("menuitem", {
-            action: "delete-entire",
-            text: me.txtDelete
-        });
-        this.pmiDeleteCells = Ext.widget("menuitem", {
-            text: me.txtDelete,
-            hideOnClick: false,
-            menu: {
-                action: "delete-cells",
-                showSeparator: false,
-                bodyCls: "no-icons",
-                items: [{
-                    text: me.txtShiftLeft,
-                    kind: c_oAscDeleteOptions.DeleteCellsAndShiftLeft
-                },
-                {
-                    text: me.txtShiftUp,
-                    kind: c_oAscDeleteOptions.DeleteCellsAndShiftTop
-                },
-                {
-                    text: me.txtRow,
-                    kind: c_oAscDeleteOptions.DeleteRows
-                },
-                {
-                    text: me.txtColumn,
-                    kind: c_oAscDeleteOptions.DeleteColumns
-                }],
-                plugins: [{
-                    ptype: "menuexpand"
-                }],
-                listeners: {
-                    show: fixSubmenuPosition
-                }
-            }
-        });
-        this.pmiSortCells = Ext.widget("menuitem", {
-            text: me.txtSort,
-            hideOnClick: false,
-            menu: {
-                id: "cmi-sort-cells",
-                bodyCls: "no-icons",
-                showSeparator: false,
-                items: [{
-                    text: me.txtAscending,
-                    direction: "descending"
-                },
-                {
-                    text: me.txtDescending,
-                    direction: "ascending"
-                }],
-                plugins: [{
-                    ptype: "menuexpand"
-                }],
-                listeners: {
-                    show: fixSubmenuPosition
-                }
-            }
-        });
-        this.pmiInsFunction = Ext.widget("menuitem", {
-            text: me.txtFormula,
-            listeners: {
-                click: function (item) {
-                    dlgFormulas.addListener("onmodalresult", function (o, mr, s) {
-                        me.fireEvent("editcomplete", me);
+ define(["jquery", "underscore", "backbone", "gateway", "common/main/lib/component/Menu"], function ($, _, Backbone, gateway) {
+    SSE.Views.DocumentHolder = Backbone.View.extend(_.extend({
+        el: "#editor_sdk",
+        template: null,
+        events: {},
+        initialize: function () {
+            var me = this;
+            this.setApi = function (api) {
+                me.api = api;
+                return me;
+            };
+            var value = window.localStorage.getItem("sse-settings-livecomment");
+            me.isLiveCommenting = !(value !== null && parseInt(value) == 0);
+        },
+        render: function () {
+            this.fireEvent("render:before", this);
+            this.cmpEl = $(this.el);
+            this.fireEvent("render:after", this);
+            return this;
+        },
+        focus: function () {
+            var me = this;
+            _.defer(function () {
+                me.cmpEl.focus();
+            },
+            50);
+        },
+        createDelayedElements: function () {
+            var me = this;
+            me.pmiCut = new Common.UI.MenuItem({
+                caption: me.txtCut,
+                value: "cut"
+            });
+            me.pmiCopy = new Common.UI.MenuItem({
+                caption: me.txtCopy,
+                value: "copy"
+            });
+            me.pmiPaste = new Common.UI.MenuItem({
+                caption: me.txtPaste,
+                value: "paste"
+            });
+            me.pmiInsertEntire = new Common.UI.MenuItem({
+                caption: me.txtInsert
+            });
+            me.pmiInsertCells = new Common.UI.MenuItem({
+                caption: me.txtInsert,
+                menu: new Common.UI.Menu({
+                    menuAlign: "tl-tr",
+                    items: [{
+                        caption: me.txtShiftRight,
+                        value: c_oAscInsertOptions.InsertCellsAndShiftRight
                     },
-                    me, {
-                        single: true
-                    });
-                    dlgFormulas.show();
-                }
-            }
-        });
-        this.pmiInsHyperlink = Ext.widget("menuitem", {
-            action: "insert-hyperlink",
-            text: me.txtInsHyperlink
-        });
-        this.pmiDelHyperlink = Ext.widget("menuitem", {
-            action: "remove-hyperlink",
-            text: me.removeHyperlinkText
-        });
-        this.pmiRowHeight = Ext.widget("menuitem", {
-            action: "row-height",
-            text: this.txtRowHeight
-        });
-        this.pmiColumnWidth = Ext.widget("menuitem", {
-            action: "column-width",
-            text: this.txtColumnWidth
-        });
-        this.pmiEntireHide = Ext.widget("menuitem", {
-            text: this.txtHide,
-            handler: function (item, event) {
-                me.api[item.isrowmenu ? "asc_hideRows" : "asc_hideColumns"]();
-            }
-        });
-        this.pmiEntireShow = Ext.widget("menuitem", {
-            text: this.txtShow,
-            handler: function (item, event) {
-                me.api[item.isrowmenu ? "asc_showRows" : "asc_showColumns"]();
-            }
-        });
-        this.pmiAddComment = Ext.widget("menuitem", {
-            id: "cmi-add-comment",
-            text: this.txtAddComment
-        });
-        this.pmiCellMenuSeparator = Ext.widget("menuseparator");
-        this.ssMenu = Ext.widget("menu", {
-            id: "context-menu-cell",
-            showSeparator: false,
-            bodyCls: "no-icons",
-            group: "menu-document",
-            items: [{
-                text: this.txtCut,
-                group: "copy-paste",
-                action: "cut"
-            },
-            {
-                text: this.txtCopy,
-                group: "copy-paste",
-                action: "copy"
-            },
-            {
-                text: this.txtPaste,
-                group: "copy-paste",
-                action: "paste"
-            },
-            {
-                xtype: "menuseparator"
-            },
-            this.pmiInsertEntire, this.pmiInsertCells, this.pmiDeleteEntire, this.pmiDeleteCells, {
-                action: "clear-all",
-                text: me.txtClear
-            },
-            this.pmiSortCells, {
-                xtype: "menuseparator"
-            },
-            this.pmiAddComment, this.pmiCellMenuSeparator, this.pmiInsFunction, this.pmiInsHyperlink, this.pmiDelHyperlink, this.pmiRowHeight, this.pmiColumnWidth, this.pmiEntireHide, this.pmiEntireShow],
-            plugins: [{
-                ptype: "menuexpand"
-            }]
-        });
-        this.mnuGroupImg = Ext.create("Ext.menu.Item", {
-            iconCls: "mnu-icon-item mnu-group",
-            text: this.txtGroup,
-            action: "image-grouping",
-            grouping: true
-        });
-        this.mnuUnGroupImg = Ext.create("Ext.menu.Item", {
-            iconCls: "mnu-icon-item mnu-ungroup",
-            text: this.txtUngroup,
-            action: "image-grouping",
-            grouping: false
-        });
-        this.imgMenu = Ext.widget("menu", {
-            showSeparator: false,
-            group: "menu-document",
-            listeners: {
-                click: function (menu, item) {
-                    if (item) {
-                        me.api.asc_setSelectedDrawingObjectLayer(item.arrange);
-                    }
-                    me.fireEvent("editcomplete", me);
-                }
-            },
-            items: [{
-                iconCls: "mnu-icon-item mnu-arrange-front",
-                text: this.textArrangeFront,
-                arrange: c_oAscDrawingLayerType.BringToFront
-            },
-            {
-                iconCls: "mnu-icon-item mnu-arrange-back",
-                text: this.textArrangeBack,
-                arrange: c_oAscDrawingLayerType.SendToBack
-            },
-            {
-                iconCls: "mnu-icon-item mnu-arrange-forward",
-                text: this.textArrangeForward,
-                arrange: c_oAscDrawingLayerType.BringForward
-            },
-            {
-                iconCls: "mnu-icon-item mnu-arrange-backward",
-                text: this.textArrangeBackward,
-                arrange: c_oAscDrawingLayerType.SendBackward
-            },
-            {
-                xtype: "menuseparator"
-            },
-            this.mnuGroupImg, this.mnuUnGroupImg]
-        });
-        this.menuParagraphVAlign = Ext.widget("menuitem", {
-            text: this.vertAlignText,
-            hideOnClick: false,
-            menu: {
-                showSeparator: false,
-                bodyCls: "no-icons",
-                items: [this.menuParagraphTop = Ext.widget("menucheckitem", {
-                    text: this.topCellText,
-                    checked: false,
-                    group: "popupparagraphvalign",
-                    valign: c_oAscVerticalTextAlign.TEXT_ALIGN_TOP
-                }), this.menuParagraphCenter = Ext.widget("menucheckitem", {
-                    text: this.centerCellText,
-                    checked: false,
-                    group: "popupparagraphvalign",
-                    valign: c_oAscVerticalTextAlign.TEXT_ALIGN_CTR
-                }), this.menuParagraphBottom = Ext.widget("menucheckitem", {
-                    text: this.bottomCellText,
-                    checked: false,
-                    group: "popupparagraphvalign",
-                    valign: c_oAscVerticalTextAlign.TEXT_ALIGN_BOTTOM
-                })],
-                plugins: [{
-                    ptype: "menuexpand"
+                    {
+                        caption: me.txtShiftDown,
+                        value: c_oAscInsertOptions.InsertCellsAndShiftDown
+                    },
+                    {
+                        caption: me.txtRow,
+                        value: c_oAscInsertOptions.InsertRows
+                    },
+                    {
+                        caption: me.txtColumn,
+                        value: c_oAscInsertOptions.InsertColumns
+                    }]
+                })
+            });
+            me.pmiDeleteEntire = new Common.UI.MenuItem({
+                caption: me.txtDelete
+            });
+            me.pmiDeleteCells = new Common.UI.MenuItem({
+                caption: me.txtDelete,
+                menu: new Common.UI.Menu({
+                    menuAlign: "tl-tr",
+                    items: [{
+                        caption: me.txtShiftLeft,
+                        value: c_oAscDeleteOptions.DeleteCellsAndShiftLeft
+                    },
+                    {
+                        caption: me.txtShiftUp,
+                        value: c_oAscDeleteOptions.DeleteCellsAndShiftTop
+                    },
+                    {
+                        caption: me.txtRow,
+                        value: c_oAscDeleteOptions.DeleteRows
+                    },
+                    {
+                        caption: me.txtColumn,
+                        value: c_oAscDeleteOptions.DeleteColumns
+                    }]
+                })
+            });
+            me.pmiClear = new Common.UI.MenuItem({
+                caption: me.txtClear,
+                menu: new Common.UI.Menu({
+                    menuAlign: "tl-tr",
+                    items: [{
+                        caption: me.txtClearAll,
+                        value: c_oAscCleanOptions.All
+                    },
+                    {
+                        caption: me.txtClearText,
+                        value: c_oAscCleanOptions.Text
+                    },
+                    {
+                        caption: me.txtClearFormat,
+                        value: c_oAscCleanOptions.Format
+                    },
+                    {
+                        caption: me.txtClearComments,
+                        value: c_oAscCleanOptions.Comments
+                    },
+                    {
+                        caption: me.txtClearHyper,
+                        value: c_oAscCleanOptions.Hyperlinks
+                    }]
+                })
+            });
+            me.pmiSortCells = new Common.UI.MenuItem({
+                caption: me.txtSort,
+                menu: new Common.UI.Menu({
+                    menuAlign: "tl-tr",
+                    items: [{
+                        caption: me.txtAscending,
+                        value: "ascending"
+                    },
+                    {
+                        caption: me.txtDescending,
+                        value: "descending"
+                    }]
+                })
+            });
+            me.pmiInsFunction = new Common.UI.MenuItem({
+                caption: me.txtFormula
+            });
+            me.menuAddHyperlink = new Common.UI.MenuItem({
+                caption: me.txtInsHyperlink,
+                inCell: true
+            });
+            me.menuEditHyperlink = new Common.UI.MenuItem({
+                caption: me.editHyperlinkText,
+                inCell: true
+            });
+            me.menuRemoveHyperlink = new Common.UI.MenuItem({
+                caption: me.removeHyperlinkText
+            });
+            me.menuHyperlink = new Common.UI.MenuItem({
+                caption: me.txtInsHyperlink,
+                menu: new Common.UI.Menu({
+                    menuAlign: "tl-tr",
+                    items: [me.menuEditHyperlink, me.menuRemoveHyperlink]
+                })
+            });
+            me.pmiRowHeight = new Common.UI.MenuItem({
+                caption: me.txtRowHeight,
+                action: "row-height"
+            });
+            me.pmiColumnWidth = new Common.UI.MenuItem({
+                caption: me.txtColumnWidth,
+                action: "column-width"
+            });
+            me.pmiEntireHide = new Common.UI.MenuItem({
+                caption: me.txtHide
+            });
+            me.pmiEntireShow = new Common.UI.MenuItem({
+                caption: me.txtShow
+            });
+            me.pmiAddComment = new Common.UI.MenuItem({
+                id: "id-context-menu-item-add-comment",
+                caption: me.txtAddComment
+            });
+            me.pmiCellMenuSeparator = new Common.UI.MenuItem({
+                caption: "--"
+            });
+            me.ssMenu = new Common.UI.Menu({
+                id: "id-context-menu-cell",
+                items: [me.pmiCut, me.pmiCopy, me.pmiPaste, {
+                    caption: "--"
+                },
+                me.pmiInsertEntire, me.pmiInsertCells, me.pmiDeleteEntire, me.pmiDeleteCells, me.pmiClear, me.pmiSortCells, {
+                    caption: "--"
+                },
+                me.pmiAddComment, me.pmiCellMenuSeparator, me.pmiInsFunction, me.menuAddHyperlink, me.menuHyperlink, me.pmiRowHeight, me.pmiColumnWidth, me.pmiEntireHide, me.pmiEntireShow]
+            });
+            me.mnuGroupImg = new Common.UI.MenuItem({
+                caption: this.txtGroup,
+                iconCls: "mnu-group",
+                type: "group",
+                value: "grouping"
+            });
+            me.mnuUnGroupImg = new Common.UI.MenuItem({
+                caption: this.txtUngroup,
+                iconCls: "mnu-ungroup",
+                type: "group",
+                value: "ungrouping"
+            });
+            me.mnuShapeSeparator = new Common.UI.MenuItem({
+                caption: "--"
+            });
+            me.mnuShapeAdvanced = new Common.UI.MenuItem({
+                caption: me.advancedShapeText
+            });
+            me.mnuChartEdit = new Common.UI.MenuItem({
+                caption: me.chartText
+            });
+            me.pmiImgCut = new Common.UI.MenuItem({
+                caption: me.txtCut,
+                value: "cut"
+            });
+            me.pmiImgCopy = new Common.UI.MenuItem({
+                caption: me.txtCopy,
+                value: "copy"
+            });
+            me.pmiImgPaste = new Common.UI.MenuItem({
+                caption: me.txtPaste,
+                value: "paste"
+            });
+            this.imgMenu = new Common.UI.Menu({
+                items: [me.pmiImgCut, me.pmiImgCopy, me.pmiImgPaste, {
+                    caption: "--"
+                },
+                {
+                    caption: this.textArrangeFront,
+                    iconCls: "mnu-arrange-front",
+                    type: "arrange",
+                    value: c_oAscDrawingLayerType.BringToFront
+                },
+                {
+                    caption: this.textArrangeBack,
+                    iconCls: "mnu-arrange-back",
+                    type: "arrange",
+                    value: c_oAscDrawingLayerType.SendToBack
+                },
+                {
+                    caption: this.textArrangeForward,
+                    iconCls: "mnu-arrange-forward",
+                    type: "arrange",
+                    value: c_oAscDrawingLayerType.BringForward
+                },
+                {
+                    caption: this.textArrangeBackward,
+                    iconCls: "mnu-arrange-backward",
+                    type: "arrange",
+                    value: c_oAscDrawingLayerType.SendBackward
+                },
+                {
+                    caption: "--"
+                },
+                me.mnuGroupImg, me.mnuUnGroupImg, me.mnuShapeSeparator, me.mnuChartEdit, me.mnuShapeAdvanced]
+            });
+            this.menuParagraphVAlign = new Common.UI.MenuItem({
+                caption: this.vertAlignText,
+                menu: new Common.UI.Menu({
+                    menuAlign: "tl-tr",
+                    items: [me.menuParagraphTop = new Common.UI.MenuItem({
+                        caption: me.topCellText,
+                        checkable: true,
+                        toggleGroup: "popupparagraphvalign",
+                        value: c_oAscVerticalTextAlign.TEXT_ALIGN_TOP
+                    }), me.menuParagraphCenter = new Common.UI.MenuItem({
+                        caption: me.centerCellText,
+                        checkable: true,
+                        toggleGroup: "popupparagraphvalign",
+                        value: c_oAscVerticalTextAlign.TEXT_ALIGN_CTR
+                    }), this.menuParagraphBottom = new Common.UI.MenuItem({
+                        caption: me.bottomCellText,
+                        checkable: true,
+                        toggleGroup: "popupparagraphvalign",
+                        value: c_oAscVerticalTextAlign.TEXT_ALIGN_BOTTOM
+                    })]
+                })
+            });
+            me.menuAddHyperlinkShape = new Common.UI.MenuItem({
+                caption: me.txtInsHyperlink
+            });
+            me.menuEditHyperlinkShape = new Common.UI.MenuItem({
+                caption: me.editHyperlinkText
+            });
+            me.menuRemoveHyperlinkShape = new Common.UI.MenuItem({
+                caption: me.removeHyperlinkText
+            });
+            me.menuHyperlinkShape = new Common.UI.MenuItem({
+                caption: me.txtInsHyperlink,
+                menu: new Common.UI.Menu({
+                    menuAlign: "tl-tr",
+                    items: [me.menuEditHyperlinkShape, me.menuRemoveHyperlinkShape]
+                })
+            });
+            this.pmiTextAdvanced = new Common.UI.MenuItem({
+                caption: me.txtTextAdvanced
+            });
+            me.pmiTextCut = new Common.UI.MenuItem({
+                caption: me.txtCut,
+                value: "cut"
+            });
+            me.pmiTextCopy = new Common.UI.MenuItem({
+                caption: me.txtCopy,
+                value: "copy"
+            });
+            me.pmiTextPaste = new Common.UI.MenuItem({
+                caption: me.txtPaste,
+                value: "paste"
+            });
+            this.textInShapeMenu = new Common.UI.Menu({
+                items: [me.pmiTextCut, me.pmiTextCopy, me.pmiTextPaste, {
+                    caption: "--"
+                },
+                me.menuParagraphVAlign, me.menuAddHyperlinkShape, me.menuHyperlinkShape, {
+                    caption: "--"
+                },
+                me.pmiTextAdvanced]
+            });
+            this.funcMenu = new Common.UI.Menu({
+                items: [{
+                    caption: "item 1"
+                },
+                {
+                    caption: "item 2"
+                },
+                {
+                    caption: "item 3"
+                },
+                {
+                    caption: "item 4"
+                },
+                {
+                    caption: "item 5"
                 }]
-            }
-        });
-        this.pmiInsHyperlinkShape = Ext.widget("menuitem", {
-            text: me.txtInsHyperlink,
-            action: "add-hyperlink-shape"
-        });
-        this.pmiRemoveHyperlinkShape = Ext.widget("menuitem", {
-            text: me.removeHyperlinkText,
-            action: "remove-hyperlink-shape"
-        });
-        this.pmiTextAdvanced = Ext.widget("menuitem", {
-            text: me.txtTextAdvanced,
-            action: "text-advanced"
-        });
-        this.textInShapeMenu = Ext.widget("menu", {
-            showSeparator: false,
-            bodyCls: "no-icons",
-            group: "menu-document",
-            items: [this.menuParagraphVAlign, this.pmiInsHyperlinkShape, this.pmiRemoveHyperlinkShape, {
-                xtype: "menuseparator"
-            },
-            this.pmiTextAdvanced]
-        });
-        this.funcMenu = Ext.widget("menu", {
-            showSeparator: false,
-            bodyCls: "no-icons",
-            group: "menu-document",
-            items: [{
-                text: "item 1"
-            },
-            {
-                text: "item 2"
-            },
-            {
-                text: "item 3"
-            },
-            {
-                text: "item 4"
-            },
-            {
-                text: "item 5"
-            }]
-        });
+            });
+            me.fireEvent("createdelayedelements", [me]);
+        },
+        setMenuItemCommentCaptionMode: function (edit) {
+            edit ? this.pmiAddComment.setCaption(this.txtEditComment) : this.pmiAddComment.setCaption(this.txtAddComment);
+        },
+        setLiveCommenting: function (value) {
+            this.isLiveCommenting = value;
+        },
+        txtSort: "Sort",
+        txtAscending: "Ascending",
+        txtDescending: "Descending",
+        txtFormula: "Insert Function",
+        txtInsHyperlink: "Hyperlink",
+        txtCut: "Cut",
+        txtCopy: "Copy",
+        txtPaste: "Paste",
+        txtInsert: "Insert",
+        txtDelete: "Delete",
+        txtClear: "Clear",
+        txtClearAll: "All",
+        txtClearText: "Text",
+        txtClearFormat: "Format",
+        txtClearHyper: "Hyperlink",
+        txtClearComments: "Comments",
+        txtShiftRight: "Shift cells right",
+        txtShiftLeft: "Shift cells left",
+        txtShiftUp: "Shift cells up",
+        txtShiftDown: "Shift cells down",
+        txtRow: "Entire Row",
+        txtColumn: "Entire Column",
+        txtColumnWidth: "Column Width",
+        txtRowHeight: "Row Height",
+        txtWidth: "Width",
+        txtHide: "Hide",
+        txtShow: "Show",
+        textArrangeFront: "Bring To Front",
+        textArrangeBack: "Send To Back",
+        textArrangeForward: "Bring Forward",
+        textArrangeBackward: "Send Backward",
+        txtArrange: "Arrange",
+        txtAddComment: "Add Comment",
+        txtEditComment: "Edit Comment",
+        txtUngroup: "Ungroup",
+        txtGroup: "Group",
+        topCellText: "Align Top",
+        centerCellText: "Align Center",
+        bottomCellText: "Align Bottom",
+        vertAlignText: "Vertical Alignment",
+        txtTextAdvanced: "Text Advanced Settings",
+        editHyperlinkText: "Edit Hyperlink",
+        removeHyperlinkText: "Remove Hyperlink",
+        editChartText: "Edit Data",
+        advancedShapeText: "Shape Advanced Settings",
+        chartText: "Chart Advanced Settings"
     },
-    setLiveCommenting: function (value) {
-        this.isLiveCommenting = value;
-    },
-    txtSort: "Sort",
-    txtAscending: "Ascending",
-    txtDescending: "Descending",
-    txtFormula: "Insert Function",
-    txtInsHyperlink: "Add Hyperlink",
-    txtCut: "Cut",
-    txtCopy: "Copy",
-    txtPaste: "Paste",
-    txtInsert: "Insert",
-    txtDelete: "Delete",
-    txtFilter: "Filter",
-    txtClear: "Clear All",
-    txtShiftRight: "Shift cells right",
-    txtShiftLeft: "Shift cells left",
-    txtShiftUp: "Shift cells up",
-    txtShiftDown: "Shift cells down",
-    txtRow: "Entire Row",
-    txtColumn: "Entire Column",
-    txtColumnWidth: "Column Width",
-    txtRowHeight: "Row Height",
-    txtWidth: "Width",
-    txtHide: "Hide",
-    txtShow: "Show",
-    textArrangeFront: "Bring To Front",
-    textArrangeBack: "Send To Back",
-    textArrangeForward: "Bring Forward",
-    textArrangeBackward: "Send Backward",
-    txtArrange: "Arrange",
-    txtAddComment: "Add Comment",
-    txtUngroup: "Ungroup",
-    txtGroup: "Group",
-    topCellText: "Align Top",
-    centerCellText: "Align Center",
-    bottomCellText: "Align Bottom",
-    vertAlignText: "Vertical Alignment",
-    txtTextAdvanced: "Text Advanced Settings",
-    editHyperlinkText: "Edit Hyperlink",
-    removeHyperlinkText: "Remove Hyperlink"
+    SSE.Views.DocumentHolder || {}));
 });

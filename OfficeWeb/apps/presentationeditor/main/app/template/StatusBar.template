@@ -1,0 +1,34 @@
+
+<div class="statusbar" style="display:table;">
+    <div class="status-group dropup">
+        <label id="status-label-pages" class="status-label" style="margin-left: 40px;" data-toggle="dropdown"><%= Common.Utils.String.format(scope.pageIndexText, 1, 1) %></label>
+        <div id="status-goto-box" class="dropdown-menu">
+            <label style="float:left;line-height:22px;"><%= scope.goToPageText %></label>
+            <div id="status-goto-page" style="display:inline-block;"></div>
+        </div>
+    </div>
+    <!-- /** coauthoring begin **/ -->
+    <div id="status-users-ct" class="status-group" style="display:none;">
+        <div class="separator short" style="margin-right: 12px; margin-left: 40px;" />
+        <div id="status-users-block" style="display:inline-block; cursor:pointer;">
+            <span id="status-users-icon" />
+            <label id="status-users-count" class="status-label">3</label>
+        </div>
+        <div class="separator short" style="margin-left: 10px;" />
+    </div>
+    <!-- /** coauthoring end **/ -->
+    <div class="status-group" style="width:100%; text-align:center;">
+        <label id="status-label-action" class="status-label"></label>
+    </div>
+    <div class="status-group" style="">
+        <button id="btn-zoom-topage" type="button" class="btn small btn-toolbar btn-toolbar-default"><span class="btn-icon">&nbsp;</span></button>
+        <button id="btn-zoom-towidth" type="button" class="btn small btn-toolbar btn-toolbar-default"><span class="btn-icon">&nbsp;</span></button>
+        <button id="btn-zoom-down" type="button" class="btn small btn-toolbar btn-toolbar-default"><span class="btn-icon">&nbsp;</span></button>
+        <div class="cnt-zoom">
+            <div class="dropdown-toggle" data-toggle="dropdown">
+                <label id="status-label-zoom" class="status-label">Zoom 100%</label>
+            </div>
+        </div>
+        <button id="btn-zoom-up" type="button" class="btn small btn-toolbar btn-toolbar-default" style="margin-right:40px;"><span class="btn-icon">&nbsp;</span></button>
+    </div>
+</div>

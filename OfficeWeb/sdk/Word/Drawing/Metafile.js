@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,38 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var gr_state_pen = 0;
+ "use strict";
+function CGrRFonts() {
+    this.Ascii = {
+        Name: "Empty",
+        Index: -1
+    };
+    this.EastAsia = {
+        Name: "Empty",
+        Index: -1
+    };
+    this.HAnsi = {
+        Name: "Empty",
+        Index: -1
+    };
+    this.CS = {
+        Name: "Empty",
+        Index: -1
+    };
+}
+CGrRFonts.prototype = {
+    checkFromTheme: function (fontScheme, rFonts) {
+        this.Ascii.Name = fontScheme.checkFont(rFonts.Ascii.Name);
+        this.EastAsia.Name = fontScheme.checkFont(rFonts.EastAsia.Name);
+        this.HAnsi.Name = fontScheme.checkFont(rFonts.HAnsi.Name);
+        this.CS.Name = fontScheme.checkFont(rFonts.CS.Name);
+        this.Ascii.Index = -1;
+        this.EastAsia.Index = -1;
+        this.HAnsi.Index = -1;
+        this.CS.Index = -1;
+    }
+};
+var gr_state_pen = 0;
 var gr_state_brush = 1;
 var gr_state_pen_brush = 2;
 var gr_state_state = 3;
@@ -40,6 +71,7 @@ function CFontSetup() {
     this.Size = 12;
     this.Bold = false;
     this.Italic = false;
+    this.SetUpName = "";
     this.SetUpIndex = -1;
     this.SetUpSize = 12;
     this.SetUpStyle = -1;
@@ -52,6 +84,7 @@ CFontSetup.prototype = {
         this.Size = 12;
         this.Bold = false;
         this.Italic = false;
+        this.SetUpName = "";
         this.SetUpIndex = -1;
         this.SetUpSize = 12;
         this.SetUpStyle = -1;
@@ -245,10 +278,6 @@ CGrState.prototype = {
                             this.Parent.transform3(_c[j].Transform);
                             this.Parent.SetIntegerGrid(_c[j].IsIntegerGrid);
                             var _r = _c[j].Rect;
-                            var _restoreDumpedVectors = null;
-                            if (this.Parent.private_removeVectors !== undefined) {
-                                _restoreDumpedVectors = this.Parent.private_removeVectors();
-                            }
                             this.Parent.StartClipPath();
                             this.Parent._s();
                             this.Parent._m(_r.x, _r.y);
@@ -257,9 +286,6 @@ CGrState.prototype = {
                             this.Parent._l(_r.x, _r.y + _r.h);
                             this.Parent._l(_r.x, _r.y);
                             this.Parent.EndClipPath();
-                            if (null != _restoreDumpedVectors) {
-                                this.Parent.private_restoreVectors(_restoreDumpedVectors);
-                            }
                         }
                     }
                 }
@@ -303,6 +329,10 @@ CGrState.prototype = {
     }
 };
 var g_stringBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+var g_arrayBase64 = [];
+for (var index64 = 0; index64 < g_stringBase64.length; index64++) {
+    g_arrayBase64.push(g_stringBase64.charAt(index64));
+}
 function Base64Encode(srcData, nSrcLen, nOffset) {
     if ("undefined" === typeof(nOffset)) {
         nOffset = 0;
@@ -312,7 +342,8 @@ function Base64Encode(srcData, nSrcLen, nOffset) {
     var nLen2 = (nLen1 / 76) >> 0;
     var nLen3 = 19;
     var srcInd = 0;
-    var dstStr = "";
+    var dstStr = [];
+    var _s = "";
     for (var i = 0; i <= nLen2; i++) {
         if (i == nLen2) {
             nLen3 = ((nLen1 % 76) / 4) >> 0;
@@ -323,12 +354,14 @@ function Base64Encode(srcData, nSrcLen, nOffset) {
                 dwCurr |= srcData[srcInd+++nOffset];
                 dwCurr <<= 8;
             }
+            _s = "";
             for (var k = 0; k < 4; k++) {
                 var b = (dwCurr >>> 26) & 255;
-                dstStr += g_stringBase64[b];
+                _s += g_arrayBase64[b];
                 dwCurr <<= 6;
                 dwCurr &= 4294967295;
             }
+            dstStr.push(_s);
         }
     }
     nLen2 = (nSrcLen % 3 != 0) ? (nSrcLen % 3 + 1) : 0;
@@ -340,17 +373,19 @@ function Base64Encode(srcData, nSrcLen, nOffset) {
             }
             dwCurr <<= 8;
         }
+        _s = "";
         for (var k = 0; k < nLen2; k++) {
             var b = (dwCurr >>> 26) & 255;
-            dstStr += g_stringBase64[b];
+            _s += g_arrayBase64[b];
             dwCurr <<= 6;
         }
         nLen3 = (nLen2 != 0) ? 4 - nLen2 : 0;
         for (var j = 0; j < nLen3; j++) {
-            dstStr += "=";
+            _s += "=";
         }
+        dstStr.push(_s);
     }
-    return dstStr;
+    return dstStr.join("");
 }
 function CMemory(bIsNoInit) {
     this.Init = function () {
@@ -360,7 +395,6 @@ function CMemory(bIsNoInit) {
         this.ImData = _ctx.createImageData(this.len / 4, 1);
         this.data = this.ImData.data;
         this.pos = 0;
-        delete _canvas;
     };
     this.ImData = null;
     this.data = null;
@@ -382,14 +416,13 @@ function CMemory(bIsNoInit) {
             var oldImData = this.ImData;
             var oldData = this.data;
             var oldPos = this.pos;
-            this.len *= 2;
+            this.len = Math.max(this.len * 2, this.pos + ((3 * count / 2) >> 0));
             this.ImData = _ctx.createImageData(this.len / 4, 1);
             this.data = this.ImData.data;
             var newData = this.data;
             for (var i = 0; i < this.pos; i++) {
                 newData[i] = oldData[i];
             }
-            delete _canvas;
         }
     };
     this.GetBase64Memory = function () {
@@ -600,6 +633,8 @@ function CCommandsType() {
     this.ctEdgeAlpha = 74;
     this.ctDrawText = 80;
     this.ctDrawTextEx = 81;
+    this.ctDrawTextCode = 82;
+    this.ctDrawTextCodeGid = 83;
     this.ctPathCommandMoveTo = 91;
     this.ctPathCommandLineTo = 92;
     this.ctPathCommandLinesTo = 93;
@@ -644,17 +679,26 @@ function CMetafile(width, height) {
     this.Height = height;
     this.m_oPen = new CPen();
     this.m_oBrush = new CBrush();
-    this.m_oFont = null;
+    this.m_oFont = {
+        Name: "",
+        FontSize: -1,
+        Style: -1
+    };
     this.m_oPen.Color.R = -1;
     this.m_oBrush.Color1.R = -1;
     this.m_oBrush.Color2.R = -1;
     this.m_oTransform = new CMatrix();
-    this.m_arrayCommands = new Array();
+    this.m_arrayCommands = [];
     this.Memory = null;
     this.VectorMemoryForPrint = null;
     this.BrushType = MetaBrushType.Solid;
     this.m_oTextPr = null;
-    this.m_oLastFont = new CFontSetup();
+    this.m_oGrFonts = new CGrRFonts();
+    this.m_oFontSlotFont = new CFontSetup();
+    this.LastFontOriginInfo = {
+        Name: "",
+        Replace: null
+    };
 }
 CMetafile.prototype = {
     p_color: function (r, g, b, a) {
@@ -879,6 +923,11 @@ CMetafile.prototype = {
             this.Memory.WriteLong(256);
         }
     },
+    WriteVectorMemoryForPrint: function () {
+        if (null != this.VectorMemoryForPrint) {
+            this.Memory.Copy(this.VectorMemoryForPrint, 0, this.VectorMemoryForPrint.pos);
+        }
+    },
     drawpath: function (type) {
         if (null == this.VectorMemoryForPrint) {
             this.Memory.WriteByte(CommandType.ctDrawPath);
@@ -909,11 +958,16 @@ CMetafile.prototype = {
             this.Memory.WriteDouble(h);
             return;
         }
-        var _img = window.editor.ImageLoader.map_image_index[img];
-        if (_img == undefined || _img.Image == null) {
-            return;
+        var _src = "";
+        if (!window["NATIVE_EDITOR_ENJINE"]) {
+            var _img = window.editor.ImageLoader.map_image_index[img];
+            if (_img == undefined || _img.Image == null) {
+                return;
+            }
+            _src = _img.src;
+        } else {
+            _src = img;
         }
-        var _src = _img.src;
         var _search = window.editor.DocumentUrl;
         if (0 == _src.indexOf(_search)) {
             _src = _src.substring(_search.length);
@@ -935,9 +989,6 @@ CMetafile.prototype = {
         if (null == font) {
             return;
         }
-        if (font.FontFamily.Name == "" && 0 <= font.FontFamily.Index) {
-            font.FontFamily.Name = window.g_font_infos[font.FontFamily.Index].Name;
-        }
         var style = 0;
         if (font.Italic == true) {
             style += 2;
@@ -945,45 +996,64 @@ CMetafile.prototype = {
         if (font.Bold == true) {
             style += 1;
         }
-        if (null == this.m_oFont) {
+        var fontinfo = g_fontApplication.GetFontInfo(font.FontFamily.Name, style, this.LastFontOriginInfo);
+        style = fontinfo.GetBaseStyle(style);
+        if (this.m_oFont.Name != fontinfo.Name) {
+            this.m_oFont.Name = fontinfo.Name;
             this.Memory.WriteByte(CommandType.ctFontName);
-            this.Memory.WriteString(font.FontFamily.Name);
+            this.Memory.WriteString(this.m_oFont.Name);
+        }
+        if (this.m_oFont.FontSize != font.FontSize) {
+            this.m_oFont.FontSize = font.FontSize;
             this.Memory.WriteByte(CommandType.ctFontSize);
-            this.Memory.WriteDouble(font.FontSize);
+            this.Memory.WriteDouble(this.m_oFont.FontSize);
+        }
+        if (this.m_oFont.Style != style) {
+            this.m_oFont.Style = style;
             this.Memory.WriteByte(CommandType.ctFontStyle);
             this.Memory.WriteLong(style);
-        } else {
-            if (this.m_oFont.FontFamily.Name != font.FontFamily.Name) {
-                this.Memory.WriteByte(CommandType.ctFontName);
-                this.Memory.WriteString(font.FontFamily.Name);
-            }
-            if (this.m_oFont.FontSize != font.FontSize) {
-                this.Memory.WriteByte(CommandType.ctFontSize);
-                this.Memory.WriteDouble(font.FontSize);
-            }
-            if (this.m_oFont.Italic != font.Italic || this.m_oFont.Bold != font.Bold) {
-                this.Memory.WriteByte(CommandType.ctFontStyle);
-                this.Memory.WriteLong(style);
-            }
         }
-        this.m_oFont = {
-            FontFamily: {
-                Index: font.FontFamily.Index,
-                Name: font.FontFamily.Name
-            },
-            FontSize: font.FontSize,
-            Bold: font.Bold,
-            Italic: font.Italic
-        };
-        this.m_oLastFont.SetUpIndex = font.FontFamily.Index;
-        this.m_oLastFont.SetUpSize = font.FontSize;
-        this.m_oLastFont.SetUpStyle = style;
     },
     FillText: function (x, y, text) {
         this.Memory.WriteByte(CommandType.ctDrawText);
+        if (null != this.LastFontOriginInfo.Replace && 1 == text.length) {
+            var _code = text.charCodeAt(0);
+            _code = g_fontApplication.GetReplaceGlyph(_code, this.LastFontOriginInfo.Replace);
+            text = String.fromCharCode(_code);
+        }
         this.Memory.WriteString(text);
         this.Memory.WriteDouble(x);
         this.Memory.WriteDouble(y);
+    },
+    FillTextCode: function (x, y, code) {
+        var _font_info = window.g_font_infos[window.g_map_font_index[this.m_oFont.Name]];
+        var _is_face_index_no_0 = (_font_info.faceIndexR <= 0 && _font_info.faceIndexI <= 0 && _font_info.faceIndexB <= 0 && _font_info.faceIndexBI <= 0);
+        if (code < 65535 && (_is_face_index_no_0 || window["native"] !== undefined)) {
+            return this.FillText(x, y, String.fromCharCode(code));
+        }
+        if (window["native"] !== undefined) {
+            return;
+        }
+        var _old_pos = this.Memory.pos;
+        g_fontApplication.LoadFont(_font_info.Name, window.g_font_loader, g_oTextMeasurer.m_oManager, this.m_oFont.FontSize, Math.max(this.m_oFont.Style, 0), 72, 72);
+        if (null != this.LastFontOriginInfo.Replace) {
+            code = g_fontApplication.GetReplaceGlyph(code, this.LastFontOriginInfo.Replace);
+        }
+        g_oTextMeasurer.m_oManager.LoadStringPathCode(code, false, x, y, this);
+        if ((this.Memory.pos - _old_pos) < 8) {
+            this.Memory.pos = _old_pos;
+        }
+    },
+    tg: function (gid, x, y) {
+        if (window["native"] !== undefined) {
+            return;
+        }
+        var _old_pos = this.Memory.pos;
+        g_fontApplication.LoadFont(this.m_oFont.Name, window.g_font_loader, g_oTextMeasurer.m_oManager, this.m_oFont.FontSize, Math.max(this.m_oFont.Style, 0), 72, 72);
+        g_oTextMeasurer.m_oManager.LoadStringPathCode(gid, true, x, y, this);
+        if ((this.Memory.pos - _old_pos) < 8) {
+            this.Memory.pos = _old_pos;
+        }
     },
     charspace: function (space) {},
     beginCommand: function (command) {
@@ -1021,35 +1091,23 @@ CMetafile.prototype = {
         this.Memory.WriteBool(bIsEnabled);
     },
     SetFontSlot: function (slot, fontSizeKoef) {
-        var _rfonts = this.m_oTextPr.RFonts;
-        var _lastFont = this.m_oLastFont;
+        var _rfonts = this.m_oGrFonts;
+        var _lastFont = this.m_oFontSlotFont;
         switch (slot) {
         case fontslot_ASCII:
             _lastFont.Name = _rfonts.Ascii.Name;
-            _lastFont.Index = _rfonts.Ascii.Index;
-            if (_lastFont.Index == -1 || _lastFont.Index === undefined) {
-                _lastFont.Index = window.g_map_font_index[_lastFont.Name];
-            }
             _lastFont.Size = this.m_oTextPr.FontSize;
             _lastFont.Bold = this.m_oTextPr.Bold;
             _lastFont.Italic = this.m_oTextPr.Italic;
             break;
         case fontslot_CS:
             _lastFont.Name = _rfonts.CS.Name;
-            _lastFont.Index = _rfonts.CS.Index;
-            if (_lastFont.Index == -1 || _lastFont.Index === undefined) {
-                _lastFont.Index = window.g_map_font_index[_lastFont.Name];
-            }
             _lastFont.Size = this.m_oTextPr.FontSizeCS;
             _lastFont.Bold = this.m_oTextPr.BoldCS;
             _lastFont.Italic = this.m_oTextPr.ItalicCS;
             break;
         case fontslot_EastAsia:
             _lastFont.Name = _rfonts.EastAsia.Name;
-            _lastFont.Index = _rfonts.EastAsia.Index;
-            if (_lastFont.Index == -1 || _lastFont.Index === undefined) {
-                _lastFont.Index = window.g_map_font_index[_lastFont.Name];
-            }
             _lastFont.Size = this.m_oTextPr.FontSize;
             _lastFont.Bold = this.m_oTextPr.Bold;
             _lastFont.Italic = this.m_oTextPr.Italic;
@@ -1057,10 +1115,6 @@ CMetafile.prototype = {
         case fontslot_HAnsi:
             default:
             _lastFont.Name = _rfonts.HAnsi.Name;
-            _lastFont.Index = _rfonts.HAnsi.Index;
-            if (_lastFont.Index == -1 || _lastFont.Index === undefined) {
-                _lastFont.Index = window.g_map_font_index[_lastFont.Name];
-            }
             _lastFont.Size = this.m_oTextPr.FontSize;
             _lastFont.Bold = this.m_oTextPr.Bold;
             _lastFont.Italic = this.m_oTextPr.Italic;
@@ -1076,40 +1130,27 @@ CMetafile.prototype = {
         if (_lastFont.Bold == true) {
             style += 1;
         }
-        if (null == this.m_oFont) {
+        var fontinfo = g_fontApplication.GetFontInfo(_lastFont.Name, style, this.LastFontOriginInfo);
+        style = fontinfo.GetBaseStyle(style);
+        if (this.m_oFont.Name != fontinfo.Name) {
+            this.m_oFont.Name = fontinfo.Name;
             this.Memory.WriteByte(CommandType.ctFontName);
-            this.Memory.WriteString(_lastFont.Name);
+            this.Memory.WriteString(this.m_oFont.Name);
+        }
+        if (this.m_oFont.FontSize != _lastFont.Size) {
+            this.m_oFont.FontSize = _lastFont.Size;
             this.Memory.WriteByte(CommandType.ctFontSize);
-            this.Memory.WriteDouble(_lastFont.Size);
+            this.Memory.WriteDouble(this.m_oFont.FontSize);
+        }
+        if (this.m_oFont.Style != style) {
+            this.m_oFont.Style = style;
             this.Memory.WriteByte(CommandType.ctFontStyle);
             this.Memory.WriteLong(style);
-        } else {
-            if (this.m_oFont.FontFamily.Name != _lastFont.Name) {
-                this.Memory.WriteByte(CommandType.ctFontName);
-                this.Memory.WriteString(_lastFont.Name);
-            }
-            if (this.m_oFont.FontSize != _lastFont.Size) {
-                this.Memory.WriteByte(CommandType.ctFontSize);
-                this.Memory.WriteDouble(_lastFont.Size);
-            }
-            if (this.m_oFont.Italic != _lastFont.Italic || this.m_oFont.Bold != _lastFont.Bold) {
-                this.Memory.WriteByte(CommandType.ctFontStyle);
-                this.Memory.WriteLong(style);
-            }
         }
-        this.m_oFont = {
-            FontFamily: {
-                Index: _lastFont.Index,
-                Name: _lastFont.Name
-            },
-            FontSize: _lastFont.Size,
-            Bold: _lastFont.Bold,
-            Italic: _lastFont.Italic
-        };
     }
 };
 function CDocumentRenderer() {
-    this.m_arrayPages = new Array();
+    this.m_arrayPages = [];
     this.m_lPagesCount = 0;
     this.Memory = new CMemory();
     this.VectorMemoryForPrint = null;
@@ -1122,6 +1163,7 @@ function CDocumentRenderer() {
     this.m_oPen = null;
     this.m_oBrush = null;
     this.m_oTransform = null;
+    this._restoreDumpedVectors = null;
 }
 CDocumentRenderer.prototype = {
     BeginPage: function (width, height) {
@@ -1263,14 +1305,21 @@ CDocumentRenderer.prototype = {
     restore: function () {},
     clip: function () {},
     drawImage: function (img, x, y, w, h, alpha, srcRect) {
+        if (img == null || img == undefined || img == "") {
+            return;
+        }
         if (0 != this.m_lPagesCount) {
             if (!srcRect) {
                 this.m_arrayPages[this.m_lPagesCount - 1].drawImage(img, x, y, w, h);
             } else {
-                if (!window.editor) {
-                    this.m_arrayPages[this.m_lPagesCount - 1].drawImage(img, x, y, w, h);
+                var _img = undefined;
+                if (window.editor) {
+                    _img = window.editor.ImageLoader.map_image_index[img];
+                } else {
+                    if (window["Asc"]["editor"]) {
+                        _img = window["Asc"]["editor"].ImageLoader.map_image_index[img];
+                    }
                 }
-                var _img = window.editor.ImageLoader.map_image_index[img];
                 var w0 = 0;
                 var h0 = 0;
                 if (_img != undefined && _img.Image != null) {
@@ -1356,6 +1405,16 @@ CDocumentRenderer.prototype = {
     FillText: function (x, y, text, cropX, cropW) {
         if (0 != this.m_lPagesCount) {
             this.m_arrayPages[this.m_lPagesCount - 1].FillText(x, y, text);
+        }
+    },
+    FillTextCode: function (x, y, text, cropX, cropW) {
+        if (0 != this.m_lPagesCount) {
+            this.m_arrayPages[this.m_lPagesCount - 1].FillTextCode(x, y, text);
+        }
+    },
+    tg: function (gid, x, y) {
+        if (0 != this.m_lPagesCount) {
+            this.m_arrayPages[this.m_lPagesCount - 1].tg(gid, x, y);
         }
     },
     FillText2: function (x, y, text) {
@@ -1476,6 +1535,9 @@ CDocumentRenderer.prototype = {
         }
     },
     put_brushTexture: function (src, mode) {
+        if (src == null || src == undefined) {
+            src = "";
+        }
         if (0 != this.m_lPagesCount) {
             this.m_arrayPages[this.m_lPagesCount - 1].put_brushTexture(src, mode);
         }
@@ -1564,6 +1626,7 @@ CDocumentRenderer.prototype = {
         this.GrState.RestoreGrState();
     },
     StartClipPath: function () {
+        this.private_removeVectors();
         if (0 != this.m_lPagesCount) {
             this.m_arrayPages[this.m_lPagesCount - 1].beginCommand(32);
         }
@@ -1572,10 +1635,17 @@ CDocumentRenderer.prototype = {
         if (0 != this.m_lPagesCount) {
             this.m_arrayPages[this.m_lPagesCount - 1].endCommand(32);
         }
+        this.private_restoreVectors();
     },
-    SetTextPr: function (textPr) {
+    SetTextPr: function (textPr, theme) {
         if (0 != this.m_lPagesCount) {
-            this.m_arrayPages[this.m_lPagesCount - 1].m_oTextPr = textPr.Copy();
+            var _page = this.m_arrayPages[this.m_lPagesCount - 1];
+            _page.m_oTextPr = textPr;
+            if (theme) {
+                _page.m_oGrFonts.checkFromTheme(theme.themeElements.fontScheme, _page.m_oTextPr.RFonts);
+            } else {
+                _page.m_oGrFonts = _page.m_oTextPr.RFonts;
+            }
         }
     },
     SetFontSlot: function (slot, fontSizeKoef) {
@@ -1591,21 +1661,21 @@ CDocumentRenderer.prototype = {
     },
     DrawPresentationComment: function (type, x, y, w, h) {},
     private_removeVectors: function () {
-        var _ret = this.VectorMemoryForPrint;
-        if (_ret != null) {
+        this._restoreDumpedVectors = this.VectorMemoryForPrint;
+        if (this._restoreDumpedVectors != null) {
             this.VectorMemoryForPrint = null;
             if (0 != this.m_lPagesCount) {
                 this.m_arrayPages[this.m_lPagesCount - 1].VectorMemoryForPrint = null;
             }
         }
-        return _ret;
     },
-    private_restoreVectors: function (_vectors) {
-        if (null != _vectors) {
-            this.VectorMemoryForPrint = _vectors;
+    private_restoreVectors: function () {
+        if (null != this._restoreDumpedVectors) {
+            this.VectorMemoryForPrint = this._restoreDumpedVectors;
             if (0 != this.m_lPagesCount) {
-                this.m_arrayPages[this.m_lPagesCount - 1].VectorMemoryForPrint = _vectors;
+                this.m_arrayPages[this.m_lPagesCount - 1].VectorMemoryForPrint = this._restoreDumpedVectors;
             }
         }
+        this._restoreDumpedVectors = null;
     }
 };

@@ -1,6 +1,6 @@
 ﻿<%@ WebHandler Language="C#" Class="fileDownloader" %>
 /*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -46,10 +46,10 @@ public class fileDownloader : IHttpHandler {
         try
         {
 
-            System.IO.FileInfo file = new System.IO.FileInfo(Convert.ToString(context.Server.MapPath(context.Server.UrlDecode("~" + context.Request.Params[0]))));
+            System.IO.FileInfo file = new System.IO.FileInfo(Convert.ToString(context.Server.MapPath(context.Server.UrlDecode("~" + context.Request.QueryString[0]))));
             string sOutputFilename = null;
-            if (context.Request.Params.Count > 1)
-                sOutputFilename = context.Server.UrlDecode(context.Request.Params[1]);
+            if (context.Request.QueryString.Count > 1)
+                sOutputFilename = context.Server.UrlDecode(context.Request.QueryString[1]);
             if (string.IsNullOrEmpty(sOutputFilename))
                 sOutputFilename = file.Name;
             if (!file.Exists)
@@ -60,10 +60,10 @@ public class fileDownloader : IHttpHandler {
                 context.Response.AppendHeader("Content-Disposition", "attachment; filename=\"" + context.Server.UrlEncode(sOutputFilename) + "\"");
             else
                 context.Response.AppendHeader("Content-Disposition", "attachment; filename=\"" + sOutputFilename + "\"");
-            context.Response.AddHeader("Content-Length", file.Length.ToString());
+            context.Response.AppendHeader("Content-Length", file.Length.ToString());
             context.Response.TransmitFile(file.FullName);
             context.Response.Flush();
-            context.Response.End();
+            context.ApplicationInstance.CompleteRequest();
         }
         catch(Exception){}
     }

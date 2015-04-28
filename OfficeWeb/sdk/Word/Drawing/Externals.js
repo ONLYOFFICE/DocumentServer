@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,194 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var ASC_DOCS_API_USE_FONTS_ORIGINAL_FORMAT = true;
+ "use strict";
+function ZBase32Encoder() {
+    this.EncodingTable = "ybndrfg8ejkmcpqxot1uwisza345h769";
+    this.DecodingTable = ("undefined" == typeof Uint8Array) ? new Array(128) : new Uint8Array(128);
+    var ii = 0;
+    for (ii = 0; ii < 128; ii++) {
+        this.DecodingTable[ii] = 255;
+    }
+    var _len_32 = this.EncodingTable.length;
+    for (ii = 0; ii < _len_32; ii++) {
+        this.DecodingTable[this.EncodingTable.charCodeAt(ii)] = ii;
+    }
+    this.GetUTF16_fromUnicodeChar = function (code) {
+        if (code < 65536) {
+            return String.fromCharCode(code);
+        } else {
+            code -= 65536;
+            return String.fromCharCode(55296 | ((code >> 10) & 1023)) + String.fromCharCode(56320 | (code & 1023));
+        }
+    };
+    this.GetUTF16_fromUTF8 = function (pBuffer) {
+        var _res = "";
+        var lIndex = 0;
+        var lCount = pBuffer.length;
+        var val = 0;
+        while (lIndex < lCount) {
+            var byteMain = pBuffer[lIndex];
+            if (0 == (byteMain & 128)) {
+                _res += this.GetUTF16_fromUnicodeChar(byteMain);
+                ++lIndex;
+            } else {
+                if (0 == (byteMain & 32)) {
+                    val = (((byteMain & 31) << 6) | (pBuffer[lIndex + 1] & 63));
+                    _res += this.GetUTF16_fromUnicodeChar(val);
+                    lIndex += 2;
+                } else {
+                    if (0 == (byteMain & 16)) {
+                        val = (((byteMain & 15) << 12) | ((pBuffer[lIndex + 1] & 63) << 6) | (pBuffer[lIndex + 2] & 63));
+                        _res += this.GetUTF16_fromUnicodeChar(val);
+                        lIndex += 3;
+                    } else {
+                        if (0 == (byteMain & 8)) {
+                            val = (((byteMain & 7) << 18) | ((pBuffer[lIndex + 1] & 63) << 12) | ((pBuffer[lIndex + 2] & 63) << 6) | (pBuffer[lIndex + 3] & 63));
+                            _res += this.GetUTF16_fromUnicodeChar(val);
+                            lIndex += 4;
+                        } else {
+                            if (0 == (byteMain & 4)) {
+                                val = (((byteMain & 3) << 24) | ((pBuffer[lIndex + 1] & 63) << 18) | ((pBuffer[lIndex + 2] & 63) << 12) | ((pBuffer[lIndex + 3] & 63) << 6) | (pBuffer[lIndex + 4] & 63));
+                                _res += this.GetUTF16_fromUnicodeChar(val);
+                                lIndex += 5;
+                            } else {
+                                val = (((byteMain & 1) << 30) | ((pBuffer[lIndex + 1] & 63) << 24) | ((pBuffer[lIndex + 2] & 63) << 18) | ((pBuffer[lIndex + 3] & 63) << 12) | ((pBuffer[lIndex + 4] & 63) << 6) | (pBuffer[lIndex + 5] & 63));
+                                _res += this.GetUTF16_fromUnicodeChar(val);
+                                lIndex += 5;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return _res;
+    };
+    this.GetUTF8_fromUTF16 = function (sData) {
+        var pCur = 0;
+        var pEnd = sData.length;
+        var result = [];
+        while (pCur < pEnd) {
+            var code = sData.charCodeAt(pCur++);
+            if (code >= 55296 && code <= 57343 && pCur < pEnd) {
+                code = 65536 + (((code & 1023) << 10) | (1023 & sData.charCodeAt(pCur++)));
+            }
+            if (code < 128) {
+                result.push(code);
+            } else {
+                if (code < 2048) {
+                    result.push(192 | (code >> 6));
+                    result.push(128 | (code & 63));
+                } else {
+                    if (code < 65536) {
+                        result.push(224 | (code >> 12));
+                        result.push(128 | ((code >> 6) & 63));
+                        result.push(128 | (code & 63));
+                    } else {
+                        if (code < 2097151) {
+                            result.push(240 | (code >> 18));
+                            result.push(128 | ((code >> 12) & 63));
+                            result.push(128 | ((code >> 6) & 63));
+                            result.push(128 | (code & 63));
+                        } else {
+                            if (code < 67108863) {
+                                result.push(248 | (code >> 24));
+                                result.push(128 | ((code >> 18) & 63));
+                                result.push(128 | ((code >> 12) & 63));
+                                result.push(128 | ((code >> 6) & 63));
+                                result.push(128 | (code & 63));
+                            } else {
+                                if (code < 2147483647) {
+                                    result.push(252 | (code >> 30));
+                                    result.push(128 | ((code >> 24) & 63));
+                                    result.push(128 | ((code >> 18) & 63));
+                                    result.push(128 | ((code >> 12) & 63));
+                                    result.push(128 | ((code >> 6) & 63));
+                                    result.push(128 | (code & 63));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    };
+    this.Encode = function (sData) {
+        var data = this.GetUTF8_fromUTF16(sData);
+        var encodedResult = "";
+        var len = data.length;
+        for (var i = 0; i < len; i += 5) {
+            var byteCount = Math.min(5, len - i);
+            var buffer = 0;
+            for (var j = 0; j < byteCount; ++j) {
+                buffer *= 256;
+                buffer += data[i + j];
+            }
+            var bitCount = byteCount * 8;
+            while (bitCount > 0) {
+                var index = 0;
+                if (bitCount >= 5) {
+                    var _del = Math.pow(2, bitCount - 5);
+                    index = (buffer / _del) & 31;
+                } else {
+                    index = (buffer & (31 >> (5 - bitCount)));
+                    index <<= (5 - bitCount);
+                }
+                encodedResult += this.EncodingTable.charAt(index);
+                bitCount -= 5;
+            }
+        }
+        return encodedResult;
+    };
+    this.Decode = function (data) {
+        var result = [];
+        var _len = data.length;
+        var obj = {
+            data: data,
+            index: new Array(8)
+        };
+        var cur = 0;
+        while (cur < _len) {
+            cur = this.CreateIndexByOctetAndMovePosition(obj, cur);
+            var shortByteCount = 0;
+            var buffer = 0;
+            for (var j = 0; j < 8 && obj.index[j] != -1; ++j) {
+                buffer *= 32;
+                buffer += (this.DecodingTable[obj.index[j]] & 31);
+                shortByteCount++;
+            }
+            var bitCount = shortByteCount * 5;
+            while (bitCount >= 8) {
+                var _del = Math.pow(2, bitCount - 8);
+                var _res = (buffer / _del) & 255;
+                result.push(_res);
+                bitCount -= 8;
+            }
+        }
+        this.GetUTF16_fromUTF8(result);
+    };
+    this.CreateIndexByOctetAndMovePosition = function (obj, currentPosition) {
+        var j = 0;
+        while (j < 8) {
+            if (currentPosition >= obj.data.length) {
+                obj.index[j++] = -1;
+                continue;
+            }
+            if (this.IgnoredSymbol(obj.data.charCodeAt(currentPosition))) {
+                currentPosition++;
+                continue;
+            }
+            obj.index[j] = obj.data[currentPosition];
+            j++;
+            currentPosition++;
+        }
+        return currentPosition;
+    };
+    this.IgnoredSymbol = function (checkedSymbol) {
+        return (checkedSymbol >= 128 || this.DecodingTable[checkedSymbol] == 255);
+    };
+}
+var ASC_DOCS_API_USE_FONTS_ORIGINAL_FORMAT = true;
 var bIsLocalFontsUse = false;
 function _is_support_cors() {
     if (window["NATIVE_EDITOR_ENJINE"] === true) {
@@ -82,7 +269,11 @@ function CFontFileLoader(id) {
         }
         scriptElem.onload = scriptElem.onerror = oThis._callback_font_load;
         if (this.IsNeedAddJSToFontPath) {
-            scriptElem.setAttribute("src", basePath + "js/" + this.Id + ".js");
+            if (!window.g_fontNamesEncoder) {
+                window.g_fontNamesEncoder = new ZBase32Encoder();
+            }
+            var _name = window.g_fontNamesEncoder.Encode(this.Id + ".js") + ".js";
+            scriptElem.setAttribute("src", basePath + "js/" + _name);
         } else {
             scriptElem.setAttribute("src", basePath + this.Id + ".js");
         }
@@ -114,7 +305,11 @@ function CFontFileLoader(id) {
         }
         this.Status = 2;
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", basePath + "native/" + this.Id, true);
+        if (!window.g_fontNamesEncoder) {
+            window.g_fontNamesEncoder = new ZBase32Encoder();
+        }
+        var _name = window.g_fontNamesEncoder.Encode(this.Id) + ".js";
+        xhr.open("GET", basePath + "odttf/" + _name, true);
         if (typeof ArrayBuffer !== "undefined" && !window.opera) {
             xhr.responseType = "arraybuffer";
         }
@@ -156,10 +351,21 @@ function CFontFileLoader(id) {
                     oThis.SetStreamIndex(__font_data_idx);
                 }
             }
+            var guidOdttf = [160, 102, 214, 32, 20, 150, 71, 250, 149, 105, 184, 80, 176, 65, 73, 72];
+            var _stream = g_fonts_streams[g_fonts_streams.length - 1];
+            var _data = _stream.data;
+            var _count_decode = Math.min(32, _stream.size);
+            for (var i = 0; i < _count_decode; ++i) {
+                _data[i] ^= guidOdttf[i % 16];
+            }
         };
         xhr.send(null);
     };
     this.LoadFontNative = function () {
+        if (window["use_native_fonts_only"] === true) {
+            this.Status = 0;
+            return;
+        }
         var __font_data_idx = g_fonts_streams.length;
         var _data = window["native"]["GetFontBinary"](this.Id);
         g_fonts_streams[__font_data_idx] = new FT_Stream(_data, _data.length);
@@ -716,8 +922,73 @@ CFontInfo.prototype = {
         var fontfile = (this.Type == FONT_TYPE_EMBEDDED) ? font_loader.embeddedFontFiles[index] : font_loader.fontFiles[index];
         return {
             id: fontfile.Id,
-            faceIndex: faceIndex
+            faceIndex: faceIndex,
+            file: fontfile
         };
+    },
+    GetBaseStyle: function (lStyle) {
+        switch (lStyle) {
+        case FontStyle.FontStyleBoldItalic:
+            if (-1 != this.indexBI) {
+                return FontStyle.FontStyleBoldItalic;
+            } else {
+                if (-1 != this.indexB) {
+                    return FontStyle.FontStyleBold;
+                } else {
+                    if (-1 != this.indexI) {
+                        return FontStyle.FontStyleItalic;
+                    } else {
+                        return FontStyle.FontStyleRegular;
+                    }
+                }
+            }
+            break;
+        case FontStyle.FontStyleBold:
+            if (-1 != this.indexB) {
+                return FontStyle.FontStyleBold;
+            } else {
+                if (-1 != this.indexR) {
+                    return FontStyle.FontStyleRegular;
+                } else {
+                    if (-1 != this.indexBI) {
+                        return FontStyle.FontStyleBoldItalic;
+                    } else {
+                        return FontStyle.FontStyleItalic;
+                    }
+                }
+            }
+            break;
+        case FontStyle.FontStyleItalic:
+            if (-1 != this.indexI) {
+                return FontStyle.FontStyleItalic;
+            } else {
+                if (-1 != this.indexR) {
+                    return FontStyle.FontStyleRegular;
+                } else {
+                    if (-1 != this.indexBI) {
+                        return FontStyle.FontStyleBoldItalic;
+                    } else {
+                        return FontStyle.FontStyleBold;
+                    }
+                }
+            }
+            break;
+        case FontStyle.FontStyleRegular:
+            if (-1 != this.indexR) {
+                return FontStyle.FontStyleRegular;
+            } else {
+                if (-1 != this.indexI) {
+                    return FontStyle.FontStyleItalic;
+                } else {
+                    if (-1 != this.indexB) {
+                        return FontStyle.FontStyleBold;
+                    } else {
+                        return FontStyle.FontStyleBoldItalic;
+                    }
+                }
+            }
+        }
+        return FontStyle.FontStyleRegular;
     }
 };
 function CFont(name, id, type, thumbnail, style) {
@@ -740,44 +1011,7 @@ function CImage(src) {
     this.Image = null;
     this.Status = ImageLoadStatus.Complete;
 }
-var charA = "A".charCodeAt(0);
-var charZ = "Z".charCodeAt(0);
-var chara = "a".charCodeAt(0);
-var charz = "z".charCodeAt(0);
-var char0 = "0".charCodeAt(0);
-var char9 = "9".charCodeAt(0);
-var charp = "+".charCodeAt(0);
-var chars = "/".charCodeAt(0);
-function DecodeBase64Char(ch) {
-    if (ch >= charA && ch <= charZ) {
-        return ch - charA + 0;
-    }
-    if (ch >= chara && ch <= charz) {
-        return ch - chara + 26;
-    }
-    if (ch >= char0 && ch <= char9) {
-        return ch - char0 + 52;
-    }
-    if (ch == charp) {
-        return 62;
-    }
-    if (ch == chars) {
-        return 63;
-    }
-    return -1;
-}
-var b64_decode = new Array();
-for (var i = charA; i <= charZ; i++) {
-    b64_decode[i] = i - charA + 0;
-}
-for (var i = chara; i <= charz; i++) {
-    b64_decode[i] = i - chara + 26;
-}
-for (var i = char0; i <= char9; i++) {
-    b64_decode[i] = i - char0 + 52;
-}
-b64_decode[charp] = 62;
-b64_decode[chars] = 63;
+var g_fonts_streams = [];
 function DecodeBase64(imData, szSrc) {
     var srcLen = szSrc.length;
     var nWritten = 0;
@@ -833,157 +1067,10 @@ function DecodeBase64(imData, szSrc) {
             }
         }
     }
-}
-function CreateFontData2(szSrc, dstLen) {
-    var srcLen = szSrc.length;
-    var nWritten = 0;
-    if (dstLen === undefined) {
-        dstLen = srcLen;
+} (function (document) {
+    if (undefined === window["__fonts_files"] && window["native"]["GenerateAllFonts"]) {
+        window["native"]["GenerateAllFonts"]();
     }
-    var pointer = g_memory.Alloc(dstLen);
-    var stream = new FT_Stream(pointer.data, dstLen);
-    stream.obj = pointer.obj;
-    var dstPx = stream.data;
-    var index = 0;
-    if (window.chrome) {
-        while (index < srcLen) {
-            var dwCurr = 0;
-            var i;
-            var nBits = 0;
-            for (i = 0; i < 4; i++) {
-                if (index >= srcLen) {
-                    break;
-                }
-                var nCh = DecodeBase64Char(szSrc.charCodeAt(index++));
-                if (nCh == -1) {
-                    i--;
-                    continue;
-                }
-                dwCurr <<= 6;
-                dwCurr |= nCh;
-                nBits += 6;
-            }
-            dwCurr <<= 24 - nBits;
-            for (i = 0; i < nBits / 8; i++) {
-                dstPx[nWritten++] = ((dwCurr & 16711680) >>> 16);
-                dwCurr <<= 8;
-            }
-        }
-    } else {
-        var p = b64_decode;
-        while (index < srcLen) {
-            var dwCurr = 0;
-            var i;
-            var nBits = 0;
-            for (i = 0; i < 4; i++) {
-                if (index >= srcLen) {
-                    break;
-                }
-                var nCh = p[szSrc.charCodeAt(index++)];
-                if (nCh == undefined) {
-                    i--;
-                    continue;
-                }
-                dwCurr <<= 6;
-                dwCurr |= nCh;
-                nBits += 6;
-            }
-            dwCurr <<= 24 - nBits;
-            for (i = 0; i < nBits / 8; i++) {
-                dstPx[nWritten++] = ((dwCurr & 16711680) >>> 16);
-                dwCurr <<= 8;
-            }
-        }
-    }
-    return stream;
-}
-function CreateFontData3(szSrc) {
-    var srcLen = szSrc.length;
-    var nWritten = 0;
-    var pointer = g_memory.Alloc(srcLen);
-    var stream = new FT_Stream(pointer.data, srcLen);
-    stream.obj = pointer.obj;
-    var dstPx = stream.data;
-    var index = 0;
-    while (index < srcLen) {
-        dstPx[index] = (szSrc.charCodeAt(index) & 255);
-        index++;
-    }
-    return stream;
-}
-function CreateFontData4(szSrc) {
-    var srcLen = szSrc.length;
-    var nWritten = 0;
-    var index = 0;
-    var dst_len = "";
-    while (true) {
-        var _c = szSrc.charCodeAt(index);
-        if (_c == ";".charCodeAt(0)) {
-            break;
-        }
-        dst_len += String.fromCharCode(_c);
-        index++;
-    }
-    index++;
-    var dstLen = parseInt(dst_len);
-    var pointer = g_memory.Alloc(dstLen);
-    var stream = new FT_Stream(pointer.data, dstLen);
-    stream.obj = pointer.obj;
-    var dstPx = stream.data;
-    if (window.chrome) {
-        while (index < srcLen) {
-            var dwCurr = 0;
-            var i;
-            var nBits = 0;
-            for (i = 0; i < 4; i++) {
-                if (index >= srcLen) {
-                    break;
-                }
-                var nCh = DecodeBase64Char(szSrc.charCodeAt(index++));
-                if (nCh == -1) {
-                    i--;
-                    continue;
-                }
-                dwCurr <<= 6;
-                dwCurr |= nCh;
-                nBits += 6;
-            }
-            dwCurr <<= 24 - nBits;
-            for (i = 0; i < nBits / 8; i++) {
-                dstPx[nWritten++] = ((dwCurr & 16711680) >>> 16);
-                dwCurr <<= 8;
-            }
-        }
-    } else {
-        var p = b64_decode;
-        while (index < srcLen) {
-            var dwCurr = 0;
-            var i;
-            var nBits = 0;
-            for (i = 0; i < 4; i++) {
-                if (index >= srcLen) {
-                    break;
-                }
-                var nCh = p[szSrc.charCodeAt(index++)];
-                if (nCh == undefined) {
-                    i--;
-                    continue;
-                }
-                dwCurr <<= 6;
-                dwCurr |= nCh;
-                nBits += 6;
-            }
-            dwCurr <<= 24 - nBits;
-            for (i = 0; i < nBits / 8; i++) {
-                dstPx[nWritten++] = ((dwCurr & 16711680) >>> 16);
-                dwCurr <<= 8;
-            }
-        }
-    }
-    return stream;
-}
-var g_fonts_streams = new Array();
-(function (document) {
     var __len_files = window["__fonts_files"].length;
     window.g_font_files = new Array(__len_files);
     for (var i = 0; i < __len_files; i++) {

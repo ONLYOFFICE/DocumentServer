@@ -1,0 +1,78 @@
+@loadmask-zindex: @zindex-modal + 100;
+
+.asc-loadmask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    zoom: 1;
+    background-color: transparent;
+    z-index: @loadmask-zindex;
+}
+
+.asc-loadmask-body {
+    position: absolute;
+    z-index: @loadmask-zindex + 1;
+    padding: 20px;
+    line-height: 33px;
+    border: none;
+    background-image: none;
+    background-color: fade(darken(@gray-deep, 15%), 70%);
+    color: @gray-light;
+    .border-radius(@border-radius-large);
+
+    & > div {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .asc-loadmask-image {
+        background-image: ~"url('@{common-image-path}/load-mask/loading.gif')";
+        height: 33px;
+        width: 33px;
+        float: left;
+        margin-left: 20px;
+    }
+
+    .asc-loadmask-title {
+        .fontsize(@font-size-large);
+        margin: 0 20px;
+    }
+}
+
+.application-error-panel {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+
+    .application-error-message-block {
+        display: inline-block;
+        vertical-align: middle;
+        width: 100%;
+
+        .application-error-message-inner {
+            width: 550px;
+            margin: auto;
+            padding: 30px;
+            background-color: #e3e3e3;
+            text-align: center;
+
+            .application-error-message-title {
+                font-size: 24px;
+                margin: 0 0 14px;
+            }
+
+            .application-error-message-text {
+                font-size: 14px;
+            }
+        }
+    }
+
+    .application-error-message-auxiliary {
+        display: inline-block;
+        vertical-align: middle;
+        height: 100%;
+    }
+}

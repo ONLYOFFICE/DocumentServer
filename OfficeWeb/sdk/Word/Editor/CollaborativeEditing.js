@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function CIdCounter() {
+ "use strict";
+function CIdCounter() {
     this.m_sUserId = null;
     this.m_bLoad = true;
     this.m_nIdCounterLoad = 0;
@@ -52,7 +53,7 @@
 }
 var g_oIdCounter = new CIdCounter();
 function CTableId() {
-    this.m_aPairs = new Object();
+    this.m_aPairs = {};
     this.m_bTurnOff = false;
     this.Add = function (Class, Id) {
         if (false === this.m_bTurnOff) {
@@ -115,19 +116,10 @@ function CTableId() {
             Element = new ParaTextPr();
             break;
         case historyitem_type_Hyperlink:
-            Element = new ParaHyperlinkStart();
+            Element = new ParaHyperlink();
             break;
         case historyitem_type_Drawing:
             Element = new ParaDrawing();
-            break;
-        case historyitem_type_DrawingObjects:
-            Element = new CDrawingObjects();
-            break;
-        case historyitem_type_FlowObjects:
-            Element = new FlowObjects();
-            break;
-        case historyitem_type_FlowImage:
-            Element = new FlowImage();
             break;
         case historyitem_type_Table:
             Element = new CTable();
@@ -141,9 +133,6 @@ function CTableId() {
         case historyitem_type_DocumentContent:
             Element = new CDocumentContent();
             break;
-        case historyitem_type_FlowTable:
-            Element = new FlowTable();
-            break;
         case historyitem_type_HdrFtr:
             Element = new CHeaderFooter();
             break;
@@ -153,35 +142,361 @@ function CTableId() {
         case historyitem_type_Comment:
             Element = new CComment();
             break;
-        case historyitem_type_Shape:
-            Element = new WordShape();
-            break;
-        case historyitem_type_Image:
-            Element = new WordImage();
-            break;
-        case historyitem_type_GroupShapes:
-            Element = new WordGroupShapes();
-            break;
-        case historyitem_type_Chart:
-            Element = new CChartAsGroup();
-            break;
-        case historyitem_type_WrapPolygon:
-            Element = new CWrapPolygon();
-            break;
-        case historyitem_type_HdrFtrGrObjects:
-            Element = new HeaderFooterGraphicObjects();
-            break;
         case historyitem_type_Style:
             Element = new CStyle();
+            break;
+        case historyitem_type_CommentMark:
+            Element = new ParaComment();
+            break;
+        case historyitem_type_ParaRun:
+            Element = new ParaRun();
+            break;
+        case historyitem_type_Section:
+            Element = new CSectionPr();
+            break;
+        case historyitem_type_DefaultShapeDefinition:
+            Element = new DefaultShapeDefinition();
+            break;
+        case historyitem_type_CNvPr:
+            Element = new CNvPr();
+            break;
+        case historyitem_type_NvPr:
+            Element = new NvPr();
+            break;
+        case historyitem_type_Ph:
+            Element = new Ph();
+            break;
+        case historyitem_type_UniNvPr:
+            Element = new UniNvPr();
+            break;
+        case historyitem_type_StyleRef:
+            Element = new StyleRef();
+            break;
+        case historyitem_type_FontRef:
+            Element = new FontRef();
+            break;
+        case historyitem_type_Chart:
+            Element = new CChart();
+            break;
+        case historyitem_type_ChartSpace:
+            Element = new CChartSpace();
+            break;
+        case historyitem_type_Legend:
+            Element = new CLegend();
+            break;
+        case historyitem_type_Layout:
+            Element = new CLayout();
+            break;
+        case historyitem_type_LegendEntry:
+            Element = new CLegendEntry();
+            break;
+        case historyitem_type_PivotFmt:
+            Element = new CPivotFmt();
+            break;
+        case historyitem_type_DLbl:
+            Element = new CDLbl();
+            break;
+        case historyitem_type_Marker:
+            Element = new CMarker();
+            break;
+        case historyitem_type_PlotArea:
+            Element = new CPlotArea();
+            break;
+        case historyitem_type_NumFmt:
+            Element = new CNumFmt();
+            break;
+        case historyitem_type_Scaling:
+            Element = new CScaling();
+            break;
+        case historyitem_type_DTable:
+            Element = new CDTable();
+            break;
+        case historyitem_type_LineChart:
+            Element = new CLineChart();
+            break;
+        case historyitem_type_DLbls:
+            Element = new CDLbls();
+            break;
+        case historyitem_type_UpDownBars:
+            Element = new CUpDownBars();
+            break;
+        case historyitem_type_BarChart:
+            Element = new CBarChart();
+            break;
+        case historyitem_type_BubbleChart:
+            Element = new CBubbleChart();
+            break;
+        case historyitem_type_DoughnutChart:
+            Element = new CDoughnutChart();
+            break;
+        case historyitem_type_OfPieChart:
+            Element = new COfPieChart();
+            break;
+        case historyitem_type_PieChart:
+            Element = new CPieChart();
+            break;
+        case historyitem_type_RadarChart:
+            Element = new CRadarChart();
+            break;
+        case historyitem_type_ScatterChart:
+            Element = new CScatterChart();
+            break;
+        case historyitem_type_StockChart:
+            Element = new CStockChart();
+            break;
+        case historyitem_type_SurfaceChart:
+            Element = new CSurfaceChart();
+            break;
+        case historyitem_type_BandFmt:
+            Element = new CBandFmt();
+            break;
+        case historyitem_type_AreaChart:
+            Element = new CAreaChart();
+            break;
+        case historyitem_type_ScatterSer:
+            Element = new CScatterSeries();
+            break;
+        case historyitem_type_DPt:
+            Element = new CDPt();
+            break;
+        case historyitem_type_ErrBars:
+            Element = new CErrBars();
+            break;
+        case historyitem_type_MinusPlus:
+            Element = new CMinusPlus();
+            break;
+        case historyitem_type_NumLit:
+            Element = new CNumLit();
+            break;
+        case historyitem_type_NumericPoint:
+            Element = new CNumericPoint();
+            break;
+        case historyitem_type_NumRef:
+            Element = new CNumRef();
+            break;
+        case historyitem_type_TrendLine:
+            Element = new CTrendLine();
+            break;
+        case historyitem_type_Tx:
+            Element = new CTx();
+            break;
+        case historyitem_type_StrRef:
+            Element = new CStrRef();
+            break;
+        case historyitem_type_StrCache:
+            Element = new CStrCache();
+            break;
+        case historyitem_type_StrPoint:
+            Element = new CStringPoint();
+            break;
+        case historyitem_type_XVal:
+            Element = new CXVal();
+            break;
+        case historyitem_type_MultiLvlStrRef:
+            Element = new CMultiLvlStrRef();
+            break;
+        case historyitem_type_MultiLvlStrCache:
+            Element = new CMultiLvlStrCache();
+            break;
+        case historyitem_type_StringLiteral:
+            Element = new CStringLiteral();
+            break;
+        case historyitem_type_YVal:
+            Element = new CYVal();
+            break;
+        case historyitem_type_AreaSeries:
+            Element = new CAreaSeries();
+            break;
+        case historyitem_type_Cat:
+            Element = new CCat();
+            break;
+        case historyitem_type_PictureOptions:
+            Element = new CPictureOptions();
+            break;
+        case historyitem_type_RadarSeries:
+            Element = new CRadarSeries();
+            break;
+        case historyitem_type_BarSeries:
+            Element = new CBarSeries();
+            break;
+        case historyitem_type_LineSeries:
+            Element = new CLineSeries();
+            break;
+        case historyitem_type_PieSeries:
+            Element = new CPieSeries();
+            break;
+        case historyitem_type_SurfaceSeries:
+            Element = new CSurfaceSeries();
+            break;
+        case historyitem_type_BubbleSeries:
+            Element = new CBubbleSeries();
+            break;
+        case historyitem_type_ExternalData:
+            Element = new CExternalData();
+            break;
+        case historyitem_type_PivotSource:
+            Element = new CPivotSource();
+            break;
+        case historyitem_type_Protection:
+            Element = new CProtection();
+            break;
+        case historyitem_type_ChartWall:
+            Element = new CChartWall();
+            break;
+        case historyitem_type_View3d:
+            Element = new CView3d();
+            break;
+        case historyitem_type_ChartText:
+            Element = new CChartText();
+            break;
+        case historyitem_type_ShapeStyle:
+            Element = new CShapeStyle();
+            break;
+        case historyitem_type_Xfrm:
+            Element = new CXfrm();
+            break;
+        case historyitem_type_SpPr:
+            Element = new CSpPr();
+            break;
+        case historyitem_type_ClrScheme:
+            Element = new ClrScheme();
+            break;
+        case historyitem_type_ClrMap:
+            Element = new ClrMap();
+            break;
+        case historyitem_type_ExtraClrScheme:
+            Element = new ExtraClrScheme();
+            break;
+        case historyitem_type_FontCollection:
+            Element = new FontCollection();
+            break;
+        case historyitem_type_FontScheme:
+            Element = new FontScheme();
+            break;
+        case historyitem_type_FormatScheme:
+            Element = new FmtScheme();
+            break;
+        case historyitem_type_ThemeElements:
+            Element = new ThemeElements();
+            break;
+        case historyitem_type_HF:
+            Element = new HF();
+            break;
+        case historyitem_type_BgPr:
+            Element = new CBgPr();
+            break;
+        case historyitem_type_Bg:
+            Element = new CBg();
+            break;
+        case historyitem_type_PrintSettings:
+            Element = new CPrintSettings();
+            break;
+        case historyitem_type_HeaderFooterChart:
+            Element = new CHeaderFooterChart();
+            break;
+        case historyitem_type_PageMarginsChart:
+            Element = new CPageMarginsChart();
+            break;
+        case historyitem_type_PageSetup:
+            Element = new CPageSetup();
+            break;
+        case historyitem_type_Shape:
+            Element = new CShape();
+            break;
+        case historyitem_type_DispUnits:
+            Element = new CDispUnits();
+            break;
+        case historyitem_type_GroupShape:
+            Element = new CGroupShape();
+            break;
+        case historyitem_type_ImageShape:
+            Element = new CImageShape();
+            break;
+        case historyitem_type_Geometry:
+            Element = new Geometry();
+            break;
+        case historyitem_type_Path:
+            Element = new Path();
             break;
         case historyitem_type_TextBody:
             Element = new CTextBody();
             break;
-        case historyitem_type_ChartTitle:
-            Element = new CChartTitle();
+        case historyitem_type_CatAx:
+            Element = new CCatAx();
+            break;
+        case historyitem_type_ValAx:
+            Element = new CValAx();
+            break;
+        case historyitem_type_WrapPolygon:
+            Element = new CWrapPolygon();
+            break;
+        case historyitem_type_DateAx:
+            Element = new CDateAx();
+            break;
+        case historyitem_type_SerAx:
+            Element = new CSerAx();
+            break;
+        case historyitem_type_Title:
+            Element = new CTitle();
+            break;
+        case historyitem_type_Math:
+            Element = new ParaMath(false);
+            break;
+        case historyitem_type_MathContent:
+            Element = new CMathContent();
+            break;
+        case historyitem_type_acc:
+            Element = new CAccent();
+            break;
+        case historyitem_type_bar:
+            Element = new CBar();
+            break;
+        case historyitem_type_box:
+            Element = new CBox();
+            break;
+        case historyitem_type_borderBox:
+            Element = new CBorderBox();
+            break;
+        case historyitem_type_delimiter:
+            Element = new CDelimiter();
+            break;
+        case historyitem_type_eqArr:
+            Element = new CEqArray();
+            break;
+        case historyitem_type_frac:
+            Element = new CFraction();
+            break;
+        case historyitem_type_mathFunc:
+            Element = new CMathFunc();
+            break;
+        case historyitem_type_groupChr:
+            Element = new CGroupCharacter();
+            break;
+        case historyitem_type_lim:
+            Element = new CLimit();
+            break;
+        case historyitem_type_matrix:
+            Element = new CMathMatrix();
+            break;
+        case historyitem_type_nary:
+            Element = new CNary();
+            break;
+        case historyitem_type_phant:
+            Element = new CPhantom();
+            break;
+        case historyitem_type_rad:
+            Element = new CRadical();
+            break;
+        case historyitem_type_deg_subsup:
+            Element = new CDegreeSubSup();
+            break;
+        case historyitem_type_deg:
+            Element = new CDegree();
             break;
         }
-        Element.Read_FromBinary2(Reader);
+        if (null !== Element) {
+            Element.Read_FromBinary2(Reader);
+        }
         this.m_bTurnOff = false;
         return Element;
     };
@@ -197,6 +512,18 @@ function CTableId() {
         case historyitem_TableId_Reset:
             Writer.WriteString2(Data.Id_new);
             Writer.WriteString2(Data.Id_old);
+            break;
+        case historyitem_TableId_Description:
+            Writer.WriteLong(Data.FileCheckSum);
+            Writer.WriteLong(Data.FileSize);
+            Writer.WriteLong(Data.Description);
+            Writer.WriteLong(Data.ItemsCount);
+            Writer.WriteLong(Data.PointIndex);
+            Writer.WriteLong(Data.StartPoint);
+            Writer.WriteLong(Data.LastPoint);
+            Writer.WriteLong(Data.SumIndex);
+            Writer.WriteLong(null === Data.DeletedIndex ? -10 : Data.DeletedIndex);
+            Writer.WriteString2("@@Version.@@Build.@@Rev");
             break;
         }
     };
@@ -224,6 +551,18 @@ function CTableId() {
                 this.m_aPairs[Id_new] = Class;
             }
             break;
+        case historyitem_TableId_Description:
+            var FileCheckSum = Reader.GetLong();
+            var FileSize = Reader.GetLong();
+            var Description = Reader.GetLong();
+            var ItemsCount = Reader.GetLong();
+            var PointIndex = Reader.GetLong();
+            var StartPoint = Reader.GetLong();
+            var LastPoint = Reader.GetLong();
+            var SumIndex = Reader.GetLong();
+            var DeletedIndex = Reader.GetLong();
+            var VersionString = Reader.GetString2();
+            break;
         }
         return true;
     };
@@ -231,34 +570,35 @@ function CTableId() {
 }
 var g_oTableId = null;
 function CCollaborativeChanges() {
-    this.m_sId = null;
     this.m_pData = null;
-    this.Set_Id = function (sId) {
-        this.m_sId = sId;
-    };
+    this.m_oColor = null;
     this.Set_Data = function (pData) {
         this.m_pData = pData;
+    };
+    this.Set_Color = function (oColor) {
+        this.m_oColor = oColor;
     };
     this.Set_FromUndoRedo = function (Class, Data, Binary) {
         if ("undefined" === typeof(Class.Get_Id)) {
             return false;
         }
-        this.m_sId = Class.Get_Id();
         this.m_pData = this.Internal_Save_Data(Class, Data, Binary);
         return true;
     };
     this.Apply_Data = function () {
         var LoadData = this.Internal_Load_Data(this.m_pData);
+        var ClassId = LoadData.Reader.GetString2();
+        var ReaderPos = LoadData.Reader.GetCurPos();
         var Type = LoadData.Reader.GetLong();
         var Class = null;
         if (historyitem_type_HdrFtr === Type) {
             Class = editor.WordControl.m_oLogicDocument.HdrFtr;
         } else {
-            Class = g_oTableId.Get_ById(this.m_sId);
+            Class = g_oTableId.Get_ById(ClassId);
         }
-        LoadData.Reader.Seek2(0);
+        LoadData.Reader.Seek2(ReaderPos);
         if (null != Class) {
-            return Class.Load_Changes(LoadData.Reader, LoadData.Reader2);
+            return Class.Load_Changes(LoadData.Reader, LoadData.Reader2, this.m_oColor);
         } else {
             return false;
         }
@@ -372,7 +712,7 @@ function CCollaborativeChanges() {
         var Len = Binary.Len;
         if ("undefined" != typeof(Class.Save_Changes2)) {
             var Writer2 = CollaborativeEditing.m_oMemory;
-            Writer.Seek(0);
+            Writer2.Seek(0);
             if (true === Class.Save_Changes2(Data, Writer2)) {
                 return Len + ";" + Writer.GetBase64Memory2(Pos, Len) + ";" + Writer2.GetCurPosition() + ";" + Writer2.GetBase64Memory();
             }
@@ -381,14 +721,16 @@ function CCollaborativeChanges() {
     };
 }
 function CCollaborativeEditing() {
-    this.m_bUse = false;
+    this.m_nUseType = 1;
     this.m_aUsers = [];
     this.m_aChanges = [];
     this.m_aNeedUnlock = [];
     this.m_aNeedUnlock2 = [];
     this.m_aNeedLock = [];
     this.m_aLinkData = [];
+    this.m_aEndActions = [];
     this.m_bGlobalLock = false;
+    this.m_bGlobalLockSelection = false;
     this.m_aCheckLocks = [];
     this.m_aNewObjects = [];
     this.m_aNewImages = [];
@@ -397,7 +739,12 @@ function CCollaborativeEditing() {
     this.m_oMemory = new CMemory();
     var oThis = this;
     this.Start_CollaborationEditing = function () {
-        this.m_bUse = true;
+        this.m_nUseType = -1;
+    };
+    this.End_CollaborationEditing = function () {
+        if (this.m_nUseType <= 0) {
+            this.m_nUseType = 0;
+        }
     };
     this.Add_User = function (UserId) {
         if (-1 === this.Find_User(UserId)) {
@@ -427,21 +774,28 @@ function CCollaborativeEditing() {
     };
     this.Add_Unlock2 = function (Lock) {
         this.m_aNeedUnlock2.push(Lock);
+        editor._onUpdateDocumentCanSave();
     };
     this.Apply_OtherChanges = function () {
         g_oIdCounter.Set_Load(true);
-        while (this.m_aChanges.length > 0) {
-            var Changes = this.m_aChanges[0];
+        var _count = this.m_aChanges.length;
+        for (var i = 0; i < _count; i++) {
+            if (window["NATIVE_EDITOR_ENJINE"] === true && window["native"]["CheckNextChange"]) {
+                if (!window["native"]["CheckNextChange"]()) {
+                    break;
+                }
+            }
+            var Changes = this.m_aChanges[i];
             Changes.Apply_Data();
-            this.m_aChanges.splice(0, 1);
         }
+        this.m_aChanges = [];
         this.Apply_LinkData();
         this.Check_MergeData();
         this.OnEnd_ReadForeignChanges();
         g_oIdCounter.Set_Load(false);
     };
     this.Get_SelfChanges = function () {
-        var aChanges = new Array();
+        var aChanges = [];
         var PointsCount = History.Points.length;
         for (var PointIndex = 0; PointIndex < PointsCount; PointIndex++) {
             var Point = History.Points[PointIndex];
@@ -459,35 +813,45 @@ function CCollaborativeEditing() {
         return aChanges;
     };
     this.Apply_Changes = function () {
-        if (true != this.m_bUse) {
-            editor.CoAuthoringApi.saveChanges(new Array());
-            return;
+        var OtherChanges = (this.m_aChanges.length > 0 ? true : false);
+        if (true === OtherChanges) {
+            editor.WordControl.m_oLogicDocument.Stop_Recalculate();
+            editor.sync_StartAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.ApplyChanges);
+            var LogicDocument = editor.WordControl.m_oLogicDocument;
+            var DocState = LogicDocument.Get_SelectionState2();
+            this.Clear_NewImages();
+            this.Apply_OtherChanges();
+            this.Lock_NeedLock();
+            LogicDocument.Set_SelectionState2(DocState);
+            this.OnStart_Load_Objects();
         }
-        editor.WordControl.m_oLogicDocument.Stop_Recalculate();
-        editor.sync_StartAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.ApplyChanges);
-        var LogicDocument = editor.WordControl.m_oLogicDocument;
-        var DocState = LogicDocument.Get_SelectionState2();
-        this.Clear_NewImages();
-        this.Apply_OtherChanges();
-        this.Lock_NeedLock();
-        LogicDocument.Set_SelectionState2(DocState);
-        this.OnStart_Load_Objects();
     };
     this.Send_Changes = function () {
-        if (true != this.m_bUse) {
-            return;
-        }
         this.Refresh_DCChanges();
-        History.Clear_Redo();
-        var aChanges = new Array();
-        var PointsCount = History.Points.length;
-        for (var PointIndex = 0; PointIndex < PointsCount; PointIndex++) {
+        var StartPoint = (null === History.SavedIndex ? 0 : History.SavedIndex + 1);
+        var LastPoint = -1;
+        if (this.m_nUseType <= 0) {
+            History.Clear_Redo();
+            LastPoint = History.Points.length - 1;
+        } else {
+            LastPoint = History.Index;
+        }
+        var SumIndex = 0;
+        var StartPoint2 = Math.min(StartPoint, LastPoint + 1);
+        for (var PointIndex = 0; PointIndex < StartPoint2; PointIndex++) {
             var Point = History.Points[PointIndex];
+            SumIndex += Point.Items.length;
+        }
+        var deleteIndex = (null === History.SavedIndex ? null : SumIndex);
+        var aChanges = [];
+        for (var PointIndex = StartPoint; PointIndex <= LastPoint; PointIndex++) {
+            var Point = History.Points[PointIndex];
+            History.Update_PointInfoItem(PointIndex, StartPoint, LastPoint, SumIndex, deleteIndex);
             for (var Index = 0; Index < Point.Items.length; Index++) {
                 var Item = Point.Items[Index];
                 var oChanges = new CCollaborativeChanges();
                 oChanges.Set_FromUndoRedo(Item.Class, Item.Data, Item.Binary);
-                aChanges.push(oChanges);
+                aChanges.push(oChanges.m_pData);
             }
         }
         this.Release_Locks();
@@ -499,8 +863,23 @@ function CCollaborativeEditing() {
         }
         this.m_aNeedUnlock.length = 0;
         this.m_aNeedUnlock2.length = 0;
-        editor.CoAuthoringApi.saveChanges(aChanges);
-        History.Clear();
+        if (0 < aChanges.length || null !== deleteIndex) {
+            editor.CoAuthoringApi.saveChanges(aChanges, deleteIndex);
+        } else {
+            editor.CoAuthoringApi.unLockDocument(true);
+        }
+        if (-1 === this.m_nUseType) {
+            History.Clear();
+            History.SavedIndex = null;
+        } else {
+            if (0 === this.m_nUseType) {
+                History.Clear();
+                History.SavedIndex = null;
+                this.m_nUseType = 1;
+            } else {
+                History.Reset_SavedIndex();
+            }
+        }
         editor.WordControl.m_oLogicDocument.Document_UpdateInterfaceState();
         editor.WordControl.m_oLogicDocument.Document_UpdateUndoRedoState();
         editor.WordControl.m_oLogicDocument.DrawingDocument.ClearCachePages();
@@ -536,40 +915,26 @@ function CCollaborativeEditing() {
     };
     this.OnStart_Load_Objects = function () {
         oThis.m_bGlobalLock = true;
+        oThis.m_bGlobalLockSelection = true;
         editor.pre_Save(oThis.m_aNewImages);
     };
     this.OnEnd_Load_Objects = function () {
         oThis.m_bGlobalLock = false;
+        oThis.m_bGlobalLockSelection = false;
         var LogicDocument = editor.WordControl.m_oLogicDocument;
         var RecalculateData = {
             Inline: {
                 Pos: 0,
                 PageNum: 0
             },
-            Flow: new Array(),
-            HdrFtr: new Array()
+            Flow: [],
+            HdrFtr: [],
+            Drawings: {
+                All: true,
+                Map: {}
+            }
         };
-        var HdrFtr_Content = LogicDocument.HdrFtr.Content[0];
-        if (null != HdrFtr_Content.Header.First) {
-            RecalculateData.HdrFtr.push(HdrFtr_Content.Header.First);
-        }
-        if (null != HdrFtr_Content.Footer.First) {
-            RecalculateData.HdrFtr.push(HdrFtr_Content.Footer.First);
-        }
-        if (null != HdrFtr_Content.Header.Even) {
-            RecalculateData.HdrFtr.push(HdrFtr_Content.Header.Even);
-        }
-        if (null != HdrFtr_Content.Footer.Even) {
-            RecalculateData.HdrFtr.push(HdrFtr_Content.Footer.Even);
-        }
-        if (null != HdrFtr_Content.Header.Odd) {
-            RecalculateData.HdrFtr.push(HdrFtr_Content.Header.Odd);
-        }
-        if (null != HdrFtr_Content.Footer.Odd) {
-            RecalculateData.HdrFtr.push(HdrFtr_Content.Footer.Odd);
-        }
         LogicDocument.Reset_RecalculateCache();
-        LogicDocument.DrawingObjects.calculateAfterOpen();
         LogicDocument.Recalculate(false, false, RecalculateData);
         LogicDocument.Document_UpdateSelectionState();
         LogicDocument.Document_UpdateInterfaceState();
@@ -606,7 +971,7 @@ function CCollaborativeEditing() {
         this.m_aCheckLocks.push(oItem);
     };
     this.OnEnd_CheckLock = function () {
-        var aIds = new Array();
+        var aIds = [];
         var Count = this.m_aCheckLocks.length;
         for (var Index = 0; Index < Count; Index++) {
             var oItem = this.m_aCheckLocks[Index];
@@ -620,7 +985,7 @@ function CCollaborativeEditing() {
         }
         if (aIds.length > 0) {
             editor.CoAuthoringApi.askLock(aIds, this.OnCallback_AskLock);
-            if (true === this.m_bUse) {
+            if (-1 === this.m_nUseType) {
                 this.m_bGlobalLock = true;
             } else {
                 var Count = this.m_aCheckLocks.length;
@@ -629,7 +994,7 @@ function CCollaborativeEditing() {
                     if (true !== oItem && false !== oItem) {
                         var Class = g_oTableId.Get_ById(oItem);
                         if (null != Class) {
-                            Class.Lock.Set_Type(locktype_Mine);
+                            Class.Lock.Set_Type(locktype_Mine, false);
                             this.Add_Unlock2(Class);
                         }
                     }
@@ -640,29 +1005,34 @@ function CCollaborativeEditing() {
         return false;
     };
     this.OnCallback_AskLock = function (result) {
-        oThis.m_bGlobalLock = false;
-        if (result["lock"]) {
-            var Count = oThis.m_aCheckLocks.length;
-            for (var Index = 0; Index < Count; Index++) {
-                var oItem = oThis.m_aCheckLocks[Index];
-                if (true !== oItem && false !== oItem) {
-                    var Class = g_oTableId.Get_ById(oItem);
-                    if (null != Class) {
-                        Class.Lock.Set_Type(locktype_Mine);
-                        oThis.Add_Unlock2(Class);
+        if (true === oThis.m_bGlobalLock) {
+            if (false == editor.asc_CheckLongActionCallback(oThis.OnCallback_AskLock, result)) {
+                return;
+            }
+            oThis.m_bGlobalLock = false;
+            if (result["lock"]) {
+                var Count = oThis.m_aCheckLocks.length;
+                for (var Index = 0; Index < Count; Index++) {
+                    var oItem = oThis.m_aCheckLocks[Index];
+                    if (true !== oItem && false !== oItem) {
+                        var Class = g_oTableId.Get_ById(oItem);
+                        if (null != Class) {
+                            Class.Lock.Set_Type(locktype_Mine);
+                            oThis.Add_Unlock2(Class);
+                        }
                     }
                 }
-            }
-        } else {
-            if (result["error"]) {
-                if (true === editor.isChartEditor) {
-                    editor.sync_closeChartEditor();
+            } else {
+                if (result["error"]) {
+                    if (true === editor.isChartEditor) {
+                        editor.sync_closeChartEditor();
+                    }
+                    editor.WordControl.m_oLogicDocument.Document_Undo();
+                    History.Clear_Redo();
                 }
-                editor.WordControl.m_oLogicDocument.Document_Undo();
-                History.Clear_Redo();
             }
+            editor.isChartEditor = false;
         }
-        editor.isChartEditor = false;
     };
     this.Reset_NeedLock = function () {
         this.m_aNeedLock = {};
@@ -691,12 +1061,27 @@ function CCollaborativeEditing() {
         this.m_aNewObjects.push(Class);
         Class.FromBinary = true;
     };
+    this.Clear_EndActions = function () {
+        this.m_aEndActions.length = 0;
+    };
+    this.Add_EndActions = function (Class, Data) {
+        this.m_aEndActions.push({
+            Class: Class,
+            Data: Data
+        });
+    };
     this.OnEnd_ReadForeignChanges = function () {
         var Count = this.m_aNewObjects.length;
         for (var Index = 0; Index < Count; Index++) {
             var Class = this.m_aNewObjects[Index];
             Class.FromBinary = false;
         }
+        Count = this.m_aEndActions.length;
+        for (var Index = 0; Index < Count; Index++) {
+            var Item = this.m_aEndActions[Index];
+            Item.Class.Process_EndLoad(Item.Data);
+        }
+        this.Clear_EndActions();
         this.Clear_NewObjects();
     };
     this.Clear_NewImages = function () {
@@ -735,6 +1120,9 @@ function CCollaborativeEditing() {
             editor.WordControl.m_oLogicDocument.DrawingDocument.FirePaint();
         }
     };
+    this.getOwnLocksLength = function () {
+        return this.m_aNeedUnlock2.length;
+    };
 }
 var CollaborativeEditing = new CCollaborativeEditing();
 var changestype_None = 0;
@@ -764,10 +1152,12 @@ var locktype_Other3 = 5;
 function CLock() {
     this.Type = locktype_None;
     this.UserId = null;
-    this.Get_Type = function () {
+}
+CLock.prototype = {
+    Get_Type: function () {
         return this.Type;
-    };
-    this.Set_Type = function (NewType, Redraw) {
+    },
+    Set_Type: function (NewType, Redraw) {
         if (NewType === locktype_None) {
             this.UserId = null;
         }
@@ -777,8 +1167,8 @@ function CLock() {
             DrawingDocument.ClearCachePages();
             DrawingDocument.FirePaint();
         }
-    };
-    this.Check = function (Id) {
+    },
+    Check: function (Id) {
         if (this.Type === locktype_Mine) {
             CollaborativeEditing.Add_CheckLock(false);
         } else {
@@ -788,8 +1178,8 @@ function CLock() {
                 CollaborativeEditing.Add_CheckLock(Id);
             }
         }
-    };
-    this.Lock = function (bMine) {
+    },
+    Lock: function (bMine) {
         if (locktype_None === this.Type) {
             if (true === bMine) {
                 this.Type = locktype_Mine;
@@ -797,26 +1187,26 @@ function CLock() {
                 true.Type = locktype_Other;
             }
         }
-    };
-    this.Is_Locked = function () {
+    },
+    Is_Locked: function () {
         if (locktype_None != this.Type && locktype_Mine != this.Type) {
             return true;
         }
         return false;
-    };
-    this.Set_UserId = function (UserId) {
+    },
+    Set_UserId: function (UserId) {
         this.UserId = UserId;
-    };
-    this.Get_UserId = function () {
+    },
+    Get_UserId: function () {
         return this.UserId;
-    };
-    this.Have_Changes = function () {
+    },
+    Have_Changes: function () {
         if (locktype_Other2 === this.Type || locktype_Other3 === this.Type) {
             return true;
         }
         return false;
-    };
-}
+    }
+};
 var contentchanges_Add = 1;
 var contentchanges_Remove = 2;
 function CContentChangesElement(Type, Pos, Count, Data) {
@@ -824,17 +1214,21 @@ function CContentChangesElement(Type, Pos, Count, Data) {
     this.m_nPos = Pos;
     this.m_nCount = Count;
     this.m_pData = Data;
-    this.Refresh_BinaryData = function () {
+    this.m_aPositions = this.Make_ArrayOfSimpleActions(Type, Pos, Count);
+}
+CContentChangesElement.prototype = {
+    Refresh_BinaryData: function () {
         var Binary_Writer = History.BinaryWriter;
         var Binary_Pos = Binary_Writer.GetCurPosition();
         this.m_pData.Data.UseArray = true;
         this.m_pData.Data.PosArray = this.m_aPositions;
+        Binary_Writer.WriteString2(this.m_pData.Class.Get_Id());
         this.m_pData.Class.Save_Changes(this.m_pData.Data, Binary_Writer);
         var Binary_Len = Binary_Writer.GetCurPosition() - Binary_Pos;
         this.m_pData.Binary.Pos = Binary_Pos;
         this.m_pData.Binary.Len = Binary_Len;
-    };
-    this.Check_Changes = function (Type, Pos) {
+    },
+    Check_Changes: function (Type, Pos) {
         var CurPos = Pos;
         if (contentchanges_Add === Type) {
             for (var Index = 0; Index < this.m_nCount; Index++) {
@@ -875,9 +1269,9 @@ function CContentChangesElement(Type, Pos, Count, Data) {
             }
         }
         return CurPos;
-    };
-    this.Make_ArrayOfSimpleActions = function (Type, Pos, Count) {
-        var Positions = new Array();
+    },
+    Make_ArrayOfSimpleActions: function (Type, Pos, Count) {
+        var Positions = [];
         if (contentchanges_Add === Type) {
             for (var Index = 0; Index < Count; Index++) {
                 Positions[Index] = Pos + Index;
@@ -888,18 +1282,19 @@ function CContentChangesElement(Type, Pos, Count, Data) {
             }
         }
         return Positions;
-    };
-    this.m_aPositions = this.Make_ArrayOfSimpleActions(Type, Pos, Count);
-}
+    }
+};
 function CContentChanges() {
-    this.m_aChanges = new Array();
-    this.Add = function (Changes) {
+    this.m_aChanges = [];
+}
+CContentChanges.prototype = {
+    Add: function (Changes) {
         this.m_aChanges.push(Changes);
-    };
-    this.Clear = function () {
+    },
+    Clear: function () {
         this.m_aChanges.length = 0;
-    };
-    this.Check = function (Type, Pos) {
+    },
+    Check: function (Type, Pos) {
         var CurPos = Pos;
         var Count = this.m_aChanges.length;
         for (var Index = 0; Index < Count; Index++) {
@@ -910,11 +1305,11 @@ function CContentChanges() {
             CurPos = NewPos;
         }
         return CurPos;
-    };
-    this.Refresh = function () {
+    },
+    Refresh: function () {
         var Count = this.m_aChanges.length;
         for (var Index = 0; Index < Count; Index++) {
             this.m_aChanges[Index].Refresh_BinaryData();
         }
-    };
-}
+    }
+};

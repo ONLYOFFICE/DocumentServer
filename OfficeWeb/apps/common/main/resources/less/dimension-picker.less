@@ -1,0 +1,41 @@
+.dimension-picker {
+    font-size: 18px;
+}
+
+.dimension-picker div {
+    position: relative;
+}
+
+.dimension-picker div.dimension-picker-mousecatcher {
+    left: 0;
+    top: 0;
+    position: absolute !important;
+}
+
+.dimension-picker div.dimension-picker-highlighted {
+    left: 0;
+    top: 0;
+    overflow: hidden;
+    position: absolute;
+}
+
+.dimension-picker-unhighlighted {
+    background-repeat: repeat;
+    background-attachment: scroll;
+    background-position: 0 0;
+    background-color: transparent;
+    .background-ximage('@{app-image-path}/controls/dimension-picker/dimension-unhighlighted.png', '@{app-image-path}/controls/dimension-picker/dimension-unhighlighted@2x.png', 18px);
+}
+
+.dimension-picker div.dimension-picker-highlighted {
+    background-repeat: repeat;
+    background-attachment: scroll;
+    background-position: 0 0;
+    background-color: transparent;
+    .background-ximage('@{app-image-path}/controls/dimension-picker/dimension-highlighted.png', '@{app-image-path}/controls/dimension-picker/dimension-highlighted@2x.png', 18px);
+}
+
+.dimension-picker-status {
+    font-size: 12px;
+    text-align: center;
+}

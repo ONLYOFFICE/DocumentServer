@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- (function (document) {
+ "use strict";
+(function (document) {
     function CEmbeddedCutFontsLoader() {
         this.Api = null;
         this.font_infos = [];
@@ -110,18 +111,18 @@
         };
     }
     function CGlobalFontLoader() {
-        this.fonts_streams = new Array();
+        this.fonts_streams = [];
         this.fontFilesPath = "";
         this.fontFiles = window.g_font_files;
         this.fontInfos = window.g_font_infos;
         this.map_font_index = window.g_map_font_index;
         this.embeddedFilesPath = "";
-        this.embeddedFontFiles = new Array();
-        this.embeddedFontInfos = new Array();
+        this.embeddedFontFiles = [];
+        this.embeddedFontInfos = [];
         this.ThemeLoader = null;
         this.Api = null;
-        this.fonts_loading = new Array();
-        this.fonts_loading_after_style = new Array();
+        this.fonts_loading = [];
+        this.fonts_loading_after_style = [];
         this.bIsLoadDocumentFirst = false;
         this.currentInfoLoaded = null;
         this.loadFontCallBack = null;
@@ -172,11 +173,13 @@
             }
         };
         this.SetStandartFonts = function () {
-            var standarts = window.standarts;
+            var standarts = window["standarts"];
             if (undefined == standarts) {
                 standarts = [];
                 for (var i = 0; i < window.g_font_infos.length; i++) {
-                    standarts.push(window.g_font_infos[i].Name);
+                    if (window.g_font_infos[i].Name != "ASCW3") {
+                        standarts.push(window.g_font_infos[i].Name);
+                    }
                 }
             }
             var _count = standarts.length;
@@ -186,7 +189,13 @@
                 _infos[_map[standarts[i]]].Type = FONT_TYPE_STANDART;
             }
         };
-        this.AddLoadFonts = function (info, need_styles) {
+        this.AddLoadFonts = function (name, need_styles) {
+            var fontinfo = g_fontApplication.GetFontInfo(name);
+            this.fonts_loading[this.fonts_loading.length] = fontinfo;
+            this.fonts_loading[this.fonts_loading.length - 1].NeedStyles = (need_styles == undefined) ? 15 : need_styles;
+            return fontinfo;
+        };
+        this.AddLoadFontsNotPick = function (info, need_styles) {
             this.fonts_loading[this.fonts_loading.length] = info;
             this.fonts_loading[this.fonts_loading.length - 1].NeedStyles = (need_styles == undefined) ? 15 : need_styles;
         };
@@ -194,7 +203,7 @@
             if (this.embedded_cut_manager.bIsCutFontsUse) {
                 return this.embedded_cut_manager.load_cut_fonts();
             }
-            var gui_fonts = new Array();
+            var gui_fonts = [];
             var gui_count = 0;
             for (var i = 0; i < this.fontInfos.length; i++) {
                 var info = this.fontInfos[i];
@@ -204,18 +213,19 @@
                 }
             }
             for (var i in _fonts) {
-                if (_fonts[i].Type != FONT_TYPE_EMBEDDED) {
-                    var info = this.fontInfos[this.map_font_index[_fonts[i].name]];
-                    this.AddLoadFonts(info, _fonts[i].NeedStyles);
+                if (_fonts[i].type != FONT_TYPE_EMBEDDED) {
+                    var info = this.AddLoadFonts(_fonts[i].name, _fonts[i].NeedStyles);
                     if (info.Type == FONT_TYPE_ADDITIONAL) {
-                        var __font = new CFont(info.Name, "", info.Type, info.Thumbnail);
-                        gui_fonts[gui_count++] = __font;
+                        if (info.name != "ASCW3") {
+                            var __font = new CFont(info.Name, "", info.Type, info.Thumbnail);
+                            gui_fonts[gui_count++] = __font;
+                        }
                     }
                 } else {
                     var ind = -1;
                     for (var j = 0; j < this.embeddedFontInfos.length; j++) {
                         if (this.embeddedFontInfos[j].Name == _fonts[i].name) {
-                            this.AddLoadFonts(this.embeddedFontInfos[j], 0);
+                            this.AddLoadFontsNotPick(this.embeddedFontInfos[j], 15);
                             break;
                         }
                     }
@@ -223,11 +233,11 @@
             }
             this.Api.sync_InitEditorFonts(gui_fonts);
             if (this.Api.IsNeedDefaultFonts()) {
-                this.AddLoadFonts(this.fontInfos[this.map_font_index["Arial"]], 15);
-                this.AddLoadFonts(this.fontInfos[this.map_font_index["Symbol"]], 15);
-                this.AddLoadFonts(this.fontInfos[this.map_font_index["Wingdings"]], 15);
-                this.AddLoadFonts(this.fontInfos[this.map_font_index["Courier New"]], 15);
-                this.AddLoadFonts(this.fontInfos[this.map_font_index["Times New Roman"]], 15);
+                this.AddLoadFonts("Arial", 15);
+                this.AddLoadFonts("Symbol", 15);
+                this.AddLoadFonts("Wingdings", 15);
+                this.AddLoadFonts("Courier New", 15);
+                this.AddLoadFonts("Times New Roman", 15);
             }
             this.Api.asyncFontsDocumentStartLoaded();
             this.bIsLoadDocumentFirst = true;
@@ -247,7 +257,7 @@
         };
         this.CheckFontsNeedLoading = function (_fonts) {
             for (var i in _fonts) {
-                var info = this.fontInfos[this.map_font_index[_fonts[i].name]];
+                var info = g_fontApplication.GetFontInfo(_fonts[i].name);
                 var _isNeed = info.CheckFontLoadStylesNoLoad(this);
                 if (_isNeed === true) {
                     return true;
@@ -257,8 +267,7 @@
         };
         this.LoadDocumentFonts2 = function (_fonts) {
             for (var i in _fonts) {
-                var info = this.fontInfos[this.map_font_index[_fonts[i].name]];
-                this.AddLoadFonts(info, 15);
+                this.AddLoadFonts(_fonts[i].name, 15);
             }
             if (null == this.ThemeLoader) {
                 this.Api.asyncFontsDocumentStartLoaded();
@@ -359,9 +368,8 @@
         this.LoadFontsFromServer = function (_fonts) {
             var _count = _fonts.length;
             for (var i = 0; i < _count; i++) {
-                var _info_ind = this.map_font_index[_fonts[i]];
-                if (undefined !== _info_ind) {
-                    var _info = this.fontInfos[_info_ind];
+                var _info = g_fontApplication.GetFontInfo(_fonts[i]);
+                if (undefined !== _info) {
                     _info.LoadFontsFromServer(this);
                 }
             }
@@ -491,56 +499,20 @@
             oImage.Image.src = oImage.src;
         };
     }
-    function CGlobalScriptLoader() {
-        this.Status = -1;
-        this.callback = null;
-        this.oCallBackThis = null;
-        var oThis = this;
-        this.CheckLoaded = function () {
-            return (0 == oThis.Status || 1 == oThis.Status);
-        };
-        this.LoadScriptAsync = function (url, _callback, _callback_this) {
-            this.callback = _callback;
-            this.oCallBackThis = _callback_this;
-            if (-1 != this.Status) {
-                return true;
-            }
-            this.Status = 2;
-            var scriptElem = document.createElement("script");
-            if (scriptElem.readyState && false) {
-                scriptElem.onreadystatechange = function () {
-                    if (this.readyState == "complete" || this.readyState == "loaded") {
-                        scriptElem.onreadystatechange = null;
-                        setTimeout(oThis._callback_script_load, 0);
-                    }
-                };
-            }
-            scriptElem.onload = scriptElem.onerror = oThis._callback_script_load;
-            scriptElem.setAttribute("src", url);
-            scriptElem.setAttribute("type", "text/javascript");
-            document.getElementsByTagName("head")[0].appendChild(scriptElem);
-            return false;
-        };
-        this._callback_script_load = function () {
-            if (oThis.Status != 3) {
-                oThis.Status = 1;
-            }
-            if (null != oThis.callback) {
-                oThis.callback(oThis.oCallBackThis);
-                oThis.callback = null;
-            }
-        };
-    }
     window.g_font_loader = new CGlobalFontLoader();
     window.g_image_loader = new CGlobalImageLoader();
-    window.g_script_loader = new CGlobalScriptLoader();
-    window.g_script_loader2 = new CGlobalScriptLoader();
     window.g_flow_anchor = new Image();
     window.g_flow_anchor.asc_complete = false;
     window.g_flow_anchor.onload = function () {
         window.g_flow_anchor.asc_complete = true;
     };
-    window.g_flow_anchor.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAARCAYAAADUryzEAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOwwAADsMBx2+oZAAAAAd0SU1FB90FEQkoAWe6v2gAAABoSURBVDjLzZRBDsAgCAQd0v9/eXpqokaxrWlSjgLL7kJELTsRWRIQ8BUAoIpKBhJlM8g8uCarfMbgJwCrVWX+HE8MGw1rJKyaRzVRP96R0jONFcVVrjmku2bWMrY9mJ5yz2YGzu5/cAJM80IX4Fh6ugAAAABJRU5ErkJggg==";
+    window.g_flow_anchor.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAPBAMAAADNDVhEAAAAIVBMVEUAAAANDQ0NDQ0NDQ0NDQ0NDQ0AAAANDQ0NDQ0NDQ0NDQ1jk7YPAAAACnRSTlMAGkD4mb9c5s9TDghpXQAAAFZJREFUCNdjYGBgW8YABlxcIBLBZ1gAEfZa5QWiGRkWMAIpAaA4iHQE0YwODEtANMsChkIwv4BBWQBICyswMC1iWADEDAzKoUuDFUAGNC9uABvIaQkkABpxD6lFb9lRAAAAAElFTkSuQmCC";
+    window.g_flow_anchor2 = new Image();
+    window.g_flow_anchor2.asc_complete = false;
+    window.g_flow_anchor2.onload = function () {
+        window.g_flow_anchor2.asc_complete = true;
+    };
+    window.g_flow_anchor2.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAeCAMAAAAFBf7qAAAAOVBMVEUAAAAAAAAAAAAAAAAJCQkAAAAJCQkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJCQknI0ZQAAAAEnRSTlMAx9ITlAfyPHxn68yecTAl5qt6y0BvAAAAt0lEQVQoz8WS0QrDIAxFk0ajtlXb+/8fuzAprltg7Gnn4aIcvAgJTSSoBiGPoIAGV60qoquvIIL110IJgPONmKIlMI73MiwGRoZvahbKVSizcDKU8QeVPDXEIr6ShVB9VUEn2FOMkwL8VwjUtuypvDWiHeVTFeyWkZHfVQZHGm4XMhKQyJB9GKMxuHQSBlioF7u2q7kzgO2AcWwW3F8mWRmGKgyu91mK1Tzh4ixVVkBzJI/EnGjyACbfCaO3eIWRAAAAAElFTkSuQmCC";
     window["CGlobalFontLoader"] = CGlobalFontLoader;
     CGlobalFontLoader.prototype["SetStreamIndexEmb"] = CGlobalFontLoader.prototype.SetStreamIndexEmb;
 })(window.document);

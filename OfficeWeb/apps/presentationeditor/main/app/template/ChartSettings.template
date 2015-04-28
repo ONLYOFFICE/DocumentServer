@@ -1,0 +1,51 @@
+<table cols="3">
+    <tr>
+        <td colspan=3>
+            <label class="header"><%= scope.textSize %></label>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small" width="88px">
+            <label class="input-label"><%= scope.textWidth %></label>
+            <div id="chart-spin-width"></div>
+        </td>
+        <td class="padding-small" width="28px" style="vertical-align: bottom;">
+            <div id="chart-button-ratio"></div>
+        </td>
+        <td class="padding-small" width="88px">
+            <label class="input-label"><%= scope.textHeight %></label>
+            <div id="chart-spin-height"></div>
+        </td>
+    </tr>
+</table>
+<table cols="2">
+    <tr>
+        <td class="padding-small" colspan=2>
+            <div class="separator horizontal"></div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan=2>
+            <label class="header"><%= scope.textChartType %></label>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small">
+            <div id="chart-button-type" style=""></div>
+        </td>
+        <td class="padding-small">
+            <div id="chart-button-style" style=""></div>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small" colspan=2>
+            <div class="separator horizontal"></div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan=2>
+            <button type="button" class="btn btn-text-default" id="chart-button-edit-data" style="width:115px;"><%= scope.textEditData %></button>
+        </td>
+    </tr>
+    <tr class="finish-cell"></tr>
+</table>

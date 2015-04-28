@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,8 +29,72 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.application({
-    name: "PE",
-    autoCreateViewport: true,
-    controllers: ["Main"]
+ "use strict";
+require.config({
+    baseUrl: "../../",
+    waitSeconds: 30,
+    paths: {
+        jquery: "../vendor/jquery/jquery",
+        underscore: "../vendor/underscore/underscore",
+        backbone: "../vendor/backbone/backbone",
+        bootstrap: "../vendor/bootstrap/dist/js/bootstrap",
+        text: "../vendor/requirejs-text/text",
+        perfectscrollbar: "common/main/lib/mods/perfect-scrollbar",
+        jmousewheel: "../vendor/perfect-scrollbar/src/jquery.mousewheel",
+        xregexp: "../vendor/xregexp/xregexp-all-min",
+        sockjs: "../vendor/sockjs/sockjs.min",
+        allfonts: "../sdk/Common/AllFonts",
+        sdk: "../sdk/PowerPoint/sdk-all",
+        api: "api/documents/api",
+        core: "common/main/lib/core/application",
+        notification: "common/main/lib/core/NotificationCenter",
+        keymaster: "common/main/lib/core/keymaster",
+        tip: "common/main/lib/util/Tip",
+        analytics: "common/Analytics",
+        gateway: "common/Gateway",
+        locale: "common/locale",
+        irregularstack: "common/IrregularStack"
+    },
+    shim: {
+        underscore: {
+            exports: "_"
+        },
+        backbone: {
+            deps: ["underscore", "jquery"],
+            exports: "Backbone"
+        },
+        bootstrap: {
+            deps: ["jquery"]
+        },
+        perfectscrollbar: {
+            deps: ["jmousewheel"]
+        },
+        notification: {
+            deps: ["backbone"]
+        },
+        core: {
+            deps: ["backbone", "notification", "irregularstack"]
+        },
+        sdk: {
+            deps: ["jquery", "underscore", "allfonts", "xregexp", "sockjs"]
+        },
+        gateway: {
+            deps: ["jquery"]
+        },
+        analytics: {
+            deps: ["jquery"]
+        }
+    }
+});
+require(["backbone", "bootstrap", "core", "sdk", "api", "analytics", "gateway", "locale"], function (Backbone, Bootstrap, Core) {
+    Backbone.history.start();
+    var app = new Backbone.Application({
+        nameSpace: "PE",
+        autoCreate: false,
+        controllers: ["Viewport", "DocumentHolder", "Toolbar", "Statusbar", "RightMenu", "LeftMenu", "Main", "Common.Controllers.Fonts", "Common.Controllers.Chat", "Common.Controllers.Comments", "Common.Controllers.ExternalDiagramEditor"]
+    });
+    Common.Locale.apply();
+    require(["presentationeditor/main/app/controller/Viewport", "presentationeditor/main/app/controller/DocumentHolder", "presentationeditor/main/app/controller/Toolbar", "presentationeditor/main/app/controller/Statusbar", "presentationeditor/main/app/controller/RightMenu", "presentationeditor/main/app/controller/LeftMenu", "presentationeditor/main/app/controller/Main", "presentationeditor/main/app/view/ParagraphSettings", "presentationeditor/main/app/view/ImageSettings", "presentationeditor/main/app/view/ShapeSettings", "presentationeditor/main/app/view/SlideSettings", "presentationeditor/main/app/view/TableSettings", "common/main/lib/util/utils", "common/main/lib/controller/Fonts", "common/main/lib/controller/Comments", "common/main/lib/controller/Chat", "presentationeditor/main/app/view/ChartSettings", "common/main/lib/controller/ExternalDiagramEditor"], function () {
+        app.start();
+    });
 });

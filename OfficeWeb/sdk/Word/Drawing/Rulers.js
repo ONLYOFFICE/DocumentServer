@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function CTab(pos, type) {
+ "use strict";
+function CTab(pos, type) {
     this.pos = pos;
     this.type = type;
 }
@@ -44,9 +45,9 @@ function CHorRulerRepaintChecker() {
     this.Type = 0;
     this.MarginLeft = 0;
     this.MarginRight = 0;
-    this.tableCols = new Array();
-    this.marginsLeft = new Array();
-    this.marginsRight = new Array();
+    this.tableCols = [];
+    this.marginsLeft = [];
+    this.marginsRight = [];
     this.BlitAttack = false;
     this.BlitLeft = 0;
     this.BlitIndentLeft = 0;
@@ -65,23 +66,60 @@ function CVerRulerRepaintChecker() {
     this.MarginBottom = 0;
     this.HeaderTop = 0;
     this.HeaderBottom = 0;
-    this.rowsY = new Array();
-    this.rowsH = new Array();
+    this.rowsY = [];
+    this.rowsH = [];
     this.BlitAttack = false;
     this.BlitTop = 0;
 }
-function RulerCorrectPosition(val, mm_1_8, mm_1_4) {
+function RulerCorrectPosition(val, mm_1_8, mm_1_4, margin) {
     if (global_keyboardEvent.AltKey) {
         return val;
     }
-    return (((val + mm_1_8) / mm_1_4) >> 0) * mm_1_4;
+    if (undefined === margin) {
+        return (((val + mm_1_8) / mm_1_4) >> 0) * mm_1_4;
+    }
+    if (val >= margin) {
+        return margin + (((val - margin + mm_1_8) / mm_1_4) >> 0) * mm_1_4;
+    }
+    return margin + (((val - margin - mm_1_8) / mm_1_4) >> 0) * mm_1_4;
 }
+function RulerCheckSimpleChanges() {
+    this.X = -1;
+    this.Y = -1;
+    this.IsSimple = true;
+    this.IsDown = false;
+}
+RulerCheckSimpleChanges.prototype = {
+    Clear: function () {
+        this.X = -1;
+        this.Y = -1;
+        this.IsSimple = true;
+        this.IsDown = false;
+    },
+    Reinit: function () {
+        this.X = global_mouseEvent.X;
+        this.Y = global_mouseEvent.Y;
+        this.IsSimple = true;
+        this.IsDown = true;
+    },
+    CheckMove: function () {
+        if (!this.IsDown) {
+            return;
+        }
+        if (!this.IsSimple) {
+            return;
+        }
+        if (Math.abs(global_mouseEvent.X - this.X) > 0 || Math.abs(global_mouseEvent.Y - this.Y) > 0) {
+            this.IsSimple = false;
+        }
+    }
+};
 function CHorRuler() {
     this.m_oPage = null;
     this.m_nTop = 0;
     this.m_nBottom = 0;
     this.m_dDefaultTab = 12.5;
-    this.m_arrTabs = new Array();
+    this.m_arrTabs = [];
     this.m_lCurrentTab = -1;
     this.m_dCurrentTabNewPosition = -1;
     this.m_dMaxTab = 0;
@@ -108,6 +146,7 @@ function CHorRuler() {
     this.IsCanMoveMargins = true;
     this.IsCanMoveAnyMarkers = true;
     this.IsDrawAnyMarkers = true;
+    this.SimpleChanges = new RulerCheckSimpleChanges();
     this.InitTablePict = function () {
         var _data = g_memory.ctx.createImageData(7, 8);
         var _px = _data.data;
@@ -258,6 +297,9 @@ function CHorRuler() {
         return widthNew;
     };
     this.CreateBackground = function (cachedPage) {
+        if (window["NATIVE_EDITOR_ENJINE"]) {
+            return;
+        }
         if (null == cachedPage || undefined == cachedPage) {
             return;
         }
@@ -314,15 +356,15 @@ function CHorRuler() {
         checker.Type = this.CurrentObjectType;
         checker.BlitAttack = true;
         var dKoef_mm_to_pix = g_dKoef_mm_to_pix * this.m_dZoom;
-        this.m_nTop = (1.8 * g_dKoef_mm_to_pix) >> 0;
-        this.m_nBottom = (5.2 * g_dKoef_mm_to_pix) >> 0;
+        this.m_nTop = 6;
+        this.m_nBottom = 19;
         var context = this.m_oCanvas.getContext("2d");
         if (!this.IsRetina) {
             context.setTransform(1, 0, 0, 1, 5, 0);
         } else {
             context.setTransform(2, 0, 0, 2, 10, 0);
         }
-        context.fillStyle = "#B0B0B0";
+        context.fillStyle = GlobalSkin.BackgroundColor;
         context.fillRect(0, 0, this.m_oCanvas.width, this.m_oCanvas.height);
         var left_margin = 0;
         var right_margin = 0;
@@ -362,10 +404,17 @@ function CHorRuler() {
                 }
             }
         }
-        context.fillStyle = "#EDEDED";
+        context.fillStyle = GlobalSkin.RulerLight;
         context.fillRect(left_margin + 0.5, this.m_nTop + 0.5, right_margin - left_margin, this.m_nBottom - this.m_nTop);
         var intW = width >> 0;
-        context.strokeStyle = "#929292";
+        if (window["flat_desine"] === true) {
+            context.beginPath();
+            context.fillStyle = GlobalSkin.RulerDark;
+            context.fillRect(0.5, this.m_nTop + 0.5, left_margin, this.m_nBottom - this.m_nTop);
+            context.fillRect(right_margin + 0.5, this.m_nTop + 0.5, Math.max(intW - right_margin, 1), this.m_nBottom - this.m_nTop);
+            context.beginPath();
+        }
+        context.strokeStyle = GlobalSkin.RulerOutline;
         context.lineWidth = 1;
         context.strokeRect(0.5, this.m_nTop + 0.5, Math.max(intW - 1, 1), this.m_nBottom - this.m_nTop);
         context.beginPath();
@@ -457,8 +506,8 @@ function CHorRuler() {
         if (null != markup) {
             var _count = markup.Cols.length;
             if (0 != _count) {
-                context.fillStyle = "#B0B0B0";
-                context.strokeStyle = "#929292";
+                context.fillStyle = GlobalSkin.RulerDark;
+                context.strokeStyle = GlobalSkin.RulerOutline;
                 var _offset = markup.X;
                 for (var i = 0; i <= _count; i++) {
                     var __xID = 0;
@@ -537,6 +586,7 @@ function CHorRuler() {
     this.OnMouseMove = function (left, top, e) {
         var word_control = this.m_oWordControl;
         check_MouseMoveEvent(e);
+        this.SimpleChanges.CheckMove();
         var hor_ruler = word_control.m_oTopRuler_horRuler;
         var dKoefPxToMM = 100 * g_dKoef_pix_to_mm / word_control.m_nZoomValue;
         var _x = global_mouseEvent.X - 5 * g_dKoef_mm_to_pix - left - word_control.X - word_control.m_oMainContent.AbsolutePosition.L * g_dKoef_mm_to_pix;
@@ -551,6 +601,10 @@ function CHorRuler() {
             _margin_left = this.TableMarginLeft;
             _margin_right = this.TableMarginRight;
         }
+        var _presentations = false;
+        if (word_control.EditorType === "presentations") {
+            _presentations = true;
+        }
         switch (this.DragType) {
         case 0:
             var position = this.CheckMouseType(_x, _y);
@@ -561,7 +615,7 @@ function CHorRuler() {
             }
             break;
         case 1:
-            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4);
+            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4, _margin_left);
             if (newVal < 0) {
                 newVal = 0;
             }
@@ -583,7 +637,7 @@ function CHorRuler() {
             word_control.m_oDrawingDocument.SetCursorType("w-resize");
             break;
         case 2:
-            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4);
+            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4, _margin_left);
             var min = this.m_dMarginLeft;
             if ((this.m_dMarginLeft + this.m_dIndentLeft) > min) {
                 min = this.m_dMarginLeft + this.m_dIndentLeft;
@@ -608,13 +662,22 @@ function CHorRuler() {
             word_control.m_oDrawingDocument.SetCursorType("w-resize");
             break;
         case 3:
-            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4);
+            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4, _margin_left);
             var min = 0;
             if (this.m_dIndentLeftFirst < this.m_dIndentLeft) {
                 min = this.m_dIndentLeft - this.m_dIndentLeftFirst;
             }
             if (newVal < min) {
                 newVal = this.m_dIndentLeft_old;
+            }
+            if (_presentations) {
+                min = _margin_left;
+                if (this.m_dIndentLeftFirst < this.m_dIndentLeft) {
+                    min += (this.m_dIndentLeft - this.m_dIndentLeftFirst);
+                }
+                if (newVal < min) {
+                    newVal = min;
+                }
             }
             var max = _margin_right;
             if (0 < this.m_dIndentRight) {
@@ -634,13 +697,18 @@ function CHorRuler() {
             word_control.m_oOverlayApi.VertLine(pos);
             break;
         case 4:
-            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4);
+            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4, _margin_left);
             if (newVal < 0) {
                 newVal = 0;
             }
             var max = _margin_right - 20;
             if (0 < this.m_dIndentRight) {
                 max -= this.m_dIndentRight;
+            }
+            if (_presentations) {
+                if (newVal < _margin_left) {
+                    newVal = _margin_left;
+                }
             }
             if (newVal > max) {
                 newVal = Math.max(max, _margin_left + this.m_dIndentLeft_old);
@@ -651,13 +719,18 @@ function CHorRuler() {
             word_control.m_oOverlayApi.VertLine(pos);
             break;
         case 5:
-            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4);
+            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4, _margin_left);
             if (newVal < 0) {
                 newVal = 0;
             }
             var max = _margin_right - 20;
             if (0 < this.m_dIndentRight) {
                 max -= this.m_dIndentRight;
+            }
+            if (_presentations) {
+                if (newVal < _margin_left) {
+                    newVal = _margin_left;
+                }
             }
             if (newVal > max) {
                 newVal = Math.max(max, _margin_left + this.m_dIndentLeftFirst_old);
@@ -668,7 +741,7 @@ function CHorRuler() {
             word_control.m_oOverlayApi.VertLine(pos);
             break;
         case 6:
-            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4);
+            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4, _margin_left);
             if (newVal > (this.m_oPage.width_mm)) {
                 newVal = this.m_oPage.width_mm;
             }
@@ -683,13 +756,18 @@ function CHorRuler() {
             if (newVal < min) {
                 newVal = Math.min(min, _margin_right - this.m_dIndentRight_old);
             }
+            if (_presentations) {
+                if (newVal > _margin_right) {
+                    newVal = _margin_right;
+                }
+            }
             this.m_dIndentRight = _margin_right - newVal;
             word_control.UpdateHorRulerBack();
             var pos = left + (_margin_right - this.m_dIndentRight) * dKoef_mm_to_pix;
             word_control.m_oOverlayApi.VertLine(pos);
             break;
         case 7:
-            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4);
+            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4, _margin_left);
             this.m_dCurrentTabNewPosition = newVal - _margin_left;
             var pos = left + (_margin_left + this.m_dCurrentTabNewPosition) * dKoef_mm_to_pix;
             if (_y <= 3 || _y > 5.6) {
@@ -704,7 +782,7 @@ function CHorRuler() {
             }
             break;
         case 8:
-            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4);
+            var newVal = RulerCorrectPosition(_x, mm_1_8, mm_1_4, _margin_left);
             var _min = 0;
             var _max = this.m_oPage.width_mm;
             var markup = this.m_oTableMarkup;
@@ -746,7 +824,18 @@ function CHorRuler() {
             _margin_left = this.TableMarginLeft;
             _margin_right = this.TableMarginRight;
         }
-        if (this.IsCanMoveAnyMarkers) {
+        var posL = _margin_left;
+        if ((_margin_left + this.m_dIndentLeft) > posL) {
+            posL = _margin_left + this.m_dIndentLeft;
+        }
+        if ((_margin_left + this.m_dIndentLeftFirst) > posL) {
+            posL = _margin_left + this.m_dIndentLeftFirst;
+        }
+        var posR = _margin_right;
+        if (this.m_dIndentRight > 0) {
+            posR = _margin_right - this.m_dIndentRight;
+        }
+        if (this.IsCanMoveAnyMarkers && posL < posR) {
             if (y >= 3 && y <= _bottom) {
                 var _count_tabs = this.m_arrTabs.length;
                 for (var i = 0; i < _count_tabs; i++) {
@@ -830,6 +919,7 @@ function CHorRuler() {
         var word_control = this.m_oWordControl;
         check_MouseDownEvent(e);
         global_mouseEvent.LockMouse();
+        this.SimpleChanges.Reinit();
         var dKoefPxToMM = 100 * g_dKoef_pix_to_mm / word_control.m_nZoomValue;
         var dKoef_mm_to_pix = g_dKoef_mm_to_pix * this.m_dZoom;
         var _x = global_mouseEvent.X - 5 * g_dKoef_mm_to_pix - left - word_control.X - word_control.m_oMainContent.AbsolutePosition.L * g_dKoef_mm_to_pix;
@@ -891,11 +981,11 @@ function CHorRuler() {
         if (0 == this.DragType) {
             var _top = 1.8;
             var _bottom = 5.2;
-            if (_y >= 3 && _y <= _bottom && _x >= _margin_left && _x <= _margin_right) {
-                var _new_tab_pos = _x - _margin_left;
+            if (_y >= 3 && _y <= _bottom && _x >= (_margin_left + this.m_dIndentLeft) && _x <= (_margin_right - this.m_dIndentRight)) {
                 var mm_1_4 = 10 / 4;
                 var mm_1_8 = mm_1_4 / 2;
-                var _new_tab_pos = RulerCorrectPosition(_new_tab_pos, mm_1_8, mm_1_4);
+                var _new_tab_pos = RulerCorrectPosition(_x, mm_1_8, mm_1_4, _margin_left);
+                _new_tab_pos -= _margin_left;
                 this.m_arrTabs[this.m_arrTabs.length] = new CTab(_new_tab_pos, word_control.m_nTabsType);
                 word_control.UpdateHorRuler();
                 this.m_lCurrentTab = this.m_arrTabs.length - 1;
@@ -909,6 +999,7 @@ function CHorRuler() {
     };
     this.OnMouseUp = function (left, top, e) {
         var word_control = this.m_oWordControl;
+        this.m_oWordControl.m_oOverlayApi.Clear();
         var lockedElement = check_MouseUpEvent(e);
         this.m_dIndentLeft_old = -10000;
         this.m_dIndentLeftFirst_old = -10000;
@@ -925,20 +1016,30 @@ function CHorRuler() {
         switch (this.DragType) {
         case 1:
             case 2:
-            this.SetMarginProperties();
+            if (!this.SimpleChanges.IsSimple) {
+                this.SetMarginProperties();
+            }
             break;
         case 3:
             case 4:
             case 5:
             case 6:
-            this.SetPrProperties();
+            if (!this.SimpleChanges.IsSimple) {
+                this.SetPrProperties();
+            } else {
+                word_control.OnUpdateOverlay();
+            }
             break;
         case 7:
             var _y = (global_mouseEvent.Y - word_control.Y) * g_dKoef_pix_to_mm;
-            if (_y <= 3 || _y > 5.6 || this.m_dCurrentTabNewPosition < 0 || (this.m_dCurrentTabNewPosition + _margin_left) > _margin_right) {
-                this.m_arrTabs.splice(this.m_lCurrentTab, 1);
+            if (_y <= 3 || _y > 5.6 || this.m_dCurrentTabNewPosition < this.m_dIndentLeft || (this.m_dCurrentTabNewPosition + _margin_left) > (_margin_right - this.m_dIndentRight)) {
+                if (-1 != this.m_lCurrentTab) {
+                    this.m_arrTabs.splice(this.m_lCurrentTab, 1);
+                }
             } else {
-                this.m_arrTabs[this.m_lCurrentTab].pos = this.m_dCurrentTabNewPosition;
+                if (this.m_lCurrentTab < this.m_arrTabs.length) {
+                    this.m_arrTabs[this.m_lCurrentTab].pos = this.m_dCurrentTabNewPosition;
+                }
             }
             this.m_lCurrentTab = -1;
             this.CorrectTabs();
@@ -946,7 +1047,9 @@ function CHorRuler() {
             this.SetTabsProperties();
             break;
         case 8:
-            this.SetTableProperties();
+            if (!this.SimpleChanges.IsSimple) {
+                this.SetTableProperties();
+            }
             this.DragTablePos = -1;
             break;
         }
@@ -956,9 +1059,12 @@ function CHorRuler() {
         this.IsDrawingCurTab = true;
         this.DragType = 0;
         this.m_bIsMouseDown = false;
+        this.m_oWordControl.m_oDrawingDocument.UnlockCursorType();
+        this.SimpleChanges.Clear();
     };
     this.OnMouseUpExternal = function () {
         var word_control = this.m_oWordControl;
+        this.m_oWordControl.m_oOverlayApi.Clear();
         this.m_dIndentLeft_old = -10000;
         this.m_dIndentLeftFirst_old = -10000;
         this.m_dIndentRight_old = -10000;
@@ -974,20 +1080,28 @@ function CHorRuler() {
         switch (this.DragType) {
         case 1:
             case 2:
-            this.SetMarginProperties();
+            if (!this.SimpleChanges.IsSimple) {
+                this.SetMarginProperties();
+            }
             break;
         case 3:
             case 4:
             case 5:
             case 6:
-            this.SetPrProperties();
+            if (!this.SimpleChanges.IsSimple) {
+                this.SetPrProperties();
+            }
             break;
         case 7:
             var _y = (global_mouseEvent.Y - word_control.Y) * g_dKoef_pix_to_mm;
-            if (_y <= 3 || _y > 5.6 || this.m_dCurrentTabNewPosition < 0 || (this.m_dCurrentTabNewPosition + _margin_left) > _margin_right) {
-                this.m_arrTabs.splice(this.m_lCurrentTab, 1);
+            if (_y <= 3 || _y > 5.6 || this.m_dCurrentTabNewPosition < this.m_dIndentLeft || (this.m_dCurrentTabNewPosition + _margin_left) > (_margin_right - this.m_dIndentRight)) {
+                if (-1 != this.m_lCurrentTab) {
+                    this.m_arrTabs.splice(this.m_lCurrentTab, 1);
+                }
             } else {
-                this.m_arrTabs[this.m_lCurrentTab].pos = this.m_dCurrentTabNewPosition;
+                if (this.m_lCurrentTab < this.m_arrTabs.length) {
+                    this.m_arrTabs[this.m_lCurrentTab].pos = this.m_dCurrentTabNewPosition;
+                }
             }
             this.m_lCurrentTab = -1;
             this.CorrectTabs();
@@ -995,7 +1109,9 @@ function CHorRuler() {
             this.SetTabsProperties();
             break;
         case 8:
-            this.SetTableProperties();
+            if (!this.SimpleChanges.IsSimple) {
+                this.SetTableProperties();
+            }
             this.DragTablePos = -1;
             break;
         }
@@ -1005,6 +1121,8 @@ function CHorRuler() {
         this.IsDrawingCurTab = true;
         this.DragType = 0;
         this.m_bIsMouseDown = false;
+        this.m_oWordControl.m_oDrawingDocument.UnlockCursorType();
+        this.SimpleChanges.Clear();
     };
     this.SetTabsProperties = function () {
         var _arr = new CParaTabs();
@@ -1023,13 +1141,13 @@ function CHorRuler() {
             }
         }
         if (false === this.m_oWordControl.m_oLogicDocument.Document_Is_SelectionLocked(changestype_Paragraph_Properties)) {
-            this.m_oWordControl.m_oLogicDocument.Create_NewHistoryPoint();
+            this.m_oWordControl.m_oLogicDocument.Create_NewHistoryPoint(historydescription_Document_SetParagraphTabs);
             this.m_oWordControl.m_oLogicDocument.Set_ParagraphTabs(_arr);
         }
     };
     this.SetPrProperties = function () {
         if (false === this.m_oWordControl.m_oLogicDocument.Document_Is_SelectionLocked(changestype_Paragraph_Properties)) {
-            this.m_oWordControl.m_oLogicDocument.Create_NewHistoryPoint();
+            this.m_oWordControl.m_oLogicDocument.Create_NewHistoryPoint(historydescription_Document_SetParagraphIndentFromRulers);
             this.m_oWordControl.m_oLogicDocument.Set_ParagraphIndent({
                 Left: this.m_dIndentLeft,
                 Right: this.m_dIndentRight,
@@ -1040,7 +1158,7 @@ function CHorRuler() {
     };
     this.SetMarginProperties = function () {
         if (false === this.m_oWordControl.m_oLogicDocument.Document_Is_SelectionLocked(changestype_Document_SectPr)) {
-            this.m_oWordControl.m_oLogicDocument.Create_NewHistoryPoint();
+            this.m_oWordControl.m_oLogicDocument.Create_NewHistoryPoint(historydescription_Document_SetDocumentMargin_Hor);
             this.m_oWordControl.m_oLogicDocument.Set_DocumentMargin({
                 Left: this.m_dMarginLeft,
                 Right: this.m_dMarginRight
@@ -1049,11 +1167,12 @@ function CHorRuler() {
     };
     this.SetTableProperties = function () {
         if (false === this.m_oWordControl.m_oLogicDocument.Document_Is_SelectionLocked(changestype_Table_Properties)) {
-            this.m_oWordControl.m_oLogicDocument.Create_NewHistoryPoint();
+            this.m_oWordControl.m_oLogicDocument.Create_NewHistoryPoint(historydescription_Document_SetTableMarkup_Hor);
             this.m_oTableMarkup.CorrectTo();
             this.m_oTableMarkup.Table.Update_TableMarkupFromRuler(this.m_oTableMarkup, true, this.DragTablePos);
             this.m_oTableMarkup.CorrectFrom();
             this.m_oWordControl.m_oLogicDocument.Document_UpdateInterfaceState();
+            this.m_oWordControl.m_oLogicDocument.Document_UpdateRulersState();
         }
     };
     this.BlitToMain = function (left, top, htmlElement) {
@@ -1097,7 +1216,7 @@ function CHorRuler() {
             checker.BlitDefaultTab = this.m_dDefaultTab;
             checker.BlitTabs = null;
             if (0 != this.m_arrTabs.length) {
-                checker.BlitTabs = new Array();
+                checker.BlitTabs = [];
                 var _len = this.m_arrTabs.length;
                 for (var ii = 0; ii < _len; ii++) {
                     checker.BlitTabs[ii] = {
@@ -1123,8 +1242,8 @@ function CHorRuler() {
             var var4 = 0;
             var _positon_y = this.m_nBottom - 5;
             context.strokeStyle = "#81878F";
-            var2 = parseInt(1.4 * g_dKoef_mm_to_pix);
-            var3 = parseInt(1 * g_dKoef_mm_to_pix);
+            var2 = 5;
+            var3 = 3;
             checker.BlitMarginLeftInd = _margin_left;
             checker.BlitMarginRightInd = _margin_right;
             context.fillStyle = "#CDD1D6";
@@ -1173,7 +1292,7 @@ function CHorRuler() {
                 context.fill();
                 context.stroke();
             }
-            if (-1 != this.m_lCurrentTab) {
+            if (-1 != this.m_lCurrentTab && this.m_lCurrentTab < this.m_arrTabs.length) {
                 var _tab = this.m_arrTabs[this.m_lCurrentTab];
                 var _x = parseInt((_margin_left + _tab.pos) * dKoef_mm_to_pix) + left;
                 var _old_w = context.lineWidth;
@@ -1218,10 +1337,11 @@ function CHorRuler() {
                 posR = _margin_right - this.m_dIndentRight;
             }
             if (posL < posR) {
-                context.fillStyle = "#E7E7E7";
+                context.fillStyle = GlobalSkin.RulerMarkersFillColor;
                 dCenterX = left + (_margin_left + this.m_dIndentLeft) * dKoef_mm_to_pix;
-                var1 = parseInt(dCenterX - 1 * g_dKoef_mm_to_pix) - 0.5;
-                var4 = parseInt(dCenterX + 1 * g_dKoef_mm_to_pix) + 0.5;
+                var _1mm_to_pix = g_dKoef_mm_to_pix;
+                var1 = parseInt(dCenterX - _1mm_to_pix) - 0.5;
+                var4 = parseInt(dCenterX + _1mm_to_pix) + 0.5;
                 context.beginPath();
                 context.moveTo(var1, this.m_nBottom + 0.5);
                 context.lineTo(var4, this.m_nBottom + 0.5);
@@ -1235,8 +1355,8 @@ function CHorRuler() {
                 context.fill();
                 context.stroke();
                 dCenterX = left + (_margin_right - this.m_dIndentRight) * dKoef_mm_to_pix;
-                var1 = parseInt(dCenterX - 1 * g_dKoef_mm_to_pix) - 0.5;
-                var4 = parseInt(dCenterX + 1 * g_dKoef_mm_to_pix) + 0.5;
+                var1 = parseInt(dCenterX - _1mm_to_pix) - 0.5;
+                var4 = parseInt(dCenterX + _1mm_to_pix) + 0.5;
                 context.beginPath();
                 context.moveTo(var1, this.m_nBottom + 0.5);
                 context.lineTo(var4, this.m_nBottom + 0.5);
@@ -1247,8 +1367,8 @@ function CHorRuler() {
                 context.fill();
                 context.stroke();
                 dCenterX = left + (_margin_left + this.m_dIndentLeftFirst) * dKoef_mm_to_pix;
-                var1 = parseInt(dCenterX - 1 * g_dKoef_mm_to_pix) - 0.5;
-                var4 = parseInt(dCenterX + 1 * g_dKoef_mm_to_pix) + 0.5;
+                var1 = parseInt(dCenterX - _1mm_to_pix) - 0.5;
+                var4 = parseInt(dCenterX + _1mm_to_pix) + 0.5;
                 context.beginPath();
                 context.moveTo(var1, this.m_nTop + 0.5);
                 context.lineTo(var1, this.m_nTop + 0.5 - var3);
@@ -1291,7 +1411,7 @@ function CHorRuler() {
                         }
                         _x = parseInt((_margin_left + this.m_dCurrentTabNewPosition) * dKoef_mm_to_pix) + left;
                     } else {
-                        if (tab.pos < 0 || tab.pos > this.m_dMarginRight) {
+                        if (tab.pos < this.m_dIndentLeft || (tab.pos + _margin_left) > (_margin_right - this.m_dIndentRight)) {
                             continue;
                         }
                         _x = parseInt((_margin_left + tab.pos) * dKoef_mm_to_pix) + left;
@@ -1345,6 +1465,7 @@ function CVerRuler() {
     this.IsCanMoveMargins = true;
     this.m_oWordControl = null;
     this.IsRetina = false;
+    this.SimpleChanges = new RulerCheckSimpleChanges();
     this.CheckCanvas = function () {
         this.m_dZoom = this.m_oWordControl.m_nZoomValue / 100;
         this.IsRetina = this.m_oWordControl.bIsRetinaSupport;
@@ -1380,6 +1501,9 @@ function CVerRuler() {
         return heightNew;
     };
     this.CreateBackground = function (cachedPage) {
+        if (window["NATIVE_EDITOR_ENJINE"]) {
+            return;
+        }
         if (null == cachedPage || undefined == cachedPage) {
             return;
         }
@@ -1431,15 +1555,15 @@ function CVerRuler() {
         checker.Type = this.CurrentObjectType;
         checker.BlitAttack = true;
         var dKoef_mm_to_pix = g_dKoef_mm_to_pix * this.m_dZoom;
-        this.m_nLeft = (0.8 * g_dKoef_mm_to_pix) >> 0;
-        this.m_nRight = (4.2 * g_dKoef_mm_to_pix) >> 0;
+        this.m_nLeft = 3;
+        this.m_nRight = 15;
         var context = this.m_oCanvas.getContext("2d");
         if (!this.IsRetina) {
             context.setTransform(1, 0, 0, 1, 0, 5);
         } else {
             context.setTransform(2, 0, 0, 2, 0, 10);
         }
-        context.fillStyle = "#B0B0B0";
+        context.fillStyle = GlobalSkin.BackgroundColor;
         context.fillRect(0, 0, this.m_oCanvas.width, this.m_oCanvas.height);
         var top_margin = 0;
         var bottom_margin = 0;
@@ -1477,11 +1601,18 @@ function CVerRuler() {
             }
         }
         if (bottom_margin > top_margin) {
-            context.fillStyle = "#EDEDED";
+            context.fillStyle = GlobalSkin.RulerLight;
             context.fillRect(this.m_nLeft + 0.5, top_margin + 0.5, this.m_nRight - this.m_nLeft, bottom_margin - top_margin);
         }
         var intH = height >> 0;
-        context.strokeStyle = "#929292";
+        if (window["flat_desine"] === true) {
+            context.beginPath();
+            context.fillStyle = GlobalSkin.RulerDark;
+            context.fillRect(this.m_nLeft + 0.5, 0.5, this.m_nRight - this.m_nLeft, top_margin);
+            context.fillRect(this.m_nLeft + 0.5, bottom_margin + 0.5, this.m_nRight - this.m_nLeft, Math.max(intH - bottom_margin, 1));
+            context.beginPath();
+        }
+        context.strokeStyle = GlobalSkin.RulerOutline;
         context.lineWidth = 1;
         context.strokeRect(this.m_nLeft + 0.5, 0.5, this.m_nRight - this.m_nLeft, Math.max(intH - 1, 1));
         context.beginPath();
@@ -1590,8 +1721,8 @@ function CVerRuler() {
             }
             var start_dark = (((markup.Rows[0].Y + markup.Rows[0].H) * dKoef_mm_to_pix) >> 0) + 0.5;
             var end_dark = 0;
-            context.fillStyle = "#B0B0B0";
-            context.strokeStyle = "#929292";
+            context.fillStyle = GlobalSkin.RulerDark;
+            context.strokeStyle = GlobalSkin.RulerOutline;
             var _x = this.m_nLeft + 0.5;
             var _w = this.m_nRight - this.m_nLeft;
             for (var i = 1; i < _count; i++) {
@@ -1605,6 +1736,7 @@ function CVerRuler() {
     this.OnMouseMove = function (left, top, e) {
         var word_control = this.m_oWordControl;
         check_MouseMoveEvent(e);
+        this.SimpleChanges.CheckMove();
         var ver_ruler = word_control.m_oLeftRuler_vertRuler;
         var dKoefPxToMM = 100 * g_dKoef_pix_to_mm / word_control.m_nZoomValue;
         var _y = global_mouseEvent.Y - 7 * g_dKoef_mm_to_pix - top - word_control.Y;
@@ -1616,7 +1748,7 @@ function CVerRuler() {
         switch (this.DragType) {
         case 0:
             if (this.CurrentObjectType == RULER_OBJECT_TYPE_PARAGRAPH) {
-                if ((Math.abs(_y - this.m_dMarginTop) < 1) || (Math.abs(_y - this.m_dMarginBottom) < 1)) {
+                if (this.IsCanMoveMargins && ((Math.abs(_y - this.m_dMarginTop) < 1) || (Math.abs(_y - this.m_dMarginBottom) < 1))) {
                     word_control.m_oDrawingDocument.SetCursorType("s-resize");
                 } else {
                     word_control.m_oDrawingDocument.SetCursorType("default");
@@ -1649,7 +1781,7 @@ function CVerRuler() {
             }
             break;
         case 1:
-            var newVal = RulerCorrectPosition(_y, mm_1_8, mm_1_4);
+            var newVal = RulerCorrectPosition(_y, mm_1_8, mm_1_4, this.m_dMarginTop);
             if (newVal > (this.m_dMarginBottom - 30)) {
                 newVal = this.m_dMarginBottom - 30;
             }
@@ -1663,7 +1795,7 @@ function CVerRuler() {
             word_control.m_oDrawingDocument.SetCursorType("s-resize");
             break;
         case 2:
-            var newVal = RulerCorrectPosition(_y, mm_1_8, mm_1_4);
+            var newVal = RulerCorrectPosition(_y, mm_1_8, mm_1_4, this.m_dMarginTop);
             if (newVal < (this.m_dMarginTop + 30)) {
                 newVal = this.m_dMarginTop + 30;
             }
@@ -1677,7 +1809,7 @@ function CVerRuler() {
             word_control.m_oDrawingDocument.SetCursorType("s-resize");
             break;
         case 3:
-            var newVal = RulerCorrectPosition(_y, mm_1_8, mm_1_4);
+            var newVal = RulerCorrectPosition(_y, mm_1_8, mm_1_4, this.m_dMarginTop);
             if (newVal > this.header_bottom) {
                 newVal = this.header_bottom;
             }
@@ -1691,7 +1823,7 @@ function CVerRuler() {
             word_control.m_oDrawingDocument.SetCursorType("s-resize");
             break;
         case 4:
-            var newVal = RulerCorrectPosition(_y, mm_1_8, mm_1_4);
+            var newVal = RulerCorrectPosition(_y, mm_1_8, mm_1_4, this.m_dMarginTop);
             if (newVal < 0) {
                 newVal = 0;
             }
@@ -1713,7 +1845,7 @@ function CVerRuler() {
             if (this.DragTablePos < this.m_oTableMarkup.Rows.length) {
                 _max = this.m_oTableMarkup.Rows[this.DragTablePos].Y + this.m_oTableMarkup.Rows[this.DragTablePos].H;
             }
-            var newVal = RulerCorrectPosition(_y, mm_1_8, mm_1_4);
+            var newVal = RulerCorrectPosition(_y, mm_1_8, mm_1_4, this.m_dMarginTop);
             if (newVal < _min) {
                 newVal = _min;
             }
@@ -1799,6 +1931,7 @@ function CVerRuler() {
     this.OnMouseDown = function (left, top, e) {
         var word_control = this.m_oWordControl;
         check_MouseDownEvent(e);
+        this.SimpleChanges.Reinit();
         global_mouseEvent.LockMouse();
         var dKoefPxToMM = 100 * g_dKoef_pix_to_mm / word_control.m_nZoomValue;
         var dKoef_mm_to_pix = g_dKoef_mm_to_pix * this.m_dZoom;
@@ -1841,36 +1974,52 @@ function CVerRuler() {
         switch (this.DragType) {
         case 1:
             case 2:
-            this.SetMarginProperties();
+            if (!this.SimpleChanges.IsSimple) {
+                this.SetMarginProperties();
+            }
             break;
         case 3:
             case 4:
-            this.SetHeaderProperties();
+            if (!this.SimpleChanges.IsSimple) {
+                this.SetHeaderProperties();
+            }
             break;
         case 5:
-            this.SetTableProperties();
+            if (!this.SimpleChanges.IsSimple) {
+                this.SetTableProperties();
+            }
             this.DragTablePos = -1;
             break;
         }
         this.DragType = 0;
+        this.m_oWordControl.m_oDrawingDocument.UnlockCursorType();
+        this.SimpleChanges.Clear();
     };
     this.OnMouseUpExternal = function () {
         this.m_oWordControl.m_oOverlayApi.Clear();
         switch (this.DragType) {
         case 1:
             case 2:
-            this.SetMarginProperties();
+            if (!this.SimpleChanges.IsSimple) {
+                this.SetMarginProperties();
+            }
             break;
         case 3:
             case 4:
-            this.SetHeaderProperties();
+            if (!this.SimpleChanges.IsSimple) {
+                this.SetHeaderProperties();
+            }
             break;
         case 5:
-            this.SetTableProperties();
+            if (!this.SimpleChanges.IsSimple) {
+                this.SetTableProperties();
+            }
             this.DragTablePos = -1;
             break;
         }
         this.DragType = 0;
+        this.m_oWordControl.m_oDrawingDocument.UnlockCursorType();
+        this.SimpleChanges.Clear();
     };
     this.BlitToMain = function (left, top, htmlElement) {
         if (!this.RepaintChecker.BlitAttack && top == this.RepaintChecker.BlitTop) {
@@ -1890,7 +2039,7 @@ function CVerRuler() {
     };
     this.SetMarginProperties = function () {
         if (false === this.m_oWordControl.m_oLogicDocument.Document_Is_SelectionLocked(changestype_Document_SectPr)) {
-            this.m_oWordControl.m_oLogicDocument.Create_NewHistoryPoint();
+            this.m_oWordControl.m_oLogicDocument.Create_NewHistoryPoint(historydescription_Document_SetDocumentMargin_Ver);
             this.m_oWordControl.m_oLogicDocument.Set_DocumentMargin({
                 Top: this.m_dMarginTop,
                 Bottom: this.m_dMarginBottom
@@ -1899,13 +2048,13 @@ function CVerRuler() {
     };
     this.SetHeaderProperties = function () {
         if (false === this.m_oWordControl.m_oLogicDocument.Document_Is_SelectionLocked(changestype_HdrFtr)) {
-            this.m_oWordControl.m_oLogicDocument.Create_NewHistoryPoint();
+            this.m_oWordControl.m_oLogicDocument.Create_NewHistoryPoint(historydescription_Document_SetHdrFtrBounds);
             this.m_oWordControl.m_oLogicDocument.Document_SetHdrFtrBounds(this.header_top, this.header_bottom);
         }
     };
     this.SetTableProperties = function () {
         if (false === this.m_oWordControl.m_oLogicDocument.Document_Is_SelectionLocked(changestype_Table_Properties)) {
-            this.m_oWordControl.m_oLogicDocument.Create_NewHistoryPoint();
+            this.m_oWordControl.m_oLogicDocument.Create_NewHistoryPoint(historydescription_Document_SetTableMarkup_Ver);
             this.m_oTableMarkup.CorrectTo();
             this.m_oTableMarkup.Table.Update_TableMarkupFromRuler(this.m_oTableMarkup, false, this.DragTablePos);
             this.m_oTableMarkup.CorrectFrom();

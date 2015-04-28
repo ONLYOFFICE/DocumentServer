@@ -1,0 +1,256 @@
+.statusbar {
+    padding: 0 2px 0;
+    height: 25px;
+    background-color: @gray-light;
+    .box-inner-shadow(0 1px 0 @gray-dark);
+    z-index: 500;
+
+    #status-tabs-scroll {
+        width: 112px;
+        float: left;
+        padding: 3px 12px 0 10px;
+    }
+
+    #status-zoom-box {
+        width: 160px;
+        float: right;
+        padding-top: 3px;
+
+        .separator {
+            margin-right: 10px;
+            margin-top: -3px;
+        }
+
+        #status-label-zoom {
+            cursor: pointer;
+            text-align: center;
+
+            &.disabled {
+                color: @gray-darker;
+                cursor: default;
+            }
+        }
+    }
+
+    #status-users-box {
+        width: 63px;
+        float: right;
+        height: 100%;
+
+        #status-users-icon,#status-users-count {
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        #status-users-count {
+            position: relative;
+            top: -3px;
+        }
+
+        #status-users-icon {
+            .background-ximage('@{app-image-path}/toolbar-menu.png', '@{app-image-path}/toolbar-menu@2x.png', 60px);
+            background-repeat: no-repeat;
+            background-position: 0 -1320px;
+            width: 20px;
+            height: 20px;
+            top: 3px;
+            position: relative;
+        }
+    }
+
+    #status-addtabs-box {
+        float: left;
+        padding: 3px 8px 0 8px;
+        border-left: 1px solid @gray-dark;
+        border-right: 1px solid @gray-dark;
+        height: 25px;
+    }
+
+    #status-math-box {
+        float: right;
+        padding-top: 6px;
+        padding-right: 14px;
+
+        label {
+            &:not(:last-child) {
+                margin-right: 10px;
+            }
+        }
+
+        .separator {
+            margin-top: -6px;
+        }
+    }
+
+    #status-sheets-bar-box {
+        position: absolute;
+        overflow: hidden;
+        height: 32px;
+        left: 112px;
+        right: 160px;
+        margin-right: 2px;
+    }
+
+    #status-sheets-bar {
+        width: 100%;
+        height: 100%;
+
+        .dropdown-menu {
+            margin-top: -1px;
+        }
+
+        .nav-tabs {
+            height: 100%;
+
+            > li {
+                background-color: @gray-light;
+
+                &:first-child > a {
+                    border-left: 0 none;
+                }
+
+                > a {
+                    display: inline-block;
+                    .border-radius(0);
+                    padding: 0 10px 0;
+                    line-height: 24px;
+                    margin-right: -1px;
+                    background-color: @gray-light;
+                    outline: none;
+                    border-left-color: @gray-dark;
+                    border-right-color: @gray-dark;
+                    border-top-color: @gray-dark;
+
+                    &:hover {
+                        border-top-color: @gray-dark;
+                        border-bottom-color: @gray-dark;
+                        color: @black !important;
+                    }
+                }
+
+                &.active {
+                    > a {
+                        border-bottom-color: @body-bg;
+                        background-color: @body-bg;
+                        outline: none;
+
+                        box-shadow: 0px 3px 0 @primary inset;
+                        border-top-width: 0;
+                    }
+                }
+
+                &.coauth-locked {
+                    > a {
+                        outline: none;
+                    }
+                    > a:after {
+                        position: absolute;
+                        content: '';
+                        width: 7px;
+                        height: 7px;
+                        border-bottom: 7px solid red;
+                        border-left: 7px solid transparent;
+                        bottom: 0;
+                        margin-left: -7px;
+                        left: 100%;
+                    }
+                }
+
+                &.disabled {
+                    opacity: 0.5;
+
+                    > a {
+                        cursor: default;
+                    }
+                }
+
+                &:not(.active) {
+                    > a {
+                        color: @gray-darker;
+                    }
+                }
+            }
+        }
+
+        .color-tab {
+            .border-radius(4px);
+          margin-top: -25px;
+        }
+    }
+
+    .status-label {
+        font-weight: bold;
+        color: @gray-deep;
+        white-space: nowrap;
+    }
+
+    .btn-tpl(@top-position) {
+        .btn-icon {
+            background-position: 0 @top-position;
+
+            &:active {
+                background-position: -20px @top-position;
+            }
+        }
+
+        &[disabled] .btn-icon {
+            background-position: -60px @top-position;
+        }
+
+        &.active {
+            .btn-icon {
+                background-position: -20px @top-position;
+            }
+        }
+    }
+
+    .toolbar-btn-icon(btn-zoom-down,    68, @toolbar-icon-size);
+    .toolbar-btn-icon(btn-zoom-up,      67, @toolbar-icon-size);
+    .toolbar-btn-icon(btn-tab-first,    71, @toolbar-icon-size);
+    .toolbar-btn-icon(btn-tab-back,     72, @toolbar-icon-size);
+    .toolbar-btn-icon(btn-tab-next,     70, @toolbar-icon-size);
+    .toolbar-btn-icon(btn-tab-last,     69, @toolbar-icon-size);
+
+    .status-group {
+        white-space: nowrap;
+    }
+
+    .cnt-zoom {
+        display: inline-block;
+        position: relative;
+        top: 1px;
+
+        .dropdown-menu {
+            min-width: 80px;
+            margin-left: -4px;
+
+            li {
+                text-align: center;
+
+                > a {
+                      padding-left: 15px;
+                      padding-right: 15px;
+                }
+            }
+        }
+    }
+
+    .dropdown-menu {
+        margin-bottom: 6px;
+
+        li {
+            text-align: left;
+        }
+    }
+
+    .separator {
+        &.short {
+            height: 25px;
+        }
+    }
+
+    .nav-tabs.bottom {
+        margin-bottom: 6px;
+        height: 18px;
+    }
+}

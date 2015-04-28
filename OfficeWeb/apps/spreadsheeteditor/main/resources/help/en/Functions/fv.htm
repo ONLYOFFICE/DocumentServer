@@ -18,7 +18,7 @@
 				<p style="text-indent: 50px;"><b><em>pmt</em></b> is a payment amount.</p> 
 				<p style="text-indent: 50px;"><b><em>pv</em></b> is a present value of the payments. It is an optional argument. If it is omitted, the function will assume <b><em>pv</em></b> to be 0.</p>
 				<p style="text-indent: 50px;"><b><em>type</em></b> is a period when the payments are due. It is an optional argument. If it is set to 0 or omitted, the function will assume the payments to be due at the end of the period. If <b><em>type</em></b> is set to 1, the payments are due at the beginning of the period.</p>
-			<p class="note"><b>Note:</b> cash paid out (such as deposits to savings) is represented by negative numbers; cash received (such as dividend checks) is represented by positive numbers.</p>
+			<p class="note"><b>Note:</b> cash paid out (such as deposits to savings) is represented by negative numbers; cash received (such as dividend checks) is represented by positive numbers. Units for <em>rate</em> and <em>nper</em> must be consistent: use N%/12 for <em>rate</em> and N*12 for <em>nper</em> in case of monthly payments, N%/4 for <em>rate</em> and N*4 for <em>nper</em> in case of quarterly payments, N% for <em>rate</em> and N for <em>nper</em> in case of annual payments.</p>
 			<p>The numeric values can be entered manually or included into the cell you make reference to.</p>
 			<p>To apply the <b>FV</b> function,</p>
 			<ol>

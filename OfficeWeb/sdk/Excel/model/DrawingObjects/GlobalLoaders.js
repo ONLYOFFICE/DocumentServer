@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- (function (document) {
+ "use strict";
+(function (document) {
     var ImageLoadStatus = {
         Loading: 0,
         Complete: 1
@@ -50,7 +51,7 @@
         this.put_Api = function (_api) {
             this.Api = _api;
         };
-        this.LoadDocumentImages = function (_images, isUrl) {
+        this.LoadDocumentImages = function (_images, isUrl, callbackEnd) {
             if (this.ThemeLoader == null) {
                 this.Api.asyncImagesDocumentStartLoaded();
             } else {
@@ -61,27 +62,35 @@
                 this.images_loading[this.images_loading.length] = getFullImageSrc(_images[id]);
             }
             if (!this.bIsAsyncLoadDocumentImages) {
-                this._LoadImages();
+                this._LoadImages(callbackEnd);
             } else {
                 var _len = this.images_loading.length;
                 for (var i = 0; i < _len; i++) {
                     this.LoadImageAsync(i);
                 }
                 this.images_loading.splice(0, _len);
-                if (this.ThemeLoader == null) {
-                    this.Api.asyncImagesDocumentEndLoaded();
+                if (null != callbackEnd) {
+                    callbackEnd();
                 } else {
-                    this.ThemeLoader.asyncImagesEndLoaded();
+                    if (this.ThemeLoader == null) {
+                        this.Api.asyncImagesDocumentEndLoaded();
+                    } else {
+                        this.ThemeLoader.asyncImagesEndLoaded();
+                    }
                 }
             }
         };
         var oThis = this;
-        this._LoadImages = function () {
+        this._LoadImages = function (callbackEnd) {
             if (0 == this.images_loading.length) {
-                if (this.ThemeLoader == null) {
-                    this.Api.asyncImagesDocumentEndLoaded();
+                if (null != callbackEnd) {
+                    callbackEnd();
                 } else {
-                    this.ThemeLoader.asyncImagesEndLoaded();
+                    if (this.ThemeLoader == null) {
+                        this.Api.asyncImagesDocumentEndLoaded();
+                    } else {
+                        this.ThemeLoader.asyncImagesEndLoaded();
+                    }
                 }
                 return;
             }
@@ -97,7 +106,7 @@
                     oThis.Api.SendOpenProgress();
                 }
                 oThis.images_loading.shift();
-                oThis._LoadImages();
+                oThis._LoadImages(callbackEnd);
             };
             oImage.Image.onerror = function () {
                 oImage.Status = ImageLoadStatus.Complete;
@@ -107,7 +116,7 @@
                     oThis.Api.SendOpenProgress();
                 }
                 oThis.images_loading.shift();
-                oThis._LoadImages();
+                oThis._LoadImages(callbackEnd);
             };
             oImage.Image.src = oImage.src;
         };
@@ -232,18 +241,18 @@
         };
     }
     function CGlobalFontLoader() {
-        this.fonts_streams = new Array();
+        this.fonts_streams = [];
         this.fontFilesPath = "";
         this.fontFiles = window.g_font_files;
         this.fontInfos = window.g_font_infos;
         this.map_font_index = window.g_map_font_index;
         this.embeddedFilesPath = "";
-        this.embeddedFontFiles = new Array();
-        this.embeddedFontInfos = new Array();
+        this.embeddedFontFiles = [];
+        this.embeddedFontInfos = [];
         this.ThemeLoader = null;
         this.Api = null;
-        this.fonts_loading = new Array();
-        this.fonts_loading_after_style = new Array();
+        this.fonts_loading = [];
+        this.fonts_loading_after_style = [];
         this.bIsLoadDocumentFirst = false;
         this.currentInfoLoaded = null;
         this.embedded_cut_manager = new CEmbeddedCutFontsLoader();
@@ -292,11 +301,13 @@
             }
         };
         this.SetStandartFonts = function () {
-            var standarts = window.standarts;
+            var standarts = window["standarts"];
             if (undefined == standarts) {
                 standarts = [];
                 for (var i = 0; i < window.g_font_infos.length; i++) {
-                    standarts.push(window.g_font_infos[i].Name);
+                    if (window.g_font_infos[i].Name != "ASCW3") {
+                        standarts.push(window.g_font_infos[i].Name);
+                    }
                 }
             }
             var _count = standarts.length;
@@ -308,15 +319,19 @@
         };
         this.CheckFontsPaste = function (_fonts) {
             for (var i in _fonts) {
-                var info_ind = this.map_font_index[_fonts[i]];
-                if (info_ind != undefined) {
-                    this.fonts_loading[this.fonts_loading.length] = this.fontInfos[info_ind];
-                }
+                var fontinfo = g_fontApplication.GetFontInfo(_fonts[i]);
+                this.fonts_loading[this.fonts_loading.length] = fontinfo;
             }
             this.Api.asyncFontsDocumentStartLoaded();
             this._LoadFonts();
         };
-        this.AddLoadFonts = function (info, need_styles) {
+        this.AddLoadFonts = function (name, need_styles) {
+            var fontinfo = g_fontApplication.GetFontInfo(name);
+            this.fonts_loading[this.fonts_loading.length] = fontinfo;
+            this.fonts_loading[this.fonts_loading.length - 1].NeedStyles = (need_styles == undefined) ? 15 : need_styles;
+            return fontinfo;
+        };
+        this.AddLoadFontsNotPick = function (info, need_styles) {
             this.fonts_loading[this.fonts_loading.length] = info;
             this.fonts_loading[this.fonts_loading.length - 1].NeedStyles = (need_styles == undefined) ? 15 : need_styles;
         };
@@ -324,7 +339,7 @@
             if (this.embedded_cut_manager.bIsCutFontsUse) {
                 return this.embedded_cut_manager.load_cut_fonts();
             }
-            var gui_fonts = new Array();
+            var gui_fonts = [];
             var gui_count = 0;
             for (var i = 0; i < this.fontInfos.length; i++) {
                 var info = this.fontInfos[i];
@@ -335,17 +350,18 @@
             }
             for (var i in _fonts) {
                 if (_fonts[i].Type != FONT_TYPE_EMBEDDED) {
-                    var info = this.fontInfos[this.map_font_index[_fonts[i].name]];
-                    this.AddLoadFonts(info, _fonts[i].NeedStyles);
+                    var info = this.AddLoadFonts(_fonts[i].name, _fonts[i].NeedStyles);
                     if (info.Type == FONT_TYPE_ADDITIONAL) {
-                        var __font = new CFont(info.Name, "", info.Type, info.Thumbnail);
-                        gui_fonts[gui_count++] = __font;
+                        if (info.name != "ASCW3") {
+                            var __font = new CFont(info.Name, "", info.Type, info.Thumbnail);
+                            gui_fonts[gui_count++] = __font;
+                        }
                     }
                 } else {
                     var ind = -1;
                     for (var j = 0; j < this.embeddedFontInfos.length; j++) {
                         if (this.embeddedFontInfos[j].Name == _fonts[i].name) {
-                            this.AddLoadFonts(this.embeddedFontInfos[j], 0);
+                            this.AddLoadFontsNotPick(this.embeddedFontInfos[j], 0);
                             break;
                         }
                     }
@@ -353,11 +369,11 @@
             }
             this.Api.sync_InitEditorFonts(gui_fonts);
             if (this.Api.IsNeedDefaultFonts()) {
-                this.AddLoadFonts(this.fontInfos[this.map_font_index["Arial"]], 15);
-                this.AddLoadFonts(this.fontInfos[this.map_font_index["Symbol"]], 15);
-                this.AddLoadFonts(this.fontInfos[this.map_font_index["Wingdings"]], 15);
-                this.AddLoadFonts(this.fontInfos[this.map_font_index["Courier New"]], 15);
-                this.AddLoadFonts(this.fontInfos[this.map_font_index["Times New Roman"]], 15);
+                this.AddLoadFonts("Arial", 15);
+                this.AddLoadFonts("Symbol", 15);
+                this.AddLoadFonts("Wingdings", 15);
+                this.AddLoadFonts("Courier New", 15);
+                this.AddLoadFonts("Times New Roman", 15);
             }
             this.Api.asyncFontsDocumentStartLoaded();
             this.bIsLoadDocumentFirst = true;
@@ -365,8 +381,7 @@
         };
         this.LoadDocumentFonts2 = function (_fonts) {
             for (var i in _fonts) {
-                var info = this.fontInfos[this.map_font_index[_fonts[i].name]];
-                this.AddLoadFonts(info, 15);
+                this.AddLoadFonts(_fonts[i].name, 15);
             }
             if (null == this.ThemeLoader) {
                 this.Api.asyncFontsDocumentStartLoaded();
@@ -459,9 +474,8 @@
         this.LoadFontsFromServer = function (_fonts) {
             var _count = _fonts.length;
             for (var i = 0; i < _count; i++) {
-                var _info_ind = this.map_font_index[_fonts[i]];
-                if (undefined !== _info_ind) {
-                    var _info = this.fontInfos[_info_ind];
+                var _info = g_fontApplication.GetFontInfo(_fonts[i]);
+                if (undefined !== _info) {
                     _info.LoadFontsFromServer(this);
                 }
             }
@@ -470,50 +484,8 @@
     CGlobalFontLoader.prototype.SetStreamIndexEmb = function (font_index, stream_index) {
         this.embeddedFontFiles[font_index].SetStreamIndex(stream_index);
     };
-    function CGlobalScriptLoader() {
-        this.Status = -1;
-        this.callback = null;
-        this.oCallBackThis = null;
-        var oThis = this;
-        this.CheckLoaded = function () {
-            return (0 == oThis.Status || 1 == oThis.Status);
-        };
-        this.LoadScriptAsync = function (url, _callback, _callback_this) {
-            this.callback = _callback;
-            this.oCallBackThis = _callback_this;
-            if (-1 != this.Status) {
-                return true;
-            }
-            this.Status = 2;
-            var scriptElem = document.createElement("script");
-            if (scriptElem.readyState && false) {
-                scriptElem.onreadystatechange = function () {
-                    if (this.readyState == "complete" || this.readyState == "loaded") {
-                        scriptElem.onreadystatechange = null;
-                        setTimeout(oThis._callback_script_load, 0);
-                    }
-                };
-            }
-            scriptElem.onload = scriptElem.onerror = oThis._callback_script_load;
-            scriptElem.setAttribute("src", url);
-            scriptElem.setAttribute("type", "text/javascript");
-            document.getElementsByTagName("head")[0].appendChild(scriptElem);
-            return false;
-        };
-        this._callback_script_load = function () {
-            if (oThis.Status != 3) {
-                oThis.Status = 1;
-            }
-            if (null != oThis.callback) {
-                oThis.callback(oThis.oCallBackThis);
-                oThis.callback = null;
-            }
-        };
-    }
     window.g_font_loader = new CGlobalFontLoader();
     window.g_image_loader = new CGlobalImageLoader();
-    window.g_script_loader = new CGlobalScriptLoader();
-    window.g_script_loader2 = new CGlobalScriptLoader();
     window.g_flow_anchor = new Image();
     window.g_flow_anchor.asc_complete = false;
     window.g_flow_anchor.onload = function () {

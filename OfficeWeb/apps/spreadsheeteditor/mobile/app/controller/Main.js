@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -111,8 +111,8 @@
     },
     onEditorPermissions: function (params) {
         this.permissions.edit !== false && (this.permissions.edit = params.asc_getCanEdit());
-        var modeEdit = this.permissions.edit === true && this.editorConfig.mode !== "view";
-        this.api.asc_setViewerMode(modeEdit);
+        var modeEdit = false;
+        this.api.asc_setViewerMode(!modeEdit);
         this.api.asc_LoadDocument();
         var profileName = this.getApplication().getCurrentProfile().getName();
         this.getApplication().getController(profileName + ".Main").setMode(modeEdit);
@@ -247,6 +247,7 @@
     },
     onOpenDocument: function () {
         this._hideLoadSplash();
+        this.api.asc_Resize();
         if (this.api) {
             this.api.asc_cleanSelection();
         }

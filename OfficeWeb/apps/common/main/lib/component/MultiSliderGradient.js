@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,154 +29,95 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("Common.component.MultiSliderGradient", {
-    extend: "Ext.slider.Multi",
-    requires: ([]),
-    uses: [],
-    alias: "widget.cmdmultislidergradient",
-    cls: "asc-multi-slider-gradient",
-    values: [0, 100],
-    increment: 1,
-    minValue: 0,
-    maxValue: 100,
-    clickRange: [1, 20],
-    colorValues: ["#000000", "#ffffff"],
-    currentThumb: 0,
-    initComponent: function () {
-        var me = this,
-        cfg = Ext.apply({},
-        me.initialConfig);
-        if (me.initialConfig.listeners && me.initialConfig.listeners.change) {
-            var f = me.initialConfig.listeners.change;
-            me.initialConfig.listeners.change = function (slider, newvalue, thumb) {
-                me.changeGradientStyle();
-                f.call(me, slider, newvalue, thumb);
-            };
-        }
-        this.styleStr = "";
-        if (Ext.isChrome && Ext.chromeVersion < 10 || Ext.isSafari && Ext.safariVersion < 5.1) {
-            this.styleStr = "-webkit-gradient(linear, left top, right top, color-stop({1}%,{0}), color-stop({3}%,{2})); /* Chrome,Safari4+ */";
-        } else {
-            if (Ext.isChrome || Ext.isSafari) {
-                this.styleStr = "-webkit-linear-gradient(left, {0} {1}%, {2} {3}%)";
+ if (Common === undefined) {
+    var Common = {};
+}
+define(["common/main/lib/component/Slider", "underscore"], function (base, _) {
+    Common.UI.MultiSliderGradient = Common.UI.MultiSlider.extend({
+        options: {
+            width: 100,
+            minValue: 0,
+            maxValue: 100,
+            values: [0, 100],
+            colorValues: ["#000000", "#ffffff"],
+            currentThumb: 0
+        },
+        disabled: false,
+        template: _.template(['<div class="slider multi-slider-gradient">', '<div class="track"></div>', "<% _.each(items, function(item) { %>", '<div class="thumb" style=""></div>', "<% }); %>", "</div>"].join("")),
+        initialize: function (options) {
+            this.styleStr = "";
+            if (Common.Utils.isChrome && Common.Utils.chromeVersion < 10 || Common.Utils.isSafari && Common.Utils.safariVersion < 5.1) {
+                this.styleStr = "-webkit-gradient(linear, left top, right top, color-stop({1}%,{0}), color-stop({3}%,{2})); /* Chrome,Safari4+ */";
             } else {
-                if (Ext.isGecko) {
-                    this.styleStr = "-moz-linear-gradient(left, {0} {1}%, {2} {3}%)";
+                if (Common.Utils.isChrome || Common.Utils.isSafari) {
+                    this.styleStr = "-webkit-linear-gradient(left, {0} {1}%, {2} {3}%)";
                 } else {
-                    if (Ext.isOpera && Ext.operaVersion > 11) {
-                        this.styleStr = "-o-linear-gradient(left, {0} {1}%, {2} {3}%)";
+                    if (Common.Utils.isGecko) {
+                        this.styleStr = "-moz-linear-gradient(left, {0} {1}%, {2} {3}%)";
                     } else {
-                        if (Ext.isIE) {
-                            this.styleStr = "-ms-linear-gradient(left, {0} {1}%, {2} {3}%)";
+                        if (Common.Utils.isOpera && Common.Utils.operaVersion > 11) {
+                            this.styleStr = "-o-linear-gradient(left, {0} {1}%, {2} {3}%)";
+                        } else {
+                            if (Common.Utils.isIE) {
+                                this.styleStr = "-ms-linear-gradient(left, {0} {1}%, {2} {3}%)";
+                            }
                         }
                     }
                 }
             }
-        }
-        this.callParent(arguments);
-        this.addEvents("thumbclick");
-        this.addEvents("thumbdblclick");
-    },
-    listeners: {
-        afterrender: function (cmp) {
+            this.colorValues = this.options.colorValues;
+            Common.UI.MultiSlider.prototype.initialize.call(this, options);
+        },
+        render: function (parentEl) {
+            Common.UI.MultiSlider.prototype.render.call(this, parentEl);
             var me = this,
             style = "";
-            if (me.thumbs) {
-                for (var i = 0; i < me.thumbs.length; i++) {
-                    if (me.thumbs[i] && me.thumbs[i].tracker) {
-                        me.thumbs[i].tracker.addListener("mousedown", Ext.bind(me.setActiveThumb, me, [i, true]), me);
-                        me.thumbs[i].tracker.el.addListener("dblclick", function () {
-                            me.fireEvent("thumbdblclick", me);
-                        },
-                        me);
-                    }
-                }
-                me.setActiveThumb(0);
-                if (me.innerEl) {
-                    if (!Ext.isEmpty(me.styleStr)) {
-                        style = Ext.String.format(me.styleStr, me.colorValues[0], 0, me.colorValues[1], 100);
-                        me.innerEl.setStyle("background", style);
-                    }
-                    if (Ext.isIE) {
-                        style = Ext.String.format("progid:DXImageTransform.Microsoft.gradient( startColorstr={0}, endColorstr={1},GradientType=1 )", me.colorValues[0], me.colorValues[1]);
-                        me.innerEl.setStyle("filter", style);
-                    }
-                    style = Ext.String.format("linear-gradient(to right, {0} {1}%, {2} {3}%)", me.colorValues[0], 0, me.colorValues[1], 100);
-                    me.innerEl.setStyle("background", style);
-                }
+            me.trackEl = me.cmpEl.find(".track");
+            for (var i = 0; i < me.thumbs.length; i++) {
+                me.thumbs[i].thumb.on("dblclick", null, function () {
+                    me.trigger("thumbdblclick", me);
+                });
             }
-        }
-    },
-    setActiveThumb: function (index, fireevent) {
-        this.currentThumb = index;
-        this.thumbs[index].el.addCls("active-thumb");
-        for (var j = 0; j < this.thumbs.length; j++) {
-            if (index == j) {
-                continue;
+            if (me.styleStr !== "") {
+                style = Common.Utils.String.format(me.styleStr, me.colorValues[0], 0, me.colorValues[1], 100);
+                me.trackEl.css("background", style);
             }
-            this.thumbs[j].el.removeCls("active-thumb");
-        }
-        if (fireevent) {
-            this.fireEvent("thumbclick", this, index);
-        }
-    },
-    setColorValue: function (color, index) {
-        var ind = (index !== undefined) ? index : this.currentThumb;
-        this.colorValues[ind] = color;
-        this.changeGradientStyle();
-    },
-    getColorValue: function (index) {
-        var ind = (index !== undefined) ? index : this.currentThumb;
-        return this.colorValues[ind];
-    },
-    changeGradientStyle: function () {
-        if (this.innerEl) {
+            if (Common.Utils.isIE) {
+                style = Common.Utils.String.format("progid:DXImageTransform.Microsoft.gradient( startColorstr={0}, endColorstr={1},GradientType=1 )", me.colorValues[0], me.colorValues[1]);
+                me.trackEl.css("filter", style);
+            }
+            style = Common.Utils.String.format("linear-gradient(to right, {0} {1}%, {2} {3}%)", me.colorValues[0], 0, me.colorValues[1], 100);
+            me.trackEl.css("background", style);
+            me.on("change", _.bind(me.changeGradientStyle, me));
+        },
+        setColorValue: function (color, index) {
+            var ind = (index !== undefined) ? index : this.currentThumb;
+            this.colorValues[ind] = color;
+            this.changeGradientStyle();
+        },
+        getColorValue: function (index) {
+            var ind = (index !== undefined) ? index : this.currentThumb;
+            return this.colorValues[ind];
+        },
+        setValue: function (index, value) {
+            Common.UI.MultiSlider.prototype.setValue.call(this, index, value);
+            this.changeGradientStyle();
+        },
+        changeGradientStyle: function () {
+            if (!this.rendered) {
+                return;
+            }
             var style;
-            if (!Ext.isEmpty(this.styleStr)) {
-                style = Ext.String.format(this.styleStr, this.colorValues[0], this.getValue(0), this.colorValues[1], this.getValue(1));
-                this.innerEl.setStyle("background", style);
+            if (this.styleStr !== "") {
+                style = Common.Utils.String.format(this.styleStr, this.colorValues[0], this.getValue(0), this.colorValues[1], this.getValue(1));
+                this.trackEl.css("background", style);
             }
-            if (Ext.isIE) {
-                style = Ext.String.format("progid:DXImageTransform.Microsoft.gradient( startColorstr={0}, endColorstr={1},GradientType=1 )", this.colorValues[0], this.colorValues[1]);
-                this.innerEl.setStyle("filter", style);
+            if (Common.Utils.isIE) {
+                style = Common.Utils.String.format("progid:DXImageTransform.Microsoft.gradient( startColorstr={0}, endColorstr={1},GradientType=1 )", this.colorValues[0], this.colorValues[1]);
+                this.trackEl.css("filter", style);
             }
-            style = Ext.String.format("linear-gradient(to right, {0} {1}%, {2} {3}%)", this.colorValues[0], this.getValue(0), this.colorValues[1], this.getValue(1));
-            this.innerEl.setStyle("background", style);
+            style = Common.Utils.String.format("linear-gradient(to right, {0} {1}%, {2} {3}%)", this.colorValues[0], this.getValue(0), this.colorValues[1], this.getValue(1));
+            this.trackEl.css("background", style);
         }
-    },
-    getNearest: function (local, prop) {
-        var me = this,
-        localValue = prop == "top" ? me.innerEl.getHeight() - local[prop] : local[prop],
-        clickValue = me.reverseValue(localValue),
-        nearestDistance = (me.maxValue - me.minValue) + 5,
-        index = 0,
-        nearest = null,
-        thumbs = me.thumbs,
-        i = 0,
-        len = thumbs.length,
-        thumb,
-        value,
-        dist;
-        for (; i < len; i++) {
-            thumb = me.thumbs[i];
-            value = thumb.value;
-            dist = Math.abs(value - clickValue);
-            if (Math.abs(dist <= nearestDistance)) {
-                if (me.constrainThumbs) {
-                    var above = me.thumbs[i + 1];
-                    var below = me.thumbs[i - 1];
-                    if (below !== undefined && clickValue < below.value) {
-                        continue;
-                    }
-                    if (above !== undefined && clickValue > above.value) {
-                        continue;
-                    }
-                }
-                nearest = thumb;
-                index = i;
-                nearestDistance = dist;
-            }
-        }
-        return nearest;
-    }
+    });
 });

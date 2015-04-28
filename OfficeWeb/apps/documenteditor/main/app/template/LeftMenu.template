@@ -1,0 +1,18 @@
+<div id="view-left-menu" class="tool-menu left">
+    <div class="tool-menu-btns">
+        <button id="left-btn-file" class="btn btn-category" content-target="left-panel-file"><span class="btn-icon btn-menu-file">&nbsp;</span></button>
+        <button id="left-btn-search" class="btn btn-category" content-target=""><span class="btn-icon btn-menu-search">&nbsp;</span></button>
+        <!-- /** coauthoring begin **/ -->
+        <button id="left-btn-comments" class="btn btn-category" content-target="left-panel-comments"><span class="btn-icon btn-menu-comments">&nbsp;</span></button>
+        <button id="left-btn-chat" class="btn btn-category" content-target="left-panel-chat"><span class="btn-icon btn-menu-chat">&nbsp;</span></button>
+        <!-- /** coauthoring end **/ -->
+        <button id="left-btn-support" class="btn btn-category" content-target=""><span class="btn-icon btn-menu-support">&nbsp;</span></button>
+        <button id="left-btn-about" class="btn btn-category" content-target=""><span class="btn-icon btn-menu-about">&nbsp;</span></button>
+    </div>
+    <div class="left-panel" style="">
+        <!-- /** coauthoring begin **/ -->
+        <div id="left-panel-comments" class="" style="display: none;" />
+        <div id="left-panel-chat" class="" style="display: none;" />
+        <!-- /** coauthoring end **/ -->
+    </div>
+</div>

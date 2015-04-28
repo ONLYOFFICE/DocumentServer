@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,15 +29,28 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("SSE.model.Formula", {
-    extend: "Ext.data.Model",
-    fields: [{
-        name: "group"
-    },
-    {
-        name: "func"
-    },
-    {
-        name: "args"
-    }]
+ define(["backbone"], function (Backbone) {
+    SSE.Models = SSE.Models || {};
+    SSE.Models.FormulaModel = Backbone.Model.extend({
+        defaults: function () {
+            return {
+                id: Common.UI.getId(),
+                index: 0,
+                group: null,
+                name: null,
+                args: null
+            };
+        }
+    });
+    SSE.Models.FormulaGroup = Backbone.Model.extend({
+        defaults: function () {
+            return {
+                id: Common.UI.getId(),
+                index: 0,
+                name: null,
+                store: null,
+                functions: []
+            };
+        }
+    });
 });

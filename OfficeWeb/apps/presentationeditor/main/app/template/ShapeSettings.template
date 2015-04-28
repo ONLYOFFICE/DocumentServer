@@ -1,0 +1,136 @@
+<table cols="1">
+    <tr>
+        <td>
+            <label class="header"><%= scope.strFill %></label>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small">
+            <div id="shape-combo-fill-src" style="width: 100%;"></div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div id="shape-panel-color-fill" class="padding-small" style="width: 100%;">
+                <div id="shape-back-color-btn" style=""></div>
+            </div>
+            <div id="shape-panel-image-fill" class="settings-hidden padding-small" style="width: 100%;">
+                <table cols="2" style="width: 100%;">
+                <tr>
+                    <td class="padding-small" width="50%">
+                        <button type="button" class="btn btn-text-default" id="shape-button-from-file" style="width:90px;"><%= scope.textFromFile %></button>
+                    </td>
+                    <td class="padding-small" width="50%">
+                        <button type="button" class="btn btn-text-default" id="shape-button-from-url" style="width:90px;"><%= scope.textFromUrl %></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top">
+                        <div id="shape-combo-fill-type" style="width: 90px;"></div>
+                    </td>
+                    <td rowspan="2">
+                        <div style="width: 90px; height: 80px; padding: 14px 20px; border: 1px solid #AFAFAF; border-radius: 2px; background: #ffffff;">
+                            <div id="shape-texture-img" style="width: 50px;height: 50px;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: bottom">
+                        <label class="input-label" style=""><%= scope.textTexture %></label>
+                        <div id="shape-combo-fill-texture" style="width: 90px;"></div>
+                    </td>
+                </tr>
+            </table>
+            </div>
+            <div id="shape-panel-pattern-fill" class="settings-hidden padding-small" style="width: 100%;">
+                <label class="input-label" style="margin-top: 3px;"><%= scope.strPattern %></label>
+                <div id="shape-combo-pattern" style="width: 100%; height: 42px; margin-bottom: 8px;"></div>
+                <div style="width: 100%; height: 25px; margin-bottom: 8px;">
+                    <label class="input-label" style="margin-top: 3px;"><%= scope.strForeground %></label>
+                    <div id="shape-foreground-color-btn" style="display: inline-block; float:right;"></div>
+                </div>
+                <div style="width: 100%; height: 25px;">
+                    <label class="input-label" style="margin-top: 3px;"><%= scope.strBackground %></label>
+                    <div id="shape-background-color-btn" style="display: inline-block; float:right;"></div>
+                </div>
+            </div>
+            <div id="shape-panel-gradient-fill" class="settings-hidden padding-small" style="width: 100%;">
+                <div style="height:80px;">
+                    <div style="display: inline-block;">
+                        <label class="input-label" style=""><%= scope.textStyle %></label>
+                        <div id="shape-combo-grad-type" style="width: 90px;"></div>
+                    </div>
+                    <div style="display: inline-block;float: right;">
+                        <label class="input-label" style=""><%= scope.textDirection %></label>
+                        <div id="shape-button-direction" style=""></div>
+                    </div>
+                </div>
+                <label class="header" style="display:block;margin-bottom: 5px;"><%= scope.textGradient %></label>
+                <div style="display: inline-block; margin-top: 3px;">
+                    <div id="shape-slider-gradient" style="display: inline-block; vertical-align: middle;"></div>
+                </div>
+                <div id="shape-gradient-color-btn" style="display: inline-block;float: right;"></div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="padding-small" id="shape-panel-transparent-fill" style="width: 100%;">
+                <label class="header" style="display:block;"><%= scope.strTransparency %></label>
+                <div style="display: inline-block; margin-top: 3px;">
+                    <label id="shape-lbl-transparency-start">0</label>
+                    <div id="shape-slider-transparency" style="display: inline-block;margin: 0 4px; vertical-align: middle;"></div>
+                    <label id="shape-lbl-transparency-end">100</label>
+                </div>
+                <div id="shape-spin-transparency" style="display: inline-block;float: right;"></div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small">
+            <div class="separator horizontal"></div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label class="header"><%= scope.strStroke %></label>
+        </td>
+    </tr>
+    <tr>
+        <td>
+        <div style="display:inline-block;width:100px;vertical-align: middle;">
+            <label class="input-label" style=""><%= scope.strSize %></label>
+            <div id="shape-combo-border-size" style="width: 93px;"></div>
+        </div>
+        <div style="display:inline-block;vertical-align: middle;">
+            <label class="input-label" style=""><%= scope.strColor %></label>
+            <div id="shape-border-color-btn" style=""></div>
+        </div>
+        </td>
+    </tr>
+    <tr class="shape-only">
+        <td class="padding-small"></td>
+    </tr>
+    <tr class="shape-only">
+        <td class="padding-small">
+            <div class="separator horizontal"></div>
+        </td>
+    </tr>
+    <tr class="shape-only">
+        <td class="padding-small">
+            <label class="header" style="margin-top: 3px;"><%= scope.strChange %></label>
+            <div id="shape-btn-change" style="display: inline-block; float:right;"></div>
+        </td>
+    </tr>
+    <tr class="shape-only">
+        <td class="padding-small">
+            <div class="separator horizontal"></div>
+        </td>
+    </tr>
+    <tr class="shape-only">
+        <td align="center">
+            <label class="link" id="shape-advanced-link"><%= scope.textAdvanced %></label>
+        </td>
+    </tr>
+    <tr class="finish-cell"></tr>
+</table>

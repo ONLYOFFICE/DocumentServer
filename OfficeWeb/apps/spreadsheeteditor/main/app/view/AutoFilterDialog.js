@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,303 +29,615 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("SSE.view.AutoFilterDialog", {
-    extend: "Ext.window.Window",
-    alias: "widget.sseautofilterdialog",
-    requires: ["Ext.window.Window", "Common.plugin.GridScrollPane", "Common.component.SearchField"],
-    modal: true,
-    closable: true,
-    resizable: false,
-    height: 350,
-    width: 270,
-    constrain: true,
-    padding: "20px 20px 0 20px",
-    layout: {
-        type: "vbox",
-        align: "stretch"
+ define(["common/main/lib/component/Window"], function () {
+    SSE.Views = SSE.Views || {};
+    SSE.Views.DigitalFilterDialog = Common.UI.Window.extend(_.extend({
+        initialize: function (options) {
+            var t = this,
+            _options = {};
+            _.extend(_options, {
+                width: 500,
+                height: 230,
+                contentWidth: 180,
+                header: true,
+                cls: "filter-dlg",
+                contentTemplate: "",
+                title: t.txtTitle,
+                items: []
+            },
+            options);
+            this.template = options.template || ['<div class="box" style="height:' + (_options.height - 85) + 'px;">', '<div class="content-panel" >', '<label class="header">', t.textShowRows, "</label>", '<div style="margin-top:15px;">', '<div id="id-search-begin-digital-combo" class="input-group-nr" style="vertical-align:top;width:225px;display:inline-block;"></div>', '<div id="id-sd-cell-search-begin" class="" style="width:225px;display:inline-block;margin-left:18px;"></div>', "</div>", "<div>", '<div id="id-and-radio" class="padding-small" style="display: inline-block; margin-top:10px;"></div>', '<div id="id-or-radio" class="padding-small" style="display: inline-block; margin-left:25px;"></div>', "</div>", '<div style="margin-top:10px;">', '<div id="id-search-end-digital-combo" class="input-group-nr" style="vertical-align:top;width:225px;display:inline-block;"></div>', '<div id="id-sd-cell-search-end" class="" style="width:225px;display:inline-block;margin-left:18px;"></div>', "</div>", "</div>", "</div>", '<div class="separator horizontal" style="width:100%"></div>', '<div class="footer right" style="margin-left:-15px;">', '<button class="btn normal dlg-btn primary" result="ok" style="margin-right:10px;">', t.okButtonText, "</button>", '<button class="btn normal dlg-btn" result="cancel">', t.cancelButtonText, "</button>", "</div>"].join("");
+            this.api = options.api;
+            this.handler = options.handler;
+            _options.tpl = _.template(this.template, _options);
+            Common.UI.Window.prototype.initialize.call(this, _options);
+        },
+        render: function () {
+            Common.UI.Window.prototype.render.call(this);
+            var conditions = [{
+                value: c_oAscCustomAutoFilter.equals,
+                displayValue: this.capCondition1
+            },
+            {
+                value: c_oAscCustomAutoFilter.doesNotEqual,
+                displayValue: this.capCondition2
+            },
+            {
+                value: c_oAscCustomAutoFilter.isGreaterThan,
+                displayValue: this.capCondition3
+            },
+            {
+                value: c_oAscCustomAutoFilter.isGreaterThanOrEqualTo,
+                displayValue: this.capCondition4
+            },
+            {
+                value: c_oAscCustomAutoFilter.isLessThan,
+                displayValue: this.capCondition5
+            },
+            {
+                value: c_oAscCustomAutoFilter.isLessThanOrEqualTo,
+                displayValue: this.capCondition6
+            },
+            {
+                value: c_oAscCustomAutoFilter.beginsWith,
+                displayValue: this.capCondition7
+            },
+            {
+                value: c_oAscCustomAutoFilter.doesNotBeginWith,
+                displayValue: this.capCondition8
+            },
+            {
+                value: c_oAscCustomAutoFilter.endsWith,
+                displayValue: this.capCondition9
+            },
+            {
+                value: c_oAscCustomAutoFilter.doesNotEndWith,
+                displayValue: this.capCondition10
+            },
+            {
+                value: c_oAscCustomAutoFilter.contains,
+                displayValue: this.capCondition11
+            },
+            {
+                value: c_oAscCustomAutoFilter.doesNotContain,
+                displayValue: this.capCondition12
+            }];
+            this.cmbCondition1 = new Common.UI.ComboBox({
+                el: $("#id-search-begin-digital-combo", this.$window),
+                menuStyle: "min-width: 225px;",
+                cls: "input-group-nr",
+                data: conditions,
+                editable: false
+            });
+            this.cmbCondition1.setValue(c_oAscCustomAutoFilter.equals);
+            conditions.splice(0, 0, {
+                value: 0,
+                displayValue: this.textNoFilter
+            });
+            this.cmbCondition2 = new Common.UI.ComboBox({
+                el: $("#id-search-end-digital-combo", this.$window),
+                menuStyle: "min-width: 225px;",
+                cls: "input-group-nr",
+                data: conditions,
+                editable: false
+            });
+            this.cmbCondition2.setValue(0);
+            this.rbAnd = new Common.UI.RadioBox({
+                el: $("#id-and-radio", this.$window),
+                labelText: this.capAnd,
+                name: "asc-radio-filter-tab",
+                checked: true
+            });
+            this.rbOr = new Common.UI.RadioBox({
+                el: $("#id-or-radio", this.$window),
+                labelText: this.capOr,
+                name: "asc-radio-filter-tab"
+            });
+            this.txtValue1 = new Common.UI.InputField({
+                el: $("#id-sd-cell-search-begin", this.$window),
+                template: _.template(['<div class="input-field" style="<%= style %>">', "<input ", 'type="<%= type %>" ', 'name="<%= name %>" ', 'class="form-control <%= cls %>" style="float:none" ', 'placeholder="<%= placeHolder %>" ', 'value="<%= value %>"', ">", "</div>"].join("")),
+                allowBlank: true,
+                validation: function () {
+                    return true;
+                }
+            });
+            this.txtValue2 = new Common.UI.InputField({
+                el: $("#id-sd-cell-search-end", this.$window),
+                template: _.template(['<div class="input-field" style="<%= style %>">', "<input ", 'type="<%= type %>" ', 'name="<%= name %>" ', 'class="form-control <%= cls %>" style="float:none" ', 'placeholder="<%= placeHolder %>" ', 'value="<%= value %>"', ">", "</div>"].join("")),
+                allowBlank: true,
+                validation: function () {
+                    return true;
+                }
+            });
+            this.$window.find(".dlg-btn").on("click", _.bind(this.onBtnClick, this));
+            this.loadDefaults();
+        },
+        show: function () {
+            Common.UI.Window.prototype.show.call(this);
+            var me = this;
+            _.defer(function () {
+                if (me.txtValue1) {
+                    me.txtValue1.focus();
+                }
+            },
+            500);
+        },
+        close: function () {
+            if (this.api) {
+                this.api.asc_enableKeyEvents(true);
+            }
+            Common.UI.Window.prototype.close.call(this);
+        },
+        onBtnClick: function (event) {
+            if (event.currentTarget.attributes && event.currentTarget.attributes.result) {
+                if ("ok" === event.currentTarget.attributes.result.value) {
+                    this.save();
+                }
+                this.close();
+            }
+        },
+        setSettings: function (properties) {
+            this.properties = properties;
+        },
+        loadDefaults: function () {
+            if (this.properties && this.rbOr && this.rbAnd && this.cmbCondition1 && this.cmbCondition2 && this.txtValue1 && this.txtValue2) {
+                (this.properties.asc_getIsChecked()) ? this.rbOr.setValue(true) : this.rbAnd.setValue(true);
+                this.cmbCondition1.setValue(this.properties.asc_getFilter1() || c_oAscCustomAutoFilter.equals);
+                this.cmbCondition2.setValue(this.properties.asc_getFilter2() || 0);
+                this.txtValue1.setValue(null === this.properties.asc_getValFilter1() ? "" : this.properties.asc_getValFilter1());
+                this.txtValue2.setValue(null === this.properties.asc_getValFilter2() ? "" : this.properties.asc_getValFilter2());
+            }
+        },
+        save: function () {
+            if (this.api && this.properties && this.rbOr && this.rbAnd && this.cmbCondition1 && this.cmbCondition2 && this.txtValue1 && this.txtValue2) {
+                var options = new Asc.AutoFiltersOptions();
+                if (options) {
+                    options.asc_setCellId(this.properties.asc_getCellId());
+                    options.asc_setIsChecked(this.rbOr.getValue());
+                    options.asc_setFilter1(this.cmbCondition1.getValue());
+                    options.asc_setFilter2(this.cmbCondition2.getValue() || undefined);
+                    options.asc_setValFilter1(this.txtValue1.getValue());
+                    options.asc_setValFilter2(this.txtValue2.getValue());
+                    this.api.asc_applyAutoFilter("digitalFilter", options);
+                }
+            }
+        },
+        onPrimary: function () {
+            this.save();
+            this.close();
+            return false;
+        },
+        cancelButtonText: "Cancel",
+        capAnd: "And",
+        capCondition1: "equals",
+        capCondition10: "does not end with",
+        capCondition11: "contains",
+        capCondition12: "does not contain",
+        capCondition2: "does not equal",
+        capCondition3: "is greater than",
+        capCondition4: "is greater than or equal to",
+        capCondition5: "is less than",
+        capCondition6: "is less than or equal to",
+        capCondition7: "begins with",
+        capCondition8: "does not begin with",
+        capCondition9: "ends with",
+        capOr: "Or",
+        textNoFilter: "no filter",
+        textShowRows: "Show rows where",
+        textUse1: "Use ? to present any single character",
+        textUse2 : "Use * to present any series of character",
+        txtTitle: "Custom Filter"
     },
-    initComponent: function () {
-        var me = this;
-        this.addEvents("onmodalresult");
-        this.btnSortDesc = Ext.create("Ext.Button", {
-            iconCls: "asc-toolbar-btn btn-sort-up",
-            width: 28,
-            enableToggle: true,
-            toggleGroup: "autoFilterSort",
-            allowDepress: false,
-            listeners: {
-                click: function () {
-                    me.fireEvent("onmodalresult", me, 3, "descending");
-                    me.close();
-                }
+    SSE.Views.DigitalFilterDialog || {}));
+    SSE.Views.AutoFilterDialog = Common.UI.Window.extend(_.extend({
+        initialize: function (options) {
+            var t = this,
+            _options = {};
+            _.extend(_options, {
+                width: 270,
+                height: 450,
+                contentWidth: 400,
+                header: true,
+                cls: "filter-dlg",
+                contentTemplate: "",
+                title: t.txtTitle,
+                items: []
+            },
+            options);
+            this.template = options.template || ['<div class="box" style="height:' + (_options.height - 85) + 'px;">', '<div class="content-panel">', '<div class="">', '<div id="id-btn-sort-down" class="btn-placeholder border"></div>', '<div id="id-btn-sort-up" class="btn-placeholder border"></div>', '<div id="id-checkbox-custom-filter" style="max-width:50px;margin-left:50px;display:inline-block;"></div>', '<button class="btn normal dlg-btn primary" result="custom" id="id-btn-custom-filter" style="min-width:120px;">', t.btnCustomFilter, "</button>", '<div id="id-sd-cell-search" class="input-row" style="margin-bottom:10px;"></div>', '<div class="border-values" style="margin-top:45px;">', '<div id="id-dlg-filter-values" class="combo-values"/>', "</div>", "</div>", "</div>", "</div>", '<div class="separator horizontal"></div>', '<div class="footer center">', '<div id="id-apply-filter" style="display: inline-block;"></div>', '<button class="btn normal dlg-btn" result="cancel">', t.cancelButtonText, "</button>", "</div>"].join("");
+            this.api = options.api;
+            this.handler = options.handler;
+            this.throughIndexes = [];
+            _options.tpl = _.template(this.template, _options);
+            Common.UI.Window.prototype.initialize.call(this, _options);
+        },
+        render: function () {
+            var me = this;
+            Common.UI.Window.prototype.render.call(this);
+            this.$window.find(".btn").on("click", _.bind(this.onBtnClick, this));
+            this.btnOk = new Common.UI.Button({
+                cls: "btn normal dlg-btn primary",
+                caption: this.okButtonText,
+                style: "margin-right:10px;",
+                enableToggle: false,
+                allowDepress: false
+            });
+            if (this.btnOk) {
+                this.btnOk.render($("#id-apply-filter", this.$window));
+                this.btnOk.on("click", _.bind(this.onApplyFilter, this));
             }
-        });
-        this.btnSortAsc = Ext.create("Ext.Button", {
-            iconCls: "asc-toolbar-btn btn-sort-down",
-            width: 28,
-            enableToggle: true,
-            style: "margin: 0 6px 0 0",
-            toggleGroup: "autoFilterSort",
-            allowDepress: false,
-            listeners: {
-                click: function () {
-                    me.fireEvent("onmodalresult", me, 3, "ascending");
-                    me.close();
-                }
+            this.btnSortDown = new Common.UI.Button({
+                cls: "btn-toolbar btn-toolbar-default border",
+                iconCls: "btn-icon btn-sort-down",
+                pressed: true,
+                enableToggle: true,
+                allowDepress: false
+            });
+            if (this.btnSortDown) {
+                this.btnSortDown.render($("#id-btn-sort-down", this.$window));
+                this.btnSortDown.on("click", _.bind(this.onSortType, this, "ascending"));
             }
-        });
-        this.chCustomFilter = Ext.widget("checkbox", {
-            style: "margin: 0 6px 0 0",
-            disabled: true,
-            boxLabel: ""
-        });
-        var btnCustomFilter = Ext.create("Ext.Button", {
-            width: 120,
-            text: me.btnCustomFilter,
-            listeners: {
-                click: function () {
-                    me.fireEvent("onmodalresult", me, 2);
-                    me.close();
-                }
+            this.btnSortUp = new Common.UI.Button({
+                cls: "btn-toolbar btn-toolbar-default border",
+                iconCls: "btn-icon btn-sort-up",
+                pressed: true,
+                enableToggle: true,
+                allowDepress: false
+            });
+            if (this.btnSortUp) {
+                this.btnSortUp.render($("#id-btn-sort-up", this.$window));
+                this.btnSortUp.on("click", _.bind(this.onSortType, this, "descending"));
             }
-        });
-        var range, full_range;
-        var txtSearch = Ext.create("Common.component.SearchField", {
-            style: "margin: 10px 0",
-            emptyText: me.txtEmpty,
-            listeners: {
-                change: function (obj, newval, oldval, opts) {
-                    me.cellsStore.clearFilter(true);
-                    if (oldval && newval.length < oldval.length) {
-                        selectionModel.selected.clear();
-                        full_range = me.cellsStore.getAt(0).ischecked;
-                        range = me.cellsStore.getRange(full_range ? 0 : 1);
-                        range.forEach(function (record) {
-                            (full_range || record.ischecked) && selectionModel.selected.add(record);
-                        });
-                    }
-                    if (newval.length) {
-                        me.cellsStore.filter([{
-                            property: "cellvalue",
-                            value: new RegExp(newval, "i")
-                        },
-                        {
-                            property: "rowvisible",
-                            value: /^((?!ever|hidden).)*$/
-                        }]);
-                    } else {
-                        me.cellsStore.filter("rowvisible", /^((?!hidden).)*$/);
-                    }
+            this.chCustomFilter = new Common.UI.CheckBox({
+                el: $("#id-checkbox-custom-filter", this.$window)
+            });
+            this.chCustomFilter.setDisabled(true);
+            this.btnCustomFilter = new Common.UI.Button({
+                el: $("#id-btn-custom-filter", this.$window)
+            }).on("click", _.bind(this.onShowCustomFilterDialog, this));
+            this.input = new Common.UI.InputField({
+                el: $("#id-sd-cell-search", this.$window),
+                allowBlank: true,
+                placeHolder: this.txtEmpty,
+                style: "margin-top: 10px;",
+                validateOnChange: true,
+                validation: function () {
+                    return true;
+                }
+            }).on("changing", function (input, value) {
+                if (value.length) {
+                    value = value.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
+                    me.filter = new RegExp(value, "ig");
+                } else {
+                    me.filter = undefined;
+                }
+                me.setupDataCells();
+            });
+            this.cells = new Common.UI.DataViewStore();
+            this.filterExcludeCells = new Common.UI.DataViewStore();
+            if (this.cells) {
+                this.cellsList = new Common.UI.ListView({
+                    el: $("#id-dlg-filter-values", this.$window),
+                    store: this.cells,
+                    template: _.template(['<div class="listview inner" style="border:none;"></div>'].join("")),
+                    itemTemplate: _.template(["<div>", '<label class="checkbox-indeterminate" style="position:absolute;">', "<% if (!check) { %>", '<input type="button"/>', "<% } else { %>", '<input type="button" class="checked"/>', "<% } %>", "</label>", '<div id="<%= id %>" class="list-item" style="pointer-events:none;margin-left:20px;display:inline-block;"><%= value %></div>', "</div>"].join(""))
+                });
+                this.cellsList.on("item:select", _.bind(this.onCellCheck, this));
+                this.cellsList.onKeyDown = _.bind(this.onListKeyDown, this);
+            }
+            this.setupListCells();
+        },
+        show: function () {
+            Common.UI.Window.prototype.show.call(this);
+            var me = this;
+            if (this.input) {
+                _.delay(function () {
+                    me.input.$el.find("input").focus();
                 },
-                searchstart: function (obj, text) {
-                    me.cellsStore.filter([{
-                        property: "cellvalue",
-                        value: new RegExp(text, "i")
+                500, this);
+            }
+        },
+        onBtnClick: function (event) {
+            if (event.currentTarget.attributes && event.currentTarget.attributes.result) {
+                if ("cancel" === event.currentTarget.attributes.result.value) {
+                    this.close();
+                }
+            }
+        },
+        onApplyFilter: function () {
+            if (this.testFilter()) {
+                this.save();
+                this.close();
+            }
+        },
+        onSortType: function (type) {
+            if (this.api && this.configTo) {
+                this.api.asc_sortColFilter(type, this.configTo.asc_getCellId());
+            }
+            this.close();
+        },
+        onShowCustomFilterDialog: function () {
+            var me = this,
+            dlgDigitalFilter = new SSE.Views.DigitalFilterDialog({
+                api: this.api
+            }).on({
+                "close": function () {
+                    me.close();
+                }
+            });
+            dlgDigitalFilter.setSettings(this.configTo);
+            dlgDigitalFilter.show();
+            this.close();
+        },
+        onCellCheck: function (listView, itemView, record) {
+            if (this.checkCellTrigerBlock) {
+                return;
+            }
+            var target = "",
+            type = "",
+            isLabel = false,
+            bound = null;
+            var event = window.event ? window.event : window._event;
+            if (event) {
+                type = event.target.type;
+                target = $(event.currentTarget).find(".list-item");
+                if (target.length) {
+                    bound = target.get(0).getBoundingClientRect();
+                    if (bound.left < event.clientX && event.clientX < bound.right && bound.top < event.clientY && event.clientY < bound.bottom) {
+                        isLabel = true;
+                    }
+                }
+                if (type === "button" || isLabel) {
+                    this.updateCellCheck(listView, record);
+                    _.delay(function () {
+                        listView.$el.find(".listview").focus();
                     },
-                    {
-                        property: "rowvisible",
-                        value: /^((?!ever|hidden).)*$/
-                    }]);
-                    this.stopSearch(true);
-                },
-                searchclear: function () {}
+                    100, this);
+                }
             }
-        });
-        this.cellsStore = Ext.create("Ext.data.Store", {
-            fields: ["cellvalue", "rowvisible", "groupid", "intval", "strval"]
-        });
-        var selectionModel = Ext.create("Ext.selection.CheckboxModel", {
-            mode: "SIMPLE",
-            listeners: {
-                deselect: function (obj, record, index) {
-                    me.chCustomFilter.getValue() && me.chCustomFilter.setValue(false);
-                    record.ischecked = false;
-                    if (record.data.rowvisible == "ever") {
-                        obj.deselectAll();
-                        me.cellsStore.getRange(1).forEach(function (rec) {
-                            rec.ischecked = false;
-                        });
+        },
+        onListKeyDown: function (e, data) {
+            var record = null,
+            listView = this.cellsList;
+            if (listView.disabled) {
+                return;
+            }
+            if (_.isUndefined(undefined)) {
+                data = e;
+            }
+            if (data.keyCode == Common.UI.Keys.SPACE) {
+                data.preventDefault();
+                data.stopPropagation();
+                this.updateCellCheck(listView, listView.getSelectedRec()[0]);
+            } else {
+                Common.UI.DataView.prototype.onKeyDown.call(this.cellsList, e, data);
+            }
+        },
+        updateCellCheck: function (listView, record) {
+            if (record && listView) {
+                listView.isSuspendEvents = true;
+                if ("1" !== record.get("groupid")) {
+                    var check = !record.get("check");
+                    this.cells.each(function (cell) {
+                        cell.set("check", check);
+                    });
+                } else {
+                    record.set("check", !record.get("check"));
+                }
+                this.chCustomFilter.setValue(false);
+                this.btnOk.setDisabled(false);
+                listView.isSuspendEvents = false;
+                listView.scroller.update({
+                    minScrollbarLength: 40,
+                    alwaysVisibleY: true
+                });
+            }
+        },
+        setSettings: function (config) {
+            this.config = config;
+            this.configTo = config;
+        },
+        setupListCells: function () {
+            function isNumeric(value) {
+                return !isNaN(parseFloat(value)) && isFinite(value);
+            }
+            var me = this,
+            isnumber, value, index = 0,
+            haveUnselectedCell = false,
+            throughIndex = 1,
+            isCustomFilter = (this.configTo.asc_getIsCustomFilter() === true);
+            if (_.isUndefined(this.config)) {
+                return;
+            }
+            this.cells.reset();
+            this.filterExcludeCells.reset();
+            me.cells.push(new Common.UI.DataViewModel({
+                id: ++index,
+                selected: false,
+                allowSelected: true,
+                value: this.textSelectAll,
+                groupid: "0",
+                check: true,
+                throughIndex: 0
+            }));
+            this.throughIndexes.push(true);
+            this.config.asc_getResult().forEach(function (item) {
+                value = item.asc_getVal();
+                isnumber = isNumeric(value);
+                if ("hidden" !== item.asc_getVisible()) {
+                    me.cells.push(new Common.UI.DataViewModel({
+                        id: ++index,
+                        selected: false,
+                        allowSelected: true,
+                        cellvalue: value,
+                        value: isnumber ? value : (value.length > 0 ? value : me.textEmptyItem),
+                        rowvisible: item.asc_getVisible(),
+                        intval: isnumber ? parseFloat(value) : undefined,
+                        strval: !isnumber ? value : "",
+                        groupid: "1",
+                        check: item.asc_getVisible(),
+                        throughIndex: throughIndex
+                    }));
+                    if (!item.asc_getVisible()) {
+                        haveUnselectedCell = true;
+                    }
+                    me.throughIndexes.push(item.asc_getVisible());
+                    ++throughIndex;
+                }
+            });
+            this.checkCellTrigerBlock = true;
+            this.cells.at(0).set("check", !haveUnselectedCell);
+            this.checkCellTrigerBlock = undefined;
+            this.btnSortDown.toggle(false, false);
+            this.btnSortUp.toggle(false, false);
+            var sort = this.config.asc_getSortState();
+            if (sort) {
+                if ("ascending" === sort) {
+                    this.btnSortDown.toggle(true, false);
+                } else {
+                    this.btnSortUp.toggle(true, false);
+                }
+            }
+            this.chCustomFilter.setValue(isCustomFilter);
+            this.btnOk.setDisabled(isCustomFilter);
+            this.cellsList.scroller.update({
+                minScrollbarLength: 40,
+                alwaysVisibleY: true
+            });
+            this.config = undefined;
+        },
+        setupDataCells: function () {
+            function isNumeric(value) {
+                return !isNaN(parseFloat(value)) && isFinite(value);
+            }
+            var me = this,
+            isnumber, value, index = 0,
+            applyfilter = true,
+            throughIndex = 1;
+            this.cells.forEach(function (item) {
+                value = item.get("check");
+                if (_.isUndefined(value)) {
+                    value = false;
+                }
+                me.throughIndexes[parseInt(item.get("throughIndex"))] = item.get("check");
+            });
+            this.cells.reset();
+            this.filterExcludeCells.reset();
+            if (!me.filter) {
+                me.cells.push(new Common.UI.DataViewModel({
+                    id: ++index,
+                    selected: false,
+                    allowSelected: true,
+                    value: this.textSelectAll,
+                    groupid: "0",
+                    check: me.throughIndexes[0],
+                    throughIndex: 0
+                }));
+            }
+            this.configTo.asc_getResult().forEach(function (item) {
+                value = item.asc_getVal();
+                isnumber = isNumeric(value);
+                applyfilter = true;
+                if (me.filter) {
+                    if (null === value.match(me.filter)) {
+                        applyfilter = false;
+                    }
+                }
+                if ("hidden" !== item.asc_getVisible()) {
+                    if (applyfilter) {
+                        me.cells.push(new Common.UI.DataViewModel({
+                            id: ++index,
+                            selected: false,
+                            allowSelected: true,
+                            cellvalue: value,
+                            value: isnumber ? value : (value.length > 0 ? value : me.textEmptyItem),
+                            rowvisible: item.asc_getVisible(),
+                            intval: isnumber ? parseFloat(value) : undefined,
+                            strval: !isnumber ? value : "",
+                            groupid: "1",
+                            check: me.throughIndexes[throughIndex],
+                            throughIndex: throughIndex
+                        }));
                     } else {
-                        var srecord = me.cellList.getStore().getAt(0);
-                        if (srecord.data.rowvisible == "ever" && obj.isSelected(srecord)) {
-                            srecord.ischecked = false;
-                            obj.deselect(srecord, true);
+                        me.filterExcludeCells.push(new Common.UI.DataViewModel({
+                            cellvalue: value
+                        }));
+                    }++throughIndex;
+                }
+            });
+            if (this.cells.length) {
+                this.chCustomFilter.setValue(this.configTo.asc_getIsCustomFilter() === true);
+            }
+            this.cellsList.scroller.update({
+                minScrollbarLength: 40,
+                alwaysVisibleY: true
+            });
+        },
+        testFilter: function () {
+            var me = this,
+            isValid = false;
+            if (this.cells) {
+                this.cells.forEach(function (item) {
+                    if ("1" === item.get("groupid")) {
+                        if (item.get("check")) {
+                            isValid = true;
                         }
                     }
-                },
-                select: function (obj, record, index) {
-                    me.chCustomFilter.getValue() && me.chCustomFilter.setValue(false);
-                    record.ischecked = true;
-                    if (record.data.rowvisible == "ever") {
-                        obj.select(me.cellList.getStore().getRange(1), false, true);
-                        obj.select(me.cellList.getStore().getAt(0), true, true);
-                        me.cellsStore.getRange(1).forEach(function (rec) {
-                            rec.ischecked = true;
-                        });
+                });
+            }
+            if (!isValid) {
+                Common.UI.warning({
+                    title: this.textWarning,
+                    msg: this.warnNoSelected,
+                    callback: function () {
+                        _.delay(function () {
+                            me.input.$el.find("input").focus();
+                        },
+                        100, this);
                     }
-                }
+                });
             }
-        });
-        this.cellList = Ext.create("Ext.grid.Panel", {
-            activeItem: 0,
-            selModel: selectionModel,
-            store: this.cellsStore,
-            stateful: true,
-            stateId: "stateGrid",
-            scroll: false,
-            columns: [{
-                flex: 1,
-                sortable: false,
-                dataIndex: "cellvalue"
-            }],
-            height: 160,
-            hideHeaders: true,
-            style: "margin: 0 0 14px 0",
-            viewConfig: {
-                stripeRows: false
-            },
-            plugins: [{
-                ptype: "gridscrollpane"
-            }]
-        });
-        var btnOk = Ext.create("Ext.Button", {
-            text: Ext.Msg.buttonText.ok,
-            width: 80,
-            cls: "asc-blue-button",
-            listeners: {
-                click: function () {
-                    if (!selectionModel.getCount()) {
-                        Ext.Msg.show({
-                            title: me.textWarning,
-                            msg: me.warnNoSelected,
-                            icon: Ext.Msg.WARNING,
-                            buttons: Ext.Msg.OK
-                        });
-                    } else {
-                        me.fireEvent("onmodalresult", me, me.chCustomFilter.getValue() ? 0 : 1);
-                        me.close();
-                    }
-                }
-            }
-        });
-        var btnCancel = Ext.create("Ext.Button", {
-            text: me.cancelButtonText,
-            width: 80,
-            listeners: {
-                click: function () {
-                    me.fireEvent("onmodalresult", me, 0);
-                    me.close();
-                }
-            }
-        });
-        this.items = [{
-            xtype: "container",
-            height: 30,
-            layout: {
-                type: "hbox"
-            },
-            items: [this.btnSortAsc, this.btnSortDesc, {
-                xtype: "tbspacer",
-                flex: 1
-            },
-            this.chCustomFilter, btnCustomFilter]
+            return isValid;
         },
-        txtSearch, this.cellList, {
-            xtype: "container",
-            width: 250,
-            layout: "hbox",
-            layoutConfig: {
-                align: "stretch"
-            },
-            items: [{
-                xtype: "tbspacer",
-                flex: 1
-            },
-            btnOk, {
-                xtype: "tbspacer",
-                width: 5
-            },
-            btnCancel]
-        }];
-        this.callParent(arguments);
-        this.setTitle(this.txtTitle);
-    },
-    afterRender: function () {
-        this.callParent(arguments);
-        this._setDefaults();
-    },
-    setSettings: function (config) {
-        var arr = [{
-            cellvalue: this.textSelectAll,
-            rowvisible: "ever",
-            groupid: "0"
-        }];
-        var isnumber, value;
-        config.asc_getResult().forEach(function (item) {
-            value = item.asc_getVal();
-            isnumber = Ext.isNumeric(value);
-            arr.push({
-                cellvalue: value,
-                rowvisible: item.asc_getVisible(),
-                groupid: "1",
-                intval: isnumber ? parseFloat(value) : undefined,
-                strval: !isnumber ? value : ""
-            });
-        });
-        this.cellsStore.loadData(arr);
-        this.cellsStore.group("groupid");
-        this._defaults = [];
-        this._defaults.properties = config;
-    },
-    getSettings: function () {
-        var ret_out = new Asc.AutoFiltersOptions();
-        ret_out.asc_setCellId(this._defaults.properties.asc_getCellId());
-        var result_arr = [],
-        visibility,
-        me = this;
-        this.cellsStore.clearFilter(true);
-        var records = this.cellsStore.getRange(1);
-        records.forEach(function (item) {
-            if ((visibility = item.get("rowvisible")) != "hidden") {
-                visibility = me.cellList.getSelectionModel().isSelected(item);
+        save: function () {
+            if (this.api && this.configTo && this.cells && this.filterExcludeCells) {
+                var options = new Asc.AutoFiltersOptions();
+                if (options) {
+                    options.asc_setCellId(this.configTo.asc_getCellId());
+                    var me = this,
+                    result_arr = [],
+                    visibility;
+                    this.cells.forEach(function (item) {
+                        if ("1" === item.get("groupid")) {
+                            if ((visibility = item.get("rowvisible")) !== "hidden") {
+                                visibility = item.get("check");
+                                result_arr.push(new Asc.AutoFiltersOptionsElements(item.get("cellvalue"), visibility));
+                            }
+                        }
+                    });
+                    this.filterExcludeCells.forEach(function (item) {
+                        result_arr.push(new Asc.AutoFiltersOptionsElements(item.get("cellvalue"), false));
+                    });
+                    options.asc_setResult(result_arr);
+                    options.sortState = this.configTo.asc_getSortState();
+                    this.api.asc_applyAutoFilter("mainFilter", options);
+                }
             }
-            result_arr.push(new Asc.AutoFiltersOptionsElements(item.get("cellvalue"), visibility));
-        });
-        ret_out.asc_setResult(result_arr);
-        ret_out.sortState = this._defaults.properties.asc_getSortState();
-        return ret_out;
+        },
+        onPrimary: function () {
+            this.save();
+            this.close();
+            return false;
+        },
+        okButtonText: "Ok",
+        btnCustomFilter: "Custom Filter",
+        textSelectAll: "Select All",
+        txtTitle: "Filter",
+        warnNoSelected: "You must choose at least one value",
+        textWarning: "Warning",
+        cancelButtonText: "Cancel",
+        textEmptyItem: "{Blanks}",
+        txtEmpty: "Enter cell's filter"
     },
-    _setDefaults: function () {
-        var sort = this._defaults.properties.asc_getSortState();
-        if (sort) {
-            this[sort == "ascending" ? "btnSortAsc" : "btnSortDesc"].toggle(true, true);
-        }
-        var store = this.cellList.getStore(),
-        selectionModel = this.cellList.getSelectionModel();
-        store.filter("rowvisible", /^((?!hidden).)*$/);
-        var count = store.getCount(),
-        item,
-        isSelectAll = true;
-        while (count > 1) {
-            item = store.getAt(--count);
-            if (item.data.rowvisible === true) {
-                selectionModel.select(item, true, true);
-                item.ischecked = true;
-            } else {
-                isSelectAll = false;
-            }
-        }
-        if (isSelectAll) {
-            store.getAt(0).ischecked = true;
-            selectionModel.select(0, true, true);
-        }
-        this.chCustomFilter.setValue(this._defaults.properties.asc_getIsCustomFilter() === true);
-    },
-    btnCustomFilter: "Custom Filter",
-    textSelectAll: "Select All",
-    txtTitle: "Filter",
-    warnNoSelected: "You must choose at least one value",
-    textWarning: "Warning",
-    cancelButtonText: "Cancel",
-    txtEmpty: "Enter cell's filter"
+    SSE.Views.AutoFilterDialog || {}));
 });

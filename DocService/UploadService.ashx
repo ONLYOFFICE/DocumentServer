@@ -1,6 +1,6 @@
 ﻿<%@ WebHandler Language="C#" Class="UploadService" %>
 /*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -40,6 +40,7 @@ using System.Web;
 using System.IO;
 using System.Text;
 using System.Xml;
+using System.Collections;
 using System.Collections.Generic;
 using System.Web.Script.Serialization;
 using System.Collections.Specialized;
@@ -54,33 +55,33 @@ public class UploadService : IHttpAsyncHandler
     
     public IAsyncResult BeginProcessRequest(HttpContext context, AsyncCallback cb, Object extraData)
     {
-        _log.Info("Starting process request...");
-        _log.Info(context.Request.Params.ToString());
 
         TransportClassMainAshx oTransportClassMainAshx = new TransportClassMainAshx(context, cb);
         ErrorTypes eError = ErrorTypes.NoError;
         try
         {
+            _log.Info("Starting process request...");
+            _log.Info(context.Request.QueryString.ToString());
+
             string sGuid = context.Request.QueryString["key"];
             int nMaxBytes = Convert.ToInt32(ConfigurationSettings.AppSettings["limits.image.size"] ?? "25000000");
             if (context.Request.ContentLength <= nMaxBytes)
             {
                 if (context.Request.Files.Count > 0)
                 {
-                    HttpPostedFile file = context.Request.Files[0];
-                    string sFileExtension = Path.GetExtension(file.FileName).ToLower();
                     
                     int nParamsCount = 0;
                     string sInputParams = "";
-                    for (int i = 0, length = context.Request.Params.Count; i < length; ++i)
+                    for (int i = 0, length = context.Request.QueryString.Count; i < length; ++i)
                     {
-                        sInputParams += context.Request.Params.Get(i) + ":" + context.Request.Params.GetKey(i);
+                        sInputParams += context.Request.QueryString.Get(i) + ":" + context.Request.QueryString.GetKey(i);
                         if (nParamsCount > 0)
                             sInputParams += ",";
                         nParamsCount++;
                     }
                     AsyncMediaXmlOperation oAsyncMediaXmlOperation = new AsyncMediaXmlOperation();
-                    TransportClass1 oTransportClass1 = new TransportClass1(oTransportClassMainAshx, oAsyncMediaXmlOperation, context.Request.QueryString, sGuid, Path.Combine(sGuid, @"media/media.xml"), file);
+                    List<string> aUrls = new List<string>();
+                    TransportClass1 oTransportClass1 = new TransportClass1(oTransportClassMainAshx, oAsyncMediaXmlOperation, context.Request.QueryString, aUrls, sGuid, Path.Combine(sGuid, @"media/media.xml"), context.Request.Files, context.Request.Files.GetEnumerator());
                     oAsyncMediaXmlOperation.GetMediaXmlBegin(oTransportClass1.m_sMediaXml, GetMediaXmlCallback, oTransportClass1);
                 }
                 else
@@ -93,7 +94,7 @@ public class UploadService : IHttpAsyncHandler
         {
             eError = ErrorTypes.Upload;
             
-            _log.Error(context.Request.Params.ToString());
+            _log.Error(context.Request.QueryString.ToString());
             _log.Error("Exeption: ", e);
         }
         if (ErrorTypes.NoError != eError)
@@ -116,7 +117,7 @@ public class UploadService : IHttpAsyncHandler
         }
     }
     #region HelpFunctions
-    private void WriteToResponse(TransportClassMainAshx oTransportClassMainAshx, ErrorTypes eError, string sPath, NameValueCollection aNameValueCollection)
+    private void WriteToResponse(TransportClassMainAshx oTransportClassMainAshx, ErrorTypes eError, List<string> aUrls, NameValueCollection aNameValueCollection)
     {
         HttpContext oHttpContext = oTransportClassMainAshx.m_oHttpContext;
         AsyncCallback oAsyncCallback = oTransportClassMainAshx.m_oAsyncCallback;
@@ -127,8 +128,7 @@ public class UploadService : IHttpAsyncHandler
             for (int i = 0, length = aNameValueCollection.Count; i < length; ++i)
                 oOutputCommand.input.Add(aNameValueCollection.GetKey(i), aNameValueCollection.Get(i));
         }
-        if (null != sPath)
-            oOutputCommand.url = sPath;
+        oOutputCommand.urls = aUrls;
         oOutputCommand.error = (int)eError;
         oOutputCommand.type = (int)PostMessageType.UploadImage;
 
@@ -143,6 +143,14 @@ public class UploadService : IHttpAsyncHandler
     }
     #endregion
     #region Callbacks
+    private void GetMediaXmlCallbackProcess(TransportClass1 oTransportClass1, Dictionary<string, string> aMediaXmlMapHash, Dictionary<string, string> aMediaXmlMapFilename)
+    {
+        AsyncContextReadOperation oAsyncContextReadOperation = new AsyncContextReadOperation();
+        TransportClass2 oTransportClass2 = new TransportClass2(oTransportClass1, aMediaXmlMapHash, aMediaXmlMapFilename, oAsyncContextReadOperation);
+        HttpPostedFile oCurrentFile = (HttpPostedFile)oTransportClass1.m_oFiles[(string)oTransportClass1.m_oFilesEnumerator.Current];
+        oCurrentFile.InputStream.Position = 0;
+        oAsyncContextReadOperation.ReadContextBegin(oCurrentFile.InputStream, ReadContextCallback, oTransportClass2);
+    }
     private void GetMediaXmlCallback(IAsyncResult ar)
     {
         TransportClass1 oTransportClass1 = ar.AsyncState as TransportClass1;
@@ -151,18 +159,16 @@ public class UploadService : IHttpAsyncHandler
             Dictionary<string, string> aMediaXmlMapHash;
             Dictionary<string, string> aMediaXmlMapFilename;
             ErrorTypes eError = oTransportClass1.m_oAsyncMediaXmlOperation.GetMediaXmlEnd(ar, out aMediaXmlMapHash, out aMediaXmlMapFilename);
-            if (ErrorTypes.NoError == eError)
+            if (ErrorTypes.NoError == eError && oTransportClass1.m_oFilesEnumerator.MoveNext())
             {
-                AsyncContextReadOperation oAsyncContextReadOperation = new AsyncContextReadOperation();
-                TransportClass2 oTransportClass2 = new TransportClass2(oTransportClass1, aMediaXmlMapHash, aMediaXmlMapFilename, oAsyncContextReadOperation);
-                oTransportClass1.m_oFile.InputStream.Position = 0;
-                oAsyncContextReadOperation.ReadContextBegin(oTransportClass1.m_oFile.InputStream, ReadContextCallback, oTransportClass2);
+                GetMediaXmlCallbackProcess(oTransportClass1, aMediaXmlMapHash, aMediaXmlMapFilename);
             }
             else
-                WriteToResponse(oTransportClass1, ErrorTypes.Upload, null, oTransportClass1.m_aInputParams);
+                WriteToResponse(oTransportClass1, eError, null, oTransportClass1.m_aInputParams);
         }
-        catch
+        catch(Exception e)
         {
+            _log.Error("Exeption: ", e);
             WriteToResponse(oTransportClass1, ErrorTypes.Upload, null, oTransportClass1.m_aInputParams);
         }
     }
@@ -174,11 +180,24 @@ public class UploadService : IHttpAsyncHandler
             ErrorTypes eError = oTransportClass2.m_oAsyncContextReadOperation.ReadContextEnd(ar);
             if (ErrorTypes.NoError == eError)
             {
-                byte[] aBuffer = oTransportClass2.m_oAsyncContextReadOperation.m_aBuffer;
-                int nImageFormat = Utils.GetFileFormat(aBuffer);
+                HttpPostedFile oCurrentFile = ((HttpPostedFile)oTransportClass2.m_oFiles[(string)oTransportClass2.m_oFilesEnumerator.Current]);
+                oCurrentFile.InputStream.Position = 0;
+                Stream oImageStream = oCurrentFile.InputStream;
+                byte[] aBuffer = oTransportClass2.m_oAsyncContextReadOperation.m_aOutput.ToArray();
+                int nImageFormat = FormatChecker.GetFileFormat(aBuffer);
                 string sSupportedFormats = ConfigurationSettings.AppSettings["limits.image.types.upload"] ?? "jpg";
                 if (0 != (FileFormats.AVS_OFFICESTUDIO_FILE_IMAGE & nImageFormat) && -1 != sSupportedFormats.IndexOf(FileFormats.ToString(nImageFormat)))
                 {
+                    if (FileFormats.AVS_OFFICESTUDIO_FILE_IMAGE_GIF == nImageFormat || FileFormats.AVS_OFFICESTUDIO_FILE_IMAGE_ICO == nImageFormat)
+                    {
+                        byte[] aNewBuffer;
+                        if (Utils.ConvertGifIcoToPng(aBuffer, nImageFormat, out aNewBuffer))
+                        {
+                            nImageFormat = FileFormats.AVS_OFFICESTUDIO_FILE_IMAGE_PNG;
+                            aBuffer = aNewBuffer;
+                            oImageStream = new MemoryStream(aBuffer);
+                        }
+                    }
                     string sImageHash = null;
                     using (MemoryStream ms = new MemoryStream(aBuffer))
                         sImageHash = Utils.getMD5HexString(ms);
@@ -187,8 +206,7 @@ public class UploadService : IHttpAsyncHandler
                     if (oTransportClass2.m_oMediaXmlMapHash.TryGetValue(sImageHash, out sFileName))
                     {
                         
-                        string sUrl = Constants.mc_sResourceServiceUrlRel + Path.Combine(oTransportClass2.m_sKey, @"media\" + sFileName).Replace('\\', '/');
-                        WriteToResponse(oTransportClass2, ErrorTypes.NoError, sUrl, oTransportClass2.m_aInputParams);
+                        ImageUrlProcess(oTransportClass2, Constants.mc_sResourceServiceUrlRel + Path.Combine(oTransportClass2.m_sKey, @"media\" + sFileName).Replace('\\', '/'));
                     }
                     else
                     {
@@ -220,8 +238,7 @@ public class UploadService : IHttpAsyncHandler
                         string sNewPath = Path.Combine(oTransportClass2.m_sKey, @"media\" + sNewName).Replace('\\', '/');
                         Storage oStorage = new Storage();
                         TransportClass3 oTransportClass3 = new TransportClass3(oTransportClass2, sNewName, sImageHash, sNewPath, oStorage);
-                        oTransportClass2.m_oFile.InputStream.Position = 0;
-                        oTransportClass3.m_oStorage.WriteFileBegin(sNewPath, oTransportClass2.m_oFile.InputStream, WriteUploadedFileCallback, oTransportClass3);
+                        oTransportClass3.m_oStorage.WriteFileBegin(sNewPath, oImageStream, WriteUploadedFileCallback, oTransportClass3);
                     }
                 }
                 else
@@ -230,10 +247,19 @@ public class UploadService : IHttpAsyncHandler
             else
                 WriteToResponse(oTransportClass2, eError, null, oTransportClass2.m_aInputParams);
         }
-        catch
+        catch (Exception e)
         {
+            _log.Error("Exeption: ", e);
             WriteToResponse(oTransportClass2, ErrorTypes.Upload, null, oTransportClass2.m_aInputParams);
         }
+    }
+    private void ImageUrlProcess(TransportClass2 oTransportClass2, string sUrl)
+    {
+        oTransportClass2.m_aUrls.Add(sUrl);
+        if (oTransportClass2.m_oFilesEnumerator.MoveNext())
+            GetMediaXmlCallbackProcess(oTransportClass2, oTransportClass2.m_oMediaXmlMapHash, oTransportClass2.m_oMediaXmlMapFilename);
+        else
+            oTransportClass2.m_oAsyncMediaXmlOperation.WriteMediaXmlBegin(oTransportClass2.m_sMediaXml, oTransportClass2.m_oMediaXmlMapHash, WriteMediaXmlCallback, oTransportClass2);
     }
     private void WriteUploadedFileCallback(IAsyncResult ar)
     {
@@ -245,33 +271,33 @@ public class UploadService : IHttpAsyncHandler
             if (ErrorTypes.NoError == eError)
             {
                 oTransportClass3.m_oMediaXmlMapHash.Add(oTransportClass3.m_sHash, oTransportClass3.m_sFilename);
-                oTransportClass3.m_oAsyncMediaXmlOperation.WriteMediaXmlBegin(oTransportClass3.m_sMediaXml, oTransportClass3.m_oMediaXmlMapHash, WriteMediaXmlCallback, oTransportClass3);
+                oTransportClass3.m_oMediaXmlMapFilename.Add(oTransportClass3.m_sFilename, oTransportClass3.m_sHash);
+                ImageUrlProcess(oTransportClass3, Constants.mc_sResourceServiceUrlRel + oTransportClass3.m_sPath.Replace('\\', '/'));
             }
             else
                 WriteToResponse(oTransportClass3, eError, null, oTransportClass3.m_aInputParams);
         }
-        catch
+        catch (Exception e)
         {
+            _log.Error("Exeption: ", e);
             WriteToResponse(oTransportClass3, ErrorTypes.Upload, null, oTransportClass3.m_aInputParams);
         }
     }
     private void WriteMediaXmlCallback(IAsyncResult ar)
     {
-        TransportClass3 oTransportClass3 = ar.AsyncState as TransportClass3;
+        TransportClass1 oTransportClass1 = ar.AsyncState as TransportClass1;
         try
         {
-            ErrorTypes eError = oTransportClass3.m_oAsyncMediaXmlOperation.WriteMediaXmlEnd(ar);
+            ErrorTypes eError = oTransportClass1.m_oAsyncMediaXmlOperation.WriteMediaXmlEnd(ar);
             if (ErrorTypes.NoError == eError)
-            {
-                string sUrl = Constants.mc_sResourceServiceUrlRel + oTransportClass3.m_sPath.Replace('\\', '/');
-                WriteToResponse(oTransportClass3, ErrorTypes.NoError, sUrl, oTransportClass3.m_aInputParams);
-            }
+                WriteToResponse(oTransportClass1, ErrorTypes.NoError, oTransportClass1.m_aUrls, oTransportClass1.m_aInputParams);
             else
-                WriteToResponse(oTransportClass3, ErrorTypes.Upload, null, oTransportClass3.m_aInputParams);
+                WriteToResponse(oTransportClass1, eError, null, oTransportClass1.m_aInputParams);
         }
-        catch
+        catch (Exception e)
         {
-            WriteToResponse(oTransportClass3, ErrorTypes.Upload, null, oTransportClass3.m_aInputParams);
+            _log.Error("Exeption: ", e);
+            WriteToResponse(oTransportClass1, ErrorTypes.Upload, null, oTransportClass1.m_aInputParams);
         }
     }
     #endregion
@@ -280,18 +306,22 @@ public class UploadService : IHttpAsyncHandler
     {
         public AsyncMediaXmlOperation m_oAsyncMediaXmlOperation;
         public NameValueCollection m_aInputParams;
+        public List<string> m_aUrls = new List<string>();
         public string m_sKey;
         public string m_sMediaXml;
-        public HttpPostedFile m_oFile;
+        public HttpFileCollection m_oFiles;
+        public IEnumerator m_oFilesEnumerator;
 
-        public TransportClass1(TransportClassMainAshx oTransportClassMainAshx, AsyncMediaXmlOperation oAsyncMediaXmlOperation, NameValueCollection aInputParams, string sKey, string sMediaXml, HttpPostedFile oFile)
+        public TransportClass1(TransportClassMainAshx oTransportClassMainAshx, AsyncMediaXmlOperation oAsyncMediaXmlOperation, NameValueCollection aInputParams, List<string> aUrls, string sKey, string sMediaXml, HttpFileCollection oFiles, IEnumerator oFilesEnumerator)
             : base(oTransportClassMainAshx.m_oHttpContext, oTransportClassMainAshx.m_oAsyncCallback)
         {
             m_oAsyncMediaXmlOperation = oAsyncMediaXmlOperation;
             m_aInputParams = aInputParams;
             m_sKey = sKey;
-            m_oFile = oFile;
+            m_oFiles = oFiles;
+            m_oFilesEnumerator = oFilesEnumerator;
             m_sMediaXml = sMediaXml;
+            m_aUrls = aUrls;
         }
     }
     private class TransportClass2 : TransportClass1
@@ -300,7 +330,7 @@ public class UploadService : IHttpAsyncHandler
         public Dictionary<string, string> m_oMediaXmlMapFilename = new Dictionary<string, string>();
         public AsyncContextReadOperation m_oAsyncContextReadOperation;
         public TransportClass2(TransportClass1 oTransportClass1, Dictionary<string, string> oMediaXmlMapHash, Dictionary<string, string> oMediaXmlMapFilename, AsyncContextReadOperation oAsyncContextReadOperation)
-            : base(oTransportClass1, oTransportClass1.m_oAsyncMediaXmlOperation, oTransportClass1.m_aInputParams, oTransportClass1.m_sKey, oTransportClass1.m_sMediaXml, oTransportClass1.m_oFile)
+            : base(oTransportClass1, oTransportClass1.m_oAsyncMediaXmlOperation, oTransportClass1.m_aInputParams, oTransportClass1.m_aUrls, oTransportClass1.m_sKey, oTransportClass1.m_sMediaXml, oTransportClass1.m_oFiles, oTransportClass1.m_oFilesEnumerator)
         {
             m_oMediaXmlMapHash = oMediaXmlMapHash;
             m_oMediaXmlMapFilename = oMediaXmlMapFilename;
@@ -314,7 +344,7 @@ public class UploadService : IHttpAsyncHandler
         public string m_sPath;
         public Storage m_oStorage;
         public TransportClass3(TransportClass2 oTransportClass2, string sFilename, string sHash, string sPath, Storage oStorage)
-            : base(new TransportClass1(oTransportClass2, oTransportClass2.m_oAsyncMediaXmlOperation, oTransportClass2.m_aInputParams, oTransportClass2.m_sKey, oTransportClass2.m_sMediaXml, oTransportClass2.m_oFile), oTransportClass2.m_oMediaXmlMapHash, oTransportClass2.m_oMediaXmlMapFilename, oTransportClass2.m_oAsyncContextReadOperation)
+            : base(oTransportClass2, oTransportClass2.m_oMediaXmlMapHash, oTransportClass2.m_oMediaXmlMapFilename, oTransportClass2.m_oAsyncContextReadOperation)
         {
             m_sFilename = sFilename;
             m_sHash = sHash;
@@ -325,7 +355,7 @@ public class UploadService : IHttpAsyncHandler
     public class OutputCommand
     {
         public int type;
-        public string url;
+        public List<string> urls = new List<string>();
         public int error;
         public Dictionary<string, object> input = new Dictionary<string,object>();
     }

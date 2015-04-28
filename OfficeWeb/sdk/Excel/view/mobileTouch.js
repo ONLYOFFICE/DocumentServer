@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -75,6 +75,12 @@ function CMobileTouchManager() {
     this.TableCurrentMoveValueMin = null;
     this.TableCurrentMoveValueMax = null;
     this.ShowMenuTimerId = -1;
+    this.longTapFlag = false;
+    this.longTapTimer = -1;
+    this.mylatesttap = null;
+    this.zoomFactor = 1;
+    this.wasZoom = false;
+    this.canZoom = true;
     this.wasMove = false;
 }
 CMobileTouchManager.prototype = {
@@ -99,16 +105,27 @@ CMobileTouchManager.prototype = {
         global_mouseEvent.ClickCount = old_click_count;
     },
     onTouchStart: function (e) {
-        var point = arguments[0].touches ? arguments[0].touches[0] : arguments[0];
+        this.longTapFlag = true;
+        this.wasMove = false;
+        var thas = this,
+        evt = e,
+        point = arguments[0].touches ? arguments[0].touches[0] : arguments[0];
+        function longTapDetected() {
+            if (thas.longTapFlag) {
+                alert("clientX " + point.clientX + " clientY " + point.clientY);
+            }
+            thas.longTapFlag = false;
+            clearInterval(this.longTapTimer);
+        }
         this.DownPointOriginal.X = point.clientX;
         this.DownPointOriginal.Y = point.clientY;
-        this.wasMove = false;
         this.iScroll._start(e);
         e.preventDefault();
         e.returnValue = false;
         return false;
     },
     onTouchMove: function (e) {
+        this.longTapFlag = false;
         this.wasMove = true;
         this.iScroll._move(e);
         e.preventDefault();
@@ -116,14 +133,16 @@ CMobileTouchManager.prototype = {
         return false;
     },
     onTouchEnd: function (e) {
+        this.longTapFlag = false;
         this.iScroll._end(e);
-        var point = e.changedTouches ? e.changedTouches[0] : e;
+        var now = new Date().getTime(),
+        point = e.changedTouches ? e.changedTouches[0] : e;
         if (Math.abs(this.DownPointOriginal.X - point.clientX) < this.ctrl.controller.settings.hscrollStep && Math.abs(this.DownPointOriginal.Y - point.clientY) < this.ctrl.controller.settings.vscrollStep) {
             this.ctrl.handlers.trigger("asc_onTapEvent", e);
         }
-        this.wasMove = false;
         e.preventDefault();
         e.returnValue = false;
+        this.wasMove = false;
         return;
     },
     onTouchStart_renderer: function (e) {

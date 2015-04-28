@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- (function (window, undefined) {
+ "use strict";
+(function (window, undefined) {
     if (!window["Asc"]) {
         window["Asc"] = {};
     }
@@ -215,6 +216,8 @@
         this.styleName = null;
         this.numFormatType = null;
         this.angle = null;
+        this.clearFilter = false;
+        this.isAutoFilter = false;
     }
     asc_CCellInfo.prototype = {
         asc_getName: function () {
@@ -270,6 +273,12 @@
         },
         asc_getAngle: function () {
             return this.angle;
+        },
+        asc_getClearFilter: function () {
+            return this.clearFilter;
+        },
+        asc_getIsAutoFilter: function () {
+            return this.isAutoFilter;
         }
     };
     window["Asc"].asc_CCellInfo = window["Asc"]["asc_CCellInfo"] = asc_CCellInfo;
@@ -292,30 +301,6 @@
     prot["asc_getStyleName"] = prot.asc_getStyleName;
     prot["asc_getNumFormatType"] = prot.asc_getNumFormatType;
     prot["asc_getAngle"] = prot.asc_getAngle;
-    function asc_CCellRect(x, y, width, height) {
-        this._x = x;
-        this._y = y;
-        this._width = width;
-        this._height = height;
-    }
-    asc_CCellRect.prototype = {
-        asc_getX: function () {
-            return this._x;
-        },
-        asc_getY: function () {
-            return this._y;
-        },
-        asc_getWidth: function () {
-            return this._width;
-        },
-        asc_getHeight: function () {
-            return this._height;
-        }
-    };
-    window["Asc"].asc_CCellRect = asc_CCellRect;
-    prot = asc_CCellRect.prototype;
-    prot["asc_getX"] = prot.asc_getX;
-    prot["asc_getY"] = prot.asc_getY;
-    prot["asc_getWidth"] = prot.asc_getWidth;
-    prot["asc_getHeight"] = prot.asc_getHeight;
+    prot["asc_getClearFilter"] = prot.asc_getClearFilter;
+    prot["asc_getIsAutoFilter"] = prot.asc_getIsAutoFilter;
 })(window);

@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,52 +29,49 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("Common.model.Comment", {
-    extend: "Ext.data.Model",
-    fields: [{
-        type: "string",
-        name: "id"
-    },
-    {
-        type: "string",
-        name: "userid"
-    },
-    {
-        type: "string",
-        name: "username",
-        defaultValue: "Guest"
-    },
-    {
-        type: "int",
-        name: "date"
-    },
-    {
-        type: "string",
-        name: "quote"
-    },
-    {
-        type: "string",
-        name: "comment"
-    },
-    {
-        type: "boolean",
-        name: "resolved",
-        defaultValue: false
-    },
-    {
-        type: "boolean",
-        name: "lock",
-        defaultValue: false
-    },
-    {
-        type: "string",
-        name: "lockuserid"
-    }],
-    proxy: {
-        type: "memory"
-    },
-    hasMany: {
-        model: "Common.model.Reply",
-        name: "replys"
-    }
+ if (Common === undefined) {
+    var Common = {};
+}
+Common.Models = Common.Models || {};
+define(["underscore", "backbone", "common/main/lib/component/BaseView"], function (_, Backbone) {
+    Common.Models.Comment = Backbone.Model.extend({
+        defaults: {
+            uid: 0,
+            userid: 0,
+            username: "Guest",
+            date: undefined,
+            quote: "",
+            comment: "",
+            resolved: false,
+            lock: false,
+            lockuserid: "",
+            unattached: false,
+            id: Common.UI.getId(),
+            time: 0,
+            showReply: false,
+            showReplyInPopover: false,
+            editText: false,
+            editTextInPopover: false,
+            last: undefined,
+            replys: [],
+            hideAddReply: false,
+            scope: null,
+            hide: false,
+            hint: false,
+            dummy: undefined
+        }
+    });
+    Common.Models.Reply = Backbone.Model.extend({
+        defaults: {
+            time: 0,
+            userid: 0,
+            username: "Guest",
+            reply: "",
+            date: undefined,
+            id: Common.UI.getId(),
+            editText: false,
+            editTextInPopover: false,
+            scope: null
+        }
+    });
 });

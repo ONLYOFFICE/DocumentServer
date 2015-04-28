@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,327 +29,78 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var historyitem_Unknown = 0;
-var historyitem_Document_AddItem = 1;
-var historyitem_Document_RemoveItem = 2;
-var historyitem_Document_Margin = 3;
-var historyitem_Document_PageSize = 4;
-var historyitem_Document_Orientation = 5;
-var historyitem_Document_DefaultTab = 6;
-var historyitem_Paragraph_AddItem = 1;
-var historyitem_Paragraph_RemoveItem = 2;
-var historyitem_Paragraph_Numbering = 3;
-var historyitem_Paragraph_Align = 4;
-var historyitem_Paragraph_Ind_First = 5;
-var historyitem_Paragraph_Ind_Right = 6;
-var historyitem_Paragraph_Ind_Left = 7;
-var historyitem_Paragraph_ContextualSpacing = 8;
-var historyitem_Paragraph_KeepLines = 9;
-var historyitem_Paragraph_KeepNext = 10;
-var historyitem_Paragraph_PageBreakBefore = 11;
-var historyitem_Paragraph_Spacing_Line = 12;
-var historyitem_Paragraph_Spacing_LineRule = 13;
-var historyitem_Paragraph_Spacing_Before = 14;
-var historyitem_Paragraph_Spacing_After = 15;
-var historyitem_Paragraph_Spacing_AfterAutoSpacing = 16;
-var historyitem_Paragraph_Spacing_BeforeAutoSpacing = 17;
-var historyitem_Paragraph_Shd_Value = 18;
-var historyitem_Paragraph_Shd_Color = 19;
-var historyitem_Paragraph_WidowControl = 20;
-var historyitem_Paragraph_Tabs = 21;
-var historyitem_Paragraph_PStyle = 22;
-var historyitem_Paragraph_DocNext = 23;
-var historyitem_Paragraph_DocPrev = 24;
-var historyitem_Paragraph_Parent = 25;
-var historyitem_Paragraph_Borders_Between = 26;
-var historyitem_Paragraph_Borders_Bottom = 27;
-var historyitem_Paragraph_Borders_Left = 28;
-var historyitem_Paragraph_Borders_Right = 29;
-var historyitem_Paragraph_Borders_Top = 30;
-var historyitem_Paragraph_Pr = 31;
-var historyitem_Paragraph_PresentationPr_Bullet = 32;
-var historyitem_Paragraph_PresentationPr_Level = 33;
-var historyitem_Paragraph_FramePr = 34;
-var historyitem_Paragraph_Shd = 35;
-var historyitem_TextPr_Change = 1;
-var historyitem_TextPr_Bold = 2;
-var historyitem_TextPr_Italic = 3;
-var historyitem_TextPr_Strikeout = 4;
-var historyitem_TextPr_Underline = 5;
-var historyitem_TextPr_FontFamily = 6;
-var historyitem_TextPr_FontSize = 7;
-var historyitem_TextPr_Color = 8;
-var historyitem_TextPr_VertAlign = 9;
-var historyitem_TextPr_HighLight = 10;
-var historyitem_TextPr_RStyle = 11;
-var historyitem_TextPr_Spacing = 12;
-var historyitem_TextPr_DStrikeout = 13;
-var historyitem_TextPr_Caps = 14;
-var historyitem_TextPr_SmallCaps = 15;
-var historyitem_TextPr_Position = 16;
-var historyitem_TextPr_Value = 17;
-var historyitem_TextPr_RFonts = 18;
-var historyitem_TextPr_Lang = 19;
-var historyitem_TextPr_RFonts_Ascii = 20;
-var historyitem_TextPr_RFonts_HAnsi = 21;
-var historyitem_TextPr_RFonts_CS = 22;
-var historyitem_TextPr_RFonts_EastAsia = 23;
-var historyitem_TextPr_RFonts_Hint = 24;
-var historyitem_TextPr_Lang_Bidi = 25;
-var historyitem_TextPr_Lang_EastAsia = 26;
-var historyitem_TextPr_Lang_Val = 27;
-var historyitem_Drawing_Size = 1;
-var historyitem_Drawing_Url = 2;
-var historyitem_Drawing_DrawingType = 3;
-var historyitem_Drawing_WrappingType = 4;
-var historyitem_Drawing_Distance = 5;
-var historyitem_Drawing_AllowOverlap = 6;
-var historyitem_Drawing_PositionH = 7;
-var historyitem_Drawing_PositionV = 8;
-var historyitem_Drawing_AbsoluteTransform = 9;
-var historyitem_Drawing_BehindDoc = 10;
-var historyitem_Drawing_SetZIndex = 11;
-var historyitem_Drawing_SetGraphicObject = 12;
-var historyitem_CalculateAfterPaste = 13;
-var historyitem_SetSimplePos = 14;
-var historyitem_SetExtent = 15;
-var historyitem_SetWrapPolygon = 16;
-var historyitem_DrawingObjects_AddItem = 1;
-var historyitem_DrawingObjects_RemoveItem = 2;
-var historyitem_FlowObjects_AddItem = 1;
-var historyitem_FlowObjects_RemoveItem = 2;
-var historyitem_FlowImage_Position = 1;
-var historyitem_FlowImage_Size = 2;
-var historyitem_FlowImage_Paddings = 3;
-var historyitem_FlowImage_PageNum = 4;
-var historyitem_FlowImage_Url = 5;
-var historyitem_FlowImage_Parent = 6;
-var historyitem_Table_DocNext = 1;
-var historyitem_Table_DocPrev = 2;
-var historyitem_Table_Parent = 3;
-var historyitem_Table_TableW = 4;
-var historyitem_Table_TableCellMar = 5;
-var historyitem_Table_TableAlign = 6;
-var historyitem_Table_TableInd = 7;
-var historyitem_Table_TableBorder_Left = 8;
-var historyitem_Table_TableBorder_Top = 9;
-var historyitem_Table_TableBorder_Right = 10;
-var historyitem_Table_TableBorder_Bottom = 11;
-var historyitem_Table_TableBorder_InsideH = 12;
-var historyitem_Table_TableBorder_InsideV = 13;
-var historyitem_Table_TableShd = 14;
-var historyitem_Table_Inline = 15;
-var historyitem_Table_AddRow = 16;
-var historyitem_Table_RemoveRow = 17;
-var historyitem_Table_TableGrid = 18;
-var historyitem_Table_TableLook = 19;
-var historyitem_Table_TableStyleRowBandSize = 20;
-var historyitem_Table_TableStyleColBandSize = 21;
-var historyitem_Table_TableStyle = 22;
-var historyitem_Table_AllowOverlap = 23;
-var historyitem_Table_PositionH = 24;
-var historyitem_Table_PositionV = 25;
-var historyitem_Table_Distance = 26;
-var historyitem_Table_Pr = 27;
-var historyitem_Table_TableLayout = 28;
-var historyitem_TableRow_Before = 1;
-var historyitem_TableRow_After = 2;
-var historyitem_TableRow_CellSpacing = 3;
-var historyitem_TableRow_Height = 4;
-var historyitem_TableRow_AddCell = 5;
-var historyitem_TableRow_RemoveCell = 6;
-var historyitem_TableRow_TableHeader = 7;
-var historyitem_TableRow_Pr = 8;
-var historyitem_TableCell_GridSpan = 1;
-var historyitem_TableCell_Margins = 2;
-var historyitem_TableCell_Shd = 3;
-var historyitem_TableCell_VMerge = 4;
-var historyitem_TableCell_Border_Left = 5;
-var historyitem_TableCell_Border_Right = 6;
-var historyitem_TableCell_Border_Top = 7;
-var historyitem_TableCell_Border_Bottom = 8;
-var historyitem_TableCell_VAlign = 9;
-var historyitem_TableCell_W = 10;
-var historyitem_TableCell_Pr = 11;
-var historyitem_DocumentContent_AddItem = 1;
-var historyitem_DocumentContent_RemoveItem = 2;
-var historyitem_FlowTable_Position = 1;
-var historyitem_FlowTable_Paddings = 2;
-var historyitem_FlowTable_PageNum = 3;
-var historyitem_FlowTable_Parent = 4;
-var historyitem_HdrFtrController_AddItem = 1;
-var historyitem_HdrFtrController_RemoveItem = 2;
-var historyitem_HdrFtr_BoundY2 = 1;
-var historyitem_AbstractNum_LvlChange = 1;
-var historyitem_AbstractNum_TextPrChange = 2;
-var historyitem_TableId_Add = 1;
-var historyitem_TableId_Reset = 2;
-var historyitem_Comments_Add = 1;
-var historyitem_Comments_Remove = 2;
-var historyitem_Comment_Change = 1;
-var historyitem_Comment_TypeInfo = 2;
-var historyitem_Hyperlink_Value = 1;
-var historyitem_Hyperlink_ToolTip = 2;
-var historyitem_AddNewGraphicObject = 0;
-var historyitem_RemoveGraphicObject = 1;
-var historyitem_SetGuideValue = 0;
-var historyitem_SetAdjustmentValue = 1;
-var historyitem_SetAbsoluteTransform = 0;
-var historyitem_SetXfrmShape = 1;
-var historyitem_SetRotate = 2;
-var historyitem_SetSizes = 3;
-var historyitem_SetSizesInGroup = 4;
-var historyitem_SetAdjValue = 5;
-var historyitem_SetMainGroup = 7;
-var historyitem_SetGroup = 8;
-var historyitem_InitShape = 9;
-var historyitem_AddGraphicObject = 10;
-var historyitem_AddToSpTree = 11;
-var historyitem_ChangeDiagram = 12;
-var historyitem_Init2Shape = 13;
-var historyitem_ChangeFill = 14;
-var historyitem_ChangeLine = 15;
-var historyitem_ChangePresetGeom = 16;
-var historyitem_CreatePolyine = 17;
-var historyitem_AddDocContent = 18;
-var historyitem_SetSizes2 = 19;
-var historyitem_RemoveFromSpTree = 20;
-var historyitem_RemoveFromArrGraphicObj = 21;
-var historyitem_RemoveFromArrGraphicObj2 = 22;
-var historyitem_MoveShapeInArray = 23;
-var historyitem_UpadteSpTreeBefore = 24;
-var historyitem_UpadteSpTreeAfter = 25;
-var historyitem_ChangeDiagram2 = 26;
-var historyitem_SwapGrObject = 27;
-var historyitem_SetSpPr = 28;
-var historyitem_SetStyle = 29;
-var historyitem_SetBodyPr = 30;
-var historyitem_SetTextBoxContent = 31;
-var historyitem_SetRasterImage2 = 32;
-var historyitem_CalculateAfterCopyInGroup = 33;
-var historyitem_SetVerticalShapeAlign = 34;
-var historyitem_SetParent = 35;
-var historyitem_SetBlipFill = 36;
-var historyitem_AutoShapes_AddXAxis = 37;
-var historyitem_AutoShapes_AddYAxis = 38;
-var historyitem_AutoShapes_AddTitle = 39;
-var historyitem_AutoShapes_AddChart = 40;
-var historyitem_SetShapeBodyPr = 41;
-var historyitem_AutoShapes_SetChartTitleOverlay = 42;
-var historyitem_SetCahrtLayout = 43;
-var historyitem_AutoShapes_SetChartGroup = 44;
-var historyitem_AutoShapes_SetChartTitleType = 45;
-var historyitem_SetSetSpPr = 46;
-var historyitem_AutoShapes_SetChartTitleTxBody = 47;
-var historyitem_AutoShapes_RecalculateAfterResize = 48;
-var historyitem_AutoShapes_SetTextPaddings = 49;
-var historyitem_AutoShapes_RecalculateChartUndo = 50;
-var historyitem_AutoShapes_RecalculateChartRedo = 51;
-var historyitem_AutoShapes_UpdateParentWidthHeight = 52;
-var historyitem_AddHdrFtrGrObjects = 0;
-var historyitem_ChangeColorScheme = 1;
-var historyitem_AddHdr = 0;
-var historyitem_AddFtr = 1;
-var historyitem_RemoveHdr = 2;
-var historyitem_RemoveFtr = 3;
-var historyitem_InternalChanges = 6;
-var historyitem_GroupRecalculate = 32;
-var historyitem_AddNewPoint = 0;
-var historyitem_RemovePoint = 1;
-var historyitem_MovePoint = 2;
-var historyitem_UpdateWrapSizes = 3;
-var historyitem_ChangePolygon = 4;
-var historyitem_Style_TextPr = 1;
-var historyitem_Style_ParaPr = 2;
-var historyitem_Style_TablePr = 3;
-var historyitem_Style_TableRowPr = 4;
-var historyitem_Style_TableCellPr = 5;
-var historyitem_Style_TableBand1Horz = 6;
-var historyitem_Style_TableBand1Vert = 7;
-var historyitem_Style_TableBand2Horz = 8;
-var historyitem_Style_TableBand2Vert = 9;
-var historyitem_Style_TableFirstCol = 10;
-var historyitem_Style_TableFirstRow = 11;
-var historyitem_Style_TableLastCol = 12;
-var historyitem_Style_TableLastRow = 13;
-var historyitem_Style_TableTLCell = 14;
-var historyitem_Style_TableTRCell = 15;
-var historyitem_Style_TableBLCell = 16;
-var historyitem_Style_TableBRCell = 17;
-var historyitem_Style_TableWholeTable = 18;
-var historyitem_Style_Name = 101;
-var historyitem_Style_BasedOn = 102;
-var historyitem_Style_Next = 103;
-var historyitem_Style_Type = 104;
-var historyitem_Style_QFormat = 105;
-var historyitem_Style_UiPriority = 106;
-var historyitem_Style_Hidden = 107;
-var historyitem_Style_SemiHidden = 108;
-var historyitem_Style_UnhideWhenUsed = 109;
-var historyitem_Styles_Add = 1;
-var historyitem_Styles_Remove = 2;
-var historyitem_State_Unknown = 0;
-var historyitem_State_Document = 1;
-var historyitem_State_DocumentContent = 2;
-var historyitem_State_Paragraph = 3;
-var historyitem_State_Table = 4;
-var historyrecalctype_Inline = 0;
-var historyrecalctype_Flow = 1;
-var historyrecalctype_HdrFtr = 2;
-var historyitem_type_Unknown = 0;
-var historyitem_type_TableId = 1;
-var historyitem_type_Document = 2;
-var historyitem_type_Paragraph = 3;
-var historyitem_type_TextPr = 4;
-var historyitem_type_Drawing = 5;
-var historyitem_type_DrawingObjects = 6;
-var historyitem_type_FlowObjects = 7;
-var historyitem_type_FlowImage = 8;
-var historyitem_type_Table = 9;
-var historyitem_type_TableRow = 10;
-var historyitem_type_TableCell = 11;
-var historyitem_type_DocumentContent = 12;
-var historyitem_type_FlowTable = 13;
-var historyitem_type_HdrFtrController = 14;
-var historyitem_type_HdrFtr = 15;
-var historyitem_type_AbstractNum = 16;
-var historyitem_type_Comment = 17;
-var historyitem_type_Comments = 18;
-var historyitem_type_Shape = 19;
-var historyitem_type_Image = 20;
-var historyitem_type_GroupShapes = 21;
-var historyitem_type_Geometry = 22;
-var historyitem_type_WrapPolygon = 23;
-var historyitem_type_Chart = 24;
-var historyitem_type_HdrFtrGrObjects = 25;
-var historyitem_type_GrObjects = 26;
-var historyitem_type_Hyperlink = 27;
-var historyitem_type_ChartGroup = 28;
-var historyitem_type_Style = 29;
-var historyitem_type_Styles = 30;
-var historyitem_type_TextBody = 31;
-var historyitem_type_ChartTitle = 32;
-var historyitem_SetCahrtLayout = 1000;
-var historyitem_SetShape = 0;
-var historyitem_SetDocContent = 1;
-var historyitem_SetLstStyle = 2;
+ "use strict";
 function CHistory(Document) {
     this.Index = -1;
-    this.SavedIndex = -1;
-    this.Points = new Array();
+    this.SavedIndex = null;
+    this.ForceSave = false;
+    this.RecIndex = -1;
+    this.Points = [];
     this.Document = Document;
     this.RecalculateData = {
         Inline: {
             Pos: -1,
             PageNum: 0
         },
-        Flow: new Array(),
-        HdrFtr: new Array()
+        Flow: [],
+        HdrFtr: [],
+        Drawings: {
+            All: false,
+            Map: {},
+            ThemeInfo: null
+        }
     };
     this.TurnOffHistory = false;
+    this.MinorChanges = false;
     this.BinaryWriter = new CMemory();
+    this.FileCheckSum = 0;
+    this.FileSize = 0;
 }
 CHistory.prototype = {
+    Update_FileDescription: function (oStream) {
+        var pData = oStream.data;
+        var nSize = oStream.size;
+        this.FileCheckSum = g_oCRC32.Calculate_ByByteArray(pData, nSize);
+        this.FileSize = nSize;
+    },
+    Update_PointInfoItem: function (PointIndex, StartPoint, LastPoint, SumIndex, DeletedIndex) {
+        var Point = this.Points[PointIndex];
+        if (Point) {
+            var Class = g_oTableId;
+            if (Point.Items.length > 0) {
+                var FirstItem = Point.Items[0];
+                if (FirstItem.Class === Class && historyitem_TableId_Description === FirstItem.Data.Type) {
+                    Point.Items.splice(0, 1);
+                }
+            }
+            var Data = {
+                Type: historyitem_TableId_Description,
+                FileCheckSum: this.FileCheckSum,
+                FileSize: this.FileSize,
+                Description: Point.Description,
+                ItemsCount: Point.Items.length,
+                PointIndex: PointIndex,
+                StartPoint: StartPoint,
+                LastPoint: LastPoint,
+                SumIndex: SumIndex,
+                DeletedIndex: DeletedIndex
+            };
+            var Binary_Pos = this.BinaryWriter.GetCurPosition();
+            this.BinaryWriter.WriteString2(Class.Get_Id());
+            Class.Save_Changes(Data, this.BinaryWriter);
+            var Binary_Len = this.BinaryWriter.GetCurPosition() - Binary_Pos;
+            var Item = {
+                Class: Class,
+                Data: Data,
+                Binary: {
+                    Pos: Binary_Pos,
+                    Len: Binary_Len
+                },
+                NeedRecalc: false
+            };
+            Point.Items.splice(0, 0, Item);
+        }
+    },
     Is_Clear: function () {
         if (this.Points.length <= 0) {
             return true;
@@ -358,7 +109,8 @@ CHistory.prototype = {
     },
     Clear: function () {
         this.Index = -1;
-        this.SavedIndex = -1;
+        this.SavedIndex = null;
+        this.ForceSave = false;
         this.Points.length = 0;
         this.Internal_RecalcData_Clear();
     },
@@ -379,9 +131,13 @@ CHistory.prototype = {
         if (true != this.Can_Undo()) {
             return null;
         }
+        if (editor) {
+            editor.setUserAlive();
+        }
         if (this.Index === this.Points.length - 1) {
             this.LastState = this.Document.Get_SelectionState();
         }
+        this.Document.Selection_Remove();
         var Point = this.Points[this.Index--];
         this.Internal_RecalcData_Clear();
         for (var Index = Point.Items.length - 1; Index >= 0; Index--) {
@@ -396,6 +152,10 @@ CHistory.prototype = {
         if (true != this.Can_Redo()) {
             return null;
         }
+        if (editor) {
+            editor.setUserAlive();
+        }
+        this.Document.Selection_Remove();
         var Point = this.Points[++this.Index];
         this.Internal_RecalcData_Clear();
         for (var Index = 0; Index < Point.Items.length; Index++) {
@@ -412,18 +172,27 @@ CHistory.prototype = {
         this.Document.Set_SelectionState(State);
         return this.RecalculateData;
     },
-    Create_NewPoint: function () {
+    Create_NewPoint: function (Description) {
+        if (this.Index < this.SavedIndex && null !== this.SavedIndex) {
+            this.SavedIndex = this.Index;
+            this.ForceSave = true;
+        }
         this.Clear_Additional();
         this.Check_UninonLastPoints();
         var State = this.Document.Get_SelectionState();
-        var Items = new Array();
+        var Items = [];
         var Time = new Date().getTime();
         this.Points[++this.Index] = {
             State: State,
             Items: Items,
             Time: Time,
-            Additional: {}
+            Additional: {},
+            Description: Description
         };
+        this.Points.length = this.Index + 1;
+    },
+    Remove_LastPoint: function () {
+        this.Index--;
         this.Points.length = this.Index + 1;
     },
     Clear_Redo: function () {
@@ -436,7 +205,14 @@ CHistory.prototype = {
         if (this.Index < 0) {
             return;
         }
+        if (editor) {
+            editor.setUserAlive();
+        }
+        if (this.RecIndex >= this.Index) {
+            this.RecIndex = this.Index - 1;
+        }
         var Binary_Pos = this.BinaryWriter.GetCurPosition();
+        this.BinaryWriter.WriteString2(Class.Get_Id());
         Class.Save_Changes(Data, this.BinaryWriter);
         var Binary_Len = this.BinaryWriter.GetCurPosition() - Binary_Pos;
         var Item = {
@@ -445,18 +221,27 @@ CHistory.prototype = {
             Binary: {
                 Pos: Binary_Pos,
                 Len: Binary_Len
-            }
+            },
+            NeedRecalc: !this.MinorChanges
         };
         this.Points[this.Index].Items.push(Item);
-        if ((Class instanceof CDocument && (historyitem_Document_AddItem === Data.Type || historyitem_Document_RemoveItem === Data.Type)) || (Class instanceof CDocumentContent && (historyitem_DocumentContent_AddItem === Data.Type || historyitem_DocumentContent_RemoveItem === Data.Type)) || (Class instanceof CTable && (historyitem_Table_AddRow === Data.Type || historyitem_Table_RemoveRow === Data.Type)) || (Class instanceof CTableRow && (historyitem_TableRow_AddCell === Data.Type || historyitem_TableRow_RemoveCell === Data.Type)) || (Class instanceof Paragraph && (historyitem_Paragraph_AddItem === Data.Type || historyitem_Paragraph_RemoveItem === Data.Type))) {
-            var bAdd = ((Class instanceof CDocument && historyitem_Document_AddItem === Data.Type) || (Class instanceof CDocumentContent && historyitem_DocumentContent_AddItem === Data.Type) || (Class instanceof CTable && historyitem_Table_AddRow === Data.Type) || (Class instanceof CTableRow && historyitem_TableRow_AddCell === Data.Type) || (Class instanceof Paragraph && historyitem_Paragraph_AddItem === Data.Type)) ? true : false;
+        var bZIndexManager = !(typeof ZIndexManager === "undefined");
+        var bPresentation = !(typeof CPresentation === "undefined");
+        var bSlide = !(typeof Slide === "undefined");
+        if ((Class instanceof CDocument && (historyitem_Document_AddItem === Data.Type || historyitem_Document_RemoveItem === Data.Type)) || (Class instanceof CDocumentContent && (historyitem_DocumentContent_AddItem === Data.Type || historyitem_DocumentContent_RemoveItem === Data.Type)) || (Class instanceof CTable && (historyitem_Table_AddRow === Data.Type || historyitem_Table_RemoveRow === Data.Type)) || (Class instanceof CTableRow && (historyitem_TableRow_AddCell === Data.Type || historyitem_TableRow_RemoveCell === Data.Type)) || (Class instanceof Paragraph && (historyitem_Paragraph_AddItem === Data.Type || historyitem_Paragraph_RemoveItem === Data.Type)) || (Class instanceof ParaHyperlink && (historyitem_Hyperlink_AddItem === Data.Type || historyitem_Hyperlink_RemoveItem === Data.Type)) || (Class instanceof ParaRun && (historyitem_ParaRun_AddItem === Data.Type || historyitem_ParaRun_RemoveItem === Data.Type)) || (bZIndexManager && Class instanceof ZIndexManager && (historyitem_ZIndexManagerRemoveItem === Data.Type || historyitem_ZIndexManagerAddItem === Data.Type)) || (bPresentation && Class instanceof CPresentation && (historyitem_Presentation_AddSlide === Data.Type || historyitem_Presentation_RemoveSlide === Data.Type)) || (bSlide && Class instanceof Slide && (historyitem_SlideAddToSpTree === Data.Type || historyitem_SlideRemoveFromSpTree === Data.Type))) {
+            var bAdd = ((Class instanceof CDocument && historyitem_Document_AddItem === Data.Type) || (Class instanceof CDocumentContent && historyitem_DocumentContent_AddItem === Data.Type) || (Class instanceof CTable && historyitem_Table_AddRow === Data.Type) || (Class instanceof CTableRow && historyitem_TableRow_AddCell === Data.Type) || (Class instanceof Paragraph && historyitem_Paragraph_AddItem === Data.Type) || (Class instanceof ParaHyperlink && historyitem_Hyperlink_AddItem === Data.Type) || (Class instanceof ParaRun && historyitem_ParaRun_AddItem === Data.Type) || (bZIndexManager && Class instanceof ZIndexManager && historyitem_ZIndexManagerAddItem === Data.Type) || (bPresentation && Class instanceof CPresentation && (historyitem_Presentation_AddSlide === Data.Type)) || (bSlide && Class instanceof Slide && (historyitem_SlideAddToSpTree === Data.Type))) ? true : false;
             var Count = 1;
-            if ((Class instanceof Paragraph) || (Class instanceof CDocument && historyitem_Document_RemoveItem === Data.Type) || (Class instanceof CDocumentContent && historyitem_DocumentContent_RemoveItem === Data.Type)) {
+            if ((Class instanceof Paragraph) || (Class instanceof ParaHyperlink) || (Class instanceof ParaRun) || (Class instanceof CDocument && historyitem_Document_RemoveItem === Data.Type) || (Class instanceof CDocumentContent && historyitem_DocumentContent_RemoveItem === Data.Type)) {
                 Count = Data.Items.length;
             }
             var ContentChanges = new CContentChangesElement((bAdd == true ? contentchanges_Add : contentchanges_Remove), Data.Pos, Count, Item);
             Class.Add_ContentChanges(ContentChanges);
             CollaborativeEditing.Add_NewDC(Class);
+        }
+        if (CollaborativeEditing.AddPosExtChanges && Class instanceof CXfrm) {
+            if (historyitem_Xfrm_SetOffX === Data.Type || historyitem_Xfrm_SetOffY === Data.Type || historyitem_Xfrm_SetExtX === Data.Type || historyitem_Xfrm_SetExtY === Data.Type || historyitem_Xfrm_SetChOffX === Data.Type || historyitem_Xfrm_SetChOffY === Data.Type || historyitem_Xfrm_SetChExtX === Data.Type || historyitem_Xfrm_SetChExtY === Data.Type) {
+                CollaborativeEditing.AddPosExtChanges(Item, historyitem_Xfrm_SetOffX === Data.Type || historyitem_Xfrm_SetExtX === Data.Type || historyitem_Xfrm_SetChOffX === Data.Type || historyitem_Xfrm_SetChExtX === Data.Type);
+            }
         }
     },
     Internal_RecalcData_Clear: function () {
@@ -465,8 +250,13 @@ CHistory.prototype = {
                 Pos: -1,
                 PageNum: 0
             },
-            Flow: new Array(),
-            HdrFtr: new Array()
+            Flow: [],
+            HdrFtr: [],
+            Drawings: {
+                All: false,
+                Map: {},
+                ThemeInfo: null
+            }
         };
     },
     RecalcData_Add: function (Data) {
@@ -502,15 +292,41 @@ CHistory.prototype = {
             }
             break;
         case historyrecalctype_Inline:
-            if (Data.Data.Pos < this.RecalculateData.Inline.Pos || this.RecalculateData.Inline.Pos < 0) {
+            if ((Data.Data.Pos < this.RecalculateData.Inline.Pos) || (Data.Data.Pos === this.RecalculateData.Inline.Pos && Data.Data.PageNum < this.RecalculateData.Inline.PageNum) || this.RecalculateData.Inline.Pos < 0) {
                 this.RecalculateData.Inline.Pos = Data.Data.Pos;
                 this.RecalculateData.Inline.PageNum = Data.Data.PageNum;
+            }
+            break;
+        case historyrecalctype_Drawing:
+            if (!this.RecalculateData.Drawings.All) {
+                if (Data.All) {
+                    this.RecalculateData.Drawings.All = true;
+                } else {
+                    if (Data.Theme) {
+                        this.RecalculateData.Drawings.ThemeInfo = {
+                            Theme: true,
+                            ArrInd: Data.ArrInd
+                        };
+                    } else {
+                        if (Data.ColorScheme) {
+                            this.RecalculateData.Drawings.ThemeInfo = {
+                                ColorScheme: true,
+                                ArrInd: Data.ArrInd
+                            };
+                        } else {
+                            this.RecalculateData.Drawings.Map[Data.Object.Get_Id()] = Data.Object;
+                        }
+                    }
+                }
             }
             break;
         }
     },
     Check_UninonLastPoints: function () {
-        if (this.Points.length < 2 || this.SavedIndex >= this.Points.length - 2) {
+        if (true === this.Document.TurnOffRecalc) {
+            return;
+        }
+        if (this.Points.length < 2) {
             return;
         }
         var Point1 = this.Points[this.Points.length - 2];
@@ -542,11 +358,18 @@ CHistory.prototype = {
             State: Point1.State,
             Items: Point1.Items.concat(Point2.Items),
             Time: Point1.Time,
-            Additional: {}
+            Additional: {},
+            Description: historydescription_Document_AddLetter
         };
+        if (this.SavedIndex >= this.Points.length - 2 && null !== this.SavedIndex) {
+            this.SavedIndex = this.Points.length - 3;
+            this.ForceSave = true;
+        }
         this.Points.splice(this.Points.length - 2, 2, NewPoint);
         if (this.Index >= this.Points.length) {
-            this.Index = this.Points.length - 1;
+            var DiffIndex = -this.Index + (this.Points.length - 1);
+            this.Index += DiffIndex;
+            this.RecIndex = Math.max(-1, this.RecIndex + DiffIndex);
         }
     },
     TurnOff: function () {
@@ -560,40 +383,66 @@ CHistory.prototype = {
     },
     Reset_SavedIndex: function () {
         this.SavedIndex = this.Index;
+        this.ForceSave = false;
     },
     Have_Changes: function () {
-        if (this.Index != this.SavedIndex) {
+        if (-1 === this.Index && null === this.SavedIndex && false === this.ForceSave) {
+            return false;
+        }
+        if (this.Index != this.SavedIndex || true === this.ForceSave) {
             return true;
         }
         return false;
     },
     Get_RecalcData: function () {
         if (this.Index >= 0) {
-            var Point = this.Points[this.Index];
             this.Internal_RecalcData_Clear();
-            for (var Index = 0; Index < Point.Items.length; Index++) {
-                var Item = Point.Items[Index];
-                Item.Class.Refresh_RecalcData(Item.Data);
+            for (var Pos = this.RecIndex + 1; Pos <= this.Index; Pos++) {
+                var Point = this.Points[Pos];
+                for (var Index = 0; Index < Point.Items.length; Index++) {
+                    var Item = Point.Items[Index];
+                    if (true === Item.NeedRecalc) {
+                        Item.Class.Refresh_RecalcData(Item.Data);
+                    }
+                }
             }
         }
         return this.RecalculateData;
     },
+    Reset_RecalcIndex: function () {
+        this.RecIndex = this.Index;
+    },
     Is_SimpleChanges: function () {
-        if (this.Index >= 0 && this.Points[this.Index].Items.length > 0) {
-            var Point = this.Points[this.Index];
-            var Class = Point.Items[0].Class;
-            var Count = Point.Items.length;
-            for (var Index = 1; Index < Count; Index++) {
-                var Item = Point.Items[Index];
-                if (Class !== Item.Class) {
-                    return null;
-                }
+        var Count, Items;
+        if (this.Index - this.RecIndex !== 1 && this.RecIndex >= -1) {
+            Items = [];
+            Count = 0;
+            for (var PointIndex = this.RecIndex + 1; PointIndex <= this.Index; PointIndex++) {
+                Items = Items.concat(this.Points[PointIndex].Items);
+                Count += this.Points[PointIndex].Items.length;
             }
-            if (Class instanceof Paragraph) {
-                return Class;
+        } else {
+            if (this.Index >= 0) {
+                var Point = this.Points[this.Index];
+                Count = Point.Items.length;
+                Items = Point.Items;
+            } else {
+                return [];
             }
         }
-        return null;
+        if (Items.length > 0) {
+            var Class = Items[0].Class;
+            for (var Index = 1; Index < Count; Index++) {
+                var Item = Items[Index];
+                if (Class !== Item.Class) {
+                    return [];
+                }
+            }
+            if (Class instanceof ParaRun && Class.Is_SimpleChanges(Items)) {
+                return [Items[0]];
+            }
+        }
+        return [];
     },
     Set_Additional_ExtendDocumentToPos: function () {
         if (this.Index >= 0) {
@@ -608,7 +457,7 @@ CHistory.prototype = {
     },
     Clear_Additional: function () {
         if (this.Index >= 0) {
-            this.Points[this.Index].Additional = new Object();
+            this.Points[this.Index].Additional = {};
         }
         if (true === editor.isMarkerFormat) {
             editor.sync_MarkerFormatCallback(false);
@@ -616,7 +465,7 @@ CHistory.prototype = {
     },
     Get_EditingTime: function (dTime) {
         var Count = this.Points.length;
-        var TimeLine = new Array();
+        var TimeLine = [];
         for (var Index = 0; Index < Count; Index++) {
             var PointTime = this.Points[Index].Time;
             TimeLine.push({
@@ -644,3 +493,37 @@ CHistory.prototype = {
     }
 };
 var History = null;
+function CRC32() {
+    this.m_aTable = [];
+    this.private_InitTable();
+}
+CRC32.prototype.private_InitTable = function () {
+    var CRC_POLY = 3988292384;
+    var nChar;
+    for (var nIndex = 0; nIndex < 256; nIndex++) {
+        nChar = nIndex;
+        for (var nCounter = 0; nCounter < 8; nCounter++) {
+            nChar = ((nChar & 1) ? ((nChar >>> 1) ^ CRC_POLY) : (nChar >>> 1));
+        }
+        this.m_aTable[nIndex] = nChar;
+    }
+};
+CRC32.prototype.Calculate_ByString = function (sStr, nSize) {
+    var CRC_MASK = 3523407757;
+    var nCRC = 0 ^ (-1);
+    for (var nIndex = 0; nIndex < nSize; nIndex++) {
+        nCRC = this.m_aTable[(nCRC ^ sStr.charCodeAt(nIndex)) & 255] ^ (nCRC >>> 8);
+        nCRC ^= CRC_MASK;
+    }
+    return (nCRC ^ (-1)) >>> 0;
+};
+CRC32.prototype.Calculate_ByByteArray = function (aArray, nSize) {
+    var CRC_MASK = 3523407757;
+    var nCRC = 0 ^ (-1);
+    for (var nIndex = 0; nIndex < nSize; nIndex++) {
+        nCRC = (nCRC >>> 8) ^ this.m_aTable[(nCRC ^ aArray[nIndex]) & 255];
+        nCRC ^= CRC_MASK;
+    }
+    return (nCRC ^ (-1)) >>> 0;
+};
+var g_oCRC32 = new CRC32();

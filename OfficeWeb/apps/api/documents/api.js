@@ -1,8 +1,8 @@
 /**
-* Copyright (c) Ascensio System SIA 2013. All rights reserved
-*
-* http://www.onlyoffice.com
-*/
+ * Copyright (c) Ascensio System SIA 2013. All rights reserved
+ *
+ * http://www.onlyoffice.com
+ */
 
 ;(function(DocsAPI, window, document, undefined) {
 
@@ -48,6 +48,7 @@
                 canBackToFolder: <can return to folder>,
                 createUrl: 'create document url', // editor will add '?title={document title}&template={template name}&action=create', prevent to create a new document if empty
                 sharingSettingsUrl: 'document sharing settings url',
+                callbackUrl: <url for connection between sdk and portal>,
                 user: {
                     id: 'user id',
                     name: 'full user name'
@@ -70,7 +71,13 @@
                 branding: {
                     logoUrl: 'header logo url', // default size 88 x 30
                     backgroundColor: 'header background color',
-                    textColor: 'header text color'
+                    textColor: 'header text color',
+                    customer: 'SuperPuper',
+                    customerAddr: 'New-York, 125f-25',
+                    customerMail: 'support@gmail.com',
+                    customerWww: 'www.superpuper.com',
+                    customerInfo: 'Some info',
+                    customerLogo: ''
                 }
             },
             events: {
@@ -119,6 +126,28 @@
             _config = config || {};
 
         extend(_config, DocsAPI.DocEditor.defaultConfig);
+        extend(_config.editorConfig, DocsAPI.DocEditor.defaultConfig.editorConfig);
+        _config.editorConfig.canBackToFolder = !!_config.events.onBack;
+
+        var onMouseUp = function (evt) {
+            _processMouse(evt);
+        };
+
+        var _attachMouseEvents = function() {
+            if (window.addEventListener) {
+                window.addEventListener("mouseup", onMouseUp, false)
+            } else if (window.attachEvent) {
+                window.attachEvent("onmouseup", onMouseUp);
+            }
+        };
+
+        var _detachMouseEvents = function() {
+            if (window.removeEventListener) {
+                window.removeEventListener("mouseup", onMouseUp, false)
+            } else if (window.detachEvent) {
+                window.detachEvent("onmouseup", onMouseUp);
+            }
+        };
 
         var _onReady = function() {
             if (_config.type === 'mobile') {
@@ -134,9 +163,7 @@
                 };
             }
 
-            window.onmouseup = function(evt) {
-                _processMouse(evt);
-            };
+            _attachMouseEvents();
 
             if (_config.editorConfig) {
                 _init(_config.editorConfig);
@@ -289,17 +316,26 @@
             applyEditRights     : _applyEditRights,
             processSaveResult   : _processSaveResult,
             processRightsChange : _processRightsChange,
-            serviceCommand      : _serviceCommand
+            serviceCommand      : _serviceCommand,
+            attachMouseEvents   : _attachMouseEvents,
+            detachMouseEvents   : _detachMouseEvents
         }
     };
 
 
     DocsAPI.DocEditor.defaultConfig = {
         type: 'desktop',
-        width: '640px',
-        height: '480px'
+        width: '100%',
+        height: '100%',
+        editorConfig: {
+            lang: 'en',
+            canCoAuthoring: true
+        }
     };
 
+    DocsAPI.DocEditor.version = function() {
+        return '3.0b';
+    };
 
     MessageDispatcher = function(fn, scope) {
         var _fn     = fn,
@@ -363,13 +399,21 @@
                 'spreadsheet': 'spreadsheeteditor',
                 'presentation': 'presentationeditor'
             },
-            app;
+            app = appMap['text'];
 
         if (typeof config.documentType === 'string') {
             app = appMap[config.documentType.toLowerCase()];
+        } else
+        if (!!config.document && typeof config.document.fileType === 'string') {
+            var type = /^(?:(xls|xlsx|ods|csv|xlst|xlsy|gsheet)|(pps|ppsx|ppt|pptx|odp|pptt|ppty|gslides))$/
+                            .exec(config.document.fileType);
+            if (type) {
+                if (typeof type[1] === 'string') app = appMap['spreadsheet']; else
+                if (typeof type[2] === 'string') app = appMap['presentation'];
+            }
         }
 
-        path += (app || appMap['text']) + "/";
+        path += app + "/";
         path += config.type === "mobile"
             ? "mobile"
             : config.type === "embedded"
@@ -419,3 +463,4 @@
     }
 
 })(window.DocsAPI = window.DocsAPI || {}, window, document);
+

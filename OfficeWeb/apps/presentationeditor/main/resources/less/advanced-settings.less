@@ -1,0 +1,42 @@
+.toolbar-btn-icon(advanced-btn-ratio, 67, 20px);
+
+.combo-arrow-style {
+    .form-control {
+        cursor: pointer;
+        background-color: white;
+
+        &.image {
+            .background-ximage('@{app-image-path}/right-panels/Begin-EndStyle.png', '@{app-image-path}/right-panels/Begin-EndStyle@2x.png', 480px);
+            background-repeat: no-repeat;
+            background-position: 10px 0;
+            background-attachment: scroll;
+            background-color: white;
+        }
+    }
+
+    .btn {
+        &:active:not(.disabled),
+        &.active:not(.disabled){
+            .caret {
+                background-position: @arrow-small-offset-x @arrow-small-offset-y;
+            }
+        }
+    }
+}
+
+.item-arrow {
+    .background-ximage('@{app-image-path}/right-panels/Begin-EndStyle.png', '@{app-image-path}/right-panels/Begin-EndStyle@2x.png', 480px);
+    width:44px;
+    height:20px;
+}
+
+.advanced-settings-dlg {
+    .div-category {
+        padding: 0 15px;
+        text-align: right;
+        font-weight: bold;
+        font-size: 11px;
+    }
+}
+
+

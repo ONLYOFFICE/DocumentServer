@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var c_oMainTables = {
+ "use strict";
+var c_oMainTables = {
     Main: 255,
     App: 1,
     Core: 2,
@@ -64,7 +65,7 @@ function GUID() {
     return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
 }
 function CBinaryFileWriter() {
-    this.tableStylesGuides = new Array();
+    this.tableStylesGuides = {};
     this.Init = function () {
         var _canvas = document.createElement("canvas");
         var _ctx = _canvas.getContext("2d");
@@ -72,7 +73,6 @@ function CBinaryFileWriter() {
         this.ImData = _ctx.createImageData(this.len / 4, 1);
         this.data = this.ImData.data;
         this.pos = 0;
-        delete _canvas;
     };
     this.IsWordWriter = false;
     this.ImData = null;
@@ -108,14 +108,13 @@ function CBinaryFileWriter() {
             var oldImData = this.ImData;
             var oldData = this.data;
             var oldPos = this.pos;
-            this.len *= 2;
+            this.len = Math.max(this.len * 2, this.pos + ((3 * count / 2) >> 0));
             this.ImData = _ctx.createImageData(this.len / 4, 1);
             this.data = this.ImData.data;
             var newData = this.data;
             for (var i = 0; i < this.pos; i++) {
                 newData[i] = oldData[i];
             }
-            delete _canvas;
         }
     };
     this.GetBase64Memory = function () {
@@ -186,9 +185,9 @@ function CBinaryFileWriter() {
             this.data[this.pos++] = data[_pos + i];
         }
     };
-    this.m_arStack = new Array();
+    this.m_arStack = [];
     this.m_lStackPosition = 0;
-    this.m_arMainTables = new Array();
+    this.m_arMainTables = [];
     this.StartRecord = function (lType) {
         this.m_arStack[this.m_lStackPosition] = this.pos + 5;
         this.m_lStackPosition++;
@@ -320,7 +319,7 @@ function CBinaryFileWriter() {
     };
     this.font_map = {};
     this.image_map = {};
-    this.WriteDocument = function (presentation) {
+    this.WriteDocument2 = function (presentation) {
         this.font_map = {};
         this.image_map = {};
         this.WriteReserved(5 * 30);
@@ -362,7 +361,7 @@ function CBinaryFileWriter() {
                 _dst_masters[_len_dst] = _m;
                 var _m_rels = {
                     ThemeIndex: 0,
-                    Layouts: new Array()
+                    Layouts: []
                 };
                 var _lay_c = _m.sldLayoutLst.length;
                 var _ind_l = _dst_layouts.length;
@@ -381,6 +380,23 @@ function CBinaryFileWriter() {
             }
         }
         var _dst_masters_len = _dst_masters.length;
+        if (0 == _dst_masters_len && presentation.slideMasters.length > 0) {
+            var _m = presentation.slideMasters[0];
+            _dst_masters[0] = _m;
+            var _m_rels = {
+                ThemeIndex: 0,
+                Layouts: []
+            };
+            var _lay_c = _m.sldLayoutLst.length;
+            var _ind_l = _dst_layouts.length;
+            for (var k = 0; k < _lay_c; k++) {
+                _dst_layouts[_ind_l] = _m.sldLayoutLst[k];
+                _m_rels.Layouts[k] = _ind_l;
+                _ind_l++;
+            }
+            _master_rels[0] = _m_rels;
+            _dst_masters_len = 1;
+        }
         for (var i = 0; i < _dst_masters_len; i++) {
             var _t = _dst_masters[i].Theme;
             var is_found = false;
@@ -396,28 +412,38 @@ function CBinaryFileWriter() {
                 _master_rels[i].ThemeIndex = _len_dst;
             }
         }
-        var _count_table_styles = presentation.globalTableStyles.length;
-        if (0 < _count_table_styles) {
-            for (var i = 0; i < _count_table_styles; i++) {
-                this.tableStylesGuides[i] = "{" + GUID() + "}";
+        for (var key in presentation.TableStylesIdMap) {
+            if (presentation.TableStylesIdMap.hasOwnProperty(key)) {
+                this.tableStylesGuides[key] = "{" + GUID() + "}";
             }
-            this.StartMainRecord(c_oMainTables.TableStyles);
-            this.StartRecord(c_oMainTables.SlideRels);
-            this.WriteUChar(g_nodeAttributeStart);
-            this._WriteString1(0, this.tableStylesGuides[0]);
-            this.WriteUChar(g_nodeAttributeEnd);
-            this.StartRecord(0);
-            for (var i = 0; i < _count_table_styles; i++) {
-                this.WriteTableStyle(i, presentation.globalTableStyles[i]);
-            }
-            this.EndRecord();
-            this.EndRecord();
         }
+        this.StartMainRecord(c_oMainTables.TableStyles);
+        this.StartRecord(c_oMainTables.SlideRels);
+        this.WriteUChar(g_nodeAttributeStart);
+        if (this.tableStylesGuides[presentation.DefaultTableStyleId]) {
+            this._WriteString1(0, this.tableStylesGuides[presentation.DefaultTableStyleId]);
+        } else {
+            for (key in this.tableStylesGuides) {
+                if (this.tableStylesGuides.hasOwnProperty(key)) {
+                    this._WriteString1(0, this.tableStylesGuides[key]);
+                    break;
+                }
+            }
+        }
+        this.WriteUChar(g_nodeAttributeEnd);
+        this.StartRecord(0);
+        for (key in this.tableStylesGuides) {
+            if (this.tableStylesGuides.hasOwnProperty(key)) {
+                this.WriteTableStyle(key, g_oTableId.m_aPairs[key]);
+            }
+        }
+        this.EndRecord();
+        this.EndRecord();
         this.StartMainRecord(c_oMainTables.SlideRels);
         this.StartRecord(c_oMainTables.SlideRels);
         this.WriteUChar(g_nodeAttributeStart);
         for (var i = 0; i < _slide_count; i++) {
-            this._WriteInt1(i, _slides_rels[i]);
+            this._WriteInt1(0, _slides_rels[i]);
         }
         this.WriteUChar(g_nodeAttributeEnd);
         this.EndRecord();
@@ -505,6 +531,9 @@ function CBinaryFileWriter() {
         this.WriteUChar(g_nodeAttributeEnd);
         this.EndRecord();
         this.WriteMainPart();
+    };
+    this.WriteDocument = function (presentation) {
+        this.WriteDocument2(presentation);
         var ret = "PPTY;v1;" + this.pos + ";";
         return ret + this.GetBase64Memory();
     };
@@ -577,7 +606,7 @@ function CBinaryFileWriter() {
         this._WriteLimit2(2, pres.SldSz.type);
         this.WriteUChar(g_nodeAttributeEnd);
         this.EndRecord();
-        pres.NotesSz = new Object();
+        pres.NotesSz = {};
         pres.NotesSz.cx = (presentation.Height * c_dScalePPTXSizes) >> 0;
         pres.NotesSz.cy = (presentation.Width * c_dScalePPTXSizes) >> 0;
         this.StartRecord(3);
@@ -617,6 +646,9 @@ function CBinaryFileWriter() {
         this.StartRecord(c_oMainTables.Themes);
         this.WriteUChar(g_nodeAttributeStart);
         this._WriteString2(0, _theme.name);
+        if (_theme.isThemeOverride) {
+            this._WriteBool1(1, true);
+        }
         this.WriteUChar(g_nodeAttributeEnd);
         this.WriteRecord1(0, _theme.themeElements, this.WriteThemeElements);
         this.WriteRecord2(1, _theme.spDef, this.WriteDefaultShapeDefinition);
@@ -1002,10 +1034,20 @@ function CBinaryFileWriter() {
         var _len = spTree.length;
         oThis.StartRecord(1);
         oThis.StartRecord(4);
-        var uniPr = new UniNvPr();
+        var uniPr = ExecuteNoHistory(function () {
+            return new UniNvPr();
+        },
+        this, []);
         uniPr.cNvPr.id = 1;
         uniPr.cNvPr.name = "";
-        var spPr = new CSpPr();
+        var spPr = ExecuteNoHistory(function () {
+            return new CSpPr();
+        },
+        this, []);
+        spPr.xfrm = ExecuteNoHistory(function () {
+            return new CXfrm();
+        },
+        this, []);
         spPr.xfrm.offX = 0;
         spPr.xfrm.offY = 0;
         spPr.xfrm.extX = 0;
@@ -1022,23 +1064,22 @@ function CBinaryFileWriter() {
             oThis.WriteULong(_len);
             for (var i = 0; i < _len; i++) {
                 oThis.StartRecord(0);
-                if (spTree[i] instanceof CShape) {
+                switch (spTree[i].getObjectType()) {
+                case historyitem_type_Shape:
                     oThis.WriteShape(spTree[i]);
-                } else {
-                    if (spTree[i] instanceof CImageShape) {
-                        oThis.WriteImage(spTree[i]);
-                    } else {
-                        if (spTree[i] instanceof CGroupShape) {
-                            oThis.WriteGroupShape(spTree[i]);
-                        } else {
-                            if (spTree[i] instanceof CGraphicFrame && spTree[i].graphicObject instanceof CTable) {
-                                oThis.WriteTable(spTree[i]);
-                            } else {
-                                if (typeof CChartAsGroup != "undefined" && spTree[i] instanceof CChartAsGroup) {
-                                    oThis.WriteChart(spTree[i]);
-                                }
-                            }
-                        }
+                    break;
+                case historyitem_type_ImageShape:
+                    oThis.WriteImage(spTree[i]);
+                    break;
+                case historyitem_type_GroupShape:
+                    oThis.WriteGroupShape(spTree[i]);
+                    break;
+                case historyitem_type_ChartSpace:
+                    oThis.WriteChart(spTree[i]);
+                    break;
+                default:
+                    if (spTree[i] instanceof CGraphicFrame && spTree[i].graphicObject instanceof CTable) {
+                        oThis.WriteTable(spTree[i]);
                     }
                 }
                 oThis.EndRecord();
@@ -1089,8 +1130,18 @@ function CBinaryFileWriter() {
     this.WriteTextListStyle = function (styles) {
         var _levels = styles.levels;
         var _count = _levels.length;
+        var _props_to_write;
         for (var i = 0; i < _count; ++i) {
-            oThis.WriteRecord2(i, _levels[i], oThis.WriteTextParagraphPr);
+            if (_levels[i]) {
+                _props_to_write = new CTextParagraphPr();
+                _props_to_write.bullet = _levels[i].Bullet;
+                _props_to_write.lvl = _levels[i].Lvl;
+                _props_to_write.pPr = _levels[i];
+                _props_to_write.rPr = _levels[i].DefaultRunPr;
+            } else {
+                _props_to_write = null;
+            }
+            oThis.WriteRecord2(i, _props_to_write, oThis.WriteTextParagraphPr);
         }
     };
     this.WriteTextParagraphPr = function (tPr) {
@@ -1115,20 +1166,18 @@ function CBinaryFileWriter() {
             }
             var ind = pPr.Ind;
             if (ind !== undefined && ind != null) {
-                if (ind.FirstLine !== undefined) {
-                    oThis._WriteInt1(5, ind.FirstLine * 36000);
+                if (ind.FirstLine != null) {
+                    oThis._WriteInt2(5, ind.FirstLine * 36000);
                 }
-                if (ind.Left !== undefined) {
+                if (ind.Left != null) {
                     oThis._WriteInt1(8, ind.Left * 36000);
                 }
-                if (ind.Right !== undefined) {
+                if (ind.Right != null) {
                     oThis._WriteInt1(9, ind.Right * 36000);
                 }
             }
         }
-        if (tPr.lvl !== undefined && tPr.lvl != null) {
-            oThis._WriteInt1(7, tPr.lvl);
-        }
+        oThis._WriteInt2(7, tPr.lvl);
         oThis.WriteUChar(g_nodeAttributeEnd);
         if (undefined !== pPr && null != pPr) {
             var spacing = pPr.Spacing;
@@ -1293,6 +1342,9 @@ function CBinaryFileWriter() {
                 }
             }
         }
+        if (undefined !== rPr.Spacing && null != rPr.Spacing) {
+            oThis._WriteInt1(15, (rPr.Spacing * 7200 / 25.4) >> 0);
+        }
         if (null != _strike) {
             oThis._WriteUChar1(16, _strike);
         }
@@ -1310,8 +1362,17 @@ function CBinaryFileWriter() {
             }
         }
         oThis.WriteUChar(g_nodeAttributeEnd);
-        oThis.WriteRecord1(1, rPr.unifill, oThis.WriteUniFill);
-        oThis.WriteRecord2(3, rPr.FontFamily, oThis.WriteTextFontTypeface);
+        if (rPr.Unifill) {
+            oThis.WriteRecord1(1, rPr.Unifill, oThis.WriteUniFill);
+        }
+        if (rPr.RFonts) {
+            if (rPr.RFonts.Ascii) {
+                oThis.WriteRecord2(3, rPr.RFonts.Ascii, oThis.WriteTextFontTypeface);
+            }
+            if (rPr.RFonts.EastAsia) {
+                oThis.WriteRecord2(4, rPr.RFonts.EastAsia, oThis.WriteTextFontTypeface);
+            }
+        }
         if (hlinkObj != null && hlinkObj !== undefined) {
             oThis.WriteRecord1(7, hlinkObj, oThis.WriteHyperlink);
         }
@@ -1454,6 +1515,9 @@ function CBinaryFileWriter() {
         }
     };
     this.WriteMods = function (mods) {
+        if (!mods || !mods.Mods) {
+            return;
+        }
         var _count = mods.Mods.length;
         if (0 == _count) {
             return;
@@ -1471,6 +1535,9 @@ function CBinaryFileWriter() {
         oThis.EndRecord();
     };
     this.CorrectUniColorAlpha = function (color, trans) {
+        if (!color.Mods) {
+            color.setMods(new CColorModifiers());
+        }
         var mods = color.Mods.Mods;
         var _len = mods.length;
         if (trans != null) {
@@ -1559,7 +1626,7 @@ function CBinaryFileWriter() {
             if (api_sheet) {
                 sFindString = api_sheet.wbModel.sUrlPath + "media/";
             } else {
-                sFindString = editor.DocumentUrl + "media/";
+                sFindString = window.editor.DocumentUrl + "media/";
             }
             var _src = fill.RasterImageId;
             if (0 == _src.indexOf(sFindString)) {
@@ -1685,12 +1752,10 @@ function CBinaryFileWriter() {
     };
     this.WriteParagraph = function (paragraph, startPos, endPos) {
         var tPr = new CTextParagraphPr();
-        if (paragraph.bullet) {
-            tPr.bullet = paragraph.bullet;
-        }
-        tPr.lvl = paragraph.PresentationPr.Level;
+        tPr.bullet = paragraph.Pr.Bullet;
+        tPr.lvl = paragraph.Pr.Lvl;
         tPr.pPr = paragraph.Pr;
-        tPr.rPr = null;
+        tPr.rPr = paragraph.Pr.DefaultRunPr;
         if (tPr.rPr == null) {
             tPr.rPr = new CTextPr();
         }
@@ -1701,83 +1766,104 @@ function CBinaryFileWriter() {
         oThis.WriteULong(0);
         var _count = 0;
         var _par_content = paragraph.Content;
-        var start_pos = startPos != null ? startPos : 0;
-        var end_pos = endPos != undefined ? endPos : _par_content.length;
         if (paragraph.f_id != undefined || paragraph.f_type != undefined || paragraph.f_text != undefined) {
             oThis.StartRecord(0);
             oThis.WriteParagraphField(paragraph.f_id, paragraph.f_type, paragraph.f_text);
             oThis.EndRecord();
             _count++;
         }
-        var _content_index;
-        var _cur_run_text = "";
-        _content_index = start_pos;
-        var _cur_run_text_pr = null;
-        var hlinkObj = null;
-        while (_content_index < end_pos) {
-            switch (_par_content[_content_index].Type) {
-            case para_Text:
-                _cur_run_text += _par_content[_content_index].Value;
-                break;
-            case para_Space:
-                _cur_run_text += " ";
-                break;
-            case para_Tab:
-                _cur_run_text += "\t";
-                break;
-            case para_TextPr:
-                if (("" != _cur_run_text) || (null != _cur_run_text_pr)) {
+        var _content_len = _par_content.length;
+        for (var i = 0; i < _content_len; i++) {
+            var _elem = _par_content[i];
+            switch (_elem.Type) {
+            case para_Run:
+                var _run_len = _elem.Content.length;
+                var _run_text = "";
+                for (var j = 0; j < _run_len; j++) {
+                    switch (_elem.Content[j].Type) {
+                    case para_Text:
+                        _run_text += String.fromCharCode(_elem.Content[j].Value);
+                        break;
+                    case para_Space:
+                        _run_text += " ";
+                        break;
+                    case para_Tab:
+                        _run_text += "\t";
+                        break;
+                    case para_NewLine:
+                        if ("" != _run_text) {
+                            oThis.StartRecord(0);
+                            oThis.WriteTextRun(_elem.Pr, _run_text, null);
+                            oThis.EndRecord();
+                            _count++;
+                            _run_text = "";
+                        }
+                        oThis.StartRecord(0);
+                        oThis.WriteLineBreak(_elem.Pr, null);
+                        oThis.EndRecord();
+                        _count++;
+                        break;
+                    }
+                }
+                if ("" != _run_text) {
                     oThis.StartRecord(0);
-                    oThis.WriteTextRun((null == _cur_run_text_pr) ? null : _cur_run_text_pr.Value, _cur_run_text, hlinkObj);
+                    oThis.WriteTextRun(_elem.Pr, _run_text, null);
                     oThis.EndRecord();
                     _count++;
-                    _cur_run_text = "";
-                    _cur_run_text_pr = null;
                 }
-                _cur_run_text_pr = _par_content[_content_index];
                 break;
-            case para_NewLine:
-                if (("" != _cur_run_text) || (null != _cur_run_text_pr)) {
-                    oThis.StartRecord(0);
-                    oThis.WriteTextRun((null == _cur_run_text_pr) ? null : _cur_run_text_pr.Value, _cur_run_text, hlinkObj);
-                    oThis.EndRecord();
-                    _count++;
-                    _cur_run_text = "";
-                    _cur_run_text_pr = null;
+            case para_Hyperlink:
+                var _hObj = {
+                    Value: _elem.Value
+                };
+                var _content_len_h = _elem.Content.length;
+                for (var hi = 0; hi < _content_len_h; hi++) {
+                    var _elem_h = _elem.Content[hi];
+                    switch (_elem_h.Type) {
+                    case para_Run:
+                        var _run_len = _elem_h.Content.length;
+                        var _run_text = "";
+                        for (var j = 0; j < _run_len; j++) {
+                            switch (_elem_h.Content[j].Type) {
+                            case para_Text:
+                                _run_text += String.fromCharCode(_elem_h.Content[j].Value);
+                                break;
+                            case para_Space:
+                                _run_text += " ";
+                                break;
+                            case para_Tab:
+                                _run_text += "\t";
+                                break;
+                            case para_NewLine:
+                                if ("" != _run_text) {
+                                    oThis.StartRecord(0);
+                                    oThis.WriteTextRun(_elem_h.Pr, _run_text, _hObj);
+                                    oThis.EndRecord();
+                                    _count++;
+                                    _run_text = "";
+                                }
+                                oThis.StartRecord(0);
+                                oThis.WriteLineBreak(_elem_h.Pr, _hObj);
+                                oThis.EndRecord();
+                                _count++;
+                                break;
+                            }
+                        }
+                        if ("" != _run_text) {
+                            oThis.StartRecord(0);
+                            oThis.WriteTextRun(_elem.Content[0].Pr, _run_text, _hObj);
+                            oThis.EndRecord();
+                            _count++;
+                        }
+                        break;
+                    default:
+                        break;
+                    }
                 }
-                oThis.StartRecord(0);
-                oThis.WriteLineBreak(_cur_run_text_pr, hlinkObj);
-                oThis.EndRecord();
-                _count++;
                 break;
-            case para_HyperlinkStart:
-                if ("" != _cur_run_text) {
-                    oThis.StartRecord(0);
-                    oThis.WriteTextRun((null == _cur_run_text_pr) ? null : _cur_run_text_pr.Value, _cur_run_text, hlinkObj);
-                    oThis.EndRecord();
-                    _count++;
-                    _cur_run_text = "";
-                }
-                hlinkObj = _par_content[_content_index];
-                break;
-            case para_HyperlinkEnd:
-                if ("" != _cur_run_text) {
-                    oThis.StartRecord(0);
-                    oThis.WriteTextRun((null == _cur_run_text_pr) ? null : _cur_run_text_pr.Value, _cur_run_text, hlinkObj);
-                    oThis.EndRecord();
-                    _count++;
-                    _cur_run_text = "";
-                }
-                hlinkObj = null;
+            default:
                 break;
             }
-            _content_index++;
-        }
-        if (_cur_run_text.length > 0) {
-            oThis.StartRecord(0);
-            oThis.WriteTextRun((null == _cur_run_text_pr) ? null : _cur_run_text_pr.Value, _cur_run_text, hlinkObj);
-            oThis.EndRecord();
-            _count++;
         }
         var _new_pos = oThis.pos;
         oThis.pos = _position;
@@ -1880,7 +1966,9 @@ function CBinaryFileWriter() {
         if (image.spPr.geometry === undefined || image.spPr.geometry == null) {
             image.spPr.geometry = CreateGeometry("rect");
         }
-        oThis.WriteRecord1(1, image.blipFill, oThis.WriteUniFill);
+        var unifill = new CUniFill();
+        unifill.fill = image.blipFill;
+        oThis.WriteRecord1(1, unifill, oThis.WriteUniFill);
         oThis.WriteRecord1(2, image.spPr, oThis.WriteSpPr);
         oThis.WriteRecord2(3, image.style, oThis.WriteShapeStyle);
         image.spPr.WriteXfrm = null;
@@ -1915,7 +2003,7 @@ function CBinaryFileWriter() {
         _memory.pos = oThis.pos;
         oThis.UseContinueWriter = true;
         var oBinaryChartWriter = new BinaryChartWriter(_memory);
-        oBinaryChartWriter.WriteChartContent(grObj);
+        oBinaryChartWriter.WriteCT_ChartSpace(grObj);
         oThis.ImData = _memory.ImData;
         oThis.data = _memory.data;
         oThis.len = _memory.len;
@@ -1925,10 +2013,10 @@ function CBinaryFileWriter() {
         _memory.data = null;
     };
     this.WriteTable2 = function (table) {
-        var obj = new Object();
+        var obj = {};
         obj.props = table.Pr;
         obj.look = table.TableLook;
-        obj.style = table.styleIndex;
+        obj.style = table.TableStyle;
         oThis.WriteRecord1(0, obj, oThis.WriteTableProps);
         var grid = table.TableGrid;
         var _len = grid.length;
@@ -1954,20 +2042,20 @@ function CBinaryFileWriter() {
         oThis.EndRecord();
     };
     this.GenerateTableWriteGrid = function (table) {
-        var TableGrid = new Object();
+        var TableGrid = {};
         var _rows = table.Content;
         var _cols = table.TableGrid;
         var _cols_count = _cols.length;
         var _rows_count = _rows.length;
         TableGrid.Rows = new Array(_rows_count);
         for (var i = 0; i < _rows_count; i++) {
-            TableGrid.Rows[i] = new Object();
-            TableGrid.Rows[i].Cells = new Array();
+            TableGrid.Rows[i] = {};
+            TableGrid.Rows[i].Cells = [];
             var _index = 0;
             var _cells_len = _rows[i].Content.length;
             for (var j = 0; j < _cells_len; j++) {
                 var _cell = _rows[i].Content[j];
-                var _cell_info = new Object();
+                var _cell_info = {};
                 _cell_info.Cell = _cell;
                 _cell_info.row_span = 1;
                 _cell_info.grid_span = (_cell.Pr.GridSpan === undefined || _cell.Pr.GridSpan == null) ? 1 : _cell.Pr.GridSpan;
@@ -1980,7 +2068,7 @@ function CBinaryFileWriter() {
                 TableGrid.Rows[i].Cells.push(_cell_info);
                 if (_cell_info.grid_span > 1) {
                     for (var t = _cell_info.grid_span - 1; t > 0; t--) {
-                        var _cell_info_empty = new Object();
+                        var _cell_info_empty = {};
                         _cell_info_empty.isEmpty = true;
                         _cell_info_empty.vMerge = _cell_info.vMerge;
                         TableGrid.Rows[i].Cells.push(_cell_info_empty);
@@ -1993,12 +2081,17 @@ function CBinaryFileWriter() {
             while (_index < _rows_count) {
                 var _count = 1;
                 for (var j = _index + 1; j < _rows_count; j++) {
+                    if (i >= TableGrid.Rows[j].Cells.length) {
+                        continue;
+                    }
                     if (TableGrid.Rows[j].Cells[i].vMerge !== true) {
                         break;
                     }++_count;
                 }
-                TableGrid.Rows[_index].Cells[i].row_span = _count;
-                _index += _count + 1;
+                if (i < TableGrid.Rows[_index].Cells.length) {
+                    TableGrid.Rows[_index].Cells[i].row_span = _count;
+                }
+                _index += _count;
             }
         }
         return TableGrid;
@@ -2065,11 +2158,34 @@ function CBinaryFileWriter() {
         oThis.StartRecord(0);
         oThis.WriteUChar(g_nodeAttributeStart);
         var _marg = cell.Pr.TableCellMar;
-        if (_marg !== undefined && null != _marg && null != _marg.Left && null != _marg.Top && null != _marg.Right && null != _marg.Bottom) {
+        var tableMar = cell.Row.Table.Pr.TableCellMar;
+        if (_marg && _marg.Left && isRealNumber(_marg.Left.W)) {
             oThis._WriteInt1(0, (_marg.Left.W * 36000) >> 0);
+        } else {
+            if (tableMar && tableMar.Left && isRealNumber(tableMar.Left.W)) {
+                oThis._WriteInt1(0, (tableMar.Left.W * 36000) >> 0);
+            }
+        }
+        if (_marg && _marg.Top && isRealNumber(_marg.Top.W)) {
             oThis._WriteInt1(1, (_marg.Top.W * 36000) >> 0);
+        } else {
+            if (tableMar && tableMar.Top && isRealNumber(tableMar.Top.W)) {
+                oThis._WriteInt1(1, (tableMar.Top.W * 36000) >> 0);
+            }
+        }
+        if (_marg && _marg.Right && isRealNumber(_marg.Right.W)) {
             oThis._WriteInt1(2, (_marg.Right.W * 36000) >> 0);
+        } else {
+            if (tableMar && tableMar.Right && isRealNumber(tableMar.Right.W)) {
+                oThis._WriteInt1(2, (tableMar.Right.W * 36000) >> 0);
+            }
+        }
+        if (_marg && _marg.Bottom && isRealNumber(_marg.Bottom.W)) {
             oThis._WriteInt1(3, (_marg.Bottom.W * 36000) >> 0);
+        } else {
+            if (tableMar && tableMar.Bottom && isRealNumber(tableMar.Bottom.W)) {
+                oThis._WriteInt1(3, (tableMar.Bottom.W * 36000) >> 0);
+            }
         }
         oThis.WriteUChar(g_nodeAttributeEnd);
         oThis.WriteRecord3(0, cell.Pr.TableCellBorders.Left, oThis.WriteTableCellBorder);
@@ -2078,7 +2194,7 @@ function CBinaryFileWriter() {
         oThis.WriteRecord3(3, cell.Pr.TableCellBorders.Bottom, oThis.WriteTableCellBorder);
         var shd = cell.Pr.Shd;
         if (shd !== undefined && shd != null) {
-            oThis.WriteRecord2(6, shd.unifill, oThis.WriteUniFill);
+            oThis.WriteRecord2(6, shd.Unifill, oThis.WriteUniFill);
         }
         oThis.EndRecord();
         oThis.StartRecord(1);
@@ -2087,7 +2203,7 @@ function CBinaryFileWriter() {
     };
     this.WriteTableProps = function (obj) {
         oThis.WriteUChar(g_nodeAttributeStart);
-        if (obj.style != -1) {
+        if (oThis.tableStylesGuides.hasOwnProperty(obj.style)) {
             oThis._WriteString1(0, oThis.tableStylesGuides[obj.style]);
         }
         oThis._WriteBool1(2, obj.look.m_bFirst_Row);
@@ -2099,9 +2215,9 @@ function CBinaryFileWriter() {
         oThis.WriteUChar(g_nodeAttributeEnd);
         var shd = obj.props.Shd;
         if (shd !== undefined && shd != null) {
-            if (shd.unifill !== undefined && shd.unifill != null) {
-                if (shd.unifill.fill !== undefined && shd.unifill.fill != null) {
-                    oThis.WriteRecord1(0, shd.unifill, oThis.WriteUniFill);
+            if (shd.Unifill !== undefined && shd.Unifill != null) {
+                if (shd.Unifill.fill !== undefined && shd.Unifill.fill != null) {
+                    oThis.WriteRecord1(0, shd.Unifill, oThis.WriteUniFill);
                 }
             }
         }
@@ -2122,23 +2238,22 @@ function CBinaryFileWriter() {
             oThis.WriteULong(_len);
             for (var i = 0; i < _len; i++) {
                 oThis.StartRecord(0);
-                if (spTree[i] instanceof CShape) {
+                switch (spTree[i].getObjectType()) {
+                case historyitem_type_Shape:
                     oThis.WriteShape(spTree[i]);
-                } else {
-                    if (spTree[i] instanceof CImageShape) {
-                        oThis.WriteImage(spTree[i]);
-                    } else {
-                        if (spTree[i] instanceof CGroupShape) {
-                            oThis.WriteGroupShape(spTree[i]);
-                        } else {
-                            if (spTree[i] instanceof CGraphicFrame && spTree[i].graphicObject instanceof CTable) {
-                                oThis.WriteTable(spTree[i]);
-                            } else {
-                                if (typeof CChartAsGroup != "undefined" && spTree[i] instanceof CChartAsGroup) {
-                                    oThis.WriteChart(spTree[i]);
-                                }
-                            }
-                        }
+                    break;
+                case historyitem_type_ImageShape:
+                    oThis.WriteImage(spTree[i]);
+                    break;
+                case historyitem_type_GroupShape:
+                    oThis.WriteGroupShape(spTree[i]);
+                    break;
+                case historyitem_type_ChartSpace:
+                    oThis.WriteChart(spTree[i]);
+                    break;
+                default:
+                    if (spTree[i] instanceof CGraphicFrame && spTree[i].graphicObject instanceof CTable) {
+                        oThis.WriteTable(spTree[i]);
                     }
                 }
                 oThis.EndRecord(0);
@@ -2172,8 +2287,8 @@ function CBinaryFileWriter() {
                 bIsExistLn = true;
             }
         }
-        if (spPr.WriteXfrm && spPr.WriteXfrm.isNotNull()) {
-            oThis.WriteRecord2(0, spPr.WriteXfrm, oThis.WriteXfrm);
+        if (spPr.xfrm && spPr.xfrm.isNotNull()) {
+            oThis.WriteRecord2(0, spPr.xfrm, oThis.WriteXfrm);
         }
         oThis.WriteRecord2(1, spPr.geometry, oThis.WriteGeometry);
         if (spPr.geometry === undefined || spPr.geometry == null) {
@@ -2277,7 +2392,7 @@ function CBinaryFileWriter() {
         if (undefined === geom || null == geom) {
             return;
         }
-        if (geom.preset != null && geom.preset != null) {
+        if (typeof geom.preset === "string" && geom.preset.length > 0) {
             oThis.StartRecord(1);
             oThis.WriteUChar(g_nodeAttributeStart);
             oThis._WriteString1(0, geom.preset);
@@ -2329,15 +2444,9 @@ function CBinaryFileWriter() {
             this.WriteUChar(g_nodeAttributeStart);
             this._WriteString1(0, _gd.name);
             this._WriteInt1(1, _gd.formula);
-            if (_gd.x !== undefined) {
-                this._WriteString1(2, _gd.x);
-            }
-            if (_gd.y !== undefined) {
-                this._WriteString1(3, _gd.y);
-            }
-            if (_gd.z !== undefined) {
-                this._WriteString1(4, _gd.z);
-            }
+            this._WriteString2(2, _gd.x);
+            this._WriteString2(3, _gd.y);
+            this._WriteString2(4, _gd.z);
             this.WriteUChar(g_nodeAttributeEnd);
             this.EndRecord();
         }
@@ -2525,13 +2634,13 @@ function CBinaryFileWriter() {
         oThis.WriteUChar(g_nodeAttributeEnd);
         if (undefined !== tableStyle.TablePr.Shd && null != tableStyle.TablePr.Shd) {
             oThis.StartRecord(0);
-            if (tableStyle.TablePr.Shd.unifill != null && tableStyle.TablePr.Shd.unifill !== undefined) {
+            if (tableStyle.TablePr.Shd.Unifill != null && tableStyle.TablePr.Shd.Unifill !== undefined) {
                 oThis.StartRecord(0);
-                oThis.WriteRecord2(0, tableStyle.TablePr.Shd.unifill, oThis.WriteUniFill);
+                oThis.WriteRecord2(0, tableStyle.TablePr.Shd.Unifill, oThis.WriteUniFill);
                 oThis.EndRecord();
             }
-            if (tableStyle.TablePr.Shd.fillRef != null && tableStyle.TablePr.Shd.fillRef !== undefined) {
-                oThis.WriteRecord2(1, tableStyle.TablePr.Shd.fillRef, oThis.WriteStyleRef);
+            if (tableStyle.TablePr.Shd.FillRef != null && tableStyle.TablePr.Shd.FillRef !== undefined) {
+                oThis.WriteRecord2(1, tableStyle.TablePr.Shd.FillRef, oThis.WriteStyleRef);
             }
             oThis.EndRecord();
         }
@@ -2556,20 +2665,26 @@ function CBinaryFileWriter() {
     };
     this.WriteTableStylePart = function (_part) {
         var bIsFontRef = false;
-        if (_part.TextPr.fontRef !== undefined && _part.TextPr.fontRef != null) {
+        if (_part.TextPr.FontRef !== undefined && _part.TextPr.FontRef != null) {
             bIsFontRef = true;
         }
         var bIsFill = false;
-        if (_part.TextPr.unifill !== undefined && _part.TextPr.unifill != null) {
+        if (_part.TextPr.Unifill !== undefined && _part.TextPr.Unifill != null) {
             bIsFill = true;
         }
         if (bIsFontRef || bIsFill) {
             oThis.StartRecord(0);
             oThis.WriteUChar(g_nodeAttributeStart);
+            if (isRealBool(_part.TextPr.Italic)) {
+                oThis._WriteLimit1(0, _part.TextPr.Italic === true ? 0 : 1);
+            }
+            if (isRealBool(_part.TextPr.Bold)) {
+                oThis._WriteLimit1(1, _part.TextPr.Bold === true ? 0 : 1);
+            }
             oThis.WriteUChar(g_nodeAttributeEnd);
-            oThis.WriteRecord2(0, _part.TextPr.fontRef, oThis.WriteFontRef);
-            if (bIsFill && _part.TextPr.unifill.fill !== undefined && _part.TextPr.unifill.fill != null && _part.TextPr.unifill.fill.type == FILL_TYPE_SOLID) {
-                oThis.WriteRecord2(1, _part.TextPr.unifill.fill.color, oThis.WriteUniColor);
+            oThis.WriteRecord2(0, _part.TextPr.FontRef, oThis.WriteFontRef);
+            if (bIsFill && _part.TextPr.Unifill.fill !== undefined && _part.TextPr.Unifill.fill != null && _part.TextPr.Unifill.fill.type == FILL_TYPE_SOLID) {
+                oThis.WriteRecord2(1, _part.TextPr.Unifill.fill.color, oThis.WriteUniColor);
             }
             oThis.EndRecord();
         }
@@ -2584,10 +2699,10 @@ function CBinaryFileWriter() {
         oThis.EndRecord();
         var _Shd = _part.TableCellPr.Shd;
         if (undefined !== _Shd && null != _Shd) {
-            oThis.WriteRecord2(1, _Shd.fillRef, oThis.WriteStyleRef);
-            if (_Shd.unifill !== undefined && _Shd.unifill != null) {
+            oThis.WriteRecord2(1, _Shd.FillRef, oThis.WriteStyleRef);
+            if (_Shd.Unifill !== undefined && _Shd.Unifill != null) {
                 oThis.StartRecord(2);
-                oThis.WriteRecord2(0, _Shd.unifill, oThis.WriteUniFill);
+                oThis.WriteRecord2(0, _Shd.Unifill, oThis.WriteUniFill);
                 oThis.EndRecord();
             }
         }
@@ -2595,51 +2710,55 @@ function CBinaryFileWriter() {
     };
     this.WriteTableStylePartWH = function (_part, tablePr) {
         var bIsFontRef = false;
-        if (_part.TextPr.fontRef !== undefined && _part.TextPr.fontRef != null) {
+        if (_part.TextPr.FontRef !== undefined && _part.TextPr.FontRef != null) {
             bIsFontRef = true;
         }
         var bIsFill = false;
-        if (_part.TextPr.unifill !== undefined && _part.TextPr.unifill != null) {
+        if (_part.TextPr.Unifill !== undefined && _part.TextPr.Unifill != null) {
             bIsFill = true;
         }
         if (bIsFontRef || bIsFill) {
             oThis.StartRecord(0);
             oThis.WriteUChar(g_nodeAttributeStart);
             oThis.WriteUChar(g_nodeAttributeEnd);
-            oThis.WriteRecord2(0, _part.TextPr.fontRef, oThis.WriteFontRef);
-            if (bIsFill && _part.TextPr.unifill.fill !== undefined && _part.TextPr.unifill.fill != null && _part.TextPr.unifill.fill.type == FILL_TYPE_SOLID) {
-                oThis.WriteRecord2(1, _part.TextPr.unifill.fill.color, oThis.WriteUniColor);
+            oThis.WriteRecord2(0, _part.TextPr.FontRef, oThis.WriteFontRef);
+            if (bIsFill && _part.TextPr.Unifill.fill !== undefined && _part.TextPr.Unifill.fill != null && _part.TextPr.Unifill.fill.type == FILL_TYPE_SOLID) {
+                oThis.WriteRecord2(1, _part.TextPr.Unifill.fill.color, oThis.WriteUniColor);
             }
             oThis.EndRecord();
         }
         oThis.StartRecord(1);
         oThis.StartRecord(0);
         var bIsRet = false;
-        bIsRet = oThis.WriteRecord3(0, _part.TableCellPr.TableCellBorders.Left, oThis.WriteTableCellBorderLineStyle);
+        bIsRet = oThis.WriteRecord3(0, tablePr.TableBorders.Left, oThis.WriteTableCellBorderLineStyle);
         if (!bIsRet) {
             oThis.WriteTableCellBorderLineStyle2(0, tablePr.TableBorders.Left);
         }
-        bIsRet = oThis.WriteRecord3(1, _part.TableCellPr.TableCellBorders.Right, oThis.WriteTableCellBorderLineStyle);
+        bIsRet = oThis.WriteRecord3(1, tablePr.TableBorders.Right, oThis.WriteTableCellBorderLineStyle);
         if (!bIsRet) {
             oThis.WriteTableCellBorderLineStyle2(1, tablePr.TableBorders.Right);
         }
-        bIsRet = oThis.WriteRecord3(2, _part.TableCellPr.TableCellBorders.Top, oThis.WriteTableCellBorderLineStyle);
+        bIsRet = oThis.WriteRecord3(2, tablePr.TableBorders.Top, oThis.WriteTableCellBorderLineStyle);
         if (!bIsRet) {
             oThis.WriteTableCellBorderLineStyle2(2, tablePr.TableBorders.Top);
         }
-        bIsRet = oThis.WriteRecord3(3, _part.TableCellPr.TableCellBorders.Bottom, oThis.WriteTableCellBorderLineStyle);
+        bIsRet = oThis.WriteRecord3(3, tablePr.TableBorders.Bottom, oThis.WriteTableCellBorderLineStyle);
         if (!bIsRet) {
             oThis.WriteTableCellBorderLineStyle2(3, tablePr.TableBorders.Bottom);
         }
-        oThis.WriteTableCellBorderLineStyle2(4, _part.TablePr.TableBorders.InsideH);
-        oThis.WriteTableCellBorderLineStyle2(5, _part.TablePr.TableBorders.InsideV);
+        if (tablePr.TableBorders.InsideH) {
+            oThis.WriteTableCellBorderLineStyle2(4, tablePr.TableBorders.InsideH);
+        }
+        if (tablePr.TableBorders.InsideV) {
+            oThis.WriteTableCellBorderLineStyle2(5, tablePr.TableBorders.InsideV);
+        }
         oThis.EndRecord();
         var _Shd = _part.TableCellPr.Shd;
         if (undefined !== _Shd && null != _Shd) {
-            oThis.WriteRecord2(1, _Shd.fillRef, oThis.WriteStyleRef);
-            if (_Shd.unifill !== undefined && _Shd.unifill != null) {
+            oThis.WriteRecord2(1, _Shd.FillRef, oThis.WriteStyleRef);
+            if (_Shd.Unifill !== undefined && _Shd.Unifill != null) {
                 oThis.StartRecord(2);
-                oThis.WriteRecord2(0, _Shd.unifill, oThis.WriteUniFill);
+                oThis.WriteRecord2(0, _Shd.Unifill, oThis.WriteUniFill);
                 oThis.EndRecord();
             }
         }
@@ -2658,7 +2777,7 @@ function CBinaryFileWriter() {
         }
         var bIsFill = false;
         var bIsSize = false;
-        if ((_border.unifill !== undefined && _border.unifill != null) || _border.Color instanceof CDocumentColor) {
+        if ((_border.Unifill !== undefined && _border.Unifill != null)) {
             bIsFill = true;
         }
         if (_border.Size !== undefined && _border.Size != null) {
@@ -2671,16 +2790,7 @@ function CBinaryFileWriter() {
                 oThis._WriteInt2(3, (_border.Size * 36000) >> 0);
             }
             oThis.WriteUChar(g_nodeAttributeEnd);
-            if (!_border.unifill && _border.Color instanceof CDocumentColor) {
-                var _unifill = new CUniFill();
-                _unifill.fill = new CSolidFill();
-                _unifill.fill.color.color = new CRGBColor();
-                _unifill.fill.color.color.RGBA.R = _border.Color.r;
-                _unifill.fill.color.color.RGBA.G = _border.Color.g;
-                _unifill.fill.color.color.RGBA.B = _border.Color.b;
-                oThis.WriteRecord2(0, _unifill, oThis.WriteUniFill);
-            }
-            oThis.WriteRecord2(0, _border.unifill, oThis.WriteUniFill);
+            oThis.WriteRecord2(0, _border.Unifill, oThis.WriteUniFill);
             oThis.EndRecord();
         }
     };
@@ -2714,7 +2824,7 @@ function CBinaryFileWriter() {
         var bIsFill = false;
         var bIsSize = false;
         var bIsLnRef = false;
-        if ((_border.unifill !== undefined && _border.unifill != null) || _border.Color instanceof CDocumentColor) {
+        if ((_border.Unifill !== undefined && _border.Unifill != null)) {
             bIsFill = true;
         }
         if (_border.Size !== undefined && _border.Size != null) {
@@ -2727,18 +2837,9 @@ function CBinaryFileWriter() {
                 oThis._WriteInt2(3, (_border.Size * 36000) >> 0);
             }
             oThis.WriteUChar(g_nodeAttributeEnd);
-            if (!_border.unifill && _border.Color instanceof CDocumentColor) {
-                var _unifill = new CUniFill();
-                _unifill.fill = new CSolidFill();
-                _unifill.fill.color.color = new CRGBColor();
-                _unifill.fill.color.color.RGBA.R = _border.Color.r;
-                _unifill.fill.color.color.RGBA.G = _border.Color.g;
-                _unifill.fill.color.color.RGBA.B = _border.Color.b;
-                oThis.WriteRecord2(0, _unifill, oThis.WriteUniFill);
-            }
-            oThis.WriteRecord2(0, _border.unifill, oThis.WriteUniFill);
+            oThis.WriteRecord2(0, _border.Unifill, oThis.WriteUniFill);
             oThis.EndRecord();
         }
-        oThis.WriteRecord2(1, _border.lnRef, oThis.WriteStyleRef);
+        oThis.WriteRecord2(1, _border.LineRef, oThis.WriteStyleRef);
     };
 }

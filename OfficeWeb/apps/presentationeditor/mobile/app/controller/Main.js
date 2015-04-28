@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -46,13 +46,13 @@
         api.SetMobileVersion(true);
         api.CreateComponents();
         api.SetFontsPath("../../../sdk/Fonts/");
+        api.SetThemesPath("../../../sdk/PowerPoint/themes/");
         api.Init();
         api.initEvents2MobileAdvances();
         api.asc_registerCallback("asc_onStartAction", Ext.bind(this.onLongActionBegin, this));
         api.asc_registerCallback("asc_onError", Ext.bind(this.onError, this));
         api.asc_registerCallback("asc_onEndAction", Ext.bind(this.onLongActionEnd, this));
         api.asc_registerCallback("asc_onDocumentContentReady", Ext.bind(this.onDocumentContentReady, this));
-        api.asc_registerCallback("asc_onOpenDocumentProgress2", Ext.bind(this.onOpenDocument, this));
         api.asc_registerCallback("asc_onSaveUrl", Ext.bind(this.onSaveUrl, this));
         api.asc_registerCallback("asc_onGetEditorPermissions", Ext.bind(this.onEditorPermissions, this));
         Ext.each(app.getControllers(), function (controllerName) {
@@ -122,12 +122,6 @@
         }
         this._hideLoadSplash();
         Common.component.Analytics.trackEvent("Load", "Complete");
-    },
-    onOpenDocument: function (progress) {
-        var elem = document.getElementById("loadmask-text");
-        if (elem) {
-            elem.innerHTML = this.textLoadingDocument + ": " + Math.round(progress) + "%";
-        }
     },
     onSaveUrl: function (url) {
         Common.Gateway.save(url);

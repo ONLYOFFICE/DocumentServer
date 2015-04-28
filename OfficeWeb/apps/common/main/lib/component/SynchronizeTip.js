@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,74 +29,60 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("Common.component.SynchronizeTip", {
-    extend: "Ext.container.Container",
-    alias: "widget.commonsynchronizetip",
-    cls: "asc-synchronizetip",
-    requires: ["Ext.button.Button", "Ext.form.Label"],
-    layout: {
-        type: "vbox",
-        align: "stretch"
-    },
-    width: 240,
-    height: 95,
-    hideMode: "visibility",
-    constructor: function (config) {
-        this.initConfig(config);
-        this.callParent(arguments);
-        return this;
-    },
-    initComponent: function () {
-        var me = this;
-        me.addEvents("dontshowclick");
-        me.addEvents("closeclick");
-        var btnClose = Ext.widget("button", {
-            cls: "btn-close-tip",
-            iconCls: "icon-close-tip",
-            listeners: {
-                click: function () {
-                    me.fireEvent("closeclick", me);
-                }
-            }
-        });
-        me.items = [{
-            xtype: "container",
-            html: '<div class="tip-arrow"></div>'
-        },
-        {
-            xtype: "container",
-            flex: 1,
-            style: "padding-left: 15px;",
-            layout: {
-                type: "hbox",
-                align: "stretch"
+ if (Common === undefined) {
+    var Common = {};
+}
+define(["common/main/lib/component/BaseView"], function () {
+    Common.UI.SynchronizeTip = Common.UI.BaseView.extend(_.extend((function () {
+        var tipEl;
+        return {
+            options: {
+                target: $(document.body)
             },
-            items: [{
-                xtype: "container",
-                flex: 1,
-                style: "margin-top: 15px;line-height: 1.2;",
-                html: "<div>" + me.textSynchronize + "</div>"
+            template: _.template(['<div class="synch-tip-root">', '<div class="asc-synchronizetip">', '<div class="tip-arrow"></div>', "<div>", '<div style="width: 260px;"><%= scope.textSynchronize %></div>', '<div class="close"></div>', "</div>", '<div class="show-link"><label><%= scope.textDontShow %></label></div>', "</div>", "</div>"].join("")),
+            initialize: function (options) {
+                this.textSynchronize += Common.Utils.String.platformKey("Ctrl+S");
+                Common.UI.BaseView.prototype.initialize.call(this, options);
+                this.target = this.options.target;
             },
-            btnClose]
-        },
-        {
-            xtype: "container",
-            cls: "show-link",
-            items: [{
-                xtype: "label",
-                text: me.textDontShow,
-                listeners: {
-                    afterrender: function (cmp) {
-                        cmp.getEl().on("click", function (event, node) {
-                            me.fireEvent("dontshowclick", me);
-                        });
-                    },
+            render: function () {
+                tipEl = $(this.template({
                     scope: this
+                }));
+                tipEl.find(".close").on("click", _.bind(function () {
+                    this.trigger("closeclick");
+                },
+                this));
+                tipEl.find(".show-link label").on("click", _.bind(function () {
+                    this.trigger("dontshowclick");
+                },
+                this));
+                $(document.body).append(tipEl);
+                this.applyPlacement();
+                return this;
+            },
+            show: function () {
+                if (tipEl) {
+                    this.applyPlacement();
+                    tipEl.show();
+                } else {
+                    this.render();
                 }
-            }]
-        }];
-        me.callParent(arguments);
-    },
-    textDontShow: "Don't show this message again",
-    textSynchronize: "The document has changed. <br/>Refresh the document to see the updates."
+            },
+            hide: function () {
+                if (tipEl) {
+                    tipEl.hide();
+                }
+            },
+            applyPlacement: function () {
+                var showxy = this.target.offset();
+                tipEl.css({
+                    top: showxy.top + this.target.height() / 2 + "px",
+                    left: showxy.left + this.target.width() + "px"
+                });
+            },
+            textDontShow: "Don't show this message again",
+            textSynchronize: "The document has been changed by another user.<br/>Please click to save your changes and reload the updates."
+        };
+    })(), Common.UI.SynchronizeTip || {}));
 });

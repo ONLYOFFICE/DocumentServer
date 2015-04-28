@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function CPPTXContentLoader() {
+ "use strict";
+function CPPTXContentLoader() {
     this.Reader = new BinaryPPTYLoader();
     this.Writer = null;
     this.stream = null;
@@ -37,7 +38,7 @@
     this.ParaDrawing = null;
     this.LogicDocument = null;
     this.BaseReader = null;
-    this.ImageMapChecker = new Object();
+    this.ImageMapChecker = {};
     this.Start_UseFullUrl = function () {
         this.Reader.Start_UseFullUrl();
     };
@@ -64,41 +65,48 @@
         this.stream.pos = stream.pos;
         this.stream.cur = stream.cur;
         this.Reader.stream = this.stream;
+        this.Reader.presentation = logicDocument;
         var GrObject = null;
         var s = this.stream;
         var _main_type = s.GetUChar();
         var _rec_start = s.cur;
         var _end_rec = _rec_start + s.GetULong() + 4;
-        s.Skip2(5);
-        var _type = s.GetUChar();
-        switch (_type) {
-        case 1:
-            GrObject = this.ReadShape();
-            break;
-        case 2:
-            GrObject = this.ReadPic();
-            break;
-        case 3:
-            GrObject = this.ReadCxn();
-            break;
-        case 4:
-            GrObject = this.ReadGroupShape();
-            break;
-        case 5:
-            s.SkipRecord();
-            break;
-        default:
-            break;
+        if (s.cur < _end_rec) {
+            s.Skip2(5);
+            var _type = s.GetUChar();
+            switch (_type) {
+            case 1:
+                GrObject = this.ReadShape();
+                break;
+            case 2:
+                GrObject = this.ReadPic();
+                break;
+            case 3:
+                GrObject = this.ReadCxn();
+                break;
+            case 4:
+                GrObject = this.ReadGroupShape();
+                break;
+            case 5:
+                s.SkipRecord();
+                break;
+            default:
+                break;
+            }
         }
         s.Seek2(_end_rec);
         stream.pos = s.pos;
         stream.cur = s.cur;
         return GrObject;
     };
-    this.ReadGraphicObject = function (stream) {
+    this.ReadGraphicObject = function (stream, presentation) {
         if (this.Reader == null) {
             this.Reader = new BinaryPPTYLoader();
         }
+        if (presentation) {
+            this.Reader.presentation = presentation;
+        }
+        var oLogicDocument = this.LogicDocument;
         this.LogicDocument = null;
         this.Reader.ImageMapChecker = this.ImageMapChecker;
         if (null == this.stream) {
@@ -119,13 +127,18 @@
         s.Seek2(_end_rec);
         stream.pos = s.pos;
         stream.cur = s.cur;
+        this.LogicDocument = oLogicDocument;
         return GrObject;
     };
-    this.ReadTextBody = function (reader, stream, shape) {
+    this.ReadTextBody = function (reader, stream, shape, presentation) {
         this.BaseReader = reader;
         if (this.Reader == null) {
             this.Reader = new BinaryPPTYLoader();
         }
+        if (!this.Reader.presentation && presentation) {
+            this.Reader.presentation = presentation;
+        }
+        var oLogicDocument = this.LogicDocument;
         this.LogicDocument = null;
         this.Reader.ImageMapChecker = this.ImageMapChecker;
         if (null == this.stream) {
@@ -142,6 +155,7 @@
         var txBody = this.Reader.ReadTextBody(shape);
         stream.pos = s.pos;
         stream.cur = s.cur;
+        this.LogicDocument = oLogicDocument;
         return txBody;
     };
     this.ReadTextBodyTxPr = function (reader, stream, shape) {
@@ -149,6 +163,7 @@
         if (this.Reader == null) {
             this.Reader = new BinaryPPTYLoader();
         }
+        var oLogicDocument = this.LogicDocument;
         this.LogicDocument = null;
         this.Reader.ImageMapChecker = this.ImageMapChecker;
         if (null == this.stream) {
@@ -165,12 +180,14 @@
         var txBody = this.Reader.ReadTextBodyTxPr(shape);
         stream.pos = s.pos;
         stream.cur = s.cur;
+        this.LogicDocument = oLogicDocument;
         return txBody;
     };
     this.ReadShapeProperty = function (stream) {
         if (this.Reader == null) {
             this.Reader = new BinaryPPTYLoader();
         }
+        var oLogicDocument = this.LogicDocument;
         this.LogicDocument = null;
         this.Reader.ImageMapChecker = this.ImageMapChecker;
         if (null == this.stream) {
@@ -188,11 +205,15 @@
         this.Reader.ReadSpPr(oNewSpPr);
         stream.pos = s.pos;
         stream.cur = s.cur;
+        this.LogicDocument = oLogicDocument;
         return oNewSpPr;
     };
     this.ReadShape = function () {
         var s = this.stream;
-        var shape = new WordShape(this.TempMainObject == null ? this.ParaDrawing : null, this.LogicDocument, this.LogicDocument.DrawingDocument, this.TempMainObject);
+        var shape = new CShape();
+        shape.setWordShape(true);
+        shape.setBDeleted(false);
+        shape.setParent(this.TempMainObject == null ? this.ParaDrawing : null);
         var _rec_start = s.cur;
         var _end_rec = _rec_start + s.GetULong() + 4;
         s.Skip2(1);
@@ -219,6 +240,7 @@
                 var spPr = new CSpPr();
                 this.ReadSpPr(spPr);
                 shape.setSpPr(spPr);
+                shape.spPr.setParent(shape);
                 break;
             case 2:
                 shape.setStyle(this.Reader.ReadShapeStyle());
@@ -228,7 +250,7 @@
                 break;
             case 4:
                 var oThis = this.BaseReader;
-                shape.addDocContent(new CDocumentContent(shape, this.LogicDocument.DrawingDocument, 0, 0, 0, 0, false, false));
+                shape.setTextBoxContent(new CDocumentContent(shape, this.LogicDocument.DrawingDocument, 0, 0, 0, 0, false, false));
                 var _old_cont = shape.textBoxContent.Content[0];
                 shape.textBoxContent.Internal_Content_RemoveAll();
                 s.Skip2(4);
@@ -262,7 +284,8 @@
     };
     this.ReadCxn = function () {
         var s = this.stream;
-        var shape = new WordShape(null, this.LogicDocument, this.LogicDocument.DrawingDocument, this.TempMainObject);
+        var shape = new CShape();
+        shape.setWordShape(true);
         shape.setParent(this.TempMainObject == null ? this.ParaDrawing : null);
         var _rec_start = s.cur;
         var _end_rec = _rec_start + s.GetULong() + 4;
@@ -303,7 +326,8 @@
     };
     this.ReadPic = function () {
         var s = this.stream;
-        var pic = new WordImage(null, this.LogicDocument, this.LogicDocument.DrawingDocument, this.TempMainObject);
+        var pic = new CImageShape();
+        pic.setBDeleted(false);
         pic.setParent(this.TempMainObject == null ? this.ParaDrawing : null);
         var _rec_start = s.cur;
         var _end_rec = _rec_start + s.GetULong() + 4;
@@ -316,14 +340,12 @@
             case 1:
                 var unifill = this.Reader.ReadUniFill();
                 pic.setBlipFill(unifill.fill);
-                pic.spPr.Fill = new CUniFill();
-                pic.spPr.Fill.fill = pic.blipFill;
-                pic.brush = pic.spPr.Fill;
                 break;
             case 2:
                 var spPr = new CSpPr();
                 this.ReadSpPr(spPr);
                 pic.setSpPr(spPr);
+                pic.spPr.setParent(pic);
                 break;
             case 3:
                 pic.setStyle(this.Reader.ReadShapeStyle());
@@ -337,10 +359,12 @@
     };
     this.ReadGroupShape = function () {
         var s = this.stream;
-        var shape = new WordGroupShapes(null, this.LogicDocument, this.LogicDocument.DrawingDocument, this.TempMainObject);
+        var shape = new CGroupShape();
+        shape.setBDeleted(false);
         shape.setParent(this.TempMainObject == null ? this.ParaDrawing : null);
         this.TempGroupObject = shape;
-        var arrGraphicObjects = shape.arrGraphicObjects;
+        var oldParaDrawing = this.ParaDrawing;
+        this.ParaDrawing = null;
         var _rec_start = s.cur;
         var _end_rec = _rec_start + s.GetULong() + 4;
         while (s.cur < _end_rec) {
@@ -353,6 +377,7 @@
                 var spPr = new CSpPr();
                 this.ReadSpPr(spPr);
                 shape.setSpPr(spPr);
+                shape.spPr.setParent(shape);
                 break;
             case 2:
                 s.Skip2(4);
@@ -364,24 +389,33 @@
                         continue;
                     }
                     var _type = s.GetUChar();
+                    var sp;
                     switch (_type) {
                     case 1:
-                        shape.addGraphicObject(this.ReadShape());
+                        sp = this.ReadShape();
+                        sp.setGroup(shape);
+                        shape.addToSpTree(shape.spTree.length, sp);
                         break;
                     case 2:
-                        shape.addGraphicObject(this.ReadPic());
+                        sp = this.ReadPic();
+                        sp.setGroup(shape);
+                        shape.addToSpTree(shape.spTree.length, sp);
                         break;
                     case 3:
-                        shape.addGraphicObject(this.ReadCxn());
+                        sp = this.ReadCxn();
+                        sp.setGroup(shape);
+                        shape.addToSpTree(shape.spTree.length, sp);
                         break;
                     case 4:
-                        shape.addGraphicObject(this.ReadGroupShape());
-                        this.TempGroupObject = shape;
+                        sp = this.ReadGroupShape();
+                        sp.setGroup(shape);
+                        shape.addToSpTree(shape.spTree.length, sp);
                         break;
                     case 5:
                         var _chart = this.Reader.ReadChartDataInGroup(shape);
                         if (null != _chart) {
-                            shape.addGraphicObject(_chart);
+                            _chart.setGroup(shape);
+                            shape.addToSpTree(shape.spTree.length, _chart);
                         }
                         break;
                     default:
@@ -393,6 +427,7 @@
                 break;
             }
         }
+        this.ParaDrawing = oldParaDrawing;
         s.Seek2(_end_rec);
         this.TempGroupObject = null;
         return shape;
@@ -417,16 +452,20 @@
             var _at = s.GetUChar();
             switch (_at) {
             case 0:
-                spPr.xfrm = this.Reader.ReadXfrm();
+                spPr.setXfrm(this.Reader.ReadXfrm());
+                spPr.xfrm.setParent(spPr);
                 break;
             case 1:
-                spPr.geometry = this.Reader.ReadGeometry(spPr.xfrm);
+                spPr.setGeometry(this.Reader.ReadGeometry(spPr.xfrm));
+                if (spPr.geometry) {
+                    spPr.geometry.setParent(spPr);
+                }
                 break;
             case 2:
-                spPr.Fill = this.Reader.ReadUniFill();
+                spPr.setFill(this.Reader.ReadUniFill());
                 break;
             case 3:
-                spPr.ln = this.Reader.ReadLn();
+                spPr.setLn(this.Reader.ReadLn());
                 break;
             case 4:
                 var _len = s.GetULong();
@@ -495,14 +534,18 @@
     };
     this.CheckImagesNeeds = function (logicDoc) {
         var index = 0;
-        logicDoc.ImageMap = new Object();
+        logicDoc.ImageMap = {};
         for (var i in this.ImageMapChecker) {
             logicDoc.ImageMap[index++] = i;
         }
     };
-    this.Clear = function () {
+    this.Clear = function (bClearStreamOnly) {
+        this.Reader.stream = null;
         this.stream = null;
-        this.ImageMapChecker = new Object();
+        this.BaseReader = null;
+        if (!bClearStreamOnly) {
+            this.ImageMapChecker = {};
+        }
     };
 }
 function CPPTXContentWriter() {
@@ -565,7 +608,6 @@ function CPPTXContentWriter() {
         } else {
             this.TreeDrawingIndex++;
             this.arrayStackStarts.push(this.BinaryFileWriter.pos);
-            this.BinaryFileWriter.pos = 0;
         }
         var _writer = this.BinaryFileWriter;
         _writer.StartRecord(0);
@@ -589,20 +631,20 @@ function CPPTXContentWriter() {
         this.arrayStackStarts.push(this.BinaryFileWriter.pos);
         this.BinaryFileWriter.StartRecord(0);
         this.BinaryFileWriter.StartRecord(1);
-        if ("undefined" !== typeof(WordShape) && grObject instanceof WordShape) {
-            this.WriteShape(grObject, Document, oMapCommentId, oNumIdMap, copyParams);
-        } else {
-            if ("undefined" !== typeof(CShape) && grObject instanceof CShape) {
-                this.WriteShape2(grObject, Document, oMapCommentId, oNumIdMap, copyParams);
+        switch (grObject.getObjectType()) {
+        case historyitem_type_Shape:
+            if (grObject.bWordShape) {
+                this.WriteShape(grObject, Document, oMapCommentId, oNumIdMap, copyParams);
             } else {
-                if (("undefined" !== typeof(WordImage) && grObject instanceof WordImage) || ("undefined" !== typeof(CImageShape) && grObject instanceof CImageShape)) {
-                    this.WriteImage(grObject);
-                } else {
-                    if (("undefined" !== typeof(WordGroupShapes) && grObject instanceof WordGroupShapes) || ("undefined" !== typeof(CGroupShape) && grObject instanceof CGroupShape)) {
-                        this.WriteGroup(grObject, Document, oMapCommentId, oNumIdMap, copyParams);
-                    }
-                }
+                this.WriteShape2(grObject, Document, oMapCommentId, oNumIdMap, copyParams);
             }
+            break;
+        case historyitem_type_ImageShape:
+            this.WriteImage(grObject);
+            break;
+        case historyitem_type_GroupShape:
+            this.WriteGroup(grObject, Document, oMapCommentId, oNumIdMap, copyParams);
+            break;
         }
         this.BinaryFileWriter.EndRecord();
         this.BinaryFileWriter.EndRecord();
@@ -714,15 +756,9 @@ function CPPTXContentWriter() {
         var _writer = this.BinaryFileWriter;
         _writer.StartRecord(4);
         group.spPr.WriteXfrm = group.spPr.xfrm;
-        if (group.spPr.WriteXfrm) {
-            group.spPr.WriteXfrm.chOffX = 0;
-            group.spPr.WriteXfrm.chOffY = 0;
-            group.spPr.WriteXfrm.chExtX = group.spPr.WriteXfrm.extX;
-            group.spPr.WriteXfrm.chExtY = group.spPr.WriteXfrm.extY;
-        }
         _writer.WriteRecord1(1, group.spPr, _writer.WriteGrpSpPr);
         delete group.spPr.WriteXfrm;
-        var spTree = group.arrGraphicObjects;
+        var spTree = group.spTree;
         var _len = spTree.length;
         if (0 != _len) {
             _writer.StartRecord(2);
@@ -730,24 +766,23 @@ function CPPTXContentWriter() {
             for (var i = 0; i < _len; i++) {
                 _writer.StartRecord(0);
                 var elem = spTree[i];
-                if ("undefined" !== typeof(WordShape) && elem instanceof WordShape) {
-                    this.WriteShape(elem, Document, oMapCommentId, oNumIdMap, copyParams);
-                } else {
-                    if ("undefined" !== typeof(CShape) && elem instanceof CShape) {
-                        this.WriteShape2(elem, Document, oMapCommentId, oNumIdMap, copyParams);
+                switch (elem.getObjectType()) {
+                case historyitem_type_Shape:
+                    if (elem.bWordShape) {
+                        this.WriteShape(elem, Document, oMapCommentId, oNumIdMap, copyParams);
                     } else {
-                        if (("undefined" !== typeof(WordImage) && elem instanceof WordImage) || ("undefined" !== typeof(CImageShape) && elem instanceof CImageShape)) {
-                            this.WriteImage(elem);
-                        } else {
-                            if (("undefined" !== typeof(WordGroupShapes) && elem instanceof WordGroupShapes) || ("undefined" !== typeof(CGroupShape) && elem instanceof CGroupShape)) {
-                                this.WriteGroup(elem, Document, oMapCommentId, oNumIdMap, copyParams);
-                            } else {
-                                if ("undefined" !== typeof(CChartAsGroup) && elem instanceof CChartAsGroup) {
-                                    this.BinaryFileWriter.WriteChart(elem);
-                                }
-                            }
-                        }
+                        this.WriteShape2(elem, Document, oMapCommentId, oNumIdMap, copyParams);
                     }
+                    break;
+                case historyitem_type_ImageShape:
+                    this.WriteImage(elem);
+                    break;
+                case historyitem_type_GroupShape:
+                    this.WriteGroup(elem, Document, oMapCommentId, oNumIdMap, copyParams);
+                    break;
+                case historyitem_type_ChartSpace:
+                    this.BinaryFileWriter.WriteChart(elem);
+                    break;
                 }
                 _writer.EndRecord(0);
             }

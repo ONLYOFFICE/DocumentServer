@@ -1,0 +1,203 @@
+<div id="id-adv-dropcap-frame" class="settings-panel">
+    <div class="inner-content">
+        <table cols="3" style="width: 100%">
+            <tr>
+                <td colspan="3">
+                    <label class="header  padding-small"><%= scope.textPosition %></label>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" class="settins-cell padding-large">
+                    <span id="frame-advanced-button-none" style="margin-right:5px;"></span>
+                    <span id="frame-advanced-button-inline" style="margin-right:5px;"></span>
+                    <span id="frame-advanced-button-flow"></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-small" colspan="3">
+                    <div class="separator horizontal"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="settins-cell padding-small" width="80">
+                    <label class="input-label"><%= scope.textWidth %></label>
+                </td>
+                <td class="settins-cell padding-small" width="130" style="padding-right: 10px;">
+                    <div id="frame-advanced-input-widthtype"></div>
+                </td>
+                <td class="settins-cell padding-small" width="95">
+                    <div id="frame-advanced-input-width"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="settins-cell padding-small" width="80">
+                    <label class="input-label"><%= scope.textHeight %></label>
+                </td>
+                <td class="settins-cell padding-small" width="130" style="padding-right: 10px;">
+                    <div id="frame-advanced-input-heighttype"></div>
+                </td>
+                <td class="settins-cell padding-small" width="95">
+                    <div id="frame-advanced-input-height"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-small" colspan="3">
+                    <div class="separator horizontal"></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <label class="header"><%= scope.textHorizontal %></label>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2"></td>
+                <td class="settins-cell">
+                    <label class="input-label"><%= scope.textRelative %></label>
+                </td>
+            </tr>
+            <tr>
+                <td class="settins-cell padding-small" width="80">
+                    <label class="input-label"><%= scope.textPosition %></label>
+                </td>
+                <td class="settins-cell padding-small" width="130" style="padding-right: 10px;">
+                    <div id="frame-advanced-input-hposition"></div>
+                </td>
+                <td class="settins-cell padding-small" width="95">
+                    <div id="frame-advanced-input-hrelative"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="settins-cell padding-small" colspan="2" style="padding-right: 10px;">
+                    <label class="input-label" style="float: right;"><%= scope.textDistance %></label>
+                </td>
+                <td class="settins-cell padding-small">
+                    <div id="frame-advanced-input-hdist"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-small" colspan="3">
+                    <div class="separator horizontal"></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <label class="header"><%= scope.textVertical %></label>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2"></td>
+                <td class="settins-cell">
+                    <label class="input-label"><%= scope.textRelative %></label>
+                </td>
+            </tr>
+            <tr>
+                <td class="settins-cell padding-small" width="80">
+                    <label class="input-label"><%= scope.textPosition %></label>
+                </td>
+                <td class="settins-cell padding-small" width="130" style="padding-right: 10px;">
+                    <div id="frame-advanced-input-vposition"></div>
+                </td>
+                <td class="settins-cell padding-small" width="95">
+                    <div id="frame-advanced-input-vrelative"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="settins-cell padding-small" colspan="2" style="padding-right: 10px;">
+                    <label class="input-label" style="float: right;"><%= scope.textDistance %></label>
+                </td>
+                <td class="settins-cell padding-small">
+                    <div id="frame-advanced-input-vdist"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-small" colspan="3">
+                    <div id="frame-advanced-checkbox-move"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div id="id-adv-dropcap-dropcap" class="settings-panel">
+    <div class="inner-content">
+        <label class="header padding-small" style="width: 100%;"><%= scope.textPosition %></label>
+        <div class="padding-small" style="width: 100%">
+            <span id="drop-advanced-button-none" style="margin-right:5px;"></span>
+            <span id="drop-advanced-button-intext" style="margin-right:5px;"></span>
+            <span id="drop-advanced-button-inmargin" style="margin-right:5px;"></span>
+        </div>
+        <label class="header padding-small" style="width: 100%;"><%= scope.textParameters %></label>
+        <label class="input-label"><%= scope.textFont %></label>
+        <div id="drop-advanced-input-fonts" class="padding-small" style="width: 100%;"></div>
+    </div>
+    <div class="inner-content">
+        <table cols="2" style="width: 100%;">
+            <tr>
+                <td width="50%">
+                    <label class="input-label"><%= scope.textRowHeight %></label>
+                    <div id="drop-advanced-input-rowheight"></div>
+                </td>
+                <td width="50%">
+                    <label class="input-label"><%= scope.textDistance %></label>
+                    <div id="drop-advanced-input-distance"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div id="id-adv-dropcap-borders" class="settings-panel">
+    <div class="inner-content">
+        <div style="width: 100%;" class="padding-small">
+            <label class="input-label" style="margin-right: 5px;"><%= scope.textBorderWidth %></label>
+            <div id="drop-advanced-input-bordersize" style="display: inline-block; vertical-align: middle; width: 93px;"></div>
+            <div style="display: inline-block; float:right;vertical-align: middle;">
+                <label class="input-label" style="margin-right: 5px;"><%= scope.textBorderColor %></label>
+                <div id="drop-advanced-button-bordercolor" style="display: inline-block;"></div>
+            </div>
+        </div>
+        <label class="input-label padding-small" style="width: 100%;"><%= scope.textBorderDesc %></label>
+        <div style="width: 100%;" class="padding-large">
+            <div id="drop-advanced-borderstyler" style="display: inline-block; vertical-align: middle; width: 200px; height: 170px;outline: 1px solid #ccc;"></div>
+            <div style="display: inline-block; float:right;vertical-align: middle; width: 80px; height: 170px; padding-top: 10px; padding-left: 4px;">
+                <div id="drop-advanced-button-borderline-00" style="display: inline-block;"></div>
+                <div id="drop-advanced-button-borderline-01" style="display: inline-block;"></div>
+                <div id="drop-advanced-button-borderline-10" style="display: inline-block;"></div>
+                <div id="drop-advanced-button-borderline-11" style="display: inline-block;"></div>
+                <div id="drop-advanced-button-borderline-20" style="display: inline-block;"></div>
+                <div id="drop-advanced-button-borderline-21" style="display: inline-block;"></div>
+                <div id="drop-advanced-button-borderline-30" style="display: inline-block;"></div>
+                <div id="drop-advanced-button-borderline-31" style="display: inline-block;"></div>
+            </div>
+        </div>
+        <div style="width: 100%;" class="padding-small">
+            <label class="input-label" style="margin-right: 5px;"><%= scope.textBackColor %></label>
+            <div id="drop-advanced-button-color" style="display: inline-block;"></div>
+        </div>
+    </div>
+</div>
+<div id="id-adv-dropcap-margins" class="settings-panel">
+    <div class="inner-content">
+        <table cols="2" style="width: 100%;">
+            <tr>
+                <td class="padding-small" width="50%">
+                    <label class="input-label"><%= scope.textTop %></label>
+                    <div id="drop-advanced-input-top"></div>
+                </td>
+                <td class="padding-small" width="50%">
+                    <label class="input-label"><%= scope.textLeft %></label>
+                    <div id="drop-advanced-input-left"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-small" width="50%">
+                    <label class="input-label"><%= scope.textBottom %></label>
+                    <div id="drop-advanced-input-bottom"></div>
+                </td>
+                <td class="padding-small" width="50%">
+                    <label class="input-label"><%= scope.textRight %></label>
+                    <div id="drop-advanced-input-right"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

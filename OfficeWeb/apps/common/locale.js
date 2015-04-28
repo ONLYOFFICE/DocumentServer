@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -57,30 +57,43 @@ Common.Locale = new(function () {
                 if (p && p.length > 2) {
                     var obj = window;
                     for (var i = 0; i < p.length - 1; ++i) {
-                        obj = obj[p[i]];
-                        if (obj == undefined) {
-                            break;
+                        if (obj[p[i]] === undefined) {
+                            obj[p[i]] = new Object();
                         }
+                        obj = obj[p[i]];
                     }
                     if (obj) {
-                        obj.prototype[p[p.length - 1]] = l10n[prop];
+                        obj[p[p.length - 1]] = l10n[prop];
                     }
                 }
             }
         } catch(e) {}
     };
+    var _get = function (prop, scope) {
+        var res = "";
+        if (scope && scope.name) {
+            res = l10n[scope.name + "." + prop];
+        }
+        return res || (scope ? eval(scope.name).prototype[prop] : "");
+    };
+    var _getUrlParameterByName = function (name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+        return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    };
     try {
-        var urlParams = Ext.urlDecode(location.search.substring(1));
+        var langParam = _getUrlParameterByName("lang");
         var xhrObj = _createXMLHTTPObject();
-        if (xhrObj && urlParams && urlParams.lang) {
-            var lang = urlParams.lang.split("-")[0];
+        if (xhrObj && langParam) {
+            var lang = langParam.split("-")[0];
             xhrObj.open("GET", "locale/" + lang + ".json", false);
             xhrObj.send("");
             l10n = eval("(" + xhrObj.responseText + ")");
-            _applyLocalization();
         }
     } catch(e) {}
     return {
-        apply: _applyLocalization
+        apply: _applyLocalization,
+        get: _get
     };
 })();

@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -36,6 +36,8 @@ using System.Web;
 using System.Web.Routing;
 using System.IO;
 using System.Text;
+using System.Linq;
+using System.Collections.Generic;
 
 using Microsoft.Win32; 
 
@@ -53,12 +55,30 @@ public class FontServiceRoute : IRouteHandler
 
 public class FontService : IHttpAsyncHandler
 {
+    private const string gc_sJsExtention = ".js";
     private readonly ILog _log = LogManager.GetLogger(typeof(FontServiceRoute));
     private string m_sFontName = null;
     private readonly static System.Collections.Generic.Dictionary<string, string> m_mapFontNameToFullPath;
     static FontService()
     {
         m_mapFontNameToFullPath = new System.Collections.Generic.Dictionary<string, string>();
+
+        string sConfigFontDir = ConfigurationManager.AppSettings["utils.common.fontdir"];
+
+        if (null != sConfigFontDir && string.Empty != sConfigFontDir)
+        {
+            string sConfigSearchPattern = ConfigurationSettings.AppSettings["utils.fonts.search_patterns"] ?? "*.ttf;*.ttc;*.otf";
+            InitFontMapByFolder(sConfigFontDir, sConfigSearchPattern);
+        }
+        else
+        {
+            InitFontMapBySysFont();
+        }
+
+    }
+    static private void InitFontMapBySysFont()
+    {
+        
         DirectoryInfo dirWindowsFolder = Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.System));
         string sWinFontDir = Path.Combine(dirWindowsFolder.FullName, "Fonts");
         RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts");
@@ -80,6 +100,34 @@ public class FontService : IHttpAsyncHandler
             }
         }
     }
+    static private void InitFontMapByFolder(string sConfigFontDir, string sConfigSearchPattern)
+    {
+        string sFontDir = Environment.ExpandEnvironmentVariables(sConfigFontDir);
+
+        char[] aDelemiters = { '|', ',', ';' };
+        List<string> aSearchPatterns = (sConfigSearchPattern.Split(
+            aDelemiters, StringSplitOptions.RemoveEmptyEntries)).ToList();
+
+        string[] aFontFiles = { };
+        foreach (string sSearchPattern in aSearchPatterns)
+        {
+
+            aFontFiles = aFontFiles.Concat(Directory.GetFiles(
+                sFontDir, sSearchPattern, SearchOption.AllDirectories)).ToArray();
+        }
+
+        foreach (string sFontFile in aFontFiles)
+        {
+            try
+            {
+                m_mapFontNameToFullPath.Add(
+                    Path.GetFileName(sFontFile).ToUpper(), sFontFile);
+            }
+            catch (ArgumentException)
+            { 
+            }
+        }
+    }
     public FontService(RequestContext context)
     {
         m_sFontName = Convert.ToString(context.RouteData.Values["fontname"]);
@@ -93,31 +141,30 @@ public class FontService : IHttpAsyncHandler
             _log.Info("Starting process request...");
             _log.Info("fontname: " + m_sFontName);
 
-            context.Response.Clear();
-            context.Response.Cache.SetExpires(DateTime.Now);
-            context.Response.Cache.SetCacheability(HttpCacheability.Public);
-            context.Response.ContentType = Utils.GetMimeType(m_sFontName);
-            if (context.Request.ServerVariables.Get("HTTP_USER_AGENT").Contains("MSIE"))
-                context.Response.AppendHeader("Content-Disposition", "attachment; filename=\"" + context.Server.UrlEncode(m_sFontName) + "\"");
+            string sNameToDecode;
+            if (m_sFontName.Length > gc_sJsExtention.Length && gc_sJsExtention == m_sFontName.Substring(m_sFontName.Length - gc_sJsExtention.Length))
+                sNameToDecode = m_sFontName.Substring(0, m_sFontName.Length - gc_sJsExtention.Length);
             else
-                context.Response.AppendHeader("Content-Disposition", "attachment; filename=\"" + m_sFontName + "\"");
+                sNameToDecode = m_sFontName;
+            byte[] data_decode = Odtff_fonts.ZBase32Encoder.Decode(sNameToDecode);
+            string sFontNameDecoded = System.Text.Encoding.UTF8.GetString(data_decode);
+            _log.Info("fontnameDecoded: " + sFontNameDecoded);
 
-            string sConfigFontDir = ConfigurationManager.AppSettings["utils.common.fontdir"];
+            context.Response.Clear();
+            context.Response.Cache.SetExpires(DateTime.Now.AddMinutes(double.Parse(ConfigurationManager.AppSettings["resource.expires"], Constants.mc_oCultureInfo)));
+            context.Response.Cache.SetSlidingExpiration(false);
+            context.Response.Cache.SetCacheability(HttpCacheability.Public);
+            context.Response.ContentType = Utils.GetMimeType(sFontNameDecoded);
+            string contentDisposition = Utils.GetContentDisposition(context.Request.UserAgent, context.Request.Browser.Browser, context.Request.Browser.Version, m_sFontName);
+            context.Response.AppendHeader("Content-Disposition", contentDisposition);
+
+            string sRealFontName = sFontNameDecoded;
+            if (gc_sJsExtention == Path.GetExtension(sRealFontName))
+                sRealFontName = sRealFontName.Substring(0, sRealFontName.Length - gc_sJsExtention.Length);
+
             string strFilepath;
-            if (null != sConfigFontDir && string.Empty != sConfigFontDir)
-                strFilepath = Path.Combine(Environment.ExpandEnvironmentVariables(sConfigFontDir), m_sFontName);
-            else
-                m_mapFontNameToFullPath.TryGetValue(m_sFontName.ToUpper(), out strFilepath);
-            if (".js" == Path.GetExtension(m_sFontName))
-            {
-                string[] aFontExts = {".ttf", ".ttc", ".otf"};
-                for(int i = 0; i < aFontExts.Length; i++)
-                {
-                    strFilepath = Path.ChangeExtension(strFilepath, aFontExts[i]);
-                    if (File.Exists(strFilepath))
-                        break;
-                }
-            }
+            m_mapFontNameToFullPath.TryGetValue(sRealFontName.ToUpper(), out strFilepath);
+
             FileInfo oFileInfo = new FileInfo(strFilepath);
             if (oFileInfo.Exists)
             {
@@ -163,11 +210,12 @@ public class FontService : IHttpAsyncHandler
                 if (false == bNoModify)
                 {
                     context.Response.Cache.SetETag(sETag);
-                    context.Response.Cache.SetLastModified(oLastModified);
+
+                    context.Response.Cache.SetLastModified(oLastModified.ToLocalTime());
                     
                     FileStream oFileStreamInput = new FileStream(strFilepath, FileMode.Open, FileAccess.Read, FileShare.Read, (int)oFileInfo.Length, true);
                     byte[] aBuffer = new byte[oFileStreamInput.Length];
-                    TransportClass oTransportClass = new TransportClass(context, cb, oFileStreamInput, aBuffer);
+                    TransportClass oTransportClass = new TransportClass(context, cb, oFileStreamInput, aBuffer, sFontNameDecoded);
                     oFileStreamInput.BeginRead(aBuffer, 0, aBuffer.Length, ReadFileCallback, oTransportClass);
                     bStartAsync = true;
                 }
@@ -179,10 +227,10 @@ public class FontService : IHttpAsyncHandler
         {
             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             
-            _log.Error(context.Request.Params.ToString());
+            _log.Error(context.Request.QueryString.ToString());
             _log.Error("Exeption catched in BeginProcessRequest:", e);
         }
-        TransportClass oTempTransportClass = new TransportClass(context, cb, null, null);
+        TransportClass oTempTransportClass = new TransportClass(context, cb, null, null, null);
         if (false == bStartAsync)
             cb(new AsyncOperationData(oTempTransportClass));
         return new AsyncOperationData(oTempTransportClass);
@@ -219,13 +267,20 @@ public class FontService : IHttpAsyncHandler
             else
             {
                 byte[] aOutput = null;
-                if (".js" == Path.GetExtension(m_sFontName))
+                if (gc_sJsExtention == Path.GetExtension(oTransportClass.m_sFontNameDecoded))
                 {
-                    aOutput = GetJsContent(oTransportClass.m_aBuffer);
+                    aOutput = GetJsContent(oTransportClass.m_aBuffer, oTransportClass.m_sFontNameDecoded.Substring(0, oTransportClass.m_sFontNameDecoded.Length - gc_sJsExtention.Length));
                     oTransportClass.nReadWriteBytes = aOutput.Length;
                 }
                 else
-                    aOutput = oTransportClass.m_aBuffer;
+                {
+					aOutput = oTransportClass.m_aBuffer;
+					byte[] guidOdttf = {0xA0, 0x66, 0xD6, 0x20, 0x14, 0x96, 0x47, 0xfa, 0x95, 0x69, 0xB8, 0x50, 0xB0, 0x41, 0x49, 0x48};
+
+                    int nMaxLen = Math.Min(32, aOutput.Length);
+                    for (int i = 0; i < nMaxLen; ++i)
+                        aOutput[i] ^= guidOdttf[i % 16];
+				}
                 context.Response.OutputStream.BeginWrite(aOutput, 0, aOutput.Length, WriteBufferCallback, oTransportClass);
             }
         }
@@ -244,24 +299,46 @@ public class FontService : IHttpAsyncHandler
         try
         {
             context.Response.OutputStream.EndWrite(result);
-            context.Response.AddHeader("Content-Length", oTransportClass.nReadWriteBytes.ToString());
+            context.Response.AppendHeader("Content-Length", oTransportClass.nReadWriteBytes.ToString());
             context.Response.StatusCode = (int)HttpStatusCode.OK;
-            context.Response.Flush();
-            context.Response.End();
-            oTransportClass.m_oCallback(new AsyncOperationData(oTransportClass));
+        }
+        catch (HttpException httpEx)
+        {
+            _log.Error("HttpException catched in WriteBufferCallback:", httpEx);
         }
         catch (Exception e)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-            oTransportClass.m_oCallback(new AsyncOperationData(oTransportClass));
-
             _log.Error("Exception catched in WriteBufferCallback:", e);
+
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
         }
+        try
+        {
+            if (context.Response.IsClientConnected)
+            {
+                context.Response.Flush();
+            }
+        }
+        catch (Exception e)
+        {
+            _log.Error("Exception catched in WriteBufferCallback, while response end:", e);
+        }
+		finally
+		{
+			try
+			{
+				oTransportClass.m_oCallback(new AsyncOperationData(oTransportClass));
+			}
+			catch(Exception e)
+			{
+				_log.Error("Exception catched in WriteBufferCallback, while callback:", e);
+			}
+		}
     }
-    private byte[] GetJsContent(byte[] aBuffer)
+    private byte[] GetJsContent(byte[] aBuffer, string sFilename)
     {
         string data = Convert.ToBase64String(aBuffer);
-        string sRes = string.Format("var __font_data1=\"{0}\";var __font_data1_idx = g_fonts_streams.length;g_fonts_streams[__font_data1_idx] = CreateFontData2(__font_data1,{1});__font_data1 = null;g_font_files[1].SetStreamIndex(__font_data1_idx);", data, aBuffer.Length);
+        string sRes = string.Format("window[\"{0}\"] = \"{1};{2}\";", sFilename, aBuffer.Length, data);
         return Encoding.UTF8.GetBytes(sRes);
     }
     private class TransportClass
@@ -271,12 +348,14 @@ public class FontService : IHttpAsyncHandler
         public FileStream m_oFileStreamInput;
         public byte[] m_aBuffer;
         public int nReadWriteBytes;
-        public TransportClass(HttpContext oContext, AsyncCallback oCallback, FileStream oFileStreamInput, byte[] aBuffer)
+        public string m_sFontNameDecoded;
+        public TransportClass(HttpContext oContext, AsyncCallback oCallback, FileStream oFileStreamInput, byte[] aBuffer, string sFontNameDecoded)
         {
             m_oContext = oContext;
             m_oCallback = oCallback;
             m_oFileStreamInput = oFileStreamInput;
             m_aBuffer = aBuffer;
+            m_sFontNameDecoded = sFontNameDecoded;
         }
     }
 }

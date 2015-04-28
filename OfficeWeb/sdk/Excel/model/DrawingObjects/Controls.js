@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function CBounds() {
+ "use strict";
+function CBounds() {
     this.L = 0;
     this.T = 0;
     this.R = 0;
@@ -212,7 +213,7 @@ function CControlContainer() {
     this.TabIndex = null;
     this.HtmlElement = null;
     this.AbsolutePosition = new CBounds();
-    this.Controls = new Array();
+    this.Controls = [];
     this.AddControl = function (ctrl) {
         ctrl.Parent = this;
         this.Controls[this.Controls.length] = ctrl;

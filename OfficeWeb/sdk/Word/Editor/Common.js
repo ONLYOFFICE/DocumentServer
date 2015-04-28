@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function Common_CopyObj(Obj) {
+ "use strict";
+function Common_CopyObj(Obj) {
     if (!Obj || !("object" == typeof(Obj) || "array" == typeof(Obj))) {
         return Obj;
     }
@@ -52,7 +53,7 @@ function Common_CopyObj2(Dst, Obj) {
         return;
     }
     if (Dst == null) {
-        Dst = new Object();
+        Dst = {};
     }
     var p, v;
     for (p in Obj) {
@@ -61,9 +62,9 @@ function Common_CopyObj2(Dst, Obj) {
             if (v && "object" === typeof v) {
                 if ("object" != typeof(Dst[p])) {
                     if ("undefined" != typeof(v.splice)) {
-                        Dst[p] = new Array();
+                        Dst[p] = [];
                     } else {
-                        Dst[p] = new Object();
+                        Dst[p] = {};
                     }
                 }
                 Common_CopyObj2(Dst[p], v);

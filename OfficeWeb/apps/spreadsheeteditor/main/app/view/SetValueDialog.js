@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,105 +29,69 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("SSE.view.SetValueDialog", {
-    extend: "Ext.window.Window",
-    alias: "widget.setvaluedialog",
-    requires: ["Ext.window.Window", "Ext.window.MessageBox"],
-    modal: true,
-    resizable: false,
-    plain: true,
-    height: 138,
-    width: 222,
-    padding: "20px",
-    layout: {
-        type: "vbox",
-        align: "stretch"
-    },
-    listeners: {
-        show: function () {
-            this.udRetValue.focus(false, 500);
-        }
-    },
-    initComponent: function () {
-        var me = this;
-        this.addEvents("onmodalresult");
-        this.items = [{
-            xtype: "container",
-            height: 42,
-            layout: {
-                type: "hbox",
-                align: "stretch"
-            },
-            items: [this.udRetValue = Ext.widget("numberfield", {
-                minValue: 0,
-                maxValue: me.maxvalue,
-                value: me.startvalue,
-                step: 1,
-                flex: 1,
-                allowDecimals: true,
-                validateOnBlur: false,
-                msgTarget: "side",
-                minText: this.txtMinText,
-                maxText: this.txtMaxText,
-                listeners: {
-                    specialkey: function (field, e) {
-                        if (e.getKey() == e.ENTER) {
-                            me.btnOk.fireEvent("click");
-                        } else {
-                            if (e.getKey() == e.ESC) {
-                                me.btnCancel.fireEvent("click");
-                            }
-                        }
-                    }
-                }
-            })]
+ define(["common/main/lib/component/Window", "common/main/lib/component/ComboBox"], function () {
+    SSE.Views.SetValueDialog = Common.UI.Window.extend(_.extend({
+        options: {
+            width: 214,
+            header: true,
+            style: "min-width: 214px;",
+            cls: "modal-dlg"
         },
-        {
-            xtype: "container",
-            height: 30,
-            layout: {
-                type: "vbox",
-                align: "center"
+        initialize: function (options) {
+            _.extend(this.options, {
+                title: this.textTitle
             },
-            items: [{
-                xtype: "container",
+            options || {});
+            this.template = ['<div class="box">', '<div class="input-row">', '<div id="id-spin-set-value"></div>', "</div>", '<div class="footer center">', '<button class="btn normal dlg-btn primary" result="ok" style="margin-right: 10px;">' + this.okButtonText + "</button>", '<button class="btn normal dlg-btn" result="cancel">' + this.cancelButtonText + "</button>", "</div>"].join("");
+            this.options.tpl = _.template(this.template, this.options);
+            this.startvalue = this.options.startvalue;
+            this.maxvalue = this.options.maxvalue;
+            this.defaultUnit = this.options.defaultUnit;
+            this.step = this.options.step;
+            Common.UI.Window.prototype.initialize.call(this, this.options);
+        },
+        render: function () {
+            Common.UI.Window.prototype.render.call(this);
+            this.spnSize = new Common.UI.MetricSpinner({
+                el: $("#id-spin-set-value"),
                 width: 182,
-                layout: {
-                    type: "hbox",
-                    align: "middle"
-                },
-                items: [this.btnOk = Ext.widget("button", {
-                    cls: "asc-blue-button",
-                    width: 86,
-                    height: 22,
-                    margin: "0 5px 0 0",
-                    text: this.okButtonText,
-                    listeners: {
-                        click: function (btn) {
-                            if (me.udRetValue.isValid()) {
-                                me.fireEvent("onmodalresult", me, 1, me.udRetValue.value);
-                                me.close();
-                            }
-                        }
-                    }
-                }), this.btnCancel = Ext.widget("button", {
-                    cls: "asc-darkgray-button",
-                    width: 86,
-                    height: 22,
-                    text: this.cancelButtonText,
-                    listeners: {
-                        click: function (btn) {
-                            me.fireEvent("onmodalresult", this, 0);
-                            me.close();
-                        }
-                    }
-                })]
-            }]
-        }];
-        this.callParent(arguments);
+                step: this.step,
+                defaultUnit: this.defaultUnit,
+                minValue: 0,
+                maxValue: this.maxvalue,
+                value: this.startvalue + " " + this.defaultUnit
+            });
+            var $window = this.getChild();
+            $window.find(".dlg-btn").on("click", _.bind(this.onBtnClick, this));
+            this.spnSize.on("entervalue", _.bind(this.onEnterValue, this));
+            this.spnSize.on("change", _.bind(this.onChange, this));
+            this.spnSize.$el.find("input").focus();
+        },
+        _handleInput: function (state) {
+            if (this.options.handler) {
+                this.options.handler.call(this, this, state);
+            }
+            this.close();
+        },
+        onBtnClick: function (event) {
+            this._handleInput(event.currentTarget.attributes["result"].value);
+        },
+        onEnterValue: function (event) {
+            this._handleInput("ok");
+        },
+        onChange: function () {
+            var val = this.spnSize.getNumberValue();
+            val = val / this.step;
+            val = (val | val) * this.step;
+            this.spnSize.setValue(val, true);
+        },
+        getSettings: function () {
+            return this.spnSize.getNumberValue();
+        },
+        cancelButtonText: "Cancel",
+        okButtonText: "Ok",
+        txtMinText: "The minimum value for this field is {0}",
+        txtMaxText: "The maximum value for this field is {0}"
     },
-    cancelButtonText: "Cancel",
-    okButtonText: "Ok",
-    txtMinText: "The minimum value for this field is {0}",
-    txtMaxText: "The maximum value for this field is {0}"
+    SSE.Views.SetValueDialog || {}));
 });

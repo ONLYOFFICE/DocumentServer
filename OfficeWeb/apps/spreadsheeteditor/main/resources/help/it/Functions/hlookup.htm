@@ -11,13 +11,10 @@
 			<h1>Funzione HLOOKUP</h1>
 			<p>La funzione <b>HLOOKUP</b> è una delle funzioni della categoria Ricerca e riferimento. Si usa per effettuare la ricerca orizzontale di un valore nella riga superiore di una tabella o un intervallo e restituire il valore nella stessa colonna in base al numero di indice riga specificato.</p>
 			<p>La sintassi della funzione <b>HLOOKUP</b> è:</p> 
-			<p style="text-indent: 150px;"><b><em>HLOOKUP (lookup-value, table-array, row-index-num[, [range-lookup-flag]])</em></b></p>
-			<p><em>dove</em></p> 
-				<p style="text-indent: 50px;"><b><em>lookup-value</em></b> è un valore da cercare.</p> 
-				<p style="text-indent: 50px;"><b><em>table-array</em></b> sono due o più righe contenenti i dati ordinati in ordine crescente.</p> 
-				<p style="text-indent: 50px;"><b><em>row-index-num</em></b> è il numero riga in <b><em>table-array</em></b>, un valore numerico maggiore o uguale a 1 ma minore del numero di righe in <b>table-array</b>.</p>
-			<p style="text-indent: 50px;"><b><em>range-lookup-flag</em></b> è un argomento opzionale. E' un valore logico TRUE o FALSE. Inserite FALSE per trovare una corrispondenza esatta. Inserite TRUE per trovare una corrispondenza approssimativa, in questo caso se nessun valore corrisponde a <b><em>lookup-value</em></b>, la funzione seleziona il valore successivo più grande minore di <b><em>lookup-value</em></b>. Se questo argomento è assente, la funzione trova la corrispondenza approssimativa.</p>
-			<p class="note"><b>Nota</b>: se <b><em>range-lookup-flag</em></b> è impostato a FALSE, ma la corrispondenza esatta non è trovata, la funzione restituisce l'errore <b>#N/A</b>.</p>
+			<p style="text-indent: 150px;"><b><em>HLOOKUP (lookup-value, table-array, row-index-num[, [range-lookup-flag]])</em></b></p> 
+			<p>dove <b><em>lookup-value</em></b> è un valore da cercare, <b><em>table-array</em></b> sono due o più righe contenenti i dati ordinati in ordine crescente, <b><em>row-index-num</em></b> è il numero riga in <b><em>table-array</em></b>,</p>
+			<p><b><em>range-lookup-flag</em></b> è un argomento opzionale. E' un valore logico TRUE o FALSE. Inserite FALSE per trovare una corrispondenza esatta. Inserite TRUE per trovare una corrispondenza approssimativa, in questo caso se nessun valore corrisponde a <b><em>lookup-value</em></b>, la funzione seleziona il valore successivo più grande inferiore a <b><em>lookup-value</em></b>. Se questo argomento è assente, la funzione trova la corrispondenza approssimativa.</p>
+			<p class="note"><b>Nota</b>: se <b>row-index-num</b> è inferiore a 1, la funzione restituisce l'errore <b>#VALUE!</b>. Se <b>row-index-num</b> è superiore al numero di righe in <b>table-array</b>, la funzione restituisce l'errore <b>#REF!</b>. Se <b><em>range-lookup-flag</em></b> è impostato a FALSE, ma la corrispondenza esatta non è trovata, la funzione restituisce l'errore <b>#N/A</b>.</p>
 			<p>Per applicare la funzione <b>HLOOKUP</b>,</p>
 			<ol>
 			<li>selezionate la cella dove desiderate visualizzare il risultato,</li>

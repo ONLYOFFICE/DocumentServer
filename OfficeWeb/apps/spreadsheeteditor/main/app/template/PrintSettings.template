@@ -1,0 +1,48 @@
+<div class="settings-panel active">
+    <div class="padding-large inner-content" >
+        <div id="printadv-dlg-radio-current" class="padding-small" style="display: block;"></div>
+        <div id="printadv-dlg-radio-all" class="padding-small" style="display: block;"></div>
+        <div id="printadv-dlg-radio-selection" style="display: block;"></div>
+    </div>
+    <div class="separator horizontal padding-large"/>
+    <div class="padding-large inner-content" >
+        <div id="printadv-dlg-combo-pages" class="input-group-nr" />
+    </div>
+    <div class="separator horizontal padding-large"/>
+    <div class="padding-large inner-content" >
+        <span id="printadv-dlg-combo-orient" />
+    </div>
+    <div id="printadv-dlg-content-to-hide">
+        <div class="separator horizontal padding-large"/>
+        <div class="padding-large inner-content" >
+            <table cols="2" class="no-padding">
+            <tr>
+                <td><label><%= scope.strTop %></label></td>
+                <td><label><%= scope.strBottom %></label></td>
+                </tr>
+            <tr>
+                <td class="padding-small"><div id="printadv-dlg-spin-margin-top" style="margin-right: 15px;"></div></td>
+                <td class="padding-small"><div id="printadv-dlg-spin-margin-bottom"></div></td>
+            </tr>
+            <tr>
+                <td><label><%= scope.strLeft %></label></td>
+                <td><label><%= scope.strRight %></label></td>
+                </tr>
+            <tr>
+                <td><div id="printadv-dlg-spin-margin-left" style="margin-right: 15px;"></div></td>
+                <td><div id="printadv-dlg-spin-margin-right"></div></td>
+                </tr>
+            </table>
+        </div>
+        <div class="separator horizontal padding-large"/>
+        <!--<div class="padding-large inner-content" >-->
+            <!--<div id="printadv-dlg-radio-actual" class="padding-small" style="display: block;"></div>-->
+            <!--<div id="printadv-dlg-radio-fit" class="" style="display: block;"></div>-->
+        <!--</div>-->
+        <!--<div class="separator horizontal padding-large"/>-->
+        <div class="inner-content">
+            <div id="printadv-dlg-chb-grid" style="margin-bottom: 10px;"/>
+            <div id="printadv-dlg-chb-rows"/>
+        </div>
+    </div>
+</div>

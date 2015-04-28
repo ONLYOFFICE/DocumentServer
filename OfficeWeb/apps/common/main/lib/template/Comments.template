@@ -1,0 +1,89 @@
+<% if (!hide) { %>
+    <div id="<%= id %>" class="user-comment-item">
+
+        <!-- comment block -->
+
+        <div class="user-name"><%=scope.getUserName(username)%></div>
+        <div class="user-date"><%=date%></div>
+        <div class="user-quote"><%=scope.getFixedQuote(quote)%></div>
+        <% if (!editText) { %>
+            <div class="user-message text-select" data-can-copy="true"><%=scope.pickLink(comment)%></div>
+        <% } else { %>
+            <div class="inner-edit-ct">
+                <textarea class="msg-reply"><%=comment%></textarea>
+                <button class="btn normal dlg-btn primary btn-inner-edit" id="id-comments-change">textEdit</button>
+                <button class="btn normal dlg-btn btn-inner-close">textCancel</button>
+            </div>
+        <% } %>
+
+        <!-- replys elements -->
+
+        <% if (replys.length) { %>
+            <div class="reply-arrow "></div>
+            <% _.each(replys, function (item) { %>
+                <div class="reply-item-ct">
+                    <div class="user-name"><%=scope.getFixedQuote(item.get("username"))%></div>
+                    <div class="user-date"><%=item.get("date")%></div>
+                    <% if (!item.get("editText")) { %>
+                        <div class="user-message text-select" data-can-copy="true"><%=scope.pickLink(item.get("reply"))%></div>
+                            <div class="btns-reply-ct">
+                            <div class="btn-edit" data-value="<%=item.get("id")%>"></div>
+                            <div class="btn-delete" data-value="<%=item.get("id")%>"></div>
+                        </div>
+                    <% } else { %>
+                        <div class="inner-edit-ct">
+                            <textarea class="msg-reply textarea-fix"><%=item.get("reply")%></textarea>
+                            <button class="btn normal dlg-btn primary btn-inner-edit btn-fix" id="id-comments-change">textEdit</button>
+                            <button class="btn normal dlg-btn btn-inner-close">textClose</button>
+                        </div>
+                    <% } %>
+                </div>
+            <% }); %>
+        <% } %>
+
+        <!-- add reply button -->
+
+        <% if (!showReply) { %>
+            <% if (replys.length) { %>
+                <label class="user-reply" style="margin-left: 20px; margin-top: 5px;" role="presentation" tabindex="-1">textAddReply</label>
+            <% } else { %>
+                <label class="user-reply" role="presentation" tabindex="-1">textAddReply</label>
+            <% } %>
+        <% } %>
+
+        <!-- edit buttons -->
+
+        <% if (!editText && !lock) { %>
+            <div class="edit-ct">
+                <div class="btn-edit"></div>
+                <div class="btn-delete"></div>
+                <% if (resolved) { %>
+                <div class="resolve-ct-check" style="float:left;">
+                    <div class="resolved"></div>
+                    <div class="btn-resolve-check">textResolved</div>
+                <% } else { %>
+                <div class="resolve-ct" style="float:left;">
+                    <div class="btn-resolve">textResolve</div>
+                <% } %>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- reply -->
+
+        <% if (showReply) { %>
+            <div class="reply-ct">
+                <textarea class="msg-reply" placeholder="textAddReply"></textarea>
+                <button class="btn normal dlg-btn primary btn-reply" id="id-comments-change">textReply</button>
+                <button class="btn normal dlg-btn btn-close">textClose</button>
+            </div>
+        <% } %>
+        <% if (lock) { %>
+            <div class="lock-area"></div>
+            <div class="lock-author"><%=lockuserid%></div>
+        <% } %>
+        <% if (!last) { %>
+            <div class="separator-cmt"></div>
+        <% } %>
+    </div>
+<% } %>

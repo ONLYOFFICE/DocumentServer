@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var numbering_numfmt_None = 0;
+ "use strict";
+var numbering_numfmt_None = 0;
 var numbering_numfmt_Bullet = 4097;
 var numbering_numfmt_Decimal = 8194;
 var numbering_numfmt_LowerRoman = 8195;
@@ -146,13 +147,15 @@ function CAbstractNum(Type) {
     this.Lock = new CLock();
     if (false === g_oIdCounter.m_bLoad) {
         this.Lock.Set_Type(locktype_Mine, false);
-        CollaborativeEditing.Add_Unlock2(this);
+        if (typeof CollaborativeEditing !== "undefined") {
+            CollaborativeEditing.Add_Unlock2(this);
+        }
     }
     this.NumStyleLink = undefined;
     this.StyleLink = undefined;
-    this.Lvl = new Array();
+    this.Lvl = [];
     for (var Index = 0; Index < 9; Index++) {
-        this.Lvl[Index] = new Object();
+        this.Lvl[Index] = {};
         var Lvl = this.Lvl[Index];
         Lvl.PStyle = undefined;
         Lvl.Start = 1;
@@ -162,7 +165,7 @@ function CAbstractNum(Type) {
         var FirstLine = -18 * g_dKoef_pt_to_mm;
         Lvl.Jc = align_Left;
         Lvl.Format = numbering_numfmt_Bullet;
-        Lvl.LvlText = new Array();
+        Lvl.LvlText = [];
         Lvl.ParaPr = new CParaPr();
         Lvl.ParaPr.Ind.Left = Left;
         Lvl.ParaPr.Ind.FirstLine = FirstLine;
@@ -208,7 +211,7 @@ CAbstractNum.prototype = {
         var OldLeft = this.Lvl[0].ParaPr.Ind.Left;
         for (var Index = 0; Index < 9; Index++) {
             var Lvl_new = this.Internal_CopyLvl(this.Lvl[Index]);
-            var Lvl_old = this.Lvl[Index];
+            var Lvl_old = this.Internal_CopyLvl(this.Lvl[Index]);
             Lvl_new.ParaPr.Ind.Left = Lvl_old.ParaPr.Ind.Left - OldLeft + NewLeft;
             this.Internal_SetLvl(Index, Lvl_new);
             History.Add(this, {
@@ -259,7 +262,7 @@ CAbstractNum.prototype = {
     Create_Default_Numbered: function () {
         for (var Index = 0; Index < 9; Index++) {
             var Lvl_old = this.Internal_CopyLvl(this.Lvl[Index]);
-            this.Lvl[Index] = new Object();
+            this.Lvl[Index] = {};
             var Lvl = this.Lvl[Index];
             Lvl.Start = 1;
             Lvl.Restart = -1;
@@ -279,15 +282,13 @@ CAbstractNum.prototype = {
                     FirstLine = -9 * g_dKoef_pt_to_mm;
                 }
             }
-            Lvl.LvlText = new Array();
+            Lvl.LvlText = [];
             Lvl.LvlText.push(new CLvlText_Num(Index));
             Lvl.LvlText.push(new CLvlText_Text("."));
             Lvl.ParaPr = new CParaPr();
             Lvl.ParaPr.Ind.Left = Left;
             Lvl.ParaPr.Ind.FirstLine = FirstLine;
-            var TextPr = new CTextPr();
-            TextPr.RFonts.Set_All("Times New Roman", -1);
-            Lvl.TextPr = TextPr;
+            Lvl.TextPr = new CTextPr();
             var Lvl_new = this.Internal_CopyLvl(Lvl);
             History.Add(this, {
                 Type: historyitem_AbstractNum_LvlChange,
@@ -300,7 +301,7 @@ CAbstractNum.prototype = {
     Create_Default_Multilevel_1: function () {
         for (var Index = 0; Index < 9; Index++) {
             var Lvl_old = this.Internal_CopyLvl(this.Lvl[Index]);
-            this.Lvl[Index] = new Object();
+            this.Lvl[Index] = {};
             var Lvl = this.Lvl[Index];
             Lvl.Start = 1;
             Lvl.Restart = -1;
@@ -317,14 +318,13 @@ CAbstractNum.prototype = {
                     Lvl.Format = numbering_numfmt_LowerRoman;
                 }
             }
-            Lvl.LvlText = new Array();
+            Lvl.LvlText = [];
             Lvl.LvlText.push(new CLvlText_Num(Index));
             Lvl.LvlText.push(new CLvlText_Text(")"));
             Lvl.ParaPr = new CParaPr();
             Lvl.ParaPr.Ind.Left = Left;
             Lvl.ParaPr.Ind.FirstLine = FirstLine;
             var TextPr = new CTextPr();
-            TextPr.RFonts.Set_All("Times New Roman", -1);
             Lvl.TextPr = TextPr;
             var Lvl_new = this.Internal_CopyLvl(Lvl);
             History.Add(this, {
@@ -338,7 +338,7 @@ CAbstractNum.prototype = {
     Create_Default_Multilevel_2: function () {
         for (var Index = 0; Index < 9; Index++) {
             var Lvl_old = this.Internal_CopyLvl(this.Lvl[Index]);
-            this.Lvl[Index] = new Object();
+            this.Lvl[Index] = {};
             var Lvl = this.Lvl[Index];
             Lvl.Start = 1;
             Lvl.Restart = -1;
@@ -385,7 +385,7 @@ CAbstractNum.prototype = {
             }
             Lvl.Jc = align_Left;
             Lvl.Format = numbering_numfmt_Decimal;
-            Lvl.LvlText = new Array();
+            Lvl.LvlText = [];
             for (var Index2 = 0; Index2 <= Index; Index2++) {
                 Lvl.LvlText.push(new CLvlText_Num(Index2));
                 Lvl.LvlText.push(new CLvlText_Text("."));
@@ -394,7 +394,6 @@ CAbstractNum.prototype = {
             Lvl.ParaPr.Ind.Left = Left;
             Lvl.ParaPr.Ind.FirstLine = FirstLine;
             var TextPr = new CTextPr();
-            TextPr.RFonts.Set_All("Times New Roman", -1);
             Lvl.TextPr = TextPr;
             var Lvl_new = this.Internal_CopyLvl(Lvl);
             History.Add(this, {
@@ -408,7 +407,7 @@ CAbstractNum.prototype = {
     Create_Default_Multilevel_3: function () {
         for (var Index = 0; Index < 9; Index++) {
             var Lvl_old = this.Internal_CopyLvl(this.Lvl[Index]);
-            this.Lvl[Index] = new Object();
+            this.Lvl[Index] = {};
             var Lvl = this.Lvl[Index];
             Lvl.Start = 1;
             Lvl.Restart = -1;
@@ -417,19 +416,7 @@ CAbstractNum.prototype = {
             var FirstLine = -18 * g_dKoef_pt_to_mm;
             Lvl.Format = numbering_numfmt_Bullet;
             Lvl.Jc = align_Left;
-            if (0 == Index % 3) {
-                Lvl.Jc = align_Left;
-            } else {
-                if (1 == Index % 3) {
-                    Lvl.Jc = align_Left;
-                    Lvl.Format = numbering_numfmt_LowerLetter;
-                } else {
-                    Lvl.Jc = align_Right;
-                    Lvl.Format = numbering_numfmt_LowerRoman;
-                    FirstLine = -9 * g_dKoef_pt_to_mm;
-                }
-            }
-            Lvl.LvlText = new Array();
+            Lvl.LvlText = [];
             switch (Index) {
             case 0:
                 Lvl.LvlText.push(new CLvlText_Text(String.fromCharCode(118)));
@@ -464,7 +451,7 @@ CAbstractNum.prototype = {
             Lvl.ParaPr.Ind.FirstLine = FirstLine;
             var TextPr = new CTextPr();
             if (3 === Index || 4 === Index || 7 === Index || 8 === Index) {
-                TextPr.RFonts.Set_All("Times New Roman", -1);
+                TextPr.RFonts.Set_All("Symbol", -1);
             } else {
                 TextPr.RFonts.Set_All("Wingdings", -1);
             }
@@ -481,7 +468,7 @@ CAbstractNum.prototype = {
     Create_Default_Bullet: function () {
         for (var Index = 0; Index < 9; Index++) {
             var Lvl_old = this.Internal_CopyLvl(this.Lvl[Index]);
-            this.Lvl[Index] = new Object();
+            this.Lvl[Index] = {};
             var Lvl = this.Lvl[Index];
             Lvl.Start = 1;
             Lvl.Restart = -1;
@@ -490,7 +477,7 @@ CAbstractNum.prototype = {
             var FirstLine = -18 * g_dKoef_pt_to_mm;
             Lvl.Jc = align_Left;
             Lvl.Format = numbering_numfmt_Bullet;
-            Lvl.LvlText = new Array();
+            Lvl.LvlText = [];
             Lvl.ParaPr = new CParaPr();
             Lvl.ParaPr.Ind.Left = Left;
             Lvl.ParaPr.Ind.FirstLine = FirstLine;
@@ -524,7 +511,7 @@ CAbstractNum.prototype = {
         var Lvl = this.Lvl[iLvl];
         var Lvl_old = this.Internal_CopyLvl(Lvl);
         Lvl.Format = numbering_numfmt_Bullet;
-        Lvl.LvlText = new Array();
+        Lvl.LvlText = [];
         Lvl.LvlText.push(new CLvlText_Text(LvlText));
         Lvl.TextPr = TextPr;
         var Lvl_new = this.Internal_CopyLvl(Lvl);
@@ -543,10 +530,9 @@ CAbstractNum.prototype = {
         var Lvl_old = this.Internal_CopyLvl(Lvl);
         Lvl.Jc = align_Right;
         Lvl.Format = numbering_numfmt_Decimal;
-        Lvl.LvlText = new Array();
+        Lvl.LvlText = [];
         Lvl.LvlText.push(new CLvlText_Num(iLvl));
         Lvl.LvlText.push(new CLvlText_Text(")"));
-        Lvl.TextPr.RFonts.Set_All("Times New Roman", -1);
         var Lvl_new = this.Internal_CopyLvl(Lvl);
         History.Add(this, {
             Type: historyitem_AbstractNum_LvlChange,
@@ -563,10 +549,9 @@ CAbstractNum.prototype = {
         var Lvl_old = this.Internal_CopyLvl(Lvl);
         Lvl.Jc = align_Right;
         Lvl.Format = numbering_numfmt_Decimal;
-        Lvl.LvlText = new Array();
+        Lvl.LvlText = [];
         Lvl.LvlText.push(new CLvlText_Num(iLvl));
         Lvl.LvlText.push(new CLvlText_Text("."));
-        Lvl.TextPr.RFonts.Set_All("Times New Roman", -1);
         var Lvl_new = this.Internal_CopyLvl(Lvl);
         History.Add(this, {
             Type: historyitem_AbstractNum_LvlChange,
@@ -583,10 +568,9 @@ CAbstractNum.prototype = {
         var Lvl_old = this.Internal_CopyLvl(Lvl);
         Lvl.Jc = align_Left;
         Lvl.Format = numbering_numfmt_Decimal;
-        Lvl.LvlText = new Array();
+        Lvl.LvlText = [];
         Lvl.LvlText.push(new CLvlText_Num(iLvl));
         Lvl.LvlText.push(new CLvlText_Text("."));
-        Lvl.TextPr.RFonts.Set_All("Times New Roman", -1);
         var Lvl_new = this.Internal_CopyLvl(Lvl);
         History.Add(this, {
             Type: historyitem_AbstractNum_LvlChange,
@@ -603,10 +587,9 @@ CAbstractNum.prototype = {
         var Lvl_old = this.Internal_CopyLvl(Lvl);
         Lvl.Jc = align_Left;
         Lvl.Format = numbering_numfmt_Decimal;
-        Lvl.LvlText = new Array();
+        Lvl.LvlText = [];
         Lvl.LvlText.push(new CLvlText_Num(iLvl));
         Lvl.LvlText.push(new CLvlText_Text(")"));
-        Lvl.TextPr.RFonts.Set_All("Times New Roman", -1);
         var Lvl_new = this.Internal_CopyLvl(Lvl);
         History.Add(this, {
             Type: historyitem_AbstractNum_LvlChange,
@@ -623,10 +606,9 @@ CAbstractNum.prototype = {
         var Lvl_old = this.Internal_CopyLvl(Lvl);
         Lvl.Jc = align_Right;
         Lvl.Format = numbering_numfmt_UpperRoman;
-        Lvl.LvlText = new Array();
+        Lvl.LvlText = [];
         Lvl.LvlText.push(new CLvlText_Num(iLvl));
         Lvl.LvlText.push(new CLvlText_Text("."));
-        Lvl.TextPr.RFonts.Set_All("Times New Roman", -1);
         var Lvl_new = this.Internal_CopyLvl(Lvl);
         History.Add(this, {
             Type: historyitem_AbstractNum_LvlChange,
@@ -643,10 +625,9 @@ CAbstractNum.prototype = {
         var Lvl_old = this.Internal_CopyLvl(Lvl);
         Lvl.Jc = align_Left;
         Lvl.Format = numbering_numfmt_UpperLetter;
-        Lvl.LvlText = new Array();
+        Lvl.LvlText = [];
         Lvl.LvlText.push(new CLvlText_Num(iLvl));
         Lvl.LvlText.push(new CLvlText_Text("."));
-        Lvl.TextPr.RFonts.Set_All("Times New Roman", -1);
         var Lvl_new = this.Internal_CopyLvl(Lvl);
         History.Add(this, {
             Type: historyitem_AbstractNum_LvlChange,
@@ -663,10 +644,9 @@ CAbstractNum.prototype = {
         var Lvl_old = this.Internal_CopyLvl(Lvl);
         Lvl.Jc = align_Left;
         Lvl.Format = numbering_numfmt_LowerLetter;
-        Lvl.LvlText = new Array();
+        Lvl.LvlText = [];
         Lvl.LvlText.push(new CLvlText_Num(iLvl));
         Lvl.LvlText.push(new CLvlText_Text(")"));
-        Lvl.TextPr.RFonts.Set_All("Times New Roman", -1);
         var Lvl_new = this.Internal_CopyLvl(Lvl);
         History.Add(this, {
             Type: historyitem_AbstractNum_LvlChange,
@@ -683,10 +663,9 @@ CAbstractNum.prototype = {
         var Lvl_old = this.Internal_CopyLvl(Lvl);
         Lvl.Jc = align_Left;
         Lvl.Format = numbering_numfmt_LowerLetter;
-        Lvl.LvlText = new Array();
+        Lvl.LvlText = [];
         Lvl.LvlText.push(new CLvlText_Num(iLvl));
         Lvl.LvlText.push(new CLvlText_Text("."));
-        Lvl.TextPr.RFonts.Set_All("Times New Roman", -1);
         var Lvl_new = this.Internal_CopyLvl(Lvl);
         History.Add(this, {
             Type: historyitem_AbstractNum_LvlChange,
@@ -703,10 +682,9 @@ CAbstractNum.prototype = {
         var Lvl_old = this.Internal_CopyLvl(Lvl);
         Lvl.Jc = align_Right;
         Lvl.Format = numbering_numfmt_LowerRoman;
-        Lvl.LvlText = new Array();
+        Lvl.LvlText = [];
         Lvl.LvlText.push(new CLvlText_Num(iLvl));
         Lvl.LvlText.push(new CLvlText_Text("."));
-        Lvl.TextPr.RFonts.Set_All("Times New Roman", -1);
         var Lvl_new = this.Internal_CopyLvl(Lvl);
         History.Add(this, {
             Type: historyitem_AbstractNum_LvlChange,
@@ -715,11 +693,11 @@ CAbstractNum.prototype = {
             New: Lvl_new
         });
     },
-    Draw: function (X, Y, Context, Lvl, NumInfo, NumTextPr) {
+    Draw: function (X, Y, Context, Lvl, NumInfo, NumTextPr, Theme) {
         var Text = this.Lvl[Lvl].LvlText;
-        Context.SetTextPr(NumTextPr);
+        Context.SetTextPr(NumTextPr, Theme);
         Context.SetFontSlot(fontslot_ASCII);
-        g_oTextMeasurer.SetTextPr(NumTextPr);
+        g_oTextMeasurer.SetTextPr(NumTextPr, Theme);
         g_oTextMeasurer.SetFontSlot(fontslot_ASCII);
         for (var Index = 0; Index < Text.length; Index++) {
             switch (Text[Index].Type) {
@@ -827,10 +805,10 @@ CAbstractNum.prototype = {
             }
         }
     },
-    Measure: function (Context, Lvl, NumInfo, NumTextPr) {
+    Measure: function (Context, Lvl, NumInfo, NumTextPr, Theme) {
         var X = 0;
         var Text = this.Lvl[Lvl].LvlText;
-        Context.SetTextPr(NumTextPr);
+        Context.SetTextPr(NumTextPr, Theme);
         Context.SetFontSlot(fontslot_ASCII);
         var Ascent = Context.GetAscender();
         for (var Index = 0; Index < Text.length; Index++) {
@@ -1079,13 +1057,13 @@ CAbstractNum.prototype = {
         });
     },
     Internal_CopyLvl: function (Lvl) {
-        var Lvl_new = new Object();
+        var Lvl_new = {};
         Lvl_new.Start = Lvl.Start;
         Lvl_new.Restart = Lvl.Restart;
         Lvl_new.Suff = Lvl.Suff;
         Lvl_new.Jc = Lvl.Jc;
         Lvl_new.Format = Lvl.Format;
-        Lvl_new.LvlText = new Array();
+        Lvl_new.LvlText = [];
         for (var Index = 0; Index < Lvl.LvlText.length; Index++) {
             var Item = Lvl.LvlText[Index];
             Lvl_new.LvlText.push(Item.Copy());
@@ -1121,7 +1099,7 @@ CAbstractNum.prototype = {
         Lvl.TextPr.Read_FromBinary(Reader);
         Lvl.ParaPr.Read_FromBinary(Reader);
         var Count = Reader.GetLong();
-        Lvl.LvlText = new Array();
+        Lvl.LvlText = [];
         for (var Index = 0; Index < Count; Index++) {
             var Element = LvlText_Read_FromBinary(Reader);
             Lvl.LvlText.push(Element);
@@ -1132,9 +1110,11 @@ CAbstractNum.prototype = {
         switch (Type) {
         case historyitem_AbstractNum_LvlChange:
             this.Internal_SetLvl(Data.Index, Data.Old);
+            this.Recalc_CompiledPr(Data.Index);
             break;
         case historyitem_AbstractNum_TextPrChange:
             this.Lvl[Data.Index].TextPr = Data.Old;
+            this.Recalc_CompiledPr(Data.Index);
             break;
         }
     },
@@ -1143,9 +1123,11 @@ CAbstractNum.prototype = {
         switch (Type) {
         case historyitem_AbstractNum_LvlChange:
             this.Internal_SetLvl(Data.Index, Data.New);
+            this.Recalc_CompiledPr(Data.Index);
             break;
         case historyitem_AbstractNum_TextPrChange:
             this.Lvl[Data.Index].TextPr = Data.New;
+            this.Recalc_CompiledPr(Data.Index);
             break;
         }
     },
@@ -1161,20 +1143,6 @@ CAbstractNum.prototype = {
             Para.Refresh_RecalcData({
                 Type: historyitem_Paragraph_Numbering
             });
-        }
-    },
-    Document_Is_SelectionLocked: function (CheckType) {
-        switch (CheckType) {
-        case changestype_Paragraph_Content:
-            case changestype_Paragraph_Properties:
-            this.Lock.Check(this.Get_Id());
-            break;
-        case changestype_Document_Content:
-            case changestype_Document_Content_Add:
-            case changestype_Image_Properties:
-            case changestype_Remove:
-            CollaborativeEditing.Add_CheckLock(true);
-            break;
         }
     },
     Save_Changes: function (Data, Writer) {
@@ -1202,17 +1170,21 @@ CAbstractNum.prototype = {
             return;
         }
         var Type = Reader.GetLong();
+        var iLvl = 0;
         switch (Type) {
         case historyitem_AbstractNum_LvlChange:
-            var iLvl = Reader.GetLong();
+            iLvl = Reader.GetLong();
             this.Read_Lvl_FromBinary(this.Lvl[iLvl], Reader);
             break;
         case historyitem_AbstractNum_TextPrChange:
-            var iLvl = Reader.GetLong();
+            iLvl = Reader.GetLong();
             this.Lvl[iLvl].TextPr = new CTextPr();
             this.Lvl[iLvl].TextPr.Read_FromBinary(Reader);
             break;
         }
+        CollaborativeEditing.Add_EndActions(this, {
+            iLvl: iLvl
+        });
     },
     Write_ToBinary2: function (Writer) {
         Writer.WriteLong(historyitem_type_AbstractNum);
@@ -1230,6 +1202,24 @@ CAbstractNum.prototype = {
         Numbering.AbstractNum[this.Id] = this;
     },
     Load_LinkData: function (LinkData) {},
+    Process_EndLoad: function (Data) {
+        var iLvl = Data.iLvl;
+        if (undefined !== iLvl) {
+            this.Recalc_CompiledPr(iLvl);
+        }
+    },
+    Recalc_CompiledPr: function (iLvl) {
+        var NumPr = new CNumPr();
+        NumPr.NumId = this.Id;
+        NumPr.Lvl = iLvl;
+        var LogicDocument = editor.WordControl.m_oLogicDocument;
+        var AllParagraphs = LogicDocument.Get_AllParagraphs_ByNumbering(NumPr);
+        var Count = AllParagraphs.length;
+        for (var Index = 0; Index < Count; Index++) {
+            var Para = AllParagraphs[Index];
+            Para.Recalc_CompiledPr();
+        }
+    },
     isEqual: function (abstractNum) {
         var lvlUsuallyAdd = this.Lvl;
         var lvlNew = abstractNum.Lvl;
@@ -1249,6 +1239,9 @@ CAbstractNum.prototype = {
         return true;
     },
     _isEqualLvlText: function (LvlTextOld, LvlTextNew) {
+        if (LvlTextOld.length !== LvlTextNew.length) {
+            return false;
+        }
         for (var LvlText = 0; LvlText < LvlTextOld.length; LvlText++) {
             if (LvlTextOld[LvlText].Type != LvlTextNew[LvlText].Type || LvlTextOld[LvlText].Value != LvlTextNew[LvlText].Value) {
                 return false;
@@ -1258,8 +1251,8 @@ CAbstractNum.prototype = {
     }
 };
 function CNumbering() {
-    this.AbstractNum = new Array();
-    this.Num = new Array();
+    this.AbstractNum = [];
+    this.Num = [];
 }
 CNumbering.prototype = {
     Create_AbstractNum: function (Type) {
@@ -1305,13 +1298,13 @@ CNumbering.prototype = {
         }
         return false;
     },
-    Draw: function (NumId, Lvl, X, Y, Context, NumInfo, TextPr) {
+    Draw: function (NumId, Lvl, X, Y, Context, NumInfo, TextPr, Theme) {
         var AbstractId = this.Get_AbstractNum(NumId);
-        return AbstractId.Draw(X, Y, Context, Lvl, NumInfo, TextPr);
+        return AbstractId.Draw(X, Y, Context, Lvl, NumInfo, TextPr, Theme);
     },
-    Measure: function (NumId, Lvl, Context, NumInfo, TextPr) {
+    Measure: function (NumId, Lvl, Context, NumInfo, TextPr, Theme) {
         var AbstractId = this.Get_AbstractNum(NumId);
-        return AbstractId.Measure(Context, Lvl, NumInfo, TextPr);
+        return AbstractId.Measure(Context, Lvl, NumInfo, TextPr, Theme);
     },
     Document_CreateFontCharMap: function (FontCharMap, NumTextPr, NumPr, NumInfo) {
         var AbstractId = this.Get_AbstractNum(NumPr.NumId);
@@ -1325,7 +1318,6 @@ CNumbering.prototype = {
         AllFonts["Symbol"] = true;
         AllFonts["Courier New"] = true;
         AllFonts["Wingdings"] = true;
-        AllFonts["Times New Roman"] = true;
     }
 };
 var numbering_presentationnumfrmt_None = 0;
@@ -1338,6 +1330,48 @@ var numbering_presentationnumfrmt_AlphaLcParenR = 104;
 var numbering_presentationnumfrmt_AlphaLcPeriod = 105;
 var numbering_presentationnumfrmt_AlphaUcParenR = 106;
 var numbering_presentationnumfrmt_AlphaUcPeriod = 107;
+var g_NumberingArr = [];
+g_NumberingArr[0] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[1] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[2] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[3] = numbering_presentationnumfrmt_AlphaUcParenR;
+g_NumberingArr[4] = numbering_presentationnumfrmt_AlphaUcParenR;
+g_NumberingArr[5] = numbering_presentationnumfrmt_AlphaUcPeriod;
+g_NumberingArr[6] = numbering_presentationnumfrmt_ArabicPeriod;
+g_NumberingArr[7] = numbering_presentationnumfrmt_ArabicPeriod;
+g_NumberingArr[8] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[9] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[10] = numbering_presentationnumfrmt_ArabicParenR;
+g_NumberingArr[11] = numbering_presentationnumfrmt_ArabicParenR;
+g_NumberingArr[12] = numbering_presentationnumfrmt_ArabicPeriod;
+g_NumberingArr[13] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[14] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[15] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[16] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[17] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[18] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[19] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[20] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[21] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[22] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[23] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[24] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[25] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[26] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[27] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[28] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[29] = numbering_presentationnumfrmt_RomanLcPeriod;
+g_NumberingArr[30] = numbering_presentationnumfrmt_RomanLcPeriod;
+g_NumberingArr[31] = numbering_presentationnumfrmt_RomanLcPeriod;
+g_NumberingArr[32] = numbering_presentationnumfrmt_RomanUcPeriod;
+g_NumberingArr[33] = numbering_presentationnumfrmt_RomanUcPeriod;
+g_NumberingArr[34] = numbering_presentationnumfrmt_RomanUcPeriod;
+g_NumberingArr[35] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[36] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[37] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[38] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[39] = numbering_presentationnumfrmt_AlphaLcParenR;
+g_NumberingArr[40] = numbering_presentationnumfrmt_AlphaLcPeriod;
 function CPresentationBullet() {
     this.m_nType = numbering_presentationnumfrmt_None;
     this.m_nStartAt = null;
@@ -1362,7 +1396,7 @@ function CPresentationBullet() {
     this.Get_StartAt = function () {
         return this.m_nStartAt;
     };
-    this.Measure = function (Context, FirstTextPr, _Num) {
+    this.Measure = function (Context, FirstTextPr, _Num, Theme) {
         var dFontSize = FirstTextPr.FontSize;
         if (false === this.m_bSizeTx) {
             if (true === this.m_bSizePct) {
@@ -1371,21 +1405,46 @@ function CPresentationBullet() {
                 dFontSize = this.m_dSize;
             }
         }
-        var sFontName = (true === this.m_bFontTx ? FirstTextPr.FontFamily.Name : this.m_sFont);
-        this.m_oTextPr = {
-            FontFamily: {
-                Name: sFontName,
-                Index: -1
-            },
+        var RFonts;
+        if (!this.m_bFontTx) {
+            RFonts = {
+                Ascii: {
+                    Name: this.m_sFont,
+                    Index: -1
+                },
+                EastAsia: {
+                    Name: this.m_sFont,
+                    Index: -1
+                },
+                CS: {
+                    Name: this.m_sFont,
+                    Index: -1
+                },
+                HAnsi: {
+                    Name: this.m_sFont,
+                    Index: -1
+                }
+            };
+        } else {
+            RFonts = FirstTextPr.RFonts;
+        }
+        var FirstTextPr_ = FirstTextPr.Copy();
+        if (FirstTextPr_.Underline) {
+            FirstTextPr_.Underline = false;
+        }
+        var TextPr_ = new CTextPr();
+        TextPr_.Set_FromObject({
+            RFonts: RFonts,
             FontSize: dFontSize,
             Bold: (this.m_nType >= numbering_presentationnumfrmt_ArabicPeriod ? FirstTextPr.Bold : false),
             Italic: (this.m_nType >= numbering_presentationnumfrmt_ArabicPeriod ? FirstTextPr.Italic : false)
-        };
+        });
+        FirstTextPr_.Merge(TextPr_);
+        this.m_oTextPr = FirstTextPr_;
         var Num = _Num + this.m_nStartAt - 1;
         this.m_nNum = Num;
         var X = 0;
-        var OldFont = Context.GetFont();
-        Context.SetFont(this.m_oTextPr);
+        var OldTextPr = Context.GetTextPr();
         var sT = "";
         switch (this.m_nType) {
         case numbering_presentationnumfrmt_Char:
@@ -1419,11 +1478,20 @@ function CPresentationBullet() {
             break;
         }
         this.m_sString = sT;
+        var Hint = this.m_oTextPr.RFonts.Hint;
+        var bCS = this.m_oTextPr.CS;
+        var bRTL = this.m_oTextPr.RTL;
+        var lcid = this.m_oTextPr.Lang.EastAsia;
+        var FontSlot = g_font_detector.Get_FontClass(sT.charCodeAt(0), Hint, lcid, bCS, bRTL);
+        Context.SetTextPr(this.m_oTextPr, Theme);
+        Context.SetFontSlot(FontSlot);
         for (var Index2 = 0; Index2 < sT.length; Index2++) {
             var Char = sT.charAt(Index2);
             X += Context.Measure(Char).Width;
         }
-        Context.SetFont(OldFont);
+        if (OldTextPr) {
+            Context.SetTextPr(OldTextPr, Theme);
+        }
         return {
             Width: X
         };
@@ -1444,7 +1512,7 @@ function CPresentationBullet() {
         Bullet.m_bSizePct = this.m_bSizePct;
         return Bullet;
     };
-    this.Draw = function (X, Y, Context, FirstTextPr) {
+    this.Draw = function (X, Y, Context, FirstTextPr, PDSE) {
         if (null === this.m_oTextPr || null === this.m_nNum) {
             return;
         }
@@ -1454,24 +1522,43 @@ function CPresentationBullet() {
             b: this.m_oColor.b
         };
         if (true === this.m_bColorTx) {
-            oColor.r = FirstTextPr.Color.r;
-            oColor.g = FirstTextPr.Color.g;
-            oColor.b = FirstTextPr.Color.b;
+            if (FirstTextPr.Unifill) {
+                FirstTextPr.Unifill.check(PDSE.Theme, PDSE.ColorMap);
+                var RGBA = FirstTextPr.Unifill.getRGBAColor();
+                oColor.r = RGBA.R;
+                oColor.g = RGBA.G;
+                oColor.b = RGBA.B;
+            } else {
+                oColor.r = FirstTextPr.Color.r;
+                oColor.g = FirstTextPr.Color.g;
+                oColor.b = FirstTextPr.Color.b;
+            }
         }
         Context.p_color(oColor.r, oColor.g, oColor.b, 255);
         Context.b_color1(oColor.r, oColor.g, oColor.b, 255);
-        var OldFont = Context.GetFont();
-        var OldFont2 = g_oTextMeasurer.GetFont();
-        Context.SetFont(this.m_oTextPr);
-        g_oTextMeasurer.SetFont(this.m_oTextPr);
+        var OldTextPr = Context.GetTextPr();
+        var OldTextPr2 = g_oTextMeasurer.GetTextPr();
+        var Hint = this.m_oTextPr.RFonts.Hint;
+        var bCS = this.m_oTextPr.CS;
+        var bRTL = this.m_oTextPr.RTL;
+        var lcid = this.m_oTextPr.Lang.EastAsia;
         var sT = this.m_sString;
+        var FontSlot = g_font_detector.Get_FontClass(sT.charCodeAt(0), Hint, lcid, bCS, bRTL);
+        Context.SetTextPr(this.m_oTextPr, PDSE.Theme);
+        Context.SetFontSlot(FontSlot);
+        g_oTextMeasurer.SetTextPr(this.m_oTextPr, PDSE.Theme);
+        g_oTextMeasurer.SetFontSlot(FontSlot);
         for (var Index2 = 0; Index2 < sT.length; Index2++) {
             var Char = sT.charAt(Index2);
             Context.FillText(X, Y, Char);
             X += g_oTextMeasurer.Measure(Char).Width;
         }
-        Context.SetFont(OldFont);
-        g_oTextMeasurer.SetFont(OldFont2);
+        if (OldTextPr) {
+            Context.SetTextPr(OldTextPr, PDSE.Theme);
+        }
+        if (OldTextPr2) {
+            g_oTextMeasurer.SetTextPr(OldTextPr2, PDSE.Theme);
+        }
     };
     this.Write_ToBinary = function (Writer) {
         Writer.WriteLong(this.m_nType);

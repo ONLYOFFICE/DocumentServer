@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function CBounds() {
+ "use strict";
+function CBounds() {
     this.L = 0;
     this.T = 0;
     this.R = 0;
@@ -203,6 +204,12 @@ function CControl() {
             this.HtmlElement.height = ((_b - _y) * g_dKoef_mm_to_pix + 0.5) >> 0;
         }
     };
+    this.GetCSS_width = function () {
+        return ((this.AbsolutePosition.R - this.AbsolutePosition.L) * g_dKoef_mm_to_pix + 0.5) >> 0;
+    };
+    this.GetCSS_height = function () {
+        return ((this.AbsolutePosition.B - this.AbsolutePosition.T) * g_dKoef_mm_to_pix + 0.5) >> 0;
+    };
 }
 function CControlContainer() {
     this.Bounds = new CBounds();
@@ -212,7 +219,7 @@ function CControlContainer() {
     this.TabIndex = null;
     this.HtmlElement = null;
     this.AbsolutePosition = new CBounds();
-    this.Controls = new Array();
+    this.Controls = [];
     this.AddControl = function (ctrl) {
         ctrl.Parent = this;
         this.Controls[this.Controls.length] = ctrl;
@@ -353,6 +360,12 @@ function CControlContainer() {
         for (var i = 0; i < lCount; i++) {
             this.Controls[i].Resize(_r - _x, _b - _y, api);
         }
+    };
+    this.GetCSS_width = function () {
+        return ((this.AbsolutePosition.R - this.AbsolutePosition.L) * g_dKoef_mm_to_pix + 0.5) >> 0;
+    };
+    this.GetCSS_height = function () {
+        return ((this.AbsolutePosition.B - this.AbsolutePosition.T) * g_dKoef_mm_to_pix + 0.5) >> 0;
     };
 }
 function CreateControlContainer(name) {

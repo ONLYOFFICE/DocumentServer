@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function _rect() {
+ "use strict";
+function _rect() {
     this.x = 0;
     this.y = 0;
     this.w = 0;
@@ -58,16 +59,12 @@ function CPdfPrinter(sUrlPath) {
     this.DocumentRenderer = new CDocumentRenderer();
     this.DocumentRenderer.VectorMemoryForPrint = new CMemory();
     this.font = new window["Asc"].FontProperties("Arial", -1);
-    this.asc_round = window["Asc"].round;
     this.Transform = new CMatrix();
     this.InvertTransform = new CMatrix();
     this.sUrlPath = sUrlPath;
-    var ppiTest = $('<div style="position: absolute; width: 10in; height:10in; ' + 'visibility:hidden; padding:0;"/>').appendTo("body");
-    this.dpiX = this.asc_round(ppiTest[0].offsetWidth * 0.1);
-    this.dpiY = this.asc_round(ppiTest[0].offsetHeight * 0.1);
-    ppiTest.remove();
     this.bIsSimpleCommands = false;
-    this.parseColor = window["Asc"].parseColor;
+    this.width_1px = 0.75;
+    this.height_1px = 0.75;
 }
 CPdfPrinter.prototype = {
     BeginPage: function (width, height) {
@@ -156,16 +153,22 @@ CPdfPrinter.prototype = {
         return "miter";
     },
     setFillStyle: function (val) {
-        var c = this.parseColor(val);
-        this.DocumentRenderer.b_color1(c.r, c.g, c.b, (c.a * 255 + 0.5) >> 0);
+        var _r = val.getR();
+        var _g = val.getG();
+        var _b = val.getB();
+        var _a = val.getA();
+        this.DocumentRenderer.b_color1(_r, _g, _b, (_a * 255 + 0.5) >> 0);
         return this;
     },
     setFillPattern: function (val) {
         return this;
     },
     setStrokeStyle: function (val) {
-        var c = this.parseColor(val);
-        this.DocumentRenderer.p_color(c.r, c.g, c.b, (c.a * 255 + 0.5) >> 0);
+        var _r = val.getR();
+        var _g = val.getG();
+        var _b = val.getB();
+        var _a = val.getA();
+        this.DocumentRenderer.p_color(_r, _g, _b, (_a * 255 + 0.5) >> 0);
         return this;
     },
     setLineWidth: function (val) {
@@ -202,7 +205,7 @@ CPdfPrinter.prototype = {
     },
     getFontMetrix: function () {
         console.log("error");
-        return new FontMetrics(0, 0, 0);
+        return new FontMetrics();
     },
     setFont: function (font) {
         this.DocumentRenderer.SetFont(font);
@@ -260,6 +263,18 @@ CPdfPrinter.prototype = {
         this.DocumentRenderer._l(x * vector_koef, y2 * vector_koef);
         return this;
     },
+    lineHorPrevPx: function (x1, y, x2) {
+        y -= this.height_1px;
+        this.DocumentRenderer._m(x1 * vector_koef, y * vector_koef);
+        this.DocumentRenderer._l(x2 * vector_koef, y * vector_koef);
+        return this;
+    },
+    lineVerPrevPx: function (x, y1, y2) {
+        x -= this.width_1px;
+        this.DocumentRenderer._m(x * vector_koef, y1 * vector_koef);
+        this.DocumentRenderer._l(x * vector_koef, y2 * vector_koef);
+        return this;
+    },
     rect: function (x, y, w, h) {
         if (this.bIsSimpleCommands) {
             return this.DocumentRenderer.rect(x, y, w, h);
@@ -280,9 +295,6 @@ CPdfPrinter.prototype = {
     },
     stroke: function () {
         this.DocumentRenderer.ds();
-        return this;
-    },
-    clip: function () {
         return this;
     },
     drawImage: function (_src, sx, sy, sw, sh, dx, dy, dw, dh, src_w, src_h) {

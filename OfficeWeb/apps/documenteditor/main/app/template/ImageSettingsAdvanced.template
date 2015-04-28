@@ -1,0 +1,231 @@
+<div id="id-adv-image-width" class="settings-panel active">
+    <div class="inner-content">
+    <table cols="4" width="100%">
+        <tr>
+            <td width="88px">
+                <label class="input-label"><%= scope.textWidth %></label>
+                <div id="image-advanced-spin-width"></div>
+            </td>
+            <td width="28px" style="vertical-align: bottom;">
+                <div id="image-advanced-button-ratio"></div>
+            </td>
+            <td width="88px">
+                <label class="input-label"><%= scope.textHeight %></label>
+                <div id="image-advanced-spin-height"></div>
+            </td>
+            <td style="vertical-align: bottom;">
+                <button type="button" class="btn btn-text-default" id="image-advanced-button-original-size" style="width:100px;"><%= scope.textOriginalSize %></button>
+            </td>
+        </tr>
+    </table>
+    </div>
+</div>
+<div id="id-adv-image-wrap" class="settings-panel">
+    <div class="inner-content padding-large">
+        <label class="header padding-small"><%= scope.textWrap %></label>
+        <div class="padding-small">
+            <div id="image-advanced-button-wrap-inline" style="display: inline-block; margin-right:7px;"></div>
+            <div id="image-advanced-button-wrap-square" style="display: inline-block; margin-right:7px;"></div>
+            <div id="image-advanced-button-wrap-tight" style="display: inline-block; margin-right:7px;"></div>
+            <div id="image-advanced-button-wrap-through" style="display: inline-block; margin-right:7px;"></div>
+        </div>
+        <div class="padding-small">
+            <div id="image-advanced-button-wrap-topbottom" style="display: inline-block; margin-right:7px;"></div>
+            <div id="image-advanced-button-wrap-infront" style="display: inline-block; margin-right:7px;"></div>
+            <div id="image-advanced-button-wrap-behind" style="display: inline-block;"></div>
+        </div>
+    </div>
+    <div class="separator horizontal padding-large"></div>
+    <div class="inner-content">
+        <table cols="2" style="width: 100%;">
+            <tr>
+                <td colspan=2 class="padding-small">
+                    <label class="header"><%= scope.textDistance %></label>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-small" width="125px">
+                    <label class="input-label"><%= scope.textTop %></label>
+                    <div id="image-advanced-distance-top"></div>
+                </td>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textLeft %></label>
+                    <div id="image-advanced-distance-left"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textBottom %></label>
+                    <div id="image-advanced-distance-bottom"></div>
+                </td>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textRight %></label>
+                    <div id="image-advanced-distance-right"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div id="id-adv-image-position" class="settings-panel">
+    <div class="inner-content">
+        <table cols="3" style="width: 100%;">
+            <tr>
+                <td colspan="3" class="padding-small">
+                    <label class="header"><%= scope.textHorizontal %></label>
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: bottom; padding-bottom: 12px;">
+                    <div id="image-radio-halign"></div>
+                </td>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textAlignment %></label>
+                    <div id="image-combo-halign" style="width: 115px;"></div>
+                </td>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textRelative %></label>
+                    <div id="image-combo-hrelative" style="width: 115px;"></div>
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: bottom; padding-bottom: 12px;">
+                    <div id="image-radio-hposition"></div>
+                </td>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textPosition %></label>
+                    <div id="image-spin-x"></div>
+                </td>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textRightOf %></label>
+                    <div id="image-combo-hposition" style="width: 115px;"></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" class="padding-small">
+                    <label class="header"><%= scope.textVertical %></label>
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: bottom; padding-bottom: 12px;">
+                    <div id="image-radio-valign"></div>
+                </td>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textAlignment %></label>
+                    <div id="image-combo-valign" style="width: 115px;"></div>
+                </td>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textRelative %></label>
+                    <div id="image-combo-vrelative" style="width: 115px;"></div>
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: bottom; padding-bottom: 19px;">
+                    <div id="image-radio-vposition"></div>
+                </td>
+                <td class="padding-large">
+                    <label class="input-label"><%= scope.textPosition %></label>
+                    <div id="image-spin-y"></div>
+                </td>
+                <td class="padding-large">
+                    <label class="input-label"><%= scope.textBelow %></label>
+                    <div id="image-combo-vposition" style="width: 115px;"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="separator horizontal padding-large"></div>
+    <div class="inner-content">
+        <table cols="2" style="width: 100%;">
+            <tr>
+                <td colspan="2" class="padding-small">
+                    <label class="header"><%= scope.textOptions %></label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="image-checkbox-move"></div>
+                </td>
+                <td>
+                    <div id="image-checkbox-overlap"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div id="id-adv-image-shape" class="settings-panel">
+    <div class="inner-content">
+        <table cols="2" style="width: 100%;">
+            <tr>
+                <td colspan=2 class="padding-small">
+                    <label class="header"><%= scope.textLineStyle %></label>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-large" width="125px">
+                    <label class="input-label"><%= scope.textCapType %></label>
+                    <div id="shape-advanced-cap-type" style="width: 100px;"></div>
+                </td>
+                <td class="padding-large">
+                    <label class="input-label"><%= scope.textJoinType %></label>
+                    <div id="shape-advanced-join-type" style="width: 100px;"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="separator horizontal padding-large"></div>
+    <div class="inner-content">
+        <table cols="2" style="width: 100%;">
+            <tr>
+                <td colspan=2 class="padding-small">
+                    <label class="header"><%= scope.textArrows %></label>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-small" width="125px">
+                    <label class="input-label"><%= scope.textBeginStyle %></label>
+                    <div id="shape-advanced-begin-style" style="width: 100px;"></div>
+                </td>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textEndStyle %></label>
+                    <div id="shape-advanced-end-style" style="width: 100px;"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textBeginSize %></label>
+                    <div id="shape-advanced-begin-size" style="width: 100px;"></div>
+                </td>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textEndSize %></label>
+                    <div id="shape-advanced-end-size" style="width: 100px;"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div id="id-adv-image-margins" class="settings-panel">
+    <div class="inner-content">
+        <table cols="2" style="width: 100%;">
+            <tr>
+                <td class="padding-small" width="125px">
+                    <label class="input-label"><%= scope.textTop %></label>
+                    <div id="image-margin-top"></div>
+                </td>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textLeft %></label>
+                    <div id="image-margin-left"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textBottom %></label>
+                    <div id="image-margin-bottom"></div>
+                </td>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textRight %></label>
+                    <div id="image-margin-right"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

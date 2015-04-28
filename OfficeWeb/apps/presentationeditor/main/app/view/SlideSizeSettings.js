@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,321 +29,198 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("PE.view.SlideSizeSettings", {
-    extend: "Ext.window.Window",
-    alias: "widget.peslidesizesettings",
-    requires: ["Ext.window.Window", "Ext.form.field.ComboBox", "Common.component.MetricSpinner", "Ext.Array", "Common.plugin.ComboBoxScrollPane"],
-    cls: "asc-advanced-settings-window",
-    modal: true,
-    resizable: false,
-    plain: true,
-    constrain: true,
-    height: 230,
-    width: 270,
-    layout: {
-        type: "vbox",
-        align: "stretch"
-    },
-    listeners: {
-        show: function () {
-            this._spnWidth.focus(false, 500);
-        }
-    },
-    initComponent: function () {
-        var me = this;
-        this.addEvents("onmodalresult");
-        this._noApply = false;
-        this._sizeIdx = 0;
-        this._spacer = Ext.create("Ext.toolbar.Spacer", {
-            width: "100%",
-            height: 10,
-            html: '<div style="width: 100%; height: 40%; border-bottom: 1px solid #C7C7C7"></div>'
-        });
-        this.cmbSlideSize = Ext.widget("combo", {
-            store: Ext.create("Ext.data.Store", {
-                fields: ["description", "type", "size"],
+ define(["common/main/lib/component/Window", "common/main/lib/component/ComboBox"], function () {
+    PE.Views.SlideSizeSettings = Common.UI.Window.extend(_.extend({
+        options: {
+            width: 250,
+            header: true,
+            style: "min-width: 250px;",
+            cls: "modal-dlg",
+            id: "window-slide-size-settings"
+        },
+        initialize: function (options) {
+            _.extend(this.options, {
+                title: this.textTitle
+            },
+            options || {});
+            this.template = ['<div class="box" style="height: 95px;">', '<div class="input-row">', '<label class="text columns-text" style="font-weight: bold;">' + this.textSlideSize + "</label>", "</div>", '<div id="slide-size-combo" class="" style="margin-bottom: 10px;"></div>', '<table cols="2" style="width: 100%;margin-bottom: 10px;">', "<tr>", '<td class="padding-small" style="padding-right: 10px;">', '<label class="input-label" style="font-weight: bold;">' + this.textWidth + "</label>", '<div id="slide-size-spin-width"></div>', "</td>", '<td class="padding-small" style="padding-left: 10px;">', '<label class="input-label" style="font-weight: bold;">' + this.textHeight + "</label>", '<div id="slide-size-spin-height"></div>', "</td>", "</tr>", "</table>", "</div>", '<div class="separator horizontal"/>', '<div class="footer center">', '<button class="btn normal dlg-btn primary" result="ok" style="margin-right: 10px;">' + this.okButtonText + "</button>", '<button class="btn normal dlg-btn" result="cancel">' + this.cancelButtonText + "</button>", "</div>"].join("");
+            this.options.tpl = _.template(this.template, this.options);
+            this.spinners = [];
+            this._noApply = false;
+            Common.UI.Window.prototype.initialize.call(this, this.options);
+        },
+        render: function () {
+            Common.UI.Window.prototype.render.call(this);
+            this.cmbSlideSize = new Common.UI.ComboBox({
+                el: $("#slide-size-combo"),
+                cls: "input-group-nr",
+                style: "width: 100%;",
+                menuStyle: "min-width: 218px;",
+                editable: false,
                 data: [{
-                    type: 1,
-                    description: me.txtStandard,
+                    value: 0,
+                    displayValue: this.txtStandard,
                     size: [254, 190.5]
                 },
                 {
-                    type: 2,
-                    description: me.txtWidescreen1,
+                    value: 1,
+                    displayValue: this.txtWidescreen1,
                     size: [254, 143]
                 },
                 {
-                    type: 3,
-                    description: me.txtWidescreen2,
+                    value: 2,
+                    displayValue: this.txtWidescreen2,
                     size: [254, 158.7]
                 },
                 {
-                    type: 4,
-                    description: me.txtLetter,
+                    value: 3,
+                    displayValue: this.txtLetter,
                     size: [254, 190.5]
                 },
                 {
-                    type: 5,
-                    description: me.txtLedger,
+                    value: 4,
+                    displayValue: this.txtLedger,
                     size: [338.3, 253.7]
                 },
                 {
-                    type: 6,
-                    description: me.txtA3,
+                    value: 5,
+                    displayValue: this.txtA3,
                     size: [355.6, 266.7]
                 },
                 {
-                    type: 7,
-                    description: me.txtA4,
+                    value: 6,
+                    displayValue: this.txtA4,
                     size: [275, 190.5]
                 },
                 {
-                    type: 8,
-                    description: me.txtB4,
+                    value: 7,
+                    displayValue: this.txtB4,
                     size: [300.7, 225.5]
                 },
                 {
-                    type: 9,
-                    description: me.txtB5,
+                    value: 8,
+                    displayValue: this.txtB5,
                     size: [199.1, 149.3]
                 },
                 {
-                    type: 10,
-                    description: me.txt35,
+                    value: 9,
+                    displayValue: this.txt35,
                     size: [285.7, 190.5]
                 },
                 {
-                    type: 11,
-                    description: me.txtOverhead,
+                    value: 10,
+                    displayValue: this.txtOverhead,
                     size: [254, 190.5]
                 },
                 {
-                    type: 12,
-                    description: me.txtBanner,
+                    value: 11,
+                    displayValue: this.txtBanner,
                     size: [203.2, 25.4]
                 },
                 {
-                    type: -1,
-                    description: me.txtCustom,
+                    value: -1,
+                    displayValue: this.txtCustom,
                     size: []
                 }]
-            }),
-            displayField: "description",
-            valueField: "type",
-            queryMode: "local",
-            editable: false,
-            value: me.txtStandard,
-            listeners: {
-                select: Ext.bind(function (combo, records, eOpts) {
-                    me._sizeIdx = records[0].index;
-                    combo.blur();
-                    me._noApply = true;
-                    if (records[0].index == 12) {} else {
-                        me._spnWidth.setValue(Common.MetricSettings.fnRecalcFromMM(records[0].data.size[0]));
-                        me._spnHeight.setValue(Common.MetricSettings.fnRecalcFromMM(records[0].data.size[1]));
-                    }
-                    me._noApply = false;
-                },
-                this)
-            }
-        });
-        this.cmbSlideSize.select(this.cmbSlideSize.getStore().getAt(0));
-        this._spnWidth = Ext.create("Common.component.MetricSpinner", {
-            id: "slide-advanced-spin-width",
-            readOnly: false,
-            maxValue: 55.88,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "25.4 cm",
-            width: 75,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (!me._noApply && me._sizeIdx != 12) {
-                        me.cmbSlideSize.select(me.cmbSlideSize.getStore().getAt(12));
-                        me._sizeIdx = 12;
-                    }
-                },
-                this),
-                specialkey: function (field, e) {
-                    if (e.getKey() == e.ENTER) {
-                        me.btnOk.fireEvent("click");
-                    } else {
-                        if (e.getKey() == e.ESC) {
-                            me.btnCancel.fireEvent("click");
-                        }
-                    }
+            });
+            this.cmbSlideSize.setValue(0);
+            this.cmbSlideSize.on("selected", _.bind(function (combo, record) {
+                this._noApply = true;
+                if (record.value < 0) {} else {
+                    this.spnWidth.setValue(Common.Utils.Metric.fnRecalcFromMM(record.size[0]), true);
+                    this.spnHeight.setValue(Common.Utils.Metric.fnRecalcFromMM(record.size[1]), true);
                 }
-            }
-        });
-        this._spnHeight = Ext.create("Common.component.MetricSpinner", {
-            id: "slide-advanced-span-height",
-            readOnly: false,
-            maxValue: 55.88,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "19.05 cm",
-            width: 75,
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {
-                    if (!me._noApply && me._sizeIdx != 12) {
-                        me.cmbSlideSize.select(me.cmbSlideSize.getStore().getAt(12));
-                        me._sizeIdx = 12;
-                    }
-                },
-                this),
-                specialkey: function (field, e) {
-                    if (e.getKey() == e.ENTER) {
-                        me.btnOk.fireEvent("click");
-                    } else {
-                        if (e.getKey() == e.ESC) {
-                            me.btnCancel.fireEvent("click");
-                        }
-                    }
+                this._noApply = false;
+            },
+            this));
+            this.spnWidth = new Common.UI.MetricSpinner({
+                el: $("#slide-size-spin-width"),
+                step: 0.1,
+                width: 98,
+                defaultUnit: "cm",
+                value: "25.4 cm",
+                maxValue: 55.88,
+                minValue: 0
+            });
+            this.spinners.push(this.spnWidth);
+            this.spnWidth.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (!this._noApply && this.cmbSlideSize.getValue() > -1) {
+                    this.cmbSlideSize.setValue(-1);
                 }
-            }
-        });
-        this.label = Ext.widget("label", {
-            width: "100%",
-            margin: "0 0 2 0",
-            style: "font-weight: bold;"
-        });
-        this.items = [{
-            xtype: "container",
-            height: 136,
-            padding: "18 25",
-            layout: {
-                type: "vbox",
-                align: "stretch"
             },
-            items: [this.label.cloneConfig({
-                text: me.textSlideSize
-            }), this.cmbSlideSize, {
-                xtype: "tbspacer",
-                height: 10
+            this));
+            this.spnHeight = new Common.UI.MetricSpinner({
+                el: $("#slide-size-spin-height"),
+                step: 0.1,
+                width: 98,
+                defaultUnit: "cm",
+                value: "19.05 cm",
+                maxValue: 55.88,
+                minValue: 0
+            });
+            this.spinners.push(this.spnHeight);
+            this.spnHeight.on("change", _.bind(function (field, newValue, oldValue, eOpts) {
+                if (!this._noApply && this.cmbSlideSize.getValue() > -1) {
+                    this.cmbSlideSize.setValue(-1);
+                }
             },
-            {
-                xtype: "container",
-                height: 44,
-                layout: {
-                    type: "hbox",
-                    align: "stretch"
-                },
-                items: [{
-                    xtype: "container",
-                    flex: 1,
-                    layout: {
-                        type: "vbox",
-                        align: "stretch"
-                    },
-                    items: [this.label.cloneConfig({
-                        text: me.textWidth
-                    }), this._spnWidth]
-                },
-                {
-                    xtype: "tbspacer",
-                    width: 18
-                },
-                {
-                    xtype: "container",
-                    flex: 1,
-                    layout: {
-                        type: "vbox",
-                        align: "stretch"
-                    },
-                    items: [this.label.cloneConfig({
-                        text: me.textHeight
-                    }), this._spnHeight]
-                }]
-            }]
+            this));
+            var $window = this.getChild();
+            $window.find(".dlg-btn").on("click", _.bind(this.onBtnClick, this));
+            $window.find("input").on("keypress", _.bind(this.onKeyPress, this));
+            this.updateMetricUnit();
         },
-        this._spacer.cloneConfig(), {
-            xtype: "container",
-            height: 40,
-            layout: {
-                type: "vbox",
-                align: "center",
-                pack: "center"
-            },
-            items: [{
-                xtype: "container",
-                width: 182,
-                height: 24,
-                layout: {
-                    type: "hbox",
-                    align: "middle"
-                },
-                items: [this.btnOk = Ext.widget("button", {
-                    cls: "asc-blue-button",
-                    width: 86,
-                    height: 22,
-                    margin: "0 5px 0 0",
-                    text: this.okButtonText,
-                    listeners: {
-                        click: function (btn) {
-                            this.fireEvent("onmodalresult", 1);
-                            this.close();
-                        },
-                        scope: this
-                    }
-                }), this.btnCancel = Ext.widget("button", {
-                    cls: "asc-darkgray-button",
-                    width: 86,
-                    height: 22,
-                    text: this.cancelButtonText,
-                    listeners: {
-                        click: function (btn) {
-                            this.fireEvent("onmodalresult", 0);
-                            this.close();
-                        },
-                        scope: this
-                    }
-                })]
-            }]
-        }];
-        this.callParent(arguments);
-        this.setTitle(this.textTitle);
-    },
-    afterRender: function () {
-        this.callParent(arguments);
-    },
-    setSettings: function (type, pagewitdh, pageheight) {
-        this._spnWidth.setValue(Common.MetricSettings.fnRecalcFromMM(pagewitdh));
-        this._spnHeight.setValue(Common.MetricSettings.fnRecalcFromMM(pageheight));
-        this.cmbSlideSize.select(this.cmbSlideSize.getStore().getAt((type < 0) ? 12 : type));
-    },
-    getSettings: function () {
-        var props = [(this._sizeIdx < 12) ? this._sizeIdx : -1, Common.MetricSettings.fnRecalcToMM(this._spnWidth.getNumberValue()), Common.MetricSettings.fnRecalcToMM(this._spnHeight.getNumberValue())];
-        return props;
-    },
-    updateMetricUnit: function () {
-        var spinners = this.query("commonmetricspinner");
-        if (spinners) {
-            for (var i = 0; i < spinners.length; i++) {
-                var spinner = spinners[i];
-                spinner.setDefaultUnit(Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()]);
-                spinner.setStep(Common.MetricSettings.getCurrentMetric() == Common.MetricSettings.c_MetricUnits.cm ? 0.1 : 1);
+        _handleInput: function (state) {
+            if (this.options.handler) {
+                this.options.handler.call(this, this, state);
             }
-        }
+            this.close();
+        },
+        onBtnClick: function (event) {
+            this._handleInput(event.currentTarget.attributes["result"].value);
+        },
+        onKeyPress: function (event) {
+            if (event.keyCode == Common.UI.Keys.RETURN) {
+                this._handleInput("ok");
+            }
+        },
+        setSettings: function (type, pagewitdh, pageheight) {
+            this.spnWidth.setValue(Common.Utils.Metric.fnRecalcFromMM(pagewitdh), true);
+            this.spnHeight.setValue(Common.Utils.Metric.fnRecalcFromMM(pageheight), true);
+            this.cmbSlideSize.setValue(type);
+        },
+        getSettings: function () {
+            var props = [this.cmbSlideSize.getValue(), Common.Utils.Metric.fnRecalcToMM(this.spnWidth.getNumberValue()), Common.Utils.Metric.fnRecalcToMM(this.spnHeight.getNumberValue())];
+            return props;
+        },
+        updateMetricUnit: function () {
+            if (this.spinners) {
+                for (var i = 0; i < this.spinners.length; i++) {
+                    var spinner = this.spinners[i];
+                    spinner.setDefaultUnit(Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()]);
+                    spinner.setStep(Common.Utils.Metric.getCurrentMetric() == Common.Utils.Metric.c_MetricUnits.cm ? 0.1 : 1);
+                }
+            }
+        },
+        textTitle: "Slide Size Settings",
+        textSlideSize: "Slide Size",
+        textWidth: "Width",
+        textHeight: "Height",
+        cancelButtonText: "Cancel",
+        okButtonText: "Ok",
+        txtStandard: "Standard (4:3)",
+        txtWidescreen1: "Widescreen (16:9)",
+        txtWidescreen2: "Widescreen (16:10)",
+        txtLetter: "Letter Paper (8.5x11 in)",
+        txtLedger: "Ledger Paper (11x17 in)",
+        txtA3: "A3 Paper (297x420 mm)",
+        txtA4: "A4 Paper (210x297 mm)",
+        txtB4: "B4 (ICO) Paper (250x353 mm)",
+        txtB5: "B5 (ICO) Paper (176x250 mm)",
+        txt35: "35 mm Slides",
+        txtOverhead: "Overhead",
+        txtBanner: "Banner",
+        txtCustom: "Custom"
     },
-    textTitle: "Slide Size Settings",
-    textSlideSize: "Slide Size",
-    textWidth: "Width",
-    textHeight: "Height",
-    cancelButtonText: "Cancel",
-    okButtonText: "Ok",
-    txtStandard: "Standard (4:3)",
-    txtWidescreen1: "Widescreen (16:9)",
-    txtWidescreen2: "Widescreen (16:10)",
-    txtLetter: "Letter Paper (8.5x11 in)",
-    txtLedger: "Ledger Paper (11x17 in)",
-    txtA3: "A3 Paper (297x420 mm)",
-    txtA4: "A4 Paper (210x297 mm)",
-    txtB4: "B4 (ICO) Paper (250x353 mm)",
-    txtB5: "B5 (ICO) Paper (176x250 mm)",
-    txt35: "35 mm Slides",
-    txtOverhead: "Overhead",
-    txtBanner: "Banner",
-    txtCustom: "Custom"
+    PE.Views.SlideSizeSettings || {}));
 });

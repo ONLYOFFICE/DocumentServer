@@ -1,0 +1,46 @@
+<table cols="3">
+    <tr>
+        <td colspan=3>
+            <label class="header"><%= scope.textSize %></label>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small" width="88px">
+            <label class="input-label"><%= scope.textWidth %></label>
+            <div id="image-spin-width"></div>
+        </td>
+        <td class="padding-small" width="28px" style="vertical-align: bottom;">
+            <div id="image-button-ratio"></div>
+        </td>
+        <td class="padding-small" width="88px">
+            <label class="input-label"><%= scope.textHeight %></label>
+            <div id="image-spin-height"></div>
+        </td>
+    </tr>
+</table>
+<table cols="2">
+    <tr>
+        <td class="padding-small" colspan=2>
+            <button type="button" class="btn btn-text-default" id="image-button-original-size" style="width:100px;"><%= scope.textOriginalSize %></button>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small" colspan=2>
+            <div class="separator horizontal"></div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan=2>
+            <label class="header"><%= scope.textInsert %></label>
+        </td>
+    </tr>
+    <tr>
+        <td width="50%">
+            <button type="button" class="btn btn-text-default" id="image-button-from-file" style="width:85px;"><%= scope.textFromFile %></button>
+        </td>
+        <td width="50%">
+            <button type="button" class="btn btn-text-default" id="image-button-from-url" style="width:85px;"><%= scope.textFromUrl %></button>
+        </td>
+    </tr>
+    <tr class="finish-cell"></tr>
+</table>

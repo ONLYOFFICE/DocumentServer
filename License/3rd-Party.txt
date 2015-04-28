@@ -1,4 +1,4 @@
-﻿ONLYOFFICE Online Editors uses code from the following 3rd party projects.
+﻿ONLYOFFICE DocumentServer uses code from the following 3rd party projects.
 
 1. Bootstrap 	- Bootstrap is a free collection of tools for creating websites and web applications. It contains HTML and CSS-based design templates for typography, forms, buttons, navigation and other interface components, as well as optional JavaScript extensions.
 
@@ -7,11 +7,11 @@ License:        Apache License Version 2.0
 License File:   Bootstrap.license 
 
 
-2. ExtJS 		- Sencha Ext JS is the industry's most powerful desktop application development platform with unparalleled cross-browser compatibility, advanced MVC architecture, plugin-free charting, and modern UI widgets
+2. RequireJS 	- RequireJS is a JavaScript file and module loader. It is optimized for in-browser use, but it can be used in other JavaScript environments, like Rhino and Node. Using a modular script loader like RequireJS will improve the speed and quality of your code.
 
-URL:			http://www.sencha.com/products/extjs
-License:        GPL v3
-License File:   ExtJs.license
+URL:			http://requirejs.org/
+License:        The "New" BSD License, MIT License
+License File:   RequireJS.license
 
 
 3. jQuery 		- jQuery is a fast, small, and feature-rich JavaScript library.
@@ -85,7 +85,7 @@ License File:   AWS.license
 
 13. EnyimMemcached - C# Memcached client
 
-URL:			http://aws.amazon.com/sdkfornet/
+URL:			https://github.com/enyim/EnyimMemcached
 License:        Apache 2.0 license
 License File:   EnyimMemcached.license
 
@@ -103,14 +103,36 @@ URL:			http://logging.apache.org/log4net/
 License:        Apache 2.0 license
 License File:   log4net.license
 
+
 16. MySQL.Data.dll - Connector/Net is a fully-managed ADO.NET driver for MySQL.
 
 URL:			http://dev.mysql.com/downloads/connector/net/1.0.html	
 License:        GPL License v.2
 License File:   MySQLDataMySQL.license
 
-17. System.Data.SQLite  - is an ADO.NET adapter for SQLite.
 
-URL:			http://system.data.sqlite.org/index.html/doc/trunk/www/index.wiki
-License:        Public domain
-License File:   SystemDataSQLite.license
+17. Backbone - Backbone.js gives structure to web applications by providing models with key-value binding and custom events, collections with a rich API of enumerable functions, views with declarative event handling, and connects it all to your existing API over a RESTful JSON interface.
+
+URL:			http://backbonejs.org/
+License:        MIT License
+License File:   Backbone.license
+
+
+18. Npgsql - Npgsql is a .Net Data Provider for Postgresql.
+URL:			http://npgsql.projects.pgfoundry.org/
+License:        Npgsql License
+License File:   Backbone.license
+
+
+19. jQuery.browser - A jQuery plugin for browser detection.
+
+URL:			http://api.jquery.com/jquery.browser/
+License:        MIT License
+License File:   jQuery.browser.license
+
+
+20. PerfectScrollbar - Tiny but perfect jQuery scrollbar plugin.
+
+URL:			http://noraesae.github.com/perfect-scrollbar/
+License:        MIT License
+License File:   PerfectScrollbar.license

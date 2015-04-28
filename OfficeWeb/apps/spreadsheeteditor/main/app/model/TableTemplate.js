@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,17 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("SSE.model.TableTemplate", {
-    extend: "Ext.data.Model",
-    fields: ["type", "name", "imageUrl"]
+ define(["backbone"], function (Backbone) {
+    SSE.Models = SSE.Models || {};
+    SSE.Models.TableTemplate = Backbone.Model.extend({
+        defaults: function () {
+            return {
+                id: Common.UI.getId(),
+                name: null,
+                caption: null,
+                type: null,
+                imageUrl: null
+            };
+        }
+    });
 });

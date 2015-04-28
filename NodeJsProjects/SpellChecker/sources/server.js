@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -40,26 +40,15 @@ var app = express();
 var server = {};
 if (config["ssl"]) {
     var privateKey = fs.readFileSync(config["ssl"]["key"]).toString();
-    var certificateKey = fs.readFileSync(config["ssl"]["cert"]).toString();
-    var trustedCertificate = fs.readFileSync(config["ssl"]["ca"]).toString();
+    var certificate = fs.readFileSync(config["ssl"]["cert"]).toString();
     var options = {
         key: privateKey,
-        cert: certificateKey,
-        ca: [trustedCertificate]
+        cert: certificate
     };
     server = https.createServer(options, app);
 } else {
     server = http.createServer(app);
 }
-app.configure("development", function () {
-    app.use(express.errorHandler({
-        dumpExceptions: true,
-        showStack: true
-    }));
-});
-app.configure("production", function () {
-    app.use(express.errorHandler());
-});
 var spellCheck = require("./spellCheck");
 spellCheck.install(server, function () {
     server.listen(config["server"]["port"], function () {

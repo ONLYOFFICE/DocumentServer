@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- (function (window, undefined) {
+ "use strict";
+(function (window, undefined) {
     var asc = window["Asc"] ? window["Asc"] : (window["Asc"] = {});
     var c_TrackingType = {
         TT_USER_COUNT: 0,
@@ -37,18 +38,17 @@
         TT_TIME_USAGE: 2,
         TT_DOCUMENT_SESSION: 3,
         TT_NONE: 4,
-        TT_USER_COUNT_2: 5
+        TT_USER_COUNT_2: 5,
+        TT_ACTIVE_CONNECTION_AWS: 6
     };
     function CTrackFile(obj) {
-        if (! (this instanceof CTrackFile)) {
-            return new CTrackFile(obj);
-        }
         this.trackingType = c_TrackingType.TT_USER_COUNT;
         this.licenseId = null;
         this.trackingUrl = g_sTrackingServiceLocalUrl;
         this.isPeriodicalyTracking = false;
         this.isAliveTrackingOnly = false;
         this.isTrackDone = false;
+        this.bAliveUser2 = false;
         if (undefined != obj && null != obj) {
             if (undefined != obj["licenseId"] && null != obj["licenseId"]) {
                 this.licenseId = obj["licenseId"];
@@ -62,11 +62,16 @@
         }
         switch (this.trackingType) {
         case c_TrackingType.TT_ACTIVE_CONNECTION:
+            case c_TrackingType.TT_ACTIVE_CONNECTION_AWS:
             this.isPeriodicalyTracking = true;
             this.isAliveTrackingOnly = false;
             break;
         case c_TrackingType.TT_DOCUMENT_SESSION:
-            case c_TrackingType.TT_USER_COUNT_2:
+            this.isPeriodicalyTracking = false;
+            this.isAliveTrackingOnly = true;
+            break;
+        case c_TrackingType.TT_USER_COUNT_2:
+            this.bAliveUser2 = true;
             this.isPeriodicalyTracking = false;
             this.isAliveTrackingOnly = true;
             break;
@@ -78,66 +83,55 @@
             break;
         }
         this.sendTrackFunc = null;
-        this.isDocumentModifiedFunc = null;
         this.trackingInterval = 300 * 1000;
         this.docId = null;
         this.userId = null;
+        this.bAliveUser = false;
     }
-    CTrackFile.prototype = {
-        constructor: CTrackFile,
-        Start: function () {
-            var oThis = this;
-            if (oThis.isPeriodicalyTracking || !oThis.isTrackDone) {
-                var _OnTrackingTimer = function () {
-                    oThis.Start();
-                };
-                var _OnSendTrack = function () {
-                    setTimeout(_OnTrackingTimer, oThis.trackingInterval);
-                };
-                if (oThis.isAliveTrackingOnly && !oThis._isAlive()) {
-                    _OnSendTrack();
-                } else {
-                    oThis.isTrackDone = true;
-                    oThis._sendTrack(_OnSendTrack);
-                }
-            }
-        },
-        Stop: function () {},
-        setInterval: function (inverval) {
-            this.trackingInterval = inverval * 1000;
-        },
-        setDocId: function (docId) {
-            this.docId = docId;
-        },
-        setUserId: function (userId) {
-            this.userId = userId;
-        },
-        setTrackFunc: function (func) {
-            if (undefined != func) {
-                this.sendTrackFunc = func;
-            }
-        },
-        setIsDocumentModifiedFunc: function (func) {
-            if (undefined != func) {
-                this.isDocumentModifiedFunc = func;
-            }
-        },
-        _isAlive: function () {
-            var bAlive = false;
-            if (null != this.isDocumentModifiedFunc) {
-                bAlive = this.isDocumentModifiedFunc();
-            }
-            return bAlive;
-        },
-        _sendTrack: function (callback) {
-            var rData = {
-                "docId": this.docId,
-                "clientId": this.userId,
-                "isAlive": this._isAlive() ? 1 : 0
+    CTrackFile.prototype.Start = function () {
+        var oThis = this;
+        if (this.isPeriodicalyTracking || !this.isTrackDone) {
+            var _OnTrackingTimer = function () {
+                oThis.Start();
             };
-            if (this.sendTrackFunc != null) {
-                this.sendTrackFunc(callback, this.trackingUrl, JSON.stringify(rData));
+            var _OnSendTrack = function () {
+                setTimeout(_OnTrackingTimer, oThis.trackingInterval);
+            };
+            if (this.isAliveTrackingOnly && !this.bAliveUser && !this.bAliveUser2) {
+                _OnSendTrack();
+            } else {
+                this.isTrackDone = true;
+                this._sendTrack(_OnSendTrack);
             }
+        }
+    };
+    CTrackFile.prototype.Stop = function () {};
+    CTrackFile.prototype.setInterval = function (inverval) {
+        this.trackingInterval = inverval * 1000;
+    };
+    CTrackFile.prototype.setDocId = function (docId) {
+        this.docId = docId;
+    };
+    CTrackFile.prototype.setUserId = function (userId) {
+        this.userId = userId;
+    };
+    CTrackFile.prototype.setTrackFunc = function (func) {
+        if (undefined != func) {
+            this.sendTrackFunc = func;
+        }
+    };
+    CTrackFile.prototype.setUserAlive = function () {
+        this.bAliveUser = true;
+    };
+    CTrackFile.prototype._sendTrack = function (callback) {
+        var rData = {
+            "docId": this.docId,
+            "clientId": this.userId,
+            "isAlive": this.bAliveUser ? 1 : 0
+        };
+        this.bAliveUser = false;
+        if (this.sendTrackFunc != null) {
+            this.sendTrackFunc(callback, this.trackingUrl, JSON.stringify(rData));
         }
     };
     asc.CTrackFile = CTrackFile;

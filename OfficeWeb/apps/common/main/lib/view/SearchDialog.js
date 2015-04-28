@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,197 +29,189 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("Common.view.SearchDialog", {
-    extend: "Ext.window.Window",
-    alias: "widget.commonsearchdialog",
-    requires: ["Ext.window.Window", "Ext.form.field.Checkbox"],
-    closable: true,
-    resizable: false,
-    height: 120,
-    width: 550,
-    padding: "12px 20px 0 20px",
-    constrain: true,
-    layout: {
-        type: "vbox",
-        align: "stretch"
-    },
-    listeners: {
-        show: function () {
-            this.txtSearchQuery.focus(false, 100);
-        }
-    },
-    initComponent: function () {
-        var me = this;
-        this.isSearchMode = true;
-        this.isViewMode = Ext.isDefined(this.initialConfig.isViewMode) ? this.initialConfig.isViewMode : false;
-        this.btnSearchPrev = Ext.create("Ext.Button", {
-            cls: "dlg-search",
-            width: 45,
-            iconCls: "asc-btn-search previous",
-            style: "margin: 0 6px 0 8px",
-            group: "search-text",
-            direction: "prev"
-        });
-        this.btnSearchNext = Ext.create("Ext.Button", {
-            cls: "dlg-search",
-            width: 45,
-            iconCls: "asc-btn-search next",
-            group: "search-text",
-            direction: "next"
-        });
-        this.btnReplace = Ext.create("Ext.Button", {
-            text: this.txtBtnReplace,
-            height: 22,
-            width: 96,
-            group: "replace-text",
-            style: "margin: 0 0 0 8px",
-            type: "single"
-        });
-        this.btnReplaceAll = Ext.create("Ext.Button", {
-            text: this.txtBtnReplaceAll,
-            height: 22,
-            width: 96,
-            group: "replace-text",
-            hidden: true,
-            type: "all"
-        });
-        this.btnOpenReplace = Ext.create("Ext.Button", {
-            text: this.txtBtnReplace,
-            height: 22,
-            width: 96,
-            hidden: this.isViewMode,
-            handler: function () {
-                me.replaceMode();
+ define(["common/main/lib/component/Window"], function () {
+    Common.UI.SearchDialog = Common.UI.Window.extend(_.extend({
+        options: {
+            width: 550,
+            title: "Search & Replace",
+            modal: false,
+            cls: "search",
+            toolclose: "hide",
+            alias: "SearchDialog"
+        },
+        initialize: function (options) {
+            _.extend(this.options, options || {});
+            this.template = ['<div class="box">', '<div class="input-row">', '<span class="btn-placeholder" id="search-placeholder-btn-options"></span>', '<input type="text" id="sd-text-search" class="form-control" maxlength="100" placeholder="' + this.textSearchStart + '">', "</div>", '<div class="input-row">', '<input type="text" id="sd-text-replace" class="form-control" maxlength="100" placeholder="' + this.textReplaceDef + '">', "</div>", '<div class="input-row">', '<label class="link" id="search-label-replace" result="replaceshow">' + this.txtBtnReplace + "</label>", "</div>", "</div>", '<div class="separator horizontal"/>', '<div class="footer right">', '<button class="btn normal dlg-btn" result="replace" style="margin-right: 6px;">' + this.txtBtnReplace + "</button>", '<button class="btn normal dlg-btn" result="replaceall" style="margin-right: 10px;">' + this.txtBtnReplaceAll + "</button>", '<button class="btn normal dlg-btn iconic" result="back" style="margin-right: 6px;"><span class="icon back" /></button>', '<button class="btn normal dlg-btn iconic" result="next"><span class="icon next" /></button>', "</div>"].join("");
+            this.options.tpl = _.template(this.template, this.options);
+            Common.UI.Window.prototype.initialize.call(this, this.options);
+        },
+        render: function () {
+            Common.UI.Window.prototype.render.call(this);
+            this.miMatchCase = new Common.UI.MenuItem({
+                caption: this.textMatchCase,
+                checkable: true
+            });
+            this.miMatchWord = new Common.UI.MenuItem({
+                caption: this.options.matchwordstr || this.textWholeWords,
+                checkable: true
+            });
+            this.miHighlight = new Common.UI.MenuItem({
+                caption: this.textHighlight,
+                checkable: true
+            });
+            this.btnOptions = new Common.UI.Button({
+                id: "search-btn-options",
+                cls: "btn-toolbar btn-toolbar-default",
+                iconCls: "btn-settings",
+                menu: new Common.UI.Menu({
+                    items: [this.miMatchCase, this.miMatchWord, this.miHighlight]
+                })
+            });
+            if (this.options.extraoptions) {
+                this.btnOptions.menu.addItem({
+                    caption: "--"
+                });
+                this.options.extraoptions.forEach(function (item) {
+                    this.btnOptions.menu.addItem(item);
+                },
+                this);
             }
-        });
-        this.chCaseSensitive = Ext.widget("checkbox", {
-            boxLabel: this.textMatchCase,
-            style: "margin: 0 20px 0 0",
-            checked: this.matchcase && this.matchcase.checked === true,
-            hidden: this.matchcase === false || (typeof(this.matchcase) == "object" && this.matchcase.visible === false)
-        });
-        this.chWholeWords = Ext.widget("checkbox", {
-            boxLabel: this.textWholeWords,
-            style: "margin: 0 20px 0 0",
-            checked: this.wholewords && this.wholewords.checked === true,
-            hidden: this.wholewords === false || (typeof(this.wholewords) == "object" && this.wholewords.visible === false)
-        });
-        this.chHighlight = Ext.widget("checkbox", {
-            boxLabel: this.textHighlight,
-            style: "margin: 0 20px 0 0",
-            action: "highlight",
-            checked: this.highlight && this.highlight.checked === true,
-            hidden: this.highlight === false || (typeof(this.highlight) == "object" && this.highlight.visible === false)
-        });
-        this.txtSearchQuery = Ext.create("Common.component.SearchField", {
-            id: "search-dialog-text-search",
-            flex: 1,
-            emptyText: this.textSearchStart,
-            tabIndex: 1,
-            style: "border-radius: 2px;"
-        });
-        this.txtReplaceQuery = Ext.create("Common.component.SearchField", {
-            id: "search-dialog-text-replace",
-            flex: 1,
-            style: "border-radius: 2px;",
-            emptyText: this.textSearchStart,
-            tabIndex: 2,
-            listeners: {
-                searchstart: function (obj, text) {
-                    obj.stopSearch(true);
+            this.btnOptions.render(this.$window.find("#search-placeholder-btn-options"));
+            if (!this.options.matchcase) {
+                this.miMatchCase.hide();
+            }
+            if (!this.options.matchword) {
+                this.miMatchWord.hide();
+            }
+            if (!this.options.markresult) {
+                this.miHighlight.hide();
+            } else {
+                if (this.options.markresult.applied) {
+                    this.miHighlight.setChecked(true, true);
                 }
             }
-        });
-        this.items = [{
-            xtype: "container",
-            width: 310,
-            height: 22,
-            layout: {
-                type: "hbox",
-                align: "stretch"
-            },
-            items: [this.txtSearchQuery, this.btnSearchPrev, this.btnSearchNext]
+            if (this.options.mode === "search") {
+                $(this.$window.find(".input-row").get(2)).hide();
+            }
+            this.txtSearch = this.$window.find("#sd-text-search");
+            this.txtReplace = this.$window.find("#sd-text-replace");
+            this.miHighlight.on("toggle", _.bind(this.onHighlight, this));
+            this.$window.find(".btn[result=back]").on("click", _.bind(this.onBtnClick, this, "back"));
+            this.$window.find(".btn[result=next]").on("click", _.bind(this.onBtnClick, this, "next"));
+            this.$window.find(".btn[result=replace]").on("click", _.bind(this.onBtnClick, this, "replace"));
+            this.$window.find(".btn[result=replaceall]").on("click", _.bind(this.onBtnClick, this, "replaceall"));
+            this.$window.find("label[result=replaceshow]").on("click", _.bind(this.onShowReplace, this));
+            this.txtSearch.on("keydown", null, "search", _.bind(this.onKeyPress, this));
+            this.txtReplace.on("keydown", null, "replace", _.bind(this.onKeyPress, this));
+            return this;
         },
-        {
-            xtype: "container",
-            width: 310,
-            height: 22,
-            style: "margin: 10px 0 0 0",
-            hidden: true,
-            layout: {
-                type: "hbox"
-            },
-            items: [this.txtReplaceQuery, this.btnReplace]
+        show: function (mode) {
+            Common.UI.Window.prototype.show.call(this); ! this.mode && !mode && (mode = "search");
+            if (mode && this.mode != mode) {
+                this.setMode(mode);
+            }
+            if (this.options.markresult && this.miHighlight.checked) {
+                this.fireEvent("search:highlight", [this, true]);
+            }
+            this.focus();
         },
-        {
-            xtype: "container",
-            width: 310,
-            height: 22,
-            style: "margin: 10px 0 0 0",
-            layout: {
-                type: "hbox"
+        focus: function () {
+            var me = this;
+            _.delay(function () {
+                me.txtSearch.focus();
+                me.txtSearch.select();
             },
-            items: [this.chCaseSensitive, this.chWholeWords, this.chHighlight, {
-                xtype: "box",
-                flex: 1
+            300);
+        },
+        onKeyPress: function (event) {
+            if (!this.isLocked()) {
+                if (event.keyCode == Common.UI.Keys.RETURN) {
+                    if (event.data == "search") {
+                        this.onBtnClick("next", event);
+                    } else {
+                        if (event.data == "replace" && this.mode == "replace") {
+                            this.onBtnClick("replace", event);
+                        }
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    if (event.keyCode == Common.UI.Keys.ESC) {
+                        this.hide();
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                }
+            }
+        },
+        onBtnClick: function (action, event) {
+            var opts = {
+                textsearch: this.txtSearch.val(),
+                textreplace: this.txtReplace.val(),
+                matchcase: this.miMatchCase.checked,
+                matchword: this.miMatchWord.checked,
+                highlight: this.miHighlight.checked
+            };
+            this.fireEvent("search:" + action, [this, opts]);
+        },
+        setMode: function (m) {
+            this.mode = m;
+            var $inputs = this.$window.find(".input-row");
+            if (m === "no-replace") {
+                this.setTitle(this.textTitle2);
+                $inputs.eq(1).hide();
+                $inputs.eq(2).hide();
+                this.$window.find(".btn[result=replace]").hide();
+                this.$window.find(".btn[result=replaceall]").hide();
+                if (this.options.matchcase || this.options.matchword || this.options.markresult) {} else {
+                    this.txtSearch.addClass("clear");
+                    this.btnOptions.hide();
+                }
+                this.setHeight(170);
+            } else {
+                this.txtSearch.removeClass("clear");
+                this.setTitle(this.textTitle);
+                if (m === "search") {
+                    $inputs.eq(2).show();
+                    $inputs.eq(1).hide();
+                    this.$window.find(".btn[result=replace]").hide();
+                    this.$window.find(".btn[result=replaceall]").hide();
+                } else {
+                    $inputs.eq(2).hide();
+                    $inputs.eq(1).show();
+                    this.$window.find(".btn[result=replace]").show();
+                    this.$window.find(".btn[result=replaceall]").show();
+                }
+                this.setHeight(200);
+            }
+        },
+        onShowReplace: function (e) {
+            this.setMode("replace");
+            var me = this;
+            _.defer(function () {
+                me.txtReplace.focus();
             },
-            this.btnReplaceAll, this.btnOpenReplace]
-        }];
-        if (this.simplesearch) {
-            this.items[2].hidden = true;
-            this.minHeight = 86;
-            this.height = 86;
-        }
-        this.callParent(arguments);
-        this.setTitle(this.isViewMode ? this.textTitle2 : this.textTitle);
+            300);
+        },
+        onHighlight: function (o, value) {
+            this.fireEvent("search:highlight", [this, value]);
+        },
+        getSettings: function () {
+            return {
+                textsearch: this.txtSearch.val(),
+                casesensitive: this.miMatchCase.checked,
+                wholewords: this.miMatchWord.checked
+            };
+        },
+        textTitle: "Search & Replace",
+        textTitle2: "Search",
+        txtBtnReplace: "Replace",
+        txtBtnReplaceAll: "Replace All",
+        textMatchCase: "Case sensitive",
+        textWholeWords: "Whole words only",
+        textHighlight: "Highlight results",
+        textReplaceDef: "Enter the replacement text",
+        textSearchStart: "Enter text for search"
     },
-    replaceMode: function () {
-        this.isSearchMode = false;
-        this.setSize({
-            height: 150
-        });
-        this.items.getAt(1).show();
-        this.btnReplaceAll.show();
-        this.btnOpenReplace.hide();
-    },
-    searchMode: function () {
-        this.isSearchMode = true;
-        this.setSize({
-            height: 120
-        });
-        this.items.getAt(1).hide();
-        this.btnReplaceAll.hide();
-        if (!this.isViewMode) {
-            this.btnOpenReplace.show();
-        }
-    },
-    getSettings: function () {
-        var out = {
-            textsearch: this.txtSearchQuery.getText(),
-            casesensitive: this.chCaseSensitive.getValue(),
-            wholewords: this.chWholeWords.getValue(),
-            highlight: this.chHighlight.getValue()
-        }; ! this.isSearchMode && (out.textreplace = this.txtReplaceQuery.getText());
-        return out;
-    },
-    selectSearch: function () {
-        if (this.txtSearchQuery.getText().length > 0) {
-            this.txtSearchQuery.focus(100, true);
-        }
-    },
-    setViewMode: function (mode) {
-        if (this.isViewMode !== mode) {
-            this.isViewMode = mode;
-            this.setTitle(this.isViewMode ? this.textTitle2 : this.textTitle);
-            this.btnOpenReplace.setVisible(!mode);
-        }
-    },
-    textTitle: "Search & Replace",
-    textTitle2: "Search",
-    txtBtnReplace: "Replace",
-    txtBtnReplaceAll: "Replace All",
-    textMatchCase: "Case sensitive",
-    textWholeWords: "Whole words only",
-    textHighlight: "Highlight results",
-    textSearchStart: "Enter text here"
+    Common.UI.SearchDialog || {}));
 });

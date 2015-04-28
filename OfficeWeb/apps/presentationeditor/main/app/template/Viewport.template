@@ -1,0 +1,17 @@
+<div class="layout-region">
+    <div id="pe-preview" style="position:absolute; left: 0; top: 0; display:none; width:100%; height:100%; z-index: 1;"></div>
+    <div id="viewport-vbox-layout" class="layout-ct vbox">
+        <div id="header" class="layout-item"></div>
+        <div id="toolbar" class="layout-item"></div>
+        <div class="layout-item">
+            <div id="viewport-hbox-layout" class="layout-ct hbox">
+                <div id="left-menu" class="layout-item" style="width: 40px;"></div>
+                <div id="file-menu-panel" class="left-menu-full-ct" style="display:none;"></div>
+                <div id="about-menu-panel" class="left-menu-full-ct" style="display:none;"></div>
+                <div id="editor_sdk" class="layout-item"></div>
+                <div id="right-menu" class="layout-item"></div>
+            </div>
+        </div>
+        <div id="statusbar" class="layout-item"></div>
+    </div>
+</div>

@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,8 +29,9 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function CAscColorScheme() {
-    this.Colors = new Array();
+ "use strict";
+function CAscColorScheme() {
+    this.Colors = [];
     this.Name = "";
 }
 CAscColorScheme.prototype.get_colors = function () {
@@ -49,41 +50,6 @@ CAscTexture.prototype.get_id = function () {
 CAscTexture.prototype.get_image = function () {
     return this.Image;
 };
-function CColor(r, g, b) {
-    this.r = (undefined == r) ? 0 : r;
-    this.g = (undefined == g) ? 0 : g;
-    this.b = (undefined == b) ? 0 : b;
-}
-CColor.prototype.get_r = function () {
-    return this.r;
-};
-CColor.prototype.put_r = function (v) {
-    this.r = v;
-    this.hex = undefined;
-};
-CColor.prototype.get_g = function () {
-    return this.g;
-};
-CColor.prototype.put_g = function (v) {
-    this.g = v;
-    this.hex = undefined;
-};
-CColor.prototype.get_b = function () {
-    return this.b;
-};
-CColor.prototype.put_b = function (v) {
-    this.b = v;
-    this.hex = undefined;
-};
-CColor.prototype.get_hex = function () {
-    if (!this.hex) {
-        var r = this.r.toString(16);
-        var g = this.g.toString(16);
-        var b = this.b.toString(16);
-        this.hex = (r.length == 1 ? "0" + r : r) + (g.length == 1 ? "0" + g : g) + (b.length == 1 ? "0" + b : b);
-    }
-    return this.hex;
-};
 function CAscColor() {
     this.type = c_oAscColor.COLOR_TYPE_SRGB;
     this.value = null;
@@ -91,8 +57,23 @@ function CAscColor() {
     this.g = 0;
     this.b = 0;
     this.a = 255;
-    this.Mods = new Array();
+    this.Auto = false;
+    this.Mods = [];
     this.ColorSchemeId = -1;
+    if (1 === arguments.length) {
+        this.r = arguments[0].r;
+        this.g = arguments[0].g;
+        this.b = arguments[0].b;
+    } else {
+        if (3 <= arguments.length) {
+            this.r = arguments[0];
+            this.g = arguments[1];
+            this.b = arguments[2];
+        }
+        if (4 === arguments.length) {
+            this.a = arguments[3];
+        }
+    }
 }
 CAscColor.prototype.get_r = function () {
     return this.r;
@@ -134,6 +115,12 @@ CAscColor.prototype.get_value = function () {
 CAscColor.prototype.put_value = function (v) {
     this.value = v;
 };
+CAscColor.prototype.put_auto = function (v) {
+    this.Auto = v;
+};
+CAscColor.prototype.get_auto = function () {
+    return this.Auto;
+};
 CAscColor.prototype.get_hex = function () {
     if (!this.hex) {
         var a = this.a.toString(16);
@@ -148,13 +135,14 @@ CAscColor.prototype.get_color = function () {
     var ret = new CColor(this.r, this.g, this.b);
     return ret;
 };
-function CreateAscColorCustom(r, g, b) {
+function CreateAscColorCustom(r, g, b, auto) {
     var ret = new CAscColor();
     ret.type = c_oAscColor.COLOR_TYPE_SRGB;
     ret.r = r;
     ret.g = g;
     ret.b = b;
     ret.a = 255;
+    ret.Auto = (undefined === auto ? false : auto);
     return ret;
 }
 function CreateAscColor(unicolor) {
@@ -184,7 +172,13 @@ function CreateAscColor(unicolor) {
     }
     return ret;
 }
-function CorrectUniColor(asc_color, unicolor) {
+function CreateUnifillFromAscColor(asc_color) {
+    var Unifill = new CUniFill();
+    Unifill.fill = new CSolidFill();
+    Unifill.fill.color = CorrectUniColor(asc_color, Unifill.fill.color);
+    return Unifill;
+}
+function CorrectUniColor(asc_color, unicolor, flag) {
     if (null == asc_color) {
         return unicolor;
     }
@@ -198,7 +192,7 @@ function CorrectUniColor(asc_color, unicolor) {
         if (ret.color == null || ret.color.type != COLOR_TYPE_PRST) {
             ret.color = new CPrstColor();
         }
-        ret.color.id = asc_color.get_value();
+        ret.color.id = asc_color.value;
         if (ret.Mods.Mods.length != 0) {
             ret.Mods.Mods.splice(0, ret.Mods.Mods.length);
         }
@@ -207,36 +201,49 @@ function CorrectUniColor(asc_color, unicolor) {
         if (ret.color == null || ret.color.type != COLOR_TYPE_SCHEME) {
             ret.color = new CSchemeColor();
         }
-        var _index = parseInt(asc_color.get_value());
+        var _index = parseInt(asc_color.value);
+        if (isNaN(_index)) {
+            break;
+        }
         var _id = (_index / 6) >> 0;
         var _pos = _index - _id * 6;
         var array_colors_types = [6, 15, 7, 16, 0, 1, 2, 3, 4, 5];
         ret.color.id = array_colors_types[_id];
+        if (!ret.Mods) {
+            ret.setMods(new CColorModifiers());
+        }
         if (ret.Mods.Mods.length != 0) {
             ret.Mods.Mods.splice(0, ret.Mods.Mods.length);
         }
-        var __mods = g_oThemeColorsDefaultMods;
+        var __mods = null;
+        var _flag;
         if (editor && editor.WordControl && editor.WordControl.m_oDrawingDocument && editor.WordControl.m_oDrawingDocument.GuiControlColorsMap) {
             var _map = editor.WordControl.m_oDrawingDocument.GuiControlColorsMap;
-            var __r = _map[_id].r;
-            var __g = _map[_id].g;
-            var __b = _map[_id].b;
-            if (__r > 200 && __g > 200 && __b > 200) {
-                __mods = g_oThemeColorsDefaultMods1;
-            } else {
-                if (__r < 40 && __g < 40 && __b < 40) {
-                    __mods = g_oThemeColorsDefaultMods2;
+            _flag = isRealNumber(flag) ? flag : 1;
+            __mods = GetDefaultMods(_map[_id].r, _map[_id].g, _map[_id].b, _pos, _flag);
+        } else {
+            var _editor = window["Asc"] && window["Asc"]["editor"];
+            if (_editor && _editor.wbModel) {
+                var _theme = _editor.wbModel.theme;
+                var _clrMap = _editor.wbModel.clrSchemeMap;
+                if (_theme && _clrMap) {
+                    var _schemeClr = new CSchemeColor();
+                    _schemeClr.id = array_colors_types[_id];
+                    var _rgba = {
+                        R: 0,
+                        G: 0,
+                        B: 0,
+                        A: 255
+                    };
+                    _schemeClr.Calculate(_theme, _clrMap.color_map, _rgba);
+                    _flag = isRealNumber(flag) ? flag : 0;
+                    __mods = GetDefaultMods(_schemeClr.RGBA.R, _schemeClr.RGBA.G, _schemeClr.RGBA.B, _pos, _flag);
                 }
             }
         }
-        if (1 <= _pos && _pos <= 5) {
-            var _mods = __mods[_pos - 1];
-            var _ind = 0;
-            for (var k in _mods) {
-                ret.Mods.Mods[_ind] = new CColorMod();
-                ret.Mods.Mods[_ind].name = k;
-                ret.Mods.Mods[_ind].val = _mods[k];
-                _ind++;
+        if (null != __mods) {
+            for (var modInd = 0; modInd < __mods.length; modInd++) {
+                ret.Mods.Mods[modInd] = _create_mod(__mods[modInd]);
             }
         }
         break;
@@ -244,11 +251,11 @@ function CorrectUniColor(asc_color, unicolor) {
         if (ret.color == null || ret.color.type != COLOR_TYPE_SRGB) {
             ret.color = new CRGBColor();
         }
-        ret.color.RGBA.R = asc_color.get_r();
-        ret.color.RGBA.G = asc_color.get_g();
-        ret.color.RGBA.B = asc_color.get_b();
-        ret.color.RGBA.A = asc_color.get_a();
-        if (ret.Mods.Mods.length != 0) {
+        ret.color.RGBA.R = asc_color.r;
+        ret.color.RGBA.G = asc_color.g;
+        ret.color.RGBA.B = asc_color.b;
+        ret.color.RGBA.A = asc_color.a;
+        if (ret.Mods && ret.Mods.Mods.length != 0) {
             ret.Mods.Mods.splice(0, ret.Mods.Mods.length);
         }
     }
@@ -400,8 +407,8 @@ function CreateAscFill(unifill) {
         ret.fill = new CAscFillGrad();
         for (var i = 0; i < _fill.colors.length; i++) {
             if (0 == i) {
-                ret.fill.Colors = new Array();
-                ret.fill.Positions = new Array();
+                ret.fill.Colors = [];
+                ret.fill.Positions = [];
             }
             ret.fill.Colors.push(CreateAscColor(_fill.colors[i].color));
             ret.fill.Positions.push(_fill.colors[i].pos);
@@ -421,6 +428,10 @@ function CreateAscFill(unifill) {
         ret.fill.url = _fill.RasterImageId;
         ret.fill.type = (_fill.tile == null) ? c_oAscFillBlipType.STRETCH : c_oAscFillBlipType.TILE;
         break;
+    case FILL_TYPE_NOFILL:
+        case FILL_TYPE_NONE:
+        ret.type = c_oAscFill.FILL_TYPE_NOFILL;
+        break;
     default:
         break;
     }
@@ -435,8 +446,8 @@ function CorrectUniFill(asc_fill, unifill) {
     if (null == ret) {
         ret = new CUniFill();
     }
-    var _fill = asc_fill.get_fill();
-    var _type = asc_fill.get_type();
+    var _fill = asc_fill.fill;
+    var _type = asc_fill.type;
     if (null != _type) {
         switch (_type) {
         case c_oAscFill.FILL_TYPE_NOFILL:
@@ -446,8 +457,8 @@ function CorrectUniFill(asc_fill, unifill) {
             if (ret.fill == null || ret.fill.type != FILL_TYPE_BLIP) {
                 ret.fill = new CBlipFill();
             }
-            var _url = _fill.get_url();
-            var _tx_id = _fill.get_texture_id();
+            var _url = _fill.url;
+            var _tx_id = _fill.texture_id;
             if (null != _tx_id && (0 <= _tx_id) && (_tx_id < g_oUserTexturePresets.length)) {
                 _url = g_oUserTexturePresets[_tx_id];
             }
@@ -457,7 +468,7 @@ function CorrectUniFill(asc_fill, unifill) {
             if (ret.fill.RasterImageId == null) {
                 ret.fill.RasterImageId = "";
             }
-            var tile = _fill.get_type();
+            var tile = _fill.type;
             if (tile == c_oAscFillBlipType.STRETCH) {
                 ret.fill.tile = null;
             } else {
@@ -474,18 +485,18 @@ function CorrectUniFill(asc_fill, unifill) {
                 ret.fill.ftype = _fill.PatternType;
             }
             if (undefined != _fill.fgClr) {
-                ret.fill.fgClr = CorrectUniColor(_fill.get_color_fg(), ret.fill.fgClr);
+                ret.fill.fgClr = CorrectUniColor(_fill.fgClr, ret.fill.fgClr);
             }
             if (undefined != _fill.bgClr) {
-                ret.fill.bgClr = CorrectUniColor(_fill.get_color_bg(), ret.fill.bgClr);
+                ret.fill.bgClr = CorrectUniColor(_fill.bgClr, ret.fill.bgClr);
             }
             break;
         case c_oAscFill.FILL_TYPE_GRAD:
             if (ret.fill == null || ret.fill.type != FILL_TYPE_GRAD) {
                 ret.fill = new CGradFill();
             }
-            var _colors = _fill.get_colors();
-            var _positions = _fill.get_positions();
+            var _colors = _fill.Colors;
+            var _positions = _fill.Positions;
             if (undefined != _colors && undefined != _positions) {
                 if (_colors.length == _positions.length) {
                     ret.fill.colors.splice(0, ret.fill.colors.length);
@@ -513,10 +524,10 @@ function CorrectUniFill(asc_fill, unifill) {
                     }
                 }
             }
-            var _grad_type = _fill.get_grad_type();
+            var _grad_type = _fill.GradType;
             if (c_oAscFillGradType.GRAD_LINEAR == _grad_type) {
-                var _angle = _fill.get_linear_angle();
-                var _scale = _fill.get_linear_scale();
+                var _angle = _fill.LinearAngle;
+                var _scale = _fill.LinearScale;
                 if (!ret.fill.lin) {
                     ret.fill.lin = new GradLin();
                 }
@@ -537,24 +548,15 @@ function CorrectUniFill(asc_fill, unifill) {
             if (ret.fill == null || ret.fill.type != FILL_TYPE_SOLID) {
                 ret.fill = new CSolidFill();
             }
-            ret.fill.color = CorrectUniColor(_fill.get_color(), ret.fill.color);
+            ret.fill.color = CorrectUniColor(_fill.color, ret.fill.color);
         }
     }
-    var _alpha = asc_fill.get_transparent();
+    var _alpha = asc_fill.transparent;
     if (null != _alpha) {
         ret.transparent = _alpha;
     }
     return ret;
 }
-function CAscSlideProps() {
-    this.Background = null;
-}
-CAscSlideProps.prototype.get_background = function () {
-    return this.Background;
-};
-CAscSlideProps.prototype.put_background = function (v) {
-    this.Background = v;
-};
 function CAscStroke() {
     this.type = null;
     this.width = null;
@@ -662,8 +664,8 @@ function CreateAscStroke(ln, _canChangeArrows) {
     if (ln.cap != null) {
         ret.put_linecap(ln.cap);
     }
-    if (ln.LineJoin != null) {
-        ret.put_linejoin(ln.LineJoin.type);
+    if (ln.Join != null) {
+        ret.put_linejoin(ln.Join.type);
     }
     if (ln.headEnd != null) {
         ret.put_linebeginstyle((ln.headEnd.type == null) ? LineEndType.None : ln.headEnd.type);
@@ -694,12 +696,12 @@ function CorrectUniStroke(asc_stroke, unistroke) {
     if (null == ret) {
         ret = new CLn();
     }
-    var _type = asc_stroke.get_type();
-    var _w = asc_stroke.get_width();
+    var _type = asc_stroke.type;
+    var _w = asc_stroke.width;
     if (_w != null && _w !== undefined) {
         ret.w = _w * 36000;
     }
-    var _color = asc_stroke.get_color();
+    var _color = asc_stroke.color;
     if (_type == c_oAscStrokeType.STROKE_NONE) {
         ret.Fill = new CUniFill();
         ret.Fill.fill = new CNoFill();
@@ -713,30 +715,30 @@ function CorrectUniStroke(asc_stroke, unistroke) {
             }
         }
     }
-    var _join = asc_stroke.get_linejoin();
+    var _join = asc_stroke.LineJoin;
     if (null != _join) {
-        ret.LineJoin = new LineJoin();
-        ret.LineJoin.type = _join;
+        ret.Join = new LineJoin();
+        ret.Join.type = _join;
     }
-    var _cap = asc_stroke.get_linecap();
+    var _cap = asc_stroke.LineCap;
     if (null != _cap) {
         ret.cap = _cap;
     }
-    var _begin_style = asc_stroke.get_linebeginstyle();
+    var _begin_style = asc_stroke.LineBeginStyle;
     if (null != _begin_style) {
         if (ret.headEnd == null) {
             ret.headEnd = new EndArrow();
         }
         ret.headEnd.type = _begin_style;
     }
-    var _end_style = asc_stroke.get_lineendstyle();
+    var _end_style = asc_stroke.LineEndStyle;
     if (null != _end_style) {
         if (ret.tailEnd == null) {
             ret.tailEnd = new EndArrow();
         }
         ret.tailEnd.type = _end_style;
     }
-    var _begin_size = asc_stroke.get_linebeginsize();
+    var _begin_size = asc_stroke.LineBeginSize;
     if (null != _begin_size) {
         if (ret.headEnd == null) {
             ret.headEnd = new EndArrow();
@@ -744,7 +746,7 @@ function CorrectUniStroke(asc_stroke, unistroke) {
         ret.headEnd.w = 2 - ((_begin_size / 3) >> 0);
         ret.headEnd.len = 2 - (_begin_size % 3);
     }
-    var _end_size = asc_stroke.get_lineendsize();
+    var _end_size = asc_stroke.LineEndSize;
     if (null != _end_size) {
         if (ret.tailEnd == null) {
             ret.tailEnd = new EndArrow();
@@ -760,6 +762,10 @@ function CAscShapeProp() {
     this.stroke = null;
     this.paddings = null;
     this.canFill = true;
+    this.bFromChart = false;
+    this.Locked = false;
+    this.w = null;
+    this.h = null;
 }
 CAscShapeProp.prototype.get_type = function () {
     return this.type;
@@ -790,6 +796,36 @@ CAscShapeProp.prototype.get_CanFill = function () {
 };
 CAscShapeProp.prototype.put_CanFill = function (v) {
     this.canFill = v;
+};
+CAscShapeProp.prototype.get_FromChart = function () {
+    return this.bFromChart;
+};
+CAscShapeProp.prototype.put_FromChart = function (v) {
+    this.bFromChart = v;
+};
+CAscShapeProp.prototype.get_Locked = function () {
+    return this.Locked;
+};
+CAscShapeProp.prototype.put_Locked = function (v) {
+    this.Locked = v;
+};
+CAscShapeProp.prototype.get_Width = function () {
+    return this.w;
+};
+CAscShapeProp.prototype.put_Width = function (v) {
+    this.w = v;
+};
+CAscShapeProp.prototype.get_Height = function () {
+    return this.h;
+};
+CAscShapeProp.prototype.put_Height = function (v) {
+    this.h = v;
+};
+CAscShapeProp.prototype.get_VerticalTextAlign = function () {
+    return this.verticalTextAlign;
+};
+CAscShapeProp.prototype.put_VerticalTextAlign = function (v) {
+    this.verticalTextAlign = v;
 };
 function CreateAscShapeProp(shape) {
     if (null == shape) {
@@ -830,6 +866,9 @@ function CreateAscShapePropFromProp(shapeProp) {
     if (!isRealObject(shapeProp)) {
         return obj;
     }
+    if (isRealBool(shapeProp.locked)) {
+        obj.Locked = shapeProp.locked;
+    }
     if (typeof shapeProp.type === "string") {
         obj.type = shapeProp.type;
     }
@@ -845,6 +884,9 @@ function CreateAscShapePropFromProp(shapeProp) {
     if (shapeProp.canFill === true || shapeProp.canFill === false) {
         obj.canFill = shapeProp.canFill;
     }
+    obj.bFromChart = shapeProp.bFromChart;
+    obj.w = shapeProp.w;
+    obj.h = shapeProp.h;
     return obj;
 }
 function CorrectShapeProp(asc_shape_prop, shape) {
@@ -854,37 +896,6 @@ function CorrectShapeProp(asc_shape_prop, shape) {
     shape.spPr.Fill = CorrectUniFill(asc_shape_prop.get_fill(), shape.spPr.Fill);
     shape.spPr.ln = CorrectUniFill(asc_shape_prop.get_stroke(), shape.spPr.ln);
 }
-function CAscThemeInfo(themeInfo) {
-    this.Obj = themeInfo;
-    this.Index = -1000;
-}
-CAscThemeInfo.prototype.get_Name = function () {
-    return this.Obj["Name"];
-};
-CAscThemeInfo.prototype.get_Url = function () {
-    return this.Obj["Url"];
-};
-CAscThemeInfo.prototype.get_Image = function () {
-    return this.Obj["Thumbnail"];
-};
-CAscThemeInfo.prototype.get_Index = function () {
-    return this.Index;
-};
-function CAscThemes() {
-    this.EditorThemes = new Array();
-    this.DocumentThemes = new Array();
-    var _count = _presentation_editor_themes.length;
-    for (var i = 0; i < _count; i++) {
-        this.EditorThemes[i] = new CAscThemeInfo(_presentation_editor_themes[i]);
-        this.EditorThemes[i].Index = i;
-    }
-}
-CAscThemes.prototype.get_EditorThemes = function () {
-    return this.EditorThemes;
-};
-CAscThemes.prototype.get_DocumentThemes = function () {
-    return this.DocumentThemes;
-};
 function CAscTableStyle() {
     this.Id = "";
     this.Type = 0;
@@ -898,6 +909,43 @@ CAscTableStyle.prototype.get_Image = function () {
 };
 CAscTableStyle.prototype.get_Type = function () {
     return this.Type;
+};
+function CPaddings(obj) {
+    if (obj) {
+        this.Left = (undefined == obj.Left) ? null : obj.Left;
+        this.Top = (undefined == obj.Top) ? null : obj.Top;
+        this.Bottom = (undefined == obj.Bottom) ? null : obj.Bottom;
+        this.Right = (undefined == obj.Right) ? null : obj.Right;
+    } else {
+        this.Left = null;
+        this.Top = null;
+        this.Bottom = null;
+        this.Right = null;
+    }
+}
+CPaddings.prototype.get_Left = function () {
+    return this.Left;
+};
+CPaddings.prototype.put_Left = function (v) {
+    this.Left = v;
+};
+CPaddings.prototype.get_Top = function () {
+    return this.Top;
+};
+CPaddings.prototype.put_Top = function (v) {
+    this.Top = v;
+};
+CPaddings.prototype.get_Bottom = function () {
+    return this.Bottom;
+};
+CPaddings.prototype.put_Bottom = function (v) {
+    this.Bottom = v;
+};
+CPaddings.prototype.get_Right = function () {
+    return this.Right;
+};
+CPaddings.prototype.put_Right = function (v) {
+    this.Right = v;
 };
 function GenerateTableStyles(drawingDoc, logicDoc, tableLook) {
     var _dst_styles = [];

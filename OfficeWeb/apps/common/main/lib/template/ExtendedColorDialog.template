@@ -1,0 +1,32 @@
+<div class="color-box">
+    <div id="id-hsb-colorpicker" style="vertical-align:top;">
+    </div>
+    <div class="color-info" style="">
+        <div style="margin-left:15px;">
+            <label class="color-label"><%= txtNew %></label>
+            <div id="field-new-color" class="color-cnt top"></div>
+            <div id="field-start-color" class="color-cnt bottom"></div>
+            <label class="color-label"><%= txtCurrent %></label>
+        </div>
+        <div style="padding:13px 0 2px 0;">
+            <label class="input-label">R:</label>
+            <div id="extended-spin-r" class="color-spin"></div>
+        </div>
+        <div style="padding:2px 0;">
+            <label class="input-label">G:</label>
+            <div id="extended-spin-g" class="color-spin"></div>
+        </div>
+        <div style="padding:2px 0;">
+            <label class="input-label">B:</label>
+            <div id="extended-spin-b" class="color-spin"></div>
+        </div>
+        <div style="padding:11px 0 0 0;">
+            <label class="input-label" style="width:12px;">#:</label>
+            <input id="extended-text-color" type="text" role="textbox" style="width:62px; height: 22px;">
+        </div>
+    </div>
+</div>
+<div class="footer center">
+    <button class="btn normal dlg-btn primary" result="1"><%= txtAdd %></button>
+    <button class="btn normal dlg-btn" result="0"><%= txtCancel %></button>
+</div>

@@ -1,0 +1,23 @@
+{
+  "name": "jquery.browser",
+  "version": "0.0.5",
+  "authors": [
+    "Gabriel Cebrian <gabceb@gmail.com>",
+    "jQuery Team <https://github.com/gabceb/jquery-browser-plugin/wiki/Authors>"
+  ],
+  "description": "A jQuery plugin for browser detection.",
+  "repository": "git@github.com:gabceb/jquery-browser-plugin.git",
+  "devDependencies": {
+    "webserver": "*",
+    "utils": "*",
+    "grunt": "~0.4.0",
+    "grunt-contrib-jshint": "~0.1.1",
+    "grunt-contrib-uglify": "~0.2.7",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-exec": "~0.4.2"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">= 0.4.0"
+  }
+}

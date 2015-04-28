@@ -1,14 +1,14 @@
 ﻿<!DOCTYPE html>
 <html>
 	<head>
-		<title>Insertar autoformas</title>
+		<title>Inserte autoformas</title>
 		<meta charset="utf-8" />
 		<meta name="description" content="Añada un autoforma a su documento y ajuste sus parámetros." />
 		<link type="text/css" rel="stylesheet" href="../editor.css" />
 	</head>
 	<body>
 		<div class="mainpart">
-			<h1>Insertar autoformas</h1>
+			<h1>Inserte autoformas</h1>
 			<p>Para añadir un autoforma a su documento,</p>
 			<ol>
 				<li>pulse el icono <b>Insertar autoforma</b> <img alt="icono insertar autoforma" src="../images/insertautoshape.png" /> en la barra de herramientas superior,</li>
@@ -21,13 +21,14 @@
 			</ol>
 			<p><img class="floatleft" alt="cambiar autoforma" src="../images/reshaping.png" />Para cambiar el tamaño de autoforma, arrastre pequeños cuadrados <img alt="icono cuadrado" src="../images/resize_square.png" /> situados en los bordes de autoforma. Para mantener los proporciones originales del autoforma seleccionada mientras redimensionamiento, mantenga apretada la tecla <b>Shift</b> y arrastre una de los iconos de la esquina.</p>
 			<p>Al modificar unas formas, por ejemplo flechas o llamadas, puede notar el icono rombo amarillo <img alt="Yellow diamond icon" src="../images/yellowdiamond.png" />. Esta función le permite a usted ajustar unos aspectos de la forma, por ejemplo, la longitud de la punta de flecha.</p>
-			<p>Para cambiar la posición de autoforma, use el icono <img alt="flecha" src="../images/arrow.png" /> que aparecerá si mantiene cursor de su ratón sobre el autoforma. Arrastre el autoforma a la posición necesaria apretando el botón de ratón. 
+			<p>Para cambiar la posición de autoforma, use el icono <img alt="flecha" src="../images/arrow.png" /> que aparecerá si mantiene cursor de su ratón sobre el autoforma. Arrastre el autoforma a la posición necesaria apretando el botón de ratón. Cuando mueve el autoforma, las línes guía se muestran para ayudarle a colocar el objeto en la página más precisamente.
 			Para desplazar el autoforma en incrementos de tres píxeles, mantenga apretada la tecla <b>Ctrl</b> y use las flechas en el teclado. 
 			Para desplazar el autoforma sólo horizontalmente/verticalmente y evitar que se mueva en dirección perpendicular, al arrastrar mantenga apretada la tecla <b>Shift</b>.</p>
 			<p>Para girar el autoforma, mantenga el cursor sobre el controlador de giro <img alt="controlador de giro" src="../images/greencircle.png" /> y arrástrelo en la dirección de las manecillas de reloj o en el sentido antihorario.  Para limitar el ángulo de rotación hasta el incremento de 15 grados, mantenga apretada la tecla <b>Shift</b> mientras rotación.</p>
 			<hr />
 			<p>Para alinear y arreglar autoformas, use el menú contextual:</p>
 			<ul>
+			    <li><b>Cortar, Copiar, Pegar</b> - opciones estándar usadas para cortar, copiar un texto/objeto seleccionado y pegar un pasaje de texto u objeto anteriormente cortado/copiado a una posición de cursor actual.</li>
 				<li><b>Arreglar</b> se usa para traer al primer plano el autoforma seleccionada, enviarla al fondo, traerla adelante o enviarla atrás. También agrupar o desagrupar autoformas para realizar las operaciones con unas imágenes a la vez.</li>
 				<li><b>Alinear</b> se usa para alinear el autoforma a la izquierda, al centro, a la derecha, en la parte superior, al medio, en la parte inferior.</li>
 				<li><b>Ajuste de texto</b> se usa para seleccionar el ajuste de texto de los estilos disponibles - alineado, cuadrado, estrecho, a través, superior e inferior, adelante, detrás - o editar límite de ajuste. La opción <b>Editar límite de ajuste</b> estará disponible sólo si usted selecciona cualquier ajuste de texto excepto alineado. Arrastre puntos de ajuste para personalizar el borde. Para crear un punto de ajuste nuevo, haga clic en cualquier lugar de la línea roja y arrástrela a la posición necesaria. <img alt="Editar límite de ajuste" src="../images/wrap_boundary.png" /></li>
@@ -36,20 +37,11 @@
 			<hr />
 			<p>Usted puede cambiar unos ajustes de autofomas usando la pestaña <b>Ajustes de forma</b> en la derecha barra lateral que aparece si hace clic sobre la forma añadida. Aquí usted puede cambiar los ajustes siguientes:</p>
 			<ul>
-			<li><b>Relleno</b> - use esta sección para seleccionar el relleno de autoforma. Usted puede elegir las opciones siguientes:
+			<li id="shape_fill"><b>Relleno</b> - use esta sección para seleccionar el relleno de autoforma. Usted puede elegir las opciones siguientes:
 			<ul>
 				<li><b>Relleno de color</b> - seleccione esta opción para especificar el color sólido que usted quiere aplicar al espacio interior del autoforma seleccionada.
 				<p><img alt="Rellene de color" src="../images/fill_color.png" /></p>
-				<p id="color">Pulse la casilla de color debajo y seleccione el color necesario en el conjunto de colores o especifique algún color deseado:</p>
-					<p><img alt="Paletas" src="../images/palette.png" /></p>
-					<ul>
-						<li><b>Colores de tema</b> - los colores que corresponden a la combinación seleccionada de colores de un documento.</li>
-						<li><b>Colores estándar</b> - el conjunto de colores predeterminado.</li>
-						<li><b>Color personalizado</b> -  pulse este enlace si en las paletas disponibles no hay color necesario. Seleccione el rango del color necesario desplazando el vertical control deslizante y establezca el color deseado arrastrando el selector de colores dentro del grande campo de color. Una vez seleccionado el color con selector, los valores RGB y sRGB apropiados serán mostrados en los campos a la derecha. Usted también puede especificar un color basándose en el modelo de color RGB introduciendo necesarios valores numéricos en los campos <b>R</b>, <b>G</b>, <b>B</b> (red-rojo, green-verde, blue-azul) o introduzca el código hexadecimal sRGB en el campo marcado con el signo <b>#</b>.  El color seleccionado aparece en la casilla <b>Nuevo</b>. Si anteriormente el objeto era rellenado con cualquier color personalizado, este color se muestra en la casilla <b>Actual</b> para que usted pueda comparar los colores original y modificado. Cuando el color se haya especificado, pulse el botón <b>Añadir</b>:
-						<p><img alt="Paleta - Color personalizado" src="../images/palette_custom.png" /></p>
-						<p>El color personalizado se aplicará a su autoforma y se añadirá a la paleta <b>Color personalizado</b>.</p>
-						</li>
-					</ul>
+				<p id="color">Pulse la casilla de color debajo y seleccione el color necesario en <a href="../UsageInstructions/ChangeColorScheme.htm">el conjunto de colores</a> o especifique algún color deseado:</p>
 				</li>
 				<li><b>Relleno degradado</b> - seleccione esta opción para rellenar la forma de dos colores que suavemente cambian de un color a otro.
 				<p><img alt="Relleno degradado" src="../images/fill_gradient.png" /></p>
@@ -79,8 +71,8 @@
 				<p><img alt="Rellene de patron" src="../images/fill_pattern.png" /></p>
 				    <ul>
 				        <li><b>Patrón</b> - seleccione uno de los diseños predeterminados en el menú.</li>
-							<li><b>Color de primer plano</b> - pulse esta casilla de color para cambiar el color de elementos de patrón.</li>
-							<li><b>Color de fondo</b> - pulse esta casilla de color para cambiar el color de fondo de patrón.</li>
+						<li><b>Color de primer plano</b> - pulse esta casilla de color para cambiar el color de elementos de patrón.</li>
+						<li><b>Color de fondo</b> - pulse esta casilla de color para cambiar el color de fondo de patrón.</li>
 				    </ul>			
 				</li>
 				<li><b>Sin relleno</b> - seleccione esta opción si no quiere usar ningún relleno.</li>
@@ -90,10 +82,10 @@
 			<p><img class="floatleft" alt="pestaña Ajustes de autoforma" src="../images/right_autoshape.png" /></p>
 			<ul style="margin-left: 280px;">
 			<li><b>Opacidad</b> - use esta sección para establecer la nivel de <b>Opacidad</b> arrastrando el control deslizante o introduciendo el valor porcentual manualmente. El valor predeterminado es <b>100%</b>. Esto corresponde a la capacidad completa. El valor <b>0%</b> corresponde a la plena transparencia.</li>
-			<li><b>Trazo</b> - use esta sección para cambiar el ancho y color de trazo de autoforma.
+			<li id="shape_stroke"><b>Trazo</b> - use esta sección para cambiar el ancho y color de trazo de autoforma.
 				<ul>
 				<li>Para cambiar el ancho de trazo, seleccione una de las opciones disponibles en la lista desplegable <b>Tamaño</b>. Las opciones disponibles son: 0.5 pt, 1 pt, 1.5 pt, 2.25 pt, 3 pt, 4.5 pt, 6 pt. Alternativamente, seleccione la opción <b>Sin relleno</b> si no quiere usar ningún trazo.</li>
-				<li>Para cambiar el <b>color</b> de trazo, pulse la casilla de color debajo y <a href="#color"> seleccione el color necesario</a>.</li>
+				<li>Para cambiar el <b>color</b> de trazo, pulse la casilla de color debajo y <a href="../UsageInstructions/ChangeColorScheme.htm"> seleccione el color necesario</a>.</li>
 				</ul>
 			</li>
 			<li><b>Ajuste de texto</b> - use esta sección para seleccionar estilo de ajuste de texto en la lista de los disponibles - alineado, cuadrado, estrecho, a través, superior e inferior, adelante, detrás (para obtener más información lea la descripción de ajustes avanzados debajo).</li>
@@ -157,7 +149,8 @@
 				<li><b>Flechas</b> - este grupo de opciones está disponible sólo para el grupo de formas <b>Líneas</b>. Le permite seleccionar el estilo y tamaño <b>Inicial</b> y <b>Final</b> eligiendo la opción apropiada en la lista desplegable.</li>
 			</ul>
 			<img alt="Forma - Ajustes avanzados" src="../images/shape_properties_4.png" />
-			<p>La pestaña <b>Márgenes</b> le permite cambiar los márgenes internos <b>superiores</b>, <b>inferiores</b>, <b>izquierdos</b> y <b>derechos</b> (a saber, la distancia entre el texto y los bordes del autoforma dentro del autoforma).</p>
+			<p>La pestaña <b>Márgenes interiores</b> le permite cambiar los márgenes internos <b>superiores</b>, <b>inferiores</b>, <b>izquierdos</b> y <b>derechos</b> (a saber, la distancia entre el texto y los bordes del autoforma dentro del autoforma).</p>
+		    <p class="note"><b>Nota</b>: la pestaña está disponible sólo si hay texto en la autoforma, en otro caso la pestaña permanece desactivada.</p>
 		</div>
 	</body>
 </html>

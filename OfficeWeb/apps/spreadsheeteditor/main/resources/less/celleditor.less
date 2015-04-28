@@ -1,0 +1,120 @@
+#cell-editing-box {
+    border-bottom: solid 1px @gray-dark;
+    border-left: solid 1px @gray-dark;
+    min-height: 20px;
+    background-color: #fff;
+
+    .ce-group-name {
+        float: left;
+        height: 20px;
+        border-bottom: 1px solid @gray-dark;
+        background-color: @gray-light;
+
+        #ce-cell-name {
+            width: 70px;
+            height: 19px;
+            background-color: @gray-light;
+            padding: 1px 0 0 4px;
+            vertical-align: top;
+            display: inline-block;
+            border: 0 none;
+            transition: none;
+            -webkit-transition: none;
+
+            &:focus {
+                background-color: #fff;
+                border-right: 1px solid @gray-dark;
+            }
+
+            &[disabled] {
+                color: @gray-darker;
+                opacity: 0.5;
+            }
+        }
+
+        #ce-func-label {
+            height: 20px;
+            margin-left: -3px;
+            .border-radius(0);
+
+            span.btn-icon {
+                height: 14px;
+                margin-top: 3px;
+                background-position: 0px -1304px;
+            }
+
+            &:hover {
+                span.btn-icon {
+                    background-position: -20px -1304px;
+                }
+            }
+
+            &.disabled {
+                span.btn-icon {
+                    opacity: 0.6;
+                }
+            }
+        }
+    }
+
+    .ce-group-expand {
+        float: right;
+        height: 20px;
+
+        #ce-btn-expand {
+            width: 16px;
+            height: 18px;
+            .border-radius(0);
+            background: transparent;
+            padding: 0 2px 0;
+
+            &:active,
+            &.active {
+                .caret {
+                    background-position: @arrow-small-offset-x @arrow-small-offset-y;
+                }
+            }
+
+            &.btn-collapse {
+                .caret {
+                    background-position: @arrow-up-small-offset-x @arrow-up-small-offset-y;
+                }
+            }
+        }
+    }
+
+    .ce-group-content {
+        padding-left: 1px;
+        margin: 0 16px 0 90px;
+        height: 100%;
+        border-left: 1px solid @gray-dark;
+
+        #ce-cell-content {
+            height: 100%;
+            resize: none;
+            min-height: 19px;
+            border: 0 none;
+            font-size: 12px;
+
+            &[disabled] {
+                color: @gray-darker;
+                opacity: 0.5;
+            }
+        }
+    }
+
+    #ce-cell-name, #ce-cell-content {
+        border-radius: 0;
+    }
+
+    &+.layout-resizer {
+        border-top: 0 none;
+        border-bottom: 0 none;
+
+        &.move {
+            border-top: 1px solid @gray-dark;
+            border-bottom: 1px solid @gray-dark;
+            opacity: 0.4;
+        }
+    }
+}

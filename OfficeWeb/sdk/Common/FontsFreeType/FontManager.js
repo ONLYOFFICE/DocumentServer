@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,85 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var g_bIsAppleDevices = AscBrowser.isAppleDevices;
+ "use strict";
+var g_bIsAppleDevices = AscBrowser.isAppleDevices;
+function get_raster_bounds(data, width, height, stride) {
+    var ret = {
+        dist_l: 0,
+        dist_t: 0,
+        dist_r: 0,
+        dist_b: 0
+    };
+    var bIsBreak = false;
+    for (var i = 0; i < width; i++) {
+        var _ind = i * 4 + 3;
+        for (var j = 0; j < height; j++, _ind += stride) {
+            if (data[_ind] != 0) {
+                bIsBreak = true;
+                break;
+            }
+        }
+        if (bIsBreak) {
+            break;
+        }
+        ret.dist_l++;
+    }
+    bIsBreak = false;
+    for (var i = width - 1; i >= 0; i--) {
+        var _ind = i * 4 + 3;
+        for (var j = 0; j < height; j++, _ind += stride) {
+            if (data[_ind] != 0) {
+                bIsBreak = true;
+                break;
+            }
+        }
+        if (bIsBreak) {
+            break;
+        }
+        ret.dist_r++;
+    }
+    var bIsBreak = false;
+    for (var j = 0; j < height; j++) {
+        var _ind = j * stride + 3;
+        for (var i = 0; i < width; i++, _ind += 4) {
+            if (data[_ind] != 0) {
+                bIsBreak = true;
+                break;
+            }
+        }
+        if (bIsBreak) {
+            break;
+        }
+        ret.dist_t++;
+    }
+    var bIsBreak = false;
+    for (var j = height - 1; j >= 0; j--) {
+        var _ind = j * stride + 3;
+        for (var i = 0; i < width; i++, _ind += 4) {
+            if (data[_ind] != 0) {
+                bIsBreak = true;
+                break;
+            }
+        }
+        if (bIsBreak) {
+            break;
+        }
+        ret.dist_b++;
+    }
+    if (null != raster_memory.m_oBuffer) {
+        var nIndexDst = 3;
+        var nPitch = 4 * (raster_memory.width - width);
+        var dst = raster_memory.m_oBuffer.data;
+        for (var j = 0; j < height; j++) {
+            for (var i = 0; i < width; i++) {
+                dst[nIndexDst] = 0;
+                nIndexDst += 4;
+            }
+            nIndexDst += nPitch;
+        }
+    }
+    return ret;
+}
 function CGlyphData() {
     this.m_oCanvas = null;
     this.m_oContext = null;
@@ -311,6 +389,7 @@ function CRasterHeapChuck() {
     this.LinesFree = [];
     this.LinesBusy = [];
     this.CurLine = null;
+    this.FindOnlyEqualHeight = false;
 }
 CRasterHeapChuck.prototype = {
     Create: function (width, height) {
@@ -351,6 +430,9 @@ CRasterHeapChuck.prototype = {
             }
         }
         var _need_height1 = (3 * _need_height) >> 1;
+        if (this.FindOnlyEqualHeight) {
+            _need_height1 = _need_height;
+        }
         var _free_len = this.LinesFree.length;
         var _index_found_koef1 = -1;
         for (var i = 0; i < _free_len; i++) {
@@ -378,7 +460,7 @@ CRasterHeapChuck.prototype = {
             }
         }
         if (-1 != _index_found_koef1) {
-            var _line = this.LinesFree[i];
+            var _line = this.LinesFree[_index_found_koef1];
             var _new_line = new CRasterHeapLine();
             _new_line.CreatePlaces(_need_height, _need_height, this.Width);
             _new_line.Y = _line.Y;
@@ -451,8 +533,8 @@ CRasterHeapChuck.prototype = {
         }
     }
 };
-function CRasterHeapTotal() {
-    this.ChunkHeapSize = 3000;
+function CRasterHeapTotal(_size) {
+    this.ChunkHeapSize = (undefined === _size) ? 3000 : _size;
     this.Chunks = [];
 }
 CRasterHeapTotal.prototype = {
@@ -481,10 +563,10 @@ CRasterHeapTotal.prototype = {
         _chunk.Create(width, height);
         this.Chunks[this.Chunks.length] = _chunk;
     },
-    CreateFirstChuck: function () {
+    CreateFirstChuck: function (_w, _h) {
         if (0 == this.Chunks.length) {
             this.Chunks[0] = new CRasterHeapChuck();
-            this.Chunks[0].Create(this.ChunkHeapSize, this.ChunkHeapSize);
+            this.Chunks[0].Create((undefined == _w) ? this.ChunkHeapSize : _w, (undefined == _h) ? this.ChunkHeapSize : _h);
         }
     }
 };
@@ -501,6 +583,26 @@ function LoadFontFile(library, stream_index, name, faceindex) {
     font.m_lAscender = face.ascender;
     font.m_lDescender = face.descender;
     font.m_lLineHeight = face.height;
+    if (window["USE_FONTS_WIN_PARAMS"] === true && face.horizontal && face.os2 && face.os2.version != 65535) {
+        var bIsUseWin = false;
+        if (face.horizontal.Ascender == 0 || face.horizontal.Descender == 0) {
+            bIsUseWin = true;
+        }
+        if (face.os2.sTypoAscender == 0 || face.os2.sTypoDescender == 0) {
+            bIsUseWin = true;
+        }
+        var _h1 = face.horizontal.Ascender - face.horizontal.Descender + face.horizontal.Line_Gap;
+        var _h2 = face.os2.sTypoAscender - face.os2.sTypoDescender + face.os2.sTypoLineGap;
+        var _h3 = face.os2.usWinAscent + face.os2.usWinDescent;
+        if (_h1 != _h2 && _h2 != _h3 && _h1 != _h3 && (_h3 > _h1 && _h3 > _h2)) {
+            bIsUseWin = true;
+        }
+        if (bIsUseWin) {
+            font.m_lAscender = face.os2.usWinAscent;
+            font.m_lDescender = -face.os2.usWinDescent;
+            font.m_lLineHeight = face.os2.usWinAscent + face.os2.usWinDescent;
+        }
+    }
     font.m_nNum_charmaps = face.num_charmaps;
     font.m_pFace = face;
     font.LoadDefaultCharAndSymbolicCmapIndex();
@@ -512,8 +614,8 @@ function LoadFontFile(library, stream_index, name, faceindex) {
     }
     font.ResetTextMatrix();
     font.ResetFontMatrix();
-    if (true === this.m_bUseKerning) {
-        this.m_bUseKerning = ((face.face_flags & 64) != 0 ? true : false);
+    if (true === font.m_bUseKerning) {
+        font.m_bUseKerning = ((face.face_flags & 64) != 0 ? true : false);
     }
     return font;
 }
@@ -539,18 +641,32 @@ function CDefaultFont() {
     this.m_oLibrary = null;
     this.m_arrDefaultFont = new Array(4);
     this.SetDefaultFont = function (sFamilyName) {
-        var fontInfo = window.g_font_infos[map_font_index[sFamilyName]];
+        var fontInfo = g_fontApplication.GetFontInfo(sFamilyName);
         var font = null;
-        font = window.g_font_infos[fontInfo.indexR];
+        var _defaultIndex = fontInfo.indexR;
+        if (-1 == _defaultIndex) {
+            _defaultIndex = fontInfo.indexI;
+        }
+        if (-1 == _defaultIndex) {
+            _defaultIndex = fontInfo.indexB;
+        }
+        if (-1 == _defaultIndex) {
+            _defaultIndex = fontInfo.indexBI;
+        }
+        var _indexR = fontInfo.indexR != -1 ? fontInfo.indexR : _defaultIndex;
+        var _indexI = fontInfo.indexI != -1 ? fontInfo.indexI : _defaultIndex;
+        var _indexB = fontInfo.indexB != -1 ? fontInfo.indexB : _defaultIndex;
+        var _indexBI = fontInfo.indexBI != -1 ? fontInfo.indexBI : _defaultIndex;
+        font = window.g_font_infos[_indexR];
         this.m_arrDefaultFont[0] = this.m_oLibrary.LoadFont(font.stream_index, font.id, fontInfo.faceIndexR);
         this.m_arrDefaultFont[0].UpdateStyles(false, false);
-        font = window.g_font_infos[fontInfo.indexB];
+        font = window.g_font_infos[_indexB];
         this.m_arrDefaultFont[1] = this.m_oLibrary.LoadFont(font.stream_index, font.id, fontInfo.faceIndexB);
         this.m_arrDefaultFont[1].UpdateStyles(true, false);
-        font = window.g_font_infos[fontInfo.indexI];
+        font = window.g_font_infos[_indexI];
         this.m_arrDefaultFont[2] = this.m_oLibrary.LoadFont(font.stream_index, font.id, fontInfo.faceIndexI);
         this.m_arrDefaultFont[2].UpdateStyles(false, true);
-        font = window.g_font_infos[fontInfo.indexBI];
+        font = window.g_font_infos[_indexBI];
         this.m_arrDefaultFont[3] = this.m_oLibrary.LoadFont(font.stream_index, font.id, fontInfo.faceIndexBI);
         this.m_arrDefaultFont[3].UpdateStyles(true, true);
     };
@@ -619,10 +735,11 @@ function TGlyph() {
     };
 }
 function TBBox() {
-    this.fMinX;
-    this.fMaxX;
-    this.fMinY;
-    this.fMaxY;
+    this.fMinX = 0;
+    this.fMaxX = 0;
+    this.fMinY = 0;
+    this.fMaxY = 0;
+    this.rasterDistances = null;
 }
 function TFontCacheSizes() {
     this.ushUnicode;
@@ -643,7 +760,7 @@ function CGlyphString() {
     this.m_nGlyphIndex = -1;
     this.m_nGlyphsCount = 0;
     this.m_pGlyphsBuffer = new Array(100);
-    this.m_arrCTM = new Array();
+    this.m_arrCTM = [];
     this.m_dIDet = 1;
     this.m_fTransX = 0;
     this.m_fTransY = 0;
@@ -1033,17 +1150,40 @@ function CFontManager() {
         this.m_pFont.GetString2C(string);
         return string.m_fEndX;
     };
+    this.LoadStringPathCode = function (code, isGid, fX, fY, worker) {
+        if (!this.m_pFont) {
+            return false;
+        }
+        this.SetStringGID(isGid);
+        var string = this.m_oGlyphString;
+        string.m_fX = fX + string.m_fTransX;
+        string.m_fY = fY + string.m_fTransY;
+        string.m_nGlyphsCount = 1;
+        string.m_nGlyphIndex = 0;
+        var buffer = string.m_pGlyphsBuffer;
+        if (buffer[0] == undefined) {
+            buffer[0] = new TGlyph();
+        }
+        var _g = buffer[0];
+        _g.bBitmap = false;
+        _g.oBitmap = null;
+        _g.eState = EGlyphState.glyphstateNormal;
+        _g.lUnicode = code;
+        this.m_pFont.GetStringPath(string, worker);
+        this.SetStringGID(false);
+        return true;
+    };
     this.LoadChar = function (lUnicode) {
         if (!this.m_pFont) {
             return false;
         }
         return this.m_pFont.GetChar2(lUnicode);
     };
-    this.MeasureChar = function (lUnicode) {
+    this.MeasureChar = function (lUnicode, is_raster_distances) {
         if (!this.m_pFont) {
             return;
         }
-        return this.m_pFont.GetChar(lUnicode);
+        return this.m_pFont.GetChar(lUnicode, is_raster_distances);
     };
     this.GetKerning = function (unPrevGID, unGID) {
         if (!this.m_pFont) {
@@ -1129,5 +1269,25 @@ function CFontManager() {
             return;
         }
         this.m_pFont.SetStringGID(this.m_bStringGID);
+    };
+    this.SetHintsProps = function (bIsHinting, bIsSubpixHinting) {
+        if (undefined === g_fontManager.m_oLibrary.tt_hint_props) {
+            return;
+        }
+        if (bIsHinting && bIsSubpixHinting) {
+            this.m_oLibrary.tt_hint_props.TT_USE_BYTECODE_INTERPRETER = true;
+            this.m_oLibrary.tt_hint_props.TT_CONFIG_OPTION_SUBPIXEL_HINTING = true;
+            this.LOAD_MODE = 40968;
+        } else {
+            if (bIsHinting) {
+                this.m_oLibrary.tt_hint_props.TT_USE_BYTECODE_INTERPRETER = true;
+                this.m_oLibrary.tt_hint_props.TT_CONFIG_OPTION_SUBPIXEL_HINTING = false;
+                this.LOAD_MODE = 40968;
+            } else {
+                this.m_oLibrary.tt_hint_props.TT_USE_BYTECODE_INTERPRETER = true;
+                this.m_oLibrary.tt_hint_props.TT_CONFIG_OPTION_SUBPIXEL_HINTING = false;
+                this.LOAD_MODE = 40970;
+            }
+        }
     };
 }

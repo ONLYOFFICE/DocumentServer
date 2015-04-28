@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -123,6 +123,7 @@
         if (this.api) {
             this.api.asc_registerCallback("asc_onCanUndo", Ext.bind(this.onApiCanUndo, this));
             this.api.asc_registerCallback("asc_onСoAuthoringDisconnect", Ext.bind(this.onCoAuthoringDisconnect, this));
+            this.api.asc_registerCallback("asc_onDocumentModifiedChanged", Ext.bind(this.onApiDocumentModified, this));
         }
     },
     loadConfig: function (data) {
@@ -145,6 +146,16 @@
         });
         var shareButton = this.getShareButton();
         shareButton && shareButton.enable();
+    },
+    onApiDocumentModified: function () {
+        var isModified = this.api.isDocumentModified();
+        if (this.isDocModified !== isModified) {
+            if (this.getSaveButton()) {
+                this.getSaveButton().setDisabled(!isModified);
+            }
+            Common.Gateway.setDocumentModified(isModified);
+            this.isDocModified = isModified;
+        }
     },
     showToolbarPanel: function (panel, button) {
         if (panel && button) {

@@ -1,0 +1,103 @@
+diff -r c7981f4f7e09 apps/common/main/lib/mods/perfect-scrollbar.js
+--- a/apps/common/main/lib/mods/perfect-scrollbar.js	Tue Oct 07 11:32:00 2014 +0400
++++ b/apps/common/main/lib/mods/perfect-scrollbar.js	Wed Oct 08 11:37:27 2014 +0400
+//  Use margins of scrollbarYRail when calculate scrollbarYRail height (scrollbarYRailHeight) and top position
+@@ -28,7 +28,8 @@
+     suppressScrollY: false,
+     scrollXMarginOffset: 0,
+     scrollYMarginOffset: 0,
+-    includePadding: false
++    includePadding: false,
++    includeMargin: true
+   };
+ 
+   var getEventClassName = (function () {
+@@ -97,11 +98,12 @@
+           scrollbarYHeight,
+           scrollbarYTop,
+           scrollbarYRight = parseInt($scrollbarYRail.css('right'), 10),
++          scrollbarYRailHeight,
+           eventClassName = getEventClassName();
+ 
+       var updateContentScrollTop = function (currentTop, deltaY) {
+         var newTop = currentTop + deltaY,
+-            maxTop = containerHeight - scrollbarYHeight;
++            maxTop = scrollbarYRailHeight - scrollbarYHeight;
+ 
+         if (newTop < 0) {
+           scrollbarYTop = 0;
+@@ -113,7 +115,7 @@
+           scrollbarYTop = newTop;
+         }
+ 
+-        var scrollTop = parseInt(scrollbarYTop * (contentHeight - containerHeight) / (containerHeight - scrollbarYHeight), 10);
++        var scrollTop = parseInt(scrollbarYTop * (contentHeight - containerHeight) / (scrollbarYRailHeight - scrollbarYHeight), 10);
+         $this.scrollTop(scrollTop);
+         $scrollbarXRail.css({bottom: scrollbarXBottom - scrollTop});
+       };
+@@ -148,9 +150,9 @@
+         $scrollbarXRail.css({left: $this.scrollLeft(), bottom: scrollbarXBottom - $this.scrollTop(), width: containerWidth, display: scrollbarXActive ? "inherit": "none"});
+ 
+         if ($scrollbarYRail.hasClass('in-scrolling'))
+-            $scrollbarYRail.css({/*top: $this.scrollTop(),*/ right: scrollbarYRight - $this.scrollLeft(), height: containerHeight, display: scrollbarYActive ? "inherit": "none"});
++            $scrollbarYRail.css({/*top: $this.scrollTop(),*/ right: scrollbarYRight - $this.scrollLeft(), height: scrollbarYRailHeight, display: scrollbarYActive ? "inherit": "none"});
+         else
+-            $scrollbarYRail.css({top: $this.scrollTop(), right: scrollbarYRight - $this.scrollLeft(), height: containerHeight, display: scrollbarYActive ? "inherit": "none"});
++            $scrollbarYRail.css({top: $this.scrollTop(), right: scrollbarYRight - $this.scrollLeft(), height: scrollbarYRailHeight, display: scrollbarYActive ? "inherit": "none"});
+ 
+         $scrollbarX.css({left: scrollbarXLeft, width: scrollbarXWidth});
+         $scrollbarY.css({top: scrollbarYTop, height: scrollbarYHeight});
+@@ -159,6 +161,7 @@
+       var updateBarSizeAndPosition = function () {
+         containerWidth = settings.includePadding ? $this.innerWidth() : $this.width();
+         containerHeight = settings.includePadding ? $this.innerHeight() : $this.height();
++        scrollbarYRailHeight = containerHeight - (settings.includeMargin ? (parseInt($scrollbarYRail.css('margin-top')) + parseInt($scrollbarYRail.css('margin-bottom'))): 0);
+         contentWidth = $this.prop('scrollWidth');
+         contentHeight = $this.prop('scrollHeight');
+ 
+@@ -176,8 +179,8 @@
+ 
+         if (!settings.suppressScrollY && containerHeight + settings.scrollYMarginOffset < contentHeight) {
+           scrollbarYActive = true;
+-          scrollbarYHeight = getSettingsAdjustedThumbSize(parseInt(containerHeight * containerHeight / contentHeight, 10));
+-          scrollbarYTop = parseInt($this.scrollTop() * (containerHeight - scrollbarYHeight) / (contentHeight - containerHeight), 10);
++          scrollbarYHeight = getSettingsAdjustedThumbSize(parseInt(scrollbarYRailHeight * containerHeight / contentHeight, 10));
++          scrollbarYTop = parseInt($this.scrollTop() * (scrollbarYRailHeight - scrollbarYHeight) / (contentHeight - containerHeight), 10);
+         }
+         else {
+           scrollbarYActive = false;
+@@ -186,8 +189,8 @@
+           $this.scrollTop(0);
+         }
+ 
+-        if (scrollbarYTop >= containerHeight - scrollbarYHeight) {
+-          scrollbarYTop = containerHeight - scrollbarYHeight;
++        if (scrollbarYTop >= scrollbarYRailHeight - scrollbarYHeight) {
++          scrollbarYTop = scrollbarYRailHeight - scrollbarYHeight;
+         }
+         if (scrollbarXLeft >= containerWidth - scrollbarXWidth) {
+           scrollbarXLeft = containerWidth - scrollbarXWidth;
+@@ -235,12 +238,12 @@
+           currentTop = $scrollbarY.position().top;
+           $scrollbarYRail.addClass('in-scrolling');
+ 
+-            var padding = parseInt($scrollbarYRail.offsetParent().css('padding-top'));
++            var margin = parseInt($scrollbarYRail.css('margin-top'));
+             var rect = $scrollbarYRail[0].getBoundingClientRect();
+             $scrollbarYRail.css({
+                 position: 'fixed',
+                 left: rect.left,
+-                top: rect.top - padding
++                top: rect.top - margin
+             });
+ 
+           e.stopPropagation();
+@@ -419,7 +422,7 @@
+         $scrollbarYRail.bind('click' + eventClassName, function (e) {
+           var halfOfScrollbarLength = parseInt(scrollbarYHeight / 2, 10),
+               positionTop = e.pageY - $scrollbarYRail.offset().top - halfOfScrollbarLength,
+-              maxPositionTop = containerHeight - scrollbarYHeight,
++              maxPositionTop = scrollbarYRailHeight - scrollbarYHeight,
+               positionRatio = positionTop / maxPositionTop;
+ 
+           if (positionRatio < 0) {

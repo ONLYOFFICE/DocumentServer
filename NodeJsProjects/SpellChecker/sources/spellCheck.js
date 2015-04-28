@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -48,7 +48,7 @@ var arrDictionaries = {};
 })();
 exports.install = function (server, callbackFunction) {
     var sockjs_opts = {
-        sockjs_url: "http://cdn.sockjs.org/sockjs-0.3.min.js"
+        sockjs_url: "./../../Common/sources/sockjs-0.3.min.js"
     },
     sockjs_echo = sockjs.createServer(sockjs_opts),
     dataHandler;

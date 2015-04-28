@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -31,194 +31,221 @@
  */
  var SCALE_MIN = 40;
 var MENU_SCALE_PART = 260;
-var RIGHTMENU_TOOLBAR_ID = "rightmenu-toolbar-id";
-var RIGHTMENU_PANEL_ID = "rightmenu-panel-id";
-Ext.define("PE.view.RightMenu", {
-    extend: "Ext.panel.Panel",
-    alias: "widget.perightmenu",
-    requires: ["Ext.toolbar.Toolbar", "Ext.button.Button", "Ext.container.Container", "Ext.toolbar.Spacer", "PE.view.RightPanel", "Ext.util.Cookies"],
-    cls: "rm-style",
-    id: RIGHTMENU_PANEL_ID,
-    bodyCls: "rm-body",
-    width: SCALE_MIN,
-    buttonCollection: [],
-    listeners: {
-        afterrender: function () {
-            var owner = this.ownerCt;
-            if (Ext.isDefined(owner)) {
-                owner.addListener("resize", Ext.bind(this.resizeMenu, this));
-            }
-        }
-    },
-    initComponent: function () {
-        this.dockedItems = this.buildDockedItems();
-        this._rightSettings = Ext.widget("perightpanel", {
-            id: "view-right-panel-settings",
-            btnText: this.btnText,
-            btnTable: this.btnTable,
-            btnImage: this.btnImage,
-            btnShape: this.btnShape,
-            btnSlide: this.btnSlide
-        });
-        this.items = [this._rightSettings];
-        this.addEvents("editcomplete");
-        this.callParent(arguments);
-    },
-    buildDockedItems: function () {
-        var me = this;
-        me.btnSlide = Ext.create("Ext.button.Button", {
-            id: "id-right-menu-slide",
-            cls: "asc-main-menu-buttons",
-            iconCls: "asc-main-menu-btn menuSlide",
-            asctype: c_oAscTypeSelectElement.Slide,
-            enableToggle: true,
-            allowDepress: true,
-            style: "margin-bottom: 8px;",
-            disabled: true,
-            toggleGroup: "tabpanelbtnsGroup"
-        });
-        me.btnShape = Ext.create("Ext.button.Button", {
-            id: "id-right-menu-shape",
-            cls: "asc-main-menu-buttons",
-            iconCls: "asc-main-menu-btn menuShape",
-            asctype: c_oAscTypeSelectElement.Shape,
-            enableToggle: true,
-            allowDepress: true,
-            style: "margin-bottom: 8px;",
-            disabled: true,
-            toggleGroup: "tabpanelbtnsGroup"
-        });
-        me.btnImage = Ext.create("Ext.Button", {
-            id: "id-right-menu-image",
-            cls: "asc-main-menu-buttons",
-            iconCls: "asc-main-menu-btn menuImage",
-            asctype: c_oAscTypeSelectElement.Image,
-            enableToggle: true,
-            allowDepress: true,
-            style: "margin-bottom: 8px;",
-            disabled: true,
-            toggleGroup: "tabpanelbtnsGroup"
-        });
-        me.btnText = Ext.create("Ext.Button", {
-            id: "id-right-menu-text",
-            cls: "asc-main-menu-buttons",
-            iconCls: "asc-main-menu-btn menuText",
-            asctype: c_oAscTypeSelectElement.Paragraph,
-            enableToggle: true,
-            allowDepress: true,
-            style: "margin-bottom: 8px;",
-            disabled: true,
-            toggleGroup: "tabpanelbtnsGroup"
-        });
-        me.btnTable = Ext.create("Ext.Button", {
-            id: "id-right-menu-table",
-            cls: "asc-main-menu-buttons",
-            iconCls: "asc-main-menu-btn menuTable",
-            asctype: c_oAscTypeSelectElement.Table,
-            enableToggle: true,
-            allowDepress: true,
-            style: "margin-bottom: 8px;",
-            disabled: true,
-            toggleGroup: "tabpanelbtnsGroup"
-        });
-        this.rightToolbar = Ext.create("Ext.toolbar.Toolbar", {
-            cls: "rm-default-toolbar",
-            width: this.width || SCALE_MIN,
-            vertical: true,
-            dock: "right",
-            defaultType: "button",
-            style: "padding-top: 15px;",
-            items: [me.btnSlide, me.btnShape, me.btnImage, me.btnText, me.btnTable]
-        });
-        return this.rightToolbar;
-    },
-    resizeMenu: function (Component, adjWidth, adjHeight, eOpts) {
-        for (var i = 0; i < this.items.length; i++) {
-            if (this.items.items[i].el && adjHeight != this.items.items[i].getHeight()) {
-                this.items.items[i].setHeight(adjHeight);
-            }
-        }
-        this.doComponentLayout();
-    },
-    setApi: function (o) {
-        this.api = o;
-        this.api.asc_registerCallback("asc_onСoAuthoringDisconnect", Ext.bind(this.onCoAuthoringDisconnect, this));
-        return this;
-    },
-    disableMenu: function (disabled) {
-        var btn, i;
-        var tbMain = this.rightToolbar;
-        if (Ext.isDefined(tbMain)) {
-            for (i = 0; i < tbMain.items.length; i++) {
-                btn = tbMain.items.items[i];
-                if (Ext.isDefined(btn) && btn.componentCls === "x-btn") {
-                    btn.pressed && btn.toggle(false);
-                    btn.setDisabled(disabled);
-                }
-            }
-        }
-    },
-    onCoAuthoringDisconnect: function () {
-        this.disableMenu(true);
-        if (this._rightSettings) {
-            this._rightSettings.setDisabled(true);
-            this._rightSettings.setMode({
-                isEdit: false
+define(["text!presentationeditor/main/app/template/RightMenu.template", "jquery", "underscore", "backbone", "common/main/lib/component/Button", "common/main/lib/component/MetricSpinner", "common/main/lib/component/CheckBox", "presentationeditor/main/app/view/ParagraphSettings", "presentationeditor/main/app/view/ImageSettings", "presentationeditor/main/app/view/ChartSettings", "presentationeditor/main/app/view/TableSettings", "presentationeditor/main/app/view/ShapeSettings", "presentationeditor/main/app/view/SlideSettings", "common/main/lib/component/Scroller"], function (menuTemplate, $, _, Backbone) {
+    PE.Views.RightMenu = Backbone.View.extend(_.extend({
+        el: "#right-menu",
+        template: _.template(menuTemplate),
+        events: {},
+        initialize: function () {
+            this.minimizedMode = true;
+            this.btnText = new Common.UI.Button({
+                hint: this.txtParagraphSettings,
+                asctype: c_oAscTypeSelectElement.Paragraph,
+                enableToggle: true,
+                disabled: true,
+                toggleGroup: "tabpanelbtnsGroup"
             });
-        }
-    },
-    createDelayedElements: function () {
-        var me = this;
-        me._rightSettings.setHeight(me.getHeight());
-        var toggleHandler = function (btn, pressed) {
-            if (pressed && !me._rightSettings.minimizedMode) {
-                btn.addCls("asc-main-menu-btn-selected");
-                var panel = me._rightSettings._settings[btn.asctype].panel;
-                var props = me._rightSettings._settings[btn.asctype].props;
-                me._rightSettings.TabPanel.getLayout().setActiveItem(panel);
-                me._rightSettings.TabPanel.setHeight(panel.initialHeight);
-                if (props) {
-                    panel.ChangeSettings.call(panel, props);
-                }
+            this.btnTable = new Common.UI.Button({
+                hint: this.txtTableSettings,
+                asctype: c_oAscTypeSelectElement.Table,
+                enableToggle: true,
+                disabled: true,
+                toggleGroup: "tabpanelbtnsGroup"
+            });
+            this.btnImage = new Common.UI.Button({
+                hint: this.txtImageSettings,
+                asctype: c_oAscTypeSelectElement.Image,
+                enableToggle: true,
+                disabled: true,
+                toggleGroup: "tabpanelbtnsGroup"
+            });
+            this.btnSlide = new Common.UI.Button({
+                hint: this.txtSlideSettings,
+                asctype: c_oAscTypeSelectElement.Slide,
+                enableToggle: true,
+                disabled: true,
+                toggleGroup: "tabpanelbtnsGroup"
+            });
+            this.btnChart = new Common.UI.Button({
+                hint: this.txtChartSettings,
+                asctype: c_oAscTypeSelectElement.Chart,
+                enableToggle: true,
+                disabled: true,
+                toggleGroup: "tabpanelbtnsGroup"
+            });
+            this.btnShape = new Common.UI.Button({
+                hint: this.txtShapeSettings,
+                asctype: c_oAscTypeSelectElement.Shape,
+                enableToggle: true,
+                disabled: true,
+                toggleGroup: "tabpanelbtnsGroup"
+            });
+            this._settings = [];
+            this._settings[c_oAscTypeSelectElement.Paragraph] = {
+                panel: "id-paragraph-settings",
+                btn: this.btnText
+            };
+            this._settings[c_oAscTypeSelectElement.Table] = {
+                panel: "id-table-settings",
+                btn: this.btnTable
+            };
+            this._settings[c_oAscTypeSelectElement.Image] = {
+                panel: "id-image-settings",
+                btn: this.btnImage
+            };
+            this._settings[c_oAscTypeSelectElement.Slide] = {
+                panel: "id-slide-settings",
+                btn: this.btnSlide
+            };
+            this._settings[c_oAscTypeSelectElement.Shape] = {
+                panel: "id-shape-settings",
+                btn: this.btnShape
+            };
+            this._settings[c_oAscTypeSelectElement.Chart] = {
+                panel: "id-chart-settings",
+                btn: this.btnChart
+            };
+            return this;
+        },
+        render: function () {
+            var el = $(this.el);
+            this.trigger("render:before", this);
+            el.css("width", "40px");
+            el.show();
+            el.html(this.template({}));
+            this.btnText.el = $("#id-right-menu-text");
+            this.btnText.render();
+            this.btnTable.el = $("#id-right-menu-table");
+            this.btnTable.render();
+            this.btnImage.el = $("#id-right-menu-image");
+            this.btnImage.render();
+            this.btnSlide.el = $("#id-right-menu-slide");
+            this.btnSlide.render();
+            this.btnChart.el = $("#id-right-menu-chart");
+            this.btnChart.render();
+            this.btnShape.el = $("#id-right-menu-shape");
+            this.btnShape.render();
+            this.btnText.on("click", _.bind(this.onBtnMenuClick, this));
+            this.btnTable.on("click", _.bind(this.onBtnMenuClick, this));
+            this.btnImage.on("click", _.bind(this.onBtnMenuClick, this));
+            this.btnSlide.on("click", _.bind(this.onBtnMenuClick, this));
+            this.btnChart.on("click", _.bind(this.onBtnMenuClick, this));
+            this.btnShape.on("click", _.bind(this.onBtnMenuClick, this));
+            this.paragraphSettings = new PE.Views.ParagraphSettings();
+            this.slideSettings = new PE.Views.SlideSettings();
+            this.imageSettings = new PE.Views.ImageSettings();
+            this.chartSettings = new PE.Views.ChartSettings();
+            this.tableSettings = new PE.Views.TableSettings();
+            this.shapeSettings = new PE.Views.ShapeSettings();
+            if (_.isUndefined(this.scroller)) {
+                this.scroller = new Common.UI.Scroller({
+                    el: $(this.el).find(".right-panel"),
+                    suppressScrollX: true,
+                    useKeyboard: false
+                });
             }
-        };
-        var clickHandler = function (btn) {
+            this.trigger("render:after", this);
+            return this;
+        },
+        setApi: function (api) {
+            this.api = api;
+            var fire = function () {
+                this.fireEvent("editcomplete", this);
+            };
+            this.paragraphSettings.setApi(api).on("editcomplete", _.bind(fire, this));
+            this.slideSettings.setApi(api).on("editcomplete", _.bind(fire, this));
+            this.imageSettings.setApi(api).on("editcomplete", _.bind(fire, this));
+            this.chartSettings.setApi(api).on("editcomplete", _.bind(fire, this));
+            this.tableSettings.setApi(api).on("editcomplete", _.bind(fire, this));
+            this.shapeSettings.setApi(api).on("editcomplete", _.bind(fire, this));
+        },
+        setMode: function (mode) {},
+        onBtnMenuClick: function (btn, e) {
+            var target_pane = $("#" + this._settings[btn.options.asctype].panel);
+            var target_pane_parent = target_pane.parent();
             if (btn.pressed) {
-                if (me._rightSettings.minimizedMode) {
-                    if (me._rightSettings.TabPanel.hidden) {
-                        me._rightSettings.TabPanel.setVisible(true);
-                    }
-                    me.setWidth(MENU_SCALE_PART);
-                    me._rightSettings.minimizedMode = false;
-                    toggleHandler(btn, btn.pressed);
-                    window.localStorage.setItem("de-hidden-right-settings", 0);
-                } else {
-                    btn.addCls("asc-main-menu-btn-selected");
+                if (this.minimizedMode) {
+                    $(this.el).width(MENU_SCALE_PART);
+                    target_pane_parent.css("display", "inline-block");
+                    this.minimizedMode = false;
+                    window.localStorage.setItem("pe-hidden-right-settings", 0);
                 }
-                me._rightSettings._settings[c_oAscTypeSelectElement.Slide].isCurrent = (btn.asctype == c_oAscTypeSelectElement.Slide);
+                target_pane_parent.find("> .active").removeClass("active");
+                target_pane.addClass("active");
+                if (this.scroller) {
+                    this.scroller.scrollTop(0);
+                }
+                this._settings[c_oAscTypeSelectElement.Slide].isCurrent = (btn.options.asctype == c_oAscTypeSelectElement.Slide);
             } else {
-                me.setWidth(SCALE_MIN);
-                me._rightSettings.minimizedMode = true;
-                btn.removeCls("asc-main-menu-btn-selected");
-                window.localStorage.setItem("de-hidden-right-settings", 1);
+                target_pane_parent.css("display", "none");
+                $(this.el).width(SCALE_MIN);
+                this.minimizedMode = true;
+                window.localStorage.setItem("pe-hidden-right-settings", 1);
             }
-            me.fireEvent("editcomplete", me);
-        };
-        var button;
-        var tips = [me.txtSlideSettings, me.txtShapeSettings, me.txtImageSettings, me.txtParagraphSettings, me.txtTableSettings];
-        for (var i = this.rightToolbar.items.items.length; i--;) {
-            button = this.rightToolbar.items.items[i];
-            button.on({
-                "click": clickHandler,
-                "toggle": toggleHandler
+            this.fireEvent("rightmenuclick", [this, btn.options.asctype, this.minimizedMode]);
+        },
+        SetActivePane: function (type, open) {
+            if (this.minimizedMode && open !== true || this._settings[type] === undefined) {
+                return;
+            }
+            if (this.minimizedMode) {
+                this._settings[type].btn.toggle(true, false);
+                this._settings[type].btn.trigger("click", this._settings[type].btn);
+            } else {
+                var target_pane = $("#" + this._settings[type].panel);
+                if (!target_pane.hasClass("active")) {
+                    target_pane.parent().find("> .active").removeClass("active");
+                    target_pane.addClass("active");
+                    if (this.scroller) {
+                        this.scroller.update();
+                    }
+                }
+                if (!this._settings[type].btn.isActive()) {
+                    this._settings[type].btn.toggle(true, false);
+                }
+            }
+        },
+        GetActivePane: function () {
+            return (this.minimizedMode) ? null : $(".settings-panel.active")[0].id;
+        },
+        SetDisabled: function (id, disabled, all) {
+            if (all) {
+                this.slideSettings.SetSlideDisabled(disabled, disabled, disabled);
+                this.paragraphSettings.disableControls(disabled);
+                this.shapeSettings.disableControls(disabled);
+                this.tableSettings.disableControls(disabled);
+                this.imageSettings.disableControls(disabled);
+                this.chartSettings.disableControls(disabled);
+            } else {
+                var cmp = $("#" + id);
+                if (disabled !== cmp.hasClass("disabled")) {
+                    cmp.toggleClass("disabled", disabled);
+                    (disabled) ? cmp.attr({
+                        disabled: disabled
+                    }) : cmp.removeAttr("disabled");
+                }
+            }
+        },
+        clearSelection: function () {
+            var target_pane = $(".right-panel");
+            target_pane.find("> .active").removeClass("active");
+            _.each(this._settings, function (item) {
+                if (item.btn.isActive()) {
+                    item.btn.toggle(false, true);
+                }
             });
-            button.setTooltip(tips[i]);
-        }
+            target_pane.css("display", "none");
+            $(this.el).width(SCALE_MIN);
+            this.minimizedMode = true;
+            window.localStorage.setItem("pe-hidden-right-settings", 1);
+            Common.NotificationCenter.trigger("layout:changed", "rightmenu");
+        },
+        txtParagraphSettings: "Text Settings",
+        txtImageSettings: "Image Settings",
+        txtTableSettings: "Table Settings",
+        txtShapeSettings: "Shape Settings",
+        txtSlideSettings: "Slide Settings",
+        txtChartSettings: "Chart Settings"
     },
-    txtParagraphSettings: "Text Settings",
-    txtImageSettings: "Image Settings",
-    txtTableSettings: "Table Settings",
-    txtShapeSettings: "Shape Settings",
-    txtSlideSettings: "Slide Settings",
-    txtChartSettings: "Chart Settings"
+    PE.Views.RightMenu || {}));
 });

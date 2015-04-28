@@ -12,13 +12,6 @@ border: none;
 vertical-align: middle;
 }
 
-img.floatleft 
-{
-float: left;
-margin-right: 30px;
-margin-bottom: 10px;
-}
-
 li
 {
 line-height: 2em;

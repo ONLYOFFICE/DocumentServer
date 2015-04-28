@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,34 +29,112 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- cFormulaFunction.Cube = {
+ "use strict";
+cFormulaFunction.Cube = {
     "groupName": "Cube",
-    "CUBEKPIMEMBER": function () {
-        var r = new cBaseFunction("CUBEKPIMEMBER");
-        return r;
-    },
-    "CUBEMEMBER": function () {
-        var r = new cBaseFunction("CUBEMEMBER");
-        return r;
-    },
-    "CUBEMEMBERPROPERTY": function () {
-        var r = new cBaseFunction("CUBEMEMBERPROPERTY");
-        return r;
-    },
-    "CUBERANKEDMEMBER": function () {
-        var r = new cBaseFunction("CUBERANKEDMEMBER");
-        return r;
-    },
-    "CUBESET": function () {
-        var r = new cBaseFunction("CUBESET");
-        return r;
-    },
-    "CUBESETCOUNT": function () {
-        var r = new cBaseFunction("CUBESETCOUNT");
-        return r;
-    },
-    "CUBEVALUE": function () {
-        var r = new cBaseFunction("CUBEVALUE");
-        return r;
-    }
+    "CUBEKPIMEMBER": cCUBEKPIMEMBER,
+    "CUBEMEMBER": cCUBEMEMBER,
+    "CUBEMEMBERPROPERTY": cCUBEMEMBERPROPERTY,
+    "CUBERANKEDMEMBER": cCUBERANKEDMEMBER,
+    "CUBESET": cCUBESET,
+    "CUBESETCOUNT": cCUBESETCOUNT,
+    "CUBEVALUE": cCUBEVALUE
 };
+function cCUBEKPIMEMBER() {
+    this.name = "CUBEKPIMEMBER";
+    this.type = cElementType.func;
+    this.value = null;
+    this.argumentsMin = 0;
+    this.argumentsCurrent = 0;
+    this.argumentsMax = 255;
+    this.formatType = {
+        def: -1,
+        noneFormat: -2
+    };
+    this.numFormat = this.formatType.def;
+}
+cCUBEKPIMEMBER.prototype = Object.create(cBaseFunction.prototype);
+function cCUBEMEMBER() {
+    this.name = "CUBEMEMBER";
+    this.type = cElementType.func;
+    this.value = null;
+    this.argumentsMin = 0;
+    this.argumentsCurrent = 0;
+    this.argumentsMax = 255;
+    this.formatType = {
+        def: -1,
+        noneFormat: -2
+    };
+    this.numFormat = this.formatType.def;
+}
+cCUBEMEMBER.prototype = Object.create(cBaseFunction.prototype);
+function cCUBEMEMBERPROPERTY() {
+    this.name = "CUBEMEMBERPROPERTY";
+    this.type = cElementType.func;
+    this.value = null;
+    this.argumentsMin = 0;
+    this.argumentsCurrent = 0;
+    this.argumentsMax = 255;
+    this.formatType = {
+        def: -1,
+        noneFormat: -2
+    };
+    this.numFormat = this.formatType.def;
+}
+cCUBEMEMBERPROPERTY.prototype = Object.create(cBaseFunction.prototype);
+function cCUBERANKEDMEMBER() {
+    this.name = "CUBERANKEDMEMBER";
+    this.type = cElementType.func;
+    this.value = null;
+    this.argumentsMin = 0;
+    this.argumentsCurrent = 0;
+    this.argumentsMax = 255;
+    this.formatType = {
+        def: -1,
+        noneFormat: -2
+    };
+    this.numFormat = this.formatType.def;
+}
+cCUBERANKEDMEMBER.prototype = Object.create(cBaseFunction.prototype);
+function cCUBESET() {
+    this.name = "CUBESET";
+    this.type = cElementType.func;
+    this.value = null;
+    this.argumentsMin = 0;
+    this.argumentsCurrent = 0;
+    this.argumentsMax = 255;
+    this.formatType = {
+        def: -1,
+        noneFormat: -2
+    };
+    this.numFormat = this.formatType.def;
+}
+cCUBESET.prototype = Object.create(cBaseFunction.prototype);
+function cCUBESETCOUNT() {
+    this.name = "CUBESETCOUNT";
+    this.type = cElementType.func;
+    this.value = null;
+    this.argumentsMin = 0;
+    this.argumentsCurrent = 0;
+    this.argumentsMax = 255;
+    this.formatType = {
+        def: -1,
+        noneFormat: -2
+    };
+    this.numFormat = this.formatType.def;
+}
+cCUBESETCOUNT.prototype = Object.create(cBaseFunction.prototype);
+function cCUBEVALUE() {
+    this.name = "CUBEVALUE";
+    this.type = cElementType.func;
+    this.value = null;
+    this.argumentsMin = 0;
+    this.argumentsCurrent = 0;
+    this.argumentsMax = 255;
+    this.formatType = {
+        def: -1,
+        noneFormat: -2
+    };
+    this.numFormat = this.formatType.def;
+}
+cCUBEVALUE.prototype = Object.create(cBaseFunction.prototype);

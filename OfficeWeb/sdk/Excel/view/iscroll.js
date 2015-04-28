@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -90,7 +90,7 @@
         var that = this,
         i;
         that.api = api;
-        that.wrapper = api.element[0];
+        that.wrapper = api.element;
         that.wrapper.style.overflow = "hidden";
         that.scroller = (scroller !== undefined) ? scroller : null;
         that.options = {
@@ -1134,8 +1134,10 @@
             that.refresh();
             that.x = that.x > 0 ? 0 : that.x < that.maxScrollX ? that.maxScrollX : that.x;
             that.y = that.y > that.minScrollY ? that.minScrollY : that.y < that.maxScrollY ? that.maxScrollY : that.y;
-            that.scroller.style[transitionDuration] = time + "ms";
-            that.scroller.style[transform] = "translate(" + that.x + "px," + that.y + "px) scale(" + scale + ")" + translateZ;
+            if (that.scroller) {
+                that.scroller.style[transitionDuration] = time + "ms";
+                that.scroller.style[transform] = "translate(" + that.x + "px," + that.y + "px) scale(" + scale + ")" + translateZ;
+            }
             that.zoomed = false;
         },
         isReady: function () {

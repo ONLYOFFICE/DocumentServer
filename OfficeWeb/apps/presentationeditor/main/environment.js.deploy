@@ -1,7 +1,0 @@
-var getEditorStylesheets = function() {
-    return ["../../../apps/presentationeditor/main/resources/css/app-edit.css"];
-};
-
-var getEditorScripts = function() {
-    return ["../../../apps/presentationeditor/main/app-edit.js"];
-};

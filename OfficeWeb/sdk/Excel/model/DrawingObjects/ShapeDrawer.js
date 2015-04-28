@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function DrawLineEnd(xEnd, yEnd, xPrev, yPrev, type, w, len, drawer, trans) {
+ "use strict";
+function DrawLineEnd(xEnd, yEnd, xPrev, yPrev, type, w, len, drawer, trans) {
     switch (type) {
     case LineEndType.None:
         break;
@@ -347,6 +348,26 @@ function CShapeDrawer() {
     this.IsRectShape = false;
 }
 CShapeDrawer.prototype = {
+    Clear: function () {
+        this.UniFill = null;
+        this.Ln = null;
+        this.Transform = null;
+        this.bIsTexture = false;
+        this.bIsNoFillAttack = false;
+        this.bIsNoStrokeAttack = false;
+        this.FillUniColor = null;
+        this.StrokeUniColor = null;
+        this.StrokeWidth = 0;
+        this.min_x = 65535;
+        this.min_y = 65535;
+        this.max_x = -65535;
+        this.max_y = -65535;
+        this.OldLineJoin = null;
+        this.IsArrowsDrawing = false;
+        this.IsCurrentPathCanArrows = true;
+        this.bIsCheckBounds = false;
+        this.IsRectShape = false;
+    },
     CheckPoint: function (_x, _y) {
         var x = _x;
         var y = _y;
@@ -457,9 +478,9 @@ CShapeDrawer.prototype = {
             }
             if ((this.Ln.headEnd != null && this.Ln.headEnd.type != null) || (this.Ln.tailEnd != null && this.Ln.tailEnd.type != null)) {
                 if (true === graphics.IsTrack) {
-                    graphics.Graphics.ArrayPoints = new Array();
+                    graphics.Graphics.ArrayPoints = [];
                 } else {
-                    graphics.ArrayPoints = new Array();
+                    graphics.ArrayPoints = [];
                 }
             }
             if (this.Graphics.m_oContext != null && this.Ln.Join != null && this.Ln.Join.type != null) {
@@ -557,14 +578,14 @@ CShapeDrawer.prototype = {
         this.IsCurrentPathCanArrows = true;
         this.Graphics._s();
         if (this.Graphics.ArrayPoints != null) {
-            this.Graphics.ArrayPoints = new Array();
+            this.Graphics.ArrayPoints = [];
         }
     },
     _e: function () {
         this.IsCurrentPathCanArrows = true;
         this.Graphics._e();
         if (this.Graphics.ArrayPoints != null) {
-            this.Graphics.ArrayPoints = new Array();
+            this.Graphics.ArrayPoints = [];
         }
     },
     df: function (mode) {
@@ -574,16 +595,32 @@ CShapeDrawer.prototype = {
         if (this.Graphics.IsSlideBoundsCheckerType === true) {
             return;
         }
+        var bIsIntegerGridTRUE = false;
         if (this.bIsTexture) {
+            if (this.Graphics.m_bIntegerGrid === true) {
+                this.Graphics.SetIntegerGrid(false);
+                bIsIntegerGridTRUE = true;
+            }
             if (this.Graphics.RENDERER_PDF_FLAG) {
                 if (null == this.UniFill.fill.tile || this.Graphics.m_oContext === undefined) {
                     this.Graphics.put_brushTexture(getFullImageSrc(this.UniFill.fill.RasterImageId), 0);
                 } else {
                     this.Graphics.put_brushTexture(getFullImageSrc(this.UniFill.fill.RasterImageId), 1);
                 }
+                if (bIsIntegerGridTRUE) {
+                    this.Graphics.SetIntegerGrid(true);
+                }
                 return;
             }
-            if (null == this.UniFill.fill.tile || this.Graphics.m_oContext === undefined) {
+            var bIsUnusePattern = false;
+            if (AscBrowser.isIE) {
+                if (this.UniFill.fill.RasterImageId) {
+                    if (this.UniFill.fill.RasterImageId.lastIndexOf(".svg") == this.UniFill.fill.RasterImageId.length - 4) {
+                        bIsUnusePattern = true;
+                    }
+                }
+            }
+            if (bIsUnusePattern || null == this.UniFill.fill.tile || this.Graphics.m_oContext === undefined) {
                 if (this.IsRectShape) {
                     this.Graphics._s();
                     if ((null == this.UniFill.transparent) || (this.UniFill.transparent == 255)) {
@@ -654,11 +691,18 @@ CShapeDrawer.prototype = {
                     _ctx.restore();
                 }
             }
+            if (bIsIntegerGridTRUE) {
+                this.Graphics.SetIntegerGrid(true);
+            }
             return;
         }
         if (this.UniFill != null && this.UniFill.fill != null) {
             var _fill = this.UniFill.fill;
             if (_fill.type == FILL_TYPE_PATT) {
+                if (this.Graphics.m_bIntegerGrid === true) {
+                    this.Graphics.SetIntegerGrid(false);
+                    bIsIntegerGridTRUE = true;
+                }
                 var _is_ctx = false;
                 if (this.Graphics.IsNoSupportTextDraw === true || undefined === this.Graphics.m_oContext || (null == this.UniFill.transparent) || (this.UniFill.transparent == 255)) {
                     _is_ctx = false;
@@ -699,9 +743,16 @@ CShapeDrawer.prototype = {
                     _ctx.fill();
                 }
                 _ctx.restore();
+                if (bIsIntegerGridTRUE) {
+                    this.Graphics.SetIntegerGrid(true);
+                }
                 return;
             } else {
                 if (_fill.type == FILL_TYPE_GRAD) {
+                    if (this.Graphics.m_bIntegerGrid === true) {
+                        this.Graphics.SetIntegerGrid(false);
+                        bIsIntegerGridTRUE = true;
+                    }
                     var _is_ctx = false;
                     if (this.Graphics.IsNoSupportTextDraw === true || undefined === this.Graphics.m_oContext || (null == this.UniFill.transparent) || (this.UniFill.transparent == 255)) {
                         _is_ctx = false;
@@ -735,6 +786,9 @@ CShapeDrawer.prototype = {
                         _ctx.globalAlpha = _old_global_alpha;
                     } else {
                         _ctx.fill();
+                    }
+                    if (bIsIntegerGridTRUE) {
+                        this.Graphics.SetIntegerGrid(true);
                     }
                     return;
                 }
@@ -815,14 +869,10 @@ CShapeDrawer.prototype = {
         var rgba = this.StrokeUniColor;
         this.Graphics.p_color(rgba.R, rgba.G, rgba.B, rgba.A);
         if (this.IsRectShape && this.Graphics.AddSmartRect !== undefined) {
-            if (undefined !== this.Shape.absExtX) {
-                this.Graphics.AddSmartRect(0, 0, this.Shape.absExtX, this.Shape.absExtY, this.StrokeWidth);
+            if (undefined !== this.Shape.extX) {
+                this.Graphics.AddSmartRect(0, 0, this.Shape.extX, this.Shape.extY, this.StrokeWidth);
             } else {
-                if (undefined !== this.Shape.extX) {
-                    this.Graphics.AddSmartRect(0, 0, this.Shape.extX, this.Shape.extY, this.StrokeWidth);
-                } else {
-                    this.Graphics.ds();
-                }
+                this.Graphics.ds();
             }
         } else {
             this.Graphics.ds();
@@ -841,20 +891,22 @@ CShapeDrawer.prototype = {
             var y2 = trans.TransformPointY(1, 1);
             var dKoef = Math.sqrt(((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)) / 2);
             var _pen_w = (this.Graphics.IsTrack === true) ? (this.Graphics.Graphics.m_oContext.lineWidth * dKoef) : (this.Graphics.m_oContext.lineWidth * dKoef);
+            var _max_delta_eps2 = 0.001;
             if (this.Ln.headEnd != null) {
                 var _x1 = trans.TransformPointX(arr[0].x, arr[0].y);
                 var _y1 = trans.TransformPointY(arr[0].x, arr[0].y);
                 var _x2 = trans.TransformPointX(arr[1].x, arr[1].y);
                 var _y2 = trans.TransformPointY(arr[1].x, arr[1].y);
+                var _max_delta_eps = Math.max(this.Ln.headEnd.GetLen(_pen_w), 5);
                 var _max_delta = Math.max(Math.abs(_x1 - _x2), Math.abs(_y1 - _y2));
                 var cur_point = 2;
-                while (_max_delta < 0.001 && cur_point < arr.length) {
+                while (_max_delta < _max_delta_eps && cur_point < arr.length) {
                     _x2 = trans.TransformPointX(arr[cur_point].x, arr[cur_point].y);
                     _y2 = trans.TransformPointY(arr[cur_point].x, arr[cur_point].y);
                     _max_delta = Math.max(Math.abs(_x1 - _x2), Math.abs(_y1 - _y2));
                     cur_point++;
                 }
-                if (_max_delta > 0.001) {
+                if (_max_delta > _max_delta_eps2) {
                     if (this.Graphics.IsTrack) {
                         this.Graphics.Graphics.ArrayPoints = null;
                         DrawLineEnd(_x1, _y1, _x2, _y2, this.Ln.headEnd.type, this.Ln.headEnd.GetWidth(_pen_w), this.Ln.headEnd.GetLen(_pen_w), this, trans1);
@@ -873,15 +925,16 @@ CShapeDrawer.prototype = {
                 var _y1 = trans.TransformPointY(arr[_1].x, arr[_1].y);
                 var _x2 = trans.TransformPointX(arr[_2].x, arr[_2].y);
                 var _y2 = trans.TransformPointY(arr[_2].x, arr[_2].y);
+                var _max_delta_eps = Math.max(this.Ln.tailEnd.GetLen(_pen_w), 5);
                 var _max_delta = Math.max(Math.abs(_x1 - _x2), Math.abs(_y1 - _y2));
                 var cur_point = _2 - 1;
-                while (_max_delta < 0.001 && cur_point >= 0) {
+                while (_max_delta < _max_delta_eps && cur_point >= 0) {
                     _x2 = trans.TransformPointX(arr[cur_point].x, arr[cur_point].y);
                     _y2 = trans.TransformPointY(arr[cur_point].x, arr[cur_point].y);
                     _max_delta = Math.max(Math.abs(_x1 - _x2), Math.abs(_y1 - _y2));
                     cur_point--;
                 }
-                if (_max_delta > 0.001) {
+                if (_max_delta > _max_delta_eps2) {
                     if (this.Graphics.IsTrack) {
                         this.Graphics.Graphics.ArrayPoints = null;
                         DrawLineEnd(_x1, _y1, _x2, _y2, this.Ln.tailEnd.type, this.Ln.tailEnd.GetWidth(_pen_w), this.Ln.tailEnd.GetLen(_pen_w), this, trans1);
@@ -1157,6 +1210,12 @@ CShapeDrawer.prototype = {
     getNormalPoint: function (x0, y0, angle, x1, y1) {
         var ex1 = Math.cos(angle);
         var ey1 = Math.sin(angle);
+        if (ex1 === 0) {
+            return {
+                X: x0,
+                Y: y1
+            };
+        }
         var ex2 = -ey1;
         var ey2 = ex1;
         var a = ex1 / ey1;

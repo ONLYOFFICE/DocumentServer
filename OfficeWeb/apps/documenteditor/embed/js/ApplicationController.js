@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -44,7 +44,7 @@
         Common.Gateway.reportError(undefined, "Your browser is not supported.");
         return;
     }
-    ZeroClipboard.setMoviePath("../../../3rdparty/ZeroClipboard/ZeroClipboard10.swf");
+    ZeroClipboard.setMoviePath("../../../vendor/ZeroClipboard/ZeroClipboard10.swf");
     var clipShortUrl = new ZeroClipboard.Client();
     var clipEmbedObj = new ZeroClipboard.Client();
     clipShortUrl.zIndex = maxZIndex;
@@ -81,13 +81,13 @@
     }
     function loadConfig(data) {
         embedConfig = $.extend(embedConfig, data.config.embedded);
-        $("#id-short-url").text(embedConfig.shareUrl || "Unavailable");
+        $("#id-short-url").val(embedConfig.shareUrl || "Unavailable");
         $("#id-textarea-embed").text(embedCode.replace("{embed-url}", embedConfig.embedUrl).replace("{width}", minEmbedWidth).replace("{height}", minEmbedHeight));
         if (typeof embedConfig.shareUrl !== "undefined" && embedConfig.shareUrl != "") {
             if ($("#id-popover-social-container ul")) {
                 $("#id-popover-social-container ul").append('<li><div class="fb-like" data-href="' + embedConfig.shareUrl + '" data-send="false" data-layout="button_count" data-width="450" data-show-faces="false"></div></li>');
                 $("#id-popover-social-container ul").append('<li class="share-twitter"><a href="https://twitter.com/share" class="twitter-share-button" data-url="' + embedConfig.shareUrl + '">Tweet</a></li>');
-                $("#id-popover-social-container ul").append('<li class="share-mail"><a class="btn btn-mini" href="mailto:?subject=I have shared a document with you: ' + embedConfig.docTitle + "&body=I have shared a document with you: " + embedConfig.shareUrl + '"><i class="icon-envelope"></i>Email</a></li>');
+                $("#id-popover-social-container ul").append('<li class="share-mail"><a class="btn btn-xs btn-default" href="mailto:?subject=I have shared a document with you: ' + embedConfig.docTitle + "&body=I have shared a document with you: " + embedConfig.shareUrl + '"><span class="glyphicon glyphicon-envelope"></span>Email</a></li>');
             }
         }
         if (typeof embedConfig.shareUrl === "undefined") {
@@ -297,7 +297,7 @@
         if (visible) {
             if (owner) {
                 popover.css("display", "block");
-                var popoverData = owner.data("popover"),
+                var popoverData = owner.data("bs.popover"),
                 $tip = popoverData.tip(),
                 pos = popoverData.getPosition(false),
                 actualHeight = $tip[0].offsetHeight,
@@ -367,7 +367,7 @@
             }
             $("#id-btn-copy-short").button("copied");
             $("#id-btn-copy-short").addClass("copied");
-            clipShortUrl.setText($("#id-short-url").text());
+            clipShortUrl.setText($("#id-short-url").val());
             setTimeout(function () {
                 $("#id-btn-copy-short").button("reset");
                 $("#id-btn-copy-short").removeClass("copied");
@@ -486,6 +486,7 @@
             },
             2000);
         });
+        window["flat_desine"] = true;
         api = new asc_docs_api("editor_sdk");
         if (api) {
             api.CreateComponents();

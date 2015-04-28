@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function _FT_Common() {
+ "use strict";
+function _FT_Common() {
     this.UintToInt = function (v) {
         return (v > 2147483647) ? v - 4294967296 : v;
     };
@@ -2680,9 +2681,9 @@ function FT_Face() {
     this.family_name = "";
     this.style_name = "";
     this.num_fixed_sizes = 0;
-    this.available_sizes = new Array();
+    this.available_sizes = [];
     this.num_charmaps = 0;
-    this.charmaps = new Array();
+    this.charmaps = [];
     this.generic = new FT_Generic();
     this.bbox = new FT_BBox();
     this.units_per_EM = 0;
@@ -2699,8 +2700,8 @@ function FT_Face() {
     this.driver = null;
     this.memory = null;
     this.stream = null;
-    this.sizes_list = new Array();
-    this.autohint = new Array();
+    this.sizes_list = [];
+    this.autohint = [];
     this.extensions = null;
     this.internal = null;
 }
@@ -2748,7 +2749,7 @@ function FT_GlyphSlot() {
     this.bitmap_top = 0;
     this.outline = new FT_Outline();
     this.num_subglyphs = 0;
-    this.subglyphs = new Array();
+    this.subglyphs = [];
     this.control_data = null;
     this.control_len = 0;
     this.lsb_delta = 0;
@@ -2881,7 +2882,7 @@ function FT_Module() {
 function FT_Driver() {
     this.root = new FT_Module();
     this.clazz = new FT_Driver_Class();
-    this.faces_list = new Array();
+    this.faces_list = [];
     this.extensions = null;
     this.glyph_loader = null;
 }
@@ -3013,7 +3014,7 @@ function find_unicode_charmap(face) {
     }
     var cur = count - 1;
     for (; cur >= 0; cur--) {
-        var cmap = face.charmaps[cur];
+        var cmap = __FT_CharmapRec(face.charmaps[cur]);
         if (cmap.encoding == 1970170211) {
             if ((cmap.platform_id == 3 && cmap.encoding_id == 10) || (cmap.platform_id == 0 && cmap.encoding_id == 4)) {
                 if (cur > 15) {
@@ -3026,7 +3027,7 @@ function find_unicode_charmap(face) {
     }
     cur = count - 1;
     for (; cur >= 0; cur--) {
-        var cmap = face.charmaps[cur];
+        var cmap = __FT_CharmapRec(face.charmaps[cur]);
         if (cmap.encoding == 1970170211) {
             if (cur > 15) {
                 continue;
@@ -3856,9 +3857,9 @@ function T1_Face() {
     this.family_name = "";
     this.style_name = "";
     this.num_fixed_sizes = 0;
-    this.available_sizes = new Array();
+    this.available_sizes = [];
     this.num_charmaps = 0;
-    this.charmaps = new Array();
+    this.charmaps = [];
     this.generic = new FT_Generic();
     this.bbox = new FT_BBox();
     this.units_per_EM = 0;
@@ -3875,8 +3876,8 @@ function T1_Face() {
     this.driver = null;
     this.memory = null;
     this.stream = null;
-    this.sizes_list = new Array();
-    this.autohint = new Array();
+    this.sizes_list = [];
+    this.autohint = [];
     this.extensions = null;
     this.internal = null;
     this.type1 = new T1_FontRec();
@@ -3906,9 +3907,9 @@ function CID_Face() {
     this.family_name = "";
     this.style_name = "";
     this.num_fixed_sizes = 0;
-    this.available_sizes = new Array();
+    this.available_sizes = [];
     this.num_charmaps = 0;
-    this.charmaps = new Array();
+    this.charmaps = [];
     this.generic = new FT_Generic();
     this.bbox = new FT_BBox();
     this.units_per_EM = 0;
@@ -3925,8 +3926,8 @@ function CID_Face() {
     this.driver = null;
     this.memory = null;
     this.stream = null;
-    this.sizes_list = new Array();
-    this.autohint = new Array();
+    this.sizes_list = [];
+    this.autohint = [];
     this.extensions = null;
     this.internal = null;
     this.psnames = null;
@@ -4527,7 +4528,7 @@ function afm_parse_kern_pairs(parser) {
             shared_vals[1].type = 5;
             shared_vals[2].type = 3;
             shared_vals[3].type = 3;
-            r = afm_parser_read_vals(parser, shared_vals, 4);
+            var r = afm_parser_read_vals(parser, shared_vals, 4);
             if (r < 3) {
                 return 160;
             }
@@ -7594,6 +7595,7 @@ function tt_face_load_pclt(face, stream) {
     var error = 0;
     var pclt = face.pclt;
     face.goto_table(face, 1346587732, stream);
+    error = FT_Error;
     if (error != 0) {
         return error;
     }
@@ -7872,7 +7874,7 @@ function load_format_20(face, stream, post_limit) {
 }
 function load_format_25(face, stream, post_limit) {
     var num_glyphs = stream.ReadUShort();
-    error = FT_Error;
+    var error = FT_Error;
     if (error != 0) {
         return error;
     }
@@ -8116,7 +8118,7 @@ function Load_SBit_Range(range, stream) {
             return error;
         }
         range.glyph_offsets = new Array(num_glyphs);
-        for (n = 0; n < num_glyphs; n++) {
+        for (var n = 0; n < num_glyphs; n++) {
             range.glyph_offsets[n] = (range.image_offset + ((large == 1) ? stream.GetULong() : stream.GetUShort()));
         }
         stream.ExitFrame();
@@ -9093,7 +9095,7 @@ function tt_cmap4_char_map_linear(cmap, _charcode, next) {
                 p.pos += num_segs2;
                 offset = FT_PEEK_USHORT(p);
                 if (i >= num_segs - 1 && start == 65535 && end == 65535) {
-                    var face = cmap.cmap.charmap.face;
+                    var face = cmap.cmap.cmap.charmap.face;
                     var limit = face.cmap_table.pos + face.cmap_size;
                     if (offset != 0 && p.pos + offset + 2 > limit) {
                         delta = 1;
@@ -9172,7 +9174,7 @@ function tt_cmap4_char_map_binary(cmap, _charcode, next) {
                 p.pos += num_segs2;
                 offset = FT_PEEK_USHORT(p);
                 if (mid >= num_segs - 1 && start == 65535 && end == 65535) {
-                    var face = cmap.cmap.charmap.face;
+                    var face = cmap.cmap.cmap.charmap.face;
                     var limit = face.cmap_table.pos + face.cmap_size;
                     if (offset && p.pos + offset + 2 > limit) {
                         delta = 1;
@@ -9728,7 +9730,7 @@ function tt_cmap10_class_rec() {
         }
         var length = FT_NEXT_ULONG(p);
         p.pos = base + 16;
-        count = FT_NEXT_ULONG(p);
+        var count = FT_NEXT_ULONG(p);
         if (length > (valid.limit - base) || length < 20 + count * 2) {
             return 8;
         }
@@ -10715,7 +10717,7 @@ function sfnt_get_name_index(face, glyph_name) {
     }
     for (var i = 0; i < max_gid; i++) {
         var gname = tt_face_get_ps_name(face, i);
-        error = FT_Error;
+        var error = FT_Error;
         if (error != 0) {
             continue;
         }
@@ -11586,6 +11588,7 @@ function FT_Outline_Get_Orientation(outline) {
         return 0;
     }
     var points = outline.points;
+    var v_cur;
     var first = 0;
     var area = 0;
     for (var c = 0; c < outline.n_contours; c++) {
@@ -17164,8 +17167,8 @@ function TT_Face() {
     this.driver = null;
     this.memory = null;
     this.stream = null;
-    this.sizes_list = new Array();
-    this.autohint = new Array();
+    this.sizes_list = [];
+    this.autohint = [];
     this.extensions = null;
     this.internal = null;
     this.ttc_header = new TTC_HeaderRec();
@@ -17204,7 +17207,7 @@ function TT_Face() {
     this.cvt = null;
     this.num_kern_pairs = 0;
     this.kern_table_index = 0;
-    this.kern_pairs = new Array();
+    this.kern_pairs = [];
     this.interpreter = null;
     this.unpatented_hinting = false;
     this.extra = new FT_Generic();
@@ -19863,7 +19866,7 @@ function TT_Driver() {
     this.memory = null;
     this.generic = null;
     this.clazz = new TT_Driver_Class();
-    this.faces_list = new Array();
+    this.faces_list = [];
     this.extensions = null;
     this.glyph_loader = null;
     this.context = null;
@@ -20157,7 +20160,7 @@ function CFF_SubFontRec() {
     this.font_dict = new CFF_FontRecDictRec();
     this.private_dict = new CFF_PrivateRec();
     this.local_subrs_index = new CFF_IndexRec();
-    this.local_subrs = new Array();
+    this.local_subrs = [];
 }
 function CFF_FontRec() {
     this.stream = null;
@@ -20178,7 +20181,7 @@ function CFF_FontRec() {
     this.private_index = new CFF_IndexRec();
     this.local_subrs_index = new CFF_IndexRec();
     this.font_name = "";
-    this.global_subrs = new Array();
+    this.global_subrs = [];
     this.num_strings = 0;
     this.strings = null;
     this.string_pool = null;
@@ -24212,7 +24215,7 @@ function CFF_Driver() {
     this.memory = null;
     this.generic = null;
     this.clazz = new CFF_Driver_Class();
-    this.faces_list = new Array();
+    this.faces_list = [];
     this.extensions = null;
     this.glyph_loader = null;
     this.extension_component = null;
@@ -26832,7 +26835,7 @@ function T1_Driver() {
     this.memory = null;
     this.generic = null;
     this.clazz = new T1_Driver_Class();
-    this.faces_list = new Array();
+    this.faces_list = [];
     this.extensions = null;
     this.glyph_loader = null;
     this.open_face = function (stream, face_index) {
@@ -26874,8 +26877,8 @@ function FT_Library() {
     this.version_major = 2;
     this.version_minor = 4;
     this.version_patch = 8;
-    this.modules = new Array();
-    this.renderers = new Array();
+    this.modules = [];
+    this.renderers = [];
     this.cur_renderer = null;
     this.auto_hinter = null;
     this.raster_pool_size = 16384;
@@ -26910,7 +26913,6 @@ function FT_Library() {
         if ((clazz.flags & 2) != 0) {
             error = this.ft_add_renderer(module);
             if (0 != error) {
-                delete module;
                 return error;
             }
         }
@@ -27015,12 +27017,12 @@ function FT_Library() {
                 var slot = FT_New_GlyphSlot(face);
                 slot = null;
                 if (FT_Error != 0) {
-                    delete face;
+                    face = null;
                     return null;
                 }
                 var size = FT_New_Size(face);
                 if (FT_Error != 0) {
-                    delete face;
+                    face = null;
                     return null;
                 }
                 face.size = size;

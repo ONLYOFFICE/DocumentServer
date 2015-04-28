@@ -10,6 +10,8 @@
   "SSE.controller.Main.errorUsersExceed": "The number of users allowed by the pricing plan was exceeded",
   "SSE.controller.Main.notcriticalErrorTitle": "Warning",
   "SSE.controller.Main.printText": "Drukā...",
+  "SSE.controller.Main.textAnonymous": "Anonymous",
+  "SSE.controller.Main.textLoadingDocument": "Loading document",
   "SSE.controller.Main.unknownErrorText": "Unknown error.",
   "SSE.controller.Main.unsupportedBrowserErrorText ": "Your browser is not supported.",
   "SSE.controller.Main.uploadImageExtMessage": "Unknown image format.",

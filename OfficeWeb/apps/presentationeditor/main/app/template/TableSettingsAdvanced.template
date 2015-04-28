@@ -1,0 +1,61 @@
+<div id="id-adv-table-cell-props" class="settings-panel active">
+    <div class="inner-content">
+        <table cols="2" style="width: 100%;">
+            <tr>
+                <td colspan=2 class="padding-small">
+                    <label class="header"><%= scope.textMargins %></label>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="padding-small">
+                    <div id="tableadv-checkbox-margins"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-small" width="125px">
+                    <label class="input-label"><%= scope.textTop %></label>
+                    <div id="tableadv-number-margin-top"></div>
+                </td>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textLeft %></label>
+                    <div id="tableadv-number-margin-left"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-large">
+                    <label class="input-label"><%= scope.textBottom %></label>
+                    <div id="tableadv-number-margin-bottom"></div>
+                </td>
+                <td class="padding-large">
+                    <label class="input-label"><%= scope.textRight %></label>
+                    <div id="tableadv-number-margin-right"></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan=2 class="padding-small">
+                    <label class="header"><%= scope.textDefaultMargins %></label>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-small" width="125px">
+                    <label class="input-label"><%= scope.textTop %></label>
+                    <div id="tableadv-number-margin-table-top"></div>
+                </td>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textLeft %></label>
+                    <div id="tableadv-number-margin-table-left"></div>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textBottom %></label>
+                    <div id="tableadv-number-margin-table-bottom"></div>
+                </td>
+                <td class="padding-small">
+                    <label class="input-label"><%= scope.textRight %></label>
+                    <div id="tableadv-number-margin-table-right"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

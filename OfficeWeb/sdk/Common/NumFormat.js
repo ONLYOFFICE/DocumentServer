@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,10 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var numFormat_Text = 0;
+ "use strict";
+var gc_sFormatDecimalPoint = ".";
+var gc_sFormatThousandSeparator = ",";
+var numFormat_Text = 0;
 var numFormat_TextPlaceholder = 1;
 var numFormat_Bracket = 2;
 var numFormat_Digit = 3;
@@ -49,6 +52,9 @@ var numFormat_Day = 16;
 var numFormat_Second = 17;
 var numFormat_Milliseconds = 18;
 var numFormat_AmPm = 19;
+var numFormat_DateSeparator = 20;
+var numFormat_TimeSeparator = 21;
+var numFormat_DecimalPointText = 22;
 var numFormat_MonthMinute = 101;
 var numFormat_Percent = 102;
 var oNumFormatCache;
@@ -63,11 +69,6 @@ var SignType = {
     Negative: 2,
     Null: 3
 };
-var monthCut = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-var monthShort = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
-var month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-var day = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-var dayShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 var gc_nMaxDigCount = 15;
 var gc_nMaxDigCountView = 11;
 var gc_nMaxMantissa = Math.pow(10, gc_nMaxDigCount);
@@ -81,6 +82,9 @@ var NumComporationOperators = {
 };
 function getNumberParts(x) {
     var sig = SignType.Null;
+    if (!isFinite(x)) {
+        x = 0;
+    }
     if (x > 0) {
         sig = SignType.Positive;
     } else {
@@ -89,11 +93,15 @@ function getNumberParts(x) {
             x = Math.abs(x);
         }
     }
-    var exp = Math.floor(Math.log(x) * Math.LOG10E) - gc_nMaxDigCount + 1;
-    var man = Math.round(x / Math.pow(10, exp));
-    if (man >= gc_nMaxMantissa) {
-        exp++;
-        man /= 10;
+    var exp = -gc_nMaxDigCount;
+    var man = 0;
+    if (SignType.Null != sig) {
+        exp = Math.floor(Math.log(x) * Math.LOG10E) - gc_nMaxDigCount + 1;
+        man = Math.round(x / Math.pow(10, exp));
+        if (man >= gc_nMaxMantissa) {
+            exp++;
+            man /= 10;
+        }
     }
     return {
         mantissa: man,
@@ -101,6 +109,14 @@ function getNumberParts(x) {
         sign: sig
     };
 }
+function NumFormatFont() {
+    this.skip = null;
+    this.repeat = null;
+    this.c = null;
+}
+NumFormatFont.prototype.isEqual = function (val) {
+    return this.skip == val.skip && this.repeat == val.repeat && this.c == val.c;
+};
 function FormatObj(type, val) {
     this.type = type;
     this.val = val;
@@ -121,11 +137,6 @@ function FormatObjDateVal(type, nCount, bElapsed) {
     this.type = type;
     this.val = nCount;
     this.bElapsed = bElapsed;
-}
-function FormatObjDateAmPm(sAm, sPm) {
-    this.type = numFormat_AmPm;
-    this.sAm = sAm;
-    this.sPm = sPm;
 }
 function FormatObjBracket(sData) {
     this.type = numFormat_Bracket;
@@ -256,12 +267,13 @@ function NumFormat(bAddMinusIfNes) {
     this.length = this.formatString.length;
     this.index = 0;
     this.EOF = -1;
-    this.aRawFormat = new Array();
-    this.aDecFormat = new Array();
-    this.aFracFormat = new Array();
+    this.aRawFormat = [];
+    this.aDecFormat = [];
+    this.aFracFormat = [];
     this.bDateTime = false;
     this.bDate = false;
     this.bTime = false;
+    this.bDay = false;
     this.nPercent = 0;
     this.bScientific = false;
     this.bThousandSep = false;
@@ -274,8 +286,10 @@ function NumFormat(bAddMinusIfNes) {
     this.bCurrency = false;
     this.bNumber = false;
     this.bInteger = false;
+    this.bRepeat = false;
     this.Color = -1;
     this.ComporationOperator = null;
+    this.bGeneralChart = false;
     this.bGeneral = false;
     this.bAddMinusIfNes = bAddMinusIfNes;
 }
@@ -366,14 +380,16 @@ NumFormat.prototype = {
             }
         }
         if ("" != sAm && "" != sPm) {
-            this._addToFormat2(new FormatObjDateAmPm(sAm, sPm));
+            this._addToFormat2(new FormatObj(numFormat_AmPm));
             this.bTimePeriod = true;
             this.bDateTime = true;
         }
     },
     _parseFormat: function (format) {
+        this.bGeneralChart = true;
         while (true) {
             var next = this._readChar();
+            var bNoFormat = false;
             if (this.EOF == next) {
                 break;
             } else {
@@ -389,68 +405,73 @@ NumFormat.prototype = {
                             if ("%" == next) {
                                 this._addToFormat(numFormat_Percent);
                             } else {
-                                if ("$" == next || "+" == next || "-" == next || "(" == next || ")" == next || " " == next || ":" == next) {
+                                if ("$" == next || "+" == next || "-" == next || "(" == next || ")" == next || " " == next) {
                                     this._addToFormat(numFormat_Text, next);
                                 } else {
-                                    if (0 <= next && next <= 9) {
-                                        this._addToFormat(numFormat_Digit, next - 0);
+                                    if (":" == next) {
+                                        this._addToFormat(numFormat_TimeSeparator);
                                     } else {
-                                        if ("#" == next) {
-                                            this._addToFormat(numFormat_DigitNoDisp);
+                                        if (0 <= next && next <= 9) {
+                                            this._addToFormat(numFormat_Digit, next - 0);
                                         } else {
-                                            if ("?" == next) {
-                                                this._addToFormat(numFormat_DigitSpace);
+                                            if ("#" == next) {
+                                                this._addToFormat(numFormat_DigitNoDisp);
                                             } else {
-                                                if ("." == next) {
-                                                    this._addToFormat(numFormat_DecimalPoint);
+                                                if ("?" == next) {
+                                                    this._addToFormat(numFormat_DigitSpace);
                                                 } else {
-                                                    if ("/" == next) {
-                                                        this._addToFormat2(new FormatObjDecimalFrac(new Array(), new Array()));
+                                                    if (gc_sFormatDecimalPoint == next) {
+                                                        this._addToFormat(numFormat_DecimalPoint);
                                                     } else {
-                                                        if ("," == next) {
-                                                            this._addToFormat(numFormat_Thousand, 1);
+                                                        if ("/" == next) {
+                                                            this._addToFormat2(new FormatObjDecimalFrac([], []));
                                                         } else {
-                                                            if ("E" == next || "e" == next) {
-                                                                var nextnext = this._readChar();
-                                                                if (this.EOF != nextnext && "+" == nextnext || "-" == nextnext) {
-                                                                    var sign = ("+" == nextnext) ? SignType.Positive : SignType.Negative;
-                                                                    this._addToFormat2(new FormatObjScientific(next, "", sign));
-                                                                }
+                                                            if (gc_sFormatThousandSeparator == next) {
+                                                                this._addToFormat(numFormat_Thousand, 1);
                                                             } else {
-                                                                if ("*" == next) {
+                                                                if ("E" == next || "e" == next) {
                                                                     var nextnext = this._readChar();
-                                                                    if (this.EOF != nextnext) {
-                                                                        this._addToFormat(numFormat_Repeat, nextnext);
+                                                                    if (this.EOF != nextnext && "+" == nextnext || "-" == nextnext) {
+                                                                        var sign = ("+" == nextnext) ? SignType.Positive : SignType.Negative;
+                                                                        this._addToFormat2(new FormatObjScientific(next, "", sign));
                                                                     }
                                                                 } else {
-                                                                    if ("_" == next) {
+                                                                    if ("*" == next) {
                                                                         var nextnext = this._readChar();
                                                                         if (this.EOF != nextnext) {
-                                                                            this._addToFormat(numFormat_Skip, nextnext);
+                                                                            this._addToFormat(numFormat_Repeat, nextnext);
                                                                         }
                                                                     } else {
-                                                                        if ("@" == next) {
-                                                                            this._addToFormat(numFormat_TextPlaceholder);
+                                                                        if ("_" == next) {
+                                                                            var nextnext = this._readChar();
+                                                                            if (this.EOF != nextnext) {
+                                                                                this._addToFormat(numFormat_Skip, nextnext);
+                                                                            }
                                                                         } else {
-                                                                            if ("Y" == next || "y" == next) {
-                                                                                this._addToFormat2(new FormatObjDateVal(numFormat_Year, 1, false));
+                                                                            if ("@" == next) {
+                                                                                this._addToFormat(numFormat_TextPlaceholder);
                                                                             } else {
-                                                                                if ("M" == next || "m" == next) {
-                                                                                    this._addToFormat2(new FormatObjDateVal(numFormat_MonthMinute, 1, false));
+                                                                                if ("Y" == next || "y" == next) {
+                                                                                    this._addToFormat2(new FormatObjDateVal(numFormat_Year, 1, false));
                                                                                 } else {
-                                                                                    if ("D" == next || "d" == next) {
-                                                                                        this._addToFormat2(new FormatObjDateVal(numFormat_Day, 1, false));
+                                                                                    if ("M" == next || "m" == next) {
+                                                                                        this._addToFormat2(new FormatObjDateVal(numFormat_MonthMinute, 1, false));
                                                                                     } else {
-                                                                                        if ("H" == next || "h" == next) {
-                                                                                            this._addToFormat2(new FormatObjDateVal(numFormat_Hour, 1, false));
+                                                                                        if ("D" == next || "d" == next) {
+                                                                                            this._addToFormat2(new FormatObjDateVal(numFormat_Day, 1, false));
                                                                                         } else {
-                                                                                            if ("S" == next || "s" == next) {
-                                                                                                this._addToFormat2(new FormatObjDateVal(numFormat_Second, 1, false));
+                                                                                            if ("H" == next || "h" == next) {
+                                                                                                this._addToFormat2(new FormatObjDateVal(numFormat_Hour, 1, false));
                                                                                             } else {
-                                                                                                if ("A" == next || "a" == next) {
-                                                                                                    this._ReadAmPm(next);
+                                                                                                if ("S" == next || "s" == next) {
+                                                                                                    this._addToFormat2(new FormatObjDateVal(numFormat_Second, 1, false));
                                                                                                 } else {
-                                                                                                    this._addToFormat(numFormat_Text, next);
+                                                                                                    if ("A" == next || "a" == next) {
+                                                                                                        this._ReadAmPm(next);
+                                                                                                    } else {
+                                                                                                        bNoFormat = true;
+                                                                                                        this._addToFormat(numFormat_Text, next);
+                                                                                                    }
                                                                                                 }
                                                                                             }
                                                                                         }
@@ -472,6 +493,9 @@ NumFormat.prototype = {
                         }
                     }
                 }
+            }
+            if (!bNoFormat) {
+                this.bGeneralChart = false;
             }
         }
         return true;
@@ -521,13 +545,13 @@ NumFormat.prototype = {
                 this.Color = oCurItem.color;
             }
         }
-        var bRepeat = false;
+        this.bRepeat = false;
         var nFormatLength = this.aRawFormat.length;
         for (var i = 0; i < nFormatLength; ++i) {
             var item = this.aRawFormat[i];
             if (numFormat_Repeat == item.type) {
-                if (false == bRepeat) {
-                    bRepeat = true;
+                if (false == this.bRepeat) {
+                    this.bRepeat = true;
                 } else {
                     this.aRawFormat.splice(i, 1);
                     nFormatLength--;
@@ -543,6 +567,9 @@ NumFormat.prototype = {
                         } else {
                             if (numFormat_Year == oNewObj.type || numFormat_Month == oNewObj.type || numFormat_Day == oNewObj.type) {
                                 this.bDate = true;
+                                if (numFormat_Day == oNewObj.type) {
+                                    this.bDay = true;
+                                }
                             }
                         }
                     }
@@ -570,6 +597,9 @@ NumFormat.prototype = {
                             } else {
                                 if (numFormat_Year == item.type || numFormat_Month == item.type || numFormat_Day == item.type) {
                                     this.bDate = true;
+                                    if (numFormat_Day == item.type) {
+                                        this.bDay = true;
+                                    }
                                 }
                             }
                         }
@@ -579,7 +609,7 @@ NumFormat.prototype = {
                             if (true == this.bScientific) {
                                 bAsText = true;
                             } else {
-                                var aDigitArray = new Array();
+                                var aDigitArray = [];
                                 for (var j = i + 1; j < nFormatLength; ++j) {
                                     var nextItem = this.aRawFormat[j];
                                     if (numFormat_Digit == nextItem.type || numFormat_DigitNoDisp == nextItem.type || numFormat_DigitSpace == nextItem.type) {
@@ -647,8 +677,7 @@ NumFormat.prototype = {
                                     }
                                 }
                                 if (false == bValid) {
-                                    item.type = numFormat_Text;
-                                    item.val = "/";
+                                    item.type = numFormat_DateSeparator;
                                 }
                             }
                         }
@@ -682,8 +711,8 @@ NumFormat.prototype = {
                         i++;
                         this.bMillisec = true;
                     }
-                    item.type = numFormat_Text;
-                    item.val = ".";
+                    item.type = numFormat_DecimalPointText;
+                    item.val = null;
                 } else {
                     if (FormatStates.Decimal == nReadState) {
                         nReadState = FormatStates.Frac;
@@ -766,7 +795,7 @@ NumFormat.prototype = {
                                 } else {
                                     if (bEndCondition == true) {
                                         item.type = numFormat_Text;
-                                        item.val = ",";
+                                        item.val = gc_sFormatThousandSeparator;
                                     }
                                 }
                             }
@@ -833,7 +862,7 @@ NumFormat.prototype = {
         }
         return nKoef;
     },
-    _parseNumber: function (number, aDecFormat, nFracLen, nValType) {
+    _parseNumber: function (number, aDecFormat, nFracLen, nValType, cultureInfo) {
         var res = {
             bDigit: false,
             dec: 0,
@@ -842,7 +871,7 @@ NumFormat.prototype = {
             exponentFrac: 0,
             scientific: 0,
             sign: SignType.Positive,
-            date: new Object()
+            date: {}
         };
         if (CellValueType.String != nValType) {
             res.bDigit = (number == number - 0);
@@ -1036,9 +1065,8 @@ NumFormat.prototype = {
             countDay: d.val
         };
     },
-    _FormatNumber: function (number, exponent, format, nReadState) {
-        var aRes = new Array();
-        var aNoDisplay = new Array();
+    _FormatNumber: function (number, exponent, format, nReadState, cultureInfo) {
+        var aRes = [];
         var nFormatLen = format.length;
         if (nFormatLen > 0) {
             if (FormatStates.Frac != nReadState) {
@@ -1069,32 +1097,51 @@ NumFormat.prototype = {
                         }
                     }
                 }
-                var bFirstNotNull = false;
                 for (var i = 0, length = sNumber.length; i < length; ++i) {
                     var sCurNumber = sNumber[i];
+                    var numFormat = numFormat_Text;
                     var item = format.shift();
-                    if (true == bIsNUll && null != item && numFormat_DigitNoDisp == item.type && FormatStates.Scientific != nReadState) {
-                        sCurNumber = "";
+                    if (true == bIsNUll && null != item && FormatStates.Scientific != nReadState) {
+                        if (numFormat_DigitNoDisp == item.type) {
+                            sCurNumber = "";
+                        } else {
+                            if (numFormat_DigitSpace == item.type) {
+                                numFormat = numFormat_DigitSpace;
+                                sCurNumber = null;
+                            }
+                        }
                     }
-                    aRes.push(new FormatObj(numFormat_Text, sCurNumber));
+                    aRes.push(new FormatObj(numFormat, sCurNumber));
                 }
                 if (true == this.bThousandSep && FormatStates.Slash != nReadState) {
+                    var sThousandSep = cultureInfo.NumberGroupSeparator;
+                    var aGroupSize = cultureInfo.NumberGroupSizes;
+                    var nCurGroupIndex = 0;
+                    var nCurGroupSize = 0;
+                    if (nCurGroupIndex < aGroupSize.length) {
+                        nCurGroupSize = aGroupSize[nCurGroupIndex++];
+                    } else {
+                        nCurGroupSize = 0;
+                    }
                     var nIndex = 0;
                     for (var i = aRes.length - 1; i >= 0; --i) {
                         var item = aRes[i];
                         if (numFormat_Text == item.type) {
-                            var aNewText = new Array();
+                            var aNewText = [];
                             var nTextLength = item.val.length;
                             for (var j = nTextLength - 1; j >= 0; --j) {
-                                if (3 == nIndex) {
-                                    aNewText.push(",");
+                                if (nCurGroupSize == nIndex) {
+                                    aNewText.push(sThousandSep);
                                     nTextLength++;
                                 }
                                 aNewText.push(item.val[j]);
                                 if (0 != j) {
                                     nIndex++;
-                                    if (4 == nIndex) {
+                                    if (nCurGroupSize + 1 == nIndex) {
                                         nIndex = 1;
+                                        if (nCurGroupIndex < aGroupSize.length) {
+                                            nCurGroupSize = aGroupSize[nCurGroupIndex++];
+                                        }
                                     }
                                 }
                             }
@@ -1104,15 +1151,18 @@ NumFormat.prototype = {
                             item.val = aNewText.join("");
                         } else {
                             if (numFormat_DigitNoDisp != item.type) {
-                                if (3 == nIndex) {
-                                    item.val = ",";
+                                if (nCurGroupSize == nIndex) {
+                                    item.val = sThousandSep;
                                     aRes[i] = item;
                                 }
                             }
                         }
                         nIndex++;
-                        if (4 == nIndex) {
+                        if (nCurGroupSize + 1 == nIndex) {
                             nIndex = 1;
+                            if (nCurGroupIndex < aGroupSize.length) {
+                                nCurGroupSize = aGroupSize[nCurGroupIndex++];
+                            }
                         }
                     }
                 }
@@ -1167,8 +1217,7 @@ NumFormat.prototype = {
                     }
                 } else {
                     if (numFormat_DigitSpace == item.type) {
-                        var oNewFont = new Font();
-                        oNewFont.clean();
+                        var oNewFont = new NumFormatFont();
                         oNewFont.skip = true;
                         this._CommitText(res, oCurText, "0", oNewFont);
                         if (null != item.val) {
@@ -1195,8 +1244,7 @@ NumFormat.prototype = {
             }
             if (-1 != this.Color) {
                 if (null == format) {
-                    format = new Font();
-                    format.clean();
+                    format = new NumFormatFont();
                 }
                 format.c = new RgbColor(this.Color);
             }
@@ -1217,7 +1265,10 @@ NumFormat.prototype = {
             }
         }
     },
-    setFormat: function (format) {
+    setFormat: function (format, cultureInfo) {
+        if (null == cultureInfo) {
+            cultureInfo = g_oDefaultCultureInfo;
+        }
         this.formatString = format;
         this.length = this.formatString.length;
         if ("general" == this.formatString.toLowerCase()) {
@@ -1229,7 +1280,7 @@ NumFormat.prototype = {
             if (true == this.valid) {
                 this.valid = this._prepareFormat();
                 if (this.valid) {
-                    var aCurrencySymbols = ["$", "€", "£", "¥", "р."];
+                    var aCurrencySymbols = ["$", "€", "£", "¥", "р.", cultureInfo.CurrencySymbol];
                     var sText = "";
                     for (var i = 0, length = this.aRawFormat.length; i < length; ++i) {
                         var item = this.aRawFormat[i];
@@ -1242,7 +1293,11 @@ NumFormat.prototype = {
                                 }
                             } else {
                                 if (numFormat_DecimalPoint == item.type) {
-                                    sText += ".";
+                                    sText += gc_sFormatDecimalPoint;
+                                } else {
+                                    if (numFormat_DecimalPointText == item.type) {
+                                        sText += gc_sFormatDecimalPoint;
+                                    }
                                 }
                             }
                         }
@@ -1255,7 +1310,7 @@ NumFormat.prototype = {
                             }
                         }
                     }
-                    var rxNumber = new RegExp("^[0#?]+(.[0#?]+)?$");
+                    var rxNumber = new RegExp("^[0#?]+(" + escapeRegExp(gc_sFormatDecimalPoint) + "[0#?]+)?$");
                     var match = this.formatString.match(rxNumber);
                     if (null != match) {
                         if (null != match[1]) {
@@ -1272,32 +1327,34 @@ NumFormat.prototype = {
     isInvalidDateValue: function (number) {
         return (number == number - 0) && ((number < 0 && false == g_bDate1904) || number > 2958465.9999884);
     },
-    format: function (number, nValType, dDigitsCount, oAdditionalResult) {
+    format: function (number, nValType, dDigitsCount, oAdditionalResult, cultureInfo, bChart) {
+        if (null == cultureInfo) {
+            cultureInfo = g_oDefaultCultureInfo;
+        }
         if (null == nValType) {
             nValType = CellValueType.Number;
         }
-        var res = new Array();
+        var res = [];
         var oCurText = {
             text: ""
         };
         if (true == this.valid) {
             if (true === this.bDateTime) {
                 if (this.isInvalidDateValue(number)) {
-                    var oNewFont = new Font();
-                    oNewFont.clean();
+                    var oNewFont = new NumFormatFont();
                     oNewFont.repeat = true;
                     this._CommitText(res, null, "#", oNewFont);
                     return res;
                 }
             }
-            var oParsedNumber = this._parseNumber(number, this.aDecFormat, this.aFracFormat.length, nValType);
-            if (true == this.bGeneral || (true == oParsedNumber.bDigit && true == this.bTextFormat) || (false == oParsedNumber.bDigit && false == this.bTextFormat)) {
+            var oParsedNumber = this._parseNumber(number, this.aDecFormat, this.aFracFormat.length, nValType, cultureInfo);
+            if (true == this.bGeneral || (true == oParsedNumber.bDigit && true == this.bTextFormat) || (false == oParsedNumber.bDigit && false == this.bTextFormat) || (bChart && this.bGeneralChart)) {
                 if (null != oAdditionalResult) {
                     oAdditionalResult.bGeneral = true;
                 }
                 var sGeneral = DecodeGeneralFormat(number, nValType, dDigitsCount);
                 if (null != sGeneral) {
-                    numFormat = oNumFormatCache.get(sGeneral);
+                    var numFormat = oNumFormatCache.get(sGeneral);
                     if (null != numFormat) {
                         return numFormat.format(number, nValType, dDigitsCount, oAdditionalResult);
                     }
@@ -1306,18 +1363,18 @@ NumFormat.prototype = {
                     text: number
                 }];
             }
-            var aDec = new Array();
-            var aFrac = new Array();
-            var aScientific = new Array();
+            var aDec = [];
+            var aFrac = [];
+            var aScientific = [];
             if (true == oParsedNumber.bDigit) {
-                aDec = this._FormatNumber(oParsedNumber.dec, oParsedNumber.exponent, this.aDecFormat.concat(), FormatStates.Decimal);
-                aFrac = this._FormatNumber(oParsedNumber.frac, oParsedNumber.exponentFrac, this.aFracFormat.concat(), FormatStates.Frac);
+                aDec = this._FormatNumber(oParsedNumber.dec, oParsedNumber.exponent, this.aDecFormat.concat(), FormatStates.Decimal, cultureInfo);
+                aFrac = this._FormatNumber(oParsedNumber.frac, oParsedNumber.exponentFrac, this.aFracFormat.concat(), FormatStates.Frac, cultureInfo);
             }
             if (true == this.bAddMinusIfNes && SignType.Negative == oParsedNumber.sign) {
                 oCurText.text += "-";
             }
             var bNoDecFormat = false;
-            if (null == aDec || 0 == aDec.length && 0 != oParsedNumber.dec) {
+            if ((null == aDec || 0 == aDec.length) && 0 != oParsedNumber.dec) {
                 bNoDecFormat = true;
             }
             var nReadState = FormatStates.Decimal;
@@ -1333,252 +1390,282 @@ NumFormat.prototype = {
                         if (bNoDecFormat && null != oParsedNumber.dec && FormatStates.Decimal == nReadState) {
                             oCurText.text += oParsedNumber.dec;
                         }
-                        oCurText.text += ".";
+                        oCurText.text += cultureInfo.NumberDecimalSeparator;
                         nReadState = FormatStates.Frac;
                     } else {
-                        if (numFormat_Digit == item.type || numFormat_DigitNoDisp == item.type || numFormat_DigitSpace == item.type) {
-                            var text = null;
-                            if (nReadState == FormatStates.Decimal) {
-                                text = aDec.shift();
-                            } else {
-                                if (nReadState == FormatStates.Frac) {
-                                    text = aFrac.shift();
+                        if (numFormat_DecimalPointText == item.type) {
+                            oCurText.text += cultureInfo.NumberDecimalSeparator;
+                        } else {
+                            if (numFormat_Digit == item.type || numFormat_DigitNoDisp == item.type || numFormat_DigitSpace == item.type) {
+                                var text = null;
+                                if (nReadState == FormatStates.Decimal) {
+                                    text = aDec.shift();
                                 } else {
-                                    if (nReadState == FormatStates.Scientific) {
-                                        text = aScientific.shift();
+                                    if (nReadState == FormatStates.Frac) {
+                                        text = aFrac.shift();
+                                    } else {
+                                        if (nReadState == FormatStates.Scientific) {
+                                            text = aScientific.shift();
+                                        }
                                     }
                                 }
-                            }
-                            if (null != text) {
-                                this._AddDigItem(res, oCurText, text);
-                            }
-                        } else {
-                            if (numFormat_Text == item.type) {
-                                oCurText.text += item.val;
+                                if (null != text) {
+                                    this._AddDigItem(res, oCurText, text);
+                                }
                             } else {
-                                if (numFormat_TextPlaceholder == item.type) {
-                                    oCurText.text += number;
+                                if (numFormat_Text == item.type) {
+                                    oCurText.text += item.val;
                                 } else {
-                                    if (numFormat_Scientific == item.type) {
-                                        if (null != item.format) {
-                                            oCurText.text += item.val;
-                                            if (oParsedNumber.scientific < 0) {
-                                                oCurText.text += "-";
-                                            } else {
-                                                if (item.sign == SignType.Positive) {
-                                                    oCurText.text += "+";
-                                                }
-                                            }
-                                            aScientific = this._FormatNumber(Math.abs(oParsedNumber.scientific), 0, item.format.concat(), FormatStates.Scientific);
-                                            nReadState = FormatStates.Scientific;
-                                        }
+                                    if (numFormat_TextPlaceholder == item.type) {
+                                        oCurText.text += number;
                                     } else {
-                                        if (numFormat_DecimalFrac == item.type) {
-                                            if (oParsedNumber.frac !== 0 || this.bWhole === false) {
-                                                var frac = oParsedNumber.frac;
-                                                var fracExp = -frac.toString().length;
-                                                if (oParsedNumber.exponent < 0) {
-                                                    fracExp -= oParsedNumber.exponent;
-                                                }
-                                                frac *= Math.pow(10, fracExp);
-                                                var numerator;
-                                                var denominator;
-                                                if (item.bNumRight === true) {
-                                                    denominator = item.aRight[0].val;
-                                                    numerator = Math.round(denominator * frac);
-                                                    if (this.bWhole === false) {
-                                                        numerator += denominator * oParsedNumber.dec;
-                                                    }
+                                        if (numFormat_Scientific == item.type) {
+                                            if (null != item.format) {
+                                                oCurText.text += item.val;
+                                                if (oParsedNumber.scientific < 0) {
+                                                    oCurText.text += "-";
                                                 } else {
-                                                    if (frac == 0) {
-                                                        numerator = oParsedNumber.dec;
-                                                        denominator = 1;
-                                                    } else {
-                                                        var d = n = frac;
-                                                        var a0 = 0,
-                                                        a1 = 1;
-                                                        var b0 = 1,
-                                                        b1 = 0;
-                                                        var eps = Math.pow(10, -15),
-                                                        arr = Math.pow(10, item.aRight.length),
-                                                        delta = 1,
-                                                        a = 0,
-                                                        b = 0;
-                                                        while ((b < arr) && (delta > eps)) {
-                                                            N = Math.floor(d);
-                                                            a = N * a1 + a0;
-                                                            b = N * b1 + b0;
-                                                            a0 = a1;
-                                                            a1 = a;
-                                                            b0 = b1;
-                                                            b1 = b;
-                                                            d = 1 / (d - N);
-                                                            delta = Math.abs(n - a / b);
-                                                        }
-                                                        if (b > arr || b == arr) {
-                                                            numerator = a0;
-                                                            denominator = b0;
-                                                        } else {
-                                                            numerator = a;
-                                                            denominator = b;
-                                                        }
+                                                    if (item.sign == SignType.Positive) {
+                                                        oCurText.text += "+";
+                                                    }
+                                                }
+                                                aScientific = this._FormatNumber(Math.abs(oParsedNumber.scientific), 0, item.format.concat(), FormatStates.Scientific, cultureInfo);
+                                                nReadState = FormatStates.Scientific;
+                                            }
+                                        } else {
+                                            if (numFormat_DecimalFrac == item.type) {
+                                                if (oParsedNumber.frac !== 0 || this.bWhole === false) {
+                                                    var frac = oParsedNumber.frac;
+                                                    var fracExp = -frac.toString().length;
+                                                    if (oParsedNumber.exponent < 0) {
+                                                        fracExp -= oParsedNumber.exponent;
+                                                    }
+                                                    frac *= Math.pow(10, fracExp);
+                                                    var numerator;
+                                                    var denominator;
+                                                    if (item.bNumRight === true) {
+                                                        denominator = item.aRight[0].val;
+                                                        numerator = Math.round(denominator * frac);
                                                         if (this.bWhole === false) {
                                                             numerator += denominator * oParsedNumber.dec;
                                                         }
-                                                    }
-                                                }
-                                                var aLeft = this._FormatNumber(numerator, 0, item.aLeft.concat(), FormatStates.Slash);
-                                                for (var j = 0, length = aLeft.length; j < length; ++j) {
-                                                    var subitem = aLeft[j];
-                                                    if (numFormat_Text == subitem.type) {
-                                                        oCurText.text += subitem.val;
                                                     } else {
-                                                        this._AddDigItem(res, oCurText, subitem);
+                                                        if (frac == 0) {
+                                                            numerator = oParsedNumber.dec;
+                                                            denominator = 1;
+                                                        } else {
+                                                            var d = frac,
+                                                            n = frac;
+                                                            var a0 = 0,
+                                                            a1 = 1;
+                                                            var b0 = 1,
+                                                            b1 = 0;
+                                                            var eps = Math.pow(10, -15),
+                                                            arr = Math.pow(10, item.aRight.length),
+                                                            delta = 1,
+                                                            a = 0,
+                                                            b = 0;
+                                                            while ((b < arr) && (delta > eps)) {
+                                                                var N = Math.floor(d);
+                                                                a = N * a1 + a0;
+                                                                b = N * b1 + b0;
+                                                                a0 = a1;
+                                                                a1 = a;
+                                                                b0 = b1;
+                                                                b1 = b;
+                                                                d = 1 / (d - N);
+                                                                delta = Math.abs(n - a / b);
+                                                            }
+                                                            if (b > arr || b == arr) {
+                                                                numerator = a0;
+                                                                denominator = b0;
+                                                            } else {
+                                                                numerator = a;
+                                                                denominator = b;
+                                                            }
+                                                            if (this.bWhole === false) {
+                                                                numerator += denominator * oParsedNumber.dec;
+                                                            }
+                                                        }
                                                     }
-                                                }
-                                                oCurText.text += "/";
-                                                if (item.bNumRight === true) {
-                                                    oCurText.text += item.aRight[0].val;
-                                                } else {
-                                                    var aRight = this._FormatNumber(denominator, 0, item.aRight.concat(), FormatStates.Slash);
-                                                    for (var j = 0, length = aRight.length; j < length; ++j) {
-                                                        var subitem = aRight[j];
+                                                    var aLeft = this._FormatNumber(numerator, 0, item.aLeft.concat(), FormatStates.Slash, cultureInfo);
+                                                    for (var j = 0, length = aLeft.length; j < length; ++j) {
+                                                        var subitem = aLeft[j];
                                                         if (numFormat_Text == subitem.type) {
                                                             oCurText.text += subitem.val;
                                                         } else {
                                                             this._AddDigItem(res, oCurText, subitem);
                                                         }
                                                     }
-                                                }
-                                            }
-                                        } else {
-                                            if (numFormat_Repeat == item.type) {
-                                                var oNewFont = new Font();
-                                                oNewFont.clean();
-                                                oNewFont.repeat = true;
-                                                this._CommitText(res, oCurText, item.val, oNewFont);
-                                            } else {
-                                                if (numFormat_Skip == item.type) {
-                                                    var oNewFont = new Font();
-                                                    oNewFont.clean();
-                                                    oNewFont.skip = true;
-                                                    this._CommitText(res, oCurText, item.val, oNewFont);
-                                                } else {
-                                                    if (numFormat_Year == item.type) {
-                                                        if (item.val == 2) {
-                                                            oCurText.text += (oParsedNumber.date.year + "").substring(2);
-                                                        } else {
-                                                            if (item.val == 4) {
-                                                                oCurText.text += oParsedNumber.date.year;
+                                                    oCurText.text += "/";
+                                                    if (item.bNumRight === true) {
+                                                        oCurText.text += item.aRight[0].val;
+                                                    } else {
+                                                        var aRight = this._FormatNumber(denominator, 0, item.aRight.concat(), FormatStates.Slash, cultureInfo);
+                                                        for (var j = 0, length = aRight.length; j < length; ++j) {
+                                                            var subitem = aRight[j];
+                                                            if (numFormat_Text == subitem.type) {
+                                                                oCurText.text += subitem.val;
+                                                            } else {
+                                                                this._AddDigItem(res, oCurText, subitem);
                                                             }
                                                         }
+                                                    }
+                                                }
+                                            } else {
+                                                if (numFormat_Repeat == item.type) {
+                                                    var oNewFont = new NumFormatFont();
+                                                    oNewFont.repeat = true;
+                                                    this._CommitText(res, oCurText, item.val, oNewFont);
+                                                } else {
+                                                    if (numFormat_Skip == item.type) {
+                                                        var oNewFont = new NumFormatFont();
+                                                        oNewFont.skip = true;
+                                                        this._CommitText(res, oCurText, item.val, oNewFont);
                                                     } else {
-                                                        if (numFormat_Month == item.type) {
-                                                            var m = oParsedNumber.date.month;
-                                                            if (item.val == 1) {
-                                                                oCurText.text += m + 1;
+                                                        if (numFormat_DateSeparator == item.type) {
+                                                            oCurText.text += cultureInfo.DateSeparator;
+                                                        } else {
+                                                            if (numFormat_TimeSeparator == item.type) {
+                                                                oCurText.text += cultureInfo.TimeSeparator;
                                                             } else {
-                                                                if (item.val == 2) {
-                                                                    oCurText.text += this._ZeroPad(m + 1);
-                                                                } else {
-                                                                    if (item.val == 3) {
-                                                                        oCurText.text += monthCut[m];
+                                                                if (numFormat_Year == item.type) {
+                                                                    if (item.val == 2) {
+                                                                        oCurText.text += (oParsedNumber.date.year + "").substring(2);
                                                                     } else {
                                                                         if (item.val == 4) {
-                                                                            oCurText.text += month[m];
-                                                                        } else {
-                                                                            if (item.val == 5) {
-                                                                                oCurText.text += monthShort[m];
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        } else {
-                                                            if (numFormat_Day == item.type) {
-                                                                if (item.val == 1) {
-                                                                    oCurText.text += oParsedNumber.date.d;
-                                                                } else {
-                                                                    if (item.val == 2) {
-                                                                        oCurText.text += this._ZeroPad(oParsedNumber.date.d);
-                                                                    } else {
-                                                                        if (item.val == 3) {
-                                                                            oCurText.text += dayShort[oParsedNumber.date.dayWeek];
-                                                                        } else {
-                                                                            if (item.val == 4) {
-                                                                                oCurText.text += day[oParsedNumber.date.dayWeek];
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            } else {
-                                                                if (numFormat_Hour == item.type) {
-                                                                    var h = oParsedNumber.date.hour;
-                                                                    if (item.bElapsed === true) {
-                                                                        h = oParsedNumber.date.countDay * 24 + oParsedNumber.date.hour;
-                                                                    }
-                                                                    if (this.bTimePeriod === true) {
-                                                                        h = h % 12 || 12;
-                                                                    }
-                                                                    if (item.val == 1) {
-                                                                        oCurText.text += h;
-                                                                    } else {
-                                                                        if (item.val == 2) {
-                                                                            oCurText.text += this._ZeroPad(h);
+                                                                            oCurText.text += oParsedNumber.date.year;
                                                                         }
                                                                     }
                                                                 } else {
-                                                                    if (numFormat_Minute == item.type) {
-                                                                        var min = oParsedNumber.date.min;
-                                                                        if (item.bElapsed === true) {
-                                                                            min = oParsedNumber.date.countDay * 24 * 60 + oParsedNumber.date.hour * 60 + oParsedNumber.date.min;
-                                                                        }
+                                                                    if (numFormat_Month == item.type) {
+                                                                        var m = oParsedNumber.date.month;
                                                                         if (item.val == 1) {
-                                                                            oCurText.text += min;
+                                                                            oCurText.text += m + 1;
                                                                         } else {
                                                                             if (item.val == 2) {
-                                                                                oCurText.text += this._ZeroPad(min);
+                                                                                oCurText.text += this._ZeroPad(m + 1);
+                                                                            } else {
+                                                                                if (item.val == 3) {
+                                                                                    if (this.bDay && cultureInfo.AbbreviatedMonthGenitiveNames.length > 0) {
+                                                                                        oCurText.text += cultureInfo.AbbreviatedMonthGenitiveNames[m];
+                                                                                    } else {
+                                                                                        oCurText.text += cultureInfo.AbbreviatedMonthNames[m];
+                                                                                    }
+                                                                                } else {
+                                                                                    if (item.val == 4) {
+                                                                                        if (this.bDay && cultureInfo.MonthGenitiveNames.length > 0) {
+                                                                                            oCurText.text += cultureInfo.MonthGenitiveNames[m];
+                                                                                        } else {
+                                                                                            oCurText.text += cultureInfo.MonthNames[m];
+                                                                                        }
+                                                                                    } else {
+                                                                                        if (item.val == 5) {
+                                                                                            var sMonthName = cultureInfo.MonthNames[m];
+                                                                                            if (sMonthName.length > 0) {
+                                                                                                oCurText.text += sMonthName[0];
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
                                                                             }
                                                                         }
                                                                     } else {
-                                                                        if (numFormat_Second == item.type) {
-                                                                            var s = oParsedNumber.date.sec;
-                                                                            if (this.bMillisec === false) {
-                                                                                s = oParsedNumber.date.sec + Math.round(oParsedNumber.date.ms / 1000);
-                                                                            }
-                                                                            if (item.bElapsed === true) {
-                                                                                s = oParsedNumber.date.countDay * 24 * 60 * 60 + oParsedNumber.date.hour * 60 * 60 + oParsedNumber.date.min * 60 + s;
-                                                                            }
+                                                                        if (numFormat_Day == item.type) {
                                                                             if (item.val == 1) {
-                                                                                oCurText.text += s;
+                                                                                oCurText.text += oParsedNumber.date.d;
                                                                             } else {
                                                                                 if (item.val == 2) {
-                                                                                    oCurText.text += this._ZeroPad(s);
+                                                                                    oCurText.text += this._ZeroPad(oParsedNumber.date.d);
+                                                                                } else {
+                                                                                    if (item.val == 3) {
+                                                                                        oCurText.text += cultureInfo.AbbreviatedDayNames[oParsedNumber.date.dayWeek];
+                                                                                    } else {
+                                                                                        if (item.val == 4) {
+                                                                                            oCurText.text += cultureInfo.DayNames[oParsedNumber.date.dayWeek];
+                                                                                        }
+                                                                                    }
                                                                                 }
                                                                             }
                                                                         } else {
-                                                                            if (numFormat_AmPm == item.type) {
-                                                                                oCurText.text += (oParsedNumber.date.hour < 12) ? item.sAm : item.sPm;
-                                                                            } else {
-                                                                                if (numFormat_Milliseconds == item.type) {
-                                                                                    var nMsFormatLength = item.format.length;
-                                                                                    var dMs = oParsedNumber.date.ms;
-                                                                                    if (nMsFormatLength < 3) {
-                                                                                        var dTemp = dMs / Math.pow(10, 3 - nMsFormatLength);
-                                                                                        dTemp = Math.round(dTemp);
-                                                                                        dMs = dTemp * Math.pow(10, 3 - nMsFormatLength);
+                                                                            if (numFormat_Hour == item.type) {
+                                                                                var h = oParsedNumber.date.hour;
+                                                                                if (item.bElapsed === true) {
+                                                                                    h = oParsedNumber.date.countDay * 24 + oParsedNumber.date.hour;
+                                                                                }
+                                                                                if (this.bTimePeriod === true) {
+                                                                                    h = h % 12 || 12;
+                                                                                }
+                                                                                if (item.val == 1) {
+                                                                                    oCurText.text += h;
+                                                                                } else {
+                                                                                    if (item.val == 2) {
+                                                                                        oCurText.text += this._ZeroPad(h);
                                                                                     }
-                                                                                    var nExponent = 0;
-                                                                                    if (dMs < 10) {
-                                                                                        nExponent = -2;
+                                                                                }
+                                                                            } else {
+                                                                                if (numFormat_Minute == item.type) {
+                                                                                    var min = oParsedNumber.date.min;
+                                                                                    if (item.bElapsed === true) {
+                                                                                        min = oParsedNumber.date.countDay * 24 * 60 + oParsedNumber.date.hour * 60 + oParsedNumber.date.min;
+                                                                                    }
+                                                                                    if (item.val == 1) {
+                                                                                        oCurText.text += min;
                                                                                     } else {
-                                                                                        if (dMs < 100) {
-                                                                                            nExponent = -1;
+                                                                                        if (item.val == 2) {
+                                                                                            oCurText.text += this._ZeroPad(min);
                                                                                         }
                                                                                     }
-                                                                                    var aMilSec = this._FormatNumber(dMs, nExponent, item.format.concat(), FormatStates.Frac);
-                                                                                    for (var k = 0; k < aMilSec.length; k++) {
-                                                                                        this._AddDigItem(res, oCurText, aMilSec[k]);
+                                                                                } else {
+                                                                                    if (numFormat_Second == item.type) {
+                                                                                        var s = oParsedNumber.date.sec;
+                                                                                        if (this.bMillisec === false) {
+                                                                                            s = oParsedNumber.date.sec + Math.round(oParsedNumber.date.ms / 1000);
+                                                                                        }
+                                                                                        if (item.bElapsed === true) {
+                                                                                            s = oParsedNumber.date.countDay * 24 * 60 * 60 + oParsedNumber.date.hour * 60 * 60 + oParsedNumber.date.min * 60 + s;
+                                                                                        }
+                                                                                        if (item.val == 1) {
+                                                                                            oCurText.text += s;
+                                                                                        } else {
+                                                                                            if (item.val == 2) {
+                                                                                                oCurText.text += this._ZeroPad(s);
+                                                                                            }
+                                                                                        }
+                                                                                    } else {
+                                                                                        if (numFormat_AmPm == item.type) {
+                                                                                            if (cultureInfo.AMDesignator.length > 0 && cultureInfo.PMDesignator.length > 0) {
+                                                                                                oCurText.text += (oParsedNumber.date.hour < 12) ? cultureInfo.AMDesignator : cultureInfo.PMDesignator;
+                                                                                            } else {
+                                                                                                oCurText.text += (oParsedNumber.date.hour < 12) ? "AM" : "PM";
+                                                                                            }
+                                                                                        } else {
+                                                                                            if (numFormat_Milliseconds == item.type) {
+                                                                                                var nMsFormatLength = item.format.length;
+                                                                                                var dMs = oParsedNumber.date.ms;
+                                                                                                if (nMsFormatLength < 3) {
+                                                                                                    var dTemp = dMs / Math.pow(10, 3 - nMsFormatLength);
+                                                                                                    dTemp = Math.round(dTemp);
+                                                                                                    dMs = dTemp * Math.pow(10, 3 - nMsFormatLength);
+                                                                                                }
+                                                                                                var nExponent = 0;
+                                                                                                if (0 == dMs) {
+                                                                                                    nExponent = -1;
+                                                                                                } else {
+                                                                                                    if (dMs < 10) {
+                                                                                                        nExponent = -2;
+                                                                                                    } else {
+                                                                                                        if (dMs < 100) {
+                                                                                                            nExponent = -1;
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                                var aMilSec = this._FormatNumber(dMs, nExponent, item.format.concat(), FormatStates.Frac, cultureInfo);
+                                                                                                for (var k = 0; k < aMilSec.length; k++) {
+                                                                                                    this._AddDigItem(res, oCurText, aMilSec[k]);
+                                                                                                }
+                                                                                            }
+                                                                                        }
                                                                                     }
                                                                                 }
                                                                             }
@@ -1721,112 +1808,124 @@ NumFormat.prototype = {
                 if (numFormat_DecimalPoint == item.type) {
                     nReadState = FormatStates.Frac;
                     if (0 != nNewFracLength && 0 != nShift) {
-                        res += ".";
+                        res += gc_sFormatDecimalPoint;
                     }
                 } else {
-                    if (numFormat_Thousand == item.type) {
-                        for (var j = 0; j < item.val; ++j) {
-                            res += ",";
-                        }
+                    if (numFormat_DecimalPointText == item.type) {
+                        res += gc_sFormatDecimalPoint;
                     } else {
-                        if (numFormat_Digit == item.type || numFormat_DigitNoDisp == item.type || numFormat_DigitSpace == item.type) {
-                            if (FormatStates.Decimal == nReadState) {
-                                nDecIndex++;
-                            } else {
-                                nFracIndex++;
-                            }
-                            if (nReadState == FormatStates.Frac && nFracIndex > nNewFracLength) {} else {
-                                var sCurSimbol;
-                                if (numFormat_Digit == item.type) {
-                                    sCurSimbol = "0";
-                                } else {
-                                    if (numFormat_DigitNoDisp == item.type) {
-                                        sCurSimbol = "#";
-                                    } else {
-                                        if (numFormat_DigitSpace == item.type) {
-                                            sCurSimbol = "?";
-                                        }
-                                    }
-                                }
-                                res += sCurSimbol;
-                                if (nReadState == FormatStates.Frac && nFracIndex == nFracLength) {
-                                    for (var j = 0; j < nShift; ++j) {
-                                        res += sCurSimbol;
-                                    }
-                                }
-                            }
-                            if (0 == nFracLength && nShift > 0 && FormatStates.Decimal == nReadState && nDecIndex == nDecLength) {
-                                res += ".";
-                                for (var j = 0; j < nShift; ++j) {
-                                    res += "0";
-                                }
+                        if (numFormat_Thousand == item.type) {
+                            for (var j = 0; j < item.val; ++j) {
+                                res += gc_sFormatThousandSeparator;
                             }
                         } else {
-                            if (numFormat_Text == item.type) {
-                                if ("%" == item.val) {
-                                    res += item.val;
+                            if (numFormat_Digit == item.type || numFormat_DigitNoDisp == item.type || numFormat_DigitSpace == item.type) {
+                                if (FormatStates.Decimal == nReadState) {
+                                    nDecIndex++;
                                 } else {
-                                    res += '"' + item.val + '"';
+                                    nFracIndex++;
+                                }
+                                if (nReadState == FormatStates.Frac && nFracIndex > nNewFracLength) {} else {
+                                    var sCurSimbol;
+                                    if (numFormat_Digit == item.type) {
+                                        sCurSimbol = "0";
+                                    } else {
+                                        if (numFormat_DigitNoDisp == item.type) {
+                                            sCurSimbol = "#";
+                                        } else {
+                                            if (numFormat_DigitSpace == item.type) {
+                                                sCurSimbol = "?";
+                                            }
+                                        }
+                                    }
+                                    res += sCurSimbol;
+                                    if (nReadState == FormatStates.Frac && nFracIndex == nFracLength) {
+                                        for (var j = 0; j < nShift; ++j) {
+                                            res += sCurSimbol;
+                                        }
+                                    }
+                                }
+                                if (0 == nFracLength && nShift > 0 && FormatStates.Decimal == nReadState && nDecIndex == nDecLength) {
+                                    res += gc_sFormatDecimalPoint;
+                                    for (var j = 0; j < nShift; ++j) {
+                                        res += "0";
+                                    }
                                 }
                             } else {
-                                if (numFormat_TextPlaceholder == item.type) {
-                                    res += "@";
-                                } else {
-                                    if (numFormat_Scientific == item.type) {
-                                        nReadState = FormatStates.Scientific;
+                                if (numFormat_Text == item.type) {
+                                    if ("%" == item.val) {
                                         res += item.val;
-                                        if (item.sign == SignType.Positive) {
-                                            res += "+";
-                                        } else {
-                                            res += "-";
-                                        }
                                     } else {
-                                        if (numFormat_DecimalFrac == item.type) {
-                                            res += fFormatToString(item.aLeft);
-                                            res += "/";
-                                            res += fFormatToString(item.aRight);
-                                        } else {
-                                            if (numFormat_Repeat == item.type) {
-                                                res += "*" + item.val;
+                                        res += '"' + item.val + '"';
+                                    }
+                                } else {
+                                    if (numFormat_TextPlaceholder == item.type) {
+                                        res += "@";
+                                    } else {
+                                        if (numFormat_Scientific == item.type) {
+                                            nReadState = FormatStates.Scientific;
+                                            res += item.val;
+                                            if (item.sign == SignType.Positive) {
+                                                res += "+";
                                             } else {
-                                                if (numFormat_Skip == item.type) {
-                                                    res += "_" + item.val;
+                                                res += "-";
+                                            }
+                                        } else {
+                                            if (numFormat_DecimalFrac == item.type) {
+                                                res += fFormatToString(item.aLeft);
+                                                res += "/";
+                                                res += fFormatToString(item.aRight);
+                                            } else {
+                                                if (numFormat_Repeat == item.type) {
+                                                    res += "*" + item.val;
                                                 } else {
-                                                    if (numFormat_Year == item.type) {
-                                                        for (var j = 0; j < item.val; ++j) {
-                                                            res += "y";
-                                                        }
+                                                    if (numFormat_Skip == item.type) {
+                                                        res += "_" + item.val;
                                                     } else {
-                                                        if (numFormat_Month == item.type) {
-                                                            for (var j = 0; j < item.val; ++j) {
-                                                                res += "m";
-                                                            }
+                                                        if (numFormat_DateSeparator == item.type) {
+                                                            res += "/";
                                                         } else {
-                                                            if (numFormat_Day == item.type) {
-                                                                for (var j = 0; j < item.val; ++j) {
-                                                                    res += "d";
-                                                                }
+                                                            if (numFormat_TimeSeparator == item.type) {
+                                                                res += ":";
                                                             } else {
-                                                                if (numFormat_Hour == item.type) {
+                                                                if (numFormat_Year == item.type) {
                                                                     for (var j = 0; j < item.val; ++j) {
-                                                                        res += "h";
+                                                                        res += "y";
                                                                     }
                                                                 } else {
-                                                                    if (numFormat_Minute == item.type) {
+                                                                    if (numFormat_Month == item.type) {
                                                                         for (var j = 0; j < item.val; ++j) {
                                                                             res += "m";
                                                                         }
                                                                     } else {
-                                                                        if (numFormat_Second == item.type) {
+                                                                        if (numFormat_Day == item.type) {
                                                                             for (var j = 0; j < item.val; ++j) {
-                                                                                res += "s";
+                                                                                res += "d";
                                                                             }
                                                                         } else {
-                                                                            if (numFormat_AmPm == item.type) {
-                                                                                res += item.sAm + "/" + item.sPm;
+                                                                            if (numFormat_Hour == item.type) {
+                                                                                for (var j = 0; j < item.val; ++j) {
+                                                                                    res += "h";
+                                                                                }
                                                                             } else {
-                                                                                if (numFormat_Milliseconds == item.type) {
-                                                                                    res += fFormatToString(item.format);
+                                                                                if (numFormat_Minute == item.type) {
+                                                                                    for (var j = 0; j < item.val; ++j) {
+                                                                                        res += "m";
+                                                                                    }
+                                                                                } else {
+                                                                                    if (numFormat_Second == item.type) {
+                                                                                        for (var j = 0; j < item.val; ++j) {
+                                                                                            res += "s";
+                                                                                        }
+                                                                                    } else {
+                                                                                        if (numFormat_AmPm == item.type) {
+                                                                                            res += "AM/PM";
+                                                                                        } else {
+                                                                                            if (numFormat_Milliseconds == item.type) {
+                                                                                                res += fFormatToString(item.format);
+                                                                                            }
+                                                                                        }
+                                                                                    }
                                                                                 }
                                                                             }
                                                                         }
@@ -1871,7 +1970,11 @@ NumFormat.prototype = {
                             nType = c_oAscNumFormatType.Scientific;
                         } else {
                             if (this.bCurrency) {
-                                nType = c_oAscNumFormatType.Currency;
+                                if (this.bRepeat) {
+                                    nType = c_oAscNumFormatType.Accounting;
+                                } else {
+                                    nType = c_oAscNumFormatType.Currency;
+                                }
                             } else {
                                 if (this.bSlash) {
                                     nType = c_oAscNumFormatType.Fraction;
@@ -1894,7 +1997,7 @@ NumFormat.prototype = {
     }
 };
 function NumFormatCache() {
-    this.oNumFormats = new Object();
+    this.oNumFormats = {};
 }
 NumFormatCache.prototype = {
     get: function (format) {
@@ -1920,7 +2023,7 @@ function CellFormat(format) {
     this.aComporationFormats = null;
     var aFormats = format.split(";");
     var nFormatsLength = aFormats.length;
-    var aParsedFormats = new Array();
+    var aParsedFormats = [];
     for (var i = 0; i < nFormatsLength; ++i) {
         var oNewFormat = new NumFormat(false);
         oNewFormat.setFormat(aFormats[i]);
@@ -2008,12 +2111,20 @@ function CellFormat(format) {
                 this.oNegativeFormat = aParsedFormats[1];
                 this.oNullFormat = aParsedFormats[2];
                 this.oTextFormat = this.oPositiveFormat;
+                if (this.oNullFormat.bTextFormat) {
+                    this.oTextFormat = this.oNullFormat;
+                    this.oNullFormat = this.oPositiveFormat;
+                }
             } else {
                 if (2 == nFormatsLength) {
                     this.oPositiveFormat = aParsedFormats[0];
                     this.oNegativeFormat = aParsedFormats[1];
                     this.oNullFormat = this.oPositiveFormat;
                     this.oTextFormat = this.oPositiveFormat;
+                    if (this.oNegativeFormat.bTextFormat) {
+                        this.oTextFormat = this.oNegativeFormat;
+                        this.oNegativeFormat = this.oPositiveFormat;
+                    }
                 } else {
                     this.oPositiveFormat = aParsedFormats[0];
                     this.oPositiveFormat.bAddMinusIfNes = true;
@@ -2024,7 +2135,7 @@ function CellFormat(format) {
             }
         }
     }
-    this.formatCache = new Object();
+    this.formatCache = {};
 }
 CellFormat.prototype = {
     isTextFormat: function () {
@@ -2056,6 +2167,23 @@ CellFormat.prototype = {
             }
         }
         return false;
+    },
+    getTextFormat: function () {
+        var oRes = null;
+        if (null == this.aComporationFormats) {
+            if (null != this.oTextFormat && this.oTextFormat.bTextFormat) {
+                oRes = this.oTextFormat;
+            }
+        } else {
+            for (var i = 0, length = this.aComporationFormats.length; i < length; ++i) {
+                var oCurFormat = this.aComporationFormats[i];
+                if (null == oCurFormat.ComporationOperator && oCurFormat.bTextFormat) {
+                    oRes = oCurFormat;
+                    break;
+                }
+            }
+        }
+        return oRes;
     },
     getFormatByValue: function (dNumber) {
         var oRes = null;
@@ -2114,29 +2242,42 @@ CellFormat.prototype = {
         }
         return oRes;
     },
-    format: function (number, nValType, dDigitsCount, oAdditionalResult) {
+    format: function (number, nValType, dDigitsCount, oAdditionalResult, bChart) {
+        var res = null;
+        if (null == bChart) {
+            bChart = false;
+        }
         var cacheVal = this.formatCache[number];
+        var cacheType = null;
+        var cacheRes = null;
         if (null != cacheVal) {
-            cacheVal = cacheVal[nValType];
-            if (null != cacheVal) {
-                cacheVal = cacheVal[dDigitsCount];
-                if (null != cacheVal) {
-                    return cacheVal;
+            cacheType = cacheVal[nValType];
+            if (null != cacheType) {
+                cacheRes = cacheType[dDigitsCount];
+                if (null != cacheRes) {
+                    if (bChart) {
+                        res = cacheRes.chart;
+                    } else {
+                        res = cacheRes.nochart;
+                    }
+                    if (null != res) {
+                        return res;
+                    }
                 }
             }
         }
-        var res = [{
+        res = [{
             text: number
         }];
         var dNumber = number - 0;
+        var oFormat = null;
         if (CellValueType.String != nValType && number == dNumber) {
-            var oFormat = this.getFormatByValue(dNumber);
+            oFormat = this.getFormatByValue(dNumber);
             if (null != oFormat) {
-                res = oFormat.format(number, nValType, dDigitsCount, oAdditionalResult);
+                res = oFormat.format(number, nValType, dDigitsCount, oAdditionalResult, null, bChart);
             } else {
                 if (null != this.aComporationFormats) {
-                    var oNewFont = new Font();
-                    oNewFont.clean();
+                    var oNewFont = new NumFormatFont();
                     oNewFont.repeat = true;
                     res = [{
                         text: "#",
@@ -2146,20 +2287,35 @@ CellFormat.prototype = {
             }
         } else {
             if (null != this.oTextFormat) {
-                res = this.oTextFormat.format(number, nValType, dDigitsCount, oAdditionalResult);
+                oFormat = this.oTextFormat;
+                res = oFormat.format(number, nValType, dDigitsCount, oAdditionalResult, null, bChart);
             }
         }
-        var cacheVal = this.formatCache[number];
         if (null == cacheVal) {
-            cacheVal = new Object();
+            cacheVal = {};
             this.formatCache[number] = cacheVal;
         }
-        var cacheType = cacheVal[nValType];
         if (null == cacheType) {
-            cacheType = new Object();
+            cacheType = {};
             cacheVal[nValType] = cacheType;
         }
-        cacheType[dDigitsCount] = res;
+        if (null == cacheRes) {
+            cacheRes = {
+                chart: null,
+                nochart: null
+            };
+            cacheType[dDigitsCount] = cacheRes;
+        }
+        if (null != oFormat && oFormat.bGeneralChart) {
+            if (bChart) {
+                cacheRes.chart = res;
+            } else {
+                cacheRes.nochart = res;
+            }
+        } else {
+            cacheRes.chart = res;
+            cacheRes.nochart = res;
+        }
         return res;
     },
     shiftFormat: function (output, nShift) {
@@ -2172,7 +2328,7 @@ CellFormat.prototype = {
             }
             bRes |= bCurRes;
             if (null != this.oNegativeFormat && this.oPositiveFormat != this.oNegativeFormat) {
-                var oTempOutput = new Object();
+                var oTempOutput = {};
                 bCurRes = this.oNegativeFormat.toString(oTempOutput, nShift);
                 if (false == bCurRes) {
                     output.format += ";" + this.oNegativeFormat.formatString;
@@ -2182,7 +2338,7 @@ CellFormat.prototype = {
                 bRes |= bCurRes;
             }
             if (null != this.oNullFormat && this.oPositiveFormat != this.oNullFormat) {
-                var oTempOutput = new Object();
+                var oTempOutput = {};
                 bCurRes = this.oNullFormat.toString(oTempOutput, nShift);
                 if (false == bCurRes) {
                     output.format += ";" + this.oNullFormat.formatString;
@@ -2192,7 +2348,7 @@ CellFormat.prototype = {
                 bRes |= bCurRes;
             }
             if (null != this.oTextFormat && this.oPositiveFormat != this.oTextFormat) {
-                var oTempOutput = new Object();
+                var oTempOutput = {};
                 bCurRes = this.oTextFormat.toString(oTempOutput, nShift);
                 if (false == bCurRes) {
                     output.format += ";" + this.oTextFormat.formatString;
@@ -2205,7 +2361,7 @@ CellFormat.prototype = {
             var length = this.aComporationFormats.length;
             output.format = "";
             for (var i = 0; i < length; ++i) {
-                var oTempOutput = new Object();
+                var oTempOutput = {};
                 var oCurFormat = this.aComporationFormats[i];
                 var bCurRes = oCurFormat.toString(oTempOutput, nShift);
                 if (0 != i) {
@@ -2221,6 +2377,32 @@ CellFormat.prototype = {
         }
         return bRes;
     },
+    formatToMathInfo: function (number, nValType, dDigitsCount) {
+        return this._formatToText(number, nValType, dDigitsCount, false);
+    },
+    formatToChart: function (number) {
+        return this._formatToText(number, CellValueType.Number, gc_nMaxDigCount, true);
+    },
+    _formatToText: function (number, nValType, dDigitsCount, bChart) {
+        var result = "";
+        var arrFormat = this.format(number, nValType, dDigitsCount, null, bChart);
+        for (var i = 0, item; i < arrFormat.length; ++i) {
+            item = arrFormat[i];
+            if (item.format) {
+                if (item.format.repeat) {
+                    continue;
+                }
+                if (item.format.skip) {
+                    result += " ";
+                    continue;
+                }
+            }
+            if (item.text) {
+                result += item.text;
+            }
+        }
+        return result;
+    },
     getType: function () {
         if (null != this.oPositiveFormat) {
             return this.oPositiveFormat.getType();
@@ -2232,7 +2414,7 @@ CellFormat.prototype = {
         return c_oAscNumFormatType.General;
     }
 };
-var oDecodeGeneralFormatCache = new Object();
+var oDecodeGeneralFormatCache = {};
 function DecodeGeneralFormat(val, nValType, dDigitsCount) {
     var cacheVal = oDecodeGeneralFormatCache[val];
     if (null != cacheVal) {
@@ -2247,12 +2429,12 @@ function DecodeGeneralFormat(val, nValType, dDigitsCount) {
     var res = DecodeGeneralFormat_Raw(val, nValType, dDigitsCount);
     var cacheVal = oDecodeGeneralFormatCache[val];
     if (null == cacheVal) {
-        cacheVal = new Object();
+        cacheVal = {};
         oDecodeGeneralFormatCache[val] = cacheVal;
     }
     var cacheType = cacheVal[nValType];
     if (null == cacheType) {
-        cacheType = new Object();
+        cacheType = {};
         cacheVal[nValType] = cacheType;
     }
     cacheType[dDigitsCount] = res;
@@ -2321,17 +2503,8 @@ function DecodeGeneralFormat_Raw(val, nValType, dDigitsCount) {
             }
             if (nVarian1 < nVarian2) {
                 var bUseVarian1 = false;
-                if (nVarian1 > 0) {
-                    var sTempNumber = parts.mantissa.toString();
-                    sTempNumber = sTempNumber.substring(nVarian1, nVarian2);
-                    var nTempNumberLength = sTempNumber.length;
+                if (nVarian1 > 0 && 0 == (parts.mantissa % Math.pow(10, gc_nMaxDigCount - nVarian1))) {
                     bUseVarian1 = true;
-                    for (var i = 0; i < nTempNumberLength; ++i) {
-                        if ("0" != sTempNumber[i]) {
-                            bUseVarian1 = false;
-                            break;
-                        }
-                    }
                 }
                 if (false == bUseVarian1) {
                     if (nDigitsCount >= nExpMinDigitsCount + 1) {
@@ -2410,7 +2583,7 @@ function DecodeGeneralFormat_Raw(val, nValType, dDigitsCount) {
     if (frac_num_digits <= 0) {
         return "0" + suffix;
     }
-    var number_format_string = "0.";
+    var number_format_string = "0" + gc_sFormatDecimalPoint;
     for (var i = 0; i < frac_num_digits; ++i) {
         number_format_string += "0";
     }
@@ -2418,10 +2591,13 @@ function DecodeGeneralFormat_Raw(val, nValType, dDigitsCount) {
     return number_format_string;
 }
 function GeneralEditFormatCache() {
-    this.oCache = new Object();
+    this.oCache = {};
 }
 GeneralEditFormatCache.prototype = {
-    format: function (number) {
+    format: function (number, cultureInfo) {
+        if (null == cultureInfo) {
+            cultureInfo = g_oDefaultCultureInfo;
+        }
         var value = this.oCache[number];
         if (null == value) {
             if (0 == number) {
@@ -2437,10 +2613,10 @@ GeneralEditFormatCache.prototype = {
                             sRes += "0";
                         }
                     } else {
-                        sRes = this._removeTileZeros(parts.mantissa.toString());
+                        sRes = this._removeTileZeros(parts.mantissa.toString(), cultureInfo);
                         if (sRes.length > 1) {
                             var temp = sRes.substring(0, 1);
-                            temp += ".";
+                            temp += cultureInfo.NumberDecimalSeparator;
                             temp += sRes.substring(1);
                             sRes = temp;
                         }
@@ -2451,28 +2627,28 @@ GeneralEditFormatCache.prototype = {
                         sRes = parts.mantissa.toString();
                         if (sRes.length > nRealExp) {
                             var temp = sRes.substring(0, nRealExp);
-                            temp += ".";
+                            temp += cultureInfo.NumberDecimalSeparator;
                             temp += sRes.substring(nRealExp);
                             sRes = temp;
                         }
-                        sRes = this._removeTileZeros(sRes);
+                        sRes = this._removeTileZeros(sRes, cultureInfo);
                     } else {
                         if (nRealExp >= -18) {
                             sRes = "0";
-                            sRes += ".";
+                            sRes += cultureInfo.NumberDecimalSeparator;
                             for (var i = 0; i < -nRealExp; ++i) {
                                 sRes += "0";
                             }
                             var sTemp = parts.mantissa.toString();
                             sTemp = sTemp.substring(0, 19 + nRealExp);
-                            sRes += this._removeTileZeros(sTemp);
+                            sRes += this._removeTileZeros(sTemp, cultureInfo);
                         } else {
                             sRes = parts.mantissa.toString();
                             if (sRes.length > 1) {
                                 var temp = sRes.substring(0, 1);
-                                temp += ".";
+                                temp += cultureInfo.NumberDecimalSeparator;
                                 temp += sRes.substring(1);
-                                temp = this._removeTileZeros(temp);
+                                temp = this._removeTileZeros(temp, cultureInfo);
                                 sRes = temp;
                             }
                             sRes += "E-" + (1 - nRealExp);
@@ -2489,7 +2665,7 @@ GeneralEditFormatCache.prototype = {
         }
         return value;
     },
-    _removeTileZeros: function (val) {
+    _removeTileZeros: function (val, cultureInfo) {
         var res = val;
         var nLength = val.length;
         var nLastNoZero = nLength - 1;
@@ -2500,7 +2676,7 @@ GeneralEditFormatCache.prototype = {
             }
         }
         if (nLastNoZero != nLength - 1) {
-            if ("." == res[nLastNoZero]) {
+            if (cultureInfo.NumberDecimalSeparator == res[nLastNoZero]) {
                 res = res.substring(0, nLastNoZero);
             } else {
                 res = res.substring(0, nLastNoZero + 1);
@@ -2511,168 +2687,840 @@ GeneralEditFormatCache.prototype = {
 };
 var oGeneralEditFormatCache = new GeneralEditFormatCache();
 function FormatParser() {
-    this.rx_percent = new RegExp("^([+-]?)(\\d+\\.?\\d*|\\.\\d+)%$");
-    this.rx_date = new RegExp("^ *((\\d{1,2}) *[/-] *(\\d{1,2}) *[/-] *(\\d{2,4}))? *((\\d{1,2}) *: *(\\d{1,2})? *(: *(\\d{1,2})?)? *(AM|PM)?)?$");
-    this.rx_date2 = new RegExp("^ *((\\d{1,2}) *[/-])? *(\\w{3}) *([/-]|[/-](\\w{2,4}))?$");
-    this.rx_currency = new RegExp("^([+-]?)([$€£¥])?(\\d+\\.?\\d*|\\.\\d+)(р.)?$");
+    this.aCurrencyRegexp = {};
+    this.aThouthandRegexp = {};
     this.days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     this.daysLeap = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    this.bFormatMonthFirst = true;
 }
 FormatParser.prototype = {
-    parse: function (value) {
-        var res = null;
-        var match = value.match(this.rx_percent);
-        if (null != match) {
-            var sSing1 = match[1];
-            var sV1 = match[2];
-            var dVal = parseFloat(sV1);
-            if ("-" == sSing1) {
-                dVal = -dVal;
-            }
-            dVal /= 100;
-            res = {
-                format: "0.00%",
-                value: dVal
-            };
-        } else {
-            match = value.match(this.rx_currency);
-            if (null != match) {
-                var sSing1 = match[1];
-                var bRubble = false;
-                var sSing2 = match[2];
-                var sSing3 = match[4];
-                if ("р." == sSing3) {
-                    bRubble = true;
-                }
-                var sV1 = match[3];
-                var dVal = parseFloat(sV1);
-                if ("-" == sSing1) {
-                    dVal = -dVal;
-                }
-                if (bRubble) {
-                    res = {
-                        format: "#,##0.00р.",
-                        value: dVal
-                    };
-                } else {
-                    res = {
-                        format: "\\" + sSing2 + "#,##0.00_);[Red](\\" + sSing2 + "#,##0.00)",
-                        value: dVal
-                    };
-                }
-            } else {
-                res = this.parseDate(value);
-            }
+    isLocaleNumber: function (val, cultureInfo) {
+        if (null == cultureInfo) {
+            cultureInfo = g_oDefaultCultureInfo;
         }
-        return res;
+        if ("." != cultureInfo.NumberDecimalSeparator) {
+            val = val.replace(".", "q");
+            val = val.replace(cultureInfo.NumberDecimalSeparator, ".");
+        }
+        return Asc.isNumberInfinity(val);
     },
-    parseDate: function (value) {
+    parseLocaleNumber: function (val, cultureInfo) {
+        if (null == cultureInfo) {
+            cultureInfo = g_oDefaultCultureInfo;
+        }
+        if ("." != cultureInfo.NumberDecimalSeparator) {
+            val = val.replace(".", "q");
+            val = val.replace(cultureInfo.NumberDecimalSeparator, ".");
+        }
+        return val - 0;
+    },
+    parse: function (value, cultureInfo) {
+        if (null == cultureInfo) {
+            cultureInfo = g_oDefaultCultureInfo;
+        }
         var res = null;
-        match = value.match(this.rx_date);
-        if (null != (match = value.match(this.rx_date))) {
-            var d = match[3];
-            var m = match[2];
-            var y = match[4];
-            var h = match[6];
-            var min = match[7];
-            var s = match[9];
-            var ampm = match[10];
-            var bDate = false;
-            var bTime = false;
-            var nDay;
-            var nMounth;
-            var nYear;
-            if (g_bDate1904) {
-                nDay = 1;
-                nMounth = 0;
-                nYear = 1904;
-            } else {
-                nDay = 31;
-                nMounth = 11;
-                nYear = 1899;
+        var bError = false;
+        if (" " == cultureInfo.NumberGroupSeparator) {
+            value = value.replace(new RegExp(String.fromCharCode(160), "g"));
+        }
+        var rx_thouthand = this.aThouthandRegexp[cultureInfo.LCID];
+        if (null == rx_thouthand) {
+            rx_thouthand = new RegExp("^(([ \\+\\-%\\$€£¥\\(]|" + escapeRegExp(cultureInfo.CurrencySymbol) + ")*)((\\d+" + escapeRegExp(cultureInfo.NumberGroupSeparator) + "\\d+)*\\d*" + escapeRegExp(cultureInfo.NumberDecimalSeparator) + "?\\d*)(([ %\\)]|р.|" + escapeRegExp(cultureInfo.CurrencySymbol) + ")*)$");
+            this.aThouthandRegexp[cultureInfo.LCID] = rx_thouthand;
+        }
+        var match = value.match(rx_thouthand);
+        if (null != match) {
+            var sBefore = match[1];
+            var sVal = match[3];
+            var sAfter = match[5];
+            var oChartCount = {};
+            if (null != sBefore) {
+                this._parseStringLetters(sBefore, cultureInfo.CurrencySymbol, true, oChartCount);
             }
-            var nHour = 0;
-            var nHour = 0;
-            var nMinute = 0;
-            var nSecond = 0;
-            var dValue = 0;
-            var bValidDate = true;
-            if (null != d && null != m && null != y) {
-                bDate = true;
-                var nDay = d - 0;
-                var nMounth = m - 1;
-                var nYear = y - 0;
-                if (nYear < 100) {
-                    nYear = 2000 + nYear;
-                }
-                bValidDate = this.isValidDate(nYear, nMounth, nDay);
+            if (null != sAfter) {
+                this._parseStringLetters(sAfter, cultureInfo.CurrencySymbol, false, oChartCount);
             }
-            if (null != h) {
-                bTime = true;
-                nHour = h - 0;
-                if (null != ampm) {
-                    nHour = nHour % 12;
-                    if ("PM" == ampm) {
-                        nHour += 12;
-                    }
-                }
-                if (null != min) {
-                    nMinute = min - 0;
-                }
-                if (null != s) {
-                    nSecond = s - 0;
-                }
-            }
-            if (true == bValidDate && (true == bDate || true == bTime)) {
-                if (g_bDate1904) {
-                    dValue = (Date.UTC(nYear, nMounth, nDay, nHour, nMinute, nSecond) - Date.UTC(1904, 0, 1, 0, 0, 0)) / (86400 * 1000);
+            var bMinus = false;
+            var bPercent = false;
+            var sCurrency = null;
+            var oCurrencyElem = null;
+            var nBracket = 0;
+            for (var sChar in oChartCount) {
+                var elem = oChartCount[sChar];
+                if (" " == sChar) {
+                    continue;
                 } else {
-                    if (1900 < nYear || (1900 == nYear && 2 < nMounth)) {
-                        dValue = (Date.UTC(nYear, nMounth, nDay, nHour, nMinute, nSecond) - Date.UTC(1899, 11, 30, 0, 0, 0)) / (86400 * 1000);
-                    } else {
-                        if (1900 == nYear && 2 == nMounth && 29 == nDay) {
-                            dValue = 60;
-                        } else {
-                            dValue = (Date.UTC(nYear, nMounth, nDay, nHour, nMinute, nSecond) - Date.UTC(1899, 11, 31, 0, 0, 0)) / (86400 * 1000);
+                    if ("+" == sChar) {
+                        if (elem.all > 1) {
+                            bError = true;
                         }
-                    }
-                }
-                if (dValue > 0) {
-                    var sFormat;
-                    if (true == bDate && true == bTime) {
-                        sFormat = "m/d/yyyy h:mm:ss AM/PM";
                     } else {
-                        if (true == bDate) {
-                            sFormat = "m/d/yyyy";
-                        } else {
-                            if (dValue > 1) {
-                                sFormat = "[h]:mm:ss";
+                        if ("-" == sChar) {
+                            if (elem.all > 1) {
+                                bError = true;
                             } else {
-                                if (null != ampm) {
-                                    sFormat = "h:mm:ss AM/PM";
+                                bMinus = true;
+                            }
+                        } else {
+                            if ("-" == sChar) {
+                                if (elem.all > 1) {
+                                    bError = true;
                                 } else {
-                                    sFormat = "h:mm:ss";
+                                    bMinus = true;
+                                }
+                            } else {
+                                if ("(" == sChar) {
+                                    if (1 == elem.all && 1 == elem.before) {
+                                        nBracket++;
+                                    } else {
+                                        bError = true;
+                                    }
+                                } else {
+                                    if (")" == sChar) {
+                                        if (1 == elem.all && 1 == elem.after) {
+                                            nBracket++;
+                                        } else {
+                                            bError = true;
+                                        }
+                                    } else {
+                                        if ("%" == sChar) {
+                                            if (1 == elem.all) {
+                                                bPercent = true;
+                                            } else {
+                                                bError = true;
+                                            }
+                                        } else {
+                                            if (null == sCurrency && 1 == elem.all) {
+                                                sCurrency = sChar;
+                                                oCurrencyElem = elem;
+                                            } else {
+                                                bError = true;
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
+                }
+            }
+            if (nBracket > 0) {
+                if (2 == nBracket) {
+                    bMinus = true;
+                } else {
+                    bError = true;
+                }
+            }
+            var CurrencyNegativePattern = cultureInfo.CurrencyNegativePattern;
+            if (null != sCurrency) {
+                if (sCurrency == cultureInfo.CurrencySymbol) {
+                    var nPattern = cultureInfo.CurrencyNegativePattern;
+                    if (0 == nPattern || 1 == nPattern || 2 == nPattern || 3 == nPattern || 9 == nPattern || 11 == nPattern || 12 == nPattern || 14 == nPattern) {
+                        if (1 != oCurrencyElem.before) {
+                            bError = true;
+                        }
+                    } else {
+                        if (1 != oCurrencyElem.after) {
+                            bError = true;
+                        }
+                    }
+                } else {
+                    if (-1 != "$€£¥".indexOf(sCurrency)) {
+                        if (1 == oCurrencyElem.before) {
+                            CurrencyNegativePattern = 0;
+                        } else {
+                            bError = true;
+                        }
+                    } else {
+                        if (-1 != "р.".indexOf(sCurrency)) {
+                            if (1 == oCurrencyElem.after) {
+                                CurrencyNegativePattern = 5;
+                            } else {
+                                bError = true;
+                            }
+                        } else {
+                            bError = true;
+                        }
+                    }
+                }
+            }
+            if (!bError) {
+                var oVal = this._parseThouthand(sVal, cultureInfo);
+                if (oVal) {
                     res = {
-                        format: sFormat,
-                        value: dValue,
-                        bDateTime: true
+                        format: null,
+                        value: null,
+                        bDateTime: false,
+                        bDate: false,
+                        bTime: false,
+                        bPercent: false,
+                        bCurrency: false
+                    };
+                    var dVal = oVal.number;
+                    if (bMinus) {
+                        dVal = -dVal;
+                    }
+                    var sFracFormat = "";
+                    if (parseInt(dVal) != dVal) {
+                        sFracFormat = gc_sFormatDecimalPoint + "00";
+                    }
+                    var sFormat = null;
+                    if (bPercent) {
+                        res.bPercent = true;
+                        dVal /= 100;
+                        sFormat = "0" + sFracFormat + "%";
+                    } else {
+                        if (sCurrency) {
+                            res.bCurrency = true;
+                            var sNumberFormat = "#" + gc_sFormatThousandSeparator + "##0" + sFracFormat;
+                            var sCurrencyFormat;
+                            if (sCurrency.length > 1) {
+                                sCurrencyFormat = '"' + sCurrency + '"';
+                            } else {
+                                sCurrencyFormat = "\\" + sCurrency;
+                            }
+                            var sPositivePattern;
+                            var sNegativePattern;
+                            switch (CurrencyNegativePattern) {
+                            case 0:
+                                sPositivePattern = sCurrencyFormat + sNumberFormat + "_)";
+                                sNegativePattern = "[Red](" + sCurrencyFormat + sNumberFormat + ")";
+                                break;
+                            case 1:
+                                sPositivePattern = sCurrencyFormat + sNumberFormat;
+                                sNegativePattern = "[Red]-" + sCurrencyFormat + sNumberFormat;
+                                break;
+                            case 2:
+                                sPositivePattern = sCurrencyFormat + sNumberFormat;
+                                sNegativePattern = "[Red]" + sCurrencyFormat + "-" + sNumberFormat;
+                                break;
+                            case 3:
+                                sPositivePattern = sCurrencyFormat + sNumberFormat + "_-";
+                                sNegativePattern = "[Red]" + sCurrencyFormat + sNumberFormat + "-";
+                                break;
+                            case 4:
+                                sPositivePattern = sNumberFormat + sCurrencyFormat + "_)";
+                                sNegativePattern = "[Red](" + sNumberFormat + sCurrencyFormat + ")";
+                                break;
+                            case 5:
+                                sPositivePattern = sNumberFormat + sCurrencyFormat;
+                                sNegativePattern = "[Red]-" + sNumberFormat + sCurrencyFormat;
+                                break;
+                            case 6:
+                                sPositivePattern = sNumberFormat + "-" + sCurrencyFormat;
+                                sNegativePattern = "[Red]" + sNumberFormat + "-" + sCurrencyFormat;
+                                break;
+                            case 7:
+                                sPositivePattern = sNumberFormat + sCurrencyFormat + "_-";
+                                sNegativePattern = "[Red]" + sNumberFormat + sCurrencyFormat + "-";
+                                break;
+                            case 8:
+                                sPositivePattern = sNumberFormat + " " + sCurrencyFormat;
+                                sNegativePattern = "[Red]-" + sNumberFormat + " " + sCurrencyFormat;
+                                break;
+                            case 9:
+                                sPositivePattern = sCurrencyFormat + " " + sNumberFormat;
+                                sNegativePattern = "[Red]-" + sCurrencyFormat + " " + sNumberFormat;
+                                break;
+                            case 10:
+                                sPositivePattern = sNumberFormat + " " + sCurrencyFormat + "_-";
+                                sNegativePattern = "[Red]" + sNumberFormat + " " + sCurrencyFormat + "-";
+                                break;
+                            case 11:
+                                sPositivePattern = sCurrencyFormat + " " + sNumberFormat + "_-";
+                                sNegativePattern = "[Red]" + sCurrencyFormat + " " + sNumberFormat + "-";
+                                break;
+                            case 12:
+                                sPositivePattern = sCurrencyFormat + " " + sNumberFormat;
+                                sNegativePattern = "[Red]" + sCurrencyFormat + " -" + sNumberFormat;
+                                break;
+                            case 13:
+                                sPositivePattern = sNumberFormat + " " + sCurrencyFormat;
+                                sNegativePattern = "[Red]" + sNumberFormat + "- " + sCurrencyFormat;
+                                break;
+                            case 14:
+                                sPositivePattern = sCurrencyFormat + " " + sNumberFormat + "_)";
+                                sNegativePattern = "[Red](" + sCurrencyFormat + " " + sNumberFormat + ")";
+                                break;
+                            case 15:
+                                sPositivePattern = sNumberFormat + " " + sCurrencyFormat + "_)";
+                                sNegativePattern = "[Red](" + sNumberFormat + " " + sCurrencyFormat + ")";
+                                break;
+                            }
+                            sFormat = sPositivePattern + ";" + sNegativePattern;
+                        } else {
+                            if (oVal.thouthand) {
+                                sFormat = "#" + gc_sFormatThousandSeparator + "##0" + sFracFormat;
+                            } else {
+                                sFormat = "General";
+                            }
+                        }
+                    }
+                    res.format = sFormat;
+                    res.value = dVal;
+                }
+            }
+        }
+        if (null == res && !bError) {
+            res = this.parseDate(value, cultureInfo);
+        }
+        return res;
+    },
+    _parseStringLetters: function (sVal, currencySymbol, bBefore, oRes) {
+        var aTemp = ["р.", currencySymbol];
+        for (var i = 0, length = aTemp.length; i < length; i++) {
+            var sChar = aTemp[i];
+            var nIndex = -1;
+            var nCount = 0;
+            while (-1 != (nIndex = sVal.indexOf(sChar, nIndex + 1))) {
+                nCount++;
+            }
+            if (nCount > 0) {
+                sVal = sVal.replace(new RegExp(escapeRegExp(sChar), "g"), "");
+                var elem = oRes[sChar];
+                if (!elem) {
+                    elem = {
+                        before: 0,
+                        after: 0,
+                        all: 0
+                    };
+                    oRes[sChar] = elem;
+                }
+                if (bBefore) {
+                    elem.before += nCount;
+                } else {
+                    elem.after += nCount;
+                }
+                elem.all += nCount;
+            }
+        }
+        for (var i = 0, length = sVal.length; i < length; i++) {
+            var sChar = sVal[i];
+            var elem = oRes[sChar];
+            if (!elem) {
+                elem = {
+                    before: 0,
+                    after: 0,
+                    all: 0
+                };
+                oRes[sChar] = elem;
+            }
+            if (bBefore) {
+                elem.before++;
+            } else {
+                elem.after++;
+            }
+            elem.all++;
+        }
+    },
+    _parseThouthand: function (val, cultureInfo) {
+        var oRes = null;
+        var bThouthand = false;
+        var sReverseVal = "";
+        for (var i = val.length - 1; i >= 0; --i) {
+            sReverseVal += val[i];
+        }
+        var nGroupSizeIndex = 0;
+        var nGroupSize = cultureInfo.NumberGroupSizes[nGroupSizeIndex];
+        var nPrevIndex = 0;
+        var nIndex = -1;
+        var bError = false;
+        while (-1 != (nIndex = sReverseVal.indexOf(cultureInfo.NumberGroupSeparator, nIndex + 1))) {
+            var nCurLength = nIndex - nPrevIndex;
+            if (nCurLength < nGroupSize) {
+                bError = true;
+                break;
+            }
+            if (nGroupSizeIndex < cultureInfo.NumberGroupSizes.length - 1) {
+                nGroupSizeIndex++;
+                nGroupSize = cultureInfo.NumberGroupSizes[nGroupSizeIndex];
+            }
+            nPrevIndex = nIndex + 1;
+        }
+        if (!bError) {
+            if (0 != nPrevIndex) {
+                if (nPrevIndex < val.length && parseInt(val.substr(0, val.length - nPrevIndex)) > 0) {
+                    val = val.replace(new RegExp(escapeRegExp(cultureInfo.NumberGroupSeparator), "g"), "");
+                    bThouthand = true;
+                }
+            }
+            if (Asc.isNumber(val)) {
+                var dNumber = parseFloat(val);
+                if (!isNaN(dNumber)) {
+                    oRes = {
+                        number: dNumber,
+                        thouthand: bThouthand
                     };
                 }
             }
-        } else {
-            if (null != (match = this.rx_date2.exec(value))) {
-                var sDD = match[2],
-                sMM = match[3],
-                sYY = match[5],
-                nDay,
-                nMounth,
-                nYear,
-                sFormat,
-                bValidDate = false;
+        }
+        return oRes;
+    },
+    _parseDateFromArray: function (match, oDataTypes, cultureInfo) {
+        var res = null;
+        var bError = false;
+        for (var i = 0, length = match.length; i < length; i++) {
+            var elem = match[i];
+            if (elem.type == oDataTypes.delimiter) {
+                bError = true;
+                if (i - 1 >= 0 && i + 1 < length) {
+                    var prev = match[i - 1];
+                    var next = match[i + 1];
+                    if (prev.type != oDataTypes.delimiter && next.type != oDataTypes.delimite) {
+                        if (cultureInfo.TimeSeparator == elem.val || (":" == elem.val && cultureInfo.DateSeparator != elem.val)) {
+                            if (false == prev.date && false == next.date) {
+                                bError = false;
+                                prev.time = true;
+                                next.time = true;
+                            }
+                        } else {
+                            if (false == prev.time && false == next.time) {
+                                bError = false;
+                                prev.date = true;
+                                next.date = true;
+                            }
+                        }
+                    }
+                } else {
+                    if (i - 1 >= 0 && i + 1 == length) {
+                        var prev = match[i - 1];
+                        if (prev.type != oDataTypes.delimiter) {
+                            if (cultureInfo.TimeSeparator == elem.val || (":" == elem.val && cultureInfo.DateSeparator != elem.val)) {
+                                if (false == prev.date) {
+                                    bError = false;
+                                    prev.time = true;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (bError) {
+                    break;
+                }
+            }
+        }
+        if (!bError) {
+            for (var i = 0, length = match.length; i < length; i++) {
+                var elem = match[i];
+                if (elem.type == oDataTypes.letter) {
+                    var valLower = elem.val.toLowerCase();
+                    if (elem.am || elem.pm) {
+                        if (i - 1 >= 0) {
+                            var prev = match[i - 1];
+                            if (oDataTypes.digit == prev.type && false == prev.date) {
+                                prev.time = true;
+                            }
+                        }
+                        if (i + 1 != length) {
+                            bError = true;
+                        }
+                    } else {
+                        if (null != elem.month) {
+                            if (i - 1 >= 0) {
+                                var prev = match[i - 1];
+                                if (oDataTypes.digit == prev.type && false == prev.time) {
+                                    prev.date = true;
+                                }
+                            }
+                            if (i + 1 < length) {
+                                var next = match[i + 1];
+                                if (oDataTypes.digit == next.type && false == next.time) {
+                                    next.date = true;
+                                }
+                            }
+                        } else {
+                            bError = true;
+                        }
+                    }
+                }
+                if (bError) {
+                    break;
+                }
+            }
+        }
+        if (!bError) {
+            var aDate = [];
+            var nMonthIndex = null;
+            var sMonthFormat = null;
+            var aTime = [];
+            var am = false;
+            var pm = false;
+            for (var i = 0, length = match.length; i < length; i++) {
+                var elem = match[i];
+                if (elem.date) {
+                    if (elem.type == oDataTypes.digit) {
+                        aDate.push(elem.val);
+                    } else {
+                        if (elem.type == oDataTypes.letter && null != elem.month) {
+                            nMonthIndex = aDate.length;
+                            sMonthFormat = elem.month.format;
+                            aDate.push(elem.month.val);
+                        } else {
+                            bError = true;
+                        }
+                    }
+                } else {
+                    if (elem.time) {
+                        if (elem.type == oDataTypes.digit) {
+                            aTime.push(elem.val);
+                        } else {
+                            if (elem.type == oDataTypes.letter && (elem.am || elem.pm)) {
+                                am = elem.am;
+                                pm = elem.pm;
+                            } else {
+                                bError = true;
+                            }
+                        }
+                    } else {
+                        if (oDataTypes.digit == elem.type) {
+                            bError = true;
+                        }
+                    }
+                }
+            }
+            var nDateLength = aDate.length;
+            if (nDateLength > 0 && !(2 <= nDateLength && nDateLength <= 3 && (null == nMonthIndex || (3 == nDateLength && 1 == nMonthIndex) || 2 == nDateLength))) {
+                bError = true;
+            }
+            var nTimeLength = aTime.length;
+            if (nTimeLength > 3) {
+                bError = true;
+            }
+            if (!bError) {
+                res = {
+                    d: null,
+                    m: null,
+                    y: null,
+                    h: null,
+                    min: null,
+                    s: null,
+                    am: am,
+                    pm: pm,
+                    sDateFormat: null
+                };
+                if (nDateLength > 0) {
+                    var nIndexD = cultureInfo.ShortDatePattern.indexOf("0");
+                    var nIndexM = cultureInfo.ShortDatePattern.indexOf("1");
+                    var nIndexY = cultureInfo.ShortDatePattern.indexOf("2");
+                    if (null != nMonthIndex) {
+                        if (2 == nDateLength) {
+                            res.d = aDate[nDateLength - 1 - nMonthIndex];
+                            res.m = aDate[nMonthIndex];
+                            if (this.isValidDate((new Date()).getFullYear(), res.m - 1, res.d)) {
+                                res.sDateFormat = "d-mmm";
+                            } else {
+                                if ("012" != cultureInfo.ShortDatePattern && this.isValidDate((new Date()).getFullYear(), res.d - 1, res.m)) {
+                                    res.sDateFormat = "d-mmm";
+                                    var temp = res.d;
+                                    res.d = res.m;
+                                    res.m = temp;
+                                } else {
+                                    if (0 == nMonthIndex) {
+                                        res.sDateFormat = "mmm-yy";
+                                        res.d = null;
+                                        res.m = aDate[0];
+                                        res.y = aDate[1];
+                                    } else {
+                                        bError = true;
+                                    }
+                                }
+                            }
+                        } else {
+                            res.sDateFormat = "d-mmm-yy";
+                            res.d = aDate[0];
+                            res.m = aDate[1];
+                            res.y = aDate[2];
+                        }
+                    } else {
+                        if (2 == nDateLength) {
+                            if (nIndexD < nIndexM) {
+                                res.d = aDate[0];
+                                res.m = aDate[1];
+                            } else {
+                                res.m = aDate[0];
+                                res.d = aDate[1];
+                            }
+                            if (this.isValidDate((new Date()).getFullYear(), res.m - 1, res.d)) {
+                                res.sDateFormat = "d-mmm";
+                            } else {
+                                if ("210" == cultureInfo.ShortDatePattern && this.isValidDate((new Date()).getFullYear(), res.d - 1, res.m)) {
+                                    res.sDateFormat = "d-mmm";
+                                    var temp = res.d;
+                                    res.d = res.m;
+                                    res.m = temp;
+                                } else {
+                                    res.sDateFormat = "mmm-yy";
+                                    res.d = null;
+                                    if (nIndexM < nIndexY) {
+                                        res.m = aDate[0];
+                                        res.y = aDate[1];
+                                    } else {
+                                        res.y = aDate[0];
+                                        res.m = aDate[1];
+                                    }
+                                }
+                            }
+                        } else {
+                            var sFormat = "";
+                            for (var i = 0, length = cultureInfo.ShortDatePattern.length; i < length; i++) {
+                                var nIndex = cultureInfo.ShortDatePattern[i] - 0;
+                                var val = aDate[i];
+                                if (0 != i) {
+                                    sFormat += "/";
+                                }
+                                if (0 == nIndex) {
+                                    res.d = val;
+                                    sFormat += "d";
+                                } else {
+                                    if (1 == nIndex) {
+                                        res.m = val;
+                                        sFormat += "m";
+                                    } else {
+                                        if (2 == nIndex) {
+                                            res.y = val;
+                                            sFormat += "yyyy";
+                                        }
+                                    }
+                                }
+                            }
+                            res.sDateFormat = sFormat;
+                        }
+                    }
+                    if (null != res.y) {
+                        if (res.y < 30) {
+                            res.y = 2000 + res.y;
+                        } else {
+                            if (res.y < 100) {
+                                res.y = 1900 + res.y;
+                            }
+                        }
+                    }
+                }
+                if (nTimeLength > 0) {
+                    res.h = aTime[0];
+                    if (nTimeLength > 1) {
+                        res.min = aTime[1];
+                    }
+                    if (nTimeLength > 2) {
+                        res.s = aTime[2];
+                    }
+                }
+                if (bError) {
+                    res = null;
+                }
+            }
+        }
+        return res;
+    },
+    strcmp: function (s1, s2, index1, length, index2) {
+        if (null == index2) {
+            index2 = 0;
+        }
+        var bRes = true;
+        for (var i = 0; i < length; ++i) {
+            if (s1[index1 + i] != s2[index2 + i]) {
+                bRes = false;
+                break;
+            }
+        }
+        return bRes;
+    },
+    parseDate: function (value, cultureInfo) {
+        var res = null;
+        var match = [];
+        var sCurValue = null;
+        var oCurDataType = null;
+        var oPrevType = null;
+        var bAmPm = false;
+        var bMonth = false;
+        var bError = false;
+        var oDataTypes = {
+            letter: {
+                id: 0,
+                min: 2,
+                max: 9
+            },
+            digit: {
+                id: 1,
+                min: 1,
+                max: 4
+            },
+            delimiter: {
+                id: 2,
+                min: 1,
+                max: 1
+            },
+            space: {
+                id: 3,
+                min: null,
+                max: null
+            }
+        };
+        var valueLower = value.toLowerCase();
+        for (var i = 0, length = value.length; i < length; i++) {
+            var sChar = value[i];
+            var oDataType = null;
+            if ("0" <= sChar && sChar <= "9") {
+                oDataType = oDataTypes.digit;
+            } else {
+                if (" " == sChar) {
+                    oDataType = oDataTypes.space;
+                } else {
+                    if ("/" == sChar || "-" == sChar || ":" == sChar || cultureInfo.DateSeparator == sChar || cultureInfo.TimeSeparator == sChar) {
+                        oDataType = oDataTypes.delimiter;
+                    } else {
+                        oDataType = oDataTypes.letter;
+                    }
+                }
+            }
+            if (null != oDataType) {
+                if (null == oCurDataType) {
+                    sCurValue = sChar;
+                } else {
+                    if (oCurDataType == oDataType) {
+                        if (null == oCurDataType.max || sCurValue.length < oCurDataType.max) {
+                            sCurValue += sChar;
+                        } else {
+                            bError = true;
+                        }
+                    } else {
+                        if (null == oCurDataType.min || sCurValue.length >= oCurDataType.min) {
+                            if (oDataTypes.space != oCurDataType) {
+                                var oNewElem = {
+                                    val: sCurValue,
+                                    type: oCurDataType,
+                                    month: null,
+                                    am: false,
+                                    pm: false,
+                                    date: false,
+                                    time: false
+                                };
+                                if (oDataTypes.digit == oCurDataType) {
+                                    oNewElem.val = oNewElem.val - 0;
+                                }
+                                match.push(oNewElem);
+                            }
+                            sCurValue = sChar;
+                            oPrevType = oCurDataType;
+                        } else {
+                            bError = true;
+                        }
+                    }
+                }
+                oCurDataType = oDataType;
+            } else {
+                bError = true;
+            }
+            if (oDataTypes.letter == oDataType) {
+                var oNewElem = {
+                    val: sCurValue,
+                    type: oCurDataType,
+                    month: null,
+                    am: false,
+                    pm: false,
+                    date: false,
+                    time: false
+                };
+                var bAm = false;
+                var bPm = false;
+                if (!bAmPm && ((bAm = this.strcmp(valueLower, "am", i, 2)) || (bPm = this.strcmp(valueLower, "pm", i, 2)))) {
+                    bAmPm = true;
+                    oNewElem.am = bAm;
+                    oNewElem.pm = bPm;
+                    oNewElem.time = true;
+                    match.push(oNewElem);
+                    i += 2 - 1;
+                    if (oPrevType != oDataTypes.space) {
+                        bError = true;
+                    }
+                } else {
+                    if (!bMonth) {
+                        bMonth = true;
+                        var aArraysToCheck = [{
+                            arr: cultureInfo.AbbreviatedMonthNames,
+                            format: "mmm"
+                        },
+                        {
+                            arr: cultureInfo.MonthNames,
+                            format: "mmmm"
+                        }];
+                        var bFound = false;
+                        for (var index in aArraysToCheck) {
+                            var aArrayTemp = aArraysToCheck[index];
+                            for (var j = 0, length2 = aArrayTemp.arr.length; j < length2; j++) {
+                                var sCmpVal = aArrayTemp.arr[j].toLowerCase();
+                                var sCmpValCrop = sCmpVal.replace(/\./g, "");
+                                var bCrop = false;
+                                if (this.strcmp(valueLower, sCmpVal, i, sCmpVal.length) || (bCrop = (sCmpVal != sCmpValCrop && this.strcmp(valueLower, sCmpValCrop, i, sCmpValCrop.length)))) {
+                                    bFound = true;
+                                    oNewElem.month = {
+                                        val: j + 1,
+                                        format: aArrayTemp.format
+                                    };
+                                    oNewElem.date = true;
+                                    if (bCrop) {
+                                        i += sCmpValCrop.length - 1;
+                                    } else {
+                                        i += sCmpVal.length - 1;
+                                    }
+                                    break;
+                                }
+                            }
+                            if (bFound) {
+                                break;
+                            }
+                        }
+                        if (bFound) {
+                            match.push(oNewElem);
+                        } else {
+                            bError = true;
+                        }
+                    } else {
+                        bError = true;
+                    }
+                }
+                oCurDataType = null;
+                sCurValue = null;
+            }
+            if (bError) {
+                match = null;
+                break;
+            }
+        }
+        if (null != match && null != sCurValue) {
+            if (oDataTypes.space != oCurDataType) {
+                var oNewElem = {
+                    val: sCurValue,
+                    type: oCurDataType,
+                    month: null,
+                    am: false,
+                    pm: false,
+                    date: false,
+                    time: false
+                };
+                if (oDataTypes.digit == oCurDataType) {
+                    oNewElem.val = oNewElem.val - 0;
+                }
+                match.push(oNewElem);
+            }
+        }
+        if (null != match && match.length > 0) {
+            var oParsedDate = this._parseDateFromArray(match, oDataTypes, cultureInfo);
+            if (null != oParsedDate) {
+                var d = oParsedDate.d;
+                var m = oParsedDate.m;
+                var y = oParsedDate.y;
+                var h = oParsedDate.h;
+                var min = oParsedDate.min;
+                var s = oParsedDate.s;
+                var am = oParsedDate.am;
+                var pm = oParsedDate.pm;
+                var sDateFormat = oParsedDate.sDateFormat;
+                var bDate = false;
+                var bTime = false;
+                var nDay;
+                var nMounth;
+                var nYear;
                 if (g_bDate1904) {
                     nDay = 1;
                     nMounth = 0;
@@ -2682,95 +3530,62 @@ FormatParser.prototype = {
                     nMounth = 11;
                     nYear = 1899;
                 }
-                if (undefined != sDD) {
-                    if (undefined != sYY) {
-                        if (sYY.length == 4) {
-                            sFormat = "d-mmm-yyyy";
-                        } else {
-                            sFormat = "d-mmm-yy";
-                        }
+                var nHour = 0;
+                var nMinute = 0;
+                var nSecond = 0;
+                var dValue = 0;
+                var bValidDate = true;
+                if (null != m && (null != d || null != y)) {
+                    bDate = true;
+                    var oNowDate;
+                    if (null != d) {
+                        nDay = d - 0;
                     } else {
-                        sFormat = "d-mmm";
+                        nDay = 1;
                     }
-                } else {
-                    if (undefined != sYY) {
-                        if (sYY.length == 4) {
-                            sFormat = "mmm-yyyy";
-                        } else {
-                            sFormat = "mmm-yy";
-                        }
+                    nMounth = m - 1;
+                    if (null != y) {
+                        nYear = y - 0;
                     } else {
-                        return res;
-                    }
-                }
-                var nDD = 1;
-                if (undefined != sDD) {
-                    nDD = parseInt(sDD);
-                }
-                var nMM = 0;
-                switch (sMM.toLowerCase()) {
-                case "jan":
-                    nMM = 1;
-                    break;
-                case "feb":
-                    nMM = 2;
-                    break;
-                case "mar":
-                    nMM = 3;
-                    break;
-                case "apr":
-                    nMM = 4;
-                    break;
-                case "may":
-                    nMM = 5;
-                    break;
-                case "jun":
-                    nMM = 6;
-                    break;
-                case "jul":
-                    nMM = 7;
-                    break;
-                case "aug":
-                    nMM = 8;
-                    break;
-                case "sep":
-                    nMM = 9;
-                    break;
-                case "oct":
-                    nMM = 10;
-                    break;
-                case "nov":
-                    nMM = 11;
-                    break;
-                case "dec":
-                    nMM = 12;
-                    break;
-                default:
-                    return res;
-                }
-                var nYY = -1;
-                if (undefined != sYY) {
-                    nYY = parseInt(sYY);
-                } else {
-                    nYY = new Date().getFullYear();
-                }
-                if (0 <= nDD && 0 < nMM && 0 <= nYY) {
-                    nDay = nDD - 0;
-                    nMounth = nMM - 1;
-                    nYear = nYY - 0;
-                    if (nYear < 100) {
-                        nYear = 2000 + nYear;
+                        oNowDate = new Date();
+                        nYear = oNowDate.getFullYear();
                     }
                     bValidDate = this.isValidDate(nYear, nMounth, nDay);
                 }
-                if (true == bValidDate) {
+                if (null != h) {
+                    bTime = true;
+                    nHour = h - 0;
+                    if (am || pm) {
+                        if (nHour <= 23) {
+                            nHour = nHour % 12;
+                            if (pm) {
+                                nHour += 12;
+                            }
+                        } else {
+                            bValidDate = false;
+                        }
+                    }
+                    if (null != min) {
+                        nMinute = min - 0;
+                        if (nMinute > 59) {
+                            bValidDate = false;
+                        }
+                    }
+                    if (null != s) {
+                        nSecond = s - 0;
+                        if (nSecond > 59) {
+                            bValidDate = false;
+                        }
+                    }
+                }
+                if (true == bValidDate && (true == bDate || true == bTime)) {
                     if (g_bDate1904) {
                         dValue = (Date.UTC(nYear, nMounth, nDay, nHour, nMinute, nSecond) - Date.UTC(1904, 0, 1, 0, 0, 0)) / (86400 * 1000);
                     } else {
-                        if (1900 < nYear || (1900 == nYear && 2 < nMounth)) {
+                        if (1900 < nYear || (1900 == nYear && 1 < nMounth)) {
                             dValue = (Date.UTC(nYear, nMounth, nDay, nHour, nMinute, nSecond) - Date.UTC(1899, 11, 30, 0, 0, 0)) / (86400 * 1000);
                         } else {
-                            if (1900 == nYear && 2 == nMounth && 29 == nDay) {
+                            if (1900 == nYear && 1 == nMounth && 29 == nDay) {
                                 dValue = 60;
                             } else {
                                 dValue = (Date.UTC(nYear, nMounth, nDay, nHour, nMinute, nSecond) - Date.UTC(1899, 11, 31, 0, 0, 0)) / (86400 * 1000);
@@ -2778,10 +3593,35 @@ FormatParser.prototype = {
                         }
                     }
                     if (dValue > 0) {
+                        var sFormat;
+                        if (true == bDate && true == bTime) {
+                            sFormat = sDateFormat + " h:mm:ss";
+                            if (am || pm) {
+                                sFormat += " AM/PM";
+                            }
+                        } else {
+                            if (true == bDate) {
+                                sFormat = sDateFormat;
+                            } else {
+                                if (dValue > 1) {
+                                    sFormat = "[h]:mm:ss";
+                                } else {
+                                    if (am || pm) {
+                                        sFormat = "h:mm:ss AM/PM";
+                                    } else {
+                                        sFormat = "h:mm:ss";
+                                    }
+                                }
+                            }
+                        }
                         res = {
                             format: sFormat,
                             value: dValue,
-                            bDateTime: true
+                            bDateTime: true,
+                            bDate: bDate,
+                            bTime: bTime,
+                            bPercent: false,
+                            bCurrency: false
                         };
                     }
                 }
@@ -2796,15 +3636,25 @@ FormatParser.prototype = {
             if (nMounth < 0 || nMounth > 11) {
                 return false;
             } else {
-                if (this.isLeapYear(nYear)) {
-                    if (nDay <= 0 || nDay > this.daysLeap[nMounth]) {
-                        return false;
-                    }
+                if (this.isValidDay(nYear, nMounth, nDay)) {
+                    return true;
                 } else {
-                    if (nDay <= 0 || nDay > this.days[nMounth]) {
-                        return false;
+                    if (1900 == nYear && 1 == nMounth && 29 == nDay) {
+                        return true;
                     }
                 }
+            }
+        }
+        return false;
+    },
+    isValidDay: function (nYear, nMounth, nDay) {
+        if (this.isLeapYear(nYear)) {
+            if (nDay <= 0 || nDay > this.daysLeap[nMounth]) {
+                return false;
+            }
+        } else {
+            if (nDay <= 0 || nDay > this.days[nMounth]) {
+                return false;
             }
         }
         return true;
@@ -2814,3 +3664,29 @@ FormatParser.prototype = {
     }
 };
 var g_oFormatParser = new FormatParser();
+function escapeRegExp(string) {
+    return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+}
+var g_aCultureInfos = {
+    1033: {
+        LCID: 1033,
+        Name: "en-US",
+        CurrencyNegativePattern: 0,
+        CurrencySymbol: "$",
+        NumberDecimalSeparator: ".",
+        NumberGroupSeparator: ",",
+        NumberGroupSizes: [3],
+        DayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+        AbbreviatedDayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+        MonthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", ""],
+        AbbreviatedMonthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", ""],
+        MonthGenitiveNames: [],
+        AbbreviatedMonthGenitiveNames: [],
+        AMDesignator: "AM",
+        PMDesignator: "PM",
+        DateSeparator: "/",
+        TimeSeparator: ":",
+        ShortDatePattern: "102"
+    }
+};
+var g_oDefaultCultureInfo = g_aCultureInfos[1033];

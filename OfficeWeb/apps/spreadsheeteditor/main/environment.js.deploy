@@ -1,7 +1,0 @@
-var getEditorStylesheets = function() {
-    return ["../../../apps/spreadsheeteditor/main/resources/css/app-edit.css"];
-};
-
-var getEditorScripts = function() {
-    return ["../../../apps/spreadsheeteditor/main/app-edit.js"];
-};

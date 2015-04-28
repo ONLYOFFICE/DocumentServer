@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,18 +29,22 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function CParagraphSearchElement(StartPos, EndPos, Type) {
+ "use strict";
+function CParagraphSearchElement(StartPos, EndPos, Type, Id) {
     this.StartPos = StartPos;
     this.EndPos = EndPos;
     this.Type = Type;
     this.ResultStr = "";
+    this.Id = Id;
+    this.ClassesS = [];
+    this.ClassesE = [];
 }
 function CDocumentSearch() {
     this.Text = "";
     this.MatchCase = false;
     this.Id = 0;
     this.Count = 0;
-    this.Elements = new Array();
+    this.Elements = [];
     this.CurId = -1;
     this.Direction = true;
     this.ClearOnRecalc = true;
@@ -62,11 +66,11 @@ CDocumentSearch.prototype = {
         this.MatchCase = false;
         for (var Id in this.Elements) {
             var Paragraph = this.Elements[Id];
-            Paragraph.SearchResults = new Object();
+            Paragraph.Clear_SearchResults();
         }
         this.Id = 0;
         this.Count = 0;
-        this.Elements = new Object();
+        this.Elements = {};
         this.CurId = -1;
         this.Direction = true;
     },
@@ -76,17 +80,16 @@ CDocumentSearch.prototype = {
         this.Elements[this.Id] = Paragraph;
         return this.Id;
     },
-    Select: function (Id) {
+    Select: function (Id, bUpdateStates) {
         var Paragraph = this.Elements[Id];
         if (undefined != Paragraph) {
             var SearchElement = Paragraph.SearchResults[Id];
             if (undefined != SearchElement) {
                 Paragraph.Selection.Use = true;
                 Paragraph.Selection.Start = false;
-                Paragraph.Selection.StartPos = SearchElement.StartPos;
-                Paragraph.Selection.EndPos = SearchElement.EndPos;
-                Paragraph.CurPos.ContentPos = SearchElement.StartPos;
-                Paragraph.Document_SetThisElementCurrent();
+                Paragraph.Set_SelectionContentPos(SearchElement.StartPos, SearchElement.EndPos);
+                Paragraph.Set_ParaContentPos(SearchElement.StartPos, false, -1, -1);
+                Paragraph.Document_SetThisElementCurrent(false !== bUpdateStates ? true : false);
             }
             this.CurId = Id;
         }
@@ -99,39 +102,30 @@ CDocumentSearch.prototype = {
         if (undefined != Para) {
             var SearchElement = Para.SearchResults[Id];
             if (undefined != SearchElement) {
-                var StartPos = SearchElement.StartPos;
-                var EndPos = SearchElement.EndPos;
-                for (var Pos = EndPos - 1; Pos >= StartPos; Pos--) {
-                    var ItemType = Para.Content[Pos].Type;
-                    if (para_TextPr != ItemType && para_CollaborativeChangesStart != ItemType && para_CollaborativeChangesEnd != ItemType && para_CommentStart != ItemType && para_CommentEnd != ItemType && para_HyperlinkStart != ItemType && para_HyperlinkEnd != ItemType) {
-                        Para.Internal_Content_Remove(Pos);
-                    }
-                }
+                var StartContentPos = SearchElement.StartPos;
+                var StartRun = SearchElement.ClassesS[SearchElement.ClassesS.length - 1];
+                var RunPos = StartContentPos.Get(SearchElement.ClassesS.length - 1);
                 var Len = NewStr.length;
                 for (var Pos = 0; Pos < Len; Pos++) {
-                    Para.Internal_Content_Add2(StartPos + Pos, new ParaText(NewStr[Pos]));
+                    StartRun.Add_ToContent(RunPos + Pos, new ParaText(NewStr[Pos]));
                 }
-                Para.RecalcInfo.Set_Type_0(pararecalc_0_All);
-                Para.RecalcInfo.Set_Type_0_Spell(pararecalc_0_Spell_All);
+                Para.Selection.Use = true;
+                Para.Set_SelectionContentPos(SearchElement.StartPos, SearchElement.EndPos);
+                Para.Remove();
+                Para.Selection_Remove();
+                Para.Set_ParaContentPos(SearchElement.StartPos, true, -1, -1);
                 this.Count--;
-                delete Para.SearchResults[Id];
-                var ParaCount = 0;
-                for (var TempId in Para.SearchResults) {
-                    ParaCount++;
-                    break;
-                }
-                if (ParaCount <= 0) {
-                    delete this.Elements[Id];
-                }
+                Para.Remove_SearchResult(Id);
+                delete this.Elements[Id];
             }
         }
     },
-    Replace_All: function (NewStr) {
+    Replace_All: function (NewStr, bUpdateStates) {
         var bSelect = true;
         for (var Id in this.Elements) {
             if (true === bSelect) {
                 bSelect = false;
-                this.Select(Id);
+                this.Select(Id, bUpdateStates);
             }
             this.Replace(NewStr, Id);
         }
@@ -141,7 +135,7 @@ CDocumentSearch.prototype = {
         this.Direction = bDirection;
     }
 };
-CDocument.prototype.Search = function (Str, Props) {
+CDocument.prototype.Search = function (Str, Props, bDraw) {
     var StartTime = new Date().getTime();
     if (true === this.SearchEngine.Compare(Str, Props)) {
         return this.SearchEngine;
@@ -152,14 +146,16 @@ CDocument.prototype.Search = function (Str, Props) {
     for (var Index = 0; Index < Count; Index++) {
         this.Content[Index].Search(Str, Props, this.SearchEngine, search_Common);
     }
-    this.HdrFtr.Search(Str, Props, this.SearchEngine);
-    this.DrawingDocument.ClearCachePages();
-    this.DrawingDocument.FirePaint();
+    this.SectionsInfo.Search(Str, Props, this.SearchEngine);
+    if (false !== bDraw) {
+        this.DrawingDocument.ClearCachePages();
+        this.DrawingDocument.FirePaint();
+    }
     return this.SearchEngine;
 };
 CDocument.prototype.Search_Select = function (Id) {
     this.Selection_Remove();
-    this.SearchEngine.Select(Id);
+    this.SearchEngine.Select(Id, true);
     this.RecalculateCurPos();
     this.Document_UpdateInterfaceState();
     this.Document_UpdateSelectionState();
@@ -184,9 +180,9 @@ CDocument.prototype.Search_Replace = function (NewStr, bAll, Id) {
         Elements: CheckParagraphs,
         CheckType: changestype_Paragraph_Content
     })) {
-        History.Create_NewPoint();
+        History.Create_NewPoint(bAll ? historydescription_Document_ReplaceAll : historydescription_Document_ReplaceSingle);
         if (true === bAll) {
-            this.SearchEngine.Replace_All(NewStr);
+            this.SearchEngine.Replace_All(NewStr, true);
         } else {
             this.SearchEngine.Replace(NewStr, Id);
         }
@@ -216,8 +212,8 @@ CDocument.prototype.Search_GetId = function (bNext) {
         if (null != Id) {
             return Id;
         }
-        ParaDrawing.GoTo_Text(true === bNext ? false : true);
         this.DrawingObjects.resetSelection();
+        ParaDrawing.GoTo_Text(true === bNext ? false : true, false);
     }
     if (docpostype_Content === this.CurPos.Type) {
         var Id = null;
@@ -274,7 +270,7 @@ CDocument.prototype.Search_GetId = function (bNext) {
         }
     } else {
         if (docpostype_HdrFtr === this.CurPos.Type) {
-            return this.HdrFtr.Search_GetId(bNext);
+            return this.SectionsInfo.Search_GetId(bNext, this.HdrFtr.CurHdrFtr);
         }
     }
     return null;
@@ -306,7 +302,7 @@ CDocumentContent.prototype.Search_GetId = function (bNext, bCurrent) {
             if (null != Id) {
                 return Id;
             }
-            ParaDrawing.GoTo_Text(true === bNext ? false : true);
+            ParaDrawing.GoTo_Text(true === bNext ? false : true, false);
         }
         var Pos = this.CurPos.ContentPos;
         if (true === this.Selection.Use && selectionflag_Common === this.Selection.Flag) {
@@ -370,132 +366,80 @@ CHeaderFooter.prototype.Search = function (Str, Props, SearchEngine, Type) {
 CHeaderFooter.prototype.Search_GetId = function (bNext, bCurrent) {
     return this.Content.Search_GetId(bNext, bCurrent);
 };
-CHeaderFooterController.prototype.Search = function (Str, Props, SearchEngine) {
-    var bHdr_first = false;
-    var bHdr_even = false;
-    if (this.Content[0].Header.First != this.Content[0].Header.Odd) {
-        bHdr_first = true;
-    }
-    if (this.Content[0].Header.Even != this.Content[0].Header.Odd) {
-        bHdr_even = true;
-    }
-    if (true === bHdr_even && true === bHdr_first) {
-        if (null != this.Content[0].Header.First) {
-            this.Content[0].Header.First.Search(Str, Props, SearchEngine, search_Header | search_HdrFtr_First);
+CDocumentSectionsInfo.prototype.Search = function (Str, Props, SearchEngine) {
+    var bEvenOdd = EvenAndOddHeaders;
+    var Count = this.Elements.length;
+    for (var Index = 0; Index < Count; Index++) {
+        var SectPr = this.Elements[Index].SectPr;
+        var bFirst = SectPr.Get_TitlePage();
+        if (null != SectPr.HeaderFirst && true === bFirst) {
+            SectPr.HeaderFirst.Search(Str, Props, SearchEngine, search_Header);
         }
-        if (null != this.Content[0].Header.Even) {
-            this.Content[0].Header.Even.Search(Str, Props, SearchEngine, search_Header | search_HdrFtr_Even);
+        if (null != SectPr.HeaderEven && true === bEvenOdd) {
+            SectPr.HeaderEven.Search(Str, Props, SearchEngine, search_Header);
         }
-        if (null != this.Content[0].Header.Odd) {
-            this.Content[0].Header.Odd.Search(Str, Props, SearchEngine, search_Header | search_HdrFtr_Odd_no_First);
+        if (null != SectPr.HeaderDefault) {
+            SectPr.HeaderDefault.Search(Str, Props, SearchEngine, search_Header);
         }
-    } else {
-        if (true === bHdr_even) {
-            if (null != this.Content[0].Header.Even) {
-                this.Content[0].Header.Even.Search(Str, Props, SearchEngine, search_Header | search_HdrFtr_Even);
-            }
-            if (null != this.Content[0].Header.Odd) {
-                this.Content[0].Header.Odd.Search(Str, Props, SearchEngine, search_Header | search_HdrFtr_Odd);
-            }
-        } else {
-            if (true === bHdr_first) {
-                if (null != this.Content[0].Header.First) {
-                    this.Content[0].Header.First.Search(Str, Props, SearchEngine, search_Header | search_HdrFtr_First);
-                }
-                if (null != this.Content[0].Header.Odd) {
-                    this.Content[0].Header.Odd.Search(Str, Props, SearchEngine, search_Header | search_HdrFtr_All_no_First);
-                }
-            } else {
-                if (null != this.Content[0].Header.Odd) {
-                    this.Content[0].Header.Odd.Search(Str, Props, SearchEngine, search_Header | search_HdrFtr_All);
-                }
-            }
+        if (null != SectPr.FooterFirst && true === bFirst) {
+            SectPr.FooterFirst.Search(Str, Props, SearchEngine, search_Footer);
         }
-    }
-    var bFtr_first = false;
-    var bFtr_even = false;
-    if (this.Content[0].Footer.First != this.Content[0].Footer.Odd) {
-        bFtr_first = true;
-    }
-    if (this.Content[0].Footer.Even != this.Content[0].Footer.Odd) {
-        bFtr_even = true;
-    }
-    if (true === bFtr_even && true === bFtr_first) {
-        if (null != this.Content[0].Footer.First) {
-            this.Content[0].Footer.First.Search(Str, Props, SearchEngine, search_Footer | search_HdrFtr_First);
+        if (null != SectPr.FooterEven && true === bEvenOdd) {
+            SectPr.FooterEven.Search(Str, Props, SearchEngine, search_Footer);
         }
-        if (null != this.Content[0].Footer.Even) {
-            this.Content[0].Footer.Even.Search(Str, Props, SearchEngine, search_Footer | search_HdrFtr_Even);
-        }
-        if (null != this.Content[0].Footer.Odd) {
-            this.Content[0].Footer.Odd.Search(Str, Props, SearchEngine, search_Footer | search_HdrFtr_Odd_no_First);
-        }
-    } else {
-        if (true === bFtr_even) {
-            if (null != this.Content[0].Footer.Even) {
-                this.Content[0].Footer.Even.Search(Str, Props, SearchEngine, search_Footer | search_HdrFtr_Even);
-            }
-            if (null != this.Content[0].Footer.Odd) {
-                this.Content[0].Footer.Odd.Search(Str, Props, SearchEngine, search_Footer | search_HdrFtr_Odd);
-            }
-        } else {
-            if (true === bFtr_first) {
-                if (null != this.Content[0].Footer.First) {
-                    this.Content[0].Footer.First.Search(Str, Props, SearchEngine, search_Footer | search_HdrFtr_First);
-                }
-                if (null != this.Content[0].Footer.Odd) {
-                    this.Content[0].Footer.Odd.Search(Str, Props, SearchEngine, search_Footer | search_HdrFtr_All_no_First);
-                }
-            } else {
-                if (null != this.Content[0].Footer.Odd) {
-                    this.Content[0].Footer.Odd.Search(Str, Props, SearchEngine, search_Footer | search_HdrFtr_All);
-                }
-            }
+        if (null != SectPr.FooterDefault) {
+            SectPr.FooterDefault.Search(Str, Props, SearchEngine, search_Footer);
         }
     }
 };
-CHeaderFooterController.prototype.Search_GetId = function (bNext) {
-    var HdrFtrs = new Array();
+CDocumentSectionsInfo.prototype.Search_GetId = function (bNext, CurHdrFtr) {
+    var HdrFtrs = [];
     var CurPos = -1;
-    if (null != this.Content[0].Header.First) {
-        HdrFtrs.push(this.Content[0].Header.First);
-        if (this.CurHdrFtr === this.Content[0].Header.First) {
-            CurPos = HdrFtrs.length - 1;
+    var bEvenOdd = EvenAndOddHeaders;
+    var Count = this.Elements.length;
+    for (var Index = 0; Index < Count; Index++) {
+        var SectPr = this.Elements[Index].SectPr;
+        var bFirst = SectPr.Get_TitlePage();
+        if (null != SectPr.HeaderFirst && true === bFirst) {
+            HdrFtrs.push(SectPr.HeaderFirst);
+            if (CurHdrFtr === SectPr.HeaderFirst) {
+                CurPos = HdrFtrs.length - 1;
+            }
         }
-    }
-    if (null != this.Content[0].Footer.First) {
-        HdrFtrs.push(this.Content[0].Footer.First);
-        if (this.CurHdrFtr === this.Content[0].Footer.First) {
-            CurPos = HdrFtrs.length - 1;
+        if (null != SectPr.HeaderEven && true === bEvenOdd) {
+            HdrFtrs.push(SectPr.HeaderEven);
+            if (CurHdrFtr === SectPr.HeaderEven) {
+                CurPos = HdrFtrs.length - 1;
+            }
         }
-    }
-    if (null === Id && null != this.Content[0].Header.Even && this.Content[0].Header.First != this.Content[0].Header.Even) {
-        HdrFtrs.push(this.Content[0].Header.Even);
-        if (this.CurHdrFtr === this.Content[0].Header.Even) {
-            CurPos = HdrFtrs.length - 1;
+        if (null != SectPr.HeaderDefault) {
+            HdrFtrs.push(SectPr.HeaderDefault);
+            if (CurHdrFtr === SectPr.HeaderDefault) {
+                CurPos = HdrFtrs.length - 1;
+            }
         }
-    }
-    if (null === Id && null != this.Content[0].Footer.Even && this.Content[0].Footer.First != this.Content[0].Footer.Even) {
-        HdrFtrs.push(this.Content[0].Footer.Even);
-        if (this.CurHdrFtr === this.Content[0].Footer.Even) {
-            CurPos = HdrFtrs.length - 1;
+        if (null != SectPr.FooterFirst && true === bFirst) {
+            HdrFtrs.push(SectPr.FooterFirst);
+            if (CurHdrFtr === SectPr.FooterFirst) {
+                CurPos = HdrFtrs.length - 1;
+            }
         }
-    }
-    if (null === Id && null != this.Content[0].Header.Odd && this.Content[0].Header.First != this.Content[0].Header.Odd && this.Content[0].Header.First != this.Content[0].Header.Odd) {
-        HdrFtrs.push(this.Content[0].Header.Odd);
-        if (this.CurHdrFtr === this.Content[0].Header.Odd) {
-            CurPos = HdrFtrs.length - 1;
+        if (null != SectPr.FooterEven && true === bEvenOdd) {
+            HdrFtrs.push(SectPr.FooterEven);
+            if (CurHdrFtr === SectPr.FooterEven) {
+                CurPos = HdrFtrs.length - 1;
+            }
         }
-    }
-    if (null === Id && null != this.Content[0].Footer.Odd && this.Content[0].Footer.First != this.Content[0].Footer.Odd && this.Content[0].Footer.First != this.Content[0].Footer.Odd) {
-        HdrFtrs.push(this.Content[0].Footer.Odd);
-        if (this.CurHdrFtr === this.Content[0].Footer.Odd) {
-            CurPos = HdrFtrs.length - 1;
+        if (null != SectPr.FooterDefault) {
+            HdrFtrs.push(SectPr.FooterDefault);
+            if (CurHdrFtr === SectPr.FooterDefault) {
+                CurPos = HdrFtrs.length - 1;
+            }
         }
     }
     var Count = HdrFtrs.length;
     if (-1 != CurPos) {
-        var Id = this.CurHdrFtr.Search_GetId(bNext, true);
+        var Id = CurHdrFtr.Search_GetId(bNext, true);
         if (null != Id) {
             return Id;
         }
@@ -603,56 +547,19 @@ CTable.prototype.Search_GetId = function (bNext, bCurrent) {
 };
 Paragraph.prototype.Search = function (Str, Props, SearchEngine, Type) {
     var bMatchCase = Props.MatchCase;
-    for (var Pos = 0; Pos < this.Content.length; Pos++) {
-        var Item = this.Content[Pos];
-        if (para_Numbering === Item.Type || para_PresentationNumbering === Item.Type || para_TextPr === Item.Type || para_CommentStart === Item.Type || para_CommentEnd === Item.Type || para_CollaborativeChangesStart === Item.Type || para_CollaborativeChangesEnd === Item.Type || para_HyperlinkStart === Item.Type || para_HyperlinkEnd === Item.Type) {
-            continue;
-        }
-        if (para_Drawing === Item.Type) {
-            Item.Search(Str, Props, SearchEngine, Type);
-        }
-        if ((" " === Str[0] && para_Space === Item.Type) || (para_Text === Item.Type && ((true != bMatchCase && (Item.Value).toLowerCase() === Str[0].toLowerCase()) || (true === bMatchCase && Item.Value === Str[0])))) {
-            if (1 === Str.length) {
-                var Id = SearchEngine.Add(this);
-                this.SearchResults[Id] = new CParagraphSearchElement(Pos, Pos + 1, Type);
-            } else {
-                var bFind = true;
-                var Pos2 = Pos + 1;
-                for (var Index = 1; Index < Str.length; Index++) {
-                    var _TempType = this.Content[Pos2].Type;
-                    while (Pos2 < this.Content.length && (para_Numbering === _TempType || para_PresentationNumbering === _TempType || para_TextPr === _TempType || para_CommentStart === _TempType || para_CommentEnd === _TempType || para_CollaborativeChangesStart === _TempType || para_CollaborativeChangesEnd === _TempType || para_HyperlinkStart === _TempType || para_HyperlinkEnd === _TempType)) {
-                        Pos2++;
-                        _TempType = this.Content[Pos2].Type;
-                    }
-                    if ((Pos2 >= this.Content.length) || (" " === Str[Index] && para_Space != this.Content[Pos2].Type) || (" " != Str[Index] && ((para_Text != this.Content[Pos2].Type) || (para_Text === this.Content[Pos2].Type && !((true != bMatchCase && (this.Content[Pos2].Value).toLowerCase() === Str[Index].toLowerCase()) || (true === bMatchCase && this.Content[Pos2].Value === Str[Index])))))) {
-                        bFind = false;
-                        break;
-                    }
-                    Pos2++;
-                }
-                if (true === bFind) {
-                    var Id = SearchEngine.Add(this);
-                    this.SearchResults[Id] = new CParagraphSearchElement(Pos, Pos2, Type);
-                }
-            }
-        }
+    var ParaSearch = new CParagraphSearch(this, Str, Props, SearchEngine, Type);
+    var ContentLen = this.Content.length;
+    for (var CurPos = 0; CurPos < ContentLen; CurPos++) {
+        var Element = this.Content[CurPos];
+        ParaSearch.ContentPos.Update(CurPos, 0);
+        Element.Search(ParaSearch, 1);
     }
     var MaxShowValue = 100;
     for (var FoundId in this.SearchResults) {
         var StartPos = this.SearchResults[FoundId].StartPos;
         var EndPos = this.SearchResults[FoundId].EndPos;
         var ResultStr = new String();
-        var _Str = "";
-        for (var Pos = StartPos; Pos < EndPos; Pos++) {
-            Item = this.Content[Pos];
-            if (para_Text === Item.Type) {
-                _Str += Item.Value;
-            } else {
-                if (para_Space === Item.Type) {
-                    _Str += " ";
-                }
-            }
-        }
+        var _Str = Str;
         if (_Str.length >= MaxShowValue) {
             ResultStr = "<b>";
             for (var Index = 0; Index < MaxShowValue - 1; Index++) {
@@ -661,55 +568,40 @@ Paragraph.prototype.Search = function (Str, Props, SearchEngine, Type) {
             ResultStr += "</b>...";
         } else {
             ResultStr = "<b>" + _Str + "</b>";
-            var Pos_before = StartPos - 1;
-            var Pos_after = EndPos;
             var LeaveCount = MaxShowValue - _Str.length;
-            var bAfter = true;
-            while (LeaveCount > 0 && (Pos_before >= 0 || Pos_after < this.Content.length)) {
-                var TempPos = (true === bAfter ? Pos_after : Pos_before);
-                var Flag = 0;
-                while (((TempPos >= 0 && false === bAfter) || (TempPos < this.Content.length && true === bAfter)) && para_Text != this.Content[TempPos].Type && para_Space != this.Content[TempPos].Type) {
-                    if (true === bAfter) {
-                        TempPos++;
-                        if (TempPos >= this.Content.length) {
-                            TempPos = Pos_before;
-                            bAfter = false;
-                            Flag++;
-                        }
-                    } else {
-                        TempPos--;
-                        if (TempPos < 0) {
-                            TempPos = Pos_after;
-                            bAfter = true;
-                            Flag++;
-                        }
-                    }
-                    if (Flag >= 2) {
-                        break;
-                    }
+            var RunElementsAfter = new CParagraphRunElements(EndPos, LeaveCount);
+            var RunElementsBefore = new CParagraphRunElements(StartPos, LeaveCount);
+            this.Get_NextRunElements(RunElementsAfter);
+            this.Get_PrevRunElements(RunElementsBefore);
+            var LeaveCount_2 = LeaveCount / 2;
+            if (RunElementsAfter.Elements.length >= LeaveCount_2 && RunElementsBefore.Elements.length >= LeaveCount_2) {
+                for (var Index = 0; Index < LeaveCount_2; Index++) {
+                    var ItemB = RunElementsBefore.Elements[Index];
+                    var ItemA = RunElementsAfter.Elements[Index];
+                    ResultStr = (para_Text === ItemB.Type ? ItemB.Value : " ") + ResultStr + (para_Text === ItemA.Type ? ItemA.Value : " ");
                 }
-                if (Flag >= 2 || !((TempPos >= 0 && false === bAfter) || (TempPos < this.Content.length && true === bAfter))) {
-                    break;
-                }
-                if (true === bAfter) {
-                    ResultStr += (para_Space === this.Content[TempPos].Type ? " " : this.Content[TempPos].Value);
-                    Pos_after = TempPos + 1;
-                    LeaveCount--;
-                    if (Pos_before >= 0) {
-                        bAfter = false;
+            } else {
+                if (RunElementsAfter.Elements.length < LeaveCount_2) {
+                    var TempCount = RunElementsAfter.Elements.length;
+                    for (var Index = 0; Index < TempCount; Index++) {
+                        var ItemA = RunElementsAfter.Elements[Index];
+                        ResultStr = ResultStr + (para_Text === ItemA.Type ? ItemA.Value : " ");
                     }
-                    if (Pos_after >= this.Content.length) {
-                        bAfter = false;
+                    var TempCount = Math.min(2 * LeaveCount_2 - RunElementsAfter.Elements.length, RunElementsBefore.Elements.length);
+                    for (var Index = 0; Index < TempCount; Index++) {
+                        var ItemB = RunElementsBefore.Elements[Index];
+                        ResultStr = (para_Text === ItemB.Type ? ItemB.Value : " ") + ResultStr;
                     }
                 } else {
-                    ResultStr = (para_Space === this.Content[TempPos].Type ? " " : this.Content[TempPos].Value) + ResultStr;
-                    Pos_before = TempPos - 1;
-                    LeaveCount--;
-                    if (Pos_after < this.Content.length) {
-                        bAfter = true;
+                    var TempCount = RunElementsAfter.Elements.length;
+                    for (var Index = 0; Index < TempCount; Index++) {
+                        var ItemA = RunElementsAfter.Elements[Index];
+                        ResultStr = ResultStr + (para_Text === ItemA.Type ? ItemA.Value : " ");
                     }
-                    if (Pos_before < 0) {
-                        bAfter = true;
+                    var TempCount = RunElementsBefore.Elements.length;
+                    for (var Index = 0; Index < TempCount; Index++) {
+                        var ItemB = RunElementsBefore.Elements[Index];
+                        ResultStr = (para_Text === ItemB.Type ? ItemB.Value : " ") + ResultStr;
                     }
                 }
             }
@@ -718,33 +610,171 @@ Paragraph.prototype.Search = function (Str, Props, SearchEngine, Type) {
     }
 };
 Paragraph.prototype.Search_GetId = function (bNext, bCurrent) {
-    var Pos = -1;
+    var ContentPos = null;
     if (true === bCurrent) {
-        Pos = this.CurPos.ContentPos;
-        if (true == this.Selection.Use) {
-            Pos = (true === bNext ? Math.max(this.Selection.StartPos, this.Selection.EndPos) : Math.min(this.Selection.StartPos, this.Selection.EndPos));
+        if (true === this.Selection.Use) {
+            var SSelContentPos = this.Get_ParaContentPos(true, true);
+            var ESelContentPos = this.Get_ParaContentPos(true, false);
+            if (SSelContentPos.Compare(ESelContentPos) > 0) {
+                var Temp = ESelContentPos;
+                ESelContentPos = SSelContentPos;
+                SSelContentPos = Temp;
+            }
+            if (true === bNext) {
+                ContentPos = ESelContentPos;
+            } else {
+                ContentPos = SSelContentPos;
+            }
+        } else {
+            ContentPos = this.Get_ParaContentPos(false, false);
         }
     } else {
         if (true === bNext) {
-            Pos = -1;
+            ContentPos = this.Get_StartPos();
         } else {
-            Pos = this.Content.length - 1;
+            ContentPos = this.Get_EndPos(false);
+        }
+    }
+    if (true === bNext) {
+        var StartPos = ContentPos.Get(0);
+        var ContentLen = this.Content.length;
+        for (var CurPos = StartPos; CurPos < ContentLen; CurPos++) {
+            var ElementId = this.Content[CurPos].Search_GetId(true, CurPos === StartPos ? true : false, ContentPos, 1);
+            if (null !== ElementId) {
+                return ElementId;
+            }
+        }
+    } else {
+        var StartPos = ContentPos.Get(0);
+        var ContentLen = this.Content.length;
+        for (var CurPos = StartPos; CurPos >= 0; CurPos--) {
+            var ElementId = this.Content[CurPos].Search_GetId(false, CurPos === StartPos ? true : false, ContentPos, 1);
+            if (null !== ElementId) {
+                return ElementId;
+            }
+        }
+    }
+    return null;
+};
+Paragraph.prototype.Add_SearchResult = function (Id, StartContentPos, EndContentPos, Type) {
+    var SearchResult = new CParagraphSearchElement(StartContentPos, EndContentPos, Type, Id);
+    this.SearchResults[Id] = SearchResult;
+    SearchResult.ClassesS.push(this);
+    SearchResult.ClassesE.push(this);
+    this.Content[StartContentPos.Get(0)].Add_SearchResult(SearchResult, true, StartContentPos, 1);
+    this.Content[EndContentPos.Get(0)].Add_SearchResult(SearchResult, false, EndContentPos, 1);
+};
+Paragraph.prototype.Clear_SearchResults = function () {
+    for (var Id in this.SearchResults) {
+        var SearchResult = this.SearchResults[Id];
+        var ClassesCount = SearchResult.ClassesS.length;
+        for (var Pos = 1; Pos < ClassesCount; Pos++) {
+            SearchResult.ClassesS[Pos].Clear_SearchResults();
+        }
+        var ClassesCount = SearchResult.ClassesE.length;
+        for (var Pos = 1; Pos < ClassesCount; Pos++) {
+            SearchResult.ClassesE[Pos].Clear_SearchResults();
+        }
+    }
+    this.SearchResults = {};
+};
+Paragraph.prototype.Remove_SearchResult = function (Id) {
+    var SearchResult = this.SearchResults[Id];
+    if (undefined !== SearchResult) {
+        var ClassesCount = SearchResult.ClassesS.length;
+        for (var Pos = 1; Pos < ClassesCount; Pos++) {
+            SearchResult.ClassesS[Pos].Remove_SearchResult(SearchResult);
+        }
+        var ClassesCount = SearchResult.ClassesE.length;
+        for (var Pos = 1; Pos < ClassesCount; Pos++) {
+            SearchResult.ClassesE[Pos].Remove_SearchResult(SearchResult);
+        }
+        delete this.SearchResults[Id];
+    }
+};
+ParaRun.prototype.Search = function (ParaSearch, Depth) {
+    this.SearchMarks = [];
+    var Para = ParaSearch.Paragraph;
+    var Str = ParaSearch.Str;
+    var Props = ParaSearch.Props;
+    var SearchEngine = ParaSearch.SearchEngine;
+    var Type = ParaSearch.Type;
+    var MatchCase = Props.MatchCase;
+    var ContentLen = this.Content.length;
+    for (var Pos = 0; Pos < ContentLen; Pos++) {
+        var Item = this.Content[Pos];
+        if (para_Drawing === Item.Type) {
+            Item.Search(Str, Props, SearchEngine, Type);
+            ParaSearch.Reset();
+        }
+        if ((" " === Str[ParaSearch.SearchIndex] && para_Space === Item.Type) || (para_Math_Text == Item.Type && Item.value === Str.charCodeAt(ParaSearch.SearchIndex)) || (para_Text === Item.Type && ((true != MatchCase && (String.fromCharCode(Item.Value)).toLowerCase() === Str[ParaSearch.SearchIndex].toLowerCase()) || (true === MatchCase && Item.Value === Str.charCodeAt(ParaSearch.SearchIndex))))) {
+            if (0 === ParaSearch.SearchIndex) {
+                var StartContentPos = ParaSearch.ContentPos.Copy();
+                StartContentPos.Update(Pos, Depth);
+                ParaSearch.StartPos = StartContentPos;
+            }
+            ParaSearch.SearchIndex++;
+            if (ParaSearch.SearchIndex === Str.length) {
+                var EndContentPos = ParaSearch.ContentPos.Copy();
+                EndContentPos.Update(Pos + 1, Depth);
+                var Id = SearchEngine.Add(Para);
+                Para.Add_SearchResult(Id, ParaSearch.StartPos, EndContentPos, Type);
+                ParaSearch.Reset();
+            }
+        } else {
+            if (0 !== ParaSearch.SearchIndex) {
+                ParaSearch.Reset();
+            }
+        }
+    }
+};
+ParaRun.prototype.Add_SearchResult = function (SearchResult, Start, ContentPos, Depth) {
+    if (true === Start) {
+        SearchResult.ClassesS.push(this);
+    } else {
+        SearchResult.ClassesE.push(this);
+    }
+    this.SearchMarks.push(new CParagraphSearchMark(SearchResult, Start, Depth));
+};
+ParaRun.prototype.Clear_SearchResults = function () {
+    this.SearchMarks = [];
+};
+ParaRun.prototype.Remove_SearchResult = function (SearchResult) {
+    var MarksCount = this.SearchMarks.length;
+    for (var Index = 0; Index < MarksCount; Index++) {
+        var Mark = this.SearchMarks[Index];
+        if (SearchResult === Mark.SearchResult) {
+            this.SearchMarks.splice(Index, 1);
+            Index--;
+            MarksCount--;
+        }
+    }
+};
+ParaRun.prototype.Search_GetId = function (bNext, bUseContentPos, ContentPos, Depth) {
+    var StartPos = 0;
+    if (true === bUseContentPos) {
+        StartPos = ContentPos.Get(Depth);
+    } else {
+        if (true === bNext) {
+            StartPos = 0;
+        } else {
+            StartPos = this.Content.length;
         }
     }
     var NearElementId = null;
-    var NearElementPos = -1;
     if (true === bNext) {
-        for (var ElemId in this.SearchResults) {
-            var Element = this.SearchResults[ElemId];
-            if (Pos <= Element.StartPos && (-1 === NearElementPos || NearElementPos > Element.StartPos)) {
-                NearElementPos = Element.StartPos;
-                NearElementId = ElemId;
+        var NearPos = this.Content.length;
+        var SearchMarksCount = this.SearchMarks.length;
+        for (var SPos = 0; SPos < SearchMarksCount; SPos++) {
+            var Mark = this.SearchMarks[SPos];
+            var MarkPos = Mark.SearchResult.StartPos.Get(Mark.Depth);
+            if (MarkPos >= StartPos && MarkPos < NearPos) {
+                NearElementId = Mark.SearchResult.Id;
+                NearPos = MarkPos;
             }
         }
-        var StartPos = Math.max(Pos, 0);
-        var EndPos = Math.min((null === NearElementId ? this.Content.length - 1 : Element.StartPos), this.Content.length - 1);
-        for (var TempPos = StartPos; TempPos < EndPos; TempPos++) {
-            var Item = this.Content[TempPos];
+        for (var CurPos = StartPos; CurPos < NearPos; CurPos++) {
+            var Item = this.Content[CurPos];
             if (para_Drawing === Item.Type) {
                 var TempElementId = Item.Search_GetId(true, false);
                 if (null != TempElementId) {
@@ -753,17 +783,19 @@ Paragraph.prototype.Search_GetId = function (bNext, bCurrent) {
             }
         }
     } else {
-        for (var ElemId in this.SearchResults) {
-            var Element = this.SearchResults[ElemId];
-            if (Pos >= Element.EndPos && (-1 === NearElementPos || NearElementPos < Element.EndPos)) {
-                NearElementPos = Element.EndPos;
-                NearElementId = ElemId;
+        var NearPos = -1;
+        var SearchMarksCount = this.SearchMarks.length;
+        for (var SPos = 0; SPos < SearchMarksCount; SPos++) {
+            var Mark = this.SearchMarks[SPos];
+            var MarkPos = Mark.SearchResult.StartPos.Get(Mark.Depth);
+            if (MarkPos < StartPos && MarkPos > NearPos) {
+                NearElementId = Mark.SearchResult.Id;
+                NearPos = MarkPos;
             }
         }
-        var StartPos = Math.max((null === NearElementId ? 0 : Element.EndPos), 0);
-        var EndPos = Math.min(Pos, this.Content.length - 1);
-        for (var TempPos = EndPos - 1; TempPos >= StartPos; TempPos--) {
-            var Item = this.Content[TempPos];
+        StartPos = Math.min(this.Content.length - 1, StartPos - 1);
+        for (var CurPos = StartPos; CurPos > NearPos; CurPos--) {
+            var Item = this.Content[CurPos];
             if (para_Drawing === Item.Type) {
                 var TempElementId = Item.Search_GetId(false, false);
                 if (null != TempElementId) {
@@ -774,3 +806,109 @@ Paragraph.prototype.Search_GetId = function (bNext, bCurrent) {
     }
     return NearElementId;
 };
+ParaHyperlink.prototype.Search = function (ParaSearch, Depth) {
+    this.SearchMarks = [];
+    var ContentLen = this.Content.length;
+    for (var CurPos = 0; CurPos < ContentLen; CurPos++) {
+        var Element = this.Content[CurPos];
+        ParaSearch.ContentPos.Update(CurPos, Depth);
+        Element.Search(ParaSearch, Depth + 1);
+    }
+};
+ParaHyperlink.prototype.Add_SearchResult = function (SearchResult, Start, ContentPos, Depth) {
+    if (true === Start) {
+        SearchResult.ClassesS.push(this);
+    } else {
+        SearchResult.ClassesE.push(this);
+    }
+    this.SearchMarks.push(new CParagraphSearchMark(SearchResult, Start, Depth));
+    this.Content[ContentPos.Get(Depth)].Add_SearchResult(SearchResult, Start, ContentPos, Depth + 1);
+};
+ParaHyperlink.prototype.Clear_SearchResults = function () {
+    this.SearchMarks = [];
+};
+ParaHyperlink.prototype.Remove_SearchResult = function (SearchResult) {
+    var MarksCount = this.SearchMarks.length;
+    for (var Index = 0; Index < MarksCount; Index++) {
+        var Mark = this.SearchMarks[Index];
+        if (SearchResult === Mark.SearchResult) {
+            this.SearchMarks.splice(Index, 1);
+            Index--;
+            MarksCount--;
+        }
+    }
+};
+ParaHyperlink.prototype.Search_GetId = function (bNext, bUseContentPos, ContentPos, Depth) {
+    var StartPos = 0;
+    if (true === bUseContentPos) {
+        StartPos = ContentPos.Get(Depth);
+    } else {
+        if (true === bNext) {
+            StartPos = 0;
+        } else {
+            StartPos = this.Content.length - 1;
+        }
+    }
+    if (true === bNext) {
+        var ContentLen = this.Content.length;
+        for (var CurPos = StartPos; CurPos < ContentLen; CurPos++) {
+            var ElementId = this.Content[CurPos].Search_GetId(true, bUseContentPos && CurPos === StartPos ? true : false, ContentPos, Depth + 1);
+            if (null !== ElementId) {
+                return ElementId;
+            }
+        }
+    } else {
+        var ContentLen = this.Content.length;
+        for (var CurPos = StartPos; CurPos >= 0; CurPos--) {
+            var ElementId = this.Content[CurPos].Search_GetId(false, bUseContentPos && CurPos === StartPos ? true : false, ContentPos, Depth + 1);
+            if (null !== ElementId) {
+                return ElementId;
+            }
+        }
+    }
+    return null;
+};
+ParaComment.prototype.Search = function (ParaSearch, Depth) {};
+ParaComment.prototype.Add_SearchResult = function (SearchResult, Start, ContentPos, Depth) {};
+ParaComment.prototype.Clear_SearchResults = function () {};
+ParaComment.prototype.Remove_SearchResult = function (SearchResult) {};
+ParaComment.prototype.Search_GetId = function (bNext, bUseContentPos, ContentPos, Depth) {
+    return null;
+};
+ParaMath.prototype.Search = function (ParaSearch, Depth) {
+    this.SearchMarks = [];
+    this.Root.Search(ParaSearch, Depth);
+};
+ParaMath.prototype.Add_SearchResult = function (SearchResult, Start, ContentPos, Depth) {
+    this.Root.Add_SearchResult(SearchResult, Start, ContentPos, Depth);
+};
+ParaMath.prototype.Clear_SearchResults = function () {
+    this.Root.Clear_SearchResults();
+};
+ParaMath.prototype.Remove_SearchResult = function (SearchResult) {
+    this.Root.Remove_SearchResult(SearchResult);
+};
+ParaMath.prototype.Search_GetId = function (bNext, bUseContentPos, ContentPos, Depth) {
+    return this.Root.Search_GetId(bNext, bUseContentPos, ContentPos, Depth);
+};
+function CParagraphSearch(Paragraph, Str, Props, SearchEngine, Type) {
+    this.Paragraph = Paragraph;
+    this.Str = Str;
+    this.Props = Props;
+    this.SearchEngine = SearchEngine;
+    this.Type = Type;
+    this.ContentPos = new CParagraphContentPos();
+    this.StartPos = null;
+    this.SearchIndex = 0;
+}
+CParagraphSearch.prototype = {
+    Reset: function () {
+        this.StartPos = null;
+        this.SearchIndex = 0;
+    }
+};
+function CParagraphSearchMark(SearchResult, Start, Depth) {
+    this.SearchResult = SearchResult;
+    this.Start = Start;
+    this.Depth = Depth;
+}

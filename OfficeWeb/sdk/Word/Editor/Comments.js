@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,14 +29,29 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function CCommentData() {
+ "use strict";
+function CCommentData() {
     this.m_sText = "";
     this.m_sTime = "";
     this.m_sUserId = "";
     this.m_sUserName = "";
     this.m_sQuoteText = null;
     this.m_bSolved = false;
-    this.m_aReplies = new Array();
+    this.m_aReplies = [];
+    this.Copy = function () {
+        var NewData = new CCommentData();
+        NewData.m_sText = this.m_sText;
+        NewData.m_sTime = this.m_sTime;
+        NewData.m_sUserId = this.m_sUserId;
+        NewData.m_sUserName = this.m_sUserName;
+        NewData.m_sQuoteText = this.m_sQuoteText;
+        NewData.m_bSolved = this.m_bSolved;
+        var Count = this.m_aReplies.length;
+        for (var Pos = 0; Pos < Count; Pos++) {
+            NewData.m_aReplies.push(this.m_aReplies[Pos].Copy());
+        }
+        return NewData;
+    };
     this.Add_Reply = function (CommentData) {
         this.m_aReplies.push(CommentData);
     };
@@ -126,6 +141,13 @@
         }
     };
 }
+function CCommentDrawingRect(X, Y, W, H, CommentId) {
+    this.X = X;
+    this.Y = Y;
+    this.H = H;
+    this.W = W;
+    this.CommentId = CommentId;
+}
 var comment_type_Common = 1;
 var comment_type_HdrFtr = 2;
 function CComment(Parent, Data) {
@@ -136,74 +158,33 @@ function CComment(Parent, Data) {
         Type: comment_type_Common,
         Data: null
     };
+    this.StartId = null;
+    this.EndId = null;
     this.m_oStartInfo = {
         X: 0,
         Y: 0,
         H: 0,
-        PageNum: 0,
-        ParaId: null
-    };
-    this.m_oEndInfo = {
-        X: 0,
-        Y: 0,
-        H: 0,
-        PageNum: 0,
-        ParaId: null
+        PageNum: 0
     };
     this.Lock = new CLock();
     if (false === g_oIdCounter.m_bLoad) {
         this.Lock.Set_Type(locktype_Mine, false);
         CollaborativeEditing.Add_Unlock2(this);
     }
-    this.Set_StartInfo = function (PageNum, X, Y, H, ParaId) {
+    this.Copy = function () {
+        return new CComment(this.Parent, this.Data.Copy());
+    };
+    this.Set_StartId = function (ObjId) {
+        this.StartId = ObjId;
+    };
+    this.Set_EndId = function (ObjId) {
+        this.EndId = ObjId;
+    };
+    this.Set_StartInfo = function (PageNum, X, Y, H) {
         this.m_oStartInfo.X = X;
         this.m_oStartInfo.Y = Y;
         this.m_oStartInfo.H = H;
-        this.m_oStartInfo.ParaId = ParaId;
-        if (comment_type_Common === this.m_oTypeInfo.Type) {
-            this.m_oStartInfo.PageNum = PageNum;
-        }
-    };
-    this.Set_EndInfo = function (PageNum, X, Y, H, ParaId) {
-        this.m_oEndInfo.X = X;
-        this.m_oEndInfo.Y = Y;
-        this.m_oEndInfo.H = H;
-        this.m_oEndInfo.ParaId = ParaId;
-        if (comment_type_Common === this.m_oTypeInfo.Type) {
-            this.m_oEndInfo.PageNum = PageNum;
-        }
-    };
-    this.Check_ByXY = function (PageNum, X, Y, Type) {
-        if (this.m_oTypeInfo.Type != Type) {
-            return false;
-        }
-        if (comment_type_Common === Type) {
-            if (PageNum < this.m_oStartInfo.PageNum || PageNum > this.m_oEndInfo.PageNum) {
-                return false;
-            }
-            if (PageNum === this.m_oStartInfo.PageNum && (Y < this.m_oStartInfo.Y || (Y < (this.m_oStartInfo.Y + this.m_oStartInfo.H) && X < this.m_oStartInfo.X))) {
-                return false;
-            }
-            if (PageNum === this.m_oEndInfo.PageNum && (Y > this.m_oEndInfo.Y + this.m_oEndInfo.H || (Y > this.m_oEndInfo.Y && X > this.m_oEndInfo.X))) {
-                return false;
-            }
-        } else {
-            if (comment_type_HdrFtr === Type) {
-                var HdrFtr = this.m_oTypeInfo.Data;
-                if (null === HdrFtr || false === HdrFtr.Check_Page(PageNum)) {
-                    return false;
-                }
-                if (Y < this.m_oStartInfo.Y || (Y < (this.m_oStartInfo.Y + this.m_oStartInfo.H) && X < this.m_oStartInfo.X)) {
-                    return false;
-                }
-                if (Y > this.m_oEndInfo.Y + this.m_oEndInfo.H || (Y > this.m_oEndInfo.Y && X > this.m_oEndInfo.X)) {
-                    return false;
-                }
-                this.m_oStartInfo.PageNum = PageNum;
-                this.m_oEndInfo.PageNum = PageNum;
-            }
-        }
-        return true;
+        this.m_oStartInfo.PageNum = PageNum;
     };
     this.Set_Data = function (Data) {
         History.Add(this, {
@@ -214,18 +195,18 @@ function CComment(Parent, Data) {
         this.Data = Data;
     };
     this.Remove_Marks = function () {
-        var Para_start = g_oTableId.Get_ById(this.m_oStartInfo.ParaId);
-        var Para_end = g_oTableId.Get_ById(this.m_oEndInfo.ParaId);
-        if (Para_start === Para_end) {
-            if (null != Para_start) {
-                Para_start.Remove_CommentMarks(this.Id);
+        var ObjStart = g_oTableId.Get_ById(this.StartId);
+        var ObjEnd = g_oTableId.Get_ById(this.EndId);
+        if (ObjStart === ObjEnd) {
+            if (null != ObjStart) {
+                ObjStart.Remove_CommentMarks(this.Id);
             }
         } else {
-            if (null != Para_start) {
-                Para_start.Remove_CommentMarks(this.Id);
+            if (null != ObjStart) {
+                ObjStart.Remove_CommentMarks(this.Id);
             }
-            if (null != Para_end) {
-                Para_end.Remove_CommentMarks(this.Id);
+            if (null != ObjEnd) {
+                ObjEnd.Remove_CommentMarks(this.Id);
             }
         }
     };
@@ -243,7 +224,6 @@ function CComment(Parent, Data) {
         if (comment_type_HdrFtr === Type) {
             var PageNum = Data.Content.Get_StartPage_Absolute();
             this.m_oStartInfo.PageNum = PageNum;
-            this.m_oEndInfo.PageNum = PageNum;
         }
     };
     this.Get_TypeInfo = function () {
@@ -352,20 +332,20 @@ function CComment(Parent, Data) {
     };
     this.Check_MergeData = function () {
         var bUse = true;
-        if (null != this.m_oStartInfo.ParaId) {
-            var Para_start = g_oTableId.Get_ById(this.m_oStartInfo.ParaId);
-            if (true != Para_start.Is_UseInDocument()) {
+        if (null != this.StartId) {
+            var ObjStart = g_oTableId.Get_ById(this.StartId);
+            if (true != ObjStart.Is_UseInDocument()) {
                 bUse = false;
             }
         }
-        if (true === bUse && null != this.m_oEndInfo.ParaId) {
-            var Para_end = g_oTableId.Get_ById(this.m_oEndInfo.ParaId);
-            if (true != Para_end.Is_UseInDocument()) {
+        if (true === bUse && null != this.EndId) {
+            var ObjEnd = g_oTableId.Get_ById(this.EndId);
+            if (true != ObjEnd.Is_UseInDocument()) {
                 bUse = false;
             }
         }
         if (false === bUse) {
-            editor.WordControl.m_oLogicDocument.Remove_Comment(this.Id, true);
+            editor.WordControl.m_oLogicDocument.Remove_Comment(this.Id, true, false);
         }
     };
     g_oTableId.Add(this, this.Id);
@@ -378,7 +358,7 @@ function CComments() {
     this.m_bUse = false;
     this.m_aComments = {};
     this.m_sCurrent = null;
-    this.m_aCurrentDraw = new Array();
+    this.Pages = [];
     this.Get_Id = function () {
         return this.Id;
     };
@@ -421,63 +401,27 @@ function CComments() {
         }
         return false;
     };
-    this.Reset_CurrentDraw = function (PageNum) {
-        this.m_aCurrentDraw.length = 0;
-        for (var Id in this.m_aComments) {
-            var Comment = this.m_aComments[Id];
-            if (PageNum > Comment.m_oStartInfo.PageNum && PageNum <= Comment.m_oEndInfo.PageNum) {
-                this.m_aCurrentDraw.push(Comment.Get_Id());
-            }
-        }
+    this.Reset_Drawing = function (PageNum) {
+        this.Pages[PageNum] = [];
     };
-    this.Add_CurrentDraw = function (Id) {
-        if (null != this.Get_ById(Id)) {
-            this.m_aCurrentDraw.push(Id);
-        }
-    };
-    this.Remove_CurrentDraw = function (Id) {
-        var Count = this.m_aCurrentDraw.length;
-        for (var Index = 0; Index < Count; Index++) {
-            if (Id === this.m_aCurrentDraw[Index]) {
-                this.m_aCurrentDraw.splice(Index, 1);
-                return;
-            }
-        }
-    };
-    this.Check_CurrentDraw = function () {
-        var Flag = comments_NoComment;
-        var Count = this.m_aCurrentDraw.length;
-        if (Count > 0) {
-            Flag = comments_NonActiveComment;
-        }
-        for (var Index = 0; Index < Count; Index++) {
-            if (this.m_aCurrentDraw[Index] === this.m_sCurrent) {
-                Flag = comments_ActiveComment;
-                return Flag;
-            }
-        }
-        return Flag;
+    this.Add_DrawingRect = function (X, Y, W, H, PageNum, CommentId) {
+        this.Pages[PageNum].push(new CCommentDrawingRect(X, Y, W, H, CommentId));
     };
     this.Set_Current = function (Id) {
         this.m_sCurrent = Id;
     };
-    this.Set_StartInfo = function (Id, PageNum, X, Y, H, ParaId) {
-        var Comment = this.Get_ById(Id);
-        if (null != Comment) {
-            Comment.Set_StartInfo(PageNum, X, Y, H, ParaId);
-        }
-    };
-    this.Set_EndInfo = function (Id, PageNum, X, Y, H, ParaId) {
-        var Comment = this.Get_ById(Id);
-        if (null != Comment) {
-            Comment.Set_EndInfo(PageNum, X, Y, H, ParaId);
-        }
-    };
     this.Get_ByXY = function (PageNum, X, Y, Type) {
-        for (var Id in this.m_aComments) {
-            var Comment = this.m_aComments[Id];
-            if (true === Comment.Check_ByXY(PageNum, X, Y, Type)) {
-                return Comment;
+        var Page = this.Pages[PageNum];
+        if (undefined !== Page) {
+            var Count = Page.length;
+            for (var Pos = 0; Pos < Count; Pos++) {
+                var DrawingRect = Page[Pos];
+                if (X >= DrawingRect.X && X <= DrawingRect.X + DrawingRect.W && Y >= DrawingRect.Y && Y <= DrawingRect.Y + DrawingRect.H) {
+                    var Comment = this.Get_ById(DrawingRect.CommentId);
+                    if (null != Comment) {
+                        return Comment;
+                    }
+                }
             }
         }
         return null;
@@ -532,12 +476,6 @@ function CComments() {
         }
     };
     this.Refresh_RecalcData = function (Data) {};
-    this.Document_Is_SelectionLocked = function (Id) {
-        var Comment = this.Get_ById(Id);
-        if (null != Comment) {
-            Comment.Lock.Check(Comment.Get_Id());
-        }
-    };
     this.Save_Changes = function (Data, Writer) {
         Writer.WriteLong(historyitem_type_Comments);
         var Type = Data.Type;
@@ -586,3 +524,299 @@ function CComments() {
     };
     g_oTableId.Add(this, this.Id);
 }
+function ParaComment(Start, Id) {
+    this.Id = g_oIdCounter.Get_NewId();
+    this.Paragraph = null;
+    this.Start = Start;
+    this.CommentId = Id;
+    this.Type = para_Comment;
+    this.StartLine = 0;
+    this.StartRange = 0;
+    this.Lines = [];
+    this.LinesLength = 0;
+    g_oTableId.Add(this, this.Id);
+}
+ParaComment.prototype = {
+    Get_Id: function () {
+        return this.Id;
+    },
+    Set_CommentId: function (NewCommentId) {
+        if (this.CommentId !== NewCommentId) {
+            History.Add(this, {
+                Type: historyitem_ParaComment_CommentId,
+                Old: this.CommentId,
+                New: NewCommentId
+            });
+            this.CommentId = NewCommentId;
+        }
+    },
+    Set_Paragraph: function (Paragraph) {
+        this.Paragraph = Paragraph;
+    },
+    Is_Empty: function () {
+        return true;
+    },
+    Is_CheckingNearestPos: function () {
+        return false;
+    },
+    Get_CompiledTextPr: function () {
+        return null;
+    },
+    Clear_TextPr: function () {},
+    Remove: function () {
+        return false;
+    },
+    Get_DrawingObjectRun: function (Id) {
+        return null;
+    },
+    Get_DrawingObjectContentPos: function (Id, ContentPos, Depth) {
+        return false;
+    },
+    Get_Layout: function (DrawingLayout, UseContentPos, ContentPos, Depth) {},
+    Get_NextRunElements: function (RunElements, UseContentPos, Depth) {},
+    Get_PrevRunElements: function (RunElements, UseContentPos, Depth) {},
+    Collect_DocumentStatistics: function (ParaStats) {},
+    Create_FontMap: function (Map) {},
+    Get_AllFontNames: function (AllFonts) {},
+    Get_SelectedText: function (bAll, bClearText) {
+        return "";
+    },
+    Get_SelectionDirection: function () {
+        return 1;
+    },
+    Clear_TextFormatting: function (DefHyper) {},
+    Can_AddDropCap: function () {
+        return null;
+    },
+    Get_TextForDropCap: function (DropCapText, UseContentPos, ContentPos, Depth) {},
+    Get_StartTabsCount: function (TabsCounter) {
+        return true;
+    },
+    Remove_StartTabs: function (TabsCounter) {
+        return true;
+    },
+    Copy: function () {
+        return new ParaComment(this.Start, this.CommentId);
+    },
+    Split: function () {
+        return new ParaRun();
+    },
+    Apply_TextPr: function () {},
+    Recalculate_Reset: function (StartRange, StartLine) {
+        this.StartLine = StartLine;
+        this.StartRange = StartRange;
+    },
+    Recalculate_Range: function (PRS, ParaPr) {},
+    Recalculate_Set_RangeEndPos: function (PRS, PRP, Depth) {},
+    Recalculate_Range_Width: function (PRSC, _CurLine, _CurRange) {},
+    Recalculate_Range_Spaces: function (PRSA, CurLine, CurRange, CurPage) {
+        var Para = PRSA.Paragraph;
+        var DocumentComments = Para.LogicDocument.Comments;
+        var Comment = DocumentComments.Get_ById(this.CommentId);
+        if (null === Comment) {
+            return;
+        }
+        var X = PRSA.X;
+        var Y = Para.Pages[CurPage].Y + Para.Lines[CurLine].Top;
+        var H = Para.Lines[CurLine].Bottom - Para.Lines[CurLine].Top;
+        var Page = Para.Get_StartPage_Absolute() + CurPage;
+        if (comment_type_HdrFtr === Comment.m_oTypeInfo.Type) {
+            var HdrFtr = Comment.m_oTypeInfo.Data;
+            if (-1 !== HdrFtr.RecalcInfo.CurPage) {
+                Page = HdrFtr.RecalcInfo.CurPage;
+            }
+        }
+        if (true === this.Start) {
+            Comment.Set_StartId(Para.Get_Id());
+            Comment.Set_StartInfo(Page, X, Y, H);
+        } else {
+            Comment.Set_EndId(Para.Get_Id());
+        }
+    },
+    Recalculate_PageEndInfo: function (PRSI, _CurLine, _CurRange) {
+        if (true === this.Start) {
+            PRSI.Add_Comment(this.CommentId);
+        } else {
+            PRSI.Remove_Comment(this.CommentId);
+        }
+    },
+    Save_RecalculateObject: function (Copy) {
+        var RecalcObj = new CRunRecalculateObject(this.StartLine, this.StartRange);
+        return RecalcObj;
+    },
+    Load_RecalculateObject: function (RecalcObj, Parent) {
+        this.StartLine = RecalcObj.StartLine;
+        this.StartRange = RecalcObj.StartRange;
+        var PageNum = Parent.Get_StartPage_Absolute();
+        var DocumentComments = editor.WordControl.m_oLogicDocument.Comments;
+        var Comment = DocumentComments.Get_ById(this.CommentId);
+        Comment.m_oStartInfo.PageNum = PageNum;
+    },
+    Prepare_RecalculateObject: function () {},
+    Is_EmptyRange: function (_CurLine, _CurRange) {
+        return true;
+    },
+    Check_Range_OnlyMath: function (Checker, CurRange, CurLine) {},
+    Check_MathPara: function (Checker) {},
+    Check_PageBreak: function () {
+        return false;
+    },
+    Check_BreakPageEnd: function (PBChecker) {
+        return true;
+    },
+    Recalculate_CurPos: function (X, Y, CurrentRun, _CurRange, _CurLine, CurPage, UpdateCurPos, UpdateTarget, ReturnTarget) {
+        return {
+            X: X
+        };
+    },
+    Recalculate_MinMaxContentWidth: function () {},
+    Get_Range_VisibleWidth: function (RangeW, _CurLine, _CurRange) {},
+    Shift_Range: function (Dx, Dy, _CurLine, _CurRange) {
+        var DocumentComments = editor.WordControl.m_oLogicDocument.Comments;
+        var Comment = DocumentComments.Get_ById(this.CommentId);
+        if (null === Comment) {
+            return;
+        }
+        if (true === this.Start) {
+            Comment.m_oStartInfo.X += Dx;
+            Comment.m_oStartInfo.Y += Dy;
+        }
+    },
+    Draw_HighLights: function (PDSH) {
+        if (true === this.Start) {
+            PDSH.Add_Comment(this.CommentId);
+        } else {
+            PDSH.Remove_Comment(this.CommentId);
+        }
+    },
+    Draw_Elements: function (PDSE) {},
+    Draw_Lines: function (PDSL) {},
+    Is_CursorPlaceable: function () {
+        return false;
+    },
+    Cursor_Is_Start: function () {
+        return true;
+    },
+    Cursor_Is_NeededCorrectPos: function () {
+        return true;
+    },
+    Cursor_Is_End: function () {
+        return true;
+    },
+    Cursor_MoveToStartPos: function () {},
+    Cursor_MoveToEndPos: function (SelectFromEnd) {},
+    Get_ParaContentPosByXY: function (SearchPos, Depth, _CurLine, _CurRange, StepEnd) {
+        return false;
+    },
+    Get_ParaContentPos: function (bSelection, bStart, ContentPos) {},
+    Set_ParaContentPos: function (ContentPos, Depth) {},
+    Get_PosByElement: function (Class, ContentPos, Depth, UseRange, Range, Line) {
+        if (this === Class) {
+            return true;
+        }
+        return false;
+    },
+    Get_ElementByPos: function (ContentPos, Depth) {
+        return this;
+    },
+    Get_PosByDrawing: function (Id, ContentPos, Depth) {
+        return false;
+    },
+    Get_RunElementByPos: function (ContentPos, Depth) {
+        return null;
+    },
+    Get_LastRunInRange: function (_CurLine, _CurRange) {
+        return null;
+    },
+    Get_LeftPos: function (SearchPos, ContentPos, Depth, UseContentPos) {},
+    Get_RightPos: function (SearchPos, ContentPos, Depth, UseContentPos, StepEnd) {},
+    Get_WordStartPos: function (SearchPos, ContentPos, Depth, UseContentPos) {},
+    Get_WordEndPos: function (SearchPos, ContentPos, Depth, UseContentPos, StepEnd) {},
+    Get_EndRangePos: function (_CurLine, _CurRange, SearchPos, Depth) {
+        return false;
+    },
+    Get_StartRangePos: function (_CurLine, _CurRange, SearchPos, Depth) {
+        return false;
+    },
+    Get_StartRangePos2: function (_CurLine, _CurRange, ContentPos, Depth) {},
+    Get_StartPos: function (ContentPos, Depth) {},
+    Get_EndPos: function (BehindEnd, ContentPos, Depth) {},
+    Set_SelectionContentPos: function (StartContentPos, EndContentPos, Depth, StartFlag, EndFlag) {},
+    Selection_Stop: function () {},
+    Selection_Remove: function () {},
+    Select_All: function (Direction) {},
+    Selection_DrawRange: function (_CurLine, _CurRange, SelectionDraw) {},
+    Selection_IsEmpty: function (CheckEnd) {
+        return true;
+    },
+    Selection_CheckParaEnd: function () {
+        return false;
+    },
+    Is_SelectedAll: function (Props) {
+        return true;
+    },
+    Selection_CorrectLeftPos: function (Direction) {
+        return true;
+    },
+    Selection_CheckParaContentPos: function (ContentPos) {
+        return true;
+    },
+    Undo: function (Data) {
+        var Type = Data.Type;
+        switch (Type) {
+        case historyitem_ParaComment_CommentId:
+            this.CommentId = Data.Old;
+            break;
+        }
+    },
+    Redo: function (Data) {
+        var Type = Data.Type;
+        switch (Type) {
+        case historyitem_ParaComment_CommentId:
+            this.CommentId = Data.New;
+            break;
+        }
+    },
+    Save_Changes: function (Data, Writer) {
+        Writer.WriteLong(historyitem_type_ParaComment);
+        var Type = Data.Type;
+        Writer.WriteLong(Type);
+        switch (Type) {
+        case historyitem_ParaComment_CommentId:
+            Writer.WriteString2(Data.New);
+            break;
+        }
+    },
+    Load_Changes: function (Reader) {
+        var ClassType = Reader.GetLong();
+        if (historyitem_type_ParaComment != ClassType) {
+            return;
+        }
+        var Type = Reader.GetLong();
+        switch (Type) {
+        case historyitem_ParaComment_CommentId:
+            this.CommentId = Reader.GetString2();
+            var Comment = g_oTableId.Get_ById(this.CommentId);
+            if (null !== this.Paragraph && null !== Comment && Comment instanceof CComment) {
+                if (true === this.Start) {
+                    Comment.Set_StartId(this.Paragraph.Get_Id());
+                } else {
+                    Comment.Set_EndId(this.Paragraph.Get_Id());
+                }
+            }
+            break;
+        }
+    },
+    Refresh_RecalcData: function () {},
+    Write_ToBinary2: function (Writer) {
+        Writer.WriteLong(historyitem_type_CommentMark);
+        Writer.WriteString2("" + this.Id);
+        Writer.WriteString2("" + this.CommentId);
+        Writer.WriteBool(this.Start);
+    },
+    Read_FromBinary2: function (Reader) {
+        this.Id = Reader.GetString2();
+        this.CommentId = Reader.GetString2();
+        this.Start = Reader.GetBool();
+    }
+};

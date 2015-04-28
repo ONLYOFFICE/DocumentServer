@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var g_dDpiX = 96;
+ "use strict";
+var g_dDpiX = 96;
 var g_dDpiY = 96;
 var g_dKoef_mm_to_pix = g_dDpiX / 25.4;
 var g_dKoef_pix_to_mm = 25.4 / g_dDpiX;
@@ -64,9 +65,9 @@ function CTableMarkup(Table) {
     };
     this.Table = Table;
     this.X = 0;
-    this.Cols = new Array();
-    this.Margins = new Array();
-    this.Rows = new Array();
+    this.Cols = [];
+    this.Margins = [];
+    this.Rows = [];
     this.CurCol = 0;
     this.CurRow = 0;
     this.TransformX = 0;
@@ -141,6 +142,10 @@ function CTextMeasurer() {
     this.m_oFont = null;
     this.m_oTextPr = null;
     this.m_oLastFont = new CFontSetup();
+    this.LastFontOriginInfo = {
+        Name: "",
+        Replace: null
+    };
     this.Init = function () {
         this.m_oManager.Initialize();
     };
@@ -149,12 +154,6 @@ function CTextMeasurer() {
             return;
         }
         this.m_oFont = font;
-        if (-1 == font.FontFamily.Index || undefined === font.FontFamily.Index || null == font.FontFamily.Index) {
-            font.FontFamily.Index = window.g_map_font_index[font.FontFamily.Name];
-        }
-        if (font.FontFamily.Index == undefined || font.FontFamily.Index == -1) {
-            return;
-        }
         var bItalic = true === font.Italic;
         var bBold = true === font.Bold;
         var oFontStyle = FontStyle.FontStyleRegular;
@@ -170,15 +169,33 @@ function CTextMeasurer() {
             }
         }
         var _lastSetUp = this.m_oLastFont;
-        if (_lastSetUp.SetUpIndex != font.FontFamily.Index || _lastSetUp.SetUpSize != font.FontSize || _lastSetUp.SetUpStyle != oFontStyle) {
-            _lastSetUp.SetUpIndex = font.FontFamily.Index;
+        if (_lastSetUp.SetUpName != font.FontFamily.Name || _lastSetUp.SetUpSize != font.FontSize || _lastSetUp.SetUpStyle != oFontStyle) {
+            _lastSetUp.SetUpName = font.FontFamily.Name;
             _lastSetUp.SetUpSize = font.FontSize;
             _lastSetUp.SetUpStyle = oFontStyle;
-            window.g_font_infos[_lastSetUp.SetUpIndex].LoadFont(window.g_font_loader, this.m_oManager, _lastSetUp.SetUpSize, _lastSetUp.SetUpStyle, 72, 72);
+            g_fontApplication.LoadFont(_lastSetUp.SetUpName, window.g_font_loader, this.m_oManager, _lastSetUp.SetUpSize, _lastSetUp.SetUpStyle, 72, 72, undefined, this.LastFontOriginInfo);
         }
     };
-    this.SetTextPr = function (textPr) {
+    this.SetTextPr = function (textPr, theme) {
         this.m_oTextPr = textPr.Copy();
+        this.theme = theme;
+        var FontScheme = theme.themeElements.fontScheme;
+        this.m_oTextPr.RFonts.Ascii = {
+            Name: FontScheme.checkFont(this.m_oTextPr.RFonts.Ascii.Name),
+            Index: -1
+        };
+        this.m_oTextPr.RFonts.EastAsia = {
+            Name: FontScheme.checkFont(this.m_oTextPr.RFonts.EastAsia.Name),
+            Index: -1
+        };
+        this.m_oTextPr.RFonts.HAnsi = {
+            Name: FontScheme.checkFont(this.m_oTextPr.RFonts.HAnsi.Name),
+            Index: -1
+        };
+        this.m_oTextPr.RFonts.CS = {
+            Name: FontScheme.checkFont(this.m_oTextPr.RFonts.CS.Name),
+            Index: -1
+        };
     };
     this.SetFontSlot = function (slot, fontSizeKoef) {
         var _rfonts = this.m_oTextPr.RFonts;
@@ -187,9 +204,6 @@ function CTextMeasurer() {
         case fontslot_ASCII:
             _lastFont.Name = _rfonts.Ascii.Name;
             _lastFont.Index = _rfonts.Ascii.Index;
-            if (_lastFont.Index == -1 || _lastFont.Index === undefined) {
-                _lastFont.Index = window.g_map_font_index[_lastFont.Name];
-            }
             _lastFont.Size = this.m_oTextPr.FontSize;
             _lastFont.Bold = this.m_oTextPr.Bold;
             _lastFont.Italic = this.m_oTextPr.Italic;
@@ -197,9 +211,6 @@ function CTextMeasurer() {
         case fontslot_CS:
             _lastFont.Name = _rfonts.CS.Name;
             _lastFont.Index = _rfonts.CS.Index;
-            if (_lastFont.Index == -1 || _lastFont.Index === undefined) {
-                _lastFont.Index = window.g_map_font_index[_lastFont.Name];
-            }
             _lastFont.Size = this.m_oTextPr.FontSizeCS;
             _lastFont.Bold = this.m_oTextPr.BoldCS;
             _lastFont.Italic = this.m_oTextPr.ItalicCS;
@@ -207,9 +218,6 @@ function CTextMeasurer() {
         case fontslot_EastAsia:
             _lastFont.Name = _rfonts.EastAsia.Name;
             _lastFont.Index = _rfonts.EastAsia.Index;
-            if (_lastFont.Index == -1 || _lastFont.Index === undefined) {
-                _lastFont.Index = window.g_map_font_index[_lastFont.Name];
-            }
             _lastFont.Size = this.m_oTextPr.FontSize;
             _lastFont.Bold = this.m_oTextPr.Bold;
             _lastFont.Italic = this.m_oTextPr.Italic;
@@ -218,9 +226,6 @@ function CTextMeasurer() {
             default:
             _lastFont.Name = _rfonts.HAnsi.Name;
             _lastFont.Index = _rfonts.HAnsi.Index;
-            if (_lastFont.Index == -1 || _lastFont.Index === undefined) {
-                _lastFont.Index = window.g_map_font_index[_lastFont.Name];
-            }
             _lastFont.Size = this.m_oTextPr.FontSize;
             _lastFont.Bold = this.m_oTextPr.Bold;
             _lastFont.Italic = this.m_oTextPr.Italic;
@@ -236,11 +241,11 @@ function CTextMeasurer() {
         if (_lastFont.Bold) {
             _style += 1;
         }
-        if (_lastFont.Index != _lastFont.SetUpIndex || _lastFont.Size != _lastFont.SetUpSize || _style != _lastFont.SetUpStyle) {
-            _lastFont.SetUpIndex = _lastFont.Index;
+        if (_lastFont.Name != _lastFont.SetUpName || _lastFont.Size != _lastFont.SetUpSize || _style != _lastFont.SetUpStyle) {
+            _lastFont.SetUpName = _lastFont.Name;
             _lastFont.SetUpSize = _lastFont.Size;
             _lastFont.SetUpStyle = _style;
-            window.g_font_infos[_lastFont.SetUpIndex].LoadFont(window.g_font_loader, this.m_oManager, _lastFont.SetUpSize, _lastFont.SetUpStyle, 72, 72);
+            g_fontApplication.LoadFont(_lastFont.SetUpName, window.g_font_loader, this.m_oManager, _lastFont.SetUpSize, _lastFont.SetUpStyle, 72, 72, undefined, this.LastFontOriginInfo);
         }
     };
     this.GetTextPr = function () {
@@ -252,7 +257,11 @@ function CTextMeasurer() {
     this.Measure = function (text) {
         var Width = 0;
         var Height = 0;
-        var Temp = this.m_oManager.MeasureChar(text.charCodeAt(0));
+        var _code = text.charCodeAt(0);
+        if (null != this.LastFontOriginInfo.Replace) {
+            _code = g_fontApplication.GetReplaceGlyph(_code, this.LastFontOriginInfo.Replace);
+        }
+        var Temp = this.m_oManager.MeasureChar(_code);
         Width = Temp.fAdvanceX * 25.4 / 72;
         Height = 0;
         return {
@@ -262,7 +271,11 @@ function CTextMeasurer() {
     };
     this.Measure2 = function (text) {
         var Width = 0;
-        var Temp = this.m_oManager.MeasureChar(text.charCodeAt(0));
+        var _code = text.charCodeAt(0);
+        if (null != this.LastFontOriginInfo.Replace) {
+            _code = g_fontApplication.GetReplaceGlyph(_code, this.LastFontOriginInfo.Replace);
+        }
+        var Temp = this.m_oManager.MeasureChar(_code);
         Width = Temp.fAdvanceX * 25.4 / 72;
         return {
             Width: Width,
@@ -274,6 +287,9 @@ function CTextMeasurer() {
     this.MeasureCode = function (lUnicode) {
         var Width = 0;
         var Height = 0;
+        if (null != this.LastFontOriginInfo.Replace) {
+            lUnicode = g_fontApplication.GetReplaceGlyph(lUnicode, this.LastFontOriginInfo.Replace);
+        }
         var Temp = this.m_oManager.MeasureChar(lUnicode);
         Width = Temp.fAdvanceX * 25.4 / 72;
         Height = 0;
@@ -284,6 +300,9 @@ function CTextMeasurer() {
     };
     this.Measure2Code = function (lUnicode) {
         var Width = 0;
+        if (null != this.LastFontOriginInfo.Replace) {
+            lUnicode = g_fontApplication.GetReplaceGlyph(lUnicode, this.LastFontOriginInfo.Replace);
+        }
         var Temp = this.m_oManager.MeasureChar(lUnicode);
         Width = Temp.fAdvanceX * 25.4 / 72;
         return {
@@ -649,7 +668,7 @@ function CCacheImage() {
     this.image_unusedCount = 0;
 }
 function CCacheManager() {
-    this.arrayImages = new Array();
+    this.arrayImages = [];
     this.arrayCount = 0;
     this.countValidImage = 1;
     this.CheckImagesForNeed = function () {
@@ -725,8 +744,8 @@ function CPage() {
     this.margin_right = 0;
     this.margin_bottom = 0;
     this.pageIndex = -1;
-    this.searchingArray = new Array();
-    this.selectionArray = new Array();
+    this.searchingArray = [];
+    this.selectionArray = [];
     this.drawingPage = new CDrawingPage();
     this.Draw = function (context, xDst, yDst, wDst, hDst, contextW, contextH) {
         if (null != this.drawingPage.cachedImage) {
@@ -1259,23 +1278,19 @@ function CDrawingDocument(drawingObjects) {
     this.drawingObjects = drawingObjects;
     this.IsLockObjectsEnable = false;
     this.cursorMarkerFormat = "";
-    this.cursorPaintFormat = "";
     if (bIsIE) {
-        this.cursorPaintFormat = "url(Images/copy_format.cur), pointer";
-        this.cursorMarkerFormat = "url(Images/marker_format.cur), pointer";
+        this.cursorMarkerFormat = "url(../../../sdk/Common/Images/marker_format.cur), pointer";
     } else {
         if (window.opera) {
-            this.cursorPaintFormat = "pointer";
             this.cursorMarkerFormat = "pointer";
         } else {
-            this.cursorPaintFormat = "url('data:image/png;base64,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        emp/gv47IxYAAAAASUVORK5CYII=') 14 8, pointer";
             this.cursorMarkerFormat = "url('data:image/png;base64,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        mWhBvQBxpekAAAAASUVORK5CYII=') 14 8, pointer";
         }
     }
     this.m_oWordControl = null;
     this.m_oLogicDocument = null;
     this.m_oDocumentRenderer = null;
-    this.m_arrPages = new Array();
+    this.m_arrPages = [];
     this.m_lPagesCount = 0;
     this.m_lDrawingFirst = -1;
     this.m_lDrawingEnd = -1;
@@ -1340,12 +1355,12 @@ function CDrawingDocument(drawingObjects) {
     this.AutoShapesTrackLockPageNum = -1;
     this.Overlay = null;
     this.IsTextMatrixUse = false;
-    this._search_HdrFtr_All = new Array();
-    this._search_HdrFtr_All_no_First = new Array();
-    this._search_HdrFtr_First = new Array();
-    this._search_HdrFtr_Even = new Array();
-    this._search_HdrFtr_Odd = new Array();
-    this._search_HdrFtr_Odd_no_First = new Array();
+    this._search_HdrFtr_All = [];
+    this._search_HdrFtr_All_no_First = [];
+    this._search_HdrFtr_First = [];
+    this._search_HdrFtr_Even = [];
+    this._search_HdrFtr_Odd = [];
+    this._search_HdrFtr_Odd_no_First = [];
     this.Start_CollaborationEditing = function () {
         this.IsLockObjectsEnable = true;
         this.m_oWordControl.OnRePaintAttack();
@@ -1353,7 +1368,7 @@ function CDrawingDocument(drawingObjects) {
     this.SetCursorType = function (sType, Data) {
         if ("" == this.m_sLockedCursorType) {
             if (this.m_oWordControl.m_oApi.isPaintFormat && "default" == sType) {
-                this.m_oWordControl.m_oMainContent.HtmlElement.style.cursor = this.cursorPaintFormat;
+                this.m_oWordControl.m_oMainContent.HtmlElement.style.cursor = kCurFormatPainterWord;
             } else {
                 if (this.m_oWordControl.m_oApi.isMarkerFormat && "default" == sType) {
                     this.m_oWordControl.m_oMainContent.HtmlElement.style.cursor = this.cursorMarkerFormat;
@@ -2026,6 +2041,7 @@ function CDrawingDocument(drawingObjects) {
             _offX = this.AutoShapesTrack.Graphics.m_oCoordTransform.tx;
             _offY = this.AutoShapesTrack.Graphics.m_oCoordTransform.ty;
         }
+        var _factor = AscBrowser.isRetina ? 1 : 0;
         if (null != this.TextMatrix && !global_MatrixTransformer.IsIdentity2(this.TextMatrix)) {
             var _x1 = this.TextMatrix.TransformPointX(x, y);
             var _y1 = this.TextMatrix.TransformPointY(x, y);
@@ -2039,8 +2055,8 @@ function CDrawingDocument(drawingObjects) {
                 X: _offX + dKoef * _x2,
                 Y: _offY + dKoef * _y2
             };
-            _newW = (Math.abs(pos1.X - pos2.X) >> 0) + 1;
-            _newH = (Math.abs(pos1.Y - pos2.Y) >> 0) + 1;
+            _newW = (((Math.abs(pos1.X - pos2.X) >> 0) + 1) >> 1) << 1;
+            _newH = (((Math.abs(pos1.Y - pos2.Y) >> 0) + 1) >> 1) << 1;
             if (2 > _newW) {
                 _newW = 2;
             }
@@ -2050,8 +2066,8 @@ function CDrawingDocument(drawingObjects) {
             if (_oldW == _newW && _oldH == _newH) {
                 this.TargetHtmlElement.width = _newW;
             } else {
-                this.TargetHtmlElement.style.width = _newW + "px";
-                this.TargetHtmlElement.style.height = _newH + "px";
+                this.TargetHtmlElement.style.width = (_newW >> _factor) + "px";
+                this.TargetHtmlElement.style.height = (_newH >> _factor) + "px";
                 this.TargetHtmlElement.width = _newW;
                 this.TargetHtmlElement.height = _newH;
             }
@@ -2072,14 +2088,14 @@ function CDrawingDocument(drawingObjects) {
                 }
                 ctx.stroke();
             }
-            this.TargetHtmlElement.style.left = Math.min(pos1.X, pos2.X) + "px";
-            this.TargetHtmlElement.style.top = Math.min(pos1.Y, pos2.Y) + "px";
+            this.TargetHtmlElement.style.left = (Math.min(pos1.X, pos2.X) >> _factor) + "px";
+            this.TargetHtmlElement.style.top = (Math.min(pos1.Y, pos2.Y) >> _factor) + "px";
         } else {
             if (_oldW == _newW && _oldH == _newH) {
                 this.TargetHtmlElement.width = _newW;
             } else {
-                this.TargetHtmlElement.style.width = _newW + "px";
-                this.TargetHtmlElement.style.height = _newH + "px";
+                this.TargetHtmlElement.style.width = (_newW >> _factor) + "px";
+                this.TargetHtmlElement.style.height = (_newH >> _factor) + "px";
                 this.TargetHtmlElement.width = _newW;
                 this.TargetHtmlElement.height = _newH;
             }
@@ -2094,8 +2110,8 @@ function CDrawingDocument(drawingObjects) {
                 X: _offX + dKoef * x,
                 Y: _offY + dKoef * y
             };
-            this.TargetHtmlElement.style.left = pos.X + "px";
-            this.TargetHtmlElement.style.top = pos.Y + "px";
+            this.TargetHtmlElement.style.left = (pos.X >> _factor) + "px";
+            this.TargetHtmlElement.style.top = (pos.Y >> _factor) + "px";
         }
     };
     this.UpdateTargetTransform = function (matrix) {
@@ -2782,7 +2798,7 @@ function CDrawingDocument(drawingObjects) {
         ver_ruler.m_oTableMarkup = null;
         if (-1 != this.m_lCurrentPage) {
             if (margins) {
-                var cachedPage = new Object();
+                var cachedPage = {};
                 cachedPage.width_mm = this.m_arrPages[this.m_lCurrentPage].width_mm;
                 cachedPage.height_mm = this.m_arrPages[this.m_lCurrentPage].height_mm;
                 cachedPage.margin_left = margins.L;
@@ -2793,7 +2809,7 @@ function CDrawingDocument(drawingObjects) {
                 ver_ruler.CreateBackground(cachedPage);
                 hor_ruler.IsCanMoveMargins = false;
                 ver_ruler.IsCanMoveMargins = false;
-                this.LastParagraphMargins = new Object();
+                this.LastParagraphMargins = {};
                 this.LastParagraphMargins.L = margins.L;
                 this.LastParagraphMargins.T = margins.T;
                 this.LastParagraphMargins.R = margins.R;
@@ -2942,7 +2958,7 @@ function CDrawingDocument(drawingObjects) {
     };
     this.CheckFontNeeds = function () {
         var map_keys = this.m_oWordControl.m_oLogicDocument.Document_Get_AllFontNames();
-        var dstfonts = new Array();
+        var dstfonts = [];
         for (var i in map_keys) {
             dstfonts[dstfonts.length] = new CFont(i, 0, "", 0, null);
         }
@@ -2954,8 +2970,8 @@ function CDrawingDocument(drawingObjects) {
         this.m_oWordControl.CalculateDocumentSize();
         this.m_oWordControl.OnScroll();
     };
-    this.DrawTrack = function (type, matrix, left, top, width, height, isLine, canRotate) {
-        this.AutoShapesTrack.DrawTrack(type, matrix, left, top, width, height, isLine, canRotate);
+    this.DrawTrack = function (type, matrix, left, top, width, height, isLine, canRotate, isNoMove) {
+        this.AutoShapesTrack.DrawTrack(type, matrix, left, top, width, height, isLine, canRotate, isNoMove);
     };
     this.DrawTrackSelectShapes = function (x, y, w, h) {
         this.AutoShapesTrack.DrawTrackSelectShapes(x, y, w, h);
@@ -3027,17 +3043,10 @@ function CDrawingDocument(drawingObjects) {
             var _color_src = this.GuiControlColorsMap[i];
             _ret_array[_cur_index] = new CColor(_color_src.r, _color_src.g, _color_src.b);
             _cur_index++;
-            var _count_mods = g_oThemeColorsDefaultMods.length;
+            var _count_mods = 5;
             for (var j = 0; j < _count_mods; ++j) {
-                var _mods = g_oThemeColorsDefaultMods[j];
                 var dst_mods = new CColorModifiers();
-                var _ind = 0;
-                for (var k in _mods) {
-                    dst_mods.Mods[_ind] = new CColorMod();
-                    dst_mods.Mods[_ind].name = k;
-                    dst_mods.Mods[_ind].val = _mods[k];
-                    _ind++;
-                }
+                dst_mods.Mods = _create_mods(GetDefaultMods(_color_src.r, _color_src.g, _color_src.b, j + 1, 2));
                 var _rgba = {
                     R: _color_src.r,
                     G: _color_src.g,
@@ -3052,7 +3061,7 @@ function CDrawingDocument(drawingObjects) {
         this.m_oWordControl.m_oApi.sync_SendThemeColors(_ret_array, standart_colors);
     };
     this.SendThemeColorScheme = function () {
-        var infos = new Array();
+        var infos = [];
         var _index = 0;
         var _c = null;
         var _count_defaults = g_oUserColorScheme.length;
@@ -3198,7 +3207,7 @@ function CDrawingDocument(drawingObjects) {
         }
         if (null != this.GuiCanvasFillTexture) {
             var _div_elem = document.getElementById(this.GuiCanvasFillTextureParentId);
-            if (!_div_elem) {
+            if (_div_elem) {
                 _div_elem.removeChild(this.GuiCanvasFillTexture);
             }
             this.GuiCanvasFillTexture = null;
@@ -3209,12 +3218,20 @@ function CDrawingDocument(drawingObjects) {
         if (!_div_elem) {
             return;
         }
-        this.GuiCanvasFillTexture = document.createElement("canvas");
+        var bIsAppend = true;
+        if (_div_elem.childNodes && _div_elem.childNodes.length == 1) {
+            this.GuiCanvasFillTexture = _div_elem.childNodes[0];
+            bIsAppend = false;
+        } else {
+            this.GuiCanvasFillTexture = document.createElement("canvas");
+        }
         this.GuiCanvasFillTexture.width = parseInt(_div_elem.style.width);
         this.GuiCanvasFillTexture.height = parseInt(_div_elem.style.height);
         this.LastDrawingUrl = "";
         this.GuiCanvasFillTextureCtx = this.GuiCanvasFillTexture.getContext("2d");
-        _div_elem.appendChild(this.GuiCanvasFillTexture);
+        if (bIsAppend) {
+            _div_elem.appendChild(this.GuiCanvasFillTexture);
+        }
     };
     this.InitGuiCanvasTextProps = function (div_id) {
         var _div_elem = document.getElementById(div_id);
@@ -3309,82 +3326,87 @@ function CDrawingDocument(drawingObjects) {
         if (!bIsChange) {
             return;
         }
-        History.TurnOff();
-        var shape = new CShape(null, this.drawingObjects);
-        shape.addTextBody(new CTextBody(shape));
-        var par = shape.txBody.content.Content[0];
-        par.Cursor_MoveToStartPos();
-        var _paraPr = new CParaPr();
-        par.Pr = _paraPr;
-        var _textPr = new CTextPr();
-        _textPr.FontFamily = {
-            Name: "Arial",
-            Index: -1
-        };
-        _textPr.Strikeout = this.GuiLastTextProps.Strikeout;
-        if (true === this.GuiLastTextProps.Subscript) {
-            _textPr.VertAlign = vertalign_SubScript;
-        } else {
-            if (true === this.GuiLastTextProps.Superscript) {
-                _textPr.VertAlign = vertalign_SuperScript;
+        ExecuteNoHistory(function () {
+            var shape = new CShape();
+            shape.setTxBody(CreateTextBodyFromString("", this, shape));
+            var par = shape.txBody.content.Content[0];
+            par.Reset(0, 0, 1000, 1000, 0);
+            par.Cursor_MoveToStartPos();
+            var _paraPr = new CParaPr();
+            par.Pr = _paraPr;
+            var _textPr = new CTextPr();
+            _textPr.FontFamily = {
+                Name: "Arial",
+                Index: -1
+            };
+            _textPr.Strikeout = this.GuiLastTextProps.Strikeout;
+            if (true === this.GuiLastTextProps.Subscript) {
+                _textPr.VertAlign = vertalign_SubScript;
             } else {
-                _textPr.VertAlign = vertalign_Baseline;
+                if (true === this.GuiLastTextProps.Superscript) {
+                    _textPr.VertAlign = vertalign_SuperScript;
+                } else {
+                    _textPr.VertAlign = vertalign_Baseline;
+                }
             }
-        }
-        _textPr.DStrikeout = this.GuiLastTextProps.DStrikeout;
-        _textPr.Caps = this.GuiLastTextProps.AllCaps;
-        _textPr.SmallCaps = this.GuiLastTextProps.SmallCaps;
-        _textPr.Spacing = this.GuiLastTextProps.TextSpacing;
-        _textPr.Position = this.GuiLastTextProps.Position;
-        par.Add(new ParaTextPr(_textPr));
-        par.Add(new ParaText("H"));
-        par.Add(new ParaText("e"));
-        par.Add(new ParaText("l"));
-        par.Add(new ParaText("l"));
-        par.Add(new ParaText("o"));
-        par.Add(new ParaSpace(1));
-        par.Add(new ParaText("W"));
-        par.Add(new ParaText("o"));
-        par.Add(new ParaText("r"));
-        par.Add(new ParaText("l"));
-        par.Add(new ParaText("d"));
-        shape.txBody.content.Reset(0, 0, 1000, 1000);
-        shape.txBody.content.Recalculate_Page(0, true);
-        var baseLineOffset = par.Lines[0].Y;
-        var _bounds = par.Get_PageBounds(0);
-        var ctx = this.GuiCanvasTextProps.getContext("2d");
-        var _wPx = this.GuiCanvasTextProps.width;
-        var _hPx = this.GuiCanvasTextProps.height;
-        var _wMm = _wPx * g_dKoef_pix_to_mm;
-        var _hMm = _hPx * g_dKoef_pix_to_mm;
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(0, 0, _wPx, _hPx);
-        var _pxBoundsW = par.Lines[0].W * g_dKoef_mm_to_pix;
-        var _pxBoundsH = (_bounds.Bottom - _bounds.Top) * g_dKoef_mm_to_pix;
-        if (this.GuiLastTextProps.Position !== undefined && this.GuiLastTextProps.Position != null && this.GuiLastTextProps.Position != 0) {}
-        if (_pxBoundsH < _hPx && _pxBoundsW < _wPx) {
-            var _lineY = (((_hPx + _pxBoundsH) / 2) >> 0) + 0.5;
-            var _lineW = (((_wPx - _pxBoundsW) / 4) >> 0);
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(0, _lineY);
-            ctx.lineTo(_lineW, _lineY);
-            ctx.moveTo(_wPx - _lineW, _lineY);
-            ctx.lineTo(_wPx, _lineY);
-            ctx.stroke();
-            ctx.beginPath();
-        }
-        var _yOffset = (((_hPx + _pxBoundsH) / 2) - baseLineOffset * g_dKoef_mm_to_pix) >> 0;
-        var _xOffset = ((_wPx - _pxBoundsW) / 2) >> 0;
-        var graphics = new CGraphics();
-        graphics.init(ctx, _wPx, _hPx, _wMm, _hMm);
-        graphics.m_oFontManager = g_fontManager;
-        graphics.m_oCoordTransform.tx = _xOffset;
-        graphics.m_oCoordTransform.ty = _yOffset;
-        graphics.transform(1, 0, 0, 1, 0, 0);
-        par.Draw(0, graphics);
-        History.TurnOn();
+            _textPr.DStrikeout = this.GuiLastTextProps.DStrikeout;
+            _textPr.Caps = this.GuiLastTextProps.AllCaps;
+            _textPr.SmallCaps = this.GuiLastTextProps.SmallCaps;
+            _textPr.Spacing = this.GuiLastTextProps.TextSpacing;
+            _textPr.Position = this.GuiLastTextProps.Position;
+            var parRun = new ParaRun(par);
+            var Pos = 0;
+            parRun.Set_Pr(_textPr);
+            parRun.Add_ToContent(Pos++, new ParaText("H"), false);
+            parRun.Add_ToContent(Pos++, new ParaText("e"), false);
+            parRun.Add_ToContent(Pos++, new ParaText("l"), false);
+            parRun.Add_ToContent(Pos++, new ParaText("l"), false);
+            parRun.Add_ToContent(Pos++, new ParaText("o"), false);
+            parRun.Add_ToContent(Pos++, new ParaSpace(1), false);
+            parRun.Add_ToContent(Pos++, new ParaText("W"), false);
+            parRun.Add_ToContent(Pos++, new ParaText("o"), false);
+            parRun.Add_ToContent(Pos++, new ParaText("r"), false);
+            parRun.Add_ToContent(Pos++, new ParaText("l"), false);
+            parRun.Add_ToContent(Pos++, new ParaText("d"), false);
+            par.Add_ToContent(0, parRun);
+            par.Recalculate_Page(0);
+            par.Recalculate_Page(0);
+            var baseLineOffset = par.Lines[0].Y;
+            var _bounds = par.Get_PageBounds(0);
+            var ctx = this.GuiCanvasTextProps.getContext("2d");
+            var _wPx = this.GuiCanvasTextProps.width;
+            var _hPx = this.GuiCanvasTextProps.height;
+            var _wMm = _wPx * g_dKoef_pix_to_mm;
+            var _hMm = _hPx * g_dKoef_pix_to_mm;
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillRect(0, 0, _wPx, _hPx);
+            var _pxBoundsW = par.Lines[0].Ranges[0].W * g_dKoef_mm_to_pix;
+            var _pxBoundsH = (_bounds.Bottom - _bounds.Top) * g_dKoef_mm_to_pix;
+            if (this.GuiLastTextProps.Position !== undefined && this.GuiLastTextProps.Position != null && this.GuiLastTextProps.Position != 0) {}
+            if (_pxBoundsH < _hPx && _pxBoundsW < _wPx) {
+                var _lineY = (((_hPx + _pxBoundsH) / 2) >> 0) + 0.5;
+                var _lineW = (((_wPx - _pxBoundsW) / 4) >> 0);
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, _lineY);
+                ctx.lineTo(_lineW, _lineY);
+                ctx.moveTo(_wPx - _lineW, _lineY);
+                ctx.lineTo(_wPx, _lineY);
+                ctx.stroke();
+                ctx.beginPath();
+            }
+            var _yOffset = (((_hPx + _pxBoundsH) / 2) - baseLineOffset * g_dKoef_mm_to_pix) >> 0;
+            var _xOffset = ((_wPx - _pxBoundsW) / 2) >> 0;
+            var graphics = new CGraphics();
+            graphics.init(ctx, _wPx, _hPx, _wMm, _hMm);
+            graphics.m_oFontManager = g_fontManager;
+            graphics.m_oCoordTransform.tx = _xOffset;
+            graphics.m_oCoordTransform.ty = _yOffset;
+            graphics.transform(1, 0, 0, 1, 0, 0);
+            par.Draw(0, graphics);
+        },
+        this, []);
     };
     this.CheckTableStyles = function (tableLook) {
         if (!this.m_oWordControl.m_oApi.asc_checkNeedCallback("asc_onInitTableTemplates")) {
@@ -3522,7 +3544,7 @@ function CStylesPainter() {
         if (null != this.docStyles) {
             _count_doc = this.docStyles.length;
         }
-        var aPriorityStyles = new Array();
+        var aPriorityStyles = [];
         var fAddToPriorityStyles = function (style) {
             var index = style.uiPriority;
             if (null == index) {
@@ -3530,7 +3552,7 @@ function CStylesPainter() {
             }
             var aSubArray = aPriorityStyles[index];
             if (null == aSubArray) {
-                aSubArray = new Array();
+                aSubArray = [];
                 aPriorityStyles[index] = aSubArray;
             }
             aSubArray.push(style);
@@ -3547,7 +3569,7 @@ function CStylesPainter() {
                 fAddToPriorityStyles(style);
             }
         }
-        this.mergedStyles = new Array();
+        this.mergedStyles = [];
         for (var index in aPriorityStyles) {
             var aSubArray = aPriorityStyles[index];
             aSubArray.sort(function (a, b) {

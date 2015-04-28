@@ -3,9 +3,23 @@
 		"port": 8000,
 		"mode": "development"
 	},
-	"no_mongodb": {
+	"nono_mongodb": {
 		"host": "localhost",
 		"port": 8000,
 		"database": "coAuthoring"
-	}
+	},
+    "sql": {
+      "type"				: "mysql",
+      "tableChanges"		: "doc_changes",
+      "tableCallbacks"		: "doc_callbacks",
+      "tableResult"			: "tast_result",
+      "tablePucker"			: "doc_pucker",
+      "host"				: "localhost",
+      "dbport"				: 3306,
+      "database"			: "canvaseditors",
+      "user"				: "canvas_usr",
+      "pass"				: "canvas_usr",
+      "charset"				: "utf8",
+	  "max_allowed_packet"	: 1048575
+    }
 }

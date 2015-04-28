@@ -1,7 +1,0 @@
-var getEditorStylesheets = function() {
-    return ["../../../apps/documenteditor/main/resources/css/app-edit.css"];
-};
-
-var getEditorScripts = function() {
-    return ["../../../apps/documenteditor/main/app-edit.js"];
-};

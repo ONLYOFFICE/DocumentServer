@@ -1,0 +1,29 @@
+<div id="view-right-menu" class="tool-menu right">
+    <div class="right-panel">
+        <div id="id-paragraph-settings" class="settings-panel">
+        </div>
+        <div id="id-table-settings" class="settings-panel">
+        </div>
+        <div id="id-image-settings" class="settings-panel">
+        </div>
+        <div id="id-slide-settings" class="settings-panel">
+        </div>
+        <div id="id-shape-settings" class="settings-panel">
+        </div>
+        <!-- /** proprietary begin **/ -->
+        <div id="id-chart-settings" class="settings-panel">
+        </div>
+        <!-- /** proprietary end **/ -->
+    </div>
+    <div class="tool-menu-btns">
+        <div class="ct-btn-category arrow-left" />
+        <button id="id-right-menu-slide" class="btn btn-category arrow-left" content-target="id-slide-settings"><span class="btn-icon btn-menu-slide">&nbsp;</span></button>
+        <button id="id-right-menu-shape" class="btn btn-category arrow-left" content-target="id-shape-settings"><span class="btn-icon btn-menu-shape">&nbsp;</span></button>
+        <button id="id-right-menu-image" class="btn btn-category arrow-left" content-target="id-image-settings"><span class="btn-icon btn-menu-image">&nbsp;</span></button>
+        <button id="id-right-menu-text" class="btn btn-category arrow-left" content-target="id-paragraph-settings"><span class="btn-icon btn-menu-text">&nbsp;</span></button>
+        <button id="id-right-menu-table" class="btn btn-category arrow-left" content-target="id-table-settings"><span class="btn-icon btn-menu-table">&nbsp;</span></button>
+        <!-- /** proprietary begin **/ -->
+        <button id="id-right-menu-chart" class="btn btn-category arrow-left" content-target="id-chart-settings"><span class="btn-icon btn-menu-chart">&nbsp;</span></button>
+        <!-- /** proprietary end **/ -->
+    </div>
+</div>

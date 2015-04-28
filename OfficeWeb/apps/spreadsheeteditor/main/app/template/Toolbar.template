@@ -1,0 +1,255 @@
+<div class="toolbar" style="<%= (isCompactView || isEditDiagram) ? 'height: 41px;' : 'height: 67px;' %>">
+    <!----------------------->
+    <!-- Edit diagram mode -->
+    <!----------------------->
+    <div id="id-toolbar-diagramm" style="<%= isEditDiagram ? 'display: table;' : 'display: none;' %> width: 100%;" >
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-diagram-placeholder-btn-copy"></span>
+                <span class="btn-placeholder split" id="id-toolbar-diagram-placeholder-btn-paste"></span>
+                <span class="btn-placeholder split" id="id-toolbar-diagram-placeholder-btn-undo"></span>
+                <span class="btn-placeholder" id="id-toolbar-diagram-placeholder-btn-redo"></span>
+            </div>
+        </div>
+        <div class="separator short"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-diagram-placeholder-btn-formula"></span>
+            </div>
+        </div>
+        <div class="separator short" style="margin-left: 5px;"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-diagram-placeholder-btn-digit-dec"></span>
+                <span class="btn-placeholder split" id="id-toolbar-diagram-placeholder-btn-digit-inc"></span>
+                <span class="btn-placeholder border" id="id-toolbar-diagram-placeholder-btn-format" style="width: 84px; margin-left: 10px;"></span>
+            </div>
+        </div>
+        <div class="separator short"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder border" id="id-toolbar-diagram-placeholder-btn-chart" style="width: auto;"></span>
+            </div>
+        </div>
+        <div class="toolbar-group" style="width: 100%;"></div>
+    </div>
+    <!------------------------>
+    <!-- Short view toolbar -->
+    <!------------------------>
+    <div id="id-toolbar-short" style="<%= (!isCompactView || isEditDiagram) ? 'display: none;' : 'display: table;' %> width: 100%;" >
+        <div class="toolbar-group no-mask">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-print"></span>
+                <span class="btn-placeholder" id="id-toolbar-short-placeholder-btn-save"></span>
+            </div>
+        </div>
+        <div class="separator short"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-undo"></span>
+                <span class="btn-placeholder" id="id-toolbar-short-placeholder-btn-redo"></span>
+            </div>
+        </div>
+        <div class="separator short"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row" style="width: 140px; margin-top: -1px;">
+                <span class="btn-placeholder" style="float: left; width: 90px;" id="id-toolbar-short-placeholder-field-fontname"></span>
+                <span class="btn-placeholder" style="float: left; width: 45px; margin-left: 2px;" id="id-toolbar-short-placeholder-field-fontsize"></span>
+            </div>
+        </div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-bold"></span>
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-italic"></span>
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-underline"></span>
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-fontcolor"></span>
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-fillparag"></span>
+            </div>
+        </div>
+        <div class="separator short" style="margin-left: 5px;"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-borders"></span>
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-halign"></span>
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-valign"></span>
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-merge"></span>
+                <span class="btn-placeholder" id="id-toolbar-short-placeholder-btn-wrap"></span>
+            </div>
+        </div>
+        <div class="separator short"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-insertimage"></span>
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-inserthyperlink"></span>
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-insertchart"></span>
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-insertshape"></span>
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-formula"></span>
+            </div>
+        </div>
+        <div class="separator short" style="margin-left: 5px;"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-filter"></span>
+                <span class="btn-placeholder border" id="id-toolbar-short-placeholder-btn-format" style="width: 84px; margin-left: 7px;"></span>
+            </div>
+        </div>
+        <div class="separator short"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder" id="id-toolbar-short-placeholder-btn-copystyle"></span>
+            </div>
+        </div>
+        <!--<div class="separator short"></div>-->
+        <!--<div class="toolbar-group">-->
+            <!--<div class="toolbar-row">-->
+                <!--<span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-cell-ins"></span>-->
+                <!--<span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-cell-del"></span>-->
+            <!--</div>-->
+        <!--</div>-->
+        <div class="toolbar-group" style="width: 100%;"></div>
+        <div class="toolbar-group no-mask" style="padding-left:0;">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-short-placeholder-btn-hidebars"></span>
+            </div>
+        </div>
+    </div>
+    <!------------------------>
+    <!-- Fully view toolbar -->
+    <!------------------------>
+    <div id="id-toolbar-full" style="<%= (isCompactView || isEditDiagram)? 'display: none;' : 'display: table;' %> width: 100%;" >
+        <div class="toolbar-group toolbar-group-native">
+            <div class="toolbar-row">
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-newdocument"></span>
+            </div>
+            <div class="toolbar-row">
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-opendocument"></span>
+            </div>
+        </div>
+        <div class="toolbar-group no-mask">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-print"></span>
+            </div>
+            <div class="toolbar-row">
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-save"></span>
+            </div>
+        </div>
+        <div class="separator long" style="margin-left: 5px;"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-copy"></span>
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-paste"></span>
+            </div>
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-undo"></span>
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-redo"></span>
+            </div>
+        </div>
+        <div class="separator long"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder" style="float: left; width: 90px;" id="id-toolbar-full-placeholder-field-fontname"></span>
+                <span class="btn-placeholder" style="float: left; width: 45px; margin-left: 2px;" id="id-toolbar-full-placeholder-field-fontsize"></span>
+                <span class="btn-placeholder border" id="id-toolbar-full-placeholder-btn-incfont" style="margin-left: 2px;"></span>
+                <span class="btn-placeholder border" id="id-toolbar-full-placeholder-btn-decfont" style="margin-left: 2px;"></span>
+            </div>
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-bold"></span>
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-italic"></span>
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-underline"></span>
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-fontcolor"></span>
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-fillparag"></span>
+                <div class="separator short" style="margin: 0 6px;"></div>
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-borders"></span>
+            </div>
+        </div>
+        <div class="separator long"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-top"></span>
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-middle"></span>
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-bottom"></span>
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-wrap"></span>
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-text-orient"></span>
+            </div>
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-align-left"></span>
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-align-center"></span>
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-align-right"></span>
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-align-just"></span>
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-merge"></span>
+            </div>
+        </div>
+        <div class="separator long"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-insertimage"></span>
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-insertchart"></span>
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-text"></span>
+            </div>
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-formula"></span>
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-inserthyperlink"></span>
+                <span class="btn-placeholder " id="id-toolbar-full-placeholder-btn-insertshape"></span>
+            </div>
+        </div>
+        <div class="separator long"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-sortdesc"></span>
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-sortasc"></span>
+            </div>
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-setfilter"></span>
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-clear-filter"></span>
+            </div>
+        </div>
+        <div class="separator long"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder border" id="id-toolbar-full-placeholder-btn-format" style="width: 100%;"></span>
+            </div>
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-percents"></span>
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-currency"></span>
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-digit-dec"></span>
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-digit-inc"></span>
+            </div>
+        </div>
+        <div class="separator long"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-cell-ins"></span>
+            </div>
+            <div class="toolbar-row">
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-cell-del"></span>
+            </div>
+        </div>
+        <div class="separator long"></div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-clear"></span>
+            </div>
+            <div class="toolbar-row">
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-copystyle"></span>
+            </div>
+        </div>
+        <div class="toolbar-group">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-colorschemas"></span>
+            </div>
+            <div class="toolbar-row">
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-table-tpl"></span>
+            </div>
+        </div>
+        <div class="toolbar-group" id="id-toolbar-full-placeholder-field-styles" style="width: 100%; min-width: 100px;">
+        </div>
+        <div class="toolbar-group no-mask">
+            <div class="toolbar-row">
+                <span class="btn-placeholder split" id="id-toolbar-full-placeholder-btn-hidebars"></span>
+            </div>
+            <div class="toolbar-row">
+                <span class="btn-placeholder" id="id-toolbar-full-placeholder-btn-settings"></span>
+            </div>
+        </div>
+    </div>
+</div>

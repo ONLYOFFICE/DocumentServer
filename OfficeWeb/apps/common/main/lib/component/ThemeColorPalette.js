@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,16 +29,83 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("Common.component.ThemeColorPalette", {
-    extend: "Ext.ColorPalette",
-    alias: "widget.cmpthemecolorpalette",
-    allowReselect: true,
-    dyncolorscount: 12,
-    width: 193,
-    maxWidth: 200,
-    baseCls: "cmp-theme-colorpalette",
-    requires: ["Common.view.ExtendedColorDialog"],
-    renderTpl: ['<div style="padding: 12px;">', '<tpl for="colors">', '<tpl if="this.isBlankSeparator(values)"><div class="palette-color-spacer" style="width:100%;height:8px;float:left;"></div></tpl>', '<tpl if="this.isSeparator(values)"></div><div class="palette-color-separator" style="width:100%;height:1px;float:left;border-bottom: 1px solid #E0E0E0"></div><div style="padding: 12px;"></tpl>', '<tpl if="this.isColor(values)">', '<a href="#" class="palette-color color-{.}" style="background:#{.} "hidefocus="on">', '<em><span style="background:#{.}; border: 1px solid rgba(0, 0, 0, 0.2);" unselectable="on">&#160;</span></em>', "</a>", "</tpl>", '<tpl if="this.isTransparent(values)">', '<a href="#" class="color-{.}" hidefocus="on">', '<em><span unselectable="on">&#160;</span></em>', "</a>", "</tpl>", '<tpl if="this.isCustom(values)">', '<a href="#" id="{id}" class="palette-color-custom {cls}" hidefocus="on">', '<em><span style="background:#FFFFFF;background-image:url({image});" unselectable="on">&#160;</span></em>', "</a>", "</tpl>", '<tpl if="this.isEffect(values)">', '<a href="#" effectid="{effectId}" effectvalue="{effectValue}" class="palette-color-effect color-{color}" style="background:#{color}" hidefocus="on">', '<em><span style="background:#{color}; border: 1px solid rgba(0, 0, 0, 0.2);" unselectable="on">&#160;</span></em>', "</a>", "</tpl>", '<tpl if="this.isCaption(values)"><div class="palette-color-caption" style="width:100%;float:left;font-size: 11px;">{.}</div></tpl>', "</tpl>", "</div>", {
+ if (Common === undefined) {
+    var Common = {};
+}
+define(["common/main/lib/component/BaseView", "common/main/lib/view/ExtendedColorDialog"], function () {
+    Common.UI.ThemeColorPalette = Common.UI.BaseView.extend({
+        options: {
+            dynamiccolors: 10,
+            allowReselect: true,
+            value: "000000"
+        },
+        template: _.template('<div style="padding: 12px;">' + "<% var me = this; %>" + "<% $(colors).each(function(num, item) { %>" + '<% if (me.isBlankSeparator(item)) { %> <div class="palette-color-spacer" style="width:100%;height:8px;float:left;"></div>' + '<% } else if (me.isSeparator(item)) { %> </div><div class="palette-color-separator" style="width:100%;height:1px;float:left;border-bottom: 1px solid #E0E0E0"></div><div style="padding: 12px;">' + "<% } else if (me.isColor(item)) { %> " + '<a class="palette-color color-<%=item%>" style="background:#<%=item%>" hidefocus="on">' + '<em><span style="background:#<%=item%>;" unselectable="on">&#160;</span></em>' + "</a>" + "<% } else if (me.isTransparent(item)) { %>" + '<a class="color-<%=item%>" hidefocus="on">' + '<em><span unselectable="on">&#160;</span></em>' + "</a>" + "<% } else if (me.isEffect(item)) { %>" + '<a effectid="<%=item.effectId%>" effectvalue="<%=item.effectValue%>" class="palette-color-effect color-<%=item.color%>" style="background:#<%=item.color%>" hidefocus="on">' + '<em><span style="background:#<%=item.color%>;" unselectable="on">&#160;</span></em>' + "</a>" + "<% } else if (me.isCaption(item)) { %>" + '<div class="palette-color-caption" style="width:100%;float:left;font-size: 11px;"><%=item%></div>' + "<% } %>" + "<% }); %>" + "</div>" + "<% if (me.options.dynamiccolors!==undefined) { %>" + '<div class="palette-color-spacer" style="width:100%;height:8px;float:left;"></div><div style="padding: 12px;">' + "<% for (var i=0; i<me.options.dynamiccolors; i++) { %>" + '<a class="color-dynamic-<%=i%> dynamic-empty-color" style="background:#ffffff" color="" hidefocus="on">' + '<em><span unselectable="on">&#160;</span></em></a>' + "<% } %>" + "<% } %>" + "</div>"),
+        colorRe: /(?:^|\s)color-(.{6})(?:\s|$)/,
+        selectedCls: "selected",
+        initialize: function (options) {
+            Common.UI.BaseView.prototype.initialize.call(this, options);
+            var me = this,
+            el = $(this.el);
+            this.colors = me.options.colors || [{
+                color: "000000",
+                effectId: 1
+            },
+            {
+                color: "FFFFFF",
+                effectId: 2
+            },
+            {
+                color: "000000",
+                effectId: 3
+            },
+            {
+                color: "FFFFFF",
+                effectId: 4
+            },
+            {
+                color: "000000",
+                effectId: 5
+            },
+            {
+                color: "FF0000",
+                effectId: 1
+            },
+            {
+                color: "FF6600",
+                effectId: 1
+            },
+            {
+                color: "FFFF00",
+                effectId: 2
+            },
+            {
+                color: "CCFFCC",
+                effectId: 3
+            },
+            {
+                color: "008000",
+                effectId: 4
+            },
+            "-", "--", "-", "000000", "5301B3", "980ABD", "B2275F", "F83D26", "F86A1D", "F7AC16", "F7CA12", "FAFF44", "D6EF39"];
+            el.addClass("theme-colorpalette");
+            this.render();
+            if (this.options.updateColorsArr) {
+                this.updateColors(this.options.updateColorsArr[0], this.options.updateColorsArr[1]);
+            }
+            if (this.options.value) {
+                this.select(this.options.value, true);
+            }
+            this.updateCustomColors();
+            el.closest(".btn-group").on("show.bs.dropdown", _.bind(this.updateCustomColors, this));
+            el.closest(".dropdown-submenu").on("show.bs.dropdown", _.bind(this.updateCustomColors, this));
+            el.on("click", _.bind(this.handleClick, this));
+        },
+        render: function () {
+            $(this.el).html(this.template({
+                colors: this.colors
+            }));
+            return this;
+        },
         isBlankSeparator: function (v) {
             return typeof(v) == "string" && v == "-";
         },
@@ -57,310 +124,238 @@
         isEffect: function (v) {
             return (typeof(v) == "object" && v.effectId !== undefined);
         },
-        isCustom: function (v) {
-            return (typeof(v) == "object" && v.effectId === undefined);
-        }
-    }],
-    constructor: function (config) {
-        this.initConfig(config);
-        this.callParent(arguments);
-        return this;
-    },
-    initComponent: function () {
-        this.callParent(arguments);
-    },
-    onRender: function (o) {
-        this.callParent(arguments);
-        if (this.dynamiccolors) {
-            var picker = o.down(".x-color-picker");
-            if (picker) {
-                var i = -1,
-                colors = '<div class="palette-color-spacer" style="width:100%;height:8px;float:left;"></div><div style="padding: 12px;">';
-                while (++i < this.dyncolorscount) {
-                    colors += Ext.String.format('<a href="#" class="color-dynamic-{0} dynamic-empty-color" style="background:#ffffff" color="" hidefocus="on">' + '<em><span unselectable="on">&#160;</span></em></a>', i);
-                }
-                colors += "</div>";
-                Ext.DomHelper.insertHtml("beforeEnd", picker.dom, colors);
-            }
-        }
-        var menu = this.el.up(".x-menu");
-        if (menu) {
-            Ext.menu.Manager.menus[menu.id].addListener("beforeshow", this.updateCustomColors, this);
-        }
-        this.updateCustomColors();
-    },
-    afterRender: function (o) {
-        this.callParent(arguments);
-        if (this.updateColorsArr) {
-            this.updateColors(this.updateColorsArr[0], this.updateColorsArr[1]);
-        }
-        if (this.lastvalue) {
-            this.select(this.lastvalue, true);
-        }
-    },
-    setCustomColor: function (color) {
-        color = /#?([a-fA-F0-9]{6})/.exec(color);
-        if (color) {
-            var el = this.getEl();
+        getColor: function () {
+            return this.value;
+        },
+        updateCustomColors: function () {
+            var el = $(this.el);
             if (el) {
-                this._saveCustomColor(color[1]);
-                $("#" + el.id + " a." + this.selectedCls).removeClass(this.selectedCls);
-                var child = el.down(".dynamic-empty-color");
-                if (!child) {
-                    this.updateCustomColors();
-                    child = el.down(".color-dynamic-" + (this.dyncolorscount - 1));
+                var colors = localStorage["asc." + window.storagename + ".colors.custom"];
+                colors = colors ? colors.split(",") : [];
+                var i = -1,
+                colorEl, c = colors.length < this.options.dynamiccolors ? colors.length : this.options.dynamiccolors;
+                while (++i < c) {
+                    colorEl = el.find(".color-dynamic-" + i);
+                    colorEl.removeClass("dynamic-empty-color").attr("color", colors[i]);
+                    colorEl.find("span").css({
+                        "background-color": "#" + colors[i]
+                    });
                 }
-                child.removeCls("dynamic-empty-color").addCls(this.selectedCls).dom.setAttribute("color", color[1]);
-                child.down("span").setStyle("background-color", "#" + color[1]).setStyle("border", "none");
             }
-        }
-    },
-    select: function (color, suppressEvent) {
-        if (!this.rendered) {
-            this.lastvalue = color;
-            return;
-        }
-        var el = this.getEl();
-        if (el) {
-            $("#" + el.id + " a." + this.selectedCls).removeClass(this.selectedCls);
-        }
-        if (typeof(color) == "object") {
-            var effectEl;
-            if (color.effectId !== undefined) {
-                effectEl = el.down('a[effectid="' + color.effectId + '"]');
-                if (effectEl) {
-                    effectEl.addCls(this.selectedCls);
-                    this.value = effectEl.dom.className.match(this.colorRe)[1].toUpperCase();
-                } else {
-                    this.value = false;
-                }
+        },
+        handleClick: function (e) {
+            var me = this;
+            var target = $(e.target).closest("a");
+            var color, cmp;
+            if (target.length == 0) {
+                return;
+            }
+            if (target.hasClass("color-transparent")) {
+                $(me.el).find("a." + me.selectedCls).removeClass(me.selectedCls);
+                target.addClass(me.selectedCls);
+                me.value = "transparent";
+                me.trigger("select", me, "transparent");
             } else {
-                if (color.effectValue !== undefined) {
-                    effectEl = el.down('a[effectvalue="' + color.effectValue + '"].color-' + color.color.toUpperCase());
-                    if (effectEl) {
-                        effectEl.addCls(this.selectedCls);
-                        this.value = effectEl.dom.className.match(this.colorRe)[1].toUpperCase();
-                    } else {
-                        this.value = false;
-                    }
-                }
-            }
-        } else {
-            if (/#?[a-fA-F0-9]{6}/.test(color)) {
-                color = /#?([a-fA-F0-9]{6})/.exec(color)[1].toUpperCase();
-                this.value = color;
-            }
-            if (/^[a-fA-F0-9]{6}|transparent$/.test(color) && Ext.Array.contains(this.colors, color)) {
-                if (!Ext.Array.contains(this.colors, this.value)) {
-                    this.value = false;
-                }
-                if (color != this.value || this.allowReselect) {
-                    if (this.value) {
-                        (this.value == "transparent") ? el.down("a.color-transparent").removeCls(this.selectedCls) : el.down("a.palette-color.color-" + this.value).removeCls(this.selectedCls);
-                    } (color == "transparent") ? el.down("a.color-transparent").addCls(this.selectedCls) : el.down("a.palette-color.color-" + color).addCls(this.selectedCls);
-                    this.value = color;
-                    if (suppressEvent !== true) {
-                        this.fireEvent("select", this, color);
-                    }
-                }
-            } else {
-                if (el) {
-                    var co = el.down("#" + color) || el.down('a[color="' + color + '"]');
-                    if (co) {
-                        co.addCls(this.selectedCls);
-                        this.value = color.toUpperCase();
-                    } else {
-                        if (el.down("a." + this.selectedCls)) {
-                            this.value = false;
-                        } else {
-                            if (this.dynamiccolors) {}
-                        }
-                    }
-                } else {
-                    this.lastvalue = color;
-                }
-            }
-        }
-    },
-    handleClick: function (event, target) {
-        var me = this;
-        var color, cmp;
-        if (! (target.className.search("palette-color-custom") < 0)) {
-            event.stopEvent();
-            cmp = Ext.get(target.parentNode).down("a." + me.selectedCls);
-            if (!cmp || cmp.id != target.id) {
-                if (cmp) {
-                    cmp.removeCls(me.selectedCls);
-                }
-                Ext.get(target.id).addCls(me.selectedCls);
-                me.value = false;
-                me.fireEvent("select", me, target.id);
-            } else {
-                me.fireEvent("select", me, cmp.id);
-            }
-        } else {
-            if (! (target.className.search("color-transparent") < 0)) {
-                event.stopEvent();
-                cmp = Ext.get(target.parentNode).down("a." + me.selectedCls);
-                if (!cmp || cmp.id != target.id) {
-                    if (cmp) {
-                        cmp.removeCls(me.selectedCls);
-                    }
-                    Ext.get(target).addCls(me.selectedCls);
-                    me.value = "transparent";
-                }
-                me.fireEvent("select", me, "transparent");
-            } else {
-                if (! (target.className.search("color-dynamic") < 0)) {
-                    if (!/dynamic-empty-color/.test(target.className)) {
-                        color = target.getAttribute("color");
+                if (! (target[0].className.search("color-dynamic") < 0)) {
+                    if (!/dynamic-empty-color/.test(target[0].className)) {
+                        $(me.el).find("a." + me.selectedCls).removeClass(me.selectedCls);
+                        target.addClass(me.selectedCls);
+                        color = target.attr("color");
                         if (color) {
-                            me.fireEvent("select", me, color);
+                            me.trigger("select", me, color);
                         }
-                        this.value = color.toUpperCase();
-                        $("#" + this.getEl().id + " a." + me.selectedCls).removeClass(me.selectedCls);
-                        Ext.get(target).addCls(me.selectedCls);
+                        me.value = color.toUpperCase();
                     } else {
                         setTimeout(function () {
                             me.addNewColor();
-                            Ext.menu.Manager.hideAll();
                         },
                         10);
                     }
                 } else {
-                    cmp = Ext.get(target.parentNode).down("a.palette-color-custom");
-                    if (cmp) {
-                        cmp.removeCls(me.selectedCls);
+                    if (!/^[a-fA-F0-9]{6}$/.test(me.value) || _.indexOf(me.colors, me.value) < 0) {
+                        me.value = false;
                     }
-                    if (!/^[a-fA-F0-9]{6}$/.test(this.value) || !Ext.Array.contains(this.colors, this.value)) {
-                        this.value = false;
-                    }
-                    if (! (target.className.search("palette-color-effect") < 0)) {
-                        color = target.className.match(me.colorRe)[1];
-                        var effectId = target.getAttribute("effectid");
+                    $(me.el).find("a." + me.selectedCls).removeClass(me.selectedCls);
+                    target.addClass(me.selectedCls);
+                    color = target[0].className.match(me.colorRe)[1];
+                    if (target.hasClass("palette-color-effect")) {
+                        var effectId = parseInt(target.attr("effectid"));
                         if (color) {
-                            me.fireEvent("select", me, {
+                            me.value = color.toUpperCase();
+                            me.trigger("select", me, {
                                 color: color,
                                 effectId: effectId
                             });
-                            this.value = color.toUpperCase();
                         }
-                        $("#" + this.getEl().id + " a." + me.selectedCls).removeClass(me.selectedCls);
-                        Ext.get(target).addCls(me.selectedCls);
                     } else {
-                        this.callParent(arguments);
+                        if (/#?[a-fA-F0-9]{6}/.test(color)) {
+                            color = /#?([a-fA-F0-9]{6})/.exec(color)[1].toUpperCase();
+                            me.value = color;
+                            me.trigger("select", me, color);
+                        }
                     }
                 }
-            }
-        }
-    },
-    addNewColor: function () {
-        var me = this;
-        var win = Ext.create("Common.view.ExtendedColorDialog", {});
-        win.addListener("onmodalresult", function (mr) {
-            me._isdlgopen = false;
-            if (mr == 1) {
-                me.setCustomColor(win.getColor());
-                me.fireEvent("select", me, win.getColor());
             }
         },
-        false);
-        me._isdlgopen = true;
-        win.setColor(me.value);
-        win.show();
-    },
-    isDialogOpen: function () {
-        return this._isdlgopen == true;
-    },
-    updateColors: function (effectcolors, standartcolors) {
-        if (!this.rendered) {
-            this.updateColorsArr = [effectcolors, (standartcolors.length == 0 && this.updateColorsArr) ? this.updateColorsArr[1] : standartcolors];
-            return;
-        }
-        var me = this,
-        el = this.getEl();
-        if (me.aColorElements === undefined) {
-            me.aColorElements = el.query("a.palette-color");
-        }
-        if (me.aEffectElements === undefined) {
-            me.aEffectElements = el.query("a.palette-color-effect");
-        }
-        var aEl;
-        var aColorIdx = 0,
-        aEffectIdx = 0;
-        for (var i = 0; i < me.colors.length; i++) {
-            if (typeof(me.colors[i]) == "string" && (/[0-9A-F]{6}/).test(me.colors[i])) {
-                if (aColorIdx >= standartcolors.length) {
-                    continue;
+        setCustomColor: function (color) {
+            var el = $(this.el);
+            color = /#?([a-fA-F0-9]{6})/.exec(color);
+            if (color) {
+                this.saveCustomColor(color[1]);
+                el.find("a." + this.selectedCls).removeClass(this.selectedCls);
+                var child = el.find(".dynamic-empty-color");
+                if (child.length == 0) {
+                    this.updateCustomColors();
+                    child = el.find(".color-dynamic-" + (this.options.dynamiccolors - 1));
                 }
-                aEl = Ext.get(me.aColorElements[aColorIdx]);
-                aEl.removeCls("color-" + me.colors[i]);
-                me.colors[i] = standartcolors[aColorIdx].toUpperCase();
-                aEl.addCls("color-" + me.colors[i]);
-                aEl.applyStyles({
-                    background: "#" + me.colors[i]
+                child.first().removeClass("dynamic-empty-color").addClass(this.selectedCls).attr("color", color[1]);
+                child.first().find("span").css({
+                    "background-color": "#" + color[1]
                 });
-                aEl.down("span").applyStyles({
-                    background: "#" + me.colors[i]
-                });
-                aColorIdx++;
-            } else {
-                if (typeof(me.colors[i]) == "object" && me.colors[i].effectId !== undefined) {
-                    if (aEffectIdx >= effectcolors.length) {
-                        continue;
-                    }
-                    aEl = Ext.get(me.aEffectElements[aEffectIdx]);
-                    effectcolors[aEffectIdx].color = effectcolors[aEffectIdx].color.toUpperCase();
-                    if (me.colors[i].color !== effectcolors[aEffectIdx].color) {
-                        aEl.removeCls("color-" + me.colors[i].color);
-                        aEl.addCls("color-" + effectcolors[aEffectIdx].color);
-                        aEl.applyStyles({
-                            background: "#" + effectcolors[aEffectIdx].color
-                        });
-                        aEl.down("span").applyStyles({
-                            background: "#" + effectcolors[aEffectIdx].color
-                        });
-                    }
-                    if (me.colors[i].effectId !== effectcolors[aEffectIdx].effectId) {
-                        aEl.set({
-                            effectid: effectcolors[aEffectIdx].effectId
-                        });
-                    }
-                    if (me.colors[i].effectValue !== effectcolors[aEffectIdx].effectValue) {
-                        aEl.set({
-                            effectvalue: effectcolors[aEffectIdx].effectValue
-                        });
-                    }
-                    me.colors[i] = effectcolors[aEffectIdx];
-                    aEffectIdx++;
-                }
+                this.select(color[1], true);
             }
-        }
-        this.updateColorsArr = undefined;
-    },
-    updateCustomColors: function () {
-        var picker = this.getEl();
-        if (picker) {
+        },
+        saveCustomColor: function (color) {
             var colors = localStorage["asc." + window.storagename + ".colors.custom"];
             colors = colors ? colors.split(",") : [];
-            var i = -1,
-            colorEl, c = colors.length < this.dyncolorscount ? colors.length : this.dyncolorscount;
-            while (++i < c) {
-                colorEl = picker.down(".color-dynamic-" + i);
-                colorEl.removeCls("dynamic-empty-color").dom.setAttribute("color", colors[i]);
-                colorEl.down("span").setStyle("background-color", "#" + colors[i]).setStyle("border", "none");
+            if (colors.push(color) > this.options.dynamiccolors) {
+                colors.shift();
             }
+            localStorage["asc." + window.storagename + ".colors.custom"] = colors.join().toUpperCase();
+        },
+        addNewColor: function (defcolor) {
+            var me = this;
+            var win = new Common.UI.ExtendedColorDialog({});
+            win.on("onmodalresult", function (mr) {
+                me._isdlgopen = false;
+                if (mr == 1) {
+                    me.setCustomColor(win.getColor());
+                    me.fireEvent("select", me, win.getColor());
+                }
+            });
+            me._isdlgopen = true;
+            win.setColor((me.value !== undefined && me.value !== false) ? me.value : ((defcolor !== undefined) ? defcolor : "000000"));
+            win.show();
+        },
+        isDialogOpen: function () {
+            return this._isdlgopen == true;
+        },
+        select: function (color, suppressEvent) {
+            var el = $(this.el);
+            el.find("a." + this.selectedCls).removeClass(this.selectedCls);
+            if (typeof(color) == "object") {
+                var effectEl;
+                if (color.effectId !== undefined) {
+                    effectEl = el.find('a[effectid="' + color.effectId + '"]').first();
+                    if (effectEl.length > 0) {
+                        effectEl.addClass(this.selectedCls);
+                        this.value = effectEl[0].className.match(this.colorRe)[1].toUpperCase();
+                    } else {
+                        this.value = false;
+                    }
+                } else {
+                    if (color.effectValue !== undefined) {
+                        effectEl = el.find('a[effectvalue="' + color.effectValue + '"].color-' + color.color.toUpperCase()).first();
+                        if (effectEl.length > 0) {
+                            effectEl.addClass(this.selectedCls);
+                            this.value = effectEl[0].className.match(this.colorRe)[1].toUpperCase();
+                        } else {
+                            this.value = false;
+                        }
+                    }
+                }
+            } else {
+                if (/#?[a-fA-F0-9]{6}/.test(color)) {
+                    color = /#?([a-fA-F0-9]{6})/.exec(color)[1].toUpperCase();
+                    this.value = color;
+                }
+                if (/^[a-fA-F0-9]{6}|transparent$/.test(color) && _.indexOf(this.colors, color) >= 0) {
+                    if (_.indexOf(this.colors, this.value) < 0) {
+                        this.value = false;
+                    }
+                    if (color != this.value || this.options.allowReselect) {
+                        (color == "transparent") ? el.find("a.color-transparent").addClass(this.selectedCls) : el.find("a.palette-color.color-" + color).first().addClass(this.selectedCls);
+                        this.value = color;
+                        if (suppressEvent !== true) {
+                            this.fireEvent("select", this, color);
+                        }
+                    }
+                } else {
+                    var co = el.find("#" + color).first();
+                    if (co.length == 0) {
+                        co = el.find('a[color="' + color + '"]').first();
+                    }
+                    if (co.length > 0) {
+                        co.addClass(this.selectedCls);
+                        this.value = color.toUpperCase();
+                    }
+                }
+            }
+        },
+        updateColors: function (effectcolors, standartcolors) {
+            if (effectcolors === undefined || standartcolors === undefined) {
+                return;
+            }
+            var me = this,
+            el = $(this.el);
+            if (me.aColorElements === undefined) {
+                me.aColorElements = el.find("a.palette-color");
+            }
+            if (me.aEffectElements === undefined) {
+                me.aEffectElements = el.find("a.palette-color-effect");
+            }
+            var aEl;
+            var aColorIdx = 0,
+            aEffectIdx = 0;
+            for (var i = 0; i < me.colors.length; i++) {
+                if (typeof(me.colors[i]) == "string" && (/[0-9A-F]{6}/).test(me.colors[i])) {
+                    if (aColorIdx >= standartcolors.length) {
+                        continue;
+                    }
+                    aEl = $(me.aColorElements[aColorIdx]);
+                    aEl.removeClass("color-" + me.colors[i]);
+                    me.colors[i] = standartcolors[aColorIdx].toUpperCase();
+                    aEl.addClass("color-" + me.colors[i]);
+                    aEl.css({
+                        background: "#" + me.colors[i]
+                    });
+                    aEl.find("span").first().css({
+                        background: "#" + me.colors[i]
+                    });
+                    aColorIdx++;
+                } else {
+                    if (typeof(me.colors[i]) == "object" && me.colors[i].effectId !== undefined) {
+                        if (aEffectIdx >= effectcolors.length) {
+                            continue;
+                        }
+                        aEl = $(me.aEffectElements[aEffectIdx]);
+                        effectcolors[aEffectIdx].color = effectcolors[aEffectIdx].color.toUpperCase();
+                        if (me.colors[i].color !== effectcolors[aEffectIdx].color) {
+                            aEl.removeClass("color-" + me.colors[i].color);
+                            aEl.addClass("color-" + effectcolors[aEffectIdx].color);
+                            aEl.css({
+                                background: "#" + effectcolors[aEffectIdx].color
+                            });
+                            aEl.find("span").first().css({
+                                background: "#" + effectcolors[aEffectIdx].color
+                            });
+                        }
+                        if (me.colors[i].effectId !== effectcolors[aEffectIdx].effectId) {
+                            aEl.attr("effectid", "" + effectcolors[aEffectIdx].effectId);
+                        }
+                        if (me.colors[i].effectValue !== effectcolors[aEffectIdx].effectValue) {
+                            aEl.attr("effectvalue", "" + effectcolors[aEffectIdx].effectValue);
+                        }
+                        me.colors[i] = effectcolors[aEffectIdx];
+                        aEffectIdx++;
+                    }
+                }
+            }
+            this.options.updateColorsArr = undefined;
+        },
+        clearSelection: function (suppressEvent) {
+            $(this.el).find("a." + this.selectedCls).removeClass(this.selectedCls);
+            this.value = undefined;
         }
-    },
-    _saveCustomColor: function (color) {
-        var colors = localStorage["asc." + window.storagename + ".colors.custom"];
-        colors = colors ? colors.split(",") : [];
-        if (colors.push(color) > this.dyncolorscount) {
-            colors.shift();
-        }
-        localStorage["asc." + window.storagename + ".colors.custom"] = colors.join().toUpperCase();
-    },
-    _menuBeforeShow: function () {
-        this.updateCustomColors();
-    }
+    });
 });

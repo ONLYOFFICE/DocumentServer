@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,226 +29,435 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("Common.component.MetricSpinner", {
-    extend: "Ext.form.field.Spinner",
-    alias: "widget.commonmetricspinner",
-    defaultUnit: "px",
-    minValue: 0,
-    maxValue: 100,
-    step: 1,
-    textAlign: "right",
-    allowAuto: false,
-    autoText: "Auto",
-    mouseWheelEnabled: false,
-    constructor: function (config) {
-        var add = function (a, b, precision) {
-            var x = Math.pow(10, precision || 2);
-            return (Math.round(a * x) + Math.round(b * x)) / x;
-        };
-        var oldValue = this.minValue;
-        this.setValue = function (value, suspendchange) {
-            if (!Ext.isDefined(value) || value === "") {
+ if (Common === undefined) {
+    var Common = {};
+}
+define(["common/main/lib/component/BaseView"], function () {
+    Common.UI.MetricSpinner = Common.UI.BaseView.extend({
+        options: {
+            minValue: 0,
+            maxValue: 100,
+            step: 1,
+            defaultUnit: "px",
+            allowAuto: false,
+            autoText: "Auto",
+            hold: true,
+            speed: "medium",
+            width: 90,
+            allowDecimal: true
+        },
+        disabled: false,
+        value: "0 px",
+        rendered: false,
+        template: '<input type="text" class="form-control">' + '<div class="spinner-buttons">' + '<button type="button" class="spinner-up"><i></i></button>' + '<button type="button" class="spinner-down"><i></i></button>' + "</div>",
+        initialize: function (options) {
+            Common.UI.BaseView.prototype.initialize.call(this, options);
+            var me = this,
+            el = $(this.el);
+            el.addClass("spinner");
+            el.on("mousedown", ".spinner-up", _.bind(this.onMouseDown, this, true));
+            el.on("mousedown", ".spinner-down", _.bind(this.onMouseDown, this, false));
+            el.on("mouseup", ".spinner-up", _.bind(this.onMouseUp, this, true));
+            el.on("mouseup", ".spinner-down", _.bind(this.onMouseUp, this, false));
+            el.on("mouseover", ".spinner-up, .spinner-down", _.bind(this.onMouseOver, this));
+            el.on("mouseout", ".spinner-up, .spinner-down", _.bind(this.onMouseOut, this));
+            el.on("keydown", ".form-control", _.bind(this.onKeyDown, this));
+            el.on("keyup", ".form-control", _.bind(this.onKeyUp, this));
+            el.on("blur", ".form-control", _.bind(this.onBlur, this));
+            el.on("input", ".form-control", _.bind(this.onInput, this));
+            if (!this.options.allowDecimal) {
+                el.on("keypress", ".form-control", _.bind(this.onKeyPress, this));
+            }
+            this.switches = {
+                count: 1,
+                enabled: true,
+                fromKeyDown: false
+            };
+            if (this.options.speed === "medium") {
+                this.switches.speed = 300;
+            } else {
+                if (this.options.speed === "fast") {
+                    this.switches.speed = 100;
+                } else {
+                    this.switches.speed = 500;
+                }
+            }
+            this.render();
+            if (this.options.disabled) {
+                this.setDisabled(this.options.disabled);
+            }
+            if (this.options.value !== undefined) {
+                this.value = this.options.value;
+            }
+            this.setRawValue(this.value);
+            if (this.options.width) {
+                $(this.el).width(this.options.width);
+            }
+            if (this.options.defaultValue === undefined) {
+                this.options.defaultValue = this.options.minValue;
+            }
+            this.oldValue = this.options.minValue;
+            this.lastValue = null;
+        },
+        render: function () {
+            var el = $(this.el);
+            el.html(this.template);
+            this.$input = el.find(".form-control");
+            this.rendered = true;
+            if (this.options.tabindex != undefined) {
+                this.$input.attr("tabindex", this.options.tabindex);
+            }
+            return this;
+        },
+        setDisabled: function (disabled) {
+            var el = $(this.el);
+            if (disabled !== this.disabled) {
+                el.find("button").toggleClass("disabled", disabled);
+                el.toggleClass("disabled", disabled);
+                (disabled) ? this.$input.attr({
+                    disabled: disabled
+                }) : this.$input.removeAttr("disabled");
+            }
+            this.disabled = disabled;
+        },
+        isDisabled: function () {
+            return this.disabled;
+        },
+        setDefaultUnit: function (unit) {
+            if (this.options.defaultUnit != unit) {
+                var oldUnit = this.options.defaultUnit;
+                this.options.defaultUnit = unit;
+                this.setMinValue(this._recalcUnits(this.options.minValue, oldUnit));
+                this.setMaxValue(this._recalcUnits(this.options.maxValue, oldUnit));
+                this.setValue(this._recalcUnits(this.getNumberValue(), oldUnit), true);
+            }
+        },
+        setMinValue: function (unit) {
+            this.options.minValue = unit;
+        },
+        setMaxValue: function (unit) {
+            this.options.maxValue = unit;
+        },
+        setStep: function (step) {
+            this.options.step = step;
+        },
+        getNumberValue: function () {
+            if (this.options.allowAuto && this.value == this.options.autoText) {
+                return -1;
+            } else {
+                return parseFloat(this.value);
+            }
+        },
+        getUnitValue: function () {
+            return this.options.defaultUnit;
+        },
+        getValue: function () {
+            return this.value;
+        },
+        setRawValue: function (value) {
+            if (this.$input) {
+                this.$input.val(value);
+            }
+        },
+        setValue: function (value, suspendchange) {
+            var showError = false;
+            this._fromKeyDown = false;
+            this.lastValue = this.value;
+            if (typeof value === "undefined" || value === "") {
                 this.value = "";
             } else {
-                if (this.allowAuto && (Math.abs(parseFloat(value) + 1) < 0.0001 || value == this.autoText)) {
-                    this.value = this.autoText;
+                if (this.options.allowAuto && (Math.abs(parseFloat(value) + 1) < 0.0001 || value == this.options.autoText)) {
+                    this.value = this.options.autoText;
                 } else {
-                    var number = add(parseFloat(value), 0, 3);
-                    if (!Ext.isDefined(number) || isNaN(number)) {
-                        number = oldValue;
+                    var number = this._add(parseFloat(value), 0, (this.options.allowDecimal) ? 3 : 0);
+                    if (typeof value === "undefined" || isNaN(number)) {
+                        number = this.oldValue;
+                        showError = true;
                     }
-                    var units = this.defaultUnit;
-                    if (Ext.isDefined(value.match)) {
+                    var units = this.options.defaultUnit;
+                    if (typeof value.match !== "undefined") {
                         var searchUnits = value.match(/(px|em|%|en|ex|pt|in|cm|mm|pc|s|ms)$/i);
-                        if (null !== searchUnits && Ext.isDefined(searchUnits[0])) {
+                        if (null !== searchUnits && searchUnits[0] !== "undefined") {
                             units = searchUnits[0].toLowerCase();
                         }
                     }
-                    if (this.defaultUnit !== units) {
+                    if (this.options.defaultUnit !== units) {
                         number = this._recalcUnits(number, units);
                     }
-                    if (number > this.maxValue) {
-                        number = this.maxValue;
+                    if (number > this.options.maxValue) {
+                        number = this.options.maxValue;
+                        showError = true;
                     }
-                    if (number < this.minValue) {
-                        number = this.minValue;
+                    if (number < this.options.minValue) {
+                        number = this.options.minValue;
+                        showError = true;
                     }
-                    this.value = (number + " " + this.defaultUnit).trim();
-                    oldValue = number;
+                    this.value = (number + " " + this.options.defaultUnit).trim();
+                    this.oldValue = number;
                 }
             }
-            if (suspendchange !== true) {
-                this.checkChange();
+            if (suspendchange !== true && this.lastValue !== this.value) {
+                this.trigger("change", this, this.value, this.lastValue);
             }
-            var setFn = function (value) {
-                this.setRawValue(value);
-            };
+            if (suspendchange !== true && showError) {
+                this.trigger("inputerror", this, this.value);
+            }
             if (this.rendered) {
-                setFn.call(this, this.value);
+                this.setRawValue(this.value);
             } else {
-                this.on("afterrender", Ext.bind(setFn, this, [this.value]), {
-                    single: true
-                });
-            }
-        };
-        this.onSpinUp = function () {
-            var me = this;
-            if (!me.readOnly) {
-                var val = me.step;
-                if (me.getValue() !== "") {
-                    if (me.allowAuto && me.getValue() == me.autoText) {
-                        val = me.minValue - me.step;
-                    } else {
-                        val = parseFloat(me.getValue());
-                    }
-                    if (isNaN(val)) {
-                        val = oldValue;
-                    }
-                } else {
-                    val = me.minValue - me.step;
-                }
-                me.setValue((add(val, me.step, 3) + " " + this.defaultUnit).trim(), true);
-            }
-        };
-        this.onSpinDown = function () {
-            var me = this;
-            if (!me.readOnly) {
-                var val = me.step;
-                if (me.getValue() !== "") {
-                    if (me.allowAuto && me.getValue() == me.autoText) {
-                        val = me.minValue;
-                    } else {
-                        val = parseFloat(me.getValue());
-                    }
-                    if (isNaN(val)) {
-                        val = oldValue;
-                    }
-                    if (me.allowAuto && add(val, -me.step, 3) < me.minValue) {
-                        me.setValue(me.autoText, true);
-                        return;
-                    }
-                } else {
-                    val = me.minValue;
-                }
-                me.setValue((add(val, -me.step, 3) + " " + this.defaultUnit).trim(), true);
-            }
-        };
-        this.callParent(arguments);
-    },
-    initComponent: function () {
-        if (!Ext.isDefined(this.value)) {
-            this.value = (this.minValue + " " + this.defaultUnit).trim();
-        }
-        this.on("specialkey", function (f, e) {
-            if (e.getKey() == e.ENTER) {
-                this.onEnterValue();
-                e.stopEvent();
+                this.options.value = this.value;
             }
         },
-        this);
-        this.callParent(arguments);
-    },
-    setDefaultUnit: function (unit) {
-        if (this.defaultUnit != unit) {
-            var oldUnit = this.defaultUnit;
-            this.defaultUnit = unit;
-            this.setMinValue(this._recalcUnits(this.minValue, oldUnit));
-            this.setMaxValue(this._recalcUnits(this.maxValue, oldUnit));
-            this.setValue(this._recalcUnits(this.getNumberValue(), oldUnit), true);
-        }
-    },
-    setMinValue: function (unit) {
-        this.minValue = unit;
-    },
-    setMaxValue: function (unit) {
-        this.maxValue = unit;
-    },
-    setStep: function (step) {
-        this.step = step;
-    },
-    getNumberValue: function () {
-        if (this.allowAuto && this.value == this.autoText) {
-            return -1;
-        } else {
-            return parseFloat(this.value);
-        }
-    },
-    getUnitValue: function () {
-        return this.defaultUnit;
-    },
-    getValue: function () {
-        return this.value;
-    },
-    onEnterValue: function () {
-        if (Ext.isDefined(this.inputEl)) {
-            var val = this.inputEl.getValue();
-            this.setValue((val === "") ? this.value : val);
-        }
-    },
-    afterRender: function () {
-        var me = this;
-        this.callParent(arguments);
-        if (this.inputEl) {
-            Ext.DomHelper.applyStyles(this.inputEl, Ext.String.format("text-align:{0}", this.textAlign));
-        }
-        if (this.triggerRepeater) {
-            this.triggerRepeater.on("mouseup", function () {
-                me.checkChange();
-            },
-            this);
-        }
-    },
-    onBlur: function (field, eOpt) {
-        if (Ext.isDefined(this.inputEl)) {
-            var val = this.inputEl.getValue();
-            this.setValue((val === "") ? this.value : val);
-        }
-    },
-    _recalcUnits: function (value, fromUnit) {
-        if (fromUnit.match(/(s|ms)$/i) && this.defaultUnit.match(/(s|ms)$/i)) {
-            var v_out = value;
-            if (fromUnit == "ms") {
-                v_out = v_out / 1000;
+        onMouseDown: function (type, e) {
+            if (this.disabled) {
+                return;
             }
-            if (this.defaultUnit == "ms") {
-                v_out = v_out * 1000;
+            if (e) {
+                $(e.currentTarget).addClass("active");
+            }
+            if (this.options.hold) {
+                this.switches.fromKeyDown = false;
+                this._startSpin(type, e);
+            }
+        },
+        onMouseUp: function (type, e) {
+            if (this.disabled) {
+                return;
+            }
+            $(e.currentTarget).removeClass("active");
+            if (this.options.hold) {
+                this._stopSpin();
+            } else {
+                this._step(type);
+            }
+        },
+        onMouseOver: function (e) {
+            if (this.disabled) {
+                return;
+            }
+            $(e.currentTarget).addClass("over");
+        },
+        onMouseOut: function (e) {
+            if (this.disabled) {
+                return;
+            }
+            $(e.currentTarget).removeClass("active over");
+            if (this.options.hold) {
+                this._stopSpin();
+            }
+        },
+        onKeyDown: function (e) {
+            if (this.disabled) {
+                return;
+            }
+            if (this.options.hold && (e.keyCode == Common.UI.Keys.UP || e.keyCode == Common.UI.Keys.DOWN)) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (this.switches.timeout === undefined) {
+                    this.switches.fromKeyDown = true;
+                    this._startSpin(e.keyCode == Common.UI.Keys.UP, e);
+                }
+            } else {
+                if (e.keyCode == Common.UI.Keys.RETURN) {
+                    if (this.options.defaultUnit && this.options.defaultUnit.length) {
+                        var value = this.$input.val();
+                        if (this.value != value) {
+                            this.onEnterValue();
+                            return false;
+                        }
+                    } else {
+                        this.onEnterValue();
+                    }
+                } else {
+                    this._fromKeyDown = true;
+                }
+            }
+        },
+        onKeyUp: function (e) {
+            if (this.disabled) {
+                return;
+            }
+            if (e.keyCode == Common.UI.Keys.UP || e.keyCode == Common.UI.Keys.DOWN) {
+                e.stopPropagation();
+                e.preventDefault();
+                (this.options.hold) ? this._stopSpin() : this._step(e.keyCode == Common.UI.Keys.UP);
+            }
+        },
+        onKeyPress: function (e) {
+            if (this.disabled) {
+                return;
+            }
+            var charCode = String.fromCharCode(e.charCode);
+            if (charCode == "." || charCode == ",") {
+                e.preventDefault();
+                e.stopPropagation();
+            } else {
+                if (this.options.maskExp && !this.options.maskExp.test(charCode) && !e.ctrlKey && e.keyCode !== Common.UI.Keys.DELETE && e.keyCode !== Common.UI.Keys.BACKSPACE && e.keyCode !== Common.UI.Keys.LEFT && e.keyCode !== Common.UI.Keys.RIGHT && e.keyCode !== Common.UI.Keys.HOME && e.keyCode !== Common.UI.Keys.END && e.keyCode !== Common.UI.Keys.ESC && e.keyCode !== Common.UI.Keys.RETURN && e.keyCode !== Common.UI.Keys.INSERT && e.keyCode !== Common.UI.Keys.TAB) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }
+        },
+        onInput: function (e, extra) {
+            if (this.disabled || e.isDefaultPrevented()) {
+                return;
+            }
+            this.trigger("changing", this, $(e.target).val(), e);
+        },
+        onEnterValue: function () {
+            if (this.$input) {
+                var val = this.$input.val();
+                this.setValue((val === "") ? this.value : val);
+                this.trigger("entervalue", this);
+            }
+        },
+        onBlur: function (e) {
+            if (this.$input) {
+                var val = this.$input.val();
+                this.setValue((val === "") ? this.value : val);
+                if (this.options.hold && this.switches.fromKeyDown) {
+                    this._stopSpin();
+                }
+            }
+        },
+        _startSpin: function (type, e) {
+            if (!this.disabled) {
+                var divisor = this.switches.count;
+                if (divisor === 1) {
+                    this._step(type, true);
+                    divisor = 1;
+                } else {
+                    if (divisor < 3) {
+                        divisor = 1.5;
+                    } else {
+                        if (divisor < 8) {
+                            divisor = 2.5;
+                        } else {
+                            divisor = 6;
+                        }
+                    }
+                }
+                this.switches.timeout = setTimeout($.proxy(function () {
+                    this._step(type, true);
+                    this._startSpin(type);
+                },
+                this), this.switches.speed / divisor);
+                this.switches.count++;
+            }
+        },
+        _stopSpin: function (e) {
+            if (this.switches.timeout !== undefined) {
+                clearTimeout(this.switches.timeout);
+                this.switches.timeout = undefined;
+                this.switches.count = 1;
+                this.trigger("change", this, this.value, this.lastValue);
+            }
+        },
+        _increase: function (suspend) {
+            var me = this;
+            if (!me.readOnly) {
+                var val = me.options.step;
+                if (me._fromKeyDown) {
+                    val = this.$input.val();
+                    val = _.isEmpty(val) ? me.oldValue : parseFloat(val);
+                } else {
+                    if (me.getValue() !== "") {
+                        if (me.options.allowAuto && me.getValue() == me.options.autoText) {
+                            val = me.options.minValue - me.options.step;
+                        } else {
+                            val = parseFloat(me.getValue());
+                        }
+                        if (isNaN(val)) {
+                            val = this.oldValue;
+                        }
+                    } else {
+                        val = me.options.defaultValue;
+                    }
+                }
+                me.setValue((this._add(val, me.options.step, (me.options.allowDecimal) ? 3 : 0) + " " + this.options.defaultUnit).trim(), suspend);
+            }
+        },
+        _decrease: function (suspend) {
+            var me = this;
+            if (!me.readOnly) {
+                var val = me.options.step;
+                if (me._fromKeyDown) {
+                    val = this.$input.val();
+                    val = _.isEmpty(val) ? me.oldValue : parseFloat(val);
+                } else {
+                    if (me.getValue() !== "") {
+                        if (me.options.allowAuto && me.getValue() == me.options.autoText) {
+                            val = me.options.minValue;
+                        } else {
+                            val = parseFloat(me.getValue());
+                        }
+                        if (isNaN(val)) {
+                            val = this.oldValue;
+                        }
+                        if (me.options.allowAuto && this._add(val, -me.options.step, (me.options.allowDecimal) ? 3 : 0) < me.options.minValue) {
+                            me.setValue(me.options.autoText, true);
+                            return;
+                        }
+                    } else {
+                        val = me.options.defaultValue;
+                    }
+                }
+                me.setValue((this._add(val, -me.options.step, (me.options.allowDecimal) ? 3 : 0) + " " + this.options.defaultUnit).trim(), suspend);
+            }
+        },
+        _step: function (type, suspend) {
+            (type) ? this._increase(suspend) : this._decrease(suspend);
+        },
+        _add: function (a, b, precision) {
+            var x = Math.pow(10, precision || (this.options.allowDecimal) ? 2 : 0);
+            return (Math.round(a * x) + Math.round(b * x)) / x;
+        },
+        _recalcUnits: function (value, fromUnit) {
+            if (fromUnit.match(/(s|ms)$/i) && this.options.defaultUnit.match(/(s|ms)$/i)) {
+                var v_out = value;
+                if (fromUnit == "ms") {
+                    v_out = v_out / 1000;
+                }
+                if (this.options.defaultUnit == "ms") {
+                    v_out = v_out * 1000;
+                }
+                return v_out;
+            }
+            if (fromUnit.match(/(pt|in|cm|mm|pc)$/i) === null || this.options.defaultUnit.match(/(pt|in|cm|mm|pc)$/i) === null) {
+                return value;
+            }
+            var v_out = value;
+            if (fromUnit == "cm") {
+                v_out = v_out * 10;
+            } else {
+                if (fromUnit == "pt") {
+                    v_out = v_out * 25.4 / 72;
+                } else {
+                    if (fromUnit == "in") {
+                        v_out = v_out * 25.4;
+                    } else {
+                        if (fromUnit == "pc") {
+                            v_out = v_out * 25.4 / 6;
+                        }
+                    }
+                }
+            }
+            if (this.options.defaultUnit == "cm") {
+                v_out = v_out / 10;
+            } else {
+                if (this.options.defaultUnit == "pt") {
+                    v_out = parseFloat((v_out * 72 / 25.4).toFixed(3));
+                } else {
+                    if (this.options.defaultUnit == "in") {
+                        v_out = v_out / 25.4;
+                    } else {
+                        if (this.options.defaultUnit == "pc") {
+                            v_out = v_out * 6 / 25.4;
+                        }
+                    }
+                }
             }
             return v_out;
         }
-        if (fromUnit.match(/(pt|in|cm|mm|pc)$/i) === null || this.defaultUnit.match(/(pt|in|cm|mm|pc)$/i) === null) {
-            return value;
-        }
-        var v_out = value;
-        if (fromUnit == "cm") {
-            v_out = v_out * 10;
-        } else {
-            if (fromUnit == "pt") {
-                v_out = v_out * 25.4 / 72;
-            } else {
-                if (fromUnit == "in") {
-                    v_out = v_out * 25.4;
-                } else {
-                    if (fromUnit == "pc") {
-                        v_out = v_out * 25.4 / 6;
-                    }
-                }
-            }
-        }
-        if (this.defaultUnit == "cm") {
-            v_out = v_out / 10;
-        } else {
-            if (this.defaultUnit == "pt") {
-                v_out = parseFloat(Ext.Number.toFixed(v_out * 72 / 25.4, 3));
-            } else {
-                if (this.defaultUnit == "in") {
-                    v_out = v_out / 25.4;
-                } else {
-                    if (this.defaultUnit == "pc") {
-                        v_out = v_out * 6 / 25.4;
-                    }
-                }
-            }
-        }
-        return v_out;
-    }
+    });
 });

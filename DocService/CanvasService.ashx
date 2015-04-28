@@ -1,6 +1,6 @@
 ﻿<%@ WebHandler Language="C#" Class="CanvasService" %>
 /*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -59,8 +59,8 @@ public class CanvasService : IHttpAsyncHandler
     private const string c_sSaveTypePart = "part";
     private const string c_sSaveTypeComplete = "complete";
     private const string c_sSaveTypeCompleteAll = "completeall";
-    private const string c_sSaveTypeChanges = "changes";
     private readonly ILog _log = LogManager.GetLogger(typeof(CanvasService));
+    private OutputCommand m_oSfcOk = new OutputCommand("sfc", "");
 
     public CanvasService()
     {
@@ -108,12 +108,48 @@ public class CanvasService : IHttpAsyncHandler
         try
         {
             eError = asyncOp.ReadContextEnd(ar);
-            strStream = System.Text.Encoding.UTF8.GetString(asyncOp.m_aBuffer);
+            strStream = System.Text.Encoding.UTF8.GetString(asyncOp.m_aOutput.GetBuffer(), 0, (int)asyncOp.m_aOutput.Length);
 
             if (ErrorTypes.NoError == eError)
             {
                 InputCommand cmd = ReadCommand(strStream);
 
+				if(null != cmd)
+				{
+                    try
+                    {
+                        
+                        if ("save" == cmd.c && FileFormats.AVS_OFFICESTUDIO_FILE_CROSSPLATFORM_PDF == cmd.outputformat && !string.IsNullOrEmpty(cmd.data) && 0 != (cmd.data.Length % 4))
+                        {
+                            HttpContext context = oTransportClassContextRead.m_oHttpContext;
+                            int nContentLength = context.Request.ContentLength;
+                            bool bCanSeek = context.Request.InputStream.CanSeek;
+                            long nInputStreamLength = 0;
+                            if (bCanSeek)
+                                nInputStreamLength = context.Request.InputStream.Length;
+                            long nOutputLength = asyncOp.m_aOutput.Length;
+                            int nStrStream = strStream.Length;
+                            int nDataLength = cmd.data.Length;
+                            string sJson = "";
+                            string sSearchString = "mnuSaveAs";
+                            if (strStream.StartsWith(sSearchString))
+                            {
+                                int nSearchStringLength = sSearchString.Length;
+                                int nIdStart = nSearchStringLength + 1;
+                                int nIdEnd = strStream.IndexOf(c_cCharDelimiter, nIdStart);
+
+                                sJson = strStream.Substring(nIdStart, nIdEnd - nIdStart);
+                            }
+                            string sHeaders = context.Request.Headers.ToString();
+                            string sFormat = "Print pdf error nContentLength:{0};bCanSeek:{1};nInputStreamLength:{2};nOutputLength:{3};nStrStream:{4};nDataLength:{5};sJson:{6};sHeaders:{7}";
+                            _log.ErrorFormat(sFormat, nContentLength, bCanSeek, nInputStreamLength, nOutputLength, nStrStream, nDataLength, sJson, sHeaders);
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        _log.Error("Exception catched in Print error:", e);
+                    }
+				}
                 eError = ProcessCommand(oTransportClassContextRead, cmd);
             }
         }
@@ -127,20 +163,18 @@ public class CanvasService : IHttpAsyncHandler
         finally
         {
             if (ErrorTypes.NoError != eError)
+			{
+				_log.InfoFormat("Error {0} occur in ReadContext:", eError);
                 WriteOutputCommand(oTransportClassContextRead, new OutputCommand(eError));
-        }
+        	}
+    	}	
     }
 
     private ErrorTypes ProcessCommand(TransportClassContextRead oTransportClassContextRead, InputCommand cmd)
     {
         ErrorTypes eError = ErrorTypes.NoError;
 
-        LicenseInfo.LicenseRights oRights = null;
-
-        oRights = new LicenseInfo.LicenseRights(true);
-
-        if (ErrorTypes.NoError == eError)
-        {
+			_log.DebugFormat("ProcessCommand {0}:", cmd.c);
             switch (cmd.c)
             {
                 case "create":
@@ -162,7 +196,9 @@ public class CanvasService : IHttpAsyncHandler
                 case "save":
                     SaveCommand(oTransportClassContextRead, cmd);
                     break;
-
+                case "sfct":
+                    SfctCommand(oTransportClassContextRead, cmd);
+                    break;
                 case "chsave":
                     CheckSaveCommand(oTransportClassContextRead, cmd);
                     break;
@@ -183,53 +219,31 @@ public class CanvasService : IHttpAsyncHandler
                 case "sfc":
                     SaveFileChangesCommand(oTransportClassContextRead, cmd);
                     break;
+                case "sfcc":
+                    SaveFileChangesCallbackCommand(oTransportClassContextRead, cmd);
+                    break;
 
                 case "savefromorigin":
                     SaveFormOriginCommand(oTransportClassContextRead, cmd);
                     break;
 
                 case "getsettings":
-                    GetSettingsCommand(oTransportClassContextRead, cmd, oRights);
-                    break;
 
-                case "getlicense":
-                    GetLicenseCommand(oTransportClassContextRead, cmd);
+                    GetSettingsCommand(oTransportClassContextRead, cmd);
+
                     break;
 
                 default:
+					_log.InfoFormat("Unknown command: {0}", cmd.c);
                     eError = ErrorTypes.Unknown;
                     break;
             }
-        }
-        return eError;
-    }
 
-    private ErrorTypes GetRights(InputCommand cmd, out LicenseInfo.LicenseRights oRights)
-    {
-        oRights = null;        
-        ErrorTypes eError = ErrorTypes.NoError;
-        
-        LicenseInfo.LicenseMetaData oLicenseMetaData = null;
-
-        oLicenseMetaData = new LicenseInfo.LicenseMetaData(
-                null == cmd.vkey ? "" : cmd.vkey, 
-                cmd.id, 
-                null == cmd.userid ? "" : cmd.userid,
-                cmd.editorid);
-
-        oRights = ASP.global_asax.LicenseInfo.getRights(oLicenseMetaData, out eError);
-
-        if (null == oRights && ErrorTypes.NoError == eError)
-            eError = ErrorTypes.LicenseError;
-        else
-            eError = CheckRights(cmd, oRights);
-        
         return eError;
     }
 
     private static InputCommand ReadCommand(string strStream)
     {
-        JavaScriptSerializer oJavaScriptSerializer = new JavaScriptSerializer();
         string sSearchString = "mnuSaveAs";
         InputCommand cmd;
         if (strStream.StartsWith(sSearchString))
@@ -240,40 +254,22 @@ public class CanvasService : IHttpAsyncHandler
             int nIdEnd = strStream.IndexOf(c_cCharDelimiter, nIdStart);
 
             string sJson = strStream.Substring(nIdStart, nIdEnd - nIdStart);
-            cmd = oJavaScriptSerializer.Deserialize<InputCommand>(sJson);
+            cmd = InputCommand.DeserializeFromJson(sJson);
             cmd.data = strStream.Substring(nIdEnd + 1);
         }
         else
-            cmd = oJavaScriptSerializer.Deserialize<InputCommand>(strStream);
+            cmd = InputCommand.DeserializeFromJson(strStream);
         return cmd;
     }
 
-    private void GetSettingsCommand(TransportClassContextRead oTransportClassContextRead, InputCommand cmd, LicenseInfo.LicenseRights oRights)
+    private void GetSettingsCommand(TransportClassContextRead oTransportClassContextRead, InputCommand cmd)
+
     {
-        OutputSettingsTrackingData oTrackingData = null;
 
-        oTrackingData = new OutputSettingsTrackingData();
+        OutputSettingsData oOutputSettingsData = new OutputSettingsData(cmd.format);
 
-        oTrackingData.licenseId = "";
-        oTrackingData.trackingUrl = null;
-        oTrackingData.trackingType = TrackingType.TT_NONE;
-
-        JavaScriptSerializer oJsSerializer = new JavaScriptSerializer();
-        
-        OutputSettingsData oOutputSettingsData = new OutputSettingsData(oRights, cmd.format, oTrackingData);
-        
+        JavaScriptSerializer oJsSerializer = new JavaScriptSerializer();  
         OutputCommand oOutputCommand = new OutputCommand("getsettings", oJsSerializer.Serialize(oOutputSettingsData));
-        WriteOutputCommand(oTransportClassContextRead, oOutputCommand);
-    }
-    private void GetLicenseCommand (TransportClassContextRead oTransportClassContextRead, InputCommand cmd)
-    {
-        LicenseInfo oLicenseInfo = ASP.global_asax.LicenseInfo;
-
-        LicenseInfo.LicenseCustomerInfo customer_info = (null == oLicenseInfo) ? null : oLicenseInfo.getCustomerInfo();
-
-        JavaScriptSerializer oJsSerializer = new JavaScriptSerializer();
-
-        OutputCommand oOutputCommand = new OutputCommand("getlicense", oJsSerializer.Serialize(customer_info));
         WriteOutputCommand(oTransportClassContextRead, oOutputCommand);
     }
 
@@ -283,22 +279,9 @@ public class CanvasService : IHttpAsyncHandler
         oTaskResultData.sKey = cmd.id;
         oTaskResultData.sFormat = cmd.format;
         oTaskResultData.eStatus = FileStatus.WaitQueue;
-        oTaskResultData.oLastOpenDate = DateTime.UtcNow;
-        TaskResult oTaskResult = new TaskResult();
+        ITaskResultInterface oTaskResult = TaskResult.NewTaskResult();
         TransportClassTaskResult oTransportClassTaskResult = new TransportClassTaskResult(oTransportClassContextRead, cmd, oTaskResult);
         oTaskResult.AddRandomKeyBegin(cmd.id, oTaskResultData, TaskResultAddRandomKeyAsyncCallback2, oTransportClassTaskResult);
-    }
-
-    private void SaveFileChangesCommand(TransportClassContextRead oTransportClassContextRead, InputCommand cmd)
-    {
-        TaskResultData oTaskResultData = new TaskResultData();
-        oTaskResultData.sKey = cmd.id;
-        oTaskResultData.sFormat = cmd.format;
-        oTaskResultData.eStatus = FileStatus.WaitQueue;
-        oTaskResultData.oLastOpenDate = DateTime.UtcNow;
-        TaskResult oTaskResult = new TaskResult();
-        TransportClassTaskResult oTransportClassTaskResult = new TransportClassTaskResult(oTransportClassContextRead, cmd, oTaskResult);
-        oTaskResult.AddRandomKeyBegin(cmd.id, oTaskResultData, TaskResultAddRandomKeyAsyncCallback3, oTransportClassTaskResult);
     }
 
     private void ImageUrlCommand(TransportClassContextRead oTransportClassContextRead, InputCommand cmd)
@@ -310,7 +293,7 @@ public class CanvasService : IHttpAsyncHandler
 
     private void GetCodepageCommand(TransportClassContextRead oTransportClassContextRead)
     {
-        string sJson = Utils.GetSerializedEncodingProperty(null, null);
+        string sJson = Utils.GetSerializedEncodingProperty("temp", null, null);
         WriteOutputCommand(oTransportClassContextRead, new OutputCommand("getcodepage", sJson));
     }
 
@@ -325,34 +308,25 @@ public class CanvasService : IHttpAsyncHandler
     {
         JavaScriptSerializer oJavaScriptSerializer = new JavaScriptSerializer();
         OutputWaitSaveData oOutputWaitSaveData = oJavaScriptSerializer.Deserialize<OutputWaitSaveData>(cmd.data);
-        TaskResult oTaskResult = new TaskResult();
+        ITaskResultInterface oTaskResult = TaskResult.NewTaskResult();
         TransportClassTaskResult oTransportClassTaskResult = new TransportClassTaskResult(oTransportClassContextRead, cmd, oTaskResult);
         oTaskResult.GetBegin(oOutputWaitSaveData.key, TaskResultGetAsyncCallback, oTransportClassTaskResult);
     }
 
     private void SaveCommand(TransportClassContextRead oTransportClassContextRead, InputCommand cmd)
     {
+		_log.DebugFormat("SaveCommand, savetype={0}.", cmd.savetype);
         switch (cmd.savetype)
         {
-            case c_sSaveTypeChanges:
-                {
-                    OutputCommand oOutputCommand = new OutputCommand("changes", null);
-                    string sFilename = "changes";
-                    string sExt = ".json";
-                    Storage oStorage = new Storage();
-                    TransportClassStorage2 oTransportClassStorage2 = new TransportClassStorage2(oTransportClassContextRead, cmd, oStorage, null, cmd.id + "/changes", sFilename, sExt, oOutputCommand);
-                    oStorage.GetTreeNodeBegin(cmd.id + "/changes", GetTreeNodeCallback, oTransportClassStorage2);
-                    break;
-                }
             case c_sSaveTypePartStart:
             case c_sSaveTypeCompleteAll:
                 {
+					_log.Debug("cmd.savetype = SaveTypes.PartStart or SaveTypes.CompleteAll.");
                     TaskResultData oTaskResultData = new TaskResultData();
                     oTaskResultData.sKey = cmd.id;
                     oTaskResultData.sFormat = cmd.format;
                     oTaskResultData.eStatus = FileStatus.WaitQueue;
-                    oTaskResultData.oLastOpenDate = DateTime.UtcNow;
-                    TaskResult oTaskResult = new TaskResult();
+                    ITaskResultInterface oTaskResult = TaskResult.NewTaskResult();
                     TransportClassTaskResult oTransportClassTaskResult = new TransportClassTaskResult(oTransportClassContextRead, cmd, oTaskResult);
                     oTaskResult.AddRandomKeyBegin(cmd.id, oTaskResultData, TaskResultAddRandomKeyAsyncCallback, oTransportClassTaskResult);
                     break;
@@ -362,8 +336,9 @@ public class CanvasService : IHttpAsyncHandler
             default:
                 {
 
+					_log.Debug("cmd.savetype = SaveTypes.Part or SaveTypes.Complete or default.");
                     JavaScriptSerializer serializer = new JavaScriptSerializer();
-                    OutputSavePartData oOutputSavePartData = new OutputSavePartData(cmd.savekey, cmd.outputformat);
+                    OutputSavePartData oOutputSavePartData = new OutputSavePartData(cmd.savekey, cmd.outputformat.Value);
                     OutputCommand oOutputCommand = new OutputCommand("savepart", serializer.Serialize(oOutputSavePartData));
                     string sFilename = "Editor";
                     string sExt = ".bin";
@@ -377,75 +352,30 @@ public class CanvasService : IHttpAsyncHandler
 
     private void CheckOpenCommand(TransportClassContextRead oTransportClassContextRead, InputCommand cmd)
     {
-        TaskResult oTaskResult = new TaskResult();
+        ITaskResultInterface oTaskResult = TaskResult.NewTaskResult();
         TransportClassTaskResult oTransportClassTaskResult = new TransportClassTaskResult(oTransportClassContextRead, cmd, oTaskResult);
         oTaskResult.GetBegin(cmd.id, TaskResultGetCallback, oTransportClassTaskResult);
     }
 
     private void ReopenCommand(TransportClassContextRead oTransportClassContextRead, InputCommand cmd)
     {
-        
-        AsyncClearCacheOperation oAsyncClearCacheOperation = new AsyncClearCacheOperation();
-        TransportClassClearCache oTransportClassClearCache = new TransportClassClearCache(oTransportClassContextRead, cmd, oAsyncClearCacheOperation, null);
-        oAsyncClearCacheOperation.ClearCacheBegin(cmd.id, TaskResultRemoveCallback3, oTransportClassClearCache);
-        }
-
-    private static ErrorTypes CheckRights(InputCommand cmd, LicenseInfo.LicenseRights oRights)
-    {
-        ErrorTypes eError = ErrorTypes.NoError;
-        switch (cmd.c)
+        try
         {
-            case "create":
-            case "reopen":
-            case "open":
-            case "chopen":
-                {
-                    if (true != oRights.CanOpen)
-                        eError = ErrorTypes.LicenseErrorPermission;
-                }
-                break;
+            TaskResultDataToUpdate oTaskResultData = new TaskResultDataToUpdate();
+            oTaskResultData.eStatus = FileStatus.WaitQueue;
+            oTaskResultData.nStatusInfo = (int)ErrorTypes.NoError;
 
-            case "savefromorigin":
-                {
-                    if (true != oRights.CanPrint)
-                        eError = ErrorTypes.LicenseErrorPermission;
-                }
-                break;
+            ITaskResultInterface oTaskResult = TaskResult.NewTaskResult();
+            TransportClassTaskResult oTransportClassTaskResult = new TransportClassTaskResult(oTransportClassContextRead, cmd, oTaskResult);
 
-            case "save":
-                {
-                    if (FileFormats.AVS_OFFICESTUDIO_FILE_CROSSPLATFORM_PDF == cmd.outputformat)
-                    {
-                        if (true != oRights.CanPrint)
-                            eError = ErrorTypes.LicenseErrorPermission;
-                    }
-                    else if (true == cmd.innersave)
-                    {
-                        if (true != oRights.CanSave)
-                        eError = ErrorTypes.LicenseErrorPermission;
-                    }
-                    else if (true != oRights.CanExport)
-                        eError = ErrorTypes.LicenseErrorPermission;
-                }
-                break;
-
-            case "imgurl":
-            case "imgurls":
-            case "sfc":
-                {
-                    if (true != oRights.CanSave)
-                        eError = ErrorTypes.LicenseErrorPermission;
-                }
-                break;
-
-            case "getsettings":
-            case "getlicense":
-            case "chsave":
-            default:
-                break;
+            oTaskResult.UpdateBegin(cmd.id, oTaskResultData, TaskResultUpdateCallback, oTransportClassTaskResult);
         }
-        return eError;
+        catch
+        {
+            WriteOutputCommand(oTransportClassContextRead, new OutputCommand(ErrorTypes.Unknown));
+        }
     }
+
     private void GetTreeNodeCallback(IAsyncResult ar)
     {
         TransportClassStorage2 oTransportClassStorage = ar.AsyncState as TransportClassStorage2;
@@ -484,10 +414,15 @@ public class CanvasService : IHttpAsyncHandler
             nMaxIndex++;
             MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(cmd.data));
             oTransportClassStorage.m_oStream = ms;
+			_log.DebugFormat("oTransportClassStorage.m_sKey={0}:", oTransportClassStorage.m_sKey);
+			_log.DebugFormat("oTransportClassStorage.m_sFilename={0}:", oTransportClassStorage.m_sFilename);
+			_log.DebugFormat("nMaxIndex={0}:", nMaxIndex);
+			_log.DebugFormat("oTransportClassStorage.m_sExt={0}:", oTransportClassStorage.m_sExt);
             oStorage.WriteFileBegin(Path.Combine(oTransportClassStorage.m_sKey, oTransportClassStorage.m_sFilename + nMaxIndex + oTransportClassStorage.m_sExt), ms, ChangesWriteCallback, oTransportClassStorage);
         }
-        catch
+        catch(Exception e)
         {
+			_log.Error("Exception catched in GetTreeNodeCallback:", e);
             WriteOutputCommand(oTransportClassStorage, new OutputCommand(ErrorTypes.Unknown));
         }
     }
@@ -528,7 +463,7 @@ public class CanvasService : IHttpAsyncHandler
             if (c_sSaveTypeComplete == cmd.savetype || c_sSaveTypeCompleteAll == cmd.savetype)
             {
                 
-                int nOutputFormat = cmd.outputformat;
+                int nOutputFormat = cmd.outputformat.HasValue ? cmd.outputformat.Value : FileFormats.AVS_OFFICESTUDIO_FILE_OTHER_TEAMLAB_INNER;
                 TaskQueueData oTaskQueueData = new TaskQueueData(oTransportClassStorage.m_sKey, nOutputFormat, "output." + FileFormats.ToString(nOutputFormat));
                 oTaskQueueData.m_sFromKey = cmd.id;
                 oTaskQueueData.m_sFromFormat = "bin";
@@ -552,10 +487,25 @@ public class CanvasService : IHttpAsyncHandler
             else
                 WriteOutputCommand(oTransportClassStorage, oTransportClassStorage.m_oOutputCommand);
         }
-        catch
+        catch(Exception e)
         {
+			_log.Error("Exception catched in ChangesWriteCallback:", e);
             WriteOutputCommand(oTransportClassStorage, new OutputCommand(ErrorTypes.Unknown));
         }
+    }
+    private void TaskResultGetAsyncCallbackOk(TransportClassTaskResult oTransportClassTaskResult)
+    {
+        InputCommand cmd = oTransportClassTaskResult.m_oInputCommand;
+        JavaScriptSerializer oJavaScriptSerializer = new JavaScriptSerializer();
+        OutputWaitSaveData oOutputWaitSaveData = oJavaScriptSerializer.Deserialize<OutputWaitSaveData>(cmd.data);
+        
+        string sUrlPrefix = UrlBuilder.UrlWithoutPath( oTransportClassTaskResult.m_oHttpContext.Request );
+        string sUrl = GetResultUrl( sUrlPrefix,
+                                    oOutputWaitSaveData.key,
+                                    oOutputWaitSaveData.filename,
+                                    cmd.title + "." + FileFormats.ToString(oOutputWaitSaveData.format));
+        
+        WriteOutputCommand(oTransportClassTaskResult, new OutputCommand("save", sUrl));
     }
     private void TaskResultGetAsyncCallback(IAsyncResult ar)
     {
@@ -570,17 +520,7 @@ public class CanvasService : IHttpAsyncHandler
                 switch (oTask.eStatus)
                 {
                     case FileStatus.Ok:
-                        JavaScriptSerializer oJavaScriptSerializer = new JavaScriptSerializer();
-                        OutputWaitSaveData oOutputWaitSaveData = oJavaScriptSerializer.Deserialize<OutputWaitSaveData>(cmd.data);
-                        string sPath = HttpUtility.UrlEncode(oOutputWaitSaveData.key + "/" + oOutputWaitSaveData.filename);
-                        string sDeletePath = HttpUtility.UrlEncode(oOutputWaitSaveData.key);
-                        string sFilename = HttpUtility.UrlEncode(cmd.title + "." + FileFormats.ToString(oOutputWaitSaveData.format));
-                        Uri oSiteUri = oTransportClassTaskResult.m_oHttpContext.Request.Url;
-                        string sSiteUrl = oSiteUri.Scheme + "://" + oSiteUri.Host;
-                        if (-1 != oSiteUri.Port)
-                            sSiteUrl += ":" + oSiteUri.Port;
-                        string sUrl = sSiteUrl + Constants.mc_sResourceServiceUrlRel + sPath + "&deletepath=" + sDeletePath + "&filename=" + sFilename;
-                        WriteOutputCommand(oTransportClassTaskResult, new OutputCommand("save", sUrl));
+                        TaskResultGetAsyncCallbackOk(oTransportClassTaskResult);
                         break;
                     case FileStatus.Convert:
                     case FileStatus.WaitQueue:
@@ -622,6 +562,12 @@ public class CanvasService : IHttpAsyncHandler
                     sFilename = "Editor.bin";
                 else
                     sFilename = "Editor1.bin";
+				try
+                {
+                    if (FileFormats.AVS_OFFICESTUDIO_FILE_CROSSPLATFORM_PDF == cmd.outputformat && !string.IsNullOrEmpty(cmd.data) && 0 != (cmd.data.Length % 4))
+                        _log.ErrorFormat("Print error Request.Headers:{0}", oTransportClassTaskResult.m_oHttpContext.Request.Headers.ToString());
+                }
+                catch { }
                 
                 byte[] aBuffer = Encoding.ASCII.GetBytes(cmd.data);
                 MemoryStream oMemoryStream = new MemoryStream(aBuffer);
@@ -676,47 +622,6 @@ public class CanvasService : IHttpAsyncHandler
             WriteOutputCommand(oTransportClassTaskResult, new OutputCommand(ErrorTypes.Unknown));
         }
     }
-    private void TaskResultAddRandomKeyAsyncCallback3(IAsyncResult ar)
-    {
-        TransportClassTaskResult oTransportClassTaskResult = ar.AsyncState as TransportClassTaskResult;
-        try
-        {
-            TaskResultData oTaskResultData;
-            ErrorTypes eError = oTransportClassTaskResult.m_oTaskResult.AddRandomKeyEnd(ar, out oTaskResultData);
-            if (ErrorTypes.NoError == eError)
-            {
-                
-                InputCommand cmd = oTransportClassTaskResult.m_oInputCommand;
-                int nOutputFormat = cmd.outputformat;
-                TaskQueueData oTaskQueueData = new TaskQueueData(oTaskResultData.sKey, nOutputFormat, "output." + FileFormats.ToString(nOutputFormat));
-                oTaskQueueData.m_sFromKey = cmd.id;
-                oTaskQueueData.m_sFromFormat = "bin";
-                oTaskQueueData.m_bFromChanges = true;
-                if (cmd.codepage.HasValue)
-                    oTaskQueueData.m_nCsvTxtEncoding = cmd.codepage.Value;
-                if (cmd.delimiter.HasValue)
-                    oTaskQueueData.m_nCsvDelimiter = cmd.delimiter.Value;
-                if (null != cmd.vkey)
-                {
-                    bool bPaid;
-                    Signature.getVKeyParams(cmd.vkey, out bPaid);
-                    oTaskQueueData.m_bPaid = bPaid;
-                }
-                Priority oPriority = Priority.Low;
-                if (cmd.innersave)
-                    oPriority = Priority.Normal;
-                CTaskQueue oTaskQueue = new CTaskQueue();
-                TransportClassTaskQueue oTransportClassTaskQueue = new TransportClassTaskQueue(oTransportClassTaskResult, oTaskQueue, oTaskQueueData);
-                oTaskQueue.AddTaskBegin(oTaskQueueData, oPriority, TaskQueueAddCallbackSave, oTransportClassTaskQueue);
-            }
-            else
-                WriteOutputCommand(oTransportClassTaskResult, new OutputCommand(eError));
-        }
-        catch
-        {
-            WriteOutputCommand(oTransportClassTaskResult, new OutputCommand(ErrorTypes.Unknown));
-        }
-    }
     private void StorageWriteFileAsyncCallback(IAsyncResult ar)
     {
         TransportClassStorage oTransportClassStorage = ar.AsyncState as TransportClassStorage;
@@ -732,7 +637,7 @@ public class CanvasService : IHttpAsyncHandler
                 if (c_sSaveTypeCompleteAll == cmd.savetype || c_sSaveTypeComplete == cmd.savetype)
                 {
                     
-                    int nOutputFormat = cmd.outputformat;
+                    int nOutputFormat = cmd.outputformat.Value;
                     TaskQueueData oTaskQueueData = new TaskQueueData(oTransportClassStorage.m_sKey, nOutputFormat, "output." + FileFormats.ToString(nOutputFormat));
                     oTaskQueueData.m_sFromKey = cmd.id;
                     oTaskQueueData.m_sFromFormat = "bin";
@@ -757,7 +662,7 @@ public class CanvasService : IHttpAsyncHandler
                 else
                 {
                     JavaScriptSerializer serializer = new JavaScriptSerializer();
-                    OutputSavePartData oOutputSavePartData = new OutputSavePartData(oTransportClassStorage.m_sKey, cmd.outputformat);
+                    OutputSavePartData oOutputSavePartData = new OutputSavePartData(oTransportClassStorage.m_sKey, cmd.outputformat.Value);
                     WriteOutputCommand(oTransportClassStorage, new OutputCommand("savepart", serializer.Serialize(oOutputSavePartData)));
                 }
             }
@@ -786,9 +691,33 @@ public class CanvasService : IHttpAsyncHandler
             else
                 WriteOutputCommand(oTransportClassTaskQueue, new OutputCommand(eError));
         }
+        catch(Exception e)
+        {
+			_log.Error("Exception catched in TaskQueueAddCallbackSave:", e);
+            WriteOutputCommand(oTransportClassTaskQueue, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    private void TaskResultUpdateIfCallback2(IAsyncResult ar)
+    {
+        TransportClassTaskResult oTransportClassTaskResult = ar.AsyncState as TransportClassTaskResult;
+        try
+        {
+            bool bUpdate;
+            ErrorTypes eError = oTransportClassTaskResult.m_oTaskResult.UpdateIfEnd(ar, out bUpdate);
+            if (ErrorTypes.NoError == eError)
+            {
+                InputCommand cmd = oTransportClassTaskResult.m_oInputCommand;
+                if (bUpdate)
+                    WriteOutputCommand(oTransportClassTaskResult, new OutputCommand("open", cmd.id + "/Editor.bin"));
+                else
+                    WriteOutputCommand(oTransportClassTaskResult, new OutputCommand("updateversion", cmd.id + "/Editor.bin"));
+            }
+            else
+                WriteOutputCommand(oTransportClassTaskResult, new OutputCommand(eError));
+        }
         catch
         {
-            WriteOutputCommand(oTransportClassTaskQueue, new OutputCommand(ErrorTypes.Unknown));
+            WriteOutputCommand(oTransportClassTaskResult, new OutputCommand(ErrorTypes.Unknown));
         }
     }
     private void TaskResultGetOrCreateCallback(IAsyncResult ar)
@@ -824,11 +753,9 @@ public class CanvasService : IHttpAsyncHandler
                 if (bCreate)
                 {
                     InputCommand cmd = oTransportClassTaskResult.m_oInputCommand;
-                    MemoryStream oMemoryStream = new MemoryStream(Encoding.ASCII.GetBytes(cmd.data));
                     Storage oStorage = new Storage();
-                    oStorage.CreateDirectory(cmd.id + "/media");
-                    TransportClassStorage oTransportClassStorage = new TransportClassStorage(oTransportClassTaskResult, cmd, oStorage, oMemoryStream, cmd.id);
-                    oStorage.WriteFileBegin(cmd.id + "/Editor.bin", oMemoryStream, EditorBinWriteCallback, oTransportClassStorage);
+                    TransportClassStorage oTransportClassStorage = new TransportClassStorage(oTransportClassTaskResult, oTransportClassTaskResult.m_oInputCommand, oStorage, null, null);
+                    oStorage.CreateDirectoryBegin(cmd.id + "/media", CreateDirectoryCallback, oTransportClassStorage);
                 }
                 else
                 {
@@ -845,6 +772,29 @@ public class CanvasService : IHttpAsyncHandler
         catch
         {
             WriteOutputCommand(oTransportClassTaskResult, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    private void CreateDirectoryCallback(IAsyncResult ar)
+    {
+        TransportClassStorage oTransportClassStorage = ar.AsyncState as TransportClassStorage;
+        try
+        {
+            Storage oStorage = oTransportClassStorage.m_oStorage;
+            ErrorTypes eError = oStorage.CreateDirectoryEnd(ar);
+            if (ErrorTypes.NoError == eError)
+            {
+                InputCommand cmd = oTransportClassStorage.m_oInputCommand;
+                MemoryStream oMemoryStream = new MemoryStream(Encoding.ASCII.GetBytes(cmd.data));
+                oTransportClassStorage.m_oStream = oMemoryStream;
+                oTransportClassStorage.m_sKey = cmd.id;
+                oStorage.WriteFileBegin(cmd.id + "/Editor.bin", oMemoryStream, EditorBinWriteCallback, oTransportClassStorage);
+            }
+            else
+                WriteOutputCommand(oTransportClassStorage, new OutputCommand(eError));
+        }
+        catch
+        {
+            WriteOutputCommand(oTransportClassStorage, new OutputCommand(ErrorTypes.Unknown));
         }
     }
     private void TaskResultGetCallback(IAsyncResult ar)
@@ -888,6 +838,8 @@ public class CanvasService : IHttpAsyncHandler
             TransportClassTaskQueue oTransportClassTaskQueue = new TransportClassTaskQueue(oTransportClassMainAshx, oTaskQueue, null);
 
             oTaskQueue.AddTaskBegin(oTaskQueueData, Priority.High, TaskQueueAddCallback, oTransportClassTaskQueue);
+			
+            WriteOutputCommand(oTransportClassTaskQueue, new OutputCommand("waitopen", "0"));
         }
         catch
         {
@@ -906,7 +858,14 @@ public class CanvasService : IHttpAsyncHandler
                 InputCommand cmd = oTransportClassTaskResult.m_oInputCommand;
                 int nToFormat = FileFormats.AVS_OFFICESTUDIO_FILE_CANVAS;
                 TaskQueueData oTaskQueueData = new TaskQueueData(cmd.id, nToFormat, "Editor.bin");
+                if ("reopen" == cmd.c)
+                {
+                    oTaskQueueData.m_sFromKey = cmd.id;
+                    oTaskQueueData.m_bFromSettings = true;
+                }
+                else
                     oTaskQueueData.m_sFromUrl = cmd.url;
+
                 oTaskQueueData.m_sFromFormat = cmd.format;
                 if (cmd.codepage.HasValue)
                     oTaskQueueData.m_nCsvTxtEncoding = cmd.codepage.Value;
@@ -917,6 +876,30 @@ public class CanvasService : IHttpAsyncHandler
                 CTaskQueue oTaskQueue = new CTaskQueue();
                 TransportClassTaskQueue oTransportClassTaskQueue = new TransportClassTaskQueue(oTransportClassTaskResult, oTaskQueue, null);
                 oTaskQueue.AddTaskBegin(oTaskQueueData, Priority.High, TaskQueueAddCallback, oTransportClassTaskQueue);
+
+				WriteOutputCommand(oTransportClassTaskQueue, new OutputCommand("waitopen", "0"));
+            }
+            else
+                WriteOutputCommand(oTransportClassTaskResult, new OutputCommand(eError));
+        }
+        catch
+        {
+            WriteOutputCommand(oTransportClassTaskResult, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    private void TaskResultUpdateCallback3(IAsyncResult ar)
+    {
+        TransportClassTaskResult oTransportClassTaskResult = ar.AsyncState as TransportClassTaskResult;
+        try
+        {
+            ErrorTypes eError = oTransportClassTaskResult.m_oTaskResult.UpdateEnd(ar);
+            if (ErrorTypes.NoError == eError)
+            {
+                InputCommand cmd = oTransportClassTaskResult.m_oInputCommand;
+                if ("create" == cmd.c)
+                    WriteOutputCommand(oTransportClassTaskResult, new OutputCommand("create", cmd.id + "/Editor.bin"));
+                else
+                    WriteOutputCommand(oTransportClassTaskResult, new OutputCommand("open", cmd.id + "/Editor.bin"));
             }
             else
                 WriteOutputCommand(oTransportClassTaskResult, new OutputCommand(eError));
@@ -932,14 +915,12 @@ public class CanvasService : IHttpAsyncHandler
         try
         {
             ErrorTypes eError = oTransportClassTaskQueue.m_oTaskQueue.AddTaskEnd(ar);
-            if (ErrorTypes.NoError == eError)
-                WriteOutputCommand(oTransportClassTaskQueue, new OutputCommand("waitopen", "0"));
-            else
-                WriteOutputCommand(oTransportClassTaskQueue, new OutputCommand(eError));
+			
         }
-        catch
+        catch(Exception e)
         {
-            WriteOutputCommand(oTransportClassTaskQueue, new OutputCommand(ErrorTypes.Unknown));
+			_log.Error("Exception catched in TaskQueueAddCallback:", e);
+			
         }
     }
     private void TaskResultRemoveCallback(IAsyncResult ar)
@@ -967,24 +948,6 @@ public class CanvasService : IHttpAsyncHandler
         {
             ErrorTypes eError = (ErrorTypes)oTransportClassClearCache.m_oParam;
             WriteOutputCommand(oTransportClassClearCache, new OutputCommand(eError));
-        }
-        catch
-        {
-            WriteOutputCommand(oTransportClassClearCache, new OutputCommand(ErrorTypes.Unknown));
-        }
-    }
-    private void TaskResultRemoveCallback3(IAsyncResult ar)
-    {
-        TransportClassClearCache oTransportClassClearCache = ar.AsyncState as TransportClassClearCache;
-        try
-        {
-            ErrorTypes eError = oTransportClassClearCache.m_oAsyncClearCacheOperation.ClearCacheEnd(ar);
-            if (ErrorTypes.NoError == eError)
-            {
-                OpenCommand(oTransportClassClearCache, oTransportClassClearCache.m_oInputCommand);
-            }
-            else
-                WriteOutputCommand(oTransportClassClearCache, new OutputCommand(eError));
         }
         catch
         {
@@ -1059,9 +1022,9 @@ public class CanvasService : IHttpAsyncHandler
                 }
                 else
                 {
-                    AsyncDownloadOperation oAsyncDownloadOperation = new AsyncDownloadOperation(nMaxBytes);
+                    AsyncWebRequestOperation oAsyncDownloadOperation = new AsyncWebRequestOperation(nMaxBytes);
                     oTransportClassMediaXml.m_oDownloadOperation = oAsyncDownloadOperation;
-                    oAsyncDownloadOperation.DownloadBegin(sUrl, DownloadDataCompleted, oTransportClassImgUrl);
+                    oTransportClassMediaXml.m_iAsyncResult = oAsyncDownloadOperation.RequestBegin(sUrl, "GET", null, null, DownloadDataCompleted, oTransportClassImgUrl);
                 }
             }
         }
@@ -1076,9 +1039,8 @@ public class CanvasService : IHttpAsyncHandler
         try
         {
             TransportClassMediaXml oTransportClassMediaXml = oTransportClassImgUrl.m_oTransportClassMediaXml;
-            ErrorTypes eError;
             byte[] aBuffer;
-            oTransportClassMediaXml.m_oDownloadOperation.DownloadEnd(ar, out eError, out aBuffer);
+            ErrorTypes eError = oTransportClassMediaXml.m_oDownloadOperation.RequestEnd(oTransportClassMediaXml.m_iAsyncResult, out aBuffer);
             if (ErrorTypes.NoError == eError)
                 ProcessImage(aBuffer, oTransportClassImgUrl);
             else
@@ -1092,9 +1054,18 @@ public class CanvasService : IHttpAsyncHandler
     private void ProcessImage(byte[] aBuffer, TransportClassImgUrl oTransportClassImgUrl)
     {
         TransportClassMediaXml oTransportClassMediaXml = oTransportClassImgUrl.m_oTransportClassMediaXml;
-        int nImageFormat = Utils.GetFileFormat(aBuffer);
+        int nImageFormat = FormatChecker.GetFileFormat(aBuffer);
         if ((0 != (FileFormats.AVS_OFFICESTUDIO_FILE_IMAGE & nImageFormat) || FileFormats.AVS_OFFICESTUDIO_FILE_CROSSPLATFORM_SVG == nImageFormat) && -1 != oTransportClassImgUrl.m_sSupportedFormats.IndexOf(FileFormats.ToString(nImageFormat)))
         {
+            if (FileFormats.AVS_OFFICESTUDIO_FILE_IMAGE_GIF == nImageFormat || FileFormats.AVS_OFFICESTUDIO_FILE_IMAGE_ICO == nImageFormat)
+            {
+                byte[] aNewBuffer;
+                if (Utils.ConvertGifIcoToPng(aBuffer, nImageFormat, out aNewBuffer))
+                {
+                    nImageFormat = FileFormats.AVS_OFFICESTUDIO_FILE_IMAGE_PNG;
+                    aBuffer = aNewBuffer;
+                }
+            }
             MemoryStream ms = new MemoryStream(aBuffer);
             string sHash = Utils.getMD5HexString(ms);
             string sExistFilename;
@@ -1245,11 +1216,28 @@ public class CanvasService : IHttpAsyncHandler
         HttpContext oHttpContext = oTransportClassMainAshx.m_oHttpContext;
         AsyncCallback fAsyncCallback = oTransportClassMainAshx.m_oAsyncCallback;
         oHttpContext.Response.ContentType = "text/plain";
-        DataContractJsonSerializer serOut = new DataContractJsonSerializer(typeof(OutputCommand));
-        serOut.WriteObject(oHttpContext.Response.OutputStream, oOutputCommand);
+        string sJson = new JavaScriptSerializer().Serialize(oOutputCommand);
+        byte[] aJsonUtf8 = Encoding.UTF8.GetBytes(sJson);
+        oHttpContext.Response.OutputStream.Write(aJsonUtf8, 0, aJsonUtf8.Length);
 
         fAsyncCallback.Invoke(new AsyncOperationData(null));
     }
+    private string GetResultUrl(string sSiteUrl, string sKey, string sRealFilename, string sOutputFilename)
+    {
+        return GetResultUrl(sSiteUrl, sKey, sRealFilename, sOutputFilename, true);
+    }
+    private string GetResultUrl(string sSiteUrl, string sKey, string sRealFilename, string sOutputFilename, bool bDelete)
+    {
+        string sPath = HttpUtility.UrlEncode(sKey + "/" + sRealFilename);
+        string sDeletePath = HttpUtility.UrlEncode(sKey);
+        string sFilename = HttpUtility.UrlEncode(sOutputFilename);
+        string sRes = sSiteUrl + Constants.mc_sResourceServiceUrlRel + sPath + "&nocache=true";
+        if (bDelete)
+            sRes += "&deletepath=" + sDeletePath;
+        sRes += "&filename=" + sFilename;
+        return sRes;
+    }
+
     #endregion
     #region HelpFunction
     private void CreateCommand(TransportClassContextRead oTransportClassContextRead, InputCommand cmd)
@@ -1263,12 +1251,11 @@ public class CanvasService : IHttpAsyncHandler
                 oTaskResultData.sFormat = cmd.format;
 
             oTaskResultData.eStatus = FileStatus.Ok;
-            oTaskResultData.oLastOpenDate = DateTime.UtcNow;
 
             if (false == string.IsNullOrEmpty(cmd.title))
                 oTaskResultData.sTitle = cmd.title;
 
-            TaskResult oTaskResult = new TaskResult();
+            ITaskResultInterface oTaskResult = TaskResult.NewTaskResult();
             TransportClassTaskResult oTransportClassTaskResult = new TransportClassTaskResult(oTransportClassContextRead, cmd, oTaskResult);
 
             oTaskResult.GetOrCreateBegin(cmd.id, oTaskResultData, TaskResultGetOrCreateCallback2, oTransportClassTaskResult);
@@ -1289,12 +1276,11 @@ public class CanvasService : IHttpAsyncHandler
                 oTaskResultData.sFormat = cmd.format;
             
             oTaskResultData.eStatus = FileStatus.WaitQueue;
-            oTaskResultData.oLastOpenDate = DateTime.UtcNow;
             
             if (false == string.IsNullOrEmpty(cmd.title))
                 oTaskResultData.sTitle = cmd.title;
             
-            TaskResult oTaskResult = new TaskResult();
+            ITaskResultInterface oTaskResult = TaskResult.NewTaskResult();
             TransportClassTaskResult oTransportClassClearCache = new TransportClassTaskResult(oTransportClassMainAshx, cmd, oTaskResult);
             
             oTaskResult.GetOrCreateBegin(cmd.id, oTaskResultData, TaskResultGetOrCreateCallback, oTransportClassClearCache);
@@ -1309,24 +1295,31 @@ public class CanvasService : IHttpAsyncHandler
         switch (oTaskInfo.eStatus)
         {
             case FileStatus.Ok:
-                string sAffiliateId = null;
-                Signature.getVKeyStringParam(cmd.vkey, ConfigurationSettings.AppSettings["keyKeyID"], out sAffiliateId);
-                if (null != sAffiliateId)
                 {
-                    string sTag = null;
-                    switch (cmd.editorid)
+                    string sAffiliateId = null;
+                    Signature.getVKeyStringParam(cmd.vkey, ConfigurationSettings.AppSettings["keyKeyID"], out sAffiliateId);
+                    if (null != sAffiliateId)
                     {
-                        case (int)LicenseInfo.EditorType.Spreadsheet: sTag = "open_sheet"; break;
-                        case (int)LicenseInfo.EditorType.Presentation: sTag = "open_presentation"; break;
-                        default: sTag = "open_word"; break;
+                        string sTag = null;
+                        switch (cmd.editorid)
+                        {
+                            case (int)LicenseInfo.EditorType.Spreadsheet: sTag = "open_sheet"; break;
+                            case (int)LicenseInfo.EditorType.Presentation: sTag = "open_presentation"; break;
+                            default: sTag = "open_word"; break;
+                        }
+                        FileConverterUtils2.FileStatistic oFileStat = new FileStatistic();
+                        oFileStat.insert(sAffiliateId, cmd.id, DateTime.UtcNow, sTag);
                     }
-                    FileConverterUtils2.FileStatistic oFileStat = new FileStatistic();
-                    oFileStat.insert(sAffiliateId, cmd.id, DateTime.UtcNow, sTag);
+
+					ITaskResultInterface oTaskResult = TaskResult.NewTaskResult();
+					TransportClassTaskResult oTransportClassTaskResult = new TransportClassTaskResult(
+						oTransportClassMainAshx, cmd, oTaskResult);
+					
+					string sOutputCommand = ("create" == cmd.c)? "create": "open";
+					
+					WriteOutputCommand(oTransportClassTaskResult, 
+						new OutputCommand(sOutputCommand, cmd.id + "/Editor.bin"));
                 }
-                if ("create" == cmd.c)
-                    WriteOutputCommand(oTransportClassMainAshx, new OutputCommand("create", cmd.id + "/Editor.bin"));
-                else
-                    WriteOutputCommand(oTransportClassMainAshx, new OutputCommand("open", cmd.id + "/Editor.bin"));
                 break;
             case FileStatus.Convert:
             case FileStatus.WaitQueue:
@@ -1349,7 +1342,7 @@ public class CanvasService : IHttpAsyncHandler
                     {
                         TaskResultDataToUpdate oToUpdate = new TaskResultDataToUpdate();
                         oToUpdate.eStatus = FileStatus.WaitQueue;
-                        TaskResult oTaskResult = new TaskResult();
+                        ITaskResultInterface oTaskResult = TaskResult.NewTaskResult();
                         TransportClassTaskResult oTransportClassTaskResult = new TransportClassTaskResult(oTransportClassMainAshx, cmd, oTaskResult);
                         oTaskResult.UpdateBegin(cmd.id, oToUpdate, TaskResultUpdateCallback, oTransportClassTaskResult);
 
@@ -1376,27 +1369,560 @@ public class CanvasService : IHttpAsyncHandler
             case FileStatus.Err:
                 WriteOutputCommand(oTransportClassMainAshx, new OutputCommand((ErrorTypes)oTaskInfo.nStatusInfo));
                 break;
+            case FileStatus.SaveVersion:
+                {
+                    ITaskResultInterface oTaskResult = TaskResult.NewTaskResult();
+                    TaskResultDataToUpdate oTask = new TaskResultDataToUpdate();
+                    oTask.eStatus = FileStatus.Ok;
+                    TaskResultDataToUpdate oMask = new TaskResultDataToUpdate();
+                    oMask.eStatus = FileStatus.SaveVersion;
+                    TransportClassTaskResult oTransportClassTaskResult = new TransportClassTaskResult(oTransportClassMainAshx, cmd, oTaskResult);
+                    oTaskResult.UpdateIfBegin(cmd.id, oMask, oTask, TaskResultUpdateIfCallback2, oTransportClassTaskResult);
+                }
+                break;
+            case FileStatus.UpdateVersion:
+                WriteOutputCommand(oTransportClassMainAshx, new OutputCommand("updateversion", cmd.id + "/Editor.bin"));
+                break;
             default:
                 WriteOutputCommand(oTransportClassMainAshx, new OutputCommand(ErrorTypes.Unknown));
                 break;
         }
     }
     #endregion
-    #region TransportClasses
-    private class TransportClassContextRead : TransportClassMainAshx
+    #region sfct
+    private void SfctCommand(TransportClassContextRead oTransportClassContextRead, InputCommand cmd)
     {
-        public AsyncContextReadOperation m_oAsyncContextReadOperation;
-        public TransportClassContextRead(TransportClassMainAshx m_oTransportClassMainAshx, AsyncContextReadOperation oAsyncContextReadOperation)
-            : base(m_oTransportClassMainAshx.m_oHttpContext, m_oTransportClassMainAshx.m_oAsyncCallback)
+        TaskResultData oTaskResultData = new TaskResultData();
+        oTaskResultData.sKey = cmd.id;
+        oTaskResultData.sFormat = cmd.format;
+        oTaskResultData.eStatus = FileStatus.WaitQueue;
+        ITaskResultInterface oTaskResult = TaskResult.NewTaskResult();
+        TransportClassTaskResult oTransportClassTaskResult = new TransportClassTaskResult(oTransportClassContextRead, cmd, oTaskResult);
+        oTaskResult.AddRandomKeyBegin(cmd.id, oTaskResultData, TaskResultAddRandomKeyAsyncCallback4, oTransportClassTaskResult);
+    }
+    private void TaskResultAddRandomKeyAsyncCallback4(IAsyncResult ar)
+    {
+        TransportClassTaskResult oTransportClassTaskResult = ar.AsyncState as TransportClassTaskResult;
+        try
         {
-            m_oAsyncContextReadOperation = oAsyncContextReadOperation;
+            TaskResultData oTaskResultData;
+            ErrorTypes eError = oTransportClassTaskResult.m_oTaskResult.AddRandomKeyEnd(ar, out oTaskResultData);
+            if (ErrorTypes.NoError == eError)
+            {
+                
+                InputCommand cmd = oTransportClassTaskResult.m_oInputCommand;
+                TaskQueueData oTaskQueueData = new TaskQueueData(oTaskResultData.sKey, cmd.outputformat.Value, "output." + FileFormats.ToString(cmd.outputformat.Value));
+                oTaskQueueData.m_sFromKey = cmd.id;
+                oTaskQueueData.m_sFromFormat = "doct";
+                oTaskQueueData.m_bFromChanges = true;
+
+                CTaskQueue oTaskQueue = new CTaskQueue();
+                TransportClassTaskQueue oTransportClassTaskQueue = new TransportClassTaskQueue(oTransportClassTaskResult, oTaskQueue, oTaskQueueData);
+                oTaskQueue.AddTaskBegin(oTaskQueueData, Priority.Low, TaskQueueAddCallbackSave3, oTransportClassTaskQueue);
+            }
+            else
+                WriteOutputCommand(oTransportClassTaskResult, new OutputCommand(eError));
+        }
+        catch
+        {
+            WriteOutputCommand(oTransportClassTaskResult, new OutputCommand(ErrorTypes.Unknown));
         }
     }
+    private void TaskQueueAddCallbackSave3(IAsyncResult ar)
+    {
+        TransportClassTaskQueue oTransportClassTaskQueue = ar.AsyncState as TransportClassTaskQueue;
+        try
+        {
+            ErrorTypes eError = oTransportClassTaskQueue.m_oTaskQueue.AddTaskEnd(ar);
+            if (ErrorTypes.NoError == eError)
+            {
+                TaskQueueData oTaskQueueData = oTransportClassTaskQueue.m_oParam as TaskQueueData;
+                OutputWaitSaveData oOutputWaitSaveData = new OutputWaitSaveData(oTaskQueueData.m_sKey, oTaskQueueData.m_sToFile, oTaskQueueData.m_nToFormat);
+                JavaScriptSerializer serializer = new JavaScriptSerializer();
+                WriteOutputCommand(oTransportClassTaskQueue, new OutputCommand("waitsave", serializer.Serialize(oOutputWaitSaveData)));
+            }
+            else
+                WriteOutputCommand(oTransportClassTaskQueue, new OutputCommand(eError));
+        }
+        catch (Exception e)
+        {
+            _log.Error("Exception catched in TaskQueueAddCallbackSave2:", e);
+            WriteOutputCommand(oTransportClassTaskQueue, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    #endregion
+    #region sfc
+    private void SaveFileChangesCommand(TransportClassContextRead oTransportClassContextRead, InputCommand cmd)
+    {
+        try
+        {
+            _log.DebugFormat("Enter SaveFileChangesCommand(id={0})", cmd.id);
+            TransportClassSaveChanges1 oTransportClassSaveChanges = new TransportClassSaveChanges1(oTransportClassContextRead);
+            oTransportClassSaveChanges.m_oInputCommand = cmd;
+            oTransportClassSaveChanges.m_oTaskResult = TaskResult.NewTaskResult();
+            oTransportClassSaveChanges.m_oTaskResult.GetBegin(cmd.id, TaskResultGetCallback2, oTransportClassSaveChanges);
+        }
+        catch(Exception e)
+        {
+            _log.Error("Exception catched in SaveFileChangesCommand:", e);
+            WriteOutputCommand(oTransportClassContextRead, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    private void TaskResultGetCallback2(IAsyncResult ar)
+    {
+        TransportClassSaveChanges1 oTransportClassSaveChanges = ar.AsyncState as TransportClassSaveChanges1;
+        try
+        {
+            InputCommand cmd = oTransportClassSaveChanges.m_oInputCommand;
+            _log.DebugFormat("Enter TaskResultGetCallback2(id={0})", cmd.id);
+            TaskResultData oTaskResultData;
+            ErrorTypes eError = oTransportClassSaveChanges.m_oTaskResult.GetEnd(ar, out oTaskResultData);
+            if (ErrorTypes.NoError == eError)
+            {
+                
+                if (oTaskResultData.oLastOpenDate < DateTime.UtcNow.AddMilliseconds( - Convert.ToInt32(cmd.data)))
+                {
+                    TaskResultDataToUpdate oTaskResultDataToUpdate = new TaskResultDataToUpdate();
+                    oTaskResultDataToUpdate.eStatus = FileStatus.SaveVersion;
+                    oTaskResultDataToUpdate.nStatusInfo = Convert.ToInt32(DateTime.UtcNow.TimeOfDay.TotalMilliseconds);
+                    oTransportClassSaveChanges.m_oTaskResultDataToUpdate = oTaskResultDataToUpdate;
+                    oTransportClassSaveChanges.m_oTaskResult.UpdateBegin(cmd.id, oTaskResultDataToUpdate, TaskResultUpdateCallback2, oTransportClassSaveChanges);
+                }
+                else
+                {
+                    _log.DebugFormat("oTaskResultData.oLastOpenDate < DateTime.UtcNow.AddMilliseconds(id={0})", cmd.id);
+                    WriteOutputCommand(oTransportClassSaveChanges, m_oSfcOk);
+                }
+            }
+            else
+            {
+                _log.ErrorFormat("Error in TaskResultGetCallback2(code={0})", (int)eError);
+                WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(eError));
+            }
+        }
+        catch (Exception e)
+        {
+            _log.Error("Exception catched in TaskResultGetCallback2:", e);
+            WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    private void TaskResultUpdateCallback2(IAsyncResult ar)
+    {
+        TransportClassSaveChanges1 oTransportClassSaveChanges = ar.AsyncState as TransportClassSaveChanges1;
+        try
+        {
+            InputCommand cmd = oTransportClassSaveChanges.m_oInputCommand;
+            _log.DebugFormat("Enter TaskResultUpdateCallback2(id={0})", cmd.id);
+            ErrorTypes eError = oTransportClassSaveChanges.m_oTaskResult.UpdateEnd(ar);
+            if (ErrorTypes.NoError == eError)
+            {
+                TaskResultData oTaskResultData = new TaskResultData();
+                oTaskResultData.sKey = cmd.id;
+                oTaskResultData.sFormat = "bin";
+                oTaskResultData.eStatus = FileStatus.WaitQueue;
+                oTransportClassSaveChanges.m_oTaskResult.AddRandomKeyBegin(cmd.id, oTaskResultData, TaskResultAddRandomKeyAsyncCallback3, oTransportClassSaveChanges);
+            }
+            else
+            {
+                _log.ErrorFormat("Error in TaskResultUpdateCallback2(code={0})", (int)eError);
+                WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(eError));
+            }
+        }
+        catch (Exception e)
+        {
+            _log.Error("Exception catched in TaskResultUpdateCallback2:", e);
+            WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    private void TaskResultAddRandomKeyAsyncCallback3(IAsyncResult ar)
+    {
+        TransportClassSaveChanges1 oTransportClassSaveChanges = ar.AsyncState as TransportClassSaveChanges1;
+        try
+        {
+            InputCommand cmd = oTransportClassSaveChanges.m_oInputCommand;
+            _log.DebugFormat("Enter TaskResultAddRandomKeyAsyncCallback3(id={0})", cmd.id);
+            TaskResultData oTaskResultData;
+            ErrorTypes eError = oTransportClassSaveChanges.m_oTaskResult.AddRandomKeyEnd(ar, out oTaskResultData);
+            if (ErrorTypes.NoError == eError)
+            {
+                
+                string sFilename = "output.zip";
+                
+                int nOutputFormat = FileFormats.AVS_OFFICESTUDIO_FILE_OTHER_TEAMLAB_INNER;
+                if(cmd.outputformat.HasValue)
+                {
+                    nOutputFormat = cmd.outputformat.Value;
+                    sFilename = "output." + FileFormats.ToString(nOutputFormat);
+                }
+                TaskQueueData oTaskQueueData = new TaskQueueData(oTaskResultData.sKey, nOutputFormat, sFilename);
+                oTaskQueueData.m_sFromKey = cmd.id;
+                oTaskQueueData.m_sFromFormat = "bin";
+                oTaskQueueData.m_bFromChanges = true;
+                if (cmd.codepage.HasValue)
+                    oTaskQueueData.m_nCsvTxtEncoding = cmd.codepage.Value;
+                if (cmd.delimiter.HasValue)
+                    oTaskQueueData.m_nCsvDelimiter = cmd.delimiter.Value;
+                if (null != cmd.vkey)
+                {
+                    bool bPaid;
+                    Signature.getVKeyParams(cmd.vkey, out bPaid);
+                    oTaskQueueData.m_bPaid = bPaid;
+                }
+                Priority oPriority = Priority.Low;
+                if (cmd.innersave)
+                    oPriority = Priority.Normal;
+                oTaskQueueData.m_sResultCallbackUrl = UrlBuilder.FullUrl(oTransportClassSaveChanges.m_oHttpContext.Request);
+                InputCommand oSaveCommand = new InputCommand();
+                oSaveCommand.c = "sfcc";
+                oSaveCommand.id = cmd.id;
+                oSaveCommand.task_queue_data = oTaskQueueData;
+                oSaveCommand.url = cmd.url;
+                oSaveCommand.status = (int)oTransportClassSaveChanges.m_oTaskResultDataToUpdate.eStatus.Value;
+                oSaveCommand.status_info = oTransportClassSaveChanges.m_oTaskResultDataToUpdate.nStatusInfo.Value;
+                oTaskQueueData.m_sResultCallbackData = InputCommand.SerializeToJson(oSaveCommand);
+                _log.DebugFormat("oTaskQueueData.m_sResultCallbackData = {0}(id={1})", oTaskQueueData.m_sResultCallbackData, cmd.id);
+                CTaskQueue oTaskQueue = new CTaskQueue();
+                oTransportClassSaveChanges.m_oTaskQueue = oTaskQueue;
+                oTransportClassSaveChanges.m_oTaskQueueData = oTaskQueueData;
+                oTaskQueue.AddTaskBegin(oTaskQueueData, oPriority, TaskQueueAddCallbackSave2, oTransportClassSaveChanges);
+            }
+            else
+            {
+                _log.ErrorFormat("Error in TaskResultAddRandomKeyAsyncCallback3(code={0})", (int)eError);
+                WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(eError));
+            }
+        }
+        catch(Exception e)
+        {
+            _log.Error("Exception catched in TaskResultAddRandomKeyAsyncCallback3:", e);
+            WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    private void TaskQueueAddCallbackSave2(IAsyncResult ar)
+    {
+        TransportClassSaveChanges1 oTransportClassSaveChanges = ar.AsyncState as TransportClassSaveChanges1;
+        try
+        {
+            InputCommand cmd = oTransportClassSaveChanges.m_oInputCommand;
+            _log.DebugFormat("Enter TaskQueueAddCallbackSave2(id={0})", cmd.id);
+            ErrorTypes eError = oTransportClassSaveChanges.m_oTaskQueue.AddTaskEnd(ar);
+            if (ErrorTypes.NoError == eError)
+            {
+                _log.DebugFormat("m_oSfcOk TaskQueueAddCallbackSave2(id={0})", cmd.id);
+                WriteOutputCommand(oTransportClassSaveChanges, m_oSfcOk);
+            }
+            else
+            {
+                _log.ErrorFormat("Error in TaskQueueAddCallbackSave2(code={0})", (int)eError);
+                WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(eError));
+            }
+        }
+        catch(Exception e)
+        {
+            _log.Error("Exception catched in TaskQueueAddCallbackSave2:", e);
+            WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    private void SaveFileChangesCallbackCommand(TransportClassContextRead oTransportClassContextRead, InputCommand cmd)
+    {
+        try
+        {
+            _log.DebugFormat("Enter SaveFileChangesCallbackCommand(id={0})", cmd.id);
+            TransportClassSaveChanges2 oTransportClassSaveChanges = new TransportClassSaveChanges2(oTransportClassContextRead);
+            oTransportClassSaveChanges.m_oInputCommand = cmd;
+            oTransportClassSaveChanges.m_oTaskQueueData = cmd.task_queue_data;
+            oTransportClassSaveChanges.m_oTaskResultDataToUpdate = new TaskResultDataToUpdate();
+            oTransportClassSaveChanges.m_oTaskResultDataToUpdate.eStatus = (FileStatus)cmd.status;
+            oTransportClassSaveChanges.m_oTaskResultDataToUpdate.nStatusInfo = cmd.status_info;
+            oTransportClassSaveChanges.m_oTaskResult = TaskResult.NewTaskResult();
+            oTransportClassSaveChanges.m_oTaskResult.GetBegin(oTransportClassSaveChanges.m_oTaskQueueData.m_sKey, TaskResultGetSfcCallback, oTransportClassSaveChanges);
+        }
+        catch (Exception e)
+        {
+            _log.Error("Exception catched in SaveFileChangesCallbackCommand:", e);
+            WriteOutputCommand(oTransportClassContextRead, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    private void TaskResultGetSfcCallback(IAsyncResult ar)
+    {
+        TransportClassSaveChanges2 oTransportClassSaveChanges = ar.AsyncState as TransportClassSaveChanges2;
+        try
+        {
+            InputCommand cmd = oTransportClassSaveChanges.m_oInputCommand;
+            _log.DebugFormat("Enter TaskResultGetSfcCallback(id={0})", cmd.id);
+            TaskResultData oTaskResultData;
+            ErrorTypes eError = oTransportClassSaveChanges.m_oTaskResult.GetEnd(ar, out oTaskResultData);
+            if (ErrorTypes.NoError == eError)
+            {
+                oTransportClassSaveChanges.m_oTaskResultData = oTaskResultData;
+                TaskResultDataToUpdate oTask = new TaskResultDataToUpdate();
+                oTask.eStatus = FileStatus.UpdateVersion;
+                oTask.nStatusInfo = (int)ErrorTypes.NoError;
+                TaskResultDataToUpdate oMask = new TaskResultDataToUpdate();
+                oMask.eStatus = oTransportClassSaveChanges.m_oTaskResultDataToUpdate.eStatus;
+                oMask.nStatusInfo = oTransportClassSaveChanges.m_oTaskResultDataToUpdate.nStatusInfo;
+                oTransportClassSaveChanges.m_oTaskResult.UpdateIfBegin(oTransportClassSaveChanges.m_oTaskQueueData.m_sFromKey, oMask, oTask, TaskResultUpdateIfCallback, oTransportClassSaveChanges);
+            }
+            else
+            {
+                _log.ErrorFormat("Error in TaskResultGetSfcCallback(code={0})", (int)eError);
+                WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(eError));
+            }
+        }
+        catch (Exception e)
+        {
+            _log.Error("Exception catched in TaskResultGetSfcCallback:", e);
+            WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    private void TaskResultUpdateIfCallback(IAsyncResult ar)
+    {
+        TransportClassSaveChanges2 oTransportClassSaveChanges = ar.AsyncState as TransportClassSaveChanges2;
+        try
+        {
+            InputCommand cmd = oTransportClassSaveChanges.m_oInputCommand;
+            _log.DebugFormat("Enter TaskResultUpdateIfCallback(id={0})", cmd.id);
+            bool bUpdate;
+            ErrorTypes eError = oTransportClassSaveChanges.m_oTaskResult.UpdateIfEnd(ar, out bUpdate);
+            if (ErrorTypes.NoError == eError)
+            {
+                if (bUpdate)
+                {
+                    
+                    oTransportClassSaveChanges.m_oDocsCallbacks = new DocsCallbacks();
+                    oTransportClassSaveChanges.m_oDocsCallbacks.GetBegin(oTransportClassSaveChanges.m_oTaskQueueData.m_sFromKey, DocsCallbacksGetCallback, oTransportClassSaveChanges);
+                }
+                else
+                {
+                    
+                    AsyncClearCacheOperation oAsyncClearCacheOperation = new AsyncClearCacheOperation();
+                    oTransportClassSaveChanges.m_oAsyncClearCacheOperation = oAsyncClearCacheOperation;
+                    oAsyncClearCacheOperation.ClearCacheBegin(oTransportClassSaveChanges.m_oTaskQueueData.m_sKey, TaskResultRemoveCallback3, oTransportClassSaveChanges);
+                }
+            }
+            else
+            {
+                _log.ErrorFormat("Error in TaskResultUpdateIfCallback(code={0})", (int)eError);
+                WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(eError));
+            }
+        }
+        catch (Exception e)
+        {
+            _log.Error("Exception catched in TaskResultUpdateIfCallback:", e);
+            WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    private void TaskResultRemoveCallback3(IAsyncResult ar)
+    {
+        TransportClassSaveChanges2 oTransportClassSaveChanges = ar.AsyncState as TransportClassSaveChanges2;
+        try
+        {
+            InputCommand cmd = oTransportClassSaveChanges.m_oInputCommand;
+            _log.DebugFormat("Enter TaskResultRemoveCallback3(id={0})", cmd.id);
+            ErrorTypes eError = oTransportClassSaveChanges.m_oAsyncClearCacheOperation.ClearCacheEnd(ar);
+            if (ErrorTypes.NoError == eError)
+            {
+                _log.DebugFormat("m_oSfcOk TaskResultRemoveCallback3(id={0})", cmd.id);
+                WriteOutputCommand(oTransportClassSaveChanges, m_oSfcOk);
+            }
+            else
+            {
+                _log.ErrorFormat("Error in TaskResultRemoveCallback3(code={0})", (int)eError);
+                WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(eError));
+            }
+        }
+        catch (Exception e)
+        {
+            _log.Error("Exception catched in TaskResultRemoveCallback3:", e);
+            WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    private void DocsCallbacksGetCallback(IAsyncResult ar)
+    {
+        TransportClassSaveChanges2 oTransportClassSaveChanges2 = ar.AsyncState as TransportClassSaveChanges2;
+        try
+        {
+            InputCommand cmd = oTransportClassSaveChanges2.m_oInputCommand;
+            _log.DebugFormat("Enter DocsCallbacksGetCallback(id={0})", cmd.id);
+            ErrorTypes eError = oTransportClassSaveChanges2.m_oDocsCallbacks.GetEnd(ar, out oTransportClassSaveChanges2.m_sCallbackUrl);
+            if (ErrorTypes.NoError == eError && !string.IsNullOrEmpty(oTransportClassSaveChanges2.m_sCallbackUrl))
+            {
+                TaskResultData oTaskResultData = oTransportClassSaveChanges2.m_oTaskResultData;
+                OutputSfc oOutputSfc = new OutputSfc();
+                oOutputSfc.key = oTransportClassSaveChanges2.m_oTaskQueueData.m_sFromKey;
+                if (FileStatus.Ok == oTaskResultData.eStatus || (FileStatus.Err == oTaskResultData.eStatus && (int)ErrorTypes.ConvertCorrupted == oTaskResultData.nStatusInfo))
+                    oOutputSfc.url = GetResultUrl(UrlBuilder.UrlWithoutPath(oTransportClassSaveChanges2.m_oHttpContext.Request), oTaskResultData.sKey, oTaskResultData.sTitle, oTaskResultData.sTitle, false);
+                _log.DebugFormat("saved file url:{0}", oOutputSfc.url);
+                if (!string.IsNullOrEmpty(oTransportClassSaveChanges2.m_oInputCommand.userid))
+                    oOutputSfc.users.Add(oTransportClassSaveChanges2.m_oInputCommand.userid);
+                FileStatusOut eFileStatusOut = FileStatusOut.NotFound;
+                if (FileStatus.Ok == oTaskResultData.eStatus && !string.IsNullOrEmpty(oOutputSfc.url) && oOutputSfc.users.Count > 0)
+                    eFileStatusOut = FileStatusOut.MustSave;
+                else
+                    eFileStatusOut = FileStatusOut.Corrupted;
+                oOutputSfc.status = (int)eFileStatusOut;
+
+                string sJson = new JavaScriptSerializer().Serialize(oOutputSfc);
+                uint attempcount = uint.Parse(ConfigurationSettings.AppSettings["sfc.webrequest.attempcount"] ?? "1");
+                uint attempdelay = uint.Parse(ConfigurationSettings.AppSettings["sfc.webrequest.attempdelay"] ?? "0");
+                AsyncWebRequestOperation oAsyncWebRequestOperation = new AsyncWebRequestOperation(attempcount, attempdelay);
+                oTransportClassSaveChanges2.m_oAsyncWebRequestOperation = oAsyncWebRequestOperation;
+                _log.DebugFormat("TaskResultRemoveCallback4 url:{0}", oTransportClassSaveChanges2.m_sCallbackUrl);
+                oTransportClassSaveChanges2.m_oAsyncWebRequestOperationResult = oAsyncWebRequestOperation.RequestBegin(oTransportClassSaveChanges2.m_sCallbackUrl, "POST", "application/json",Encoding.UTF8.GetBytes(sJson), RequestCallback2, oTransportClassSaveChanges2);
+            }
+            else
+            {
+                RemoveFromCoAuthoringHandler(oTransportClassSaveChanges2);
+            }
+        }
+        catch (Exception e)
+        {
+            _log.Error("Exception catched in DocsCallbacksGetCallback:", e);
+            RemoveFromCoAuthoringHandler(oTransportClassSaveChanges2);
+        }
+    }
+    private void RequestCallback2(IAsyncResult ar)
+    {
+        TransportClassSaveChanges2 oTransportClassSaveChanges2 = ar.AsyncState as TransportClassSaveChanges2;
+        try
+        {
+            InputCommand cmd = oTransportClassSaveChanges2.m_oInputCommand;
+            _log.DebugFormat("Enter RequestCallback2(id={0})", cmd.id);
+            byte[] aOutput;
+            ErrorTypes eError = oTransportClassSaveChanges2.m_oAsyncWebRequestOperation.RequestEnd(oTransportClassSaveChanges2.m_oAsyncWebRequestOperationResult, out aOutput);
+            if (ErrorTypes.NoError == eError)
+            {
+                InputCommandSfc oInputCommandSfc = null;
+                try
+                {
+                    string sResponse = Encoding.UTF8.GetString(aOutput);
+                    _log.DebugFormat("RequestCallback2 Response='{0}'(id={1})", sResponse, cmd.id);
+
+                    oInputCommandSfc = new JavaScriptSerializer().Deserialize<InputCommandSfc>(sResponse);
+                }
+                catch
+                {
+                    oInputCommandSfc = null;
+                }
+                if (null != oInputCommandSfc)
+                {
+                    RequestToCoAuthoring(oTransportClassSaveChanges2, oInputCommandSfc.status);
+                }
+                else
+                    WriteOutputCommand(oTransportClassSaveChanges2, m_oSfcOk);
+            }
+            else
+            {
+                _log.ErrorFormat("Error in RequestCallback2(code={0})", (int)eError);
+                RemoveFromCoAuthoringHandler(oTransportClassSaveChanges2);
+            }
+        }
+        catch (Exception e)
+        {
+            _log.Error("Exception catched in RequestCallback2:", e);
+            RemoveFromCoAuthoringHandler(oTransportClassSaveChanges2);
+        }
+    }
+    private void RemoveFromCoAuthoringHandler(TransportClassSaveChanges2 oTransportClassSaveChanges2)
+    {
+        try
+        {
+            
+            AsyncClearCacheOperation oAsyncClearCacheOperation = new AsyncClearCacheOperation();
+            oTransportClassSaveChanges2.m_oAsyncClearCacheOperation = oAsyncClearCacheOperation;
+            oAsyncClearCacheOperation.ClearCacheBegin(oTransportClassSaveChanges2.m_oTaskQueueData.m_sKey, TaskResultRemoveCallback4, oTransportClassSaveChanges2);
+        }
+        catch (Exception e)
+        {
+            _log.Error("Exception catched in RemoveFromCoAuthoringHandler:", e);
+            WriteOutputCommand(oTransportClassSaveChanges2, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    private void TaskResultRemoveCallback4(IAsyncResult ar)
+    {
+        TransportClassSaveChanges2 oTransportClassSaveChanges = ar.AsyncState as TransportClassSaveChanges2;
+        try
+        {
+            InputCommand cmd = oTransportClassSaveChanges.m_oInputCommand;
+            _log.DebugFormat("Enter TaskResultRemoveCallback4(id={0})", cmd.id);
+            ErrorTypes eError = oTransportClassSaveChanges.m_oAsyncClearCacheOperation.ClearCacheEnd(ar);
+            if (ErrorTypes.NoError != eError)
+            {
+                _log.ErrorFormat("Error in TaskResultRemoveCallback4(code={0})", (int)eError);
+            }
+            RequestToCoAuthoring(oTransportClassSaveChanges, "0");
+        }
+        catch (Exception e)
+        {
+            _log.Error("Exception catched in TaskResultRemoveCallback4:", e);
+            WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    private void RequestToCoAuthoring(TransportClassSaveChanges2 oTransportClassSaveChanges, string sStatus)
+    {
+        try
+        {
+            InputCommand cmd = oTransportClassSaveChanges.m_oInputCommand;
+            
+            string sUrl = ConfigurationSettings.AppSettings["editor.settings.coauthoring.url"] + oTransportClassSaveChanges.m_oInputCommand.url + sStatus;
+			Uri oAbsUrl;
+            if (!(Uri.TryCreate(sUrl, UriKind.Absolute, out oAbsUrl) && (Uri.UriSchemeHttps == oAbsUrl.Scheme || Uri.UriSchemeHttp == oAbsUrl.Scheme || Uri.UriSchemeFtp == oAbsUrl.Scheme)))
+			{
+				Uri baseUri = new Uri("http://localhost");
+                oAbsUrl = new Uri(baseUri, sUrl);
+			}
+            _log.DebugFormat("RequestToCoAuthoring url:{0}", oAbsUrl.AbsoluteUri);
+            oTransportClassSaveChanges.m_oAsyncWebRequestOperation = new AsyncWebRequestOperation();
+            oTransportClassSaveChanges.m_oAsyncWebRequestOperationResult = oTransportClassSaveChanges.m_oAsyncWebRequestOperation.RequestBegin(oAbsUrl.AbsoluteUri, "POST", "text/plain", new byte[0], RequestToCoAuthoringCallback, oTransportClassSaveChanges);
+        }
+        catch (Exception e)
+        {
+            _log.Error("Exception catched in RequestToCoAuthoring:", e);
+            WriteOutputCommand(oTransportClassSaveChanges, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    private void RequestToCoAuthoringCallback(IAsyncResult ar)
+    {
+        TransportClassSaveChanges2 oTransportClassSaveChanges2 = ar.AsyncState as TransportClassSaveChanges2;
+        try
+        {
+            InputCommand cmd = oTransportClassSaveChanges2.m_oInputCommand;
+            _log.DebugFormat("Enter RequestCallback(id={0})", cmd.id);
+            byte[] aOutput;
+            ErrorTypes eError = oTransportClassSaveChanges2.m_oAsyncWebRequestOperation.RequestEnd(oTransportClassSaveChanges2.m_oAsyncWebRequestOperationResult, out aOutput);
+            if (ErrorTypes.NoError == eError)
+            {
+                if (_log.IsDebugEnabled)
+                {
+                    try
+                    {
+                        _log.DebugFormat("RequestCallback Response='{0}'(id={1})", Encoding.UTF8.GetString(aOutput), cmd.id);
+                    }
+                    catch
+                    {
+                    }
+                }
+                WriteOutputCommand(oTransportClassSaveChanges2, m_oSfcOk);
+            }
+            else
+            {
+                _log.ErrorFormat("Error in RequestCallback(code={0})", (int)eError);
+                WriteOutputCommand(oTransportClassSaveChanges2, new OutputCommand(eError));
+            }
+        }
+        catch (Exception e)
+        {
+            _log.Error("Exception catched in GetResponseCallback:", e);
+            WriteOutputCommand(oTransportClassSaveChanges2, new OutputCommand(ErrorTypes.Unknown));
+        }
+    }
+    #endregion
+    #region TransportClasses
     private class TransportClassTaskResult : TransportClassMainAshx
     {
         public InputCommand m_oInputCommand;
-        public TaskResult m_oTaskResult;
-        public TransportClassTaskResult(TransportClassMainAshx oTransportClassMainAshx, InputCommand oInputCommand, TaskResult oTaskResult)
+        public ITaskResultInterface m_oTaskResult;
+        public TransportClassTaskResult(TransportClassMainAshx oTransportClassMainAshx, InputCommand oInputCommand, ITaskResultInterface oTaskResult)
             : base(oTransportClassMainAshx.m_oHttpContext, oTransportClassMainAshx.m_oAsyncCallback)
         {
             m_oInputCommand = oInputCommand;
@@ -1458,7 +1984,8 @@ public class CanvasService : IHttpAsyncHandler
     private class TransportClassMediaXml : TransportClassMainAshx
     {
         public AsyncMediaXmlOperation m_oAsyncMediaXmlOperation;
-        public AsyncDownloadOperation m_oDownloadOperation;
+        public AsyncWebRequestOperation m_oDownloadOperation;
+        public IAsyncResult m_iAsyncResult;
         public InputCommand m_oInputCommand;
         public Dictionary<string, string> m_aMediaXmlMapHash;
         public Dictionary<string, string> m_aMediaXmlMapFilename;
@@ -1556,40 +2083,55 @@ public class CanvasService : IHttpAsyncHandler
             return oFromTo;
         }
     }
-    public class InputCommand
+    private class TransportClassSaveChanges1 : TransportClassMainAshx
     {
-        public string id { get; set; }
-        public string format { get; set; }
-        public int editorid { get; set; }
-        public string c { get; set; }
-        public string url { get; set; }
-        public string vkey { get; set; }
-        public string title { get; set; }
-        public string data { get; set; }
-        public int outputformat { get; set; }
-        public string savetype { get; set; }
-        public string savekey { get; set; }
-        public int? codepage { get; set; }
-        public int? delimiter { get; set; }
-        public bool embeddedfonts { get; set; }
-        public bool innersave { get; set; }
-        public string userid { get; set; }
-        
-        public string t { get; set; }
-        public string v { get; set; }
-        
-        public InputCommand()
+        public InputCommand m_oInputCommand;
+        public ITaskResultInterface m_oTaskResult;
+        public TaskResultDataToUpdate m_oTaskResultDataToUpdate;
+        public CTaskQueue m_oTaskQueue;
+        public TaskQueueData m_oTaskQueueData;
+        public TransportClassSaveChanges1(TransportClassMainAshx oTransportClassMainAshx)
+            : base(oTransportClassMainAshx.m_oHttpContext, oTransportClassMainAshx.m_oAsyncCallback)
         {
-            innersave = false;
         }
     }
-    [DataContract]
+    private class TransportClassSaveChanges2 : TransportClassMainAshx
+    {
+        public InputCommand m_oInputCommand;
+        public ITaskResultInterface m_oTaskResult;
+        public TaskResultDataToUpdate m_oTaskResultDataToUpdate;
+        public TaskQueueData m_oTaskQueueData;
+        public TaskResultData m_oTaskResultData;
+        public AsyncClearCacheOperation m_oAsyncClearCacheOperation;
+        public DocsChanges m_oDocsChanges;
+        public AsyncWebRequestOperation m_oAsyncWebRequestOperation;
+        public IAsyncResult m_oAsyncWebRequestOperationResult;
+        public DocsCallbacks m_oDocsCallbacks;
+        public string m_sCallbackUrl;
+        public TransportClassSaveChanges2(TransportClassMainAshx oTransportClassMainAshx)
+            : base(oTransportClassMainAshx.m_oHttpContext, oTransportClassMainAshx.m_oAsyncCallback)
+        {
+        }
+    }
+    private class TransportClassInfo : TransportClassMainAshx
+    {
+        public string[] m_aKeys;
+        public ITaskResultInterface m_oTaskResult;
+        public TransportClassInfo(TransportClassMainAshx oTransportClassMainAshx, string[] aKeys, ITaskResultInterface oTaskResult)
+            : base(oTransportClassMainAshx.m_oHttpContext, oTransportClassMainAshx.m_oAsyncCallback)
+        {
+            m_aKeys = aKeys;
+            m_oTaskResult = oTaskResult;
+        }
+    }
+    public class InputCommandSfc
+    {
+        public string status { get; set; }
+    }
     public class OutputCommand
     {
-        [DataMember]
-        internal string type;
-        [DataMember]
-        internal string data;
+        public string type { get; set; }
+        public string data { get; set; }
         public OutputCommand(string t, string d)
         {
             type = t;
@@ -1600,6 +2142,19 @@ public class CanvasService : IHttpAsyncHandler
             type = "err";
             data = eError.ToString("d");
         }
+        public OutputCommand(int nError)
+        {
+            type = "err";
+            data = nError.ToString();
+        }
+    }
+    private class OutputSfc
+    {
+        public string key { get; set; }
+        public long status { get; set; }
+
+        public string url { get; set; }
+        public List<string> users = new List<string>();
     }
     public class OutputWaitSaveData
     {
@@ -1630,21 +2185,6 @@ public class CanvasService : IHttpAsyncHandler
         }
     }
 
-    public enum TrackingType {
-        TT_USER_COUNT = 0,          
-        TT_ACTIVE_CONNECTION = 1,   
-        TT_TIME_USAGE = 2,          
-        TT_DOCUMENT_SESSION = 3,    
-        TT_NONE = 4,                
-        TT_USER_COUNT2 = 5          
-    };
-    public class OutputSettingsTrackingData
-    {
-        public TrackingType trackingType;
-        public string licenseId; 
-        public string trackingUrl;
-    }
-    
     public class OutputSettingsData
     {
         public bool canEdit;
@@ -1657,8 +2197,7 @@ public class CanvasService : IHttpAsyncHandler
         public int AutosaveMinInterval;
         public string g_cAscCoAuthoringUrl; 
         public string g_cAscSpellCheckUrl;  
-        
-        public OutputSettingsTrackingData trackingInfo;
+		public bool isAnalyticsEnable;
 
         public int TrackingInterval;
 
@@ -1676,12 +2215,14 @@ public class CanvasService : IHttpAsyncHandler
             
             g_cAscCoAuthoringUrl = ConfigurationSettings.AppSettings["editor.settings.coauthoring.url"] ?? "";
             g_cAscSpellCheckUrl = ConfigurationSettings.AppSettings["editor.settings.spellchecker.url"] ?? "";
+			
+			isAnalyticsEnable = bool.Parse(ConfigurationSettings.AppSettings["editor.settings.analytics.enable"] ?? "false");
 
-            trackingInfo = null;
-            
             TrackingInterval = int.Parse(ConfigurationSettings.AppSettings["license.activeconnections.tracking.interval"] ?? "300");
         }
-        public OutputSettingsData(LicenseInfo.LicenseRights oRights, string sFormat, OutputSettingsTrackingData oTrackingInfo)
+
+        public OutputSettingsData(string sFormat)
+
             : this()
         {
             if (null != sFormat)
@@ -1702,21 +2243,8 @@ public class CanvasService : IHttpAsyncHandler
                 canDownload = !aViewerFormats.Contains(sFormat);
             }
 
-            if (null != oRights)
-            {
-                canEdit &= oRights.CanSave;
-                canCoAuthoring = oRights.CanCoAuthoring;
-                canBranding = oRights.CanBranding;
-                canDownload &= oRights.CanExport;
-
-            }
-
-            if (null != oTrackingInfo)
-            {
-                trackingInfo = oTrackingInfo;
-            }
         }
     }
-
+    
     #endregion
 }

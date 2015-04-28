@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,551 +29,238 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("SSE.view.PrintSettings", {
-    extend: "Ext.window.Window",
-    alias: "widget.sseprintsettings",
-    requires: ["Ext.window.Window", "Ext.form.field.ComboBox", "Ext.form.RadioGroup", "Ext.Array", "Common.component.MetricSpinner", "Common.component.IndeterminateCheckBox"],
-    cls: "asc-advanced-settings-window",
-    modal: true,
-    resizable: false,
-    plain: true,
-    constrain: true,
-    height: 588,
-    width: 466,
-    layout: {
-        type: "vbox",
-        align: "stretch"
-    },
-    initComponent: function () {
-        var me = this;
-        this.addEvents("onmodalresult");
-        this._spacer = Ext.create("Ext.toolbar.Spacer", {
-            width: "100%",
-            height: 10,
-            html: '<div style="width: 100%; height: 40%; border-bottom: 1px solid #C7C7C7"></div>'
-        });
-        this.cmbPaperSize = Ext.widget("combo", {
-            store: Ext.create("Ext.data.Store", {
-                fields: ["description", "size"],
+ define(["text!spreadsheeteditor/main/app/template/PrintSettings.template", "common/main/lib/view/AdvancedSettingsWindow", "common/main/lib/component/MetricSpinner", "common/main/lib/component/CheckBox", "common/main/lib/component/RadioBox", "common/main/lib/component/ListView"], function (contentTemplate) {
+    SSE.Views.PrintSettings = Common.Views.AdvancedSettingsWindow.extend(_.extend({
+        options: {
+            alias: "PrintSettings",
+            contentWidth: 280,
+            height: 482
+        },
+        initialize: function (options) {
+            _.extend(this.options, {
+                title: this.textTitle,
+                template: ['<div class="box" style="height:' + (this.options.height - 85) + 'px;">', '<div class="menu-panel" style="overflow: hidden;">', '<div style="height: 90px; line-height: 90px;" class="div-category">' + this.textPrintRange + "</div>", '<div style="height: 55px; line-height: 55px;" class="div-category">' + this.textPageSize + "</div>", '<div style="height: 55px; line-height: 55px;" class="div-category">' + this.textPageOrientation + "</div>", '<div style="height: 122px; line-height: 122px;" class="div-category">' + this.strMargins + "</div>", '<div style="height: 73px; line-height: 73px;" class="div-category">' + this.strPrint + "</div>", "</div>", '<div class="separator"/>', '<div class="content-panel">' + _.template(contentTemplate)({
+                    scope: this
+                }) + "</div>", "</div>", '<div class="separator horizontal"/>', '<div class="footer justify">', '<button id="printadv-dlg-btn-hide" class="btn btn-text-default" style="margin-right: 55px; width: 100px;">' + this.textHideDetails + "</button>", '<button class="btn normal dlg-btn primary" result="ok" style="margin-right: 10px;  width: 150px;">' + this.btnPrint + "</button>", '<button class="btn normal dlg-btn" result="cancel" style="width: 86px;">' + this.cancelButtonText + "</button>", "</div>"].join("")
+            },
+            options);
+            Common.Views.AdvancedSettingsWindow.prototype.initialize.call(this, this.options);
+            this.spinners = [];
+        },
+        render: function () {
+            Common.Views.AdvancedSettingsWindow.prototype.render.call(this);
+            this.radioCurrent = new Common.UI.RadioBox({
+                el: $("#printadv-dlg-radio-current"),
+                labelText: this.textCurrentSheet,
+                name: "asc-radio-printrange",
+                checked: true
+            });
+            this.radioCurrent.on("change", _.bind(this.onRadioRangeChange, this));
+            this.radioAll = new Common.UI.RadioBox({
+                el: $("#printadv-dlg-radio-all"),
+                labelText: this.textAllSheets,
+                name: "asc-radio-printrange"
+            });
+            this.radioAll.on("change", _.bind(this.onRadioRangeChange, this));
+            this.radioSelection = new Common.UI.RadioBox({
+                el: $("#printadv-dlg-radio-selection"),
+                labelText: this.textSelection,
+                name: "asc-radio-printrange"
+            });
+            this.radioSelection.on("change", _.bind(this.onRadioRangeChange, this));
+            this.cmbPaperSize = new Common.UI.ComboBox({
+                el: $("#printadv-dlg-combo-pages"),
+                style: "width: 260px;",
+                menuStyle: "max-height: 280px; min-width: 260px;",
+                editable: false,
+                cls: "input-group-nr",
                 data: [{
-                    size: "215.9|279.4",
-                    description: "US Letter (21,59cm x 27,94cm)"
+                    value: "215.9|279.4",
+                    displayValue: "US Letter (21,59cm x 27,94cm)"
                 },
                 {
-                    size: "215.9|355.6",
-                    description: "US Legal (21,59cm x 35,56cm)"
+                    value: "215.9|355.6",
+                    displayValue: "US Legal (21,59cm x 35,56cm)"
                 },
                 {
-                    size: "210|297",
-                    description: "A4 (21cm x 29,7cm)"
+                    value: "210|297",
+                    displayValue: "A4 (21cm x 29,7cm)"
                 },
                 {
-                    size: "148.1|209.9",
-                    description: "A5 (14,81cm x 20,99cm)"
+                    value: "148.1|209.9",
+                    displayValue: "A5 (14,81cm x 20,99cm)"
                 },
                 {
-                    size: "176|250.1",
-                    description: "B5 (17,6cm x 25,01cm)"
+                    value: "176|250.1",
+                    displayValue: "B5 (17,6cm x 25,01cm)"
                 },
                 {
-                    size: "104.8|241.3",
-                    description: "Envelope #10 (10,48cm x 24,13cm)"
+                    value: "104.8|241.3",
+                    displayValue: "Envelope #10 (10,48cm x 24,13cm)"
                 },
                 {
-                    size: "110.1|220.1",
-                    description: "Envelope DL (11,01cm x 22,01cm)"
+                    value: "110.1|220.1",
+                    displayValue: "Envelope DL (11,01cm x 22,01cm)"
                 },
                 {
-                    size: "279.4|431.7",
-                    description: "Tabloid (27,94cm x 43,17cm)"
+                    value: "279.4|431.7",
+                    displayValue: "Tabloid (27,94cm x 43,17cm)"
                 },
                 {
-                    size: "297|420.1",
-                    description: "A3 (29,7cm x 42,01cm)"
+                    value: "297|420.1",
+                    displayValue: "A3 (29,7cm x 42,01cm)"
                 },
                 {
-                    size: "304.8|457.1",
-                    description: "Tabloid Oversize (30,48cm x 45,71cm)"
+                    value: "304.8|457.1",
+                    displayValue: "Tabloid Oversize (30,48cm x 45,71cm)"
                 },
                 {
-                    size: "196.8|273",
-                    description: "ROC 16K (19,68cm x 27,3cm)"
+                    value: "196.8|273",
+                    displayValue: "ROC 16K (19,68cm x 27,3cm)"
                 },
                 {
-                    size: "119.9|234.9",
-                    description: "Envelope Choukei 3 (11,99cm x 23,49cm)"
+                    value: "119.9|234.9",
+                    displayValue: "Envelope Choukei 3 (11,99cm x 23,49cm)"
                 },
                 {
-                    size: "330.2|482.5",
-                    description: "Super B/A3 (33,02cm x 48,25cm)"
+                    value: "330.2|482.5",
+                    displayValue: "Super B/A3 (33,02cm x 48,25cm)"
                 }]
-            }),
-            displayField: "description",
-            valueField: "size",
-            queryMode: "local",
-            editable: false,
-            flex: 1
-        });
-        this.cmbPaperOrientation = Ext.widget("combo", {
-            store: Ext.create("Ext.data.Store", {
-                fields: ["description", "orient"],
+            });
+            this.cmbPaperOrientation = new Common.UI.ComboBox({
+                el: $("#printadv-dlg-combo-orient"),
+                style: "width: 115px;",
+                menuStyle: "min-width: 115px;",
+                editable: false,
+                cls: "input-group-nr",
                 data: [{
-                    description: me.strPortrait,
-                    orient: c_oAscPageOrientation.PagePortrait
+                    value: c_oAscPageOrientation.PagePortrait,
+                    displayValue: this.strPortrait
                 },
                 {
-                    description: me.strLandscape,
-                    orient: c_oAscPageOrientation.PageLandscape
+                    value: c_oAscPageOrientation.PageLandscape,
+                    displayValue: this.strLandscape
                 }]
-            }),
-            displayField: "description",
-            valueField: "orient",
-            queryMode: "local",
-            editable: false,
-            width: 115
-        });
-        this.chPrintGrid = Ext.widget("cmdindeterminatecheckbox", {
-            boxLabel: this.textPrintGrid
-        });
-        this.chPrintRows = Ext.widget("cmdindeterminatecheckbox", {
-            boxLabel: this.textPrintHeadings
-        });
-        this.spnMarginLeft = Ext.create("Common.component.MetricSpinner", {
-            readOnly: false,
-            maxValue: 48.25,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0.19 cm",
-            listeners: {
-                change: Ext.bind(function (field, newValue, oldValue, eOpts) {},
-                this)
+            });
+            this.chPrintGrid = new Common.UI.CheckBox({
+                el: $("#printadv-dlg-chb-grid"),
+                labelText: this.textPrintGrid
+            });
+            this.chPrintRows = new Common.UI.CheckBox({
+                el: $("#printadv-dlg-chb-rows"),
+                labelText: this.textPrintHeadings
+            });
+            this.spnMarginTop = new Common.UI.MetricSpinner({
+                el: $("#printadv-dlg-spin-margin-top"),
+                step: 0.1,
+                width: 115,
+                defaultUnit: "cm",
+                value: "0 cm",
+                maxValue: 48.25,
+                minValue: 0
+            });
+            this.spinners.push(this.spnMarginTop);
+            this.spnMarginBottom = new Common.UI.MetricSpinner({
+                el: $("#printadv-dlg-spin-margin-bottom"),
+                step: 0.1,
+                width: 115,
+                defaultUnit: "cm",
+                value: "0 cm",
+                maxValue: 48.25,
+                minValue: 0
+            });
+            this.spinners.push(this.spnMarginBottom);
+            this.spnMarginLeft = new Common.UI.MetricSpinner({
+                el: $("#printadv-dlg-spin-margin-left"),
+                step: 0.1,
+                width: 115,
+                defaultUnit: "cm",
+                value: "0.19 cm",
+                maxValue: 48.25,
+                minValue: 0
+            });
+            this.spinners.push(this.spnMarginLeft);
+            this.spnMarginRight = new Common.UI.MetricSpinner({
+                el: $("#printadv-dlg-spin-margin-right"),
+                step: 0.1,
+                width: 115,
+                defaultUnit: "cm",
+                value: "0.19 cm",
+                maxValue: 48.25,
+                minValue: 0
+            });
+            this.spinners.push(this.spnMarginRight);
+            this.btnHide = new Common.UI.Button({
+                el: $("#printadv-dlg-btn-hide")
+            });
+            this.btnHide.on("click", _.bind(this.handlerShowDetails, this));
+            this.panelDetails = $("#printadv-dlg-content-to-hide");
+            this.updateMetricUnit();
+            this.options.afterrender && this.options.afterrender.call(this);
+        },
+        setRange: function (value) {
+            (value == c_oAscPrintType.ActiveSheets) ? this.radioCurrent.setValue(true) : ((value == c_oAscPrintType.EntireWorkbook) ? this.radioAll.setValue(true) : this.radioSelection.setValue(true));
+        },
+        setLayout: function (value) {},
+        getRange: function () {
+            return (this.radioCurrent.getValue() ? c_oAscPrintType.ActiveSheets : (this.radioAll.getValue() ? c_oAscPrintType.EntireWorkbook : c_oAscPrintType.Selection));
+        },
+        getLayout: function () {},
+        onRadioRangeChange: function (radio, newvalue) {
+            if (newvalue) {
+                this.fireEvent("changerange", this);
             }
-        });
-        this.spnMarginRight = Ext.create("Common.component.MetricSpinner", {
-            readOnly: false,
-            maxValue: 48.25,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0.19 cm",
-            listeners: {
-                change: function (field, newValue, oldValue, eOpts) {}
+        },
+        updateMetricUnit: function () {
+            if (this.spinners) {
+                for (var i = 0; i < this.spinners.length; i++) {
+                    var spinner = this.spinners[i];
+                    spinner.setDefaultUnit(Common.Utils.Metric.metricName[Common.Utils.Metric.getCurrentMetric()]);
+                    spinner.setStep(Common.Utils.Metric.getCurrentMetric() == Common.Utils.Metric.c_MetricUnits.cm ? 0.1 : 1);
+                }
             }
-        });
-        this.spnMarginTop = Ext.create("Common.component.MetricSpinner", {
-            readOnly: false,
-            maxValue: 48.25,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0 cm",
-            listeners: {
-                change: function (field, newValue, oldValue, eOpts) {}
+        },
+        handlerShowDetails: function (btn) {
+            if (!this.extended) {
+                this.extended = true;
+                this.panelDetails.css({
+                    "display": "none"
+                });
+                this.setHeight(286);
+                btn.setCaption(this.textShowDetails);
+            } else {
+                this.extended = false;
+                this.panelDetails.css({
+                    "display": "block"
+                });
+                this.setHeight(482);
+                btn.setCaption(this.textHideDetails);
             }
-        });
-        this.spnMarginBottom = Ext.create("Common.component.MetricSpinner", {
-            readOnly: false,
-            maxValue: 48.25,
-            minValue: 0,
-            step: 0.1,
-            defaultUnit: "cm",
-            value: "0 cm",
-            listeners: {
-                change: function (field, newValue, oldValue, eOpts) {}
-            }
-        });
-        this.items = [this.topCnt = Ext.widget("container", {
-            height: 490,
-            layout: {
-                type: "hbox",
-                align: "stretch"
-            },
-            items: [{
-                xtype: "container",
-                width: 160,
-                padding: "18 0 0 0",
-                layout: {
-                    type: "vbox",
-                    align: "stretch"
-                },
-                defaults: {
-                    xtype: "container",
-                    padding: "0 10 0 0",
-                    layout: {
-                        type: "hbox",
-                        align: "middle",
-                        pack: "end"
-                    }
-                },
-                items: [{
-                    height: 80,
-                    padding: "0 10px 10px 0",
-                    items: [{
-                        xtype: "label",
-                        text: me.textPrintRange,
-                        style: "font-weight: bold;"
-                    }]
-                },
-                {
-                    height: 62,
-                    items: [{
-                        xtype: "label",
-                        text: me.textPageSize,
-                        style: "font-weight: bold;"
-                    }]
-                },
-                {
-                    height: 58,
-                    items: [{
-                        xtype: "label",
-                        text: me.textPageOrientation,
-                        style: "font-weight: bold;"
-                    }]
-                },
-                {
-                    height: 124,
-                    items: [{
-                        xtype: "label",
-                        text: this.strMargins,
-                        style: "font-weight: bold;"
-                    }]
-                },
-                {
-                    height: 68,
-                    items: [{
-                        xtype: "label",
-                        text: me.textLayout,
-                        style: "font-weight: bold;"
-                    }]
-                },
-                {
-                    height: 70,
-                    items: [{
-                        xtype: "label",
-                        text: me.strPrint,
-                        style: "font-weight: bold;"
-                    }]
-                }]
-            },
-            {
-                xtype: "box",
-                cls: "advanced-settings-separator",
-                height: "100%",
-                width: 8
-            },
-            {
-                xtype: "container",
-                padding: "18 0 0 10",
-                width: 280,
-                layout: {
-                    type: "vbox",
-                    align: "stretch"
-                },
-                items: [{
-                    xtype: "container",
-                    height: 70,
-                    padding: "0 10",
-                    layout: {
-                        type: "hbox",
-                        align: "middle"
-                    },
-                    items: [this.groupRange = Ext.widget("radiogroup", {
-                        id: "dialog-printoptions-grouprange",
-                        columns: 1,
-                        width: 280,
-                        vertical: true,
-                        items: [{
-                            boxLabel: this.textCurrentSheet,
-                            name: "printrange",
-                            inputValue: c_oAscPrintType.ActiveSheets,
-                            checked: true
-                        },
-                        {
-                            boxLabel: this.textAllSheets,
-                            name: "printrange",
-                            inputValue: c_oAscPrintType.EntireWorkbook
-                        },
-                        {
-                            boxLabel: this.textSelection,
-                            name: "printrange",
-                            inputValue: c_oAscPrintType.Selection
-                        }]
-                    })]
-                },
-                this._spacer.cloneConfig({
-                    style: "margin: 15px 0 10px 0;",
-                    height: 6
-                }), {
-                    xtype: "container",
-                    height: 25,
-                    padding: "0 10",
-                    layout: {
-                        type: "hbox",
-                        align: "middle"
-                    },
-                    items: [this.cmbPaperSize]
-                },
-                this._spacer.cloneConfig({
-                    style: "margin: 17px 0 10px 0;",
-                    height: 6
-                }), {
-                    xtype: "container",
-                    height: 25,
-                    padding: "0 10",
-                    layout: {
-                        type: "hbox",
-                        align: "middle"
-                    },
-                    items: [this.cmbPaperOrientation]
-                },
-                this._spacer.cloneConfig({
-                    style: "margin: 16px 0 4px 0;",
-                    height: 6
-                }), this.cntMargins = Ext.widget("container", {
-                    height: 100,
-                    padding: "0 10",
-                    layout: {
-                        type: "hbox"
-                    },
-                    defaults: {
-                        xtype: "container",
-                        layout: {
-                            type: "vbox",
-                            align: "stretch"
-                        },
-                        height: 100
-                    },
-                    items: [{
-                        flex: 1,
-                        items: [{
-                            xtype: "label",
-                            width: "100%",
-                            text: me.strTop
-                        },
-                        {
-                            xtype: "tbspacer",
-                            height: 3
-                        },
-                        this.spnMarginTop, {
-                            xtype: "tbspacer",
-                            height: 12
-                        },
-                        {
-                            xtype: "label",
-                            width: "100%",
-                            text: me.strLeft
-                        },
-                        {
-                            xtype: "tbspacer",
-                            height: 3
-                        },
-                        this.spnMarginLeft]
-                    },
-                    {
-                        xtype: "tbspacer",
-                        width: 20
-                    },
-                    {
-                        flex: 1,
-                        items: [{
-                            xtype: "label",
-                            text: me.strBottom,
-                            width: "100%"
-                        },
-                        {
-                            xtype: "tbspacer",
-                            height: 3
-                        },
-                        this.spnMarginBottom, {
-                            xtype: "tbspacer",
-                            height: 12
-                        },
-                        {
-                            xtype: "label",
-                            text: me.strRight,
-                            width: "100%"
-                        },
-                        {
-                            xtype: "tbspacer",
-                            height: 3
-                        },
-                        this.spnMarginRight]
-                    }]
-                }), this._spacer.cloneConfig({
-                    style: "margin: 14px 0 6px 0;",
-                    height: 6
-                }), this.cntLayout = Ext.widget("container", {
-                    height: 45,
-                    padding: "0 10",
-                    layout: {
-                        type: "vbox",
-                        align: "stretch"
-                    },
-                    items: [this.groupLayout = Ext.widget("radiogroup", {
-                        columns: 1,
-                        width: 280,
-                        vertical: true,
-                        items: [{
-                            boxLabel: this.textActualSize,
-                            name: "printlayout",
-                            inputValue: c_oAscLayoutPageType.ActualSize
-                        },
-                        {
-                            boxLabel: this.textFit,
-                            name: "printlayout",
-                            inputValue: c_oAscLayoutPageType.FitToWidth,
-                            checked: true
-                        }]
-                    })]
-                }), this._spacer.cloneConfig({
-                    style: "margin: 14px 0 8px 0;",
-                    height: 6
-                }), this.cntAdditional = Ext.widget("container", {
-                    height: 65,
-                    padding: "0 10",
-                    layout: {
-                        type: "vbox",
-                        align: "stretch"
-                    },
-                    items: [this.chPrintGrid, this.chPrintRows]
-                })]
-            }]
-        }), this._spacer.cloneConfig({
-            style: "margin: 0 18px"
-        }), {
-            xtype: "container",
-            height: 40,
-            layout: {
-                type: "vbox",
-                align: "center",
-                pack: "center"
-            },
-            items: [{
-                xtype: "container",
-                width: 466,
-                height: 24,
-                style: "padding: 0 30px;",
-                layout: {
-                    type: "hbox",
-                    align: "stretch"
-                },
-                items: [{
-                    xtype: "button",
-                    width: 100,
-                    height: 22,
-                    text: this.textHideDetails,
-                    listeners: {
-                        scope: this,
-                        click: this.handlerShowDetails
-                    }
-                },
-                this.btnOk = Ext.widget("button", {
-                    id: "dialog-print-options-ok",
-                    cls: "asc-blue-button",
-                    width: 150,
-                    height: 22,
-                    style: "margin:0 10px 0 60px;",
-                    text: this.btnPrint,
-                    listeners: {}
-                }), this.btnCancel = Ext.widget("button", {
-                    cls: "asc-darkgray-button",
-                    width: 86,
-                    height: 22,
-                    text: this.cancelButtonText,
-                    listeners: {
-                        click: function (btn) {
-                            this.fireEvent("onmodalresult", this, 0);
-                            this.close();
-                        },
-                        scope: this
-                    }
-                })]
-            }]
-        }];
-        this.callParent(arguments);
-        this.setTitle(this.textTitle);
+        },
+        textTitle: "Print Settings",
+        strLeft: "Left",
+        strRight: "Right",
+        strTop: "Top",
+        strBottom: "Bottom",
+        strPortrait: "Portrait",
+        strLandscape: "Landscape",
+        textPrintGrid: "Print Gridlines",
+        textPrintHeadings: "Print Rows and Columns Headings",
+        textPageSize: "Page Size",
+        textPageOrientation: "Page Orientation",
+        strMargins: "Margins",
+        strPrint: "Print",
+        btnPrint: "Save & Print",
+        textPrintRange: "Print Range",
+        textLayout: "Layout",
+        textCurrentSheet: "Current Sheet",
+        textAllSheets: "All Sheets",
+        textSelection: "Selection",
+        textActualSize: "Actual Size",
+        textFit: "Fit to width",
+        textShowDetails: "Show Details",
+        cancelButtonText: "Cancel",
+        textHideDetails: "Hide Details"
     },
-    afterRender: function () {
-        this.callParent(arguments);
-    },
-    checkMargins: function () {
-        if (this.cmbPaperOrientation.getValue() == c_oAscPageOrientation.PagePortrait) {
-            var pagewidth = /^\d{3}\.?\d*/.exec(this.cmbPaperSize.getValue());
-            var pageheight = /\d{3}\.?\d*$/.exec(this.cmbPaperSize.getValue());
-        } else {
-            pageheight = /^\d{3}\.?\d*/.exec(this.cmbPaperSize.getValue());
-            pagewidth = /\d{3}\.?\d*$/.exec(this.cmbPaperSize.getValue());
-        }
-        var ml = Common.MetricSettings.fnRecalcToMM(this.spnMarginLeft.getNumberValue());
-        var mr = Common.MetricSettings.fnRecalcToMM(this.spnMarginRight.getNumberValue());
-        var mt = Common.MetricSettings.fnRecalcToMM(this.spnMarginTop.getNumberValue());
-        var mb = Common.MetricSettings.fnRecalcToMM(this.spnMarginBottom.getNumberValue());
-        if (ml > pagewidth) {
-            return "left";
-        }
-        if (mr > pagewidth - ml) {
-            return "right";
-        }
-        if (mt > pageheight) {
-            return "top";
-        }
-        if (mb > pageheight - mt) {
-            return "bottom";
-        }
-        return null;
-    },
-    handlerShowDetails: function (btn) {
-        if (!this.extended) {
-            this.extended = true;
-            this.cntMargins.setDisabled(true);
-            this.cntLayout.setDisabled(true);
-            this.cntAdditional.setDisabled(true);
-            this.topCnt.setHeight(218);
-            this.setHeight(316);
-            btn.setText(this.textShowDetails);
-        } else {
-            this.extended = false;
-            this.cntMargins.setDisabled(false);
-            this.cntLayout.setDisabled(false);
-            this.cntAdditional.setDisabled(false);
-            this.topCnt.setHeight(490);
-            this.setHeight(588);
-            btn.setText(this.textHideDetails);
-        }
-    },
-    updateMetricUnit: function () {
-        var spinners = this.query("commonmetricspinner");
-        if (spinners) {
-            for (var i = 0; i < spinners.length; i++) {
-                var spinner = spinners[i];
-                spinner.setDefaultUnit(Common.MetricSettings.metricName[Common.MetricSettings.getCurrentMetric()]);
-                spinner.setStep(Common.MetricSettings.getCurrentMetric() == Common.MetricSettings.c_MetricUnits.cm ? 0.1 : 1);
-            }
-        }
-    },
-    textTitle: "Print Settings",
-    strLeft: "Left",
-    strRight: "Right",
-    strTop: "Top",
-    strBottom: "Bottom",
-    strPortrait: "Portrait",
-    strLandscape: "Landscape",
-    textPrintGrid: "Print Gridlines",
-    textPrintHeadings: "Print Rows and Columns Headings",
-    textPageSize: "Page Size",
-    textPageOrientation: "Page Orientation",
-    strMargins: "Margins",
-    strPrint: "Print",
-    btnPrint: "Save & Print",
-    textPrintRange: "Print Range",
-    textLayout: "Layout",
-    textCurrentSheet: "Current Sheet",
-    textAllSheets: "All Sheets",
-    textSelection: "Selection",
-    textActualSize: "Actual Size",
-    textFit: "Fit to width",
-    textShowDetails: "Show Details",
-    cancelButtonText: "Cancel",
-    textHideDetails: "Hide Details"
+    SSE.Views.PrintSettings || {}));
 });

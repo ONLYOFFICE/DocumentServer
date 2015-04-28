@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,7 +29,8 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var c_oAscZoomType = {
+ "use strict";
+var c_oAscZoomType = {
     Current: 0,
     FitWidth: 1,
     FitPage: 2
@@ -79,8 +80,7 @@ var c_oAscAsyncAction = {
     Print: 7,
     UploadImage: 8,
     LoadTheme: 9,
-    ApplyChanges: 10,
-    PrepareToSave: 11
+    ApplyChanges: 10
 };
 var c_oAscVertAlignJc = {
     Top: 0,
@@ -136,7 +136,8 @@ var c_oAscError = {
         UserCountExceed: -22,
         SplitCellMaxRows: -23,
         SplitCellMaxCols: -24,
-        SplitCellRowsDivider: -25
+        SplitCellRowsDivider: -25,
+        UserDrop: -100
     }
 };
 var c_oAscTypeSelectElement = {
@@ -178,16 +179,6 @@ var c_oAscChartSubType = {
     normal: "normal",
     stacked: "stacked",
     stackedPer: "stackedPer"
-};
-var c_oAscChartStyle = {
-    Dark: 1,
-    Standart: 2,
-    Accent1: 3,
-    Accent2: 4,
-    Accent3: 5,
-    Accent4: 6,
-    Accent5: 7,
-    Accent6: 8
 };
 var FONT_THUMBNAIL_HEIGHT = (7 * 96 / 25.4) >> 0;
 var THEME_THUMBNAIL_WIDTH = 180;
@@ -276,6 +267,10 @@ var c_oAscLineCapType = {
     Flat: 0,
     Round: 1,
     Square: 2
+};
+var c_oAscTableLayout = {
+    AutoFit: 0,
+    Fixed: 1
 };
 var c_oAscLineBeginType = {
     None: 0,

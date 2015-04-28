@@ -1,0 +1,64 @@
+<table cols="2">
+    <tr>
+        <td colspan=2>
+            <label class="header"><%= scope.textSize %></label>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small" width="50%">
+            <label id="image-label-width" class="input-label"><%= scope.textWidth %></label>
+        </td>
+        <td class="padding-small" width="50%">
+            <label id="image-label-height" class="input-label"><%= scope.textHeight %></label>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small" colspan=2>
+            <button type="button" class="btn btn-text-default" id="image-button-original-size" style="width:100px;"><%= scope.textOriginalSize %></button>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small" colspan=2>
+            <div class="separator horizontal"></div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan=2>
+            <label class="header"><%= scope.textWrap %></label>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small" colspan=2>
+            <div id="image-button-wrap" style=""></div>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small" colspan=2>
+            <div class="separator horizontal"></div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan=2>
+            <label class="header"><%= scope.textInsert %></label>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small" width="50%">
+            <button type="button" class="btn btn-text-default" id="image-button-from-file" style="width:85px;"><%= scope.textFromFile %></button>
+        </td>
+        <td class="padding-small" width="50%">
+            <button type="button" class="btn btn-text-default" id="image-button-from-url" style="width:85px;"><%= scope.textFromUrl %></button>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small" colspan=2>
+            <div class="separator horizontal"></div>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" colspan=2>
+            <label class="link" id="image-advanced-link"><%= scope.textAdvanced %></label>
+        </td>
+    </tr>
+    <tr class="finish-cell"></tr>
+</table>

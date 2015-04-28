@@ -1,363 +1,257 @@
-﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+/**
+ *  DocumentPreview.js
  *
- * This program is a free software product. You can redistribute it and/or 
- * modify it under the terms of the GNU Affero General Public License (AGPL) 
- * version 3 as published by the Free Software Foundation. In accordance with 
- * Section 7(a) of the GNU AGPL its Section 15 shall be amended to the effect 
- * that Ascensio System SIA expressly excludes the warranty of non-infringement
- * of any third-party rights.
- *
- * This program is distributed WITHOUT ANY WARRANTY; without even the implied 
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For 
- * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
- *
- * You can contact Ascensio System SIA at Lubanas st. 125a-25, Riga, Latvia,
- * EU, LV-1021.
- *
- * The  interactive user interfaces in modified source and object code versions
- * of the Program must display Appropriate Legal Notices, as required under 
- * Section 5 of the GNU AGPL version 3.
- *
- * Pursuant to Section 7(b) of the License you must retain the original Product
- * logo when distributing the program. Pursuant to Section 7(e) we decline to
- * grant you any rights under trademark law for use of our trademarks.
- *
- * All the Product's GUI elements, including illustrations and icon sets, as
- * well as technical writing content are licensed under the terms of the
- * Creative Commons Attribution-ShareAlike 4.0 International. See the License
- * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
+ *  Created by Julia Radzhabova on 4/18/14
+ *  Copyright (c) 2014 Ascensio System SIA. All rights reserved.
  *
  */
- Ext.define("PE.view.DocumentPreview", {
-    extend: "Ext.container.Container",
-    alias: "widget.pedocumentpreview",
-    layout: "fit",
-    shadow: false,
-    floating: true,
-    toFrontOnShow: true,
-    hidden: true,
-    modal: true,
-    requires: ["Ext.container.Container", "Ext.button.Button", "Ext.form.Label"],
-    constructor: function (config) {
-        this.initConfig(config);
-        this.callParent(arguments);
-        return this;
-    },
-    listeners: {
-        afterrender: function () {
-            var parent = this.floatParent;
-            if (Ext.isDefined(parent)) {
-                parent.addListener("resize", Ext.bind(this.resizePreview, this));
-            }
+
+define([
+    'jquery',
+    'underscore',
+    'backbone',
+    'common/main/lib/component/BaseView',
+    'presentationeditor/main/app/model/Pages'
+], function () {
+    'use strict';
+
+    function _updatePagesCaption(model,value,opts) {
+        var curr = model.get('current'),
+            cnt = model.get('count');
+        $('#preview-label-slides').text(
+            Common.Utils.String.format(this.slideIndexText, (curr<cnt) ? curr : cnt , cnt) );
+    }
+
+    PE.Views.DocumentPreview = Common.UI.BaseView.extend(_.extend({
+        el: '#pe-preview',
+
+        // Delegated events for creating new items, and clearing completed ones.
+        events: {
         },
-        hide: function (cmp, eOpts) {
-            this.controlsContainer.hide();
-            Ext.getCmp("pe-applicationUI").show();
-            if (this.api) {
-                setTimeout(Ext.bind(function () {
-                    this.api.Resize();
-                    var tb = Ext.getCmp("toolbar-combo-view-themes");
-                    if (tb) {
-                        tb.doComponentLayout();
-                        tb.fillComboView(tb.dataMenu.picker.getSelectedRec(), true, true);
-                        tb.dataMenu.picker.updateScrollPane();
-                    }
-                },
-                this), 50);
-            }
-            this.fireEvent("editcomplete", this);
+
+        options: {
+            alias: 'DocumentPreview'
         },
-        show: function (cmp, eOpts) {
-            this.controlsContainer.show();
-            this.controlsContainer.setPosition(0, this.getHeight() - this._ControlPanelHeight);
-            var span = this.btnPlay.getEl().down(".asc-slide-preview-btn");
-            if (span.hasCls("btn-play")) {
-                span.removeCls("btn-play");
-                span.addCls("btn-pause");
-                this.btnPlay.getEl().set({
-                    "data-qtip": this.txtPause,
-                    "data-qalign": "bl-tl?"
-                });
-            }
-            this.fireEvent("editcomplete", this);
-        }
-    },
-    initComponent: function () {
-        var me = this;
-        me.btnPrev = Ext.create("Ext.button.Button", {
-            iconCls: "asc-slide-preview-btn btn-prev",
-            listeners: {
-                click: function () {
-                    if (me.api) {
-                        me.api.DemonstrationPrevSlide();
-                    }
-                },
-                render: function (obj) {
-                    obj.getEl().set({
-                        "data-qtip": me.txtPrev,
-                        "data-qalign": "bl-tl?"
-                    });
-                }
-            }
-        });
-        me.btnNext = Ext.create("Ext.button.Button", {
-            iconCls: "asc-slide-preview-btn btn-next",
-            listeners: {
-                click: function () {
-                    if (me.api) {
-                        me.api.DemonstrationNextSlide();
-                    }
-                },
-                render: function (obj) {
-                    obj.getEl().set({
-                        "data-qtip": me.txtNext,
-                        "data-qalign": "bl-tl?"
-                    });
-                }
-            }
-        });
-        me.btnClose = Ext.create("Ext.button.Button", {
-            iconCls: "asc-slide-preview-btn btn-close",
-            listeners: {
-                click: function () {
-                    if (me.api) {
-                        me.api.EndDemonstration();
-                    }
-                },
-                render: function (obj) {
-                    obj.getEl().set({
-                        "data-qtip": me.txtClose,
-                        "data-qalign": "bl-tl?"
-                    });
-                }
-            }
-        });
-        me.btnPlay = Ext.create("Ext.button.Button", {
-            iconCls: "asc-slide-preview-btn btn-play",
-            listeners: {
-                click: function () {
-                    var span = me.btnPlay.getEl().down(".asc-slide-preview-btn");
-                    if (span.hasCls("btn-play")) {
-                        span.removeCls("btn-play");
-                        span.addCls("btn-pause");
-                        me.btnPlay.getEl().set({
-                            "data-qtip": me.txtPause,
-                            "data-qalign": "bl-tl?"
-                        });
-                        if (me.api) {
-                            me.api.DemonstrationPlay();
-                        }
-                    } else {
-                        if (span.hasCls("btn-pause")) {
-                            span.removeCls("btn-pause");
-                            span.addCls("btn-play");
-                            me.btnPlay.getEl().set({
-                                "data-qtip": me.txtPlay,
-                                "data-qalign": "bl-tl?"
-                            });
-                            if (me.api) {
-                                me.api.DemonstrationPause();
-                            }
-                        }
-                    }
-                },
-                render: function (obj) {
-                    obj.getEl().set({
-                        "data-qtip": me.txtPlay,
-                        "data-qalign": "bl-tl?"
-                    });
-                }
-            }
-        });
-        me.txtPages = Ext.widget("label", {
-            cls: "preview-slides",
-            listeners: {
-                afterrender: Ext.bind(function (ct) {
-                    ct.getEl().on("mousedown", onShowPageMenu, this);
-                },
-                this)
-            }
-        });
-        var txtGoToPage = Ext.widget("label", {
-            text: me.goToSlideText
-        });
-        var fieldPageNumber = Ext.widget("numberfield", {
-            id: "preview-field-slide",
-            width: 40,
-            minValue: 1,
-            maxValue: 10000,
-            value: 1,
-            allowDecimals: false,
-            hideTrigger: true,
-            keyNavEnabled: false,
-            mouseWheelEnabled: false,
-            enableKeyEvents: true,
-            selectOnFocus: true,
-            listeners: {
-                specialkey: function (field, event, eOpts) {
-                    if (event.getKey() == event.ENTER) {
-                        if (me.api) {
-                            var page = fieldPageNumber.getValue();
-                            if (Ext.isNumber(page)) {
-                                if (page > fieldPageNumber.maxValue) {
-                                    page = fieldPageNumber.maxValue;
-                                }
-                                if (page < fieldPageNumber.minValue) {
-                                    page = fieldPageNumber.minValue;
-                                }
-                                fieldPageNumber.setValue(page);
-                                fieldPageNumber.selectText();
-                                me.api.DemonstrationGoToSlide(page - 1);
-                            }
-                        }
-                    }
-                }
-            }
-        });
-        var defaultPadding = 20;
-        var defaultContainerOffset = 7;
-        me.menuGoToPage = Ext.widget("menu", {
-            id: "preview-menu-slide",
-            autoHeight: true,
-            autoWidth: true,
-            plain: true,
-            items: [{
-                xtype: "container",
-                cls: "pe-documentstatusinfo-menu-inner",
-                layout: {
-                    type: "hbox",
-                    align: "middle",
-                    padding: defaultPadding / 2 + "px " + defaultPadding + "px"
-                },
-                items: [txtGoToPage, {
-                    xtype: "tbspacer",
-                    width: defaultContainerOffset
-                },
-                fieldPageNumber],
-                listeners: {
-                    afterrender: function (ct) {
-                        var textWidth = txtGoToPage.getWidth();
-                        ct.getEl().setWidth(defaultContainerOffset + 2 * defaultPadding + textWidth + fieldPageNumber.getWidth());
-                    }
-                }
-            }],
-            listeners: {
-                show: function (ct) {
-                    if (me.api) {
-                        fieldPageNumber.setValue(me.api.getCurrentPage() + 1);
-                        fieldPageNumber.focus(true, 300);
-                    }
-                }
-            }
-        });
-        var onShowPageMenu = function () {
-            me.menuGoToPage.show();
-            me.menuGoToPage.showBy(me.txtPages, "bl-tl", [0, -10]);
-        };
-        me.onCountSlides = function (count) {
-            fieldPageNumber.setMinValue((count > 0) ? 1 : 0);
-            fieldPageNumber.setMaxValue(count);
-        };
-        me.onDemonstrationSlideChanged = function (slideNum) {
-            if (me.api && Ext.isNumber(slideNum)) {
-                var count = me.api.getCountPages();
-                me.txtPages.setText(Ext.String.format(me.slideIndexText, slideNum + 1, count));
-                me.btnPrev.setDisabled(slideNum <= 0);
-                me.btnNext.setDisabled(slideNum >= count - 1);
-                fieldPageNumber.setValue(slideNum + 1);
-                var w = me.txtPages.getWidth();
-                if (me._PagesPanelSize !== w) {
-                    me.controlsContainer.setWidth(me._ControlPanelWidth + w);
-                    me._PagesPanelSize = w;
-                }
-                me.controlsContainer.doLayout();
-            }
-        };
-        me.items = [{
-            xtype: "container",
-            id: "presentation-preview",
-            listeners: {
-                resize: function (Component, adjWidth, adjHeight, eOpts) {
-                    if (this.api) {
-                        setTimeout(Ext.bind(function () {
-                            this.api.Resize();
-                        },
-                        this), 50);
-                    }
-                },
+
+        initialize : function(options) {
+            _.extend(this.options, options || {});
+
+            this.template = [
+                '<div id="presentation-preview" style="width:100%; height:100%"></div>',
+                '<div id="preview-controls-panel" class="preview-controls" style="position: absolute; bottom: 0;">',
+                    '<div class="preview-group" style="">',
+                        '<button id="btn-preview-prev" type="button" class="btn small btn-toolbar btn-toolbar-default"><span class="btn-icon">&nbsp;</span></button>',
+                        '<button id="btn-preview-play" type="button" class="btn small btn-toolbar btn-toolbar-default"><span class="btn-icon">&nbsp;</span></button>',
+                        '<button id="btn-preview-next" type="button" class="btn small btn-toolbar btn-toolbar-default"><span class="btn-icon">&nbsp;</span></button>',
+                    '<div class="separator"/>',
+                    '</div>',
+                    '<div class="preview-group dropup">',
+                        '<label id="preview-label-slides" class="status-label" data-toggle="dropdown">Slide 1 of 1</label>',
+                        '<div id="preview-goto-box" class="dropdown-menu">',
+                            '<label style="float:left;line-height:22px;">' + this.goToSlideText + '</label>',
+                            '<div id="preview-goto-page" style="display:inline-block;"></div>',
+                        '</div>',
+                    '</div>',
+                    '<div class="preview-group" style="">',
+                        '<div class="separator"/>',
+                        '<button id="btn-preview-close" type="button" class="btn small btn-toolbar btn-toolbar-default"><span class="btn-icon">&nbsp;</span></button>',
+                    '</div>',
+                '</div>'
+            ].join('');
+
+            this.pages = new PE.Models.Pages({current:1, count:1});
+            this.pages.on('change', _.bind(_updatePagesCaption,this));
+        },
+
+        render: function () {
+            var el = $(this.el),
+                me = this;
+            el.html(_.template(this.template, {
                 scope: this
+            }));
+
+            this.btnPrev = new Common.UI.Button({
+                el: $('#btn-preview-prev',this.el),
+                hint: this.txtPrev,
+                hintAnchor: 'top'
+            });
+            this.btnPrev.on('click', _.bind(function() {
+                if (this.api) this.api.DemonstrationPrevSlide();
+            }, this));
+
+            this.btnNext = new Common.UI.Button({
+                el: $('#btn-preview-next',this.el),
+                hint: this.txtNext,
+                hintAnchor: 'top'
+            });
+            this.btnNext.on('click', _.bind(function() {
+                if (this.api) this.api.DemonstrationNextSlide();
+            }, this));
+
+            this.btnPlay = new Common.UI.Button({
+                el: $('#btn-preview-play',this.el),
+                hint: this.txtPlay,
+                hintAnchor: 'top'
+            });
+            this.btnPlay.on('click', _.bind(function(btn) {
+                var iconEl = $('.btn-icon', this.btnPlay.cmpEl);
+                if (iconEl.hasClass('btn-pause')) {
+                    iconEl.removeClass('btn-pause');
+                    this.btnPlay.updateHint(this.txtPlay);
+                    if (this.api)
+                        this.api.DemonstrationPause();
+                } else {
+                    iconEl.addClass('btn-pause');
+                    this.btnPlay.updateHint(this.txtPause);
+                    if (this.api)
+                        this.api.DemonstrationPlay ();
+                }
+            }, this));
+
+            this.btnClose = new Common.UI.Button({
+                el: $('#btn-preview-close',this.el),
+                hint: this.txtClose,
+                hintAnchor: 'top'
+            });
+            this.btnClose.on('click', _.bind(function() {
+                if (this.api) this.api.EndDemonstration();
+            }, this));
+
+            this.txtGoToPage = new Common.UI.InputField({
+                el          : $('#preview-goto-page'),
+                allowBlank  : true,
+                validateOnChange: true,
+                style       : 'width: 60px;',
+                maskExp: /[0-9]/,
+                validation  : function(value) {
+                    if (/(^[0-9]+$)/.test(value)) {
+                        value = parseInt(value);
+                        if (undefined !== value && value > 0 && value <= me.pages.get('count'))
+                            return true;
+                    }
+
+                    return me.txtPageNumInvalid;
+                }
+            }).on('keypress:after', function(input, e) {
+                    var box = me.$el.find('#preview-goto-box');
+                    if (e.keyCode === Common.UI.Keys.RETURN) {
+                        var edit = box.find('input[type=text]'), page = parseInt(edit.val());
+                        if (!page || page-- > me.pages.get('count') || page < 0) {
+                            edit.select();
+                            return false;
+                        }
+
+                        box.focus();                        // for IE
+                        box.parent().removeClass('open');
+
+                        me.api.DemonstrationGoToSlide(page);
+                        me.api.asc_enableKeyEvents(true);
+
+                        return false;
+                    }
+                }
+            );
+
+            var goto = this.$el.find('#preview-goto-box');
+            goto.on('click', function() {
+                return false;
+            });
+            goto.parent().on('show.bs.dropdown',
+                function () {
+//                    me.txtGoToPage.setValue(me.api.getCurrentPage() + 1);
+//                    me.txtGoToPage.checkValidate();
+                    var edit = me.txtGoToPage.$el.find('input');
+                    _.defer(function(){edit.focus(); edit.select();}, 100);
+
+                }
+            );
+            goto.parent().on('hide.bs.dropdown',
+                function () { var box = me.$el.find('#preview-goto-box');
+                    if (me.api && box) {
+                        box.focus();                        // for IE
+                        box.parent().removeClass('open');
+
+                        me.api.asc_enableKeyEvents(true);
+                    }
+                }
+            );
+        },
+
+        show: function() {
+            var toolbar = PE.getController('Toolbar').getView('Toolbar');
+            if (toolbar._state.hasCollaborativeChanges) {
+                toolbar._state.hasCollaborativeChanges = false;
+                if (toolbar.synchTooltip) toolbar.synchTooltip.hide();
+                toolbar.needShowSynchTip = true;
             }
-        }];
-        this.controlsContainer = Ext.create("Ext.container.Container", {
-            id: "preview-controls-panel",
-            cls: "pe-documentpreview",
-            floating: true,
-            shadow: false,
-            toFrontOnShow: true,
-            layout: {
-                type: "hbox",
-                align: "middle"
-            },
-            height: me._ControlPanelHeight = 35,
-            width: me._ControlPanelWidth = 122,
-            items: [{
-                xtype: "tbspacer",
-                width: 3
-            },
-            me.btnPrev, me.btnPlay, me.btnNext, {
-                xtype: "tbseparator",
-                width: 2,
-                height: "100%",
-                style: "padding-top:8px; padding-bottom:8px;",
-                html: '<div style="width: 100%; height: 100%; border-right: 1px solid #DADADA"></div>'
-            },
-            {
-                xtype: "tbspacer",
-                width: 8
-            },
-            me.txtPages, {
-                xtype: "tbspacer",
-                width: 8
-            },
-            {
-                xtype: "tbseparator",
-                width: 6,
-                height: "100%",
-                style: "padding-top:8px; padding-bottom:8px;",
-                html: '<div style="width: 100%; height: 100%; border-left: 1px solid #DADADA"></div>'
-            },
-            me.btnClose]
-        });
-        this.addEvents("editcomplete");
-        this.callParent(arguments);
-    },
-    setApi: function (o) {
-        this.api = o;
-        if (this.api) {
-            this.api.asc_registerCallback("asc_onCountPages", Ext.bind(this.onCountSlides, this));
-            this.api.asc_registerCallback("asc_onEndDemonstration", Ext.bind(this.onEndDemonstration, this));
-            this.api.asc_registerCallback("asc_onDemonstrationSlideChanged", Ext.bind(this.onDemonstrationSlideChanged, this));
-            this.api.DemonstrationEndShowMessage(this.txtFinalMessage);
-        }
-        return this;
-    },
-    resizePreview: function (Component, adjWidth, adjHeight, eOpts) {
-        this.setSize(adjWidth, adjHeight);
-        this.controlsContainer.setPosition(0, adjHeight - this._ControlPanelHeight);
-        if (this.menuGoToPage.isVisible()) {
-            this.menuGoToPage.showBy(this.txtPages, "bl-tl", [0, -10]);
-        }
-    },
-    onEndDemonstration: function () {
-        this.hide();
-    },
-    txtPrev: "Previous Slide",
-    txtNext: "Next Slide",
-    txtClose: "Close Preview",
-    goToSlideText: "Go to Slide",
-    slideIndexText: "Slide {0} of {1}",
-    txtPlay: "Start Presentation",
-    txtPause: "Pause Presentation",
-    txtFinalMessage: "The end of slide preview. Click to exit."
+
+            Common.UI.BaseView.prototype.show.call(this,arguments);
+
+            var iconEl = $('.btn-icon', this.btnPlay.cmpEl);
+            if (!iconEl.hasClass('btn-pause')) {
+                iconEl.addClass('btn-pause');
+                this.btnPlay.updateHint(this.txtPause);
+            }
+            $('#viewport-vbox-layout').css('z-index','0');
+            this.fireEvent('editcomplete', this);
+        },
+
+        hide: function() {
+            Common.UI.BaseView.prototype.hide.call(this,arguments);
+
+            $('#viewport-vbox-layout').css('z-index','auto');
+            Common.NotificationCenter.trigger('layout:changed', 'preview');
+
+            var toolbar = PE.getController('Toolbar').getView('Toolbar');
+            if (toolbar.needShowSynchTip) {
+                toolbar.needShowSynchTip = false;
+                toolbar.onCollaborativeChanges();
+            }
+
+            this.fireEvent('editcomplete', this);
+        },
+
+        setApi: function(o) {
+            this.api = o;
+
+            if (this.api) {
+                this.api.asc_registerCallback('asc_onCountPages',   _.bind(this.onCountSlides, this));
+                this.api.asc_registerCallback('asc_onEndDemonstration',  _.bind(this.onEndDemonstration, this));
+                this.api.asc_registerCallback('asc_onDemonstrationSlideChanged',  _.bind(this.onDemonstrationSlideChanged, this));
+                this.api.DemonstrationEndShowMessage(this.txtFinalMessage);
+            }
+            return this;
+        },
+
+        onCountSlides: function(count){
+            this.pages.set('count', count);
+        },
+
+        onDemonstrationSlideChanged: function(slideNum) {
+            this.pages.set('current', slideNum+1);
+            if (this.api && _.isNumber(slideNum)) {
+                var count = this.api.getCountPages();
+                if (count !== this.pages.get('count'))
+                    this.pages.set('count', count);
+                this.btnPrev.setDisabled(slideNum<=0);
+                this.btnNext.setDisabled(slideNum>=count-1);
+                this.txtGoToPage.setValue(slideNum + 1);
+                this.txtGoToPage.checkValidate();
+            }
+        },
+
+        onEndDemonstration: function( ) {
+            this.hide();
+        },
+
+        txtPrev: 'Previous Slide',
+        txtNext: 'Next Slide',
+        txtClose: 'Close Preview',
+        goToSlideText    : 'Go to Slide',
+        slideIndexText   : 'Slide {0} of {1}',
+        txtPlay: 'Start Presentation',
+        txtPause: 'Pause Presentation',
+        txtFinalMessage: 'The end of slide preview. Click to exit.',
+        txtPageNumInvalid: 'Slide number invalid'
+    }, PE.Views.DocumentPreview || {}));
 });

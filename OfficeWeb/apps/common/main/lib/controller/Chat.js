@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,75 +29,124 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("Common.controller.Chat", {
-    extend: "Ext.app.Controller",
-    views: ["ChatPanel"],
-    refs: [{
-        ref: "chatPanel",
-        selector: "commonchatpanel"
-    },
-    {
-        ref: "messageList",
-        selector: "#id-chat-msg"
-    },
-    {
-        ref: "userList",
-        selector: "#id-chat-users"
-    },
-    {
-        ref: "messageTextArea",
-        selector: "#id-chat-textarea"
-    },
-    {
-        ref: "btnSend",
-        selector: "#id-btn-send-msg"
-    }],
-    stores: ["Common.store.ChatMessages", "Common.store.Users"],
-    init: function () {
-        this.control({
-            "#id-btn-send-msg": {
-                afterrender: this.onBtnSendAfterRender,
-                click: this.onBtnSendClick
-            },
-            "#id-chat-msg": {
-                itemadd: this.onAddMessage
-            },
-            "#id-chat-textarea": {
-                keydown: this.onTextAreaKeyDown,
-                keyup: this.onTextAreaKeyUp
-            },
-            "#id-chat-users": {
-                viewready: function () {
-                    this.onUpdateUser();
-                },
-                itemclick: this.onUserListItemClick,
-                itemupdate: this.onUpdateUser
-            },
-            "#view-main-menu": {
-                panelshow: this.onShowPanel
+ define(["core", "common/main/lib/collection/Users", "common/main/lib/collection/ChatMessages", "common/main/lib/view/Chat"], function () {
+    Common.Controllers.Chat = Backbone.Controller.extend(_.extend({
+        models: [],
+        collections: ["Common.Collections.Users", "Common.Collections.ChatMessages"],
+        views: ["Common.Views.Chat"],
+        initialize: function () {
+            this.addListeners({
+                "Common.Views.Chat": {
+                    "message:add": _.bind(this.onSendMessage, this)
+                }
+            });
+        },
+        events: {},
+        onLaunch: function () {
+            this.panelChat = this.createView("Common.Views.Chat", {
+                storeUsers: this.getApplication().getCollection("Common.Collections.Users"),
+                storeMessages: this.getApplication().getCollection("Common.Collections.ChatMessages")
+            });
+        },
+        setMode: function (mode) {
+            this.mode = mode;
+            if (this.api) {
+                if (this.mode.canCoAuthoring) {
+                    this.api.asc_registerCallback("asc_onCoAuthoringChatReceiveMessage", _.bind(this.onReceiveMessage, this));
+                }
+                this.api.asc_registerCallback("asc_onAuthParticipantsChanged", _.bind(this.onUsersChanged, this));
+                this.api.asc_registerCallback("asc_onConnectionStateChanged", _.bind(this.onUserConnection, this));
+                this.api.asc_coAuthoringGetUsers();
+                if (this.mode.canCoAuthoring) {
+                    this.api.asc_coAuthoringChatGetMessages();
+                }
             }
-        });
-    },
-    setApi: function (o) {
-        this.api = o;
-        this.api.asc_registerCallback("asc_onParticipantsChanged", Ext.bind(this.onParticipantsChanged, this));
-        this.api.asc_registerCallback("asc_onCoAuthoringChatReceiveMessage", Ext.bind(this.onCoAuthoringChatReceiveMessage, this));
-        this.api.asc_registerCallback("asc_onAuthParticipantsChanged", Ext.bind(this.onAuthParticipantsChanged, this));
-        this.api.asc_registerCallback("asc_onConnectionStateChanged", Ext.bind(this.onConnectionStateChanged, this));
-        this.api.asc_coAuthoringGetUsers();
-        this.api.asc_coAuthoringChatGetMessages();
-        return this;
-    },
-    onLaunch: function () {
-        Common.Gateway.on("init", Ext.bind(this.loadConfig, this));
-    },
-    loadConfig: function (data) {},
-    _sendMessage: function () {
-        var messageTextArea = this.getMessageTextArea(),
-        me = this;
-        if (messageTextArea) {
-            var message = Ext.String.trim(messageTextArea.getValue());
-            if (message.length > 0 && this.api) {
+            return this;
+        },
+        setApi: function (api) {
+            this.api = api;
+            return this;
+        },
+        onUsersChanged: function (users) {
+            if (!this.mode.canCoAuthoring) {
+                var len = 0;
+                for (name in users) {
+                    if (undefined !== name) {
+                        len++;
+                    }
+                }
+                if (len > 2 && this._isCoAuthoringStopped == undefined) {
+                    this._isCoAuthoringStopped = true;
+                    this.api.asc_coAuthoringDisconnect();
+                    Common.NotificationCenter.trigger("api:disconnect");
+                    setTimeout(_.bind(function () {
+                        Common.UI.alert({
+                            closable: false,
+                            title: this.notcriticalErrorTitle,
+                            msg: this.textUserLimit,
+                            iconCls: "warn",
+                            buttons: ["ok"]
+                        });
+                    },
+                    this), 100);
+                    return;
+                }
+            }
+            var usersStore = this.getApplication().getCollection("Common.Collections.Users");
+            if (usersStore) {
+                var arrUsers = [],
+                name,
+                user;
+                for (name in users) {
+                    if (undefined !== name) {
+                        user = users[name];
+                        if (user) {
+                            arrUsers.push(new Common.Models.User({
+                                id: user.asc_getId(),
+                                username: user.asc_getUserName(),
+                                online: true,
+                                color: user.asc_getColor()
+                            }));
+                        }
+                    }
+                }
+                usersStore[usersStore.size() > 0 ? "add" : "reset"](arrUsers);
+            }
+        },
+        onUserConnection: function (change) {
+            var usersStore = this.getApplication().getCollection("Common.Collections.Users");
+            if (usersStore) {
+                var user = usersStore.findUser(change.asc_getId());
+                if (!user) {
+                    usersStore.add(new Common.Models.User({
+                        id: change.asc_getId(),
+                        username: change.asc_getUserName(),
+                        online: change.asc_getState(),
+                        color: change.asc_getColor()
+                    }));
+                } else {
+                    user.set({
+                        online: change.asc_getState()
+                    });
+                }
+            }
+        },
+        onReceiveMessage: function (messages) {
+            var msgStore = this.getApplication().getCollection("Common.Collections.ChatMessages");
+            if (msgStore) {
+                var array = [];
+                messages.forEach(function (msg) {
+                    array.push(new Common.Models.ChatMessage({
+                        userid: msg.user,
+                        message: msg.message,
+                        username: msg.username
+                    }));
+                });
+                msgStore[msgStore.size() > 0 ? "add" : "reset"](array);
+            }
+        },
+        onSendMessage: function (panel, text) {
+            if (text.length > 0) {
                 var splitString = function (string, chunkSize) {
                     var chunks = [];
                     while (string) {
@@ -111,168 +160,14 @@
                     }
                     return chunks;
                 };
-                var messageList = splitString(message, 2048);
-                Ext.each(messageList, function (message) {
+                var me = this;
+                splitString(text, 2048).forEach(function (message) {
                     me.api.asc_coAuthoringChatSendMessage(message);
                 });
-                messageTextArea.setValue("");
             }
-        }
+        },
+        notcriticalErrorTitle: "Warning",
+        textUserLimit: 'You are using ONLYOFFICE Editors free version.<br>Only two users can co-edit the document simultaneously.<br>Want more? Consider buying ONLYOFFICE Editors Pro version.<br><a href="http://www.onlyoffice.com" target="_blank">Read more</a>'
     },
-    _updateUserOnline: function (user, online) {
-        if (user) {
-            user.beginEdit();
-            user.set("online", online);
-            if (user.get("color").length < 1) {
-                user.set("color", "#" + ("000000" + Math.floor(Math.random() * 16777215).toString(16)).substr(-6));
-            }
-            user.endEdit();
-            user.commit();
-        }
-    },
-    onBtnSendClick: function (btn, e) {
-        this._sendMessage();
-        var textarea = Ext.getCmp("id-chat-textarea");
-        if (textarea) {
-            var doSetFocus = new Ext.util.DelayedTask(function () {
-                this.api.asc_enableKeyEvents(false);
-                textarea.focus();
-            },
-            this);
-            doSetFocus.delay(100);
-        }
-    },
-    onBtnSendAfterRender: function (cmp) {
-        var btnEl = cmp.getEl(),
-        messageTextArea = this.getMessageTextArea();
-        if (Ext.supports.Placeholder) {
-            btnEl.on("mousedown", function () {
-                messageTextArea.emptyText = this.textEnterMessage;
-                messageTextArea.applyEmptyText();
-            },
-            this);
-            btnEl.on("mouseup", function () {
-                messageTextArea.emptyText = " ";
-                messageTextArea.applyEmptyText();
-            },
-            this);
-        }
-    },
-    onAddMessage: function (records, index, node) {
-        var messageList = this.getMessageList();
-        if (messageList) {
-            var plugin = messageList.getPlugin("scrollpane");
-            if (plugin && plugin.jspApi) {
-                var needScroll = plugin.jspApi.getPercentScrolledY() > 0.999;
-                if (messageList.getWidth() > 0) {
-                    plugin.updateScrollPane();
-                }
-                if (needScroll) {
-                    Ext.defer(function () {
-                        var node = messageList.getNode(index);
-                        node && plugin.scrollToElement(node, false, true);
-                    },
-                    100, this);
-                }
-            }
-        }
-    },
-    onUpdateUser: function (records, index, node) {
-        var userList = this.getUserList();
-        if (userList) {
-            var onlinecount = userList.getStore().getOnlineUserCount();
-            if (onlinecount > 10) {
-                onlinecount = 10;
-            }
-            userList.setHeight((onlinecount < 4) ? 70 : onlinecount * 18 + 12);
-            var plugin = userList.getPlugin("scrollpane");
-            if (plugin && userList.getEl().dom.clientWidth > 0) {
-                plugin.updateScrollPane();
-            }
-        }
-    },
-    onTextAreaKeyUp: function (field, event) {
-        if (event.getKey() == event.ENTER) {
-            field.emptyText = " ";
-            field.applyEmptyText();
-        }
-    },
-    onTextAreaKeyDown: function (field, event) {
-        if (event.getKey() == event.ENTER) {
-            if ((event.ctrlKey || event.metaKey) && !event.shiftKey) {
-                if (field.getValue().length < 1) {
-                    field.emptyText = this.textEnterMessage;
-                    field.applyEmptyText();
-                } else {
-                    this._sendMessage();
-                }
-                event.stopEvent();
-            }
-        }
-    },
-    onUserListItemClick: function (view, record, item, index, e) {},
-    onParticipantsChanged: function (e) {},
-    onCoAuthoringChatReceiveMessage: function (messages) {
-        var messagesStore = this.getCommonStoreChatMessagesStore();
-        if (messagesStore) {
-            Ext.each(messages, function (item) {
-                messagesStore.add({
-                    type: 0,
-                    userid: item.user,
-                    message: item.message,
-                    username: item.username
-                });
-            });
-        }
-    },
-    onAuthParticipantsChanged: function (users) {
-        var userStore = this.getCommonStoreUsersStore();
-        if (userStore) {
-            var record, me = this;
-            Ext.each(users, function (user) {
-                record = userStore.add({
-                    id: user.asc_getId(),
-                    username: user.asc_getUserName()
-                })[0];
-                this._updateUserOnline(record, true);
-            },
-            this);
-        }
-    },
-    onConnectionStateChanged: function (change) {
-        var userStore = this.getCommonStoreUsersStore();
-        if (userStore) {
-            var record = userStore.findRecord("id", change.asc_getId());
-            if (!record) {
-                record = userStore.add({
-                    id: change.asc_getId(),
-                    username: change.asc_getUserName()
-                })[0];
-            }
-            this._updateUserOnline(userStore.findRecord("id", change.asc_getId()), change.asc_getState());
-        }
-    },
-    onShowPanel: function (panel, fulscreen) {
-        var activeStep = panel.down("container");
-        if (activeStep && activeStep.isXType("commonchatpanel")) {
-            var messageList = this.getMessageList(),
-            userList = this.getUserList(),
-            plugin;
-            if (messageList) {
-                plugin = messageList.getPlugin("scrollpane");
-                if (plugin) {
-                    plugin.updateScrollPane();
-                    plugin.jspApi.scrollToPercentY(100, true);
-                }
-            }
-            if (userList) {
-                plugin = userList.getPlugin("scrollpane");
-                if (plugin) {
-                    plugin.updateScrollPane();
-                }
-            }
-        }
-    },
-    textEnterMessage: "Enter your message here",
-    capGuest: "Guest"
+    Common.Controllers.Chat || {}));
 });

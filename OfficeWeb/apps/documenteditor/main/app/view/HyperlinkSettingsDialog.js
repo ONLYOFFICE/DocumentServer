@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,231 +29,142 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("DE.view.HyperlinkSettingsDialog", {
-    extend: "Ext.window.Window",
-    alias: "widget.dehyperlinksettingsdialog",
-    requires: ["Ext.window.Window"],
-    modal: true,
-    closable: true,
-    resizable: false,
-    preventHeader: true,
-    plain: true,
-    height: 216,
-    width: 350,
-    padding: "20px 20px 18px 20px",
-    layout: "vbox",
-    layoutConfig: {
-        align: "stretch"
-    },
-    listeners: {
+ if (Common === undefined) {
+    var Common = {};
+}
+define(["common/main/lib/util/utils", "common/main/lib/component/InputField", "common/main/lib/component/Window"], function () {
+    DE.Views.HyperlinkSettingsDialog = Common.UI.Window.extend(_.extend({
+        options: {
+            width: 350,
+            style: "min-width: 230px;",
+            cls: "modal-dlg"
+        },
+        initialize: function (options) {
+            _.extend(this.options, {
+                title: this.textTitle
+            },
+            options || {});
+            this.template = ['<div class="box">', '<div class="input-row">', "<label>" + this.textUrl + " *</label>", "</div>", '<div id="id-dlg-hyperlink-url" class="input-row" style="margin-bottom: 5px;"></div>', '<div class="input-row">', "<label>" + this.textDisplay + "</label>", "</div>", '<div id="id-dlg-hyperlink-display" class="input-row" style="margin-bottom: 5px;"></div>', '<div class="input-row">', "<label>" + this.textTooltip + "</label>", "</div>", '<div id="id-dlg-hyperlink-tip" class="input-row" style="margin-bottom: 5px;"></div>', "</div>", '<div class="footer right">', '<button class="btn normal dlg-btn primary" result="ok" style="margin-right: 10px;">' + this.okButtonText + "</button>", '<button class="btn normal dlg-btn" result="cancel">' + this.cancelButtonText + "</button>", "</div>"].join("");
+            this.options.tpl = _.template(this.template, this.options);
+            Common.UI.Window.prototype.initialize.call(this, this.options);
+        },
+        render: function () {
+            Common.UI.Window.prototype.render.call(this);
+            var me = this,
+            $window = this.getChild();
+            me.inputUrl = new Common.UI.InputField({
+                el: $("#id-dlg-hyperlink-url"),
+                allowBlank: false,
+                blankError: me.txtEmpty,
+                style: "width: 100%;",
+                validateOnBlur: false,
+                validation: function (value) {
+                    me.isEmail = false;
+                    var isvalid = value.strongMatch(Common.Utils.hostnameRe); ! isvalid && (me.isEmail = isvalid = value.strongMatch(Common.Utils.emailRe)); ! isvalid && (isvalid = value.strongMatch(Common.Utils.ipRe)); ! isvalid && (isvalid = value.strongMatch(Common.Utils.localRe));
+                    if (isvalid) {
+                        return true;
+                    } else {
+                        return me.txtNotUrl;
+                    }
+                }
+            });
+            me.inputDisplay = new Common.UI.InputField({
+                el: $("#id-dlg-hyperlink-display"),
+                allowBlank: true,
+                validateOnBlur: false,
+                style: "width: 100%;"
+            }).on("changed:after", function () {
+                me.isTextChanged = true;
+            });
+            me.inputTip = new Common.UI.InputField({
+                el: $("#id-dlg-hyperlink-tip"),
+                style: "width: 100%;"
+            });
+            $window.find(".dlg-btn").on("click", _.bind(this.onBtnClick, this));
+            $window.find("input").on("keypress", _.bind(this.onKeyPress, this));
+        },
         show: function () {
-            this.txtUrl.focus(false, 500);
-        }
-    },
-    constructor: function (config) {
-        this.callParent(arguments);
-        this.initConfig(config);
-        return this;
-    },
-    initComponent: function () {
-        this.isTextChanged = false;
-        var _btnOk = Ext.create("Ext.Button", {
-            id: "addhyperlink-button-ok",
-            text: this.okButtonText,
-            width: 80,
-            cls: "asc-blue-button",
-            listeners: {
-                click: function () {
-                    if (!this.txtUrl.isValid() || !this.txtDisplay.isValid()) {
+            Common.UI.Window.prototype.show.apply(this, arguments);
+            var me = this;
+            _.delay(function () {
+                me.inputUrl.cmpEl.find("input").focus();
+            },
+            500);
+        },
+        setSettings: function (props) {
+            if (props) {
+                var me = this;
+                if (props.get_Value()) {
+                    me.inputUrl.setValue(props.get_Value());
+                } else {
+                    me.inputUrl.setValue("");
+                }
+                if (props.get_Text() !== null) {
+                    me.inputDisplay.setValue(props.get_Text());
+                    me.inputDisplay.setDisabled(false);
+                } else {
+                    me.inputDisplay.setValue(this.textDefault);
+                    me.inputDisplay.setDisabled(true);
+                }
+                this.isTextChanged = false;
+                me.inputTip.setValue(props.get_ToolTip());
+            }
+        },
+        getSettings: function () {
+            var me = this,
+            props = new CHyperlinkProperty(),
+            url = $.trim(me.inputUrl.getValue());
+            if (!/(((^https?)|(^ftp)):\/\/)|(^mailto:)/i.test(url)) {
+                url = ((me.isEmail) ? "mailto:": "http://") + url;
+            }
+            props.put_Value(url);
+            if (!me.inputDisplay.isDisabled() && (this.isTextChanged || _.isEmpty(me.inputDisplay.getValue()))) {
+                if (_.isEmpty(me.inputDisplay.getValue())) {
+                    me.inputDisplay.setValue(url);
+                }
+                props.put_Text(me.inputDisplay.getValue());
+            } else {
+                props.put_Text(null);
+            }
+            props.put_ToolTip(me.inputTip.getValue());
+            return props;
+        },
+        onBtnClick: function (event) {
+            this._handleInput(event.currentTarget.attributes["result"].value);
+        },
+        onKeyPress: function (event) {
+            if (event.keyCode == Common.UI.Keys.RETURN) {
+                this._handleInput("ok");
+                return false;
+            }
+        },
+        _handleInput: function (state) {
+            if (this.options.handler) {
+                if (state == "ok") {
+                    var checkurl = this.inputUrl.checkValidate(),
+                    checkdisp = this.inputDisplay.checkValidate();
+                    if (checkurl !== true) {
+                        this.inputUrl.cmpEl.find("input").focus();
                         return;
                     }
-                    this._modalresult = 1;
-                    this.fireEvent("onmodalresult", this._modalresult);
-                    this.close();
-                },
-                scope: this
-            }
-        });
-        var _btnCancel = Ext.create("Ext.Button", {
-            id: "addhyperlink-button-cancel",
-            text: this.cancelButtonText,
-            width: 80,
-            cls: "asc-darkgray-button",
-            listeners: {
-                click: function () {
-                    this._modalresult = 0;
-                    this.fireEvent("onmodalresult", this._modalresult);
-                    this.close();
-                },
-                scope: this
-            }
-        });
-        this.txtUrl = Ext.create("Ext.form.Text", {
-            id: "addhyperlink-text-url",
-            width: 310,
-            msgTarget: "side",
-            validateOnChange: false,
-            allowBlank: false,
-            value: "http://",
-            blankText: this.txtEmpty,
-            regex: /(([\-\wа-яё]+\.)+[\wа-яё]{2,3}(\/[%\-\wа-яё]+(\.[\wа-яё]{2,})?)*(([\wа-яё\-\.\?\\\/+@&#;`~=%!]*)(\.[\wа-яё]{2,})?)*\/?)/i,
-            regexText: this.txtNotUrl,
-            listeners: {
-                specialkey: function (field, e) {
-                    if (e.getKey() == e.ENTER) {
-                        _btnOk.fireEvent("click");
-                    } else {
-                        if (e.getKey() == e.ESC) {
-                            _btnCancel.fireEvent("click");
-                        }
+                    if (checkdisp !== true) {
+                        this.inputDisplay.cmpEl.find("input").focus();
+                        return;
                     }
                 }
+                this.options.handler.call(this, this, state);
             }
-        });
-        this.txtDisplay = Ext.create("Ext.form.Text", {
-            id: "addhyperlink-text-display",
-            width: 310,
-            msgTarget: "side",
-            validateOnBlur: false,
-            allowBlank: false,
-            blankText: this.txtEmpty,
-            value: "",
-            listeners: {
-                specialkey: function (field, e) {
-                    if (e.getKey() == e.ENTER) {
-                        _btnOk.fireEvent("click");
-                    } else {
-                        if (e.getKey() == e.ESC) {
-                            _btnCancel.fireEvent("click");
-                        }
-                    }
-                },
-                change: function (field, newValue, oldValue) {
-                    this.isTextChanged = true;
-                },
-                scope: this
-            }
-        });
-        this.txtTooltip = Ext.create("Ext.form.Text", {
-            id: "addhyperlink-text-tooltip",
-            width: 310,
-            msgTarget: "side",
-            validateOnBlur: false,
-            allowBlank: true,
-            value: "",
-            listeners: {
-                specialkey: function (field, e) {
-                    if (e.getKey() == e.ENTER) {
-                        _btnOk.fireEvent("click");
-                    } else {
-                        if (e.getKey() == e.ESC) {
-                            _btnCancel.fireEvent("click");
-                        }
-                    }
-                }
-            }
-        });
-        this.addEvents("onmodalresult");
-        this.items = [{
-            xtype: "label",
-            text: this.textUrl,
-            width: "100%",
-            style: "text-align:left"
+            this.close();
         },
-        {
-            xtype: "tbspacer",
-            height: 3
-        },
-        this.txtUrl, {
-            xtype: "tbspacer",
-            height: 3
-        },
-        {
-            xtype: "label",
-            text: this.textDisplay,
-            width: "100%",
-            style: "text-align:left"
-        },
-        {
-            xtype: "tbspacer",
-            height: 3
-        },
-        this.txtDisplay, {
-            xtype: "tbspacer",
-            height: 3
-        },
-        {
-            xtype: "label",
-            text: this.textTooltip,
-            width: "100%",
-            style: "text-align:left"
-        },
-        {
-            xtype: "tbspacer",
-            height: 3
-        },
-        this.txtTooltip, {
-            xtype: "tbspacer",
-            height: 8
-        },
-        {
-            xtype: "container",
-            width: 310,
-            layout: "hbox",
-            layoutConfig: {
-                align: "stretch"
-            },
-            items: [{
-                xtype: "tbspacer",
-                flex: 1
-            },
-            _btnOk, {
-                xtype: "tbspacer",
-                width: 5
-            },
-            _btnCancel]
-        }];
-        this.callParent(arguments);
+        textUrl: "Link to",
+        textDisplay: "Display",
+        cancelButtonText: "Cancel",
+        okButtonText: "Ok",
+        txtEmpty: "This field is required",
+        txtNotUrl: 'This field should be a URL in the format "http://www.example.com"',
+        textTooltip: "ScreenTip text",
+        textDefault: "Selected text",
+        textTitle: "Hyperlink Settings"
     },
-    setSettings: function (props) {
-        if (props) {
-            if (props.get_Value()) {
-                this.txtUrl.setValue(props.get_Value());
-            } else {
-                this.txtUrl.setValue("");
-            }
-            if (props.get_Text() !== null) {
-                this.txtDisplay.setValue(props.get_Text());
-                this.txtDisplay.setDisabled(false);
-            } else {
-                this.txtDisplay.setValue(this.textDefault);
-                this.txtDisplay.setDisabled(true);
-            }
-            this.isTextChanged = false;
-            this.txtTooltip.setValue(props.get_ToolTip());
-        }
-    },
-    getSettings: function () {
-        var props = new CHyperlinkProperty();
-        var url = this.txtUrl.getValue().trim();
-        if (!/(((^https?)|(^ftp)):\/\/)/i.test(url)) {
-            url = "http://" + url;
-        }
-        props.put_Value(url);
-        if (!this.txtDisplay.isDisabled() && this.isTextChanged) {
-            props.put_Text(this.txtDisplay.getValue());
-        } else {
-            props.put_Text(null);
-        }
-        props.put_ToolTip(this.txtTooltip.getValue());
-        return props;
-    },
-    textUrl: "Link to",
-    textDisplay: "Display",
-    cancelButtonText: "Cancel",
-    okButtonText: "Ok",
-    txtEmpty: "This field is required",
-    txtNotUrl: 'This field should be a URL in the format "http://www.example.com"',
-    textTooltip: "ScreenTip text",
-    textDefault: "Selected text"
+    DE.Views.HyperlinkSettingsDialog || {}));
 });

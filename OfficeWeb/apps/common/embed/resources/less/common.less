@@ -1,6 +1,56 @@
-// Bootstrap core variables and mixins
-@import "../../../../../3rdparty/bootstrap/src/less/variables.less";
-@import "../../../../../3rdparty/bootstrap/src/less/mixins.less";
+// Core variables and mixins
+@import "../../../../../vendor/bootstrap/less/variables.less";
+
+@icon-font-path: "../../../../../vendor/bootstrap/dist/fonts/";
+
+@import "../../../../../vendor/bootstrap/less/mixins.less";
+
+// Reset
+@import "../../../../../vendor/bootstrap/less/normalize.less";
+@import "../../../../../vendor/bootstrap/less/print.less";
+
+// Core CSS
+@import "../../../../../vendor/bootstrap/less/scaffolding.less";
+@import "../../../../../vendor/bootstrap/less/type.less";
+//@import "code.less";
+//@import "grid.less";
+//@import "tables.less";
+@import "../../../../../vendor/bootstrap/less/forms.less";
+@import "../../../../../vendor/bootstrap/less/buttons.less";
+
+// Components
+@import "../../../../../vendor/bootstrap/less/component-animations.less";
+@import "../../../../../vendor/bootstrap/less/glyphicons.less";
+//@import "dropdowns.less";
+//@import "button-groups.less";
+//@import "input-groups.less";
+//@import "navs.less";
+//@import "navbar.less";
+//@import "breadcrumbs.less";
+//@import "pagination.less";
+//@import "pager.less";
+@import "../../../../../vendor/bootstrap/less/labels.less";
+//@import "badges.less";
+//@import "jumbotron.less";
+//@import "thumbnails.less";
+@import "../../../../../vendor/bootstrap/less/alerts.less";
+//@import "progress-bars.less";
+//@import "media.less";
+//@import "list-group.less";
+//@import "panels.less";
+//@import "wells.less";
+//@import "close.less";
+
+// Components w/ JavaScript
+@import "../../../../../vendor/bootstrap/less/modals.less";
+@import "../../../../../vendor/bootstrap/less/tooltip.less";
+@import "../../../../../vendor/bootstrap/less/popovers.less";
+//@import "carousel.less";
+
+// Utility classes
+@import "../../../../../vendor/bootstrap/less/utilities.less";
+@import "../../../../../vendor/bootstrap/less/responsive-utilities.less";
+
 
 @toolbarBorderColor:            #929292;
 @toolbarBorderShadowColor:      #FAFAFA;
@@ -10,33 +60,21 @@
 @toolbarFontSize:               12px;
 @controlBtnHoverTopColor:       #6180C4;
 @controlBtnHoverBottomColor:    #8AACF1;
+@iconSpriteCommonPath:          "../img/glyphicons.png";
 
-// Global overwrite
-// -------------------------
-
-.btn-mini {
-    font-weight: bold;
-}
-
-.btn-primary {
-    .buttonBackground(@controlBtnHoverBottomColor, @controlBtnHoverTopColor);
+.input-xs {
+    .input-size(@input-height-small - 8px; @padding-small-vertical; @padding-small-horizontal; @font-size-small; @line-height-small; @border-radius-small);
 }
 
 .embed-body {
-        -moz-user-select: -moz-none;
-      -khtml-user-select: none;
-     -webkit-user-select: none;
-         -ms-user-select: none;
-             user-select: none;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 
-    font-size: 12px;
+    font-size: @toolbarFontSize;
     overflow: hidden;
-}
-
-// Fix popover
-// -------------------------
-.popover.top {
-    margin-top: -10px;
 }
 
 // Document Viewer
@@ -65,6 +103,7 @@
     position: fixed;
     font-size: @toolbarFontSize;
     min-width: 340px;
+    z-index: 100;
     #gradient > .vertical(@toolbarTopColor, @toolbarBottomColor);
 
     &.top {
@@ -73,9 +112,9 @@
         width: 100%;
         height: 32px;
 
-     -webkit-box-shadow: inset 0 -1px 0 @toolbarBorderColor, inset 0 1px 0 @toolbarBorderShadowColor;
+        -webkit-box-shadow: inset 0 -1px 0 @toolbarBorderColor, inset 0 1px 0 @toolbarBorderShadowColor;
         -moz-box-shadow: inset 0 -1px 0 @toolbarBorderColor, inset 0 1px 0 @toolbarBorderShadowColor;
-             box-shadow: inset 0 -1px 0 @toolbarBorderColor, inset 0 1px 0 @toolbarBorderShadowColor;
+        box-shadow: inset 0 -1px 0 @toolbarBorderColor, inset 0 1px 0 @toolbarBorderShadowColor;
     }
 
     &.bottom {
@@ -84,22 +123,24 @@
         width: 100%;
         height: 30px;
 
-     -webkit-box-shadow: inset 0 1px 0 @toolbarBorderColor, inset 0 2px 0 @toolbarBorderShadowColor;
+        -webkit-box-shadow: inset 0 1px 0 @toolbarBorderColor, inset 0 2px 0 @toolbarBorderShadowColor;
         -moz-box-shadow: inset 0 1px 0 @toolbarBorderColor, inset 0 2px 0 @toolbarBorderShadowColor;
-             box-shadow: inset 0 1px 0 @toolbarBorderColor, inset 0 2px 0 @toolbarBorderShadowColor;
+        box-shadow: inset 0 1px 0 @toolbarBorderColor, inset 0 2px 0 @toolbarBorderShadowColor;
     }
 
     ul {
         position: absolute;
         list-style-type: none;
         margin: 0;
+        padding: 0;
 
         li {
             input {
-                height: 14px;
-                font-size: @toolbarFontSize;
-                margin: 4px 3px 5px;
-                padding: 4px 0;
+                display: inline-block;
+                width: 25px;
+                padding: 0;
+                height: 25px;
+                margin: 3px;
                 text-align: center;
             }
 
@@ -148,13 +189,13 @@ a.brand-logo {
 // -------------------------
 [class^="control-icon-"],
 [class*=" control-icon-"] {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  vertical-align: text-top;
-  background-image: url("@{iconSpriteCommonPath}");
-  background-repeat: no-repeat;
-  margin-top: -2px;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    vertical-align: text-top;
+    background-image: url("@{iconSpriteCommonPath}");
+    background-repeat: no-repeat;
+    margin-top: -2px;
 }
 
 [class^="overlay-icon-"],
@@ -177,7 +218,6 @@ a.brand-logo {
 .overlay-icon-zoom-in       { background-position: 0        -120px; }
 .overlay-icon-zoom-out      { background-position: -32px    -120px; }
 
-
 // Control buttons
 // -------------------------
 .control-btn {
@@ -191,7 +231,7 @@ a.brand-logo {
     background-color: transparent;
     background-image: none;
     border: 1px solid transparent;
-    .border-radius(2px);
+    border-radius: 2px;
     margin: 4px 5px 0 0;
 
     i {
@@ -222,13 +262,14 @@ a.brand-logo {
 // Focus state for keyboard and accessibility
     &:focus {
         .tab-focus();
+        outline: none;
     }
 
 // Active state
     &.active,
     &:active {
         color: #ffffff;
-        outline: 0;
+        outline: none;
         border: 1px solid darken(@controlBtnHoverTopColor, 5%);
         #gradient > .vertical(@controlBtnHoverTopColor, @controlBtnHoverBottomColor);
         text-shadow: 0 1px 0 darken(@toolbarBorderColor, 20%);
@@ -250,11 +291,20 @@ a.brand-logo {
     left: 50%;
 
     ul {
+        padding: 0;
         list-style-type: none;
         margin: 0 auto;
 
         li {
             display: inline-block;
+
+            &:first-child {
+                margin-right: 5px;
+            }
+
+            &:last-child {
+                margin-left: 5px;
+            }
         }
     }
 
@@ -271,23 +321,24 @@ a.brand-logo {
         border: none;
         padding: 0;
         line-height: 0;
+        outline: none;
 
         &:hover {
-            [class^="overlay-icon-"],
-            [class*=" overlay-icon-"] {
-                opacity: .6;
-            }
-        }
-
-        &.active,
-        &:active {
-            [class^="overlay-icon-"],
-            [class*=" overlay-icon-"] {
-                opacity: .8;
-            }
-        }
-    }
+[class^="overlay-icon-"],
+[class*=" overlay-icon-"] {
+    opacity: .6;
 }
+    }
+
+&.active,
+&:active {
+[class^="overlay-icon-"],
+[class*=" overlay-icon-"] {
+    opacity: .8;
+}
+    }
+    }
+    }
 
 // Error mask
 // -------------------------
@@ -326,10 +377,6 @@ a.brand-logo {
         padding: 14px;
     }
 
-    .btn {
-        .border-radius(2px);
-    }
-
     &.hyperlink {
         .popover-content {
             padding: 5px 10px;
@@ -348,25 +395,30 @@ a.brand-logo {
         width: 280px;
 
         .share-link {
+            margin-bottom: 5px;
+
             .caption {
+                margin-top: 3px;
                 margin-right: 8px;
                 float: left;
             }
 
-            .uneditable-input {
+            input[readonly] {
+                display: inline-block;
                 font-size: 1em;
                 padding: 0 4px;
                 margin-right: 5px;
-                .border-radius(0);
-                cursor: auto;
-                    -moz-user-select: text;
-                  -khtml-user-select: text;
-                 -webkit-user-select: text;
-                     -ms-user-select: text;
-                         user-select: text;
+                border-radius: 0;
+                cursor: text;
+                background-color: #fff;
+                -moz-user-select: text;
+                -khtml-user-select: text;
+                -webkit-user-select: text;
+                -ms-user-select: text;
+                user-select: text;
             }
 
-            .input-medium {
+            .input-xs {
                 width: 130px;
             }
 
@@ -377,6 +429,7 @@ a.brand-logo {
 
         .share-buttons {
             ul {
+                width: 244px;
                 height: 25px;
                 list-style-type: none;
                 margin: 5px 0 0;
@@ -390,17 +443,20 @@ a.brand-logo {
 
                     &.share-mail {
                         float: right;
+                        padding-right: 1px;
                         margin: 0;
+
                         a {
-                            padding: 2px 8px;
+                            min-width: 64px;
                         }
-                        i {
-                            margin-right: 5px;
+
+                        .glyphicon {
+                            margin-right: 4px;
                         }
                     }
 
                     &.share-twitter {
-                        max-width: 100px;
+                        max-width: 93px;
                     }
                 }
             }
@@ -419,75 +475,47 @@ a.brand-logo {
         }
 
         .caption {
+            margin-top: 2px;
             margin-right: 8px;
         }
 
         input {
+            display: inline-block;
             font-size: 1em;
             padding: 0 4px;
-            .border-radius(0);
+            border-radius: 0;
             margin: 0;
             margin-top: -1px;
 
-            &.input-mini {
-                width: 40px;
+            &.input-xs {
+                width: 50px;
             }
         }
 
         textarea {
-            width: 228px;
+            width: 238px;
             resize: none;
             cursor: auto;
             font-size: 1em;
-            .border-radius(0);
+            border-radius: 0;
         }
 
         button {
             float: right;
-            margin: 5px 0 15px;
+            margin: 10px 0 15px;
             width: 86px;
         }
     }
 }
 
-
-// Modal dialog
+// Modals
 // -------------------------
-.modal.error {
+.modal {
+    .modal-header {
+        padding: 5px 15px;
+    }
+
     .modal-footer {
-        text-align: center;
-    }
-}
-
-
-// Loader
-// -------------------------
-.cmd-loader-body {
-    z-index: 20001;
-    width: 300px;
-    padding: 16px;
-    margin: -71px 0 0 -166px;
-    border: none;
-    background-image: none;
-    background-color: #787C80;
-    opacity: 0.8;
-    -webkit-border-radius: 10px;
-       -moz-border-radius: 10px;
-            border-radius: 10px;
-
-    .cmd-loader-image {
-        background-image: url("../img/loading.gif");
-        background-repeat: no-repeat;
-        background-position: top center;
-        height: 74px;
-        width: 100%;
-    }
-
-    .cmd-loader-title {
-        font-size: 18px;
-        font-weight: lighter;
-        color: #FFF;
-        text-align: center;
-        margin: 16px 24px 0 24px;
+        border-top: none;
     }
 }

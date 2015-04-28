@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,18 +29,16 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("PE.model.SlideLayout", {
-    extend: "Ext.data.Model",
-    fields: [{
-        name: "imageUrl"
-    },
-    {
-        name: "title"
-    },
-    {
-        name: "data"
-    },
-    {
-        name: "uid"
-    }]
+ define(["backbone"], function (Backbone) {
+    PE.Models = PE.Models || {};
+    PE.Models.SlideLayout = Backbone.Model.extend({
+        defaults: function () {
+            return {
+                id: Common.UI.getId(),
+                imageUrl: null,
+                title: null,
+                data: null
+            };
+        }
+    });
 });

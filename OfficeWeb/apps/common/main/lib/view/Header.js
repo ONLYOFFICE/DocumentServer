@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,65 +29,100 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("Common.view.Header", {
-    extend: "Ext.container.Container",
-    alias: "widget.commonheader",
-    cls: "common-header",
-    config: {
-        headerCaption: "Default Caption",
-        documentCaption: "",
-        canBack: false
-    },
-    constructor: function (config) {
-        this.initConfig(config);
-        this.callParent(arguments);
-        return this;
-    },
-    initComponent: function () {
-        this.html = '<div id="header-logo"></div>' + '<span id="header-caption"></span>' + '<span id="header-delimiter">-</span>' + '<span id="header-documentcaption"></span>' + '<span id="header-back">' + this.textBack + "</span>";
-        this.callParent(arguments);
-    },
-    afterRender: function (obj) {
-        this.callParent(arguments);
-        $("#header-logo").on("click", function (e) {
-            var newDocumentPage = window.open("http://www.onlyoffice.com");
-            newDocumentPage && newDocumentPage.focus();
-        });
-    },
-    applyHeaderCaption: function (value) {
-        var hc = Ext.fly("header-caption");
-        if (hc) {
-            Ext.DomHelper.overwrite(hc, value);
-        }
-        return value;
-    },
-    applyDocumentCaption: function (value) {
-        if (!value) {
-            value = "";
-        }
-        var hd = Ext.fly("header-delimiter");
-        if (hd) {
-            hd.setVisible(value.length > 0);
-        }
-        var dc = Ext.fly("header-documentcaption");
-        if (dc) {
-            Ext.DomHelper.overwrite(dc, Ext.htmlEncode(value));
-        }
-        return value;
-    },
-    applyCanBack: function (value) {
-        var back = Ext.fly("header-back");
-        if (back) {
-            back.un("click");
-            back.setVisible(value);
-            if (value) {
-                back.on("click", Ext.bind(this.onBackClick, this));
+ if (Common === undefined) {
+    var Common = {};
+}
+Common.Views = Common.Views || {};
+define(["backbone", "text!common/main/lib/template/Header.template", "core"], function (Backbone, headerTemplate) {
+    Common.Views.Header = Backbone.View.extend(_.extend({
+        options: {
+            branding: {},
+            headerCaption: "Default Caption",
+            documentCaption: "",
+            canBack: false
+        },
+        el: "#header",
+        template: _.template(headerTemplate),
+        events: {
+            "click #header-logo": function (e) {
+                var newDocumentPage = window.open("http://www.onlyoffice.com");
+                newDocumentPage && newDocumentPage.focus();
             }
-        }
+        },
+        initialize: function (options) {
+            this.options = this.options ? _({}).extend(this.options, options) : options;
+            this.headerCaption = this.options.headerCaption;
+            this.documentCaption = this.options.documentCaption;
+            this.canBack = this.options.canBack;
+            this.branding = this.options.branding;
+        },
+        render: function () {
+            $(this.el).html(this.template({
+                headerCaption: this.headerCaption,
+                documentCaption: Common.Utils.String.htmlEncode(this.documentCaption),
+                canBack: this.canBack,
+                textBack: this.textBack
+            }));
+        },
+        setVisible: function (visible) {
+            visible ? this.show() : this.hide();
+        },
+        setBranding: function (value) {
+            var element;
+            this.branding = value;
+            if (value && value.logoUrl) {
+                element = $("#header-logo");
+                if (element) {
+                    element.css("background-image", 'url("' + value.logoUrl + '")');
+                }
+            }
+        },
+        setHeaderCaption: function (value) {
+            this.headerCaption = value;
+            var caption = $("#header-caption > div");
+            if (caption) {
+                caption.html(value);
+            }
+            return value;
+        },
+        getHeaderCaption: function () {
+            return this.headerCaption;
+        },
+        setDocumentCaption: function (value, applyOnly) {
+            if (_.isUndefined(applyOnly)) {
+                this.documentCaption = value;
+            }
+            if (!value) {
+                value = "";
+            }
+            var dc = $("#header-documentcaption");
+            if (dc) {
+                dc.html(Common.Utils.String.htmlEncode(value));
+            }
+            return value;
+        },
+        getDocumentCaption: function () {
+            return this.documentCaption;
+        },
+        setCanBack: function (value) {
+            this.canBack = value;
+            var back = $("#header-back");
+            if (back) {
+                back.off("click");
+                back.css("display", value ? "table-cell" : "none");
+                if (value) {
+                    back.on("click", _.bind(this.onBackClick, this));
+                }
+            }
+        },
+        getCanBack: function () {
+            return this.canBack;
+        },
+        onBackClick: function (e) {
+            Common.Gateway.goBack(e.which == 2);
+            Common.component.Analytics.trackEvent("Back to Folder");
+        },
+        textBack: "Go to Documents"
     },
-    onBackClick: function (e) {
-        Common.Gateway.goBack();
-        Common.component.Analytics.trackEvent("Back to Folder");
-    },
-    textBack: "Go to Documents"
+    Common.Views.Header || {}));
 });

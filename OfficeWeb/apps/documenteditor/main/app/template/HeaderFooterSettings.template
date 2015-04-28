@@ -1,0 +1,63 @@
+<table cols="1">
+    <tr>
+        <td>
+            <label class="header"><%= scope.textPageNum %></label>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small">
+            <div id="headerfooter-button-top-left" style="display: inline-block; margin-right:5px;"></div>
+            <div id="headerfooter-button-top-center" style="display: inline-block; margin-right:5px;"></div>
+            <div id="headerfooter-button-top-right" style="display: inline-block; margin-right:5px;"></div>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small">
+            <div id="headerfooter-button-bottom-left" style="display: inline-block; margin-right:5px;"></div>
+            <div id="headerfooter-button-bottom-center" style="display: inline-block; margin-right:5px;"></div>
+            <div id="headerfooter-button-bottom-right" style="display: inline-block; margin-right:5px;"></div>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small">
+            <div class="separator horizontal"></div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label class="header"><%= scope.textPosition %></label>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small">
+            <label id="headerfooter-label-position" class="input-label"><%= scope.textHeaderFromTop %></label>
+            <div id="headerfooter-spin-position"></div>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small">
+            <div class="separator horizontal"></div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label class="header"><%= scope.textOptions %></label>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small">
+            <div id="headerfooter-check-diff-first"></div>
+        </td>
+    </tr>
+    <tr>
+        <td class="padding-small">
+            <div id="headerfooter-check-diff-odd"></div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div id="headerfooter-check-same-as"></div>
+        </td>
+    </tr>
+    <tr class="finish-cell"></tr>
+</table>

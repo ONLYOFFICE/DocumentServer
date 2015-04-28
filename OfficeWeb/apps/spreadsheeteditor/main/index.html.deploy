@@ -6,92 +6,163 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8"/>
     <meta name="description" content="" />
     <meta name="keywords" content="" />
-    <link rel="icon" href="resources/img/favicon.png" type="image/png" />
+    <link rel="icon" href="resources/img/favicon.ico" type="image/x-icon" />
 
-    <link rel="stylesheet" type="text/css" href="../../../3rdparty/extjs/resources/css/ext-all.css">
     <link rel="stylesheet" type="text/css" href="../../../sdk/Excel/css/main.css"/>
-    <link rel="stylesheet" type="text/css" href="../../../apps/spreadsheeteditor/main/resources/css/app-view.css">
+    <link rel="stylesheet" type="text/css" href="../../../apps/spreadsheeteditor/main/resources/css/app.css">
 
     <!-- splash -->        
 
     <style type="text/css">
         .loadmask {
-            position: absolute;
             left: 0;
             top: 0;
+            position: absolute;
             height: 100%;
             width: 100%;
             overflow: hidden;
             border: none;
             background-color: #f4f4f4;
-            z-index: 20002;
+            z-index: 100;
         }
 
-        .loadmask-body {
-            font-weight: bold;
-            font-family: Arial;
-            position:relative;
-            top:44%;
+        .loader-page {
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 180px;
+            z-index: 100;
+            position: absolute;
+            margin-top: -100px;
         }
 
-        .loadmask-logo {
-            display:inline-block;
-            min-width: 220px;
-            height: 62px;
-            vertical-align:top;
-            background-image:url('./resources/img/loading-logo.gif');
-            background-repeat:no-repeat;
+        .romb {
+            width: 40px;
+            height: 40px;
+            -webkit-transform: rotate(135deg) skew(20deg, 20deg);
+            -moz-transform: rotate(135deg) skew(20deg, 20deg);
+            -ms-transform: rotate(135deg) skew(20deg, 20deg);
+            -o-transform: rotate(135deg) skew(20deg, 20deg);
+            position: absolute;
+            background: red;
+            border-radius: 6px;
+            -webkit-animation: movedown 3s infinite ease;
+            -moz-animation: movedown 3s infinite ease;
+            -ms-animation: movedown 3s infinite ease;
+            -o-animation: movedown 3s infinite ease;
+            animation: movedown 3s infinite ease;
         }
 
-        #loadmask-text {
-            color: #b2b2b2;
-            font-size: 10px;
-            height:14px;
-            margin-top:32px;
-            padding-left:44px;
-            text-align:left;
-            text-transform: uppercase;
+        #blue {
+            z-index: 3;
+            background: #55bce6;
+            -webkit-animation-name: blue;
+            -moz-animation-name: blue;
+            -ms-animation-name: blue;
+            -o-animation-name: blue;
+            animation-name: blue;
         }
 
-        #loadmask-tmlink {
-            border-top: 1px solid #d3d3d3;
-            margin-top: 15px;
-            padding-top: 11px;
-            width: 270px;
-            margin-left: -14px;
-            font-size: 18px;
-            color: #6e6e6e;
+        #red {
+            z-index:1;
+            background: #de7a59;
+            -webkit-animation-name: red;
+            -moz-animation-name: red;
+            -ms-animation-name: red;
+            -o-animation-name: red;
+            animation-name: red;
+        }
+
+        #green {
+            z-index: 2;
+            background: #a1cb5c;
+            -webkit-animation-name: green;
+            -moz-animation-name: green;
+            -ms-animation-name: green;
+            -o-animation-name: green;
+            animation-name: green;
+        }
+
+        @-webkit-keyframes red {
+              0%    { top:120px; background: #de7a59; }
+             10%    { top:120px; background: #F2CBBF; }
+             14%    { background: #f4f4f4; top:120px; }
+             15%    { background: #f4f4f4; top:0;}
+             20%    { background: #E6E4E4; }
+             30%    { background: #D2D2D2; }
+             40%    { top:120px; }
+            100%    { top:120px; background: #de7a59; }
+        }
+
+        @keyframes red {
+              0%    { top:120px; background: #de7a59; }
+             10%    { top:120px; background: #F2CBBF; }
+             14%    { background: #f4f4f4; top:120px; }
+             15%    { background: #f4f4f4; top:0; }
+             20%    { background: #E6E4E4; }
+             30%    { background: #D2D2D2; }
+             40%    { top:120px; }
+            100%    { top:120px; background: #de7a59; }
+        }
+
+        @-webkit-keyframes green {
+              0%    { top:110px; background: #a1cb5c; opacity:1; }
+             10%    { top:110px; background: #CBE0AC; opacity:1; }
+             14%    { background: #f4f4f4; top:110px; opacity:1; }
+             15%    { background: #f4f4f4; top:0; opacity:1; }
+             20%    { background: #f4f4f4; top:0; opacity:0; }
+             25%    { background: #EFEFEF; top:0; opacity:1; }
+             30%    { background:#E6E4E4; }
+             70%    { top:110px; }
+            100%    { top:110px; background: #a1cb5c; }
+        }
+
+        @keyframes green {
+              0%    { top:110px; background: #a1cb5c; opacity:1; }
+             10%    { top:110px; background: #CBE0AC; opacity:1; }
+             14%    { background: #f4f4f4; top:110px; opacity:1; }
+             15%    { background: #f4f4f4; top:0; opacity:1; }
+             20%    { background: #f4f4f4; top:0; opacity:0; }
+             25%    { background: #EFEFEF; top:0; opacity:1; }
+             30%    { background:#E6E4E4; }
+             70%    { top:110px; }
+            100%    { top:110px; background: #a1cb5c; }
+        }
+
+        @-webkit-keyframes blue {
+              0%    { top:100px; background: #55bce6; opacity:1; }
+             10%    { top:100px; background: #BFE8F8; opacity:1; }
+             14%    { background: #f4f4f4; top:100px; opacity:1; }
+             15%    { background: #f4f4f4; top:0; opacity:1; }
+             20%    { background: #f4f4f4; top:0; opacity:0; }
+             25%    { background: #f4f4f4; top:0; opacity:0; }
+             45%    { background: #EFEFEF; top:0; opacity:0,2; }
+            100%    { top:100px; background: #55bce6; }
+        }
+
+        @keyframes blue {
+              0%    { top:100px; background: #55bce6; opacity:1; }
+             10%    { top:100px; background: #BFE8F8; opacity:1; }
+             14%    { background: #f4f4f4; top:100px; opacity:1; }
+             15%    { background: #f4f4f4; top:0; opacity:1; }
+             20%    { background: #f4f4f4; top:0; opacity:0; }
+             25%    { background: #f4f4f4; top:0; opacity:0; }
+             45%    { background: #EFEFEF; top:0; opacity:0,2; }
+            100%    { top:100px; background: #55bce6; }
         }
     </style>
 </head>
 <body>
     <div id="loading-mask" class="loadmask">
-        <div class="loadmask-body" align="center">
-            <div class="loadmask-logo">
-                <!-- <div id="loadmask-text">LOADING APPLICATION</div> -->
-                <!--<div id="loadmask-tmlink">www.onlyoffice.com</div>-->
-            </div>
+        <div class="loader-page">
+            <div class="romb" id="blue"></div>
+            <div class="romb" id="green"></div>
+            <div class="romb" id="red"></div>
         </div>
     </div>
 
-    <!-- 3rdparty -->
+    <div id="viewport"></div>
 
-    <script type="text/javascript" src="../../../3rdparty/extjs/ext-all.js"></script>
-    <script type="text/javascript" src="../../../3rdparty/jquery/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript" src="../../../3rdparty/jquery/mousewheel/jquery.mousewheel.js"></script>
-    <script type="text/javascript" src="../../../3rdparty/jquery/jscrollpane/jquery.jscrollpane.min.js"></script>
-    <script type="text/javascript" src="../../../3rdparty/xregexp/xregexp-all-min.js"></script>
-    <script type="text/javascript" src="../../../3rdparty/sockjs/sockjs-0.3.min.js"></script>
-    <script type="text/javascript" src="../../../3rdparty/underscore/underscore-min.js"></script>
-
-    <!-- application -->
-
-    <script type="text/javascript" src="../../../apps/spreadsheeteditor/main/app-view.js"></script>
-    
-    <!-- sdk -->
-
-    <script type="text/javascript" src="../../../sdk/Common/AllFonts.js"></script>
-    <script type="text/javascript" src="../../../sdk/Excel/sdk-all.js"></script>
-
+    <script data-main="app" src="../../../vendor/requirejs/require.js"></script>
 </body>
 </html>

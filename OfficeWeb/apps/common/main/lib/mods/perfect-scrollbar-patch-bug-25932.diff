@@ -1,0 +1,48 @@
+diff -r 5047272bb302 apps/common/main/lib/mods/perfect-scrollbar.js
+--- a/apps/common/main/lib/mods/perfect-scrollbar.js	Fri Sep 12 18:17:33 2014 +0400
++++ b/apps/common/main/lib/mods/perfect-scrollbar.js	Fri Sep 12 18:18:56 2014 +0400
+@@ -146,7 +146,12 @@
+ 
+       var updateScrollbarCss = function () {
+         $scrollbarXRail.css({left: $this.scrollLeft(), bottom: scrollbarXBottom - $this.scrollTop(), width: containerWidth, display: scrollbarXActive ? "inherit": "none"});
+-        $scrollbarYRail.css({top: $this.scrollTop(), right: scrollbarYRight - $this.scrollLeft(), height: containerHeight, display: scrollbarYActive ? "inherit": "none"});
++
++        if ($scrollbarYRail.hasClass('in-scrolling'))
++            $scrollbarYRail.css({/*top: $this.scrollTop(),*/ right: scrollbarYRight - $this.scrollLeft(), height: containerHeight, display: scrollbarYActive ? "inherit": "none"});
++        else
++            $scrollbarYRail.css({top: $this.scrollTop(), right: scrollbarYRight - $this.scrollLeft(), height: containerHeight, display: scrollbarYActive ? "inherit": "none"});
++
+         $scrollbarX.css({left: scrollbarXLeft, width: scrollbarXWidth});
+         $scrollbarY.css({top: scrollbarYTop, height: scrollbarYHeight});
+       };
+@@ -229,6 +234,15 @@
+           currentPageY = e.pageY;
+           currentTop = $scrollbarY.position().top;
+           $scrollbarYRail.addClass('in-scrolling');
++
++            var padding = parseInt($scrollbarYRail.offsetParent().css('padding-top'));
++            var rect = $scrollbarYRail[0].getBoundingClientRect();
++            $scrollbarYRail.css({
++                position: 'fixed',
++                left: rect.left,
++                top: rect.top - padding
++            });
++
+           e.stopPropagation();
+           e.preventDefault();
+         });
+@@ -244,6 +258,14 @@
+         $(document).bind('mouseup' + eventClassName, function (e) {
+           if ($scrollbarYRail.hasClass('in-scrolling')) {
+             $scrollbarYRail.removeClass('in-scrolling');
++
++              $scrollbarYRail.css({
++                  position: '',
++                  left: '',
++                  top: ''
++              });
++
++              updateScrollbarCss();
+           }
+         });
+ 

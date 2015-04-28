@@ -1,0 +1,130 @@
+.statusbar {
+    display: table;
+    padding: 2px;
+    height: 25px;
+    background-color: @gray-light;
+    .box-inner-shadow(0 1px 0 @gray-dark);
+
+    .status-label {
+        font-weight: bold;
+        color: @gray-deep;
+        white-space: nowrap;
+        position: relative;
+        top: 1px;
+    }
+
+    #status-label-pages, #status-label-zoom {
+        cursor: pointer;
+    }
+
+    #status-label-pages, #status-label-action {
+        margin-top: 2px;
+    }
+
+    #status-users-icon, #status-users-count {
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    #status-users-icon {
+        .background-ximage('@{app-image-path}/toolbar-menu.png', '@{app-image-path}/toolbar-menu@2x.png', 60px);
+        background-repeat: no-repeat;
+        background-position: 0 -1140px;
+        width: 20px;
+        height: 20px;
+        vertical-align: middle;
+    }
+
+    #status-label-zoom {
+        text-align: center;
+    }
+
+    .btn-tpl(@top-position) {
+        .btn-icon {
+            background-position: 0 @top-position;
+
+            &:active {
+                background-position: -20px @top-position;
+            }
+        }
+
+        &[disabled] .btn-icon {
+            background-position: -40px @top-position;
+        }
+
+        &.active {
+            .btn-icon {
+                background-position: -20px @top-position;
+            }
+        }
+    }
+
+    #btn-zoom-topage {
+        .btn-tpl(-1160px);
+        margin-right: 9px;
+    }
+
+    #btn-zoom-towidth {
+        .btn-tpl(-1180px);
+        margin-right: 9px;
+    }
+
+    #btn-zoom-down {
+        .btn-tpl(-1200px);
+    }
+
+    #btn-zoom-up {
+        .btn-tpl(-1220px);
+    }
+
+    .status-group {
+        display: table-cell;
+        white-space: nowrap;
+        vertical-align: top;
+        padding-top: 3px;
+    }
+
+    .separator {
+        margin: -2px 3px 0 4px;
+
+        &.short {
+            height: 25px;
+        }
+    }
+
+    .cnt-zoom {
+        display: inline-block;
+
+        .dropdown-menu {
+            min-width: 80px;
+            margin-left: -4px;
+
+            li {
+                text-align: center;
+
+                > a {
+                    padding-left: 15px;
+                    padding-right: 15px;
+                }
+            }
+        }
+    }
+
+    #status-goto-box {
+        padding: 10px;
+        margin-left: 40px;
+        margin-bottom: 2px;
+        min-width: 130px;
+
+        > label {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        > input[type=text] {
+            width: 50px;
+            display: inline-block;
+        }
+    }
+}
+

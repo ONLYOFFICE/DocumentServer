@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,128 +29,72 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- var FONT_TYPE_USERUSED = 4;
-Ext.define("Common.controller.Fonts", {
-    extend: "Ext.app.Controller",
-    views: ["ComboFonts"],
-    refs: [{
-        ref: "combo",
-        selector: "commoncombofonts"
-    }],
-    stores: ["Common.store.Fonts"],
-    init: function () {
-        this.control({
-            "commoncombofonts": {
-                expand: function (picker) {
-                    var combo = this.getCombo();
-                    var plugin = combo.getPlugin("scrollpane");
-                    if (plugin) {
-                        var doScroll = new Ext.util.DelayedTask(function () {
-                            var node = combo.picker.getNode(combo.lastSelection[0]);
-                            if (node) {
-                                plugin.scrollToElement(node, false, false);
-                            }
-                        });
-                    }
-                    doScroll.delay(10);
-                },
-                select: this._selectitem
+ if (Common === undefined) {
+    var Common = {};
+}
+Common.Controllers = Common.Controllers || {};
+define(["core", "common/main/lib/collection/Fonts"], function () {
+    Common.Controllers.Fonts = Backbone.Controller.extend((function () {
+        var FONT_TYPE_USERUSED = 4;
+        function isFontSaved(store, rec) {
+            var out = rec.get("type") == FONT_TYPE_USERUSED,
+            i = -1,
+            c = store.length,
+            su,
+            n = rec.get("name");
+            while (!out && ++i < c) {
+                su = store.at(i);
+                if (su.get("type") != FONT_TYPE_USERUSED) {
+                    break;
+                }
+                out = su.get("name") == n;
             }
-        });
-    },
-    setApi: function (o) {
-        this.api = o;
-        this.api.asc_registerCallback("asc_onInitEditorFonts", Ext.bind(this._onloadfonts, this));
-        this.api.asc_registerCallback("asc_onFontFamily", Ext.bind(this._onfontchange, this));
-    },
-    _isfontsaved: function (s, r) {
-        var out = r.get("type") == FONT_TYPE_USERUSED,
-        i = -1,
-        c = s.getCount(),
-        su,
-        n = r.get("name");
-        while (!out && ++i < c) {
-            su = s.getAt(i);
-            if (su.get("type") != FONT_TYPE_USERUSED) {
-                break;
-            }
-            out = su.get("name") == n;
+            return out;
         }
-        return out;
-    },
-    _selectitem: function (combo, records, eOpts) {
-        if (combo.showlastused && !this._isfontsaved(combo.getStore(), records[0])) {
-            var node = combo.picker.getNode(records[0]);
-            var data = records[0].data;
-            var font = {
-                id: data.id,
-                name: data.name,
-                imgidx: data.imgidx,
-                cloneid: node.querySelector("img").id,
-                type: FONT_TYPE_USERUSED
-            };
-            combo.getStore().insert(0, [font]);
-            var separator = combo.picker.getEl().down(".used-fonts-separator");
-            if (!separator) {
-                separator = document.createElement("div");
-                separator.setAttribute("class", "x-menu-item-separator used-fonts-separator");
-                separator.setAttribute("style", "padding:0 10px;margin-left: 10px;");
-                node = combo.picker.getNode(combo.getStore().getAt(1));
-                node.parentNode.insertBefore(separator, node);
+        function onSelectFont(combo, record) {
+            if (combo.showlastused && !isFontSaved(combo.store, record)) {}
+        }
+        function onApiFontChange(fontobj) {
+            Common.NotificationCenter.trigger("fonts:change", fontobj);
+        }
+        function onApiLoadFonts(fonts, select) {
+            var fontsArray = [];
+            _.each(fonts, function (font) {
+                var fontId = font.asc_getFontId();
+                fontsArray.push({
+                    id: _.isEmpty(fontId) ? Common.UI.getId() : fontId,
+                    name: font.asc_getFontName(),
+                    imgidx: font.asc_getFontThumbnail(),
+                    type: font.asc_getFontType()
+                });
+            });
+            var store = this.getCollection("Common.Collections.Fonts");
+            if (store) {
+                store.add(fontsArray);
             }
-            font = combo.getStore().getAt(5);
-            if (font.data.type == FONT_TYPE_USERUSED) {
-                combo.getStore().remove(font);
-            } else {
-                var plugin = combo.getPlugin("scrollpane");
-                if (plugin) {
-                    plugin.updateScrollPane();
+            Common.NotificationCenter.trigger("fonts:load", store, select);
+        }
+        return {
+            models: ["Common.Models.Fonts"],
+            collections: ["Common.Collections.Fonts"],
+            views: [],
+            initialize: function () {
+                Common.NotificationCenter.on("fonts:select", _.bind(onSelectFont, this));
+            },
+            onLaunch: function () {},
+            setApi: function (api) {
+                this.api = api;
+                this.api.asc_registerCallback("asc_onInitEditorFonts", _.bind(onApiLoadFonts, this));
+                this.api.asc_registerCallback("asc_onFontFamily", _.bind(onApiFontChange, this));
+            },
+            loadFonts: function (select) {
+                if (this.api) {
+                    var fonts = this.api.get_PropertyEditorFonts();
+                    if (fonts) {
+                        onApiLoadFonts.call(this, fonts, select);
+                    }
                 }
             }
-        }
-    },
-    _onfontchange: function (fontobj) {
-        var combo = this.getCombo();
-        var name = fontobj.get_Name();
-        var rec = combo.store.findRecord("name", name, 0, false, false, true);
-        combo.clearValue();
-        if (rec) {
-            combo.select(rec);
-        } else {
-            combo.setRawValue(name);
-        }
-    },
-    _onloadfonts: function (fl, select) {
-        var farr = [];
-        Ext.each(fl, function (item) {
-            farr.push({
-                id: item.asc_getFontId(),
-                name: item.asc_getFontName(),
-                imgidx: item.asc_getFontThumbnail(),
-                type: item.asc_getFontType()
-            });
-        });
-        var combo = this.getCombo();
-        if (combo) {
-            combo.fillFonts(farr, select);
-        } else {
-            this.fontscash = farr;
-        }
-        window.required_downloads--;
-    },
-    loadFonts: function (select) {
-        if (this.api) {
-            var fl = this.api.get_PropertyEditorFonts();
-            if (fl) {
-                this._onloadfonts(fl, select);
-            }
-        }
-    },
-    fillFonts: function (select) {
-        var combo = this.getCombo();
-        if (combo && combo.rendered && this.fontscash) {
-            combo.fillFonts(this.fontscash, select);
-            delete this.fontscash;
-        }
-    }
+        };
+    })());
 });

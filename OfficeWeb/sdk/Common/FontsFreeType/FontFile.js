@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,9 +29,71 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- function CCMapIndex() {
+ "use strict";
+function CCMapIndex() {
     this.index = 0;
 }
+function CGlyphVectorPainter() {
+    this.X = 0;
+    this.Y = 0;
+    this.KoefX = 25.4 / 72;
+    this.KoefY = 25.4 / 72;
+    this.NeedClosed = false;
+    this.shift = 0;
+    this.delta = 0;
+    this.CurX = 0;
+    this.CurY = 0;
+}
+CGlyphVectorPainter.prototype = {
+    start: function () {},
+    move_to: function (to, worker) {
+        if (this.NeedClosed) {
+            worker._z();
+            this.NeedClosed = false;
+        }
+        this.CurX = this.X + this.KoefX * (to.x / 64);
+        this.CurY = this.Y - this.KoefY * (to.y / 64);
+        worker._m(this.CurX, this.CurY);
+        return 0;
+    },
+    line_to: function (to, worker) {
+        this.CurX = this.X + this.KoefX * (to.x / 64);
+        this.CurY = this.Y - this.KoefY * (to.y / 64);
+        worker._l(this.CurX, this.CurY);
+        this.NeedClosed = true;
+        return 0;
+    },
+    conic_to: function (control, to, worker) {
+        var dX0 = this.CurX;
+        var dY0 = this.CurY;
+        var dXc = this.X + this.KoefX * (control.x / 64);
+        var dYc = this.Y - this.KoefY * (control.y / 64);
+        var dX3 = this.X + this.KoefX * (to.x / 64);
+        var dY3 = this.Y - this.KoefY * (to.y / 64);
+        var dX1 = (1 / 3) * (dX0 + 2 * dXc);
+        var dY1 = (1 / 3) * (dY0 + 2 * dYc);
+        var dX2 = (1 / 3) * (2 * dXc + dX3);
+        var dY2 = (1 / 3) * (2 * dYc + dY3);
+        worker._c(dX1, dY1, dX2, dY2, dX3, dY3);
+        this.CurX = dX3;
+        this.CurY = dY3;
+        this.NeedClosed = true;
+        return 0;
+    },
+    cubic_to: function (control1, control2, to, worker) {
+        this.CurX = this.X + this.KoefX * (to.x / 64);
+        this.CurY = this.Y - this.KoefY * (to.y / 64);
+        worker._c(this.X + this.KoefX * (control1.x / 64), this.Y - this.KoefY * (control1.y / 64), this.X + this.KoefX * (control2.x / 64), this.Y - this.KoefY * (control2.y / 64), this.CurX, this.CurY);
+        this.NeedClosed = true;
+        return 0;
+    },
+    end: function (worker) {
+        if (this.NeedClosed) {
+            worker._z();
+            this.NeedClosed = false;
+        }
+    }
+};
 function CFontFile(fileName, faceIndex) {
     this.m_arrdFontMatrix = new Array(6);
     this.m_arrdTextMatrix = new Array(6);
@@ -63,7 +125,8 @@ function CFontFile(fileName, faceIndex) {
     this.m_lDescender = 0;
     this.m_lLineHeight = 0;
     this.m_lUnits_Per_Em = 0;
-    this.m_arrCacheSizes = new Array();
+    this.m_arrCacheSizes = [];
+    this.m_arrCacheSizesGid = [];
     this.m_bUseDefaultFont = false;
     this.m_pDefaultFont = null;
     this.m_bIsNeedUpdateMatrix12 = true;
@@ -272,6 +335,14 @@ function CFontFile(fileName, faceIndex) {
         }
     };
     this.ClearCache = function () {
+        this.Destroy();
+        this.ClearCacheNoAttack();
+    };
+    this.ClearCacheNoAttack = function () {
+        this.m_arrCacheSizes = [];
+        this.m_arrCacheSizesGid = [];
+    };
+    this.Destroy = function () {
         if (this.m_oFontManager != null && this.m_oFontManager.RasterMemory != null) {
             var _arr = this.m_arrCacheSizes;
             for (var i in _arr) {
@@ -279,15 +350,7 @@ function CFontFile(fileName, faceIndex) {
                     _arr[i].oBitmap.Free();
                 }
             }
-        }
-        this.m_arrCacheSizes = [];
-    };
-    this.ClearCacheNoAttack = function () {
-        this.m_arrCacheSizes = [];
-    };
-    this.Destroy = function () {
-        if (this.m_oFontManager != null && this.m_oFontManager.RasterMemory != null) {
-            var _arr = this.m_arrCacheSizes;
+            _arr = this.m_arrCacheSizesGid;
             for (var i in _arr) {
                 if (_arr[i].oBitmap != null) {
                     _arr[i].oBitmap.Free();
@@ -351,6 +414,7 @@ function CFontFile(fileName, faceIndex) {
             }
             this.UpdateMatrix1();
         }
+        var _cache_array = (this.m_bStringGID === false) ? this.m_arrCacheSizes : this.m_arrCacheSizesGid;
         for (var nIndex = 0; nIndex < pString.GetLength(); ++nIndex) {
             nCMapIndex.index = 0;
             var pFace = this.m_pFace;
@@ -358,7 +422,7 @@ function CFontFile(fileName, faceIndex) {
             var pCurGlyph = pString.GetAt(nIndex);
             var ushUnicode = pCurGlyph.lUnicode;
             var unGID = 0;
-            var charSymbolObj = this.m_arrCacheSizes[ushUnicode];
+            var charSymbolObj = _cache_array[ushUnicode];
             if (undefined == charSymbolObj) {
                 var nCMapIndex = new CCMapIndex();
                 unGID = this.SetCMapForCharCode(ushUnicode, nCMapIndex);
@@ -426,7 +490,7 @@ function CFontFile(fileName, faceIndex) {
                 dstM.fVertAdvance = (srcM.vertAdvance >> 6);
                 oSizes.bBitmap = false;
                 oSizes.oBitmap = null;
-                this.m_arrCacheSizes[oSizes.ushUnicode] = oSizes;
+                _cache_array[oSizes.ushUnicode] = oSizes;
             } else {
                 var _cmap_index = charSymbolObj.nCMapIndex;
                 unGID = charSymbolObj.ushGID;
@@ -488,6 +552,7 @@ function CFontFile(fileName, faceIndex) {
         var unPrevGID = 0;
         var fPenX = 0,
         fPenY = 0;
+        var _cache_array = (this.m_bStringGID === false) ? this.m_arrCacheSizes : this.m_arrCacheSizesGid;
         for (var nIndex = 0; nIndex < pString.GetLength(); ++nIndex) {
             if (this.m_bIsNeedUpdateMatrix12) {
                 if (this.m_pDefaultFont) {
@@ -500,7 +565,7 @@ function CFontFile(fileName, faceIndex) {
             var pCurGlyph = pString.GetAt(nIndex);
             var ushUnicode = pCurGlyph.lUnicode;
             var unGID = 0;
-            var charSymbolObj = this.m_arrCacheSizes[ushUnicode];
+            var charSymbolObj = _cache_array[ushUnicode];
             if (undefined == charSymbolObj || null == charSymbolObj.oBitmap) {
                 var nCMapIndex = new CCMapIndex();
                 unGID = this.SetCMapForCharCode(ushUnicode, nCMapIndex);
@@ -593,39 +658,27 @@ function CFontFile(fileName, faceIndex) {
                     if (this.m_bNeedDoBold && this.m_bAntiAliasing) {
                         var _width_im = oSizes.oBitmap.nWidth;
                         var _height = oSizes.oBitmap.nHeight;
-                        var _temp = g_memory.Alloc(_width);
-                        var _data = _temp.data;
                         var nY, nX;
                         var pDstBuffer;
-                        var pSrcBuffer;
-                        var nPitch = pCurentGliph.bitmap.pitch;
-                        for (nY = 0, pDstBuffer = 0, pSrcBuffer = 0; nY < oSizes.oBitmap.nHeight; ++nY, pDstBuffer += (raster_memory.pitch), pSrcBuffer += nPitch) {
-                            var _input = raster_memory.m_oBuffer.data;
-                            for (var i = 0; i < _width; i++) {
-                                _data[i] = _input[pDstBuffer + i * 4 + 3];
-                            }
+                        var _input = raster_memory.m_oBuffer.data;
+                        for (nY = 0, pDstBuffer = 0; nY < _height; ++nY, pDstBuffer += (raster_memory.pitch)) {
                             for (nX = _width_im - 1; nX >= 0; --nX) {
                                 if (0 != nX) {
-                                    var nFirstByte, nSecondByte;
-                                    if (_width - 1 == nX) {
-                                        nFirstByte = 0;
+                                    var _pos_x = pDstBuffer + nX * 4 + 3;
+                                    if (_width_im - 1 == nX) {
+                                        _input[_pos_x] = _input[_pos_x - 4];
                                     } else {
-                                        nFirstByte = _data[nX];
+                                        _input[_pos_x] = Math.min(255, _input[_pos_x - 4] + _input[_pos_x]);
                                     }
-                                    nSecondByte = _data[nX - 1];
-                                    _input[pDstBuffer + nX * 4 + 3] = Math.min(255, nFirstByte + nSecondByte);
-                                } else {
-                                    _input[pDstBuffer + 3] = _data[0];
                                 }
                             }
                         }
-                        _temp = null;
                     }
                     pCurGlyph.bBitmap = oSizes.bBitmap;
                     pCurGlyph.oBitmap = oSizes.oBitmap;
                     oSizes.oBitmap.fromAlphaMask(this.m_oFontManager);
                 }
-                this.m_arrCacheSizes[oSizes.ushUnicode] = oSizes;
+                _cache_array[oSizes.ushUnicode] = oSizes;
                 charSymbolObj = oSizes;
             }
             if (null != charSymbolObj) {
@@ -695,8 +748,9 @@ function CFontFile(fileName, faceIndex) {
         }
         var pCurGlyph = pString.m_pGlyphsBuffer[0];
         var ushUnicode = pCurGlyph.lUnicode;
+        var _cache_array = (this.m_bStringGID === false) ? this.m_arrCacheSizes : this.m_arrCacheSizesGid;
         var unGID = 0;
-        var charSymbolObj = this.m_arrCacheSizes[ushUnicode];
+        var charSymbolObj = _cache_array[ushUnicode];
         if (undefined == charSymbolObj || (null == charSymbolObj.oBitmap && charSymbolObj.bBitmap === false)) {
             var nCMapIndex = new CCMapIndex();
             unGID = this.SetCMapForCharCode(ushUnicode, nCMapIndex);
@@ -713,13 +767,9 @@ function CFontFile(fileName, faceIndex) {
                     } else {
                         unGID = this.m_nDefaultChar;
                         oSizes.eState = EGlyphState.glyphstateNormal;
-                        pFace = this.m_pFace;
-                        pCurentGliph = pFace.glyph;
                     }
                 } else {
                     oSizes.eState = EGlyphState.glyphstateDeafault;
-                    pFace = this.m_pDefaultFont.m_pFace;
-                    pCurentGliph = this.m_pDefaultFont.m_pFace.glyph;
                 }
             } else {
                 oSizes.eState = EGlyphState.glyphstateNormal;
@@ -796,39 +846,27 @@ function CFontFile(fileName, faceIndex) {
                 if (this.m_bNeedDoBold && this.m_bAntiAliasing) {
                     var _width_im = oSizes.oBitmap.nWidth;
                     var _height = oSizes.oBitmap.nHeight;
-                    var _temp = g_memory.Alloc(_width);
-                    var _data = _temp.data;
                     var nY, nX;
                     var pDstBuffer;
-                    var pSrcBuffer;
-                    var nPitch = pCurentGliph.bitmap.pitch;
-                    for (nY = 0, pDstBuffer = 0, pSrcBuffer = 0; nY < oSizes.oBitmap.nHeight; ++nY, pDstBuffer += (raster_memory.pitch), pSrcBuffer += nPitch) {
-                        var _input = raster_memory.m_oBuffer.data;
-                        for (var i = 0; i < _width; i++) {
-                            _data[i] = _input[pDstBuffer + i * 4 + 3];
-                        }
+                    var _input = raster_memory.m_oBuffer.data;
+                    for (nY = 0, pDstBuffer = 0; nY < _height; ++nY, pDstBuffer += (raster_memory.pitch)) {
                         for (nX = _width_im - 1; nX >= 0; --nX) {
                             if (0 != nX) {
-                                var nFirstByte, nSecondByte;
-                                if (_width - 1 == nX) {
-                                    nFirstByte = 0;
+                                var _pos_x = pDstBuffer + nX * 4 + 3;
+                                if (_width_im - 1 == nX) {
+                                    _input[_pos_x] = _input[_pos_x - 4];
                                 } else {
-                                    nFirstByte = _data[nX];
+                                    _input[_pos_x] = Math.min(255, _input[_pos_x - 4] + _input[_pos_x]);
                                 }
-                                nSecondByte = _data[nX - 1];
-                                _input[pDstBuffer + nX * 4 + 3] = Math.min(255, nFirstByte + nSecondByte);
-                            } else {
-                                _input[pDstBuffer + 3] = _data[0];
                             }
                         }
                     }
-                    _temp = null;
                 }
                 pCurGlyph.bBitmap = oSizes.bBitmap;
                 pCurGlyph.oBitmap = oSizes.oBitmap;
                 oSizes.oBitmap.fromAlphaMask(this.m_oFontManager);
             }
-            this.m_arrCacheSizes[oSizes.ushUnicode] = oSizes;
+            _cache_array[oSizes.ushUnicode] = oSizes;
             charSymbolObj = oSizes;
         } else {
             var nCMapIndex = charSymbolObj.nCMapIndex;
@@ -896,15 +934,6 @@ function CFontFile(fileName, faceIndex) {
                 }
             } else {
                 if (FT_ENCODING_NONE == pEncoding || FT_ENCODING_MS_SYMBOL == pEncoding || FT_ENCODING_APPLE_ROMAN == pEncoding) {
-                    var res_code = FT_Get_First_Char(this.m_pFace);
-                    while (res_code.gindex != 0) {
-                        res_code = FT_Get_Next_Char(this.m_pFace, res_code.char_code);
-                        if (res_code.char_code == lUnicode) {
-                            nCharIndex = res_code.gindex;
-                            pnCMapIndex.index = nIndex;
-                            break;
-                        }
-                    }
                     nCharIndex = FT_Get_Char_Index(this.m_pFace, lUnicode);
                     if (0 != nCharIndex) {
                         pnCMapIndex.index = nIndex;
@@ -914,7 +943,7 @@ function CFontFile(fileName, faceIndex) {
         }
         return nCharIndex;
     };
-    this.GetChar = function (lUnicode) {
+    this.GetChar = function (lUnicode, is_raster_distances) {
         var pFace = this.m_pFace;
         var pCurentGliph = pFace.glyph;
         var Result;
@@ -926,7 +955,8 @@ function CFontFile(fileName, faceIndex) {
             this.UpdateMatrix1();
         }
         var unGID = 0;
-        var charSymbolObj = this.m_arrCacheSizes[ushUnicode];
+        var _cache_array = (this.m_bStringGID === false) ? this.m_arrCacheSizes : this.m_arrCacheSizesGid;
+        var charSymbolObj = _cache_array[ushUnicode];
         if (undefined == charSymbolObj) {
             var nCMapIndex = new CCMapIndex();
             unGID = this.SetCMapForCharCode(ushUnicode, nCMapIndex);
@@ -994,7 +1024,12 @@ function CFontFile(fileName, faceIndex) {
             dstM.fVertAdvance = (srcM.vertAdvance >> 6);
             oSizes.bBitmap = false;
             oSizes.oBitmap = null;
-            this.m_arrCacheSizes[oSizes.ushUnicode] = oSizes;
+            if (is_raster_distances === true) {
+                if (0 == FT_Render_Glyph(pCurentGliph, REND_MODE)) {
+                    oSizes.oBBox.rasterDistances = get_raster_bounds(raster_memory.m_oBuffer.data, pCurentGliph.bitmap.width, pCurentGliph.bitmap.rows, raster_memory.pitch);
+                }
+            }
+            _cache_array[oSizes.ushUnicode] = oSizes;
             Result = oSizes;
         } else {
             var nCMapIndex = charSymbolObj.nCMapIndex;
@@ -1113,6 +1148,76 @@ function CFontFile(fileName, faceIndex) {
         }
         if (this.m_pFace.family_name == "MS Mincho" || this.m_pFace.family_name == "Castellar") {
             this.HintsSupport = false;
+        }
+    };
+    this.GetCharPath = function (lUnicode, worker, x, y) {
+        var pFace = this.m_pFace;
+        var pCurentGliph = pFace.glyph;
+        var Result;
+        var ushUnicode = lUnicode;
+        if (this.m_bIsNeedUpdateMatrix12) {
+            if (this.m_pDefaultFont) {
+                this.m_pDefaultFont.UpdateMatrix1();
+            }
+            this.UpdateMatrix1();
+        }
+        var unGID = 0;
+        var nCMapIndex = new CCMapIndex();
+        unGID = this.SetCMapForCharCode(ushUnicode, nCMapIndex);
+        if (! ((unGID > 0) || (-1 != this.m_nSymbolic && (ushUnicode < 61440) && 0 < (unGID = this.SetCMapForCharCode(ushUnicode + 61440, nCMapIndex))))) {
+            if (false === this.m_bUseDefaultFont || null == this.m_pDefaultFont || 0 >= (unGID = this.m_pDefaultFont.SetCMapForCharCode(ushUnicode, nCMapIndex))) {
+                if (this.m_nDefaultChar < 0) {
+                    return;
+                } else {
+                    unGID = this.m_nDefaultChar;
+                    pFace = this.m_pFace;
+                    pCurentGliph = pFace.glyph;
+                }
+            } else {
+                pFace = this.m_pDefaultFont.m_pFace;
+                pCurentGliph = this.m_pDefaultFont.m_pGlyph;
+            }
+        }
+        var _LOAD_MODE = this.HintsSupport ? this.m_oFontManager.LOAD_MODE : 40970;
+        if (0 != FT_Load_Glyph(pFace, unGID, _LOAD_MODE)) {
+            return;
+        }
+        var pGlyph = FT_Get_Glyph(pCurentGliph);
+        if (null == pGlyph) {
+            return;
+        }
+        var _painter = new CGlyphVectorPainter();
+        _painter.KoefX = 25.4 / this.m_unHorDpi;
+        _painter.KoefY = 25.4 / this.m_unVerDpi;
+        if (x !== undefined) {
+            _painter.X = x;
+        }
+        if (y !== undefined) {
+            _painter.Y = y;
+        }
+        _painter.start(worker);
+        FT_Outline_Decompose(pGlyph.outline, _painter, worker);
+        _painter.end(worker);
+        if (this.m_bIsNeedUpdateMatrix12) {
+            if (this.m_pDefaultFont) {
+                this.m_pDefaultFont.UpdateMatrix2();
+            }
+            this.UpdateMatrix2();
+        }
+    };
+    this.GetStringPath = function (string, worker) {
+        var _len = string.GetLength();
+        if (_len <= 0) {
+            return true;
+        }
+        for (var nIndex = 0; nIndex < _len; ++nIndex) {
+            var _glyph = string.m_pGlyphsBuffer[nIndex];
+            var _x = string.m_fX + 25.4 * _glyph.fX / this.m_unHorDpi;
+            var _y = string.m_fY + 25.4 * _glyph.fY / this.m_unVerDpi;
+            worker._s();
+            this.GetCharPath(_glyph.lUnicode, worker, _x, _y);
+            worker.df();
+            worker._e();
         }
     };
 }

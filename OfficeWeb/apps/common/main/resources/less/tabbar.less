@@ -1,0 +1,49 @@
+.nav-tabs {
+    white-space: nowrap;
+    overflow: hidden;
+
+    > li {
+        float: none;
+        display: inline;
+
+        &.active {
+            > a, > a:hover, > a:focus {
+                background-color: #fff;
+                color: #000;
+                border-color: #fff;
+                cursor: pointer;
+            }
+        }
+
+        > a {
+            display: inline;
+            background-color: #7a7a7a;
+            color: #fff;
+
+            padding-top: 0;
+            padding-bottom: 0;
+            white-space: pre-wrap;
+
+            &:hover, &:focus {
+                background-color: #7a7a7a;
+                border-color: #7a7a7a;
+                cursor: pointer;
+            }
+        }
+    }
+
+    &.bottom {
+        border-bottom: none;
+        border-top: none;
+
+        > li {
+            vertical-align: middle;
+
+            > a {
+                padding-bottom: 1px;
+                border-radius: 0 0 4px 4px;
+            }
+        }
+    }
+}
+

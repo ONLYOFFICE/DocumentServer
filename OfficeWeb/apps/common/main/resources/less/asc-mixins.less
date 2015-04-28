@@ -1,0 +1,106 @@
+*, *:before, *:after {
+    -moz-user-select: none;
+}
+
+:focus {
+    outline: none;
+}
+
+.gradient(@color: #F5F5F5, @start: #EEE, @stop: #FFF) {
+    background: @color;
+    background: -webkit-gradient(linear,
+    left bottom,
+    left top,
+    color-stop(0, @start),
+    color-stop(1, @stop));
+    background: -ms-linear-gradient(bottom,
+        @start,
+        @stop);
+    background: -moz-linear-gradient(center bottom,
+        @start 0%,
+        @stop 100%);
+    background: -o-linear-gradient(@stop,
+        @start);
+    filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d', GradientType=0)",@stop, @start));
+}
+
+.box-shadow(@arguments) {
+    -webkit-box-shadow: @arguments;
+    -moz-box-shadow: @arguments;
+    box-shadow: @arguments;
+}
+
+.box-inner-shadow(@arguments) {
+    -webkit-box-shadow: inset @arguments;
+    -moz-box-shadow: inset @arguments;
+    box-shadow: inset @arguments;
+}
+
+.border-radius(@radius: 2px) {
+    -webkit-border-radius: @radius;
+    -moz-border-radius: @radius;
+    border-radius: @radius;
+}
+
+.position(@type: absolute, @left: 0, @top: 0, @right: 0, @bottom: 0) {
+    position: @type;
+    left: @left;
+    top: @top;
+    right: @right;
+    bottom: @bottom;
+}
+
+.fontsize(@value) {
+    font-size: @value;
+}
+
+// User select
+.user-select(@select: none) {
+    -webkit-user-select: @select;
+       -moz-user-select: @select;
+        -ms-user-select: @select;
+         -o-user-select: @select;
+            user-select: @select;
+}
+
+.toolbar-btn-icon(@icon-class, @index, @icon-size, @offset-x: 0, @offset-y: 0) {
+                      .@{icon-class},
+    button.over     > .@{icon-class} {background-position: 0 (-1 * (@index * @icon-size) - @offset-y);}
+    .btn-group.open > .@{icon-class},
+    button.active   > .@{icon-class},
+    button:active   > .@{icon-class} {background-position: (-1 * @icon-size - @offset-x) (-1 * @index * @icon-size - @offset-y);}
+    button.disabled > .@{icon-class} {background-position: (-2 * @icon-size - @offset-x) (-1 * @index * @icon-size - @offset-y);}
+}
+
+.menu-btn-icon(@icon-class, @index, @icon-size) {
+                                .menu-item-icon.@{icon-class} {background-position: -0*@icon-size -@index*@icon-size;}
+//    li:hover      > a >         .menu-item-icon.@{icon-class} {background-position: -1*@icon-size -@index*@icon-size;}
+    li            > a.checked > .menu-item-icon.@{icon-class} {background-position: -2*@icon-size -@index*@icon-size;}
+    li.disabled   > a >         .menu-item-icon.@{icon-class} {background-position: -3*@icon-size -@index*@icon-size;}
+}
+
+.options-btn-icon(@icon-class, @index, @icon-size) {
+                  .@{icon-class} {background-position: -0*@icon-size -@index*@icon-size;}
+button.over     > .@{icon-class} {background-position: -1*@icon-size -@index*@icon-size;}
+.btn-group.open > .@{icon-class},
+button.active   > .@{icon-class},
+button:active   > .@{icon-class} {background-position: -2*@icon-size -@index*@icon-size;}
+button.disabled > .@{icon-class} {background-position: -3*@icon-size -@index*@icon-size;}
+}
+
+.background-ximage(@image, @image2x, @w: auto, @h: auto) {
+    background-image: e(%("url(%s)",@image));
+
+    @media
+    only screen and (-webkit-min-device-pixel-ratio: 2),
+    only screen and (min-resolution: 2dppx),
+    only screen and (min-resolution: 192dpi) {
+        background-image: e(%("url(%s)",@image2x));
+        background-size: @w @h;
+
+        @media (-webkit-min-device-pixel-ratio: 0) {
+            background-image: e(%("-webkit-image-set(url(%s) 1x, url(%s) 2x)", @image, @image2x));
+            background-size: auto;
+        }
+    }
+}

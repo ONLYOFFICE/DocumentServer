@@ -1,0 +1,146 @@
+//
+// Common
+// --------------------------------------------------
+
+// App variables
+@import "variables.less";
+
+@import "../../../../common/main/resources/less/asc-mixins.less";
+
+// Bootstrap overwrite
+@import "../../../../common/main/resources/less/variables.less";
+
+//
+// Bootstrap
+// --------------------------------------------------
+
+// Core variables and mixins
+//@import "../../../../vendor/bootstrap/less/variables.less";
+@import "../../../../../vendor/bootstrap/less/mixins.less";
+
+// Reset
+@import "../../../../../vendor/bootstrap/less/normalize.less";
+//@import "print.less";
+
+// Core CSS
+@import "../../../../../vendor/bootstrap/less/scaffolding.less";
+@import "../../../../../vendor/bootstrap/less/type.less";
+//@import "code.less";
+//@import "grid.less";
+//@import "tables.less";
+@import "../../../../../vendor/bootstrap/less/forms.less";
+@import "../../../../../vendor/bootstrap/less/buttons.less";
+
+// Components
+@import "../../../../../vendor/bootstrap/less/component-animations.less";
+//@import "glyphicons.less";
+@import "../../../../../vendor/bootstrap/less/dropdowns.less";
+@import "../../../../../vendor/bootstrap/less/button-groups.less";
+@import "../../../../../vendor/bootstrap/less/input-groups.less";
+//@import "navs.less";
+//@import "navbar.less";
+//@import "breadcrumbs.less";
+//@import "pagination.less";
+//@import "pager.less";
+//@import "labels.less";
+//@import "badges.less";
+//@import "jumbotron.less";
+//@import "thumbnails.less";
+//@import "alerts.less";
+//@import "progress-bars.less";
+//@import "media.less";
+//@import "list-group.less";
+//@import "panels.less";
+//@import "wells.less";
+//@import "close.less";
+
+// Components w/ JavaScript
+//@import "modals.less";
+@import "../../../../../vendor/bootstrap/less/tooltip.less";
+//@import "popovers.less";
+//@import "carousel.less";
+
+// Utility classes
+@import "../../../../../vendor/bootstrap/less/utilities.less";
+@import "../../../../../vendor/bootstrap/less/responsive-utilities.less";
+
+//
+// Perfect scrollbar
+// --------------------------------------------------
+
+@import (inline) "../../../../../vendor/perfect-scrollbar/src/perfect-scrollbar.css";
+
+//
+// Common
+// --------------------------------------------------
+
+@import "../../../../common/main/resources/less/header.less";
+@import "../../../../common/main/resources/less/buttons.less";
+@import "../../../../common/main/resources/less/dropdown-menu.less";
+@import "../../../../common/main/resources/less/dropdown-submenu.less";
+@import "../../../../common/main/resources/less/separator.less";
+@import "../../../../common/main/resources/less/input.less";
+@import "../../../../common/main/resources/less/combobox.less";
+@import "../../../../common/main/resources/less/window.less";
+@import "../../../../common/main/resources/less/spinner.less";
+@import "../../../../common/main/resources/less/loadmask.less";
+@import "../../../../common/main/resources/less/checkbox.less";
+@import "../../../../common/main/resources/less/radiobox.less";
+@import "../../../../common/main/resources/less/dataview.less";
+@import "../../../../common/main/resources/less/listview.less";
+@import "../../../../common/main/resources/less/colorpalette.less";
+@import "../../../../common/main/resources/less/theme-colorpalette.less";
+@import "../../../../common/main/resources/less/dimension-picker.less";
+@import "../../../../common/main/resources/less/hsb-colorpicker.less";
+@import "../../../../common/main/resources/less/table-styler.less";
+@import "../../../../common/main/resources/less/masked-field.less";
+@import "../../../../common/main/resources/less/extended-color-picker.less";
+@import "../../../../common/main/resources/less/layout.less";
+@import "../../../../common/main/resources/less/combo-border-size.less";
+@import "../../../../common/main/resources/less/combo-dataview.less";
+@import "../../../../common/main/resources/less/slider.less";
+@import "../../../../common/main/resources/less/multislider-gradient.less";
+@import "../../../../common/main/resources/less/advanced-settings-window.less";
+@import "../../../../common/main/resources/less/chat.less";
+@import "../../../../common/main/resources/less/comments.less";
+@import "../../../../common/main/resources/less/searchdialog.less";
+@import "../../../../common/main/resources/less/about.less";
+@import "../../../../common/main/resources/less/tooltip.less";
+@import "../../../../common/main/resources/less/scroller.less";
+@import "../../../../common/main/resources/less/synchronize-tip.less";
+@import "../../../../common/main/resources/less/common.less";
+
+// App
+// --------------------------------------------------
+
+@import "layout.less";
+@import "toolbar.less";
+@import "statusbar.less";
+@import "leftmenu.less";
+@import "rightmenu.less";
+@import "advanced-settings.less";
+@import "document-preview.less";
+
+.font-size-small {
+    .fontsize(@font-size-small);
+}
+
+.font-size-normal {
+    .fontsize(@font-size-base);
+}
+
+.font-size-large {
+    .fontsize(@font-size-large);
+}
+
+@huge-icon-size: 37px;
+@x-huge-icon-size: 45px;
+
+.slidenum-div {
+    background-color: @body-bg;
+    color: @gray-deep;
+    padding: 5px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    .box-shadow(0 6px 12px rgba(0, 0, 0, 0.175));
+    border-radius: @border-radius-base;
+}

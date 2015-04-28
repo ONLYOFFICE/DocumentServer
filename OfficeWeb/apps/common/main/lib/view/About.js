@@ -1,5 +1,5 @@
 ﻿/*
- * (c) Copyright Ascensio System SIA 2010-2014
+ * (c) Copyright Ascensio System SIA 2010-2015
  *
  * This program is a free software product. You can redistribute it and/or 
  * modify it under the terms of the GNU Affero General Public License (AGPL) 
@@ -29,317 +29,80 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- Ext.define("Common.view.About", {
-    extend: "Ext.container.Container",
-    alias: "widget.commonabout",
-    cls: "common-about-body",
-    requires: ["Ext.container.Container", "Ext.form.Label"],
-    constructor: function (config) {
-        this.initConfig(config);
-        this.callParent(arguments);
-        return this;
-    },
-    initComponent: function () {
-        var txtVersionNum = "2.5";
-        var txtAscMail = "support@onlyoffice.com";
-        var txtAscTelNum = "+371 660-16425";
-        var txtAscUrl = "www.onlyoffice.com";
-        var txtAscName = "Ascensio System SIA";
-        this.items = [{
-            xtype: "container",
-            layout: {
-                type: "table",
-                columns: 1,
-                tableAttrs: {
-                    style: "width: 100%;"
-                },
-                tdAttrs: {
-                    align: "center"
-                }
-            },
-            items: [{
-                xtype: "container",
-                cls: "asc-about-office"
-            },
-            {
-                xtype: "tbspacer",
-                height: 5
-            },
-            {
-                xtype: "label",
-                cls: "asc-about-version",
-                text: this.txtVersion + txtVersionNum
-            },
-            {
-                xtype: "tbspacer",
-                height: 40
-            }]
+ define(["common/main/lib/component/BaseView", "common/main/lib/component/Scroller"], function () {
+    Common.Views.About = Common.UI.BaseView.extend(_.extend({
+        menu: undefined,
+        options: {
+            alias: "Common.Views.About"
         },
-        {
-            xtype: "container",
-            layout: {
-                type: "table",
-                columns: 3,
-                tableAttrs: {
-                    style: "width: 100%;"
-                }
-            },
-            items: [{
-                cellCls: "about-separator-cell",
-                xtype: "tbspacer",
-                width: "100%",
-                html: '<div style="width: 100%; height: 3px !important; background-color: #e1e1e1"></div>'
-            },
-            {
-                xtype: "label",
-                cls: "asc-about-header",
-                text: this.txtLicensor
-            },
-            {
-                cellCls: "about-separator-cell",
-                xtype: "tbspacer",
-                width: "100%",
-                html: '<div style="width: 100%; height: 3px !important; background-color: #e1e1e1"></div>'
-            }]
+        initialize: function (options) {
+            Common.UI.BaseView.prototype.initialize.call(this, arguments);
+            this.txtVersionNum = "3.0";
+            this.txtAscMail = "support@onlyoffice.com";
+            this.txtAscTelNum = "+371 660-16425";
+            this.txtAscUrl = "www.onlyoffice.com";
+            this.txtAscName = "Ascensio System SIA";
+            this.template = _.template(['<table id="id-about-licensor-logo" cols="1" style="width: 100%; margin-top: 20px;">', "<tr>", '<td align="center"><div class="asc-about-office"/></td>', "</tr>", "<tr>", '<td align="center"><label class="asc-about-version">' + options.appName.toUpperCase() + "</label></td>", "</tr>", "<tr>", '<td align="center"><label class="asc-about-version">' + this.txtVersion + this.txtVersionNum + "</label></td>", "</tr>", "</table>", '<table id="id-about-licensor-info" cols="3" style="width: 100%;" class="margin-bottom">', "<tr>", '<td colspan="3" align="center" style="padding: 20px 0 10px 0;"><label class="asc-about-companyname">' + this.txtAscName + "</label></td>", "</tr>", "<tr>", '<td colspan="3" align="center" class="padding-small">', '<label class="asc-about-desc-name">' + this.txtAddress + "</label>", '<label class="asc-about-desc">' + this.txtAscAddress + "</label>", "</td>", "</tr>", "<tr>", '<td colspan="3" align="center" class="padding-small">', '<label class="asc-about-desc-name">' + this.txtMail + "</label>", '<a href="mailto:' + this.txtAscMail + '">' + this.txtAscMail + "</a>", "</td>", "</tr>", "<tr>", '<td colspan="3" align="center" class="padding-small">', '<label class="asc-about-desc-name">' + this.txtTel + "</label>", '<label class="asc-about-desc">' + this.txtAscTelNum + "</label>", "</td>", "</tr>", "<tr>", '<td colspan="3" align="center">', '<a href="http://' + this.txtAscUrl + '" target="_blank">' + this.txtAscUrl + "</a>", "</td>", "</tr>", "</table>", '<table id="id-about-licensee-info" cols="1" style="width: 100%; margin-top: 20px;" class="hidden margin-bottom"><tbody>', "<tr>", '<td align="center" class="padding-small"><div id="id-about-company-logo"/></td>', "</tr>", "<tr>", '<td align="center"><label class="asc-about-version">' + options.appName.toUpperCase() + "</label></td>", "</tr>", "<tr>", '<td align="center"><label style="padding-bottom: 29px;" class="asc-about-version">' + this.txtVersion + this.txtVersionNum + "</label></td>", "</tr>", "<tr>", '<td align="center" class="padding-small">', '<label class="asc-about-companyname" id="id-about-company-name"></label>', "</td>", "</tr>", "<tr>", '<td align="center" class="padding-small">', '<label class="asc-about-desc-name">' + this.txtAddress + "</label>", '<label class="asc-about-desc" id="id-about-company-address"></label>', "</td>", "</tr>", "<tr>", '<td align="center" class="padding-small">', '<label class="asc-about-desc-name">' + this.txtMail + "</label>", '<a href="mailto:" id="id-about-company-mail"></a>', "</td>", "</tr>", "<tr>", '<td align="center" class="padding-small">', '<a href="" target="_blank" id="id-about-company-url"></a>', "</td>", "</tr>", "<tr>", '<td align="center">', '<label class="asc-about-lic" id="id-about-company-lic"></label>', "</td>", "</tr>", "</table>", '<table id="id-about-licensor-short" cols="1" style="width: 100%; margin-top: 31px;" class="hidden"><tbody>', "<tr>", '<td style="width:50%;"><div class="separator horizontal short left"/></td>', '<td align="center"><label class="asc-about-header">' + this.txtPoweredBy + "</label></td>", '<td style="width:50%;"><div class="separator horizontal short"/></td>', "</tr>", "<tr>", '<td colspan="3" align="center" style="padding: 9px 0 10px;"><label class="asc-about-companyname">' + this.txtAscName + "</label></td>", "</tr>", "<tr>", '<td colspan="3" align="center">', '<a href="http://' + this.txtAscUrl + '" target="_blank">' + this.txtAscUrl + "</a>", "</td>", "</tr>", "</table>"].join(""));
+            this.menu = options.menu;
         },
-        {
-            xtype: "container",
-            layout: {
-                type: "table",
-                columns: 1,
-                tableAttrs: {
-                    style: "width: 100%;"
-                },
-                tdAttrs: {
-                    align: "center"
-                }
-            },
-            items: [{
-                xtype: "tbspacer",
-                height: 20
-            },
-            {
-                xtype: "label",
-                cls: "asc-about-companyname",
-                text: txtAscName
-            },
-            {
-                xtype: "tbspacer",
-                height: 10
-            },
-            {
-                xtype: "container",
-                items: [{
-                    xtype: "label",
-                    cls: "asc-about-desc-name",
-                    text: this.txtAddress
-                },
-                {
-                    xtype: "label",
-                    cls: "asc-about-desc",
-                    text: this.txtAscAddress
-                }]
-            },
-            {
-                xtype: "tbspacer",
-                height: 10
-            },
-            {
-                xtype: "container",
-                items: [{
-                    xtype: "label",
-                    cls: "asc-about-desc-name",
-                    text: this.txtMail
-                },
-                {
-                    xtype: "label",
-                    cls: "asc-about-desc",
-                    html: Ext.String.format('<a href="mailto:{0}">{0}</a>', txtAscMail)
-                }]
-            },
-            {
-                xtype: "tbspacer",
-                height: 10
-            },
-            {
-                xtype: "container",
-                items: [{
-                    xtype: "label",
-                    cls: "asc-about-desc-name",
-                    text: this.txtTel
-                },
-                {
-                    xtype: "label",
-                    cls: "asc-about-desc",
-                    text: txtAscTelNum
-                }]
-            },
-            {
-                xtype: "tbspacer",
-                height: 10
-            },
-            {
-                xtype: "label",
-                cls: "asc-about-desc",
-                html: Ext.String.format('<a href="http://{0}" target="_blank">{0}</a>', txtAscUrl)
-            },
-            {
-                xtype: "tbspacer",
-                height: 40
-            }]
-        },
-        {
-            xtype: "container",
-            layout: {
-                type: "table",
-                columns: 3,
-                tableAttrs: {
-                    style: "width: 100%;"
-                }
-            },
-            items: [{
-                cellCls: "about-separator-cell",
-                xtype: "tbspacer",
-                width: "100%",
-                html: '<div style="width: 100%; height: 3px !important; background-color: #e1e1e1"></div>'
-            },
-            {
-                xtype: "label",
-                cls: "asc-about-header",
-                text: this.txtLicensee
-            },
-            {
-                cellCls: "about-separator-cell",
-                xtype: "tbspacer",
-                width: "100%",
-                html: '<div style="width: 100%; height: 3px !important; background-color: #e1e1e1"></div>'
-            }]
-        },
-        this.cntLicenseeInfo = Ext.create("Ext.Container", {
-            layout: {
-                type: "table",
-                columns: 1,
-                tableAttrs: {
-                    style: "width: 100%;"
-                },
-                tdAttrs: {
-                    align: "center"
-                }
-            },
-            items: [{
-                xtype: "tbspacer",
-                height: 20
-            },
-            this.imgCompanyLogo = Ext.create("Ext.Container", {
-                html: '<img src="" />'
-            }), {
-                xtype: "tbspacer",
-                height: 10
-            },
-            this.lblCompanyName = Ext.create("Ext.form.Label", {
-                cls: "asc-about-companyname",
-                text: ""
-            }), {
-                xtype: "tbspacer",
-                height: 10
-            },
-            {
-                xtype: "container",
-                items: [{
-                    xtype: "label",
-                    cls: "asc-about-desc-name",
-                    text: this.txtAddress
-                },
-                this.lblCompanyAddress = Ext.create("Ext.form.Label", {
-                    cls: "asc-about-desc",
-                    text: ""
-                })]
-            },
-            {
-                xtype: "tbspacer",
-                height: 10
-            },
-            {
-                xtype: "container",
-                items: [{
-                    xtype: "label",
-                    cls: "asc-about-desc-name",
-                    text: this.txtMail
-                },
-                this.lblCompanyMail = Ext.create("Ext.form.Label", {
-                    cls: "asc-about-desc",
-                    text: ""
-                })]
-            },
-            {
-                xtype: "tbspacer",
-                height: 10
-            },
-            this.lblCompanyUrl = Ext.create("Ext.form.Label", {
-                cls: "asc-about-desc",
-                text: ""
-            }), {
-                xtype: "tbspacer",
-                height: 10
-            },
-            this.lblCompanyLic = Ext.create("Ext.form.Label", {
-                cls: "asc-about-lic",
-                text: ""
-            })]
-        })];
-        this.callParent(arguments);
-        this.items.items[3].hide();
-        this.cntLicenseeInfo.hide();
-    },
-    setLicInfo: function (data) {
-        if (data && typeof(data) == "object") {
-            this.items.items[3].show();
-            this.cntLicenseeInfo.show();
-            this.lblCompanyName.setText(data.asc_getCustomer());
-            var value = data.asc_getCustomerAddr();
-            if (value && value.length) {
-                this.lblCompanyAddress.setText(value);
-            } else {
-                this.cntLicenseeInfo.items.getAt(5).hide();
-                this.cntLicenseeInfo.items.getAt(6).hide();
+        render: function () {
+            var el = $(this.el);
+            el.html(this.template({
+                scope: this
+            }));
+            el.addClass("about-dlg");
+            this.cntLicenseeInfo = $("#id-about-licensee-info");
+            this.cntLicensorInfo = $("#id-about-licensor-info");
+            this.divCompanyLogo = $("#id-about-company-logo");
+            this.lblCompanyName = $("#id-about-company-name");
+            this.lblCompanyAddress = $("#id-about-company-address");
+            this.lblCompanyMail = $("#id-about-company-mail");
+            this.lblCompanyUrl = $("#id-about-company-url");
+            this.lblCompanyLic = $("#id-about-company-lic");
+            if (_.isUndefined(this.scroller)) {
+                this.scroller = new Common.UI.Scroller({
+                    el: $(this.el),
+                    suppressScrollX: true
+                });
             }
-            value = data.asc_getCustomerMail();
-            if (value && value.length) {
-                this.lblCompanyMail.update(Ext.String.format('<a href="mailto:{0}">{0}</a>', value));
+            return this;
+        },
+        setLicInfo: function (data) {
+            if (data && typeof(data) == "object") {
+                $("#id-about-licensor-logo").addClass("hidden");
+                $("#id-about-licensor-short").removeClass("hidden");
+                this.cntLicensorInfo.addClass("hidden");
+                this.cntLicenseeInfo.removeClass("hidden");
+                this.cntLicensorInfo.removeClass("margin-bottom");
+                var value = data.customer;
+                value && value.length ? this.lblCompanyName.text(value) : this.lblCompanyName.parents("tr").addClass("hidden");
+                value = data.customerAddr;
+                value && value.length ? this.lblCompanyAddress.text(value) : this.lblCompanyAddress.parents("tr").addClass("hidden");
+                (value = data.customerMail) && value.length ? this.lblCompanyMail.attr("href", "mailto:" + value).text(value) : this.lblCompanyMail.parents("tr").addClass("hidden");
+                (value = data.customerWww) && value.length ? this.lblCompanyUrl.attr("href", "http://" + value).text(value) : this.lblCompanyUrl.parents("tr").addClass("hidden");
+                (value = data.customerInfo) && value.length ? this.lblCompanyLic.text(value) : this.lblCompanyLic.parents("tr").addClass("hidden");
+                (value = data.customerLogo) && value.length ? this.divCompanyLogo.html('<img src="' + value + '" />') : this.divCompanyLogo.parents("tr").addClass("hidden");
             } else {
-                this.cntLicenseeInfo.items.getAt(7).hide();
-                this.cntLicenseeInfo.items.getAt(8).hide();
+                this.cntLicenseeInfo.addClass("hidden");
+                this.cntLicensorInfo.addClass("margin-bottom");
             }
-            value = data.asc_getCustomerWww();
-            if (value && value.length) {
-                var islicense = /^label:(.+);url:(.+)/.exec(value);
-                if (islicense) {
-                    href = islicense[2];
-                    value = islicense[1];
-                } else {
-                    var href = /^https?:\/\//.test(value) ? value : "http://" + value;
-                }
-                this.lblCompanyUrl.update(Ext.String.format('<a href="{0}" target="_blank">{1}</a>', href, value));
-            } else {
-                this.cntLicenseeInfo.items.getAt(9).hide();
-                this.cntLicenseeInfo.items.getAt(10).hide();
-            } (value = data.asc_getCustomerInfo()) && value.length ? this.lblCompanyLic.setText(value) : this.cntLicenseeInfo.items.getAt(11).hide();
-            if ((value = data.asc_getCustomerLogo()) && value.length) {
-                this.imgCompanyLogo.html = '<img src="' + value + '" />';
-            } else {
-                this.imgCompanyLogo.hide();
-                this.cntLicenseeInfo.items.getAt(2).hide();
-            }
-        } else {
-            this.items.items[3].hide();
-            this.cntLicenseeInfo.hide();
-        }
+        },
+        show: function () {
+            Common.UI.BaseView.prototype.show.call(this, arguments);
+            this.fireEvent("show", this);
+        },
+        hide: function () {
+            Common.UI.BaseView.prototype.hide.call(this, arguments);
+            this.fireEvent("hide", this);
+        },
+        txtPoweredBy: "Powered by",
+        txtVersion: "Version ",
+        txtLicensor: "LICENSOR",
+        txtLicensee: "LICENSEE",
+        txtAddress: "address: ",
+        txtAscAddress: "Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021",
+        txtMail: "email: ",
+        txtTel: "tel.: "
     },
-    txtVersion: "Version ",
-    txtLicensor: "LICENSOR",
-    txtLicensee: "LICENSEE",
-    txtAddress: "address: ",
-    txtAscAddress: "Lubanas st. 125a-25, Riga, Latvia, EU, LV-1021",
-    txtMail: "email: ",
-    txtTel: "tel.: "
+    Common.Views.About || {}));
 });
