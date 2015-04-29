@@ -1,0 +1,37 @@
+﻿<html>
+<head>
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+
+    <title>ONLYOFFICE™</title>
+
+    <link href="stylesheet.css" type="text/css" rel="stylesheet">
+
+    <!--Change the address on installed ONLYOFFICE™ Online Editors-->
+    <script id="scriptApi" type="text/javascript" src="https://doc.onlyoffice.com/OfficeWeb/apps/api/documents/api.js"></script>
+
+
+    <script type="text/javascript" src="sha256.js"></script>
+    <script type="text/javascript" src="init.js"></script>
+</head>
+
+<body>
+    <div id="page">
+        <div class="top-panel"></div>
+        <div id="mainPanel" class="main-panel">
+            <span class="portal-name">ONLYOFFICE™ Online Editors</span>
+            <br />
+            <br />
+            <span class="portal-descr">Get started with a demo-sample of ONLYOFFICE™ Online Editors, the first html5-based editors. You may enter url your own document for testing.</span>
+            <textarea id="documentUrl" class="document-url">http://onlyo.co/1x5REbq?demo.docx</textarea>
+            <br />
+            <br />
+            <div class="button" onclick="document.getElementById('mainPanel').style.display ='none';document.getElementById('placeholder').parentNode.setAttribute('class', 'embedded');initEditor(null, null, null, 'embedded')">Embedded view</div>
+            <div class="button" onclick="document.getElementById('page').style.display ='none';initEditor()">View</div>
+            <div class="button" onclick="document.getElementById('page').style.display ='none';initEditor(null, null, 'edit')">Edit</div>
+        </div>
+    </div>
+    <div>
+        <div id="placeholder"></div>
+    </div>
+</body>
+</html>

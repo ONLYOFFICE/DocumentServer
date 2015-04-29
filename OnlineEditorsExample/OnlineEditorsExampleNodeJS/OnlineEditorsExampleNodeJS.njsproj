@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <Name>OnlineEditorsExampleNodeJS</Name>
+    <RootNamespace>OnlineEditorsExampleNodeJS</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>64486bef-4c65-42b7-83c3-782eb8af4d3b</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>bin\www</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
+    <ProjectView>ShowAllFiles</ProjectView>
+    <NodejsPort>1337</NodejsPort>
+    <StartWebBrowser>true</StartWebBrowser>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="app.js" />
+    <Compile Include="config.js" />
+    <Compile Include="bin\www" />
+    <Compile Include="helpers\signatureManager.js" />
+    <Compile Include="helpers\guidManager.js" />
+    <Compile Include="helpers\cacheManager.js" />
+    <Compile Include="helpers\docManager.js" />
+    <Compile Include="helpers\fileUtility.js" />
+    <Compile Include="helpers\serviceConverter.js" />
+    <Compile Include="public\javascripts\jquery-1.8.2.js" />
+    <Compile Include="public\javascripts\jquery-ui.js" />
+    <Compile Include="public\javascripts\jquery.blockUI.js" />
+    <Compile Include="public\javascripts\jquery.dropdownToggle.js" />
+    <Compile Include="public\javascripts\jquery.fileupload.js" />
+    <Compile Include="public\javascripts\jquery.iframe-transport.js" />
+    <Compile Include="public\javascripts\jscript.js" />
+    <Content Include="public\images\alert.png" />
+    <Content Include="public\images\close.png" />
+    <Content Include="public\images\corner.png" />
+    <Content Include="public\images\done.png" />
+    <Content Include="public\images\file_doct.png" />
+    <Content Include="public\images\file_pptt.png" />
+    <Content Include="public\images\file_xlst.png" />
+    <Content Include="public\images\loader16.gif" />
+    <Content Include="public\images\logo.png" />
+    <Content Include="public\images\question_small.png" />
+    <Content Include="public\samples\sample.docx" />
+    <Content Include="public\samples\sample.pptx" />
+    <Content Include="public\samples\sample.xlsx" />
+    <Content Include="public\images\favicon.ico" />
+    <Content Include="package.json" />
+    <Content Include="public\stylesheets\editor.css" />
+    <Content Include="public\stylesheets\jquery-ui.css" />
+    <Content Include="public\stylesheets\stylesheet.css" />
+    <Content Include="views\error.ejs" />
+    <Content Include="views\editor.ejs" />
+    <Content Include="views\index.ejs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bin\" />
+    <Folder Include="helpers\" />
+    <Folder Include="public\" />
+    <Folder Include="public\images\" />
+    <Folder Include="public\javascripts\" />
+    <Folder Include="public\app_data\" />
+    <Folder Include="public\samples\" />
+    <Folder Include="public\stylesheets\" />
+    <Folder Include="views\" />
+  </ItemGroup>
+  <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsTools.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:48022/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>True</UseCustomServer>
+          <CustomServerUrl>http://localhost:1337</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}" User="">
+        <WebProjectProperties>
+          <StartPageUrl>
+          </StartPageUrl>
+          <StartAction>CurrentPage</StartAction>
+          <AspNetDebugging>True</AspNetDebugging>
+          <SilverlightDebugging>False</SilverlightDebugging>
+          <NativeDebugging>False</NativeDebugging>
+          <SQLDebugging>False</SQLDebugging>
+          <ExternalProgram>
+          </ExternalProgram>
+          <StartExternalURL>
+          </StartExternalURL>
+          <StartCmdLineArguments>
+          </StartCmdLineArguments>
+          <StartWorkingDirectory>
+          </StartWorkingDirectory>
+          <EnableENC>False</EnableENC>
+          <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
