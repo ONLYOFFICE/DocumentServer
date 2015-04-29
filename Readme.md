@@ -1,31 +1,33 @@
-ONLYOFFICE Document Server is the previous version (2.5.7) of Windows-based online document editors, comprising viewers and editors for texts, spreadsheets and presentations. They are compatible with Office Open XML formats : .docx, .xlsx, .pptx and offer collaborative editing and commenting.
-http://onlyoffice.com
+## Overview
 
-Overview
-========================
-ONLYOFFICE Document Server is a freely downloadable open source version distributed under the GNU Affero General Public License.
+ONLYOFFICE Document Server is a free collaborative online office suite comprising viewers and editors for texts, spreadsheets and presentations, fully compatible with Office Open XML formats: .docx, .xlsx, .pptx and enabling collaborative editing in real time.
 
-Functionality
-========================
-It comprises viewers and editors for texts, spreadsheets and presentations including:
+## Functionality
 
 * ONLYOFFICE Document Editor
 * ONLYOFFICE Spreadsheet Editor
 * ONLYOFFICE Presentation Editor
+* Collaborative editing
+* Hieroglyph support
 
-Project Information
-========================
-Official website: [http://www.onlyoffice.com](http://onlyoffice.com "http://www.onlyoffice.com")
+## Project Information
 
-Code repository: https://github.com/ONLYOFFICE/ONLYOFFICE-Online-Editors
+Official website: [http://www.onlyoffice.org](http://onlyoffice.org "http://www.onlyoffice.org")
 
-License: [GNU Affero GPL 3](http://www.gnu.org/licenses/agpl.html "GNU Affero GPL 3")
+Code repository: [https://github.com/ONLYOFFICE/DocumentServer](https://github.com/ONLYOFFICE/DocumentServer "https://github.com/ONLYOFFICE/DocumentServer")
 
-SaaS version: [http://www.onlyoffice.com/saas.aspx](http://www.onlyoffice.com/saas.aspx "http://www.onlyoffice.com/saas.aspx")
+Docker Image: [https://github.com/ONLYOFFICE/Docker-DocumentServer](https://github.com/ONLYOFFICE/Docker-DocumentServer "https://github.com/ONLYOFFICE/Docker-DocumentServer")
 
-Documentation
-========================
-You can compile ONLYOFFICE Document Server and install it to your local server yourself or use our installer to skip compilation stage and install it for you. The following documentation is available to the community depending on the way you choose:
+License: [GNU AGPL v3.0](https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=4358397&doc=K0ZUdlVuQzQ0RFhhMzhZRVN4ZFIvaHlhUjN2eS9XMXpKR1M5WEppUk1Gcz0_IjQzNTgzOTci0 "GNU AGPL v3.0")
 
-* [Compiling ONLYOFFICE Document Server for a Local Server](https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=3473763&doc=ZVRueGxyR1pWOFZ4YlRycjN6cm52dmpCdnA5ZS9ZWklsMUpsUGFhVk1sWT0_IjM0NzM3NjMi0 "Compiling ONLYOFFICE Document Server for a Local Server")
-* [Installing ONLYOFFICE Document Server on a Local Server](https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=3744885&doc=bDB2Zi8wNE5lZmxSbVdYYUFRNFJJUWdBZlBaZnFnWFhwSnlWZFNkckxpVT0_IjM3NDQ4ODUi0 "Installing ONLYOFFICE Document Server on a Local Server")
+SaaS version: [http://www.onlyoffice.com](http://www.onlyoffice.com "http://www.onlyoffice.com")
+
+## ONLYOFFICE One Click Installation
+
+ONLYOFFICE Document Server is a part of **ONLYOFFICE Free Edition** that comprises also Community Server and Mail Server. To get ONLYOFFICE Free Edition in one click, make use of [ONLYOFFICE One Click Installation](https://controlpanel.onlyoffice.com/ "ONLYOFFICE One Click Installation").
+
+## User Feedback and Support
+
+If you have any problems with or questions about this image, please contact us through a [dev.onlyoffice.org][1].
+
+  [1]: http://dev.onlyoffice.org
