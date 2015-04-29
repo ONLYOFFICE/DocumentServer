@@ -75,19 +75,19 @@
   <ItemGroup>
     <Reference Include="AWSSDK, Version=1.3.19.0, Culture=neutral, PublicKeyToken=cd2d24cd2bace800, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\wwwroot\Bin\AWSSDK.dll</HintPath>
+      <HintPath>..\..\ThirdParty\Bin\AWSSDK.dll</HintPath>
     </Reference>
     <Reference Include="FileConverterUtils2, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\wwwroot\Bin\FileConverterUtils2.dll</HintPath>
+      <HintPath>..\Bin\FileConverterUtils2.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\wwwroot\Bin\log4net.dll</HintPath>
+      <HintPath>..\..\ThirdParty\Bin\log4net.dll</HintPath>
     </Reference>
     <Reference Include="MySql.Data, Version=6.3.6.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\wwwroot\Bin\MySql.Data.dll</HintPath>
+      <HintPath>..\..\ThirdParty\Bin\MySql.Data.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -115,9 +115,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Settings.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <COMReference Condition=" '$(IsOpenSource)' == '' " Include="AVSGraphics">
@@ -138,8 +135,6 @@
     </COMReference>
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>copy $(ProjectDir)..\..\..\wwwroot\Bin\Settings.config $(TargetDir)
-copy $(ProjectDir)..\..\..\wwwroot\Bin\ConnectionStrings.config $(TargetDir)
-copy $(TargetPath) $(ProjectDir)..\..\..\wwwroot\Bin\</PostBuildEvent>
+    <PostBuildEvent>copy $(TargetPath) $(ProjectDir)..\Bin\</PostBuildEvent>
   </PropertyGroup>
 </Project>
