@@ -26,6 +26,13 @@ SaaS version: [http://www.onlyoffice.com](http://www.onlyoffice.com "http://www.
 
 ONLYOFFICE Document Server is a part of **ONLYOFFICE Free Edition** that comprises also Community Server and Mail Server. To get ONLYOFFICE Free Edition in one click, make use of [ONLYOFFICE One Click Installation](https://controlpanel.onlyoffice.com/ "ONLYOFFICE One Click Installation").
 
+##Documentation
+
+The easiest way to install ONLYOFFICE Document Server is to use the Docker image. You can also install it from the repository. The following documentation is available to the community depending on the way you choose:
+
+* [Installing ONLYOFFICE Document Server Linux Version](https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=4381391&doc=ZDdHWWYrTVJJMmpUTEVLRkNTOHhUSEplZklDQjQwQWVSajNhQ2VYamk4Zz0_IjQzODEzOTEi0 "Installing ONLYOFFICE Document Server Linux Version")
+* [Installing ONLYOFFICE Document Server Docker Version](https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=4356431&doc=TTlaTDdWdHA1Ny9PRFlHQUl0cDFDTFZhdnpBUFVVQmc0b0pNRnBzRndPTT0_IjQzNTY0MzEi0 "Installing ONLYOFFICE Document Server Docker Version")
+
 ## User Feedback and Support
 
 If you have any problems with or questions about this image, please contact us through a [dev.onlyoffice.org][1].
