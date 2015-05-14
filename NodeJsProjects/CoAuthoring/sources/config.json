@@ -16,9 +16,9 @@
       "tablePucker"			: "doc_pucker",
       "host"				: "localhost",
       "dbport"				: 3306,
-      "database"			: "canvaseditors",
-      "user"				: "canvas_usr",
-      "pass"				: "canvas_usr",
+      "database"			: "onlyoffice",
+      "user"				: "root",
+      "pass"				: "onlyoffice",
       "charset"				: "utf8",
 	  "max_allowed_packet"	: 1048575
     }
