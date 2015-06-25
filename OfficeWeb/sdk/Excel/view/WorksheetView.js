@@ -8073,10 +8073,54 @@
         return arnFor;
     };
     WorksheetView.prototype._isLockedFrozenPane = function (callback) {
-        asc_applyFunction(callback, true);
+        if (false === this.collaborativeEditing.isCoAuthoringExcellEnable()) {
+            asc_applyFunction(callback, true);
+            return;
+        }
+        var sheetId = this.model.getId();
+        var lockInfo = this.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Object, null, sheetId, c_oAscLockNameFrozenPane);
+        if (false === this.collaborativeEditing.getCollaborativeEditing()) {
+            asc_applyFunction(callback, true);
+            callback = undefined;
+        }
+        if (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeMine, false)) {
+            asc_applyFunction(callback, true);
+            return;
+        } else {
+            if (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeOther, false)) {
+                asc_applyFunction(callback, false);
+                return;
+            }
+        }
+        this.collaborativeEditing.onStartCheckLock();
+        this.collaborativeEditing.addCheckLock(lockInfo);
+        this.collaborativeEditing.onEndCheckLock(callback);
     };
     WorksheetView.prototype._isLockedAll = function (callback) {
-        asc_applyFunction(callback, true);
+        if (false === this.collaborativeEditing.isCoAuthoringExcellEnable()) {
+            asc_applyFunction(callback, true);
+            return;
+        }
+        var sheetId = this.model.getId();
+        var subType = c_oAscLockTypeElemSubType.ChangeProperties;
+        var ar = this.activeRange;
+        var lockInfo = this.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Range, subType, sheetId, new asc.asc_CCollaborativeRange(ar.c1, ar.r1, ar.c2, ar.r2));
+        if (false === this.collaborativeEditing.getCollaborativeEditing()) {
+            asc_applyFunction(callback, true);
+            callback = undefined;
+        }
+        if (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeMine, true)) {
+            asc_applyFunction(callback, true);
+            return;
+        } else {
+            if (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeOther, true)) {
+                asc_applyFunction(callback, false);
+                return;
+            }
+        }
+        this.collaborativeEditing.onStartCheckLock();
+        this.collaborativeEditing.addCheckLock(lockInfo);
+        this.collaborativeEditing.onEndCheckLock(callback);
     };
     WorksheetView.prototype._recalcRangeByInsertRowsAndColumns = function (sheetId, ar) {
         var isIntersection = false,
@@ -8119,7 +8163,98 @@
         return isIntersection;
     };
     WorksheetView.prototype._isLockedCells = function (range, subType, callback) {
-        asc_applyFunction(callback, true);
+        if (false === this.collaborativeEditing.isCoAuthoringExcellEnable()) {
+            asc_applyFunction(callback, true);
+            return true;
+        }
+        var sheetId = this.model.getId();
+        var isIntersection = false;
+        var newCallback = callback;
+        var t = this;
+        this.collaborativeEditing.onStartCheckLock();
+        var isArrayRange = Array.isArray(range);
+        var nLength = isArrayRange ? range.length : 1;
+        var nIndex = 0;
+        var ar = null;
+        for (; nIndex < nLength; ++nIndex) {
+            ar = isArrayRange ? range[nIndex].clone(true) : range.clone(true);
+            if (c_oAscLockTypeElemSubType.InsertColumns !== subType && c_oAscLockTypeElemSubType.InsertRows !== subType) {
+                isIntersection = this._recalcRangeByInsertRowsAndColumns(sheetId, ar);
+            }
+            if (false === isIntersection) {
+                var lockInfo = this.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Range, subType, sheetId, new asc.asc_CCollaborativeRange(ar.c1, ar.r1, ar.c2, ar.r2));
+                if (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeOther, false)) {
+                    asc_applyFunction(callback, false);
+                    return false;
+                } else {
+                    if (c_oAscLockTypeElemSubType.InsertColumns === subType) {
+                        newCallback = function (isSuccess) {
+                            if (isSuccess) {
+                                t.collaborativeEditing.addColsRange(sheetId, range.clone(true));
+                                t.collaborativeEditing.addCols(sheetId, range.c1, range.c2 - range.c1 + 1);
+                            }
+                            callback(isSuccess);
+                        };
+                    } else {
+                        if (c_oAscLockTypeElemSubType.InsertRows === subType) {
+                            newCallback = function (isSuccess) {
+                                if (isSuccess) {
+                                    t.collaborativeEditing.addRowsRange(sheetId, range.clone(true));
+                                    t.collaborativeEditing.addRows(sheetId, range.r1, range.r2 - range.r1 + 1);
+                                }
+                                callback(isSuccess);
+                            };
+                        } else {
+                            if (c_oAscLockTypeElemSubType.DeleteColumns === subType) {
+                                newCallback = function (isSuccess) {
+                                    if (isSuccess) {
+                                        t.collaborativeEditing.removeColsRange(sheetId, range.clone(true));
+                                        t.collaborativeEditing.removeCols(sheetId, range.c1, range.c2 - range.c1 + 1);
+                                    }
+                                    callback(isSuccess);
+                                };
+                            } else {
+                                if (c_oAscLockTypeElemSubType.DeleteRows === subType) {
+                                    newCallback = function (isSuccess) {
+                                        if (isSuccess) {
+                                            t.collaborativeEditing.removeRowsRange(sheetId, range.clone(true));
+                                            t.collaborativeEditing.removeRows(sheetId, range.r1, range.r2 - range.r1 + 1);
+                                        }
+                                        callback(isSuccess);
+                                    };
+                                }
+                            }
+                        }
+                    }
+                    this.collaborativeEditing.addCheckLock(lockInfo);
+                }
+            } else {
+                if (c_oAscLockTypeElemSubType.InsertColumns === subType) {
+                    t.collaborativeEditing.addColsRange(sheetId, range.clone(true));
+                    t.collaborativeEditing.addCols(sheetId, range.c1, range.c2 - range.c1 + 1);
+                } else {
+                    if (c_oAscLockTypeElemSubType.InsertRows === subType) {
+                        t.collaborativeEditing.addRowsRange(sheetId, range.clone(true));
+                        t.collaborativeEditing.addRows(sheetId, range.r1, range.r2 - range.r1 + 1);
+                    } else {
+                        if (c_oAscLockTypeElemSubType.DeleteColumns === subType) {
+                            t.collaborativeEditing.removeColsRange(sheetId, range.clone(true));
+                            t.collaborativeEditing.removeCols(sheetId, range.c1, range.c2 - range.c1 + 1);
+                        } else {
+                            if (c_oAscLockTypeElemSubType.DeleteRows === subType) {
+                                t.collaborativeEditing.removeRowsRange(sheetId, range.clone(true));
+                                t.collaborativeEditing.removeRows(sheetId, range.r1, range.r2 - range.r1 + 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (false === this.collaborativeEditing.getCollaborativeEditing()) {
+            newCallback(true);
+            newCallback = undefined;
+        }
+        this.collaborativeEditing.onEndCheckLock(newCallback);
         return true;
     };
     WorksheetView.prototype.changeWorksheet = function (prop, val) {

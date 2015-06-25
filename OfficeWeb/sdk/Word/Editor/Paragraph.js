@@ -2834,13 +2834,15 @@ Paragraph.prototype = {
         var ContentPos = new CParagraphContentPos();
         var CurRange = Class.StartRange;
         var CurLine = Class.StartLine;
-        var StartPos = this.Lines[CurLine].Ranges[CurRange].StartPos;
-        var EndPos = this.Lines[CurLine].Ranges[CurRange].EndPos;
-        for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
-            var Element = this.Content[CurPos];
-            ContentPos.Update(CurPos, 0);
-            if (true === Element.Get_PosByElement(Class, ContentPos, 1, true, CurRange, CurLine)) {
-                return ContentPos;
+        if (undefined !== this.Lines[CurLine] && undefined !== this.Lines[CurLine].Ranges[CurRange]) {
+            var StartPos = this.Lines[CurLine].Ranges[CurRange].StartPos;
+            var EndPos = this.Lines[CurLine].Ranges[CurRange].EndPos;
+            for (var CurPos = StartPos; CurPos <= EndPos; CurPos++) {
+                var Element = this.Content[CurPos];
+                ContentPos.Update(CurPos, 0);
+                if (true === Element.Get_PosByElement(Class, ContentPos, 1, true, CurRange, CurLine)) {
+                    return ContentPos;
+                }
             }
         }
         var ContentLen = this.Content.length;
@@ -2851,6 +2853,7 @@ Paragraph.prototype = {
                 return ContentPos;
             }
         }
+        return null;
     },
     Get_RunElementByPos: function (ContentPos) {
         var CurPos = ContentPos.Get(0);
@@ -3026,6 +3029,20 @@ Paragraph.prototype = {
         var ContentLen = this.Content.length;
         ContentPos.Update(ContentLen - 1, Depth);
         this.Content[ContentLen - 1].Get_EndPos(BehindEnd, ContentPos, Depth + 1);
+        return ContentPos;
+    },
+    Get_EndPos2: function (BehindEnd) {
+        var ContentPos = new CParagraphContentPos();
+        var Depth = 0;
+        var ContentLen = this.Content.length;
+        var Pos;
+        if (this.Content.length > 1) {
+            Pos = ContentLen - 2;
+        } else {
+            Pos = ContentLen - 1;
+        }
+        ContentPos.Update(Pos, Depth);
+        this.Content[Pos].Get_EndPos(BehindEnd, ContentPos, Depth + 1);
         return ContentPos;
     },
     Get_NextRunElements: function (RunElements) {
@@ -7021,7 +7038,12 @@ Paragraph.prototype = {
     },
     Continue: function (NewParagraph) {
         this.CopyPr(NewParagraph);
-        var TextPr = this.Get_TextPr(this.Get_EndPos(false));
+        var TextPr;
+        if (this.bFromDocument) {
+            TextPr = this.Get_TextPr(this.Get_EndPos(false));
+        } else {
+            TextPr = this.Get_TextPr(this.Get_EndPos2(false));
+        }
         NewParagraph.Internal_Content_Add(0, new ParaRun(NewParagraph));
         NewParagraph.Correct_Content();
         NewParagraph.Cursor_MoveToStartPos(false);
@@ -8716,6 +8738,9 @@ CParagraphContentPos.prototype = {
     },
     Get_Depth: function () {
         return this.Depth - 1;
+    },
+    Decrease_Depth: function (nCount) {
+        this.Depth = Math.max(0, this.Depth - nCount);
     },
     Copy: function () {
         var PRPos = new CParagraphContentPos();

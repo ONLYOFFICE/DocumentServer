@@ -38,6 +38,7 @@
             return new asc_CAscEditorPermissions();
         }
         if (settings) {
+            this.canLicense = settings["canLicense"];
             this.canEdit = settings["canEdit"];
             this.canDownload = settings["canDownload"];
             this.canCoAuthoring = settings["canCoAuthoring"];
@@ -60,6 +61,9 @@
     }
     asc_CAscEditorPermissions.prototype = {
         constructor: asc_CAscEditorPermissions,
+        asc_getCanLicense: function () {
+            return this.canLicense;
+        },
         asc_getCanEdit: function () {
             return this.canEdit;
         },
@@ -83,6 +87,9 @@
         },
         asc_getIsAnalyticsEnable: function () {
             return this.isAnalyticsEnable;
+        },
+        asc_setCanLicense: function (v) {
+            this.canLicense = v;
         },
         asc_setCanEdit: function (v) {
             this.canEdit = v;
@@ -111,6 +118,7 @@
     };
     window["Asc"]["asc_CAscEditorPermissions"] = window["Asc"].asc_CAscEditorPermissions = asc_CAscEditorPermissions;
     prot = asc_CAscEditorPermissions.prototype;
+    prot["asc_getCanLicense"] = prot.asc_getCanLicense;
     prot["asc_getCanEdit"] = prot.asc_getCanEdit;
     prot["asc_getCanDownload"] = prot.asc_getCanDownload;
     prot["asc_getCanCoAuthoring"] = prot.asc_getCanCoAuthoring;
@@ -904,12 +912,69 @@
     }
     window["Asc"].generateColor = generateColor;
     window["Asc"].hsvToRgb = hsvToRgb;
+    function asc_CVersionHistory(newObj) {
+        this.docId = null;
+        this.url = null;
+        this.urlChanges = null;
+        this.currentChangeId = -1;
+        this.newChangeId = -1;
+        this.colors = null;
+        this.changes = null;
+        if (newObj) {
+            this.update(newObj);
+        }
+    }
+    asc_CVersionHistory.prototype.update = function (newObj) {
+        var bUpdate = (this.docId !== newObj.docId || this.url !== newObj.url || this.urlChanges !== newObj.urlChanges || this.currentChangeId > newObj.currentChangeId);
+        if (bUpdate) {
+            this.docId = newObj.docId;
+            this.url = newObj.url;
+            this.urlChanges = newObj.urlChanges;
+            this.currentChangeId = -1;
+            this.changes = null;
+        }
+        this.colors = newObj.colors;
+        this.newChangeId = newObj.currentChangeId;
+        return bUpdate;
+    };
+    asc_CVersionHistory.prototype.applyChanges = function (editor) {
+        var color;
+        this.newChangeId = (null == this.newChangeId) ? (this.changes.length - 1) : this.newChangeId;
+        for (var i = this.currentChangeId + 1; i <= this.newChangeId && i < this.changes.length; ++i) {
+            color = this.colors[i];
+            editor._coAuthoringSetChanges(this.changes[i], i !== this.newChangeId ? null : (color ? new CDocumentColor((color >> 16) & 255, (color >> 8) & 255, color & 255) : new CDocumentColor(191, 255, 199)));
+        }
+        this.currentChangeId = this.newChangeId;
+    };
+    asc_CVersionHistory.prototype.asc_setDocId = function (val) {
+        this.docId = val;
+    };
+    asc_CVersionHistory.prototype.asc_setUrl = function (val) {
+        this.url = val;
+    };
+    asc_CVersionHistory.prototype.asc_setUrlChanges = function (val) {
+        this.urlChanges = val;
+    };
+    asc_CVersionHistory.prototype.asc_setCurrentChangeId = function (val) {
+        this.currentChangeId = val;
+    };
+    asc_CVersionHistory.prototype.asc_setArrColors = function (val) {
+        this.colors = val;
+    };
+    window["Asc"].asc_CVersionHistory = window["Asc"]["asc_CVersionHistory"] = asc_CVersionHistory;
+    prot = asc_CVersionHistory.prototype;
+    prot["asc_setDocId"] = prot.asc_setDocId;
+    prot["asc_setUrl"] = prot.asc_setUrl;
+    prot["asc_setUrlChanges"] = prot.asc_setUrlChanges;
+    prot["asc_setCurrentChangeId"] = prot.asc_setCurrentChangeId;
+    prot["asc_setArrColors"] = prot.asc_setArrColors;
 })(window);
 var CColor = window["CColor"];
 var asc_ChartSettings = window["asc_ChartSettings"];
 var asc_ValAxisSettings = window["asc_ValAxisSettings"];
 var asc_CatAxisSettings = window["asc_CatAxisSettings"];
-var g_oArrUserColors = [15064320, 58807, 16724950, 1759488, 9981439, 56805, 15050496, 15224319, 10154496, 16731553, 62146, 47077, 1828096, 15859712, 15427327, 15919360, 15905024, 59890, 12733951, 13496832, 62072, 49906, 16734720, 10682112, 7890687, 16731610, 65406, 38655, 16747008, 14221056, 16737966, 1896960, 65484, 10970879, 16759296, 16711680, 63231, 16774656, 2031360, 52479, 13330175, 16743219, 3386367, 11927347, 16752947, 9404671, 4980531, 16744678, 3407830, 11960575, 16724787, 10878873, 14745395, 16762931, 15696127, 3397375, 16744636, 3407768, 3406079, 13926655, 15269734, 16751083, 6742271, 16766566, 13107046, 16775219, 16751718, 10852863, 6750176, 16737894, 14457343, 16759142, 6750130, 6865407, 15650047, 16769945, 7929702, 16751049, 6748927, 16751001, 12884479, 16775782, 16765081, 10087423, 10878873, 16757744, 10081791, 14352281, 15053823, 10092523, 16760217, 15728537, 13815039, 16776652, 16757719, 13432319, 16773580, 13828044, 15650047, 15893248, 16724883, 58737, 15007744, 36594, 12772608, 12137471, 6442495, 9561344, 15021055, 34789, 15039488, 44761, 16718470, 14274816, 11606783, 9099520, 53721, 16718545, 1625088, 15881472, 13419776, 50636, 14752511, 55659, 14261760, 32985, 11389952, 16711800, 8571904, 1490688, 16711884, 8991743, 13407488, 41932, 11010303, 7978752, 15028480, 52387, 15007927, 52325, 47295, 14549247, 12552960, 12564480, 39359, 15007852, 12114176, 1421824, 55726, 13041893, 10665728, 30924, 49049, 14251264, 48990, 14241024, 36530, 11709440, 13369507, 44210, 11698688, 7451136, 13397504, 45710, 34214];
+var c_oAscArrUserColors = [15064320, 58807, 16724950, 1759488, 9981439, 56805, 15050496, 15224319, 10154496, 16731553, 62146, 47077, 1828096, 15859712, 15427327, 15919360, 15905024, 59890, 12733951, 13496832, 62072, 49906, 16734720, 10682112, 7890687, 16731610, 65406, 38655, 16747008, 14221056, 16737966, 1896960, 65484, 10970879, 16759296, 16711680, 63231, 16774656, 2031360, 52479, 13330175, 16743219, 3386367, 11927347, 16752947, 9404671, 4980531, 16744678, 3407830, 11960575, 16724787, 10878873, 14745395, 16762931, 15696127, 3397375, 16744636, 3407768, 3406079, 13926655, 15269734, 16751083, 6742271, 16766566, 13107046, 16775219, 16751718, 10852863, 6750176, 16737894, 14457343, 16759142, 6750130, 6865407, 15650047, 16769945, 7929702, 16751049, 6748927, 16751001, 12884479, 16775782, 16765081, 10087423, 10878873, 16757744, 10081791, 14352281, 15053823, 10092523, 16760217, 15728537, 13815039, 16776652, 16757719, 13432319, 16773580, 13828044, 15650047, 15893248, 16724883, 58737, 15007744, 36594, 12772608, 12137471, 6442495, 9561344, 15021055, 34789, 15039488, 44761, 16718470, 14274816, 11606783, 9099520, 53721, 16718545, 1625088, 15881472, 13419776, 50636, 14752511, 55659, 14261760, 32985, 11389952, 16711800, 8571904, 1490688, 16711884, 8991743, 13407488, 41932, 11010303, 7978752, 15028480, 52387, 15007927, 52325, 47295, 14549247, 12552960, 12564480, 39359, 15007852, 12114176, 1421824, 55726, 13041893, 10665728, 30924, 49049, 14251264, 48990, 14241024, 36530, 11709440, 13369507, 44210, 11698688, 7451136, 13397504, 45710, 34214];
+window["c_oAscArrUserColors"] = c_oAscArrUserColors;
 function CAscMathType() {
     this.Id = 0;
     this.X = 0;

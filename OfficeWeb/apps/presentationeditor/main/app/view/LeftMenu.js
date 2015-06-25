@@ -178,16 +178,20 @@
         },
         onCoauthOptions: function (e) {
             if (this.mode.canCoAuthoring) {
-                this.panelComments[this.btnComments.pressed ? "show" : "hide"]();
-                this.fireEvent((this.btnComments.pressed) ? "comments:show": "comments:hide", this);
-                if (this.btnChat.pressed) {
-                    if (this.btnChat.$el.hasClass("notify")) {
-                        this.btnChat.$el.removeClass("notify");
+                if (this.mode.canComments) {
+                    this.panelComments[this.btnComments.pressed ? "show" : "hide"]();
+                    this.fireEvent((this.btnComments.pressed) ? "comments:show": "comments:hide", this);
+                }
+                if (this.mode.canChat) {
+                    if (this.btnChat.pressed) {
+                        if (this.btnChat.$el.hasClass("notify")) {
+                            this.btnChat.$el.removeClass("notify");
+                        }
+                        this.panelChat.show();
+                        this.panelChat.focus();
+                    } else {
+                        this.panelChat["hide"]();
                     }
-                    this.panelChat.show();
-                    this.panelChat.focus();
-                } else {
-                    this.panelChat["hide"]();
                 }
             }
         },
@@ -211,13 +215,17 @@
             this.btnThumbs.toggle(false);
             this.$el.width(SCALE_MIN);
             if (this.mode.canCoAuthoring) {
-                this.panelComments["hide"]();
-                this.panelChat["hide"]();
-                if (this.btnComments.pressed) {
-                    this.fireEvent("comments:hide", this);
+                if (this.mode.canComments) {
+                    this.panelComments["hide"]();
+                    if (this.btnComments.pressed) {
+                        this.fireEvent("comments:hide", this);
+                    }
+                    this.btnComments.toggle(false, true);
                 }
-                this.btnComments.toggle(false, true);
-                this.btnChat.toggle(false, true);
+                if (this.mode.canChat) {
+                    this.panelChat["hide"]();
+                    this.btnChat.toggle(false, true);
+                }
             }
             this.fireEvent("panel:show", [this, "", false]);
         },

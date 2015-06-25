@@ -35,6 +35,7 @@ var ASC_DOCS_API_USE_EMBEDDED_FONTS = "@@ASC_DOCS_API_USE_EMBEDDED_FONTS";
 var documentId = undefined;
 var documentUserId = undefined;
 var documentUrl = "null";
+var documentUrlChanges = null;
 var documentTitle = "null";
 var documentTitleWithoutExtention = "null";
 var documentFormat = "null";
@@ -748,6 +749,9 @@ function () {
     };
 };
 function asc_docs_api(name) {
+    if (window["AscDesktopEditor"]) {
+        window["AscDesktopEditor"]["CreateEditorApi"]();
+    }
     g_fontApplication.Init();
     var CDocsCoApi = window["CDocsCoApi"];
     var CSpellCheckApi = window["CSpellCheckApi"];
@@ -787,7 +791,8 @@ function asc_docs_api(name) {
     this.isCoAuthoringEnable = true;
     this.isCoMarksDraw = false;
     this.isDocumentCanSave = false;
-    this.SpellCheckApi = new CSpellCheckApi();
+    this.VersionHistory = null;
+    this.SpellCheckApi = (window["AscDesktopEditor"] === undefined) ? new CSpellCheckApi() : new CSpellCheckApi_desktop();
     this.isSpellCheckEnable = true;
     this.chartTranslate = new asc_CChartTranslate();
     this.isOnlyReaderMode = false;
@@ -944,6 +949,9 @@ asc_docs_api.prototype.SetUnchangedDocument = function () {
 asc_docs_api.prototype.SetDocumentModified = function (bValue) {
     this.isDocumentModify = bValue;
     this.asc_fireCallback("asc_onDocumentModifiedChanged");
+    if (undefined !== window["AscDesktopEditor"]) {
+        window["AscDesktopEditor"]["onDocumentModifiedChanged"](bValue);
+    }
 };
 asc_docs_api.prototype.isDocumentModified = function () {
     if (!this.canSave) {
@@ -1112,6 +1120,9 @@ asc_docs_api.prototype.LoadDocument = function (c_DocInfo) {
         this.User.asc_setUserName(this.DocInfo.get_UserName());
     }
     this.DocumentName = documentTitle;
+    if (undefined !== window["AscDesktopEditor"]) {
+        window["AscDesktopEditor"]["SetDocumentName"](this.DocumentName);
+    }
     var oThis = this;
     if (this.DocInfo.get_OfflineApp() === true) {
         this.OfflineAppDocumentStartLoad();
@@ -1120,19 +1131,21 @@ asc_docs_api.prototype.LoadDocument = function (c_DocInfo) {
     }
     if (documentId) {
         var oOpenOptions = this.DocInfo.get_Options();
+        var rData = {
+            "c": "",
+            "id": documentId,
+            "userid": documentUserId,
+            "format": documentFormat,
+            "vkey": documentVKey,
+            "editorid": c_oEditorId.Word,
+            "url": documentUrl,
+            "title": documentTitle,
+            "embeddedfonts": this.isUseEmbeddedCutFonts,
+            "viewmode": this.isViewMode
+        };
         if (false && oOpenOptions && oOpenOptions["isEmpty"]) {
-            var rData = {
-                "c": "create",
-                "id": documentId,
-                "userid": documentUserId,
-                "format": documentFormat,
-                "vkey": documentVKey,
-                "editorid": c_oEditorId.Word,
-                "url": documentUrl,
-                "title": documentTitle,
-                "embeddedfonts": this.isUseEmbeddedCutFonts,
-                "data": g_sEmpty_bin
-            };
+            rData["c"] = "create";
+            rData["data"] = g_sEmpty_bin;
             sendCommand(oThis, function () {},
             rData);
             editor.OpenDocument2(g_sResourceServiceLocalUrl + documentId + "/", g_sEmpty_bin);
@@ -1143,18 +1156,8 @@ asc_docs_api.prototype.LoadDocument = function (c_DocInfo) {
                 }
             }
         } else {
+            rData["c"] = "open";
             this.sync_StartAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.Open);
-            var rData = {
-                "id": documentId,
-                "userid": documentUserId,
-                "format": documentFormat,
-                "vkey": documentVKey,
-                "editorid": c_oEditorId.Word,
-                "c": "open",
-                "url": documentUrl,
-                "title": documentTitle,
-                "embeddedfonts": this.isUseEmbeddedCutFonts
-            };
             sendCommand(oThis, function () {},
             rData);
         }
@@ -1239,6 +1242,9 @@ asc_docs_api.prototype.ContentToHTML = function (bIsRet) {
 asc_docs_api.prototype.InitEditor = function () {
     this.WordControl.m_oLogicDocument = new CDocument(this.WordControl.m_oDrawingDocument);
     this.WordControl.m_oDrawingDocument.m_oLogicDocument = this.WordControl.m_oLogicDocument;
+    if (!this.isSpellCheckEnable) {
+        this.WordControl.m_oLogicDocument.TurnOff_CheckSpelling();
+    }
     if (this.WordControl.MobileTouchManager) {
         this.WordControl.MobileTouchManager.LogicDocument = this.WordControl.m_oLogicDocument;
     }
@@ -1275,6 +1281,7 @@ asc_docs_api.prototype.OpenDocument = function (url, gObject) {
     this.LoadedObject = null;
     this.DocumentType = 1;
     this.ServerIdWaitComplete = true;
+    this.sync_EndAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.Open);
     this.WordControl.m_oDrawingDocument.m_oDocumentRenderer.Load(url, gObject);
     this.FontLoader.LoadDocumentFonts(this.WordControl.m_oDrawingDocument.m_oDocumentRenderer.Fonts, true);
 };
@@ -1591,6 +1598,7 @@ asc_docs_api.prototype.asc_coAuthoringDisconnect = function () {
         return;
     }
     this.CoAuthoringApi.disconnect();
+    this.isCoAuthoringEnable = false;
     this.SetViewMode(true);
 };
 asc_docs_api.prototype._coSpellCheckInit = function () {
@@ -1600,20 +1608,32 @@ asc_docs_api.prototype._coSpellCheckInit = function () {
     if (undefined !== window["g_cAscSpellCheckUrl"]) {
         window.g_cAscSpellCheckUrl = window["g_cAscSpellCheckUrl"];
     }
-    if (undefined !== window.g_cAscSpellCheckUrl) {
-        if (!this.isSpellCheckEnable) {
-            window.g_cAscSpellCheckUrl = "";
+    if (undefined === window["AscDesktopEditor"]) {
+        if (undefined !== window.g_cAscSpellCheckUrl) {
+            if (!this.isSpellCheckEnable) {
+                window.g_cAscSpellCheckUrl = "";
+            }
+            this.SpellCheckApi.set_url(window.g_cAscSpellCheckUrl);
         }
-        this.SpellCheckApi.set_url(window.g_cAscSpellCheckUrl);
+        this.SpellCheckApi.onSpellCheck = function (e) {
+            var incomeObject = JSON.parse(e);
+            SpellCheck_CallBack(incomeObject);
+        };
     }
-    this.SpellCheckApi.onSpellCheck = function (e) {
-        var incomeObject = JSON.parse(e);
-        SpellCheck_CallBack(incomeObject);
-    };
     this.SpellCheckApi.init(documentId);
 };
 asc_docs_api.prototype.asc_getSpellCheckLanguages = function () {
     return g_spellCheckLanguages;
+};
+asc_docs_api.prototype.asc_SpellCheckDisconnect = function () {
+    if (!this.SpellCheckApi) {
+        return;
+    }
+    this.SpellCheckApi.disconnect();
+    this.isSpellCheckEnable = false;
+    if (this.WordControl.m_oLogicDocument) {
+        this.WordControl.m_oLogicDocument.TurnOff_CheckSpelling();
+    }
 };
 asc_docs_api.prototype._onUpdateDocumentCanSave = function () {
     var tmp = this.isDocumentModified() || (0 >= CollaborativeEditing.m_nUseType && 0 !== CollaborativeEditing.getOwnLocksLength());
@@ -2496,6 +2516,16 @@ asc_docs_api.prototype.UpdateParagraphProp = function (ParaPr) {
     this.sync_PrPropCallback(ParaPr);
 };
 asc_docs_api.prototype.asc_Print = function () {
+    if (window["AscDesktopEditor"]) {
+        if (null != this.WordControl.m_oDrawingDocument.m_oDocumentRenderer) {
+            if (window["AscDesktopEditor"]["IsSupportNativePrint"](this.DocumentUrl) === true) {
+                return;
+            }
+        } else {
+            window["AscDesktopEditor"]["Print"]();
+            return;
+        }
+    }
     if (undefined != window["qtDocBridge"]) {
         this.async_SaveToPdf();
     } else {
@@ -2534,15 +2564,42 @@ asc_docs_api.prototype.Redo = function () {
     this.WordControl.m_oLogicDocument.Document_Redo();
 };
 asc_docs_api.prototype.Copy = function () {
+    if (window["AscDesktopEditor"]) {
+        window["AscDesktopEditorButtonMode"] = true;
+        var _e = new CKeyboardEvent();
+        _e.CtrlKey = true;
+        _e.KeyCode = 67;
+        this.WordControl.m_oLogicDocument.OnKeyDown(_e);
+        window["AscDesktopEditorButtonMode"] = false;
+        return;
+    }
     return Editor_Copy_Button(this);
 };
 asc_docs_api.prototype.Update_ParaTab = function (Default_Tab, ParaTabs) {
     this.WordControl.m_oDrawingDocument.Update_ParaTab(Default_Tab, ParaTabs);
 };
 asc_docs_api.prototype.Cut = function () {
+    if (window["AscDesktopEditor"]) {
+        window["AscDesktopEditorButtonMode"] = true;
+        var _e = new CKeyboardEvent();
+        _e.CtrlKey = true;
+        _e.KeyCode = 88;
+        this.WordControl.m_oLogicDocument.OnKeyDown(_e);
+        window["AscDesktopEditorButtonMode"] = false;
+        return;
+    }
     return Editor_Copy_Button(this, true);
 };
 asc_docs_api.prototype.Paste = function () {
+    if (window["AscDesktopEditor"]) {
+        window["AscDesktopEditorButtonMode"] = true;
+        var _e = new CKeyboardEvent();
+        _e.CtrlKey = true;
+        _e.KeyCode = 86;
+        this.WordControl.m_oLogicDocument.OnKeyDown(_e);
+        window["AscDesktopEditorButtonMode"] = false;
+        return;
+    }
     if (false === this.WordControl.m_oLogicDocument.Document_Is_SelectionLocked(changestype_Paragraph_Content)) {
         if (!window.GlobalPasteFlag) {
             if (!window.USER_AGENT_SAFARI_MACOS) {
@@ -2561,7 +2618,7 @@ asc_docs_api.prototype.Paste = function () {
 asc_docs_api.prototype.Share = function () {};
 function OnSave_Callback(e) {
     if (false == e["saveLock"]) {
-        if (false !== editor.waitSave) {
+        if (editor.waitSave || editor.asc_IsLongAction()) {
             editor.CoAuthoringApi.onUnSaveLock = function () {
                 editor.canSave = true;
             };
@@ -2579,6 +2636,9 @@ function OnSave_Callback(e) {
             editor.canSave = true;
             editor.sync_EndAction(c_oAscAsyncActionType.Information, c_oAscAsyncAction.Save);
             editor._onUpdateDocumentCanSave();
+            if (undefined !== window["AscDesktopEditor"]) {
+                window["AscDesktopEditor"]["OnSave"]();
+            }
         };
         CollaborativeEditing.Send_Changes();
     } else {
@@ -2594,7 +2654,7 @@ function OnSave_Callback(e) {
     }
 }
 asc_docs_api.prototype.asc_Save = function () {
-    if (false === this.waitSave && true === this.canSave) {
+    if (false === this.waitSave && true === this.canSave && !this.asc_IsLongAction()) {
         this.canSave = false;
         this.CoAuthoringApi.askSaveChanges(OnSave_Callback);
     }
@@ -2794,6 +2854,9 @@ asc_docs_api.prototype.sync_EndAction = function (type, id) {
     this.asc_fireCallback("asc_onEndAction", type, id);
     if (c_oAscAsyncActionType.BlockInteraction == type) {
         this.IsLongActionCurrent--;
+        if (this.IsLongActionCurrent < 0) {
+            this.IsLongActionCurrent = 0;
+        }
         if (!this.asc_IsLongAction()) {
             var _length = this.LongActionCallbacks.length;
             for (var i = 0; i < _length; i++) {
@@ -5154,6 +5217,12 @@ asc_docs_api.prototype.asc_setDefaultLanguage = function (Lang) {
 asc_docs_api.prototype.asc_getDefaultLanguage = function () {
     return editor.WordControl.m_oLogicDocument.Get_DefaultLanguage();
 };
+asc_docs_api.prototype.asc_getKeyboardLanguage = function () {
+    if (undefined !== window["asc_current_keyboard_layout"]) {
+        return window["asc_current_keyboard_layout"];
+    }
+    return -1;
+};
 asc_docs_api.prototype.asc_setSpellCheck = function (isOn) {
     if (editor.WordControl.m_oLogicDocument) {
         editor.WordControl.m_oLogicDocument.Spelling.Use = isOn;
@@ -5245,24 +5314,7 @@ asc_docs_api.prototype.asc_hideComments = function () {
     this.WordControl.m_oLogicDocument.Hide_Comments();
     editor.sync_HideComment();
 };
-asc_docs_api.prototype.asc_addComment = function (AscCommentData) {
-    if (true === CollaborativeEditing.Get_GlobalLock()) {
-        return;
-    }
-    if (null == this.WordControl.m_oLogicDocument) {
-        return;
-    }
-    if (true !== this.can_AddQuotedComment() || false === this.WordControl.m_oLogicDocument.Document_Is_SelectionLocked(changestype_Paragraph_Content)) {
-        var CommentData = new CCommentData();
-        CommentData.Read_FromAscCommentData(AscCommentData);
-        this.WordControl.m_oLogicDocument.Create_NewHistoryPoint(historydescription_Document_AddComment);
-        var Comment = this.WordControl.m_oLogicDocument.Add_Comment(CommentData);
-        if (null != Comment) {
-            this.sync_AddComment(Comment.Get_Id(), CommentData);
-        }
-        return Comment.Get_Id();
-    }
-};
+asc_docs_api.prototype.asc_addComment = function (AscCommentData) {};
 asc_docs_api.prototype.asc_removeComment = function (Id) {
     if (null == this.WordControl.m_oLogicDocument) {
         return;
@@ -5679,6 +5731,18 @@ asc_docs_api.prototype.asyncImagesDocumentEndLoaded = function () {
         }
         return;
     }
+    if (this.EndActionLoadImages == 1) {
+        this.sync_EndAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.LoadDocumentImages);
+    } else {
+        if (this.EndActionLoadImages == 2) {
+            if (_bIsOldPaste) {
+                this.sync_EndAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.LoadImage);
+            } else {
+                this.sync_EndAction(c_oAscAsyncActionType.Information, c_oAscAsyncAction.LoadImage);
+            }
+        }
+    }
+    this.EndActionLoadImages = 0;
     if (false === this.isPasteFonts_Images && false === this.isSaveFonts_Images && false === this.isLoadImagesCustom) {
         this.ServerImagesWaitComplete = true;
         if (true == this.ServerIdWaitComplete) {
@@ -5713,18 +5777,6 @@ asc_docs_api.prototype.asyncImagesDocumentEndLoaded = function () {
             }
         }
     }
-    if (this.EndActionLoadImages == 1) {
-        this.sync_EndAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.LoadDocumentImages);
-    } else {
-        if (this.EndActionLoadImages == 2) {
-            if (_bIsOldPaste) {
-                this.sync_EndAction(c_oAscAsyncActionType.BlockInteraction, c_oAscAsyncAction.LoadImage);
-            } else {
-                this.sync_EndAction(c_oAscAsyncActionType.Information, c_oAscAsyncAction.LoadImage);
-            }
-        }
-    }
-    this.EndActionLoadImages = 0;
 };
 asc_docs_api.prototype.OpenDocumentEndCallback = function () {
     if (null == this.WordControl.m_oLogicDocument) {
@@ -6160,6 +6212,7 @@ asc_docs_api.prototype.add_SectionBreak = function (_Type) {
 };
 asc_docs_api.prototype.SetViewMode = function (isViewMode) {
     if (isViewMode) {
+        this.asc_SpellCheckDisconnect();
         this.isViewMode = true;
         this.ShowParaMarks = false;
         CollaborativeEditing.m_bGlobalLock = true;
@@ -6285,6 +6338,11 @@ function spellCheck(editor, rdata) {
         break;
     }
 }
+window["asc_nativeOnSpellCheck"] = function (response) {
+    if (editor.SpellCheckApi) {
+        editor.SpellCheckApi.onSpellCheck(response);
+    }
+};
 function _onSpellCheck_Callback2(response) {
     var incomeObject = JSON.parse(response);
     SpellCheck_CallBack(incomeObject);
@@ -6428,38 +6486,25 @@ function sendTrack(fCallback, url, rdata) {
     });
 }
 function _onOpenCommand(fCallback, incomeObject) {
-    var sJsonUrl = g_sResourceServiceLocalUrl + incomeObject["data"];
-    asc_ajax({
-        url: sJsonUrl,
-        dataType: "text",
-        success: function (result) {
-            var url;
-            var nIndex = sJsonUrl.lastIndexOf("/");
-            if (-1 != nIndex) {
-                url = sJsonUrl.substring(0, nIndex + 1);
-            } else {
-                url = sJsonUrl;
-            }
-            var bIsViewer = false;
-            if (result.length > 0) {
-                if (c_oSerFormat.Signature != result.substring(0, c_oSerFormat.Signature.length)) {
-                    bIsViewer = true;
-                }
-            }
-            if (true == bIsViewer) {
-                editor.OpenDocument(url, result);
-            } else {
-                editor.OpenDocument2(url, result);
-            }
-            if (fCallback) {
-                fCallback(incomeObject);
-            }
-        },
-        error: function () {
+    g_fOpenFileCommand(incomeObject["data"], documentUrlChanges, c_oSerFormat.Signature, function (error, result) {
+        if (error) {
             editor.asc_fireCallback("asc_onError", c_oAscError.ID.Unknown, c_oAscError.Level.Critical);
             if (fCallback) {
                 fCallback();
             }
+            return;
+        }
+        if (result.changes && editor.VersionHistory) {
+            editor.VersionHistory.changes = result.changes;
+            editor.VersionHistory.applyChanges(editor);
+        }
+        if (result.bSerFormat) {
+            editor.OpenDocument2(result.url, result.data);
+        } else {
+            editor.OpenDocument(result.url, result.data);
+        }
+        if (fCallback) {
+            fCallback();
         }
     });
 }
@@ -6581,94 +6626,6 @@ function _mapAscServerErrorToAscError(nServerError) {
     }
     return nRes;
 }
-function asc_ajax(obj) {
-    var url = "",
-    type = "GET",
-    async = true,
-    data = null,
-    dataType = "text/xml",
-    error = null,
-    success = null,
-    httpRequest = null,
-    contentType = "application/x-www-form-urlencoded",
-    init = function (obj) {
-        if (typeof(obj.url) != "undefined") {
-            url = obj.url;
-        }
-        if (typeof(obj.type) != "undefined") {
-            type = obj.type;
-        }
-        if (typeof(obj.async) != "undefined") {
-            async = obj.async;
-        }
-        if (typeof(obj.data) != "undefined") {
-            data = obj.data;
-        }
-        if (typeof(obj.dataType) != "undefined") {
-            dataType = obj.dataType;
-        }
-        if (typeof(obj.error) != "undefined") {
-            error = obj.error;
-        }
-        if (typeof(obj.success) != "undefined") {
-            success = obj.success;
-        }
-        if (typeof(obj.contentType) != "undefined") {
-            contentType = obj.contentType;
-        }
-        if (window.XMLHttpRequest) {
-            httpRequest = new XMLHttpRequest();
-            if (httpRequest.overrideMimeType) {
-                httpRequest.overrideMimeType(dataType);
-            }
-        } else {
-            if (window.ActiveXObject) {
-                try {
-                    httpRequest = new ActiveXObject("Msxml2.XMLHTTP");
-                } catch(e) {
-                    try {
-                        httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
-                    } catch(e) {}
-                }
-            }
-        }
-        httpRequest.onreadystatechange = function () {
-            respons(this);
-        };
-        send();
-    },
-    send = function () {
-        httpRequest.open(type, url, async);
-        if (type === "POST") {
-            httpRequest.setRequestHeader("Content-Type", contentType);
-        }
-        httpRequest.send(data);
-    },
-    respons = function (httpRequest) {
-        switch (httpRequest.readyState) {
-        case 0:
-            break;
-        case 1:
-            break;
-        case 2:
-            break;
-        case 3:
-            break;
-        case 4:
-            if (httpRequest.status == 200 || httpRequest.status == 1223) {
-                if (typeof success === "function") {
-                    success(httpRequest.responseText);
-                }
-            } else {
-                if (typeof error === "function") {
-                    error(httpRequest, httpRequest.statusText, httpRequest.status);
-                }
-            }
-            break;
-        }
-    };
-    init(obj);
-}
 function CErrorData() {
     this.Value = 0;
 }
@@ -6731,6 +6688,48 @@ asc_docs_api.prototype.asc_AddMath2 = function (Type) {
         var MathElement = new MathMenu(Type);
         this.WordControl.m_oLogicDocument.Paragraph_Add(MathElement);
     }
+};
+asc_docs_api.prototype.asc_showRevision = function (newObj) {
+    if (!newObj.docId) {
+        return;
+    }
+    if (this.isCoAuthoringEnable) {
+        this.asc_coAuthoringDisconnect();
+    }
+    var bUpdate = true;
+    if (null === this.VersionHistory) {
+        this.VersionHistory = new window["Asc"].asc_CVersionHistory(newObj);
+    } else {
+        bUpdate = this.VersionHistory.update(newObj);
+    }
+    if (bUpdate) {
+        this.asc_CloseFile();
+        this.DocInfo.put_Id(this.VersionHistory.docId);
+        this.DocInfo.put_Url(this.VersionHistory.url);
+        documentUrlChanges = this.VersionHistory.urlChanges;
+        this.LoadDocument();
+    } else {
+        if (this.VersionHistory.currentChangeId < newObj.currentChangeId) {
+            CollaborativeEditing.Clear_CollaborativeMarks();
+            editor.VersionHistory.applyChanges(editor);
+            CollaborativeEditing.Apply_Changes();
+        }
+    }
+};
+asc_docs_api.prototype.asc_undoAllChanges = function () {
+    this.WordControl.m_oLogicDocument.Document_Undo({
+        All: true
+    });
+};
+asc_docs_api.prototype.asc_CloseFile = function () {
+    History.Clear();
+    g_oIdCounter.Clear();
+    g_oTableId.Clear();
+    this.isApplyChangesOnOpenEnabled = true;
+    var oLogicDocument = this.WordControl.m_oLogicDocument;
+    oLogicDocument.Stop_Recalculate();
+    oLogicDocument.Stop_CheckSpelling();
+    window.global_pptx_content_loader.ImageMapChecker = {};
 };
 window["asc_docs_api"] = asc_docs_api;
 window["asc_docs_api"].prototype["asc_nativeOpenFile"] = function (base64File, version) {
@@ -6908,6 +6907,29 @@ window["asc_docs_api"].prototype["asc_nativeCheckPdfRenderer"] = function (_memo
 };
 window["asc_docs_api"].prototype["asc_nativeCalculate"] = function () {};
 window["asc_docs_api"].prototype["asc_nativePrint"] = function (_printer, _page) {
+    if (undefined === _printer && _page === undefined) {
+        if (undefined !== window["AscDesktopEditor"]) {
+            var _drawing_document = this.WordControl.m_oDrawingDocument;
+            var pagescount = Math.min(_drawing_document.m_lPagesCount, _drawing_document.m_lCountCalculatePages);
+            window["AscDesktopEditor"]["Print_Start"](this.DocumentUrl, pagescount, "", this.getCurrentPage());
+            var oDocRenderer = new CDocumentRenderer();
+            oDocRenderer.VectorMemoryForPrint = new CMemory();
+            var bOldShowMarks = this.ShowParaMarks;
+            this.ShowParaMarks = false;
+            for (var i = 0; i < pagescount; i++) {
+                oDocRenderer.Memory.Seek(0);
+                oDocRenderer.VectorMemoryForPrint.ClearNoAttack();
+                var page = _drawing_document.m_arrPages[i];
+                oDocRenderer.BeginPage(page.width_mm, page.height_mm);
+                this.WordControl.m_oLogicDocument.DrawPage(i, oDocRenderer);
+                oDocRenderer.EndPage();
+                window["AscDesktopEditor"]["Print_Page"](oDocRenderer.Memory.GetBase64Memory(), page.width_mm, page.height_mm);
+            }
+            this.ShowParaMarks = bOldShowMarks;
+            window["AscDesktopEditor"]["Print_End"]();
+        }
+        return;
+    }
     var page = this.WordControl.m_oDrawingDocument.m_arrPages[_page];
     _printer.BeginPage(page.width_mm, page.height_mm);
     this.WordControl.m_oLogicDocument.DrawPage(_page, _printer);
@@ -6915,4 +6937,33 @@ window["asc_docs_api"].prototype["asc_nativePrint"] = function (_printer, _page)
 };
 window["asc_docs_api"].prototype["asc_nativePrintPagesCount"] = function () {
     return this.WordControl.m_oDrawingDocument.m_lPagesCount;
+};
+window["asc_docs_api"].prototype["asc_nativeGetPDF"] = function () {
+    var pagescount = this["asc_nativePrintPagesCount"]();
+    var _renderer = new CDocumentRenderer();
+    _renderer.VectorMemoryForPrint = new CMemory();
+    var _bOldShowMarks = this.ShowParaMarks;
+    this.ShowParaMarks = false;
+    for (var i = 0; i < pagescount; i++) {
+        this["asc_nativePrint"](_renderer, i);
+    }
+    this.ShowParaMarks = _bOldShowMarks;
+    window["native"]["Save_End"]("", _renderer.Memory.GetCurPosition());
+    return _renderer.Memory.data;
+};
+function CSpellCheckApi_desktop() {
+    this.docId = undefined;
+    this.init = function (docid) {
+        this.docId = docid;
+    };
+    this.set_url = function (url) {};
+    this.spellCheck = function (spellData) {
+        window["AscDesktopEditor"]["SpellCheck"](spellData);
+    };
+    this.onSpellCheck = function (spellData) {
+        SpellCheck_CallBack(spellData);
+    };
+}
+window["AscDesktopEditor_Save"] = function () {
+    return editor.asc_Save();
 };

@@ -33,9 +33,14 @@
     DE.Controllers.Main = Backbone.Controller.extend(_.extend((function () {
         var ApplyEditRights = -255;
         var LoadingDocument = -256;
+        var mapCustomizationElements = {
+            about: "button#left-btn-about",
+            feedback: "button#left-btn-support",
+            goback: "#fm-btn-back > a, #header-back > div"
+        };
         return {
             models: [],
-            collections: ["ShapeGroups", "EquationGroups"],
+            collections: ["ShapeGroups", "EquationGroups", "Common.Collections.HistoryUsers"],
             views: [],
             initialize: function () {},
             onLaunch: function () {
@@ -49,7 +54,9 @@
                         return obj1.type === obj2.type;
                     }
                 });
-                this._state = {};
+                this._state = {
+                    isDisconnected: false
+                };
                 if (!Common.Utils.isBrowserSupported()) {
                     Common.Utils.showBrowserRestriction();
                     Common.Gateway.reportError(undefined, this.unsupportedBrowserErrorText);
@@ -161,8 +168,9 @@
                 this.appOptions.user = this.editorConfig.user;
                 this.appOptions.canBack = this.editorConfig.nativeApp !== true && this.editorConfig.canBackToFolder === true;
                 this.appOptions.nativeApp = this.editorConfig.nativeApp === true;
-                this.appOptions.canCreateNew = !_.isEmpty(this.editorConfig.createUrl);
-                this.appOptions.canOpenRecent = this.editorConfig.nativeApp !== true && this.editorConfig.recent !== undefined;
+                this.appOptions.isDesktopApp = this.editorConfig.targetApp == "desktop";
+                this.appOptions.canCreateNew = !_.isEmpty(this.editorConfig.createUrl) && !this.appOptions.isDesktopApp;
+                this.appOptions.canOpenRecent = this.editorConfig.nativeApp !== true && this.editorConfig.recent !== undefined && !this.appOptions.isDesktopApp;
                 this.appOptions.templates = this.editorConfig.templates;
                 this.appOptions.recent = this.editorConfig.recent;
                 this.appOptions.createUrl = this.editorConfig.createUrl;
@@ -190,7 +198,6 @@
                     docInfo.put_UserId(this.editorConfig.user.id);
                     docInfo.put_UserName(this.editorConfig.user.name);
                     docInfo.put_CallbackUrl(this.editorConfig.callbackUrl);
-                    docInfo.put_OfflineApp(this.editorConfig.nativeApp === true);
                 }
                 this.api.asc_registerCallback("asc_onGetEditorPermissions", _.bind(this.onEditorPermissions, this));
                 this.api.asc_setDocInfo(docInfo);
@@ -211,7 +218,7 @@
             onProcessRightsChange: function (data) {
                 if (data && data.enabled === false) {
                     this.api.asc_coAuthoringDisconnect();
-                    this.getApplication().getController("LeftMenu").leftMenu.getMenu("file").panels["info"].onLostEditRights();
+                    this.getApplication().getController("LeftMenu").leftMenu.getMenu("file").panels["rights"].onLostEditRights();
                     Common.UI.warning({
                         title: this.notcriticalErrorTitle,
                         msg: _.isEmpty(data.message) ? this.warnProcessRightsChange : data.message
@@ -226,6 +233,144 @@
                         this.api.OnMouseUp(data.x - r.left, data.y - r.top);
                     }
                 }
+            },
+            onRefreshHistory: function (opts) {
+                this.loadMask && this.loadMask.hide();
+                if (opts.data.error) {
+                    var config = {
+                        closable: false,
+                        title: this.notcriticalErrorTitle,
+                        msg: opts.data.error,
+                        iconCls: "warn",
+                        buttons: ["ok"],
+                        callback: _.bind(function (btn) {
+                            this.onEditComplete();
+                        },
+                        this)
+                    };
+                    Common.UI.alert(config);
+                } else {
+                    this.api.asc_coAuthoringDisconnect();
+                    this.getApplication().getController("LeftMenu").getView("LeftMenu").showHistory();
+                    this.disableEditing(true);
+                    var versions = opts.data.history,
+                    historyStore = this.getApplication().getCollection("Common.Collections.HistoryVersions"),
+                    currentVersion = null;
+                    if (historyStore) {
+                        var arrVersions = [],
+                        ver,
+                        version,
+                        group = -1,
+                        prev_ver = -1,
+                        arrColors = [],
+                        docIdPrev = "",
+                        usersStore = this.getApplication().getCollection("Common.Collections.HistoryUsers"),
+                        user = null,
+                        usersCnt = 0;
+                        for (ver = versions.length - 1; ver >= 0; ver--) {
+                            version = versions[ver];
+                            if (version && version.user) {
+                                docIdPrev = (ver > 0 && versions[ver - 1]) ? versions[ver - 1].key : version.key + "0";
+                                user = usersStore.findUser(version.user.id);
+                                if (!user) {
+                                    user = new Common.Models.User({
+                                        id: version.user.id,
+                                        username: version.user.name,
+                                        colorval: c_oAscArrUserColors[usersCnt],
+                                        color: this.generateUserColor(c_oAscArrUserColors[usersCnt++])
+                                    });
+                                    usersStore.add(user);
+                                }
+                                arrVersions.push(new Common.Models.HistoryVersion({
+                                    version: version.version_group,
+                                    revision: version.version,
+                                    userid: version.user.id,
+                                    username: version.user.name,
+                                    usercolor: user.get("color"),
+                                    created: version.created,
+                                    docId: version.key,
+                                    markedAsVersion: (group !== version.version_group),
+                                    selected: (opts.data.currentVersion == version.version)
+                                }));
+                                if (opts.data.currentVersion == version.version) {
+                                    currentVersion = arrVersions[arrVersions.length - 1];
+                                }
+                                group = version.version_group;
+                                if (prev_ver !== version.version) {
+                                    prev_ver = version.version;
+                                    arrColors.reverse();
+                                    for (i = 0; i < arrColors.length; i++) {
+                                        arrVersions[arrVersions.length - i - 2].set("arrColors", arrColors);
+                                    }
+                                    arrColors = [];
+                                }
+                                arrColors.push(user.get("colorval"));
+                                var changes = version.changes,
+                                change, i;
+                                if (changes) {
+                                    if (changes.length > 0) {
+                                        arrVersions[arrVersions.length - 1].set("changeid", changes.length - 1);
+                                        arrVersions[arrVersions.length - 1].set("docIdPrev", docIdPrev);
+                                    }
+                                    for (i = changes.length - 2; i >= 0; i--) {
+                                        change = changes[i];
+                                        user = usersStore.findUser(change.user.id);
+                                        if (!user) {
+                                            user = new Common.Models.User({
+                                                id: change.user.id,
+                                                username: change.user.name,
+                                                colorval: c_oAscArrUserColors[usersCnt],
+                                                color: this.generateUserColor(c_oAscArrUserColors[usersCnt++])
+                                            });
+                                            usersStore.add(user);
+                                        }
+                                        arrVersions.push(new Common.Models.HistoryVersion({
+                                            version: version.version_group,
+                                            revision: version.version,
+                                            changeid: i,
+                                            userid: change.user.id,
+                                            username: change.user.name,
+                                            usercolor: user.get("color"),
+                                            created: change.created,
+                                            docId: version.key,
+                                            docIdPrev: docIdPrev,
+                                            selected: false
+                                        }));
+                                        arrColors.push(user.get("colorval"));
+                                    }
+                                }
+                            }
+                        }
+                        if (arrColors.length > 0) {
+                            arrColors.reverse();
+                            for (i = 0; i < arrColors.length; i++) {
+                                arrVersions[arrVersions.length - i - 1].set("arrColors", arrColors);
+                            }
+                            arrColors = [];
+                        }
+                        historyStore[historyStore.size() > 0 ? "add" : "reset"](arrVersions);
+                        if (currentVersion) {
+                            this.getApplication().getController("Common.Controllers.History").onSelectRevision(null, null, currentVersion);
+                        }
+                    }
+                }
+            },
+            generateUserColor: function (color) {
+                return "#" + ("000000" + color.toString(16)).substr(-6);
+            },
+            disableEditing: function (disable) {
+                var app = this.getApplication();
+                if (this.appOptions.isEdit) {
+                    app.getController("Toolbar").DisableToolbar(disable, disable);
+                    app.getController("RightMenu").SetDisabled(disable, false);
+                    app.getController("Statusbar").getView("Statusbar").btnLanguage.setDisabled(disable);
+                    app.getController("Statusbar").getView("Statusbar").btnDocLanguage.setDisabled(disable);
+                    var tooltip = app.getController("Toolbar").getView("Toolbar").synchTooltip;
+                    if (tooltip) {
+                        tooltip.hide();
+                    }
+                }
+                app.getController("LeftMenu").SetDisabled(disable);
             },
             goBack: function () {
                 Common.Gateway.goBack();
@@ -429,9 +574,11 @@
                 value = window.localStorage.getItem("de-settings-spellcheck");
                 me.api.asc_setSpellCheck(value === null || parseInt(value) == 1);
                 window.localStorage.setItem("de-settings-showsnaplines", me.api.get_ShowSnapLines() ? 1 : 0);
-                Common.Utils.isIE9m && tips.push(me.warnBrowserIE9); ! Common.Utils.isGecko && (Math.abs(me.getBrowseZoomLevel() - 1) > 0.1) && tips.push(Common.Utils.String.platformKey(me.warnBrowserZoom, "{0}"));
-                if (tips.length) {
-                    me.showTips(tips);
+                if ( !! window["AscDesktopEditor"]) {
+                    Common.Utils.isIE9m && tips.push(me.warnBrowserIE9); ! Common.Utils.isGecko && (Math.abs(me.getBrowseZoomLevel() - 1) > 0.1) && tips.push(Common.Utils.String.platformKey(me.warnBrowserZoom, "{0}"));
+                    if (tips.length) {
+                        me.showTips(tips);
+                    }
                 }
                 me.api.asc_registerCallback("asc_onStartAction", _.bind(me.onLongActionBegin, me));
                 me.api.asc_registerCallback("asc_onEndAction", _.bind(me.onLongActionEnd, me));
@@ -463,7 +610,7 @@
                 statusbarController.createDelayedElements();
                 leftmenuController.getView("LeftMenu").disableMenu("all", false);
                 if (me.appOptions.canBranding) {
-                    me.getApplication().getController("LeftMenu").leftMenu.getMenu("about").setLicInfo(me.editorConfig.branding);
+                    me.getApplication().getController("LeftMenu").leftMenu.getMenu("about").setLicInfo(me.editorConfig.customization);
                 }
                 documentHolderController.getView("DocumentHolder").setApi(me.api).on("editcomplete", _.bind(me.onEditComplete, me));
                 if (me.appOptions.isEdit) {
@@ -500,26 +647,33 @@
                 }
                 me.api.asc_setAutoSaveGap(value);
                 if (this.appOptions.canAnalytics) {
-                    Common.Gateway.on("applyeditrights", _.bind(me.onApplyEditRights, me));
+                    Common.component.Analytics.initialize("UA-12442749-13", "Document Editor");
                 }
+                Common.Gateway.on("applyeditrights", _.bind(me.onApplyEditRights, me));
                 Common.Gateway.on("processsaveresult", _.bind(me.onProcessSaveResult, me));
                 Common.Gateway.on("processrightschange", _.bind(me.onProcessRightsChange, me));
                 Common.Gateway.on("processmouse", _.bind(me.onProcessMouse, me));
+                Common.Gateway.on("refreshhistory", _.bind(me.onRefreshHistory, me));
                 $(document).on("contextmenu", _.bind(me.onContextMenu, me));
             },
             onOpenDocument: function () {},
             onEditorPermissions: function (params) {
                 this.permissions.edit !== false && (this.permissions.edit = params.asc_getCanEdit());
                 this.permissions.download !== false && (this.permissions.download = params.asc_getCanDownload());
-                this.appOptions.canCoAuthoring = params.asc_getCanCoAuthoring();
+                this.appOptions.canCoAuthoring = true;
                 this.appOptions.canEdit = this.permissions.edit === true;
                 this.appOptions.isEdit = this.appOptions.canEdit && this.editorConfig.mode !== "view";
                 this.appOptions.canDownload = !this.appOptions.nativeApp && this.permissions.download;
                 this.appOptions.canAutosave = this.editorConfig.canAutosave !== false && params.asc_getIsAutosaveEnable();
                 this.appOptions.canAnalytics = params.asc_getIsAnalyticsEnable();
-                this.appOptions.canBranding = params.asc_getCanBranding() && (typeof(this.editorConfig.branding) == "object");
+                this.appOptions.canLicense = params.asc_getCanLicense ? params.asc_getCanLicense() : false;
+                this.appOptions.canComments = this.appOptions.canLicense && !((typeof(this.editorConfig.customization) == "object") && this.editorConfig.customization.comments === false);
+                this.appOptions.canChat = this.appOptions.canLicense && !((typeof(this.editorConfig.customization) == "object") && this.editorConfig.customization.chat === false);
+                this.appOptions.customization = this.editorConfig.customization;
+                this.appOptions.canUseHistory = this.appOptions.canLicense && this.editorConfig.canUseHistory && this.appOptions.canEdit && this.appOptions.canCoAuthoring;
+                this.appOptions.canBranding = params.asc_getCanBranding() && (typeof(this.editorConfig.customization) == "object");
                 if (this.appOptions.canBranding) {
-                    this.getApplication().getController("Viewport").getView("Common.Views.Header").setBranding(this.editorConfig.branding);
+                    this.getApplication().getController("Viewport").getView("Common.Views.Header").setBranding(this.editorConfig.customization);
                 }
                 this.applyModeCommonElements();
                 this.applyModeEditorElements();
@@ -541,7 +695,7 @@
                 documentHolder = app.getController("DocumentHolder").getView("DocumentHolder");
                 if (headerView) {
                     headerView.setHeaderCaption(this.appOptions.isEdit ? "Document Editor" : "Document Viewer");
-                    headerView.setVisible(!this.appOptions.nativeApp && !value);
+                    headerView.setVisible(!this.appOptions.nativeApp && !value && !this.appOptions.isDesktopApp);
                 }
                 if (this.appOptions.nativeApp) {
                     $("body").removeClass("safari");
@@ -817,6 +971,10 @@
                 }
             },
             hidePreloader: function () {
+                if ( !! this.appOptions.customization && !this.appOptions.customization.done) {
+                    this.appOptions.customization.done = true;
+                    Common.Utils.applyCustomization(this.appOptions.customization, mapCustomizationElements);
+                }
                 Common.NotificationCenter.trigger("layout:changed", "main");
                 $("#loading-mask").hide().remove();
             },

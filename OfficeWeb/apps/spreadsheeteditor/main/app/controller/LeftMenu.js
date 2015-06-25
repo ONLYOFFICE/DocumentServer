@@ -103,7 +103,7 @@
             this.api.asc_registerCallback("asc_onRenameCellTextEnd", _.bind(this.onRenameText, this));
             this.api.asc_registerCallback("asc_onСoAuthoringDisconnect", _.bind(this.onApiServerDisconnect, this));
             Common.NotificationCenter.on("api:disconnect", _.bind(this.onApiServerDisconnect, this));
-            if (this.mode.canCoAuthoring) {
+            if (this.mode.canCoAuthoring && this.mode.canChat) {
                 this.api.asc_registerCallback("asc_onCoAuthoringChatReceiveMessage", _.bind(this.onApiChatMessage, this));
             }
             if (!this.mode.isEditDiagram) {
@@ -120,10 +120,14 @@
         },
         createDelayedElements: function () {
             if (this.mode.canCoAuthoring) {
-                this.leftMenu.btnComments[this.mode.isEdit ? "show" : "hide"]();
-                this.leftMenu.btnChat.show();
-                this.leftMenu.setOptionsPanel("chat", this.getApplication().getController("Common.Controllers.Chat").getView("Common.Views.Chat"));
-                this.leftMenu.setOptionsPanel("comment", this.getApplication().getController("Common.Controllers.Comments").getView("Common.Views.Comments"));
+                this.leftMenu.btnComments[this.mode.isEdit && this.mode.canComments ? "show" : "hide"]();
+                if (this.mode.canComments) {
+                    this.leftMenu.setOptionsPanel("comment", this.getApplication().getController("Common.Controllers.Comments").getView("Common.Views.Comments"));
+                }
+                this.leftMenu.btnChat[this.mode.canChat ? "show" : "hide"]();
+                if (this.mode.canChat) {
+                    this.leftMenu.setOptionsPanel("chat", this.getApplication().getController("Common.Controllers.Chat").getView("Common.Views.Chat"));
+                }
             } else {
                 this.leftMenu.btnChat.hide();
                 this.leftMenu.btnComments.hide();
@@ -236,7 +240,7 @@
             }
         },
         clickStatusbarUsers: function () {
-            if (this.mode.canCoAuthoring) {
+            if (this.mode.canCoAuthoring && this.mode.canChat) {
                 if (this.leftMenu.btnChat.pressed) {
                     this.leftMenu.close();
                 } else {
@@ -523,13 +527,13 @@
                 }
                 break;
             case "chat":
-                if (this.mode.canCoAuthoring) {
+                if (this.mode.canCoAuthoring && this.mode.canChat) {
                     Common.UI.Menu.Manager.hideAll();
                     this.leftMenu.showMenu("chat");
                 }
                 return false;
             case "comments":
-                if (this.mode.canCoAuthoring && this.mode.isEdit) {
+                if (this.mode.canCoAuthoring && this.mode.isEdit && this.mode.canComments) {
                     Common.UI.Menu.Manager.hideAll();
                     this.leftMenu.showMenu("comments");
                     this.getApplication().getController("Common.Controllers.Comments").focusOnInput();

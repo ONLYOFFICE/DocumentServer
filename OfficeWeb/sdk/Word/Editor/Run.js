@@ -215,6 +215,41 @@ ParaRun.prototype.Is_StartFromNewLine = function () {
     return true;
 };
 ParaRun.prototype.Add = function (Item, bMath) {
+    if (this.Paragraph && this.Paragraph.LogicDocument && true === this.Paragraph.LogicDocument.CheckLanguageOnTextAdd && editor && editor.asc_getKeyboardLanguage) {
+        var nRequiredLanguage = editor.asc_getKeyboardLanguage();
+        var nCurrentLanguage = this.Get_CompiledPr(false).Lang.Val;
+        if (-1 !== nRequiredLanguage && nRequiredLanguage !== nCurrentLanguage) {
+            var NewLang = new CLang();
+            NewLang.Val = nRequiredLanguage;
+            if (this.Is_Empty()) {
+                this.Set_Lang(NewLang);
+            } else {
+                var Parent = this.Get_Parent();
+                var RunPos = this.private_GetPosInParent();
+                if (null !== Parent && -1 !== RunPos) {
+                    var NewRun = new ParaRun(this.Paragraph, bMath);
+                    NewRun.Set_Pr(this.Pr.Copy());
+                    NewRun.Set_Lang(NewLang);
+                    NewRun.Cursor_MoveToStartPos();
+                    NewRun.Add(Item, bMath);
+                    var CurPos = this.State.ContentPos;
+                    if (0 === CurPos) {
+                        Parent.Add_ToContent(RunPos, NewRun);
+                    } else {
+                        if (this.Content.length === CurPos) {
+                            Parent.Add_ToContent(RunPos + 1, NewRun);
+                        } else {
+                            var RightRun = this.Split2(CurPos);
+                            Parent.Add_ToContent(RunPos + 1, NewRun);
+                            Parent.Add_ToContent(RunPos + 2, RightRun);
+                        }
+                    }
+                    NewRun.Make_ThisElementCurrent();
+                    return;
+                }
+            }
+        }
+    }
     this.Add_ToContent(this.State.ContentPos, Item, true, bMath);
 };
 ParaRun.prototype.Remove = function (Direction, bOnAddText) {
@@ -5633,6 +5668,39 @@ ParaRun.prototype.Get_RangesByPos = function (Pos) {
         }
     }
     return Ranges;
+};
+ParaRun.prototype.Get_Parent = function () {
+    if (!this.Paragraph) {
+        return null;
+    }
+    var ContentPos = this.Paragraph.Get_PosByElement(this);
+    if (null == ContentPos || undefined == ContentPos || ContentPos.Get_Depth() < 0) {
+        return null;
+    }
+    ContentPos.Decrease_Depth(1);
+    return this.Paragraph.Get_ElementByPos(ContentPos);
+};
+ParaRun.prototype.private_GetPosInParent = function (_Parent) {
+    var Parent = (_Parent ? _Parent : this.Get_Parent());
+    if (!Parent) {
+        return -1;
+    }
+    var RunPos = -1;
+    for (var Pos = 0, Count = Parent.Content.length; Pos < Count; Pos++) {
+        if (this === Parent.Content[Pos]) {
+            RunPos = Pos;
+            break;
+        }
+    }
+    return RunPos;
+};
+ParaRun.prototype.Make_ThisElementCurrent = function () {
+    if (this.Paragraph) {
+        var ContentPos = this.Paragraph.Get_PosByElement(this);
+        ContentPos.Add(this.State.ContentPos);
+        this.Paragraph.Set_ParaContentPos(ContentPos, true, -1, -1);
+        this.Paragraph.Document_SetThisElementCurrent(false);
+    }
 };
 function CParaRunStartState(Run) {
     this.Paragraph = Run.Paragraph;

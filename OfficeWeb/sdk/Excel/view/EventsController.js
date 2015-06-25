@@ -1303,6 +1303,11 @@
         if (this.isFillHandleMode || this.isMoveRangeMode || this.isMoveResizeRange) {
             return true;
         }
+        if (undefined !== window["AscDesktopEditor"]) {
+            if (false === window["AscDesktopEditor"]["CheckNeedWheel"]()) {
+                return true;
+            }
+        }
         var delta = 0;
         if (undefined !== event.wheelDelta && 0 !== event.wheelDelta) {
             delta = -1 * event.wheelDelta / 40;

@@ -11,6 +11,8 @@
     <li id="fm-btn-create" class="fm-btn" />
     <li class="devider" />
     <li id="fm-btn-info" class="fm-btn" />
+    <li id="fm-btn-rights" class="fm-btn" />
+    <li id="fm-btn-history" class="fm-btn" />
     <li class="devider" class="fm-btn" />
     <li id="fm-btn-settings" class="fm-btn" />
     <li class="devider" />
@@ -23,6 +25,7 @@
     <div id="panel-recentfiles" class="content-box" />
     <div id="panel-createnew" class="content-box" />
     <div id="panel-info" class="content-box" />
+    <div id="panel-rights" class="content-box" />
     <div id="panel-settings" class="content-box" />
     <div id="panel-help" class="content-box" />
 </div>

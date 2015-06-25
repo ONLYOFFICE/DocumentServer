@@ -7,6 +7,10 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
+    <!-- debug begin -->
+    <link rel="stylesheet/less" type="text/css" href="resources/less/application.less" />
+    <!-- debug end -->
+
     <!-- splash -->
 
     <style type="text/css">
@@ -22,22 +26,130 @@
             z-index: 20002;
         }
 
-        .loadmask-body {
-            position:relative;
-            top:44%;
+        .loader-page {
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 180px;
+            position: absolute;
+            margin-top: -100px;
         }
 
-        .loadmask-logo {
-            display:inline-block;
-            min-width:220px;
-            min-height:62px;
-            vertical-align:top;
-            background-image:url('./resources/img/loading-logo.gif');
-            background-repeat:no-repeat;
+        .romb {
+            width: 40px;
+            height: 40px;
+            -webkit-transform: rotate(135deg) skew(20deg, 20deg);
+            -moz-transform: rotate(135deg) skew(20deg, 20deg);
+            -ms-transform: rotate(135deg) skew(20deg, 20deg);
+            -o-transform: rotate(135deg) skew(20deg, 20deg);
+            position: absolute;
+            background: red;
+            border-radius: 6px;
+            -webkit-animation: movedown 3s infinite ease;
+            -moz-animation: movedown 3s infinite ease;
+            -ms-animation: movedown 3s infinite ease;
+            -o-animation: movedown 3s infinite ease;
+            animation: movedown 3s infinite ease;
+        }
+
+        #blue {
+            z-index: 3;
+            background: #55bce6;
+            -webkit-animation-name: blue;
+            -moz-animation-name: blue;
+            -ms-animation-name: blue;
+            -o-animation-name: blue;
+            animation-name: blue;
+        }
+
+        #red {
+            z-index:1;
+            background: #de7a59;
+            -webkit-animation-name: red;
+            -moz-animation-name: red;
+            -ms-animation-name: red;
+            -o-animation-name: red;
+            animation-name: red;
+        }
+
+        #green {
+            z-index: 2;
+            background: #a1cb5c;
+            -webkit-animation-name: green;
+            -moz-animation-name: green;
+            -ms-animation-name: green;
+            -o-animation-name: green;
+            animation-name: green;
+        }
+
+        @-webkit-keyframes red {
+              0%    { top:120px; background: #de7a59; }
+             10%    { top:120px; background: #F2CBBF; }
+             14%    { background: #f4f4f4; top:120px; }
+             15%    { background: #f4f4f4; top:0;}
+             20%    { background: #E6E4E4; }
+             30%    { background: #D2D2D2; }
+             40%    { top:120px; }
+            100%    { top:120px; background: #de7a59; }
+        }
+
+        @keyframes red {
+              0%    { top:120px; background: #de7a59; }
+             10%    { top:120px; background: #F2CBBF; }
+             14%    { background: #f4f4f4; top:120px; }
+             15%    { background: #f4f4f4; top:0; }
+             20%    { background: #E6E4E4; }
+             30%    { background: #D2D2D2; }
+             40%    { top:120px; }
+            100%    { top:120px; background: #de7a59; }
+        }
+
+        @-webkit-keyframes green {
+              0%    { top:110px; background: #a1cb5c; opacity:1; }
+             10%    { top:110px; background: #CBE0AC; opacity:1; }
+             14%    { background: #f4f4f4; top:110px; opacity:1; }
+             15%    { background: #f4f4f4; top:0; opacity:1; }
+             20%    { background: #f4f4f4; top:0; opacity:0; }
+             25%    { background: #EFEFEF; top:0; opacity:1; }
+             30%    { background:#E6E4E4; }
+             70%    { top:110px; }
+            100%    { top:110px; background: #a1cb5c; }
+        }
+
+        @keyframes green {
+              0%    { top:110px; background: #a1cb5c; opacity:1; }
+             10%    { top:110px; background: #CBE0AC; opacity:1; }
+             14%    { background: #f4f4f4; top:110px; opacity:1; }
+             15%    { background: #f4f4f4; top:0; opacity:1; }
+             20%    { background: #f4f4f4; top:0; opacity:0; }
+             25%    { background: #EFEFEF; top:0; opacity:1; }
+             30%    { background:#E6E4E4; }
+             70%    { top:110px; }
+            100%    { top:110px; background: #a1cb5c; }
+        }
+
+        @-webkit-keyframes blue {
+              0%    { top:100px; background: #55bce6; opacity:1; }
+             10%    { top:100px; background: #BFE8F8; opacity:1; }
+             14%    { background: #f4f4f4; top:100px; opacity:1; }
+             15%    { background: #f4f4f4; top:0; opacity:1; }
+             20%    { background: #f4f4f4; top:0; opacity:0; }
+             25%    { background: #f4f4f4; top:0; opacity:0; }
+             45%    { background: #EFEFEF; top:0; opacity:0,2; }
+            100%    { top:100px; background: #55bce6; }
+        }
+
+        @keyframes blue {
+              0%    { top:100px; background: #55bce6; opacity:1; }
+             10%    { top:100px; background: #BFE8F8; opacity:1; }
+             14%    { background: #f4f4f4; top:100px; opacity:1; }
+             15%    { background: #f4f4f4; top:0; opacity:1; }
+             20%    { background: #f4f4f4; top:0; opacity:0; }
+             25%    { background: #fff; top:0; opacity:0; }
+             45%    { background: #EFEFEF; top:0; opacity:0,2; }
+            100%    { top:100px; background: #55bce6; }
         }
     </style>
-
-    <link href="../../../3rdparty/bootstrap/css/bootstrap.css" rel="stylesheet">
 
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -45,6 +157,11 @@
   </head>
 
   <body class="embed-body">
+
+      <!-- debug begin -->
+      <script type="text/javascript">var less=less||{};less.env='development';</script>
+      <script src="../../../vendor/less/dist/less-1.5.1.js" type="text/javascript"></script>
+      <!-- debug end -->
 
       <!--facebook button-->
       <div id="fb-root"></div>
@@ -60,11 +177,12 @@
       <!--twitter button-->
       <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 
-
       <div id="loading-mask" class="loadmask">
-          <div class="loadmask-body" align="center">
-              <div class="loadmask-logo"></div>
-          </div>
+        <div class="loader-page">
+            <div class="romb" id="blue"></div>
+            <div class="romb" id="green"></div>
+            <div class="romb" id="red"></div>
+        </div>
       </div>
 
       <div id="editor_sdk" class="viewer" style="overflow: hidden;"></div>
@@ -79,14 +197,14 @@
 
       <div class="toolbar" id="toolbar">
           <ul class="left">
-              <li><a class="brand-logo" href="http://www.onlyoffice.com/" target="_blank"></a></li>
+              <li><a id="header-logo" class="brand-logo" href="http://www.onlyoffice.com/" target="_blank"></a></li>
               <li class="separator"></li>
               <li id="id-btn-copy"><button class="control-btn"><i class="control-icon-save"></i><span>Save Copy</span></button></li>
               <li id="id-btn-share"><button class="control-btn"><i class="control-icon-share"></i><span>Share</span></button></li>
               <li id="id-btn-embed"><button class="control-btn"><i class="control-icon-embed"></i><span>Embed</span></button></li>
           </ul>
           <ul class="right">
-              <li><input id="page-number" style="width: 25px" type="text" value="0"><span class="text" id="pages">of 0</span></li>
+              <li><input id="page-number" class="form-control input-sm" style="width: 25px;" type="text" value="0"><span class="text" id="pages">of 0</span></li>
               <li class="separator"></li>
               <li><button id="id-btn-fullscreen" class="control-btn no-caption"><i class="control-icon-fullscreen"></i></button></li>
               <li><button id="id-btn-close" class="control-btn no-caption"><i class="control-icon-close"></i></button></li>
@@ -110,112 +228,20 @@
           <div class="cmd-loader-title">Please wait...</div>
       </div>
 
-      <!--3td party-->
-      <script type="text/javascript" src="../../../3rdparty/jquery/jquery-1.8.1.min.js"></script>
-      <script type="text/javascript" src="../../../3rdparty/bootstrap/js/bootstrap.js"></script>
-      <script type="text/javascript" src="../../../3rdparty/ZeroClipboard/ZeroClipboard.min.js"></script>
-      <script type="text/javascript" src="../../../3rdparty/sockjs/sockjs-0.3.min.js"></script>
-      <script type="text/javascript" src="../../../3rdparty/xregexp/xregexp-all-min.js"></script> 
+      <!--vendor-->
+      <script type="text/javascript" src="../../../vendor/jquery/jquery.min.js"></script>
+      <script type="text/javascript" src="../../../vendor/jquery.browser/dist/jquery.browser.min.js"></script>
+      <script type="text/javascript" src="../../../vendor/bootstrap/dist/js/bootstrap.js"></script>
+      <script type="text/javascript" src="../../../vendor/ZeroClipboard/ZeroClipboard.min.js"></script>
+      <script type="text/javascript" src="../../../vendor/sockjs/sockjs.min.js"></script>
+      <script type="text/javascript" src="../../../vendor/xregexp/xregexp-all-min.js"></script>
 
       <!--sdk-->
       <script type="text/javascript" src="../../../sdk/Common/AllFonts.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/browser.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/docscoapisettings.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/docscoapicommon.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/docscoapi.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/wordcopypaste.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/downloaderfiles.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/editorscommon.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/apiCommon.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/Shapes/Serialize.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/Shapes/SerializeWriter.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/FontsFreeType/font_engine.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/FontsFreeType/FontFile.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/FontsFreeType/FontManager.js"></script>
-      <script type="text/javascript" src="../../../sdk/Word/Drawing/Externals.js"></script>
-      <script type="text/javascript" src="../../../sdk/Word/Drawing/GlobalLoaders.js"></script>
-      <script type="text/javascript" src="../../../sdk/Word/Drawing/Metafile.js"></script>	
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Drawing/ThemeLoader.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/Table.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/CollaborativeEditing.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Styles.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/Table.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/Paragraph.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/FontClassification.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/ParagraphContent.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/Spelling.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/Comments.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/GraphicObjects.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/States.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/Charts/DrawingObjects.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/commonDefines.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/SerializeCommonWordExcel.js"></script>
-      <script type="text/javascript" src="../../../sdk/Word/Editor/Serialize2.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/Charts/charts.js"></script>
-      <script type="text/javascript" src="../../../sdk/Excel/graphics/DrawingContextWord.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/trackFile.js"></script>
-      <script type="text/javascript" src="../../../sdk/Word/Editor/SerializeCommon.js"></script>
-      <script type="text/javascript" src="../../../sdk/Word/Drawing/GraphicsEvents.js"></script>
-      <script type="text/javascript" src="../../../sdk/Word/Drawing/WorkEvents.js"></script>
-      <script type="text/javascript" src="../../../sdk/Word/Drawing/Controls.js"></script>
-      <script type="text/javascript" src="../../../sdk/Word/Drawing/Rulers.js"></script>
-      <script type="text/javascript" src="../../../sdk/Word/Editor/Common.js"></script>
-      <script type="text/javascript" src="../../../sdk/Word/Editor/Sections.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/scroll.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/History.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/FlowObjects.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/DocumentContent.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/Presentation.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/SlideShowInfo.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/PresentationProperties.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/Shape.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/GraphicFrame.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Numbering.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/TrackObjects/AdjustmentTracks.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/TrackObjects/MoveTracks.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/TrackObjects/NewShapeTracks.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/TrackObjects/PolyLine.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/TrackObjects/ResizeTracks.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/TrackObjects/RotateTracks.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/TrackObjects/Spline.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/TextBody.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/Image.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/GroupShape.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/ChartTitle.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/Chart.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/ChartLayout.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/Slide.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/SlideMaster.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format/Layout.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Drawing/Geometry.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Drawing/CreateGoemetry.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Drawing/ColorArray.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Drawing/Math.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Drawing/Path.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Drawing/ArcTo.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Drawing/GraphicFigure.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Drawing/Clone.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Drawing/CImage.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Drawing/Spline.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Drawing/PolyLine.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Drawing/Hit.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Drawing/Joined.js"></script>
-      <script type="text/javascript" src="../../../sdk/Word/Drawing/Graphics.js"></script>
-      <script type="text/javascript" src="../../../sdk/Word/Drawing/Overlay.js"></script>
-      <script type="text/javascript" src="../../../sdk/Word/Drawing/HatchPattern.js"></script>
-      <script type="text/javascript" src="../../../sdk/Word/Drawing/ShapeDrawer.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Drawing/Transitions.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Drawing/DrawingDocument.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Drawing/HtmlPage.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/Editor/Format.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/apiDefines.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/api.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/apiCommon.js"></script>
-      <script type="text/javascript" src="../../../sdk/Common/Shapes/EditorSettings.js"></script>
-      <script type="text/javascript" src="../../../sdk/PowerPoint/themes/Themes.js"></script>
+      <script type="text/javascript" src="../../../sdk/PowerPoint/sdk-all.js"></script>
 
       <!--application-->
-      <link href="resources/css/application.css" rel="stylesheet">
+      <!--<link href="resources/css/application.css" rel="stylesheet">-->
       <script type="text/javascript" src="../../common/Gateway.js"></script>
       <script type="text/javascript" src="../../common/Analytics.js"></script>
       <script type="text/javascript" src="js/ApplicationView.js"></script>

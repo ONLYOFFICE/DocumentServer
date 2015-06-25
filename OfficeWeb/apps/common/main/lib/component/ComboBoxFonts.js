@@ -41,16 +41,22 @@ define(["common/main/lib/component/ComboBox"], function () {
         thumbCanvas = document.createElement("canvas"),
         thumbContext = thumbCanvas.getContext("2d"),
         thumbPath = "../../../sdk/Common/Images/fonts_thumbnail.png",
-        thumbPath2x = "../../../sdk/Common/Images/fonts_thumbnail@2x.png";
+        thumbPath2x = "../../../sdk/Common/Images/fonts_thumbnail@2x.png",
+        listItemHeight = 36;
+        if (typeof window["AscDesktopEditor"] === "object") {
+            thumbPath = window["AscDesktopEditor"].getFontsSprite();
+            thumbPath2x = window["AscDesktopEditor"].getFontsSprite(true);
+        }
         thumbCanvas.height = isRetina ? iconHeight * 2 : iconHeight;
         thumbCanvas.width = isRetina ? iconWidth * 2 : iconWidth;
         return {
-            template: _.template(['<div class="input-group combobox fonts <%= cls %>" id="<%= id %>" style="<%= style %>">', '<input type="text" class="form-control">', '<div style="display: table-cell;"></div>', '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>', '<ul class="dropdown-menu <%= menuCls %>" style="<%= menuStyle %>" role="menu">', '<li class="divider">', "<% _.each(items, function(item) { %>", '<li id="<%= item.id %>">', '<a class="font-item" tabindex="-1" type="menuitem" style="display: block;">', '<img src="<%= scope.getImageUri(item) %>" width="<%= scope.getImageWidth() %>" height="<%= scope.getImageHeight() %>" style="vertical-align: middle;margin: 0 0 0 -10px;">', "</a>", "</li>", "<% }); %>", "</ul>", "</div>"].join("")),
+            template: _.template(['<div class="input-group combobox fonts <%= cls %>" id="<%= id %>" style="<%= style %>">', '<input type="text" class="form-control">', '<div style="display: table-cell;"></div>', '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>', '<ul class="dropdown-menu <%= menuCls %>" style="<%= menuStyle %>" role="menu">', '<li class="divider">', "<% _.each(items, function(item) { %>", '<li id="<%= item.id %>">', '<a class="font-item" tabindex="-1" type="menuitem" style="vertical-align:middle; margin: 0 0 0 -10px; height:<%=scope.getListItemHeight()%>px;"/>', "</li>", "<% }); %>", "</ul>", "</div>"].join("")),
             initialize: function (options) {
                 Common.UI.ComboBox.prototype.initialize.call(this, _.extend(options, {
                     displayField: "name"
                 }));
                 this.recent = _.isNumber(options.recent) ? options.recent : 3;
+                this.bindUpdateVisibleFontsTiles = _.bind(this.updateVisibleFontsTiles, this);
                 Common.NotificationCenter.on("fonts:change", _.bind(this.onApiChangeFont, this));
                 Common.NotificationCenter.on("fonts:load", _.bind(this.fillFonts, this));
             },
@@ -64,20 +70,86 @@ define(["common/main/lib/component/ComboBox"], function () {
                 this._input.on("keyup", _.bind(this.onInputKeyUp, this));
                 this._input.on("keydown", _.bind(this.onInputKeyDown, this));
                 this.scroller.update({
-                    alwaysVisibleY: true
+                    alwaysVisibleY: true,
+                    onChange: this.bindUpdateVisibleFontsTiles
                 });
                 return this;
             },
+            onAfterKeydownMenu: function (e) {
+                var me = this;
+                if (e.keyCode == Common.UI.Keys.RETURN) {
+                    if ($(e.target).closest("input").length) {
+                        if (this.lastValue !== this._input.val()) {
+                            this._input.trigger("change");
+                        }
+                    } else {
+                        $(e.target).click();
+                        if (this.rendered) {
+                            if (Common.Utils.isIE) {
+                                this._input.trigger("change", {
+                                    onkeydown: true
+                                });
+                            } else {
+                                this._input.blur();
+                            }
+                        }
+                    }
+                    return false;
+                } else {
+                    if (e.keyCode == Common.UI.Keys.ESC && this.isMenuOpen()) {
+                        this._input.val(this.lastValue);
+                        setTimeout(function () {
+                            me.closeMenu();
+                            me.onAfterHideMenu(e);
+                        },
+                        10);
+                        return false;
+                    } else {
+                        if ((e.keyCode == Common.UI.Keys.HOME || e.keyCode == Common.UI.Keys.END || e.keyCode == Common.UI.Keys.BACKSPACE) && this.isMenuOpen()) {
+                            setTimeout(function () {
+                                me._input.focus();
+                            },
+                            10);
+                        }
+                    }
+                }
+                this.updateVisibleFontsTiles();
+            },
             onInputKeyUp: function (e) {
-                if (e.keyCode != Common.UI.Keys.RETURN) {
-                    this.selectCandidate();
+                if (e.keyCode != Common.UI.Keys.RETURN && e.keyCode !== Common.UI.Keys.SHIFT && e.keyCode !== Common.UI.Keys.CTRL && e.keyCode !== Common.UI.Keys.ALT && e.keyCode !== Common.UI.Keys.LEFT && e.keyCode !== Common.UI.Keys.RIGHT && e.keyCode !== Common.UI.Keys.HOME && e.keyCode !== Common.UI.Keys.END && e.keyCode !== Common.UI.Keys.ESC && e.keyCode !== Common.UI.Keys.INSERT && e.keyCode !== Common.UI.Keys.TAB) {
+                    e.stopPropagation();
+                    this.selectCandidate(e.keyCode == Common.UI.Keys.DELETE || e.keyCode == Common.UI.Keys.BACKSPACE);
+                    if (this._selectedItem) {
+                        var me = this;
+                        setTimeout(function () {
+                            var input = me._input[0],
+                            text = me._selectedItem.get(me.displayField),
+                            inputVal = input.value;
+                            if (me.rendered) {
+                                if (document.selection) {
+                                    document.selection.createRange().text = text;
+                                } else {
+                                    if (input.selectionStart || input.selectionStart == "0") {
+                                        input.value = text;
+                                        input.selectionStart = inputVal.length;
+                                        input.selectionEnd = text.length;
+                                    }
+                                }
+                            }
+                        },
+                        10);
+                    }
                 }
             },
             onInputKeyDown: function (e) {
                 var me = this;
                 if (e.keyCode == Common.UI.Keys.ESC) {
-                    this.closeMenu();
-                    this.onAfterHideMenu(e);
+                    this._input.val(this.lastValue);
+                    setTimeout(function () {
+                        me.closeMenu();
+                        me.onAfterHideMenu(e);
+                    },
+                    10);
                 } else {
                     if (e.keyCode != Common.UI.Keys.RETURN && e.keyCode != Common.UI.Keys.CTRL && e.keyCode != Common.UI.Keys.SHIFT && e.keyCode != Common.UI.Keys.ALT) {
                         if (!this.isMenuOpen()) {
@@ -87,10 +159,11 @@ define(["common/main/lib/component/ComboBox"], function () {
                             _.delay(function () {
                                 var selected = me.cmpEl.find("ul li.selected a");
                                 if (selected.length <= 0) {
-                                    selected = me.cmpEl.find("ul li:first a");
+                                    selected = me.cmpEl.find("ul li:not(.divider):first a");
                                 }
                                 me._skipInputChange = true;
                                 selected.focus();
+                                me.updateVisibleFontsTiles();
                             },
                             10);
                         } else {
@@ -120,6 +193,7 @@ define(["common/main/lib/component/ComboBox"], function () {
                     return;
                 }
                 record[this.valueField] = val;
+                record[this.displayField] = val;
                 this.trigger("changed:before", this, record, e);
                 if (e.isDefaultPrevented()) {
                     return;
@@ -129,6 +203,12 @@ define(["common/main/lib/component/ComboBox"], function () {
                     this.setRawValue(record[this.valueField]);
                     this.trigger("selected", this, _.extend({},
                     this._selectedItem.toJSON()), e);
+                    this.addItemToRecent(this._selectedItem);
+                    this.closeMenu();
+                } else {
+                    this.setRawValue(record[this.valueField]);
+                    record["isNewFont"] = true;
+                    this.trigger("selected", this, record, e);
                     this.closeMenu();
                 }
                 this.trigger("changed:after", this, record, e);
@@ -152,6 +232,9 @@ define(["common/main/lib/component/ComboBox"], function () {
             },
             getImageHeight: function () {
                 return iconHeight;
+            },
+            getListItemHeight: function () {
+                return listItemHeight;
             },
             loadSprite: function (callback) {
                 if (callback) {
@@ -200,34 +283,28 @@ define(["common/main/lib/component/ComboBox"], function () {
                 var record = this.store.findWhere({
                     id: el.attr("id")
                 });
-                if (record.get("type") != FONT_TYPE_RECENT && !this.store.findWhere({
-                    name: record.get("name"),
-                    type: FONT_TYPE_RECENT
-                })) {
-                    var fonts = this.store.where({
-                        type: FONT_TYPE_RECENT
-                    });
-                    if (! (fonts.length < this.recent)) {
-                        this.store.remove(fonts[0]);
-                    }
-                    var new_record = record.clone();
-                    new_record.set({
-                        "type": FONT_TYPE_RECENT,
-                        "id": Common.UI.getId(),
-                        cloneid: record.id
-                    });
-                    this.store.add(new_record);
-                }
+                this.addItemToRecent(record);
                 Common.UI.ComboBox.prototype.itemClicked.apply(this, arguments);
             },
             onInsertItem: function (item) {
-                $(this.el).find("ul").prepend(_.template(['<li id="<%= item.id %>">', '<a class="font-item" tabindex="-1" type="menuitem" style="display: block;">', '<img src="<%= scope.getImageUri(item) %>" width="<%= scope.getImageWidth() %>" height="<%= scope.getImageHeight() %>" style="vertical-align: middle;margin: 0 0 0 -10px;">', "</a>", "</li>"].join(""), {
+                $(this.el).find("ul").prepend(_.template(['<li id="<%= item.id %>">', '<a class="font-item" tabindex="-1" type="menuitem" style="vertical-align:middle; margin: 0 0 0 -10px; height:<%=scope.getListItemHeight()%>px;"/>', "</li>"].join(""), {
                     item: item.attributes,
                     scope: this
                 }));
             },
             onRemoveItem: function (item, store, opts) {
                 $(this.el).find("ul > li#" + item.id).remove();
+            },
+            onBeforeShowMenu: function (e) {
+                Common.UI.ComboBox.prototype.onBeforeShowMenu.apply(this, arguments);
+                if (!this.getSelectedRecord() && !!this.getRawValue()) {
+                    var record = this.store.where({
+                        name: this.getRawValue()
+                    });
+                    if (record && record.length) {
+                        this.selectRecord(record[record.length - 1]);
+                    }
+                }
             },
             onAfterShowMenu: function (e) {
                 if (this.recent > 0) {
@@ -240,20 +317,52 @@ define(["common/main/lib/component/ComboBox"], function () {
                 } else {
                     Common.UI.ComboBox.prototype.onAfterShowMenu.apply(this, arguments);
                 }
+                this.updateVisibleFontsTiles(null, 0);
             },
-            selectCandidate: function () {
+            onAfterHideMenu: function (e) {
+                if (this.lastValue !== this._input.val()) {
+                    this._input.val(this.lastValue);
+                }
+                this.flushVisibleFontsTiles();
+                Common.UI.ComboBox.prototype.onAfterHideMenu.apply(this, arguments);
+            },
+            addItemToRecent: function (record) {
+                if (record.get("type") != FONT_TYPE_RECENT && !this.store.findWhere({
+                    name: record.get("name"),
+                    type: FONT_TYPE_RECENT
+                })) {
+                    var fonts = this.store.where({
+                        type: FONT_TYPE_RECENT
+                    });
+                    if (! (fonts.length < this.recent)) {
+                        this.store.remove(fonts[this.recent - 1]);
+                    }
+                    var new_record = record.clone();
+                    new_record.set({
+                        "type": FONT_TYPE_RECENT,
+                        "id": Common.UI.getId(),
+                        cloneid: record.id
+                    });
+                    this.store.add(new_record, {
+                        at: 0
+                    });
+                }
+            },
+            selectCandidate: function (full) {
                 var me = this,
                 inputVal = this._input.val().toLowerCase();
                 if (!this._fontsArray) {
                     this._fontsArray = this.store.toJSON();
                 }
                 var font = _.find(this._fontsArray, function (font) {
-                    return (font[me.displayField].toLowerCase().indexOf(inputVal) == 0);
+                    return (full) ? (font[me.displayField].toLowerCase() == inputVal) : (font[me.displayField].toLowerCase().indexOf(inputVal) == 0);
                 });
                 if (font) {
                     this._selectedItem = this.store.findWhere({
                         id: font.id
                     });
+                } else {
+                    this._selectedItem = null;
                 }
                 $(".selected", $(this.el)).removeClass("selected");
                 if (this._selectedItem) {
@@ -266,6 +375,63 @@ define(["common/main/lib/component/ComboBox"], function () {
                         if (itemTop != 0) {
                             menuEl.scrollTop(menuTop + itemTop);
                         }
+                    }
+                }
+            },
+            updateVisibleFontsTiles: function (e, scrollY) {
+                var me = this,
+                j = 0,
+                storeCount = me.store.length,
+                index = 0;
+                if (!me.tiles) {
+                    me.tiles = [];
+                }
+                if (storeCount !== me.tiles.length) {
+                    for (j = me.tiles.length; j < storeCount; ++j) {
+                        me.tiles.push(null);
+                    }
+                }
+                if (_.isUndefined(scrollY)) {
+                    scrollY = parseInt($(me.el).find(".ps-scrollbar-x-rail").css("bottom"));
+                }
+                var scrollH = $(me.el).find(".dropdown-menu").height(),
+                count = Math.max(Math.floor(scrollH / listItemHeight) + 3, 0),
+                from = Math.max(Math.floor(-(scrollY / listItemHeight)) - 1, 0),
+                to = from + count;
+                var listItems = $(me.el).find("a");
+                for (j = 0; j < storeCount; ++j) {
+                    if (from <= j && j < to) {
+                        if (null === me.tiles[j]) {
+                            var fontImage = document.createElement("canvas");
+                            var context = fontImage.getContext("2d");
+                            fontImage.height = isRetina ? iconHeight * 2 : iconHeight;
+                            fontImage.width = isRetina ? iconWidth * 2 : iconWidth;
+                            fontImage.style.width = iconWidth + "px";
+                            fontImage.style.height = iconHeight + "px";
+                            index = me.store.at(j).get("imgidx");
+                            if (isRetina) {
+                                context.clearRect(0, 0, iconWidth * 2, iconHeight * 2);
+                                context.drawImage(me.spriteThumbs, 0, -FONT_THUMBNAIL_HEIGHT * 2 * index);
+                            } else {
+                                context.clearRect(0, 0, iconWidth, iconHeight);
+                                context.drawImage(me.spriteThumbs, 0, -FONT_THUMBNAIL_HEIGHT * index);
+                            }
+                            me.tiles[j] = fontImage;
+                            $(listItems[j]).get(0).appendChild(fontImage);
+                        }
+                    } else {
+                        if (me.tiles[j]) {
+                            me.tiles[j].parentNode.removeChild(me.tiles[j]);
+                            me.tiles[j] = null;
+                        }
+                    }
+                }
+            },
+            flushVisibleFontsTiles: function () {
+                for (var j = this.tiles.length - 1; j >= 0; --j) {
+                    if (this.tiles[j]) {
+                        this.tiles[j].parentNode.removeChild(this.tiles[j]);
+                        this.tiles[j] = null;
                     }
                 }
             }

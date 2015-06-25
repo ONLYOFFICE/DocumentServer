@@ -43,6 +43,8 @@ require.config({
         jmousewheel: "../vendor/perfect-scrollbar/src/jquery.mousewheel",
         xregexp: "../vendor/xregexp/xregexp-all-min",
         sockjs: "../vendor/sockjs/sockjs.min",
+        jszip: "../vendor/jszip/jszip.min",
+        jsziputils: "../vendor/jszip-utils/jszip-utils.min",
         allfonts: "../sdk/Common/AllFonts",
         sdk: "../sdk/Word/sdk-all",
         api: "api/documents/api",
@@ -76,7 +78,7 @@ require.config({
             deps: ["backbone", "notification", "irregularstack"]
         },
         sdk: {
-            deps: ["jquery", "underscore", "allfonts", "xregexp", "sockjs"]
+            deps: ["jquery", "underscore", "allfonts", "xregexp", "sockjs", "jszip", "jsziputils"]
         },
         gateway: {
             deps: ["jquery"]
@@ -91,10 +93,10 @@ require(["backbone", "bootstrap", "core", "sdk", "api", "analytics", "gateway", 
     var app = new Backbone.Application({
         nameSpace: "DE",
         autoCreate: false,
-        controllers: ["Viewport", "DocumentHolder", "Toolbar", "Statusbar", "RightMenu", "LeftMenu", "Main", "Common.Controllers.Fonts", "Common.Controllers.Chat", "Common.Controllers.Comments", "Common.Controllers.ExternalDiagramEditor"]
+        controllers: ["Viewport", "DocumentHolder", "Toolbar", "Statusbar", "RightMenu", "LeftMenu", "Main", "Common.Controllers.Fonts", "Common.Controllers.History", "Common.Controllers.Chat", "Common.Controllers.Comments", "Common.Controllers.ExternalDiagramEditor"]
     });
     Common.Locale.apply();
-    require(["documenteditor/main/app/controller/Viewport", "documenteditor/main/app/controller/DocumentHolder", "documenteditor/main/app/controller/Toolbar", "documenteditor/main/app/controller/Statusbar", "documenteditor/main/app/controller/RightMenu", "documenteditor/main/app/controller/LeftMenu", "documenteditor/main/app/controller/Main", "documenteditor/main/app/view/ParagraphSettings", "documenteditor/main/app/view/HeaderFooterSettings", "documenteditor/main/app/view/ImageSettings", "documenteditor/main/app/view/TableSettings", "documenteditor/main/app/view/ShapeSettings", "common/main/lib/util/utils", "common/main/lib/controller/Fonts", "common/main/lib/controller/Comments", "common/main/lib/controller/Chat", "documenteditor/main/app/view/ChartSettings", "common/main/lib/controller/ExternalDiagramEditor"], function () {
+    require(["documenteditor/main/app/controller/Viewport", "documenteditor/main/app/controller/DocumentHolder", "documenteditor/main/app/controller/Toolbar", "documenteditor/main/app/controller/Statusbar", "documenteditor/main/app/controller/RightMenu", "documenteditor/main/app/controller/LeftMenu", "documenteditor/main/app/controller/Main", "documenteditor/main/app/view/ParagraphSettings", "documenteditor/main/app/view/HeaderFooterSettings", "documenteditor/main/app/view/ImageSettings", "documenteditor/main/app/view/TableSettings", "documenteditor/main/app/view/ShapeSettings", "common/main/lib/util/utils", "common/main/lib/controller/Fonts", "common/main/lib/controller/History", "common/main/lib/controller/Comments", "common/main/lib/controller/Chat", "documenteditor/main/app/view/ChartSettings", "common/main/lib/controller/ExternalDiagramEditor"], function () {
         app.start();
     });
 });

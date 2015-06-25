@@ -909,7 +909,7 @@
                         iconCls: "mnu-icon-item mnu-border-width",
                         template: _.template('<a id="<%= id %>" tabindex="-1" type="menuitem"><span class="menu-item-icon" style="background-image: none; width: 11px; height: 11px; margin: 2px 7px 0 -9px; border-style: solid; border-width: 1px; border-color: #000;"></span><%= caption %></a>'),
                         menu: (function () {
-                            var itemTemplate = _.template('<a id="<%= id %>" tabindex="-1" type="menuitem"><div style="width: 80px; height: 20px; margin-top: -3px; margin-bottom: -2px; background:url(\'resources/img/toolbar/BorderSize.png\') repeat-x scroll 0 -<%= options.offsety %>px;"></div></a>');
+                            var itemTemplate = _.template('<a id="<%= id %>" tabindex="-1" type="menuitem"><div class="border-size-item" style="background-position: 0 -<%= options.offsety %>px;"></div></a>');
                             me.mnuBorderWidth = new Common.UI.Menu({
                                 style: "min-width: 100px;",
                                 menuAlign: "tl-tr",
@@ -1884,13 +1884,12 @@
                         checkable: true,
                         checked: me.isCompactView,
                         value: "compact"
-                    }), {
+                    }), me.mnuitemHideTitleBar = new Common.UI.MenuItem({
                         caption: me.textHideTBar,
                         checkable: true,
                         checked: !!options.title,
                         value: "title"
-                    },
-                    {
+                    }), {
                         caption: me.textHideFBar,
                         checkable: true,
                         checked: !!options.formula,
@@ -2205,6 +2204,10 @@
                     if (nativeBtnGroup) {
                         nativeBtnGroup.hide();
                     }
+                }
+                if (mode.isDesktopApp) {
+                    $(".toolbar-group-native").hide();
+                    this.mnuitemHideTitleBar.hide();
                 }
             }
         },

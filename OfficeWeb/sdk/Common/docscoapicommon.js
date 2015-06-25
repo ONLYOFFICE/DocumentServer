@@ -48,7 +48,7 @@
             this.id = val["id"];
             this.userName = val["username"];
             this.indexUser = val["indexUser"];
-            this.color = g_oArrUserColors[this.indexUser % g_oArrUserColors.length];
+            this.color = c_oAscArrUserColors[this.indexUser % c_oAscArrUserColors.length];
             this.state = val["state"];
             this.view = val["view"];
         }

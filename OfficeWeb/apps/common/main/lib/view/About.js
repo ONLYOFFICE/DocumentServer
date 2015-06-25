@@ -68,20 +68,21 @@
             return this;
         },
         setLicInfo: function (data) {
-            if (data && typeof(data) == "object") {
+            if (data && typeof(data) == "object" && typeof(data.customer) == "object") {
+                var customer = data.customer;
                 $("#id-about-licensor-logo").addClass("hidden");
                 $("#id-about-licensor-short").removeClass("hidden");
                 this.cntLicensorInfo.addClass("hidden");
                 this.cntLicenseeInfo.removeClass("hidden");
                 this.cntLicensorInfo.removeClass("margin-bottom");
-                var value = data.customer;
+                var value = customer.name;
                 value && value.length ? this.lblCompanyName.text(value) : this.lblCompanyName.parents("tr").addClass("hidden");
-                value = data.customerAddr;
+                value = customer.address;
                 value && value.length ? this.lblCompanyAddress.text(value) : this.lblCompanyAddress.parents("tr").addClass("hidden");
-                (value = data.customerMail) && value.length ? this.lblCompanyMail.attr("href", "mailto:" + value).text(value) : this.lblCompanyMail.parents("tr").addClass("hidden");
-                (value = data.customerWww) && value.length ? this.lblCompanyUrl.attr("href", "http://" + value).text(value) : this.lblCompanyUrl.parents("tr").addClass("hidden");
-                (value = data.customerInfo) && value.length ? this.lblCompanyLic.text(value) : this.lblCompanyLic.parents("tr").addClass("hidden");
-                (value = data.customerLogo) && value.length ? this.divCompanyLogo.html('<img src="' + value + '" />') : this.divCompanyLogo.parents("tr").addClass("hidden");
+                (value = customer.mail) && value.length ? this.lblCompanyMail.attr("href", "mailto:" + value).text(value) : this.lblCompanyMail.parents("tr").addClass("hidden");
+                (value = customer.www) && value.length ? this.lblCompanyUrl.attr("href", "http://" + value).text(value) : this.lblCompanyUrl.parents("tr").addClass("hidden");
+                (value = customer.info) && value.length ? this.lblCompanyLic.text(value) : this.lblCompanyLic.parents("tr").addClass("hidden");
+                (value = customer.logo) && value.length ? this.divCompanyLogo.html('<img src="' + value + '" />') : this.divCompanyLogo.parents("tr").addClass("hidden");
             } else {
                 this.cntLicenseeInfo.addClass("hidden");
                 this.cntLicensorInfo.addClass("margin-bottom");

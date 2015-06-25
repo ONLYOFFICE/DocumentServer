@@ -2026,6 +2026,9 @@ function CDemonstrationManager(htmlpage) {
         if (this.DemonstrationDiv == null || start_slide_num < 0 || start_slide_num >= this.SlidesCount) {
             return;
         }
+        if (undefined !== window["AscDesktopEditor"]) {
+            window["AscDesktopEditor"]["SetFullscreen"](true);
+        }
         this.MainDivId = main_div_id;
         var _width = this.DemonstrationDiv.clientWidth;
         var _height = this.DemonstrationDiv.clientHeight;
@@ -2179,6 +2182,9 @@ function CDemonstrationManager(htmlpage) {
         }
     };
     this.End = function () {
+        if (undefined !== window["AscDesktopEditor"]) {
+            window["AscDesktopEditor"]["SetFullscreen"](false);
+        }
         if (!this.Mode) {
             return;
         }
@@ -2298,6 +2304,11 @@ function CDemonstrationManager(htmlpage) {
         return false;
     };
     this.onMouseWhell = function (e) {
+        if (undefined !== window["AscDesktopEditor"]) {
+            if (false === window["AscDesktopEditor"]["CheckNeedWheel"]()) {
+                return;
+            }
+        }
         var delta = 0;
         if (undefined != e.wheelDelta) {
             delta = (e.wheelDelta > 0) ? -1 : 1;

@@ -491,6 +491,7 @@ function CDocument(DrawingDocument) {
     }
     this.Spelling = new CDocumentSpelling();
     this.UseTextShd = true;
+    this.CheckLanguageOnTextAdd = false;
     g_oTableId.Add(this, this.Id);
 }
 var selected_None = -1;
@@ -6578,7 +6579,9 @@ CDocument.prototype = {
                                         } else {
                                             this.DrawingDocument.TargetStart();
                                             this.DrawingDocument.TargetShow();
+                                            this.CheckLanguageOnTextAdd = true;
                                             this.Paragraph_Add(new ParaSpace());
+                                            this.CheckLanguageOnTextAdd = false;
                                         }
                                     }
                                 }
@@ -7236,7 +7239,9 @@ CDocument.prototype = {
                 this.Create_NewHistoryPoint(historydescription_Document_AddLetter);
                 this.DrawingDocument.TargetStart();
                 this.DrawingDocument.TargetShow();
+                this.CheckLanguageOnTextAdd = true;
                 this.Paragraph_Add(new ParaText(String.fromCharCode(Code)));
+                this.CheckLanguageOnTextAdd = false;
             }
             bRetValue = true;
         }
@@ -8722,13 +8727,13 @@ CDocument.prototype = {
     Create_NewHistoryPoint: function (Description) {
         this.History.Create_NewPoint(Description);
     },
-    Document_Undo: function () {
+    Document_Undo: function (Options) {
         if (true === CollaborativeEditing.Get_GlobalLock()) {
             return;
         }
         this.DrawingDocument.EndTrackTable(null, true);
         this.DrawingObjects.TurnOffCheckChartSelection();
-        this.History.Undo();
+        this.History.Undo(Options);
         this.DrawingObjects.TurnOnCheckChartSelection();
         this.Recalculate(false, false, this.History.RecalculateData);
         this.Document_UpdateSelectionState();

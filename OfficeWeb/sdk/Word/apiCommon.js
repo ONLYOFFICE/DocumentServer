@@ -463,7 +463,7 @@ function CorrectUniFill(asc_fill, unifill) {
                 _url = g_oUserTexturePresets[_tx_id];
             }
             if (_url != null && _url !== undefined && _url != "") {
-                ret.fill.RasterImageId = _url;
+                ret.fill.setRasterImageId(_url);
             }
             if (ret.fill.RasterImageId == null) {
                 ret.fill.RasterImageId = "";

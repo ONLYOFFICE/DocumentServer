@@ -51,13 +51,13 @@
         setMode: function (mode) {
             this.mode = mode;
             if (this.api) {
-                if (this.mode.canCoAuthoring) {
+                if (this.mode.canCoAuthoring && this.mode.canChat) {
                     this.api.asc_registerCallback("asc_onCoAuthoringChatReceiveMessage", _.bind(this.onReceiveMessage, this));
                 }
                 this.api.asc_registerCallback("asc_onAuthParticipantsChanged", _.bind(this.onUsersChanged, this));
                 this.api.asc_registerCallback("asc_onConnectionStateChanged", _.bind(this.onUserConnection, this));
                 this.api.asc_coAuthoringGetUsers();
-                if (this.mode.canCoAuthoring) {
+                if (this.mode.canCoAuthoring && this.mode.canChat) {
                     this.api.asc_coAuthoringChatGetMessages();
                 }
             }

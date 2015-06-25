@@ -37,6 +37,68 @@ var g_sSpellCheckServiceLocalUrl = "/SpellChecker.ashx";
 var g_sTrackingServiceLocalUrl = "/TrackingService.ashx";
 var g_nMaxJsonLength = 2097152;
 var g_nMaxJsonLengthChecked = g_nMaxJsonLength / 1000;
+function OpenFileResult() {
+    this.bSerFormat = false;
+    this.data = null;
+    this.url = null;
+    this.changes = null;
+}
+function g_fOpenFileCommand(binUrl, changesUrl, Signature, callback) {
+    var bError = false,
+    oResult = new OpenFileResult(),
+    bEndLoadFile = false,
+    bEndLoadChanges = false;
+    var onEndOpen = function () {
+        if (bEndLoadFile && bEndLoadChanges) {
+            if (callback) {
+                callback(bError, oResult);
+            }
+        }
+    };
+    var sFileUrl = g_sResourceServiceLocalUrl + binUrl;
+    sFileUrl = sFileUrl.replace(/\\/g, "/");
+    asc_ajax({
+        url: sFileUrl,
+        dataType: "text",
+        success: function (result) {
+            var url;
+            var nIndex = sFileUrl.lastIndexOf("/");
+            url = (-1 !== nIndex) ? sFileUrl.substring(0, nIndex + 1) : sFileUrl;
+            if (0 < result.length) {
+                oResult.bSerFormat = Signature === result.substring(0, Signature.length);
+                oResult.data = result;
+                oResult.url = url;
+            } else {
+                bError = true;
+            }
+            bEndLoadFile = true;
+            onEndOpen();
+        },
+        error: function () {
+            bEndLoadFile = true;
+            bError = true;
+            onEndOpen();
+        }
+    });
+    if (null != changesUrl) {
+        require("jsziputils").getBinaryContent(changesUrl, function (err, data) {
+            bEndLoadChanges = true;
+            if (err) {
+                bError = true;
+                onEndOpen();
+                return;
+            }
+            var oZipFile = new(require("jszip"))(data);
+            oResult.changes = [];
+            for (var i in oZipFile.files) {
+                oResult.changes.push(JSON.parse(oZipFile.file(i).asText()));
+            }
+            onEndOpen();
+        });
+    } else {
+        bEndLoadChanges = true;
+    }
+}
 function fSortAscending(a, b) {
     return a - b;
 }
@@ -709,3 +771,91 @@ if (AscBrowser.isIE) {
     }
     asc.extendClass = extendClass;
 })(window);
+function asc_ajax(obj) {
+    var url = "",
+    type = "GET",
+    async = true,
+    data = null,
+    dataType = "text/xml",
+    error = null,
+    success = null,
+    httpRequest = null,
+    contentType = "application/x-www-form-urlencoded",
+    init = function (obj) {
+        if (typeof obj.url !== "undefined") {
+            url = obj.url;
+        }
+        if (typeof obj.type !== "undefined") {
+            type = obj.type;
+        }
+        if (typeof obj.async !== "undefined") {
+            async = obj.async;
+        }
+        if (typeof obj.data !== "undefined") {
+            data = obj.data;
+        }
+        if (typeof obj.dataType !== "undefined") {
+            dataType = obj.dataType;
+        }
+        if (typeof obj.error !== "undefined") {
+            error = obj.error;
+        }
+        if (typeof obj.success !== "undefined") {
+            success = obj.success;
+        }
+        if (typeof(obj.contentType) !== "undefined") {
+            contentType = obj.contentType;
+        }
+        if (window.XMLHttpRequest) {
+            httpRequest = new XMLHttpRequest();
+            if (httpRequest.overrideMimeType) {
+                httpRequest.overrideMimeType(dataType);
+            }
+        } else {
+            if (window.ActiveXObject) {
+                try {
+                    httpRequest = new ActiveXObject("Msxml2.XMLHTTP");
+                } catch(e) {
+                    try {
+                        httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
+                    } catch(e) {}
+                }
+            }
+        }
+        httpRequest.onreadystatechange = function () {
+            respons(this);
+        };
+        send();
+    },
+    send = function () {
+        httpRequest.open(type, url, async);
+        if (type === "POST") {
+            httpRequest.setRequestHeader("Content-Type", contentType);
+        }
+        httpRequest.send(data);
+    },
+    respons = function (httpRequest) {
+        switch (httpRequest.readyState) {
+        case 0:
+            break;
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            if (httpRequest.status === 200 || httpRequest.status === 1223) {
+                if (typeof success === "function") {
+                    success(httpRequest.responseText);
+                }
+            } else {
+                if (typeof error === "function") {
+                    error(httpRequest, httpRequest.statusText, httpRequest.status);
+                }
+            }
+            break;
+        }
+    };
+    init(obj);
+}

@@ -49,15 +49,32 @@ public static class UrlBuilder
         try
         {
             string sHostHeader = oHttpRequest.Headers["Host"];
+            string sForwardedHostHeader = oHttpRequest.Headers["X-Forwarded-Host"];
+            string sForwardedProtoHeader = oHttpRequest.Headers["X-Forwarded-Proto"];
 
             Uri oSiteUri = oHttpRequest.Url;
 
-            sSiteUrl = oSiteUri.Scheme + "://";
+            if (!String.IsNullOrEmpty(sForwardedProtoHeader))
+            {
+                sSiteUrl += sForwardedProtoHeader;
+            }
+            else 
+            {
+                sSiteUrl += oSiteUri.Scheme;
+            }
 
-            if (!String.IsNullOrEmpty(sHostHeader))
+            sSiteUrl += "://";
+
+            if (!String.IsNullOrEmpty(sForwardedHostHeader))
+			{
+                sSiteUrl += sForwardedHostHeader;
+			}
+
+            else if (!String.IsNullOrEmpty(sHostHeader))
             {
                 sSiteUrl += sHostHeader;
             }
+			
             else
             {
                 sSiteUrl += oSiteUri.Host;

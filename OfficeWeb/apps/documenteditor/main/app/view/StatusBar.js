@@ -123,19 +123,24 @@ define([
                     hint: this.tipSetLang,
                     hintAnchor: 'top-left'
                 });
-                this.btnLanguage.cmpEl.on('show.bs.dropdown', function () {
+                this.btnLanguage.cmpEl.on({
+                    'show.bs.dropdown': function () {
                         _.defer(function(){
                             me.api.asc_enableKeyEvents(false);
                             me.btnLanguage.cmpEl.find('ul').focus();
                         }, 100);
-                    }
-                );
-                this.btnLanguage.cmpEl.on('hide.bs.dropdown', function () {
+                    },
+                    'hide.bs.dropdown': function () {
                         _.defer(function(){
                             me.api.asc_enableKeyEvents(true);
                         }, 100);
+                    },
+                    'click': function (e) {
+                        if (me.btnLanguage.isDisabled()) {
+                            return false;
+                        }
                     }
-                );
+                });
 
                 this.langMenu.render(panelLang);
                 this.langMenu.cmpEl.attr({tabindex: -1});

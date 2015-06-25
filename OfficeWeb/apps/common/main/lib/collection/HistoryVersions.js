@@ -29,34 +29,22 @@
  * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
  *
  */
- "use strict";
-CCellCommentator.prototype.isLockedComment = function (oComment, callbackFunc) {
-    if (false === this.worksheet.collaborativeEditing.isCoAuthoringExcellEnable()) {
-        Asc.applyFunction(callbackFunc, true);
-        return;
-    }
-    var objectGuid = oComment.asc_getId();
-    if (objectGuid) {
-        var sheetId = CCellCommentator.sStartCommentId;
-        if (!oComment.bDocument) {
-            sheetId += this.worksheet.model.getId();
+ if (Common === undefined) {
+    var Common = {};
+}
+Common.Collections = Common.Collections || {};
+define(["underscore", "backbone", "common/main/lib/model/HistoryVersion"], function (_, Backbone) {
+    Common.Collections.HistoryVersions = Backbone.Collection.extend({
+        model: Common.Models.HistoryVersion,
+        findRevision: function (revision) {
+            return this.findWhere({
+                revision: revision
+            });
+        },
+        findRevisions: function (revision) {
+            return this.where({
+                revision: revision
+            });
         }
-        var lockInfo = this.worksheet.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Object, null, sheetId, objectGuid);
-        if (false === this.worksheet.collaborativeEditing.getCollaborativeEditing()) {
-            Asc.applyFunction(callbackFunc, true);
-            callbackFunc = undefined;
-        }
-        if (false !== this.worksheet.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeMine, false)) {
-            Asc.applyFunction(callbackFunc, true);
-            return;
-        } else {
-            if (false !== this.worksheet.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeOther, false)) {
-                Asc.applyFunction(callbackFunc, false);
-                return;
-            }
-        }
-        this.worksheet.collaborativeEditing.onStartCheckLock();
-        this.worksheet.collaborativeEditing.addCheckLock(lockInfo);
-        this.worksheet.collaborativeEditing.onEndCheckLock(callbackFunc);
-    }
-};
+    });
+});

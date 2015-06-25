@@ -2040,6 +2040,10 @@
                     nativeBtnGroup.hide();
                 }
             }
+            if (mode.isDesktopApp) {
+                $(".toolbar-group-native").hide();
+                this.mnuitemHideTitleBar.hide();
+            }
         },
         changeViewMode: function (item, compact) {
             var me = this,

@@ -977,14 +977,7 @@ CShapeDrawer.prototype = {
                     if (null == this.UniFill.fill.tile) {
                         if (null == this.UniFill.fill.srcRect) {
                             if (this.UniFill.fill.RasterImageId && this.UniFill.fill.RasterImageId.indexOf(".svg") != 0) {
-                                this.Graphics.SaveGrState();
-                                this.Graphics.StartClipPath();
-                                this.Graphics.EndClipPath();
-                                this.Graphics.drawImage(getFullImageSrc(this.UniFill.fill.RasterImageId), this.min_x, this.min_y, (this.max_x - this.min_x), (this.max_y - this.min_y), undefined, undefined);
-                                bIsFill = false;
-                                var _histClip = new CHist_Clip();
-                                this.Graphics.GrState.Clips.push(_histClip);
-                                this.Graphics.RestoreGrState();
+                                this.Graphics.put_brushTexture(getFullImageSrc(this.UniFill.fill.RasterImageId), 0);
                             } else {
                                 if (this.UniFill.fill.canvas) {
                                     this.Graphics.put_brushTexture(this.UniFill.fill.canvas.toDataURL("image/png"), 0);
@@ -993,14 +986,8 @@ CShapeDrawer.prototype = {
                                 }
                             }
                         } else {
-                            this.Graphics.SaveGrState();
-                            this.Graphics.StartClipPath();
-                            this.Graphics.EndClipPath();
                             this.Graphics.drawImage(getFullImageSrc(this.UniFill.fill.RasterImageId), this.min_x, this.min_y, (this.max_x - this.min_x), (this.max_y - this.min_y), undefined, this.UniFill.fill.srcRect);
                             bIsFill = false;
-                            var _histClip = new CHist_Clip();
-                            this.Graphics.GrState.Clips.push(_histClip);
-                            this.Graphics.RestoreGrState();
                         }
                     } else {
                         if (this.UniFill.fill.canvas) {

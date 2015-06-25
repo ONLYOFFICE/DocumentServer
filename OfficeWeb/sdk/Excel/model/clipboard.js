@@ -224,6 +224,66 @@
                 this.element = undefined;
             }
         },
+        copyDesktopEditorButton: function (ElemToSelect, isCut) {
+            if (isCut) {
+                var __oncut = ElemToSelect.oncut;
+                ElemToSelect.oncut = function (e) {
+                    ElemToSelect.oncut = __oncut;
+                    __oncut = null;
+                    var api = window["Asc"]["editor"];
+                    if (api.controller.isCellEditMode) {
+                        return;
+                    }
+                    Editor_Copy_Event_Excel(e, ElemToSelect, true, true);
+                    var selection = window.getSelection();
+                    var rangeToSelect = window.document.createRange();
+                    rangeToSelect.selectNodeContents(ElemToSelect);
+                    selection.removeAllRanges();
+                    selection.addRange(rangeToSelect);
+                };
+                ElemToSelect.focus();
+                window["AscDesktopEditor"]["Cut"]();
+            } else {
+                var __oncopy = ElemToSelect.oncopy;
+                ElemToSelect.oncopy = function (e) {
+                    ElemToSelect.oncopy = __oncopy;
+                    __oncopy = null;
+                    var api = window["Asc"]["editor"];
+                    if (api.controller.isCellEditMode) {
+                        return;
+                    }
+                    Editor_Copy_Event_Excel(e, ElemToSelect, null, true);
+                    var selection = window.getSelection();
+                    var rangeToSelect = window.document.createRange();
+                    rangeToSelect.selectNodeContents(ElemToSelect);
+                    selection.removeAllRanges();
+                    selection.addRange(rangeToSelect);
+                };
+                ElemToSelect.focus();
+                window["AscDesktopEditor"]["Copy"]();
+            }
+        },
+        pasteDesktopEditorButton: function (ElemToSelect) {
+            var __onpaste = ElemToSelect.onpaste;
+            var selection = window.getSelection();
+            var rangeToSelect = window.document.createRange();
+            rangeToSelect.selectNodeContents(ElemToSelect);
+            selection.removeAllRanges();
+            selection.addRange(rangeToSelect);
+            ElemToSelect.onpaste = function (e) {
+                if (!window.GlobalPasteFlag) {
+                    return;
+                }
+                ElemToSelect.oncopy = __onpaste;
+                __onpaste = null;
+                var api = window["Asc"]["editor"];
+                var wb = api.wb;
+                var ws = wb.getWorksheet();
+                wb.clipboard._bodyPaste(ws, e);
+            };
+            ElemToSelect.focus();
+            window["AscDesktopEditor"]["Paste"]();
+        },
         copyRange: function (range, worksheet, isCut) {
             var t = this;
             t._cleanElement();
@@ -292,6 +352,10 @@
                     }
                 }
                 History.TurnOn();
+                if (window["AscDesktopEditorButtonMode"] === true && window["AscDesktopEditor"]) {
+                    this.copyDesktopEditorButton(this.element, isCut);
+                    return;
+                }
                 if (AscBrowser.isMozilla) {
                     t._selectElement(t._getStylesSelect);
                 } else {
@@ -299,6 +363,37 @@
                 }
                 this._endCopyOrPaste();
             }
+        },
+        _getHtmlBase64: function (range, worksheet, isCut) {
+            var t = this;
+            t._cleanElement();
+            var objectRender = worksheet.objectRender;
+            var isIntoShape = objectRender.controller.getTargetDocContent();
+            var text = t._makeTableNode(range, worksheet, isCut, isIntoShape);
+            if (text == false) {
+                return;
+            }
+            this._startCopyOrPaste();
+            t.element.appendChild(text);
+            History.TurnOff();
+            if (copyPasteUseBinary) {
+                if (isIntoShape) {
+                    this.lStorage = {};
+                    this.lStorage.htmlInShape = text;
+                } else {
+                    var sBase64 = this._getBinaryForCopy(worksheet);
+                    if (this.element.children && this.element.children.length == 1 && (window.USER_AGENT_WEBKIT || window.USER_AGENT_SAFARI_MACOS)) {
+                        $(this.element.children[0]).css("font-weight", "normal");
+                        $(this.element.children[0]).wrap(document.createElement("b"));
+                    }
+                    if (this.element.children[0]) {
+                        $(this.element.children[0]).addClass("xslData;" + sBase64);
+                    }
+                    this.lStorage = sBase64;
+                }
+            }
+            History.TurnOn();
+            this._endCopyOrPaste();
         },
         _getBinaryForCopy: function (worksheet) {
             var fullUrl = this._getUseFullUrl();
@@ -429,10 +524,14 @@
         },
         pasteRange: function (worksheet) {
             var t = this;
-            if (AscBrowser.isMozilla) {
-                t._editorPaste(worksheet, t._getStylesSelect);
+            if (window["AscDesktopEditorButtonMode"] === true && window["AscDesktopEditor"]) {
+                t.pasteDesktopEditorButton(t._editorPasteGetElem(worksheet, true));
             } else {
-                t._editorPaste(worksheet);
+                if (AscBrowser.isMozilla) {
+                    t._editorPaste(worksheet, t._getStylesSelect);
+                } else {
+                    t._editorPaste(worksheet);
+                }
             }
         },
         pasteRangeButton: function (worksheet) {
@@ -1029,6 +1128,9 @@
             }
             if (isNaN(oNewItem.format.fs)) {
                 oNewItem.format.fs = 11;
+            }
+            if (oNewItem.format.fs === 0) {
+                oNewItem.format.fs = 1;
             }
             oNewItem.format.b = (jqSpanObject.css("font-weight") == "bold");
             oNewItem.format.i = (jqSpanObject.css("font-style") == "italic");
@@ -1800,7 +1902,7 @@
                 countChild = pasteFragment.children.length;
                 mainChildrens = pasteFragment.children;
             }
-            if (mainChildrens && mainChildrens.length == 1 && mainChildrens[0].nodeName.toLowerCase() == "b") {
+            if (mainChildrens && mainChildrens.length == 1 && mainChildrens[0] != undefined && mainChildrens[0].nodeName.toLowerCase() == "b" && mainChildrens[0].children[0] != undefined) {
                 mainChildrens = mainChildrens[0].children;
             }
             var onlyImages = null;
@@ -4568,11 +4670,18 @@ function SafariIntervalFocus2() {
         }
     }
 }
-function Editor_Copy_Event_Excel(e, ElemToSelect, isCut) {
+function Editor_Copy_Event_Excel(e, ElemToSelect, isCut, isAlreadyReadyHtml) {
     var api = window["Asc"]["editor"];
     var wb = api.wb;
     var ws = wb.getWorksheet();
-    var sBase64 = wb.clipboard.copyRange(ws.getSelectedRange(), ws, isCut, true);
+    var sBase64;
+    if (!isAlreadyReadyHtml) {
+        if (window["AscDesktopEditorButtonMode"] === true && window["AscDesktopEditor"]) {
+            sBase64 = wb.clipboard._getHtmlBase64(ws.getSelectedRange(), ws, isCut, true);
+        } else {
+            sBase64 = wb.clipboard.copyRange(ws.getSelectedRange(), ws, isCut, true);
+        }
+    }
     if (isCut) {
         ws.emptySelection(c_oAscCleanOptions.All);
     }

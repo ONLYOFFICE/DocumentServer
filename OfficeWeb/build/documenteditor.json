@@ -1,16 +1,9 @@
 {
     "name": "documenteditor",
     "version": "3.0.0",
-    "build": 960,
+    "build": 959,
     "homepage": "http://www.onlyoffice.com",
     "private": true,
-    "dependencies": {
-        "grunt": "~0.4.2",
-        "grunt-contrib": "~0.9.0",
-        "grunt-exec": "~0.4.5",
-        "grunt-replace": "~0.7.3",
-        "grunt-html-minify": "~0.3.1"
-    },
     "sdk": {
         "clean": [
             "../deploy/sdk/Common",
@@ -29,12 +22,7 @@
                         ],
                         "dest": "../deploy/sdk/Common/"
                     },
-                    {
-                        "expand": true,
-                        "cwd": "../sdk/Fonts/",
-                        "src": "**/**",
-                        "dest": "../deploy/sdk/Fonts/"
-                    },
+                    
                     {
                         "src": "../sdk/Word/sdk-all.js",
                         "dest": "../deploy/sdk/Word/sdk-all.js"
@@ -80,6 +68,8 @@
                         "jmousewheel": "../vendor/perfect-scrollbar/src/jquery.mousewheel",
                         "xregexp": "empty:",
                         "sockjs": "empty:",
+                        "jszip": "empty:",
+                        "jszip-utils": "empty:",
                         "coapisettings": "empty:",
                         "allfonts": "empty:",
                         "sdk": "empty:",
@@ -132,7 +122,9 @@
                                 "coapisettings",
                                 "allfonts",
                                 "xregexp",
-                                "sockjs"
+                                "sockjs",
+                                "jszip",
+                                "jszip-utils"
                             ]
                         },
                         "gateway": {
@@ -448,6 +440,28 @@
             }
         }
     },
+    "jszip": {
+        "clean": [
+            "../deploy/vendor/jszip"
+        ],
+        "copy": {
+            "script": {
+                "src": "../vendor/jszip/jszip.min.js",
+                "dest": "../deploy/vendor/jszip/jszip.min.js"
+            }
+        }
+    },
+    "jsziputils": {
+        "clean": [
+            "../deploy/vendor/jszip-utils"
+        ],
+        "copy": {
+            "script": {
+                "src": "../vendor/jszip-utils/jszip-utils.min.js",
+                "dest": "../deploy/vendor/jszip-utils/jszip-utils.min.js"
+            }
+        }
+    },
     "underscore": {
         "clean": [
             "../deploy/vendor/underscore"
@@ -522,6 +536,8 @@
             "deploy-underscore",
             "deploy-zeroclipboard",
             "deploy-bootstrap",
+            "deploy-jszip",
+            "deploy-jsziputils",
             "deploy-app-main",
             "deploy-app-mobile",
             "deploy-app-embed"

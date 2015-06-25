@@ -6,7 +6,7 @@
 	"nono_mongodb": {
 		"host": "localhost",
 		"port": 8000,
-		"database": "coAuthoring"
+		"database": "onlyoffice"
 	},
     "sql": {
       "type"				: "mysql",

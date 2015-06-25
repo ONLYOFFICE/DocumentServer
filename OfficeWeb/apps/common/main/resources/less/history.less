@@ -1,0 +1,129 @@
+#history-box {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+    background-color: #f4f4f4;
+    border-right: 1px solid #cbcbcb;
+
+    .layout-resizer {
+        border-bottom:none !important;
+        border-top:none !important;
+
+        &.move {
+          border-top: 1px solid @gray-dark !important;
+          border-bottom: 1px solid @gray-dark !important;
+          opacity: 0.4;
+        }
+    }
+    
+    #history-header {
+        position: absolute;
+        height: 45px;
+        text-align: center;
+        left: 0;
+        top: 0;
+        right: 0;
+        overflow: hidden;
+        border-bottom: 1px solid @gray-dark;
+        
+        label {
+            color: @black;
+            font-size: 12px;
+            font-family: arial;
+            line-height: normal;
+            border-bottom: 1px dotted @black;
+            padding-top: 12px;
+            outline: none;
+            height: 29px;
+            cursor: pointer;
+        }
+    }
+
+    #history-list {
+        height: 100%;
+        overflow: hidden;
+        padding-top: 45px;
+
+        .dataview {
+            & > div:not(.ps-scrollbar-x-rail):not(.ps-scrollbar-y-rail) {
+                display: block;
+                border: none;
+                width: 100%;
+                .box-shadow(none);
+                margin: 0;
+                font-size: 12px;
+
+                &:hover:not(.selected),
+                &.over {
+                    background-color: #e5e5e5;
+
+                    .user-version {
+                        color: #fff;
+                        background-color: #ababab;
+                    }
+                }
+
+                &.selected {
+                    background-color: @primary;
+
+                    .user-date {
+                        color: #fff;
+                    }
+
+                    .user-name {
+                        color: #fff;
+                    }
+                }
+            }
+
+            .history-item-wrap {
+                padding: 10px 2px 15px 20px;
+
+                .user-date {
+                    display: inline-block;
+                    color: @gray-deep;
+                    font-size: 12px;
+                    font-weight: bold;
+                    min-width: 135px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .user-version {
+                    display: inline-block;
+                    width: 36px;
+                    height: 18px;
+                    color: @primary;
+                    font-size: 10px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    background-color: #e6e6e6;
+                    text-align: center;
+                    padding: 1px 0;
+                    border-radius: 2px;
+                }
+                
+                .user-name {
+                    width: 100%;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                    color: @gray-deep;
+                    font-size: 12px;
+                    cursor: pointer;
+                }
+
+                .color {
+                    width: 12px;
+                    height: 12px;
+                    border: 1px solid @gray-dark;
+                    margin: 0 5px 3px 0;
+                    vertical-align: middle;
+                }
+            }
+        }
+    }
+}

@@ -33,6 +33,11 @@
     PE.Controllers.Main = Backbone.Controller.extend(_.extend((function () {
         var ApplyEditRights = -255;
         var LoadingDocument = -256;
+        var mapCustomizationElements = {
+            about: "button#left-btn-about",
+            feedback: "button#left-btn-support",
+            goback: "#fm-btn-back > a, #header-back > div"
+        };
         return {
             models: [],
             collections: ["ShapeGroups", "SlideLayouts"],
@@ -148,14 +153,16 @@
                 this.appOptions.user = this.editorConfig.user;
                 this.appOptions.canBack = this.editorConfig.nativeApp !== true && this.editorConfig.canBackToFolder === true;
                 this.appOptions.nativeApp = this.editorConfig.nativeApp === true;
-                this.appOptions.canCreateNew = !_.isEmpty(this.editorConfig.createUrl);
-                this.appOptions.canOpenRecent = this.editorConfig.nativeApp !== true && this.editorConfig.recent !== undefined;
+                this.appOptions.isDesktopApp = this.editorConfig.targetApp == "desktop";
+                this.appOptions.canCreateNew = !_.isEmpty(this.editorConfig.createUrl) && !this.appOptions.isDesktopApp;
+                this.appOptions.canOpenRecent = this.editorConfig.nativeApp !== true && this.editorConfig.recent !== undefined && !this.appOptions.isDesktopApp;
                 this.appOptions.templates = this.editorConfig.templates;
                 this.appOptions.recent = this.editorConfig.recent;
                 this.appOptions.createUrl = this.editorConfig.createUrl;
                 this.appOptions.lang = this.editorConfig.lang;
                 this.appOptions.sharingSettingsUrl = this.editorConfig.sharingSettingsUrl;
                 this.appOptions.canAnalytics = false;
+                this.appOptions.customization = this.editorConfig.customization;
                 this.getApplication().getController("Viewport").getView("Common.Views.Header").setCanBack(this.editorConfig.canBackToFolder === true);
                 if (this.editorConfig.lang) {
                     this.api.asc_setLocale(this.editorConfig.lang);
@@ -177,7 +184,6 @@
                     docInfo.put_UserId(this.editorConfig.user.id);
                     docInfo.put_UserName(this.editorConfig.user.name);
                     docInfo.put_CallbackUrl(this.editorConfig.callbackUrl);
-                    docInfo.put_OfflineApp(this.editorConfig.nativeApp === true);
                 }
                 this.api.asc_registerCallback("asc_onGetEditorPermissions", _.bind(this.onEditorPermissions, this));
                 this.api.asc_setDocInfo(docInfo);
@@ -198,7 +204,7 @@
             onProcessRightsChange: function (data) {
                 if (data && data.enabled === false) {
                     this.api.asc_coAuthoringDisconnect();
-                    this.getApplication().getController("LeftMenu").leftMenu.getMenu("file").panels["info"].onLostEditRights();
+                    this.getApplication().getController("LeftMenu").leftMenu.getMenu("file").panels["rights"].onLostEditRights();
                     Common.UI.warning({
                         title: this.notcriticalErrorTitle,
                         msg: _.isEmpty(data.message) ? this.warnProcessRightsChange : data.message
@@ -406,9 +412,11 @@
                 value = window.localStorage.getItem("pe-settings-zoom");
                 var zf = (value !== null) ? parseInt(value) : -1;
                 (zf == -1) ? this.api.zoomFitToPage() : this.api.zoom(zf);
-                Common.Utils.isIE9m && tips.push(me.warnBrowserIE9); ! Common.Utils.isGecko && (Math.abs(me.getBrowseZoomLevel() - 1) > 0.1) && tips.push(Common.Utils.String.platformKey(me.warnBrowserZoom, "{0}"));
-                if (tips.length) {
-                    me.showTips(tips);
+                if ( !! window["AscDesktopEditor"]) {
+                    Common.Utils.isIE9m && tips.push(me.warnBrowserIE9); ! Common.Utils.isGecko && (Math.abs(me.getBrowseZoomLevel() - 1) > 0.1) && tips.push(Common.Utils.String.platformKey(me.warnBrowserZoom, "{0}"));
+                    if (tips.length) {
+                        me.showTips(tips);
+                    }
                 }
                 me.api.asc_registerCallback("asc_onStartAction", _.bind(me.onLongActionBegin, me));
                 me.api.asc_registerCallback("asc_onEndAction", _.bind(me.onLongActionEnd, me));
@@ -441,7 +449,7 @@
                 statusbarController.createDelayedElements();
                 leftmenuController.getView("LeftMenu").disableMenu("all", false);
                 if (me.appOptions.canBranding) {
-                    me.getApplication().getController("LeftMenu").leftMenu.getMenu("about").setLicInfo(me.editorConfig.branding);
+                    me.getApplication().getController("LeftMenu").leftMenu.getMenu("about").setLicInfo(me.editorConfig.customization);
                 }
                 documentHolderController.getView("DocumentHolder").setApi(me.api).on("editcomplete", _.bind(me.onEditComplete, me));
                 application.getController("Viewport").getView("DocumentPreview").setApi(me.api).on("editcomplete", _.bind(me.onEditComplete, me));
@@ -480,8 +488,9 @@
                 }
                 me.api.asc_setAutoSaveGap(value);
                 if (this.appOptions.canAnalytics) {
-                    Common.Gateway.on("applyeditrights", _.bind(me.onApplyEditRights, me));
+                    Common.component.Analytics.initialize("UA-12442749-13", "Presentation Editor");
                 }
+                Common.Gateway.on("applyeditrights", _.bind(me.onApplyEditRights, me));
                 Common.Gateway.on("processsaveresult", _.bind(me.onProcessSaveResult, me));
                 Common.Gateway.on("processrightschange", _.bind(me.onProcessRightsChange, me));
                 Common.Gateway.on("processmouse", _.bind(me.onProcessMouse, me));
@@ -500,15 +509,18 @@
             onEditorPermissions: function (params) {
                 this.permissions.edit !== false && (this.permissions.edit = params.asc_getCanEdit());
                 this.permissions.download !== false && (this.permissions.download = params.asc_getCanDownload());
-                this.appOptions.canCoAuthoring = params.asc_getCanCoAuthoring();
+                this.appOptions.canCoAuthoring = true;
                 this.appOptions.canEdit = this.permissions.edit === true;
                 this.appOptions.isEdit = this.appOptions.canEdit && this.editorConfig.mode !== "view";
                 this.appOptions.canDownload = !this.appOptions.nativeApp && this.permissions.download;
                 this.appOptions.canAutosave = this.editorConfig.canAutosave !== false && params.asc_getIsAutosaveEnable();
                 this.appOptions.canAnalytics = params.asc_getIsAnalyticsEnable();
-                this.appOptions.canBranding = params.asc_getCanBranding() && (typeof(this.editorConfig.branding) == "object");
+                this.appOptions.canLicense = params.asc_getCanLicense ? params.asc_getCanLicense() : false;
+                this.appOptions.canComments = this.appOptions.canLicense && !((typeof(this.editorConfig.customization) == "object") && this.editorConfig.customization.comments === false);
+                this.appOptions.canChat = this.appOptions.canLicense && !((typeof(this.editorConfig.customization) == "object") && this.editorConfig.customization.chat === false);
+                this.appOptions.canBranding = params.asc_getCanBranding() && (typeof(this.editorConfig.customization) == "object");
                 if (this.appOptions.canBranding) {
-                    this.getApplication().getController("Viewport").getView("Common.Views.Header").setBranding(this.editorConfig.branding);
+                    this.getApplication().getController("Viewport").getView("Common.Views.Header").setBranding(this.editorConfig.customization);
                 }
                 this.applyModeCommonElements();
                 this.applyModeEditorElements();
@@ -530,7 +542,7 @@
                 documentHolder = app.getController("DocumentHolder").getView("DocumentHolder");
                 if (headerView) {
                     headerView.setHeaderCaption(this.appOptions.isEdit ? "Presentation Editor" : "Presentation Viewer");
-                    headerView.setVisible(!this.appOptions.nativeApp && !value);
+                    headerView.setVisible(!this.appOptions.nativeApp && !value && !this.appOptions.isDesktopApp);
                 }
                 viewport && viewport.setMode(this.appOptions, true);
                 statusbarView && statusbarView.setMode(this.appOptions);
@@ -807,6 +819,10 @@
                 }
             },
             hidePreloader: function () {
+                if ( !! this.appOptions.customization && !this.appOptions.customization.done) {
+                    this.appOptions.customization.done = true;
+                    Common.Utils.applyCustomization(this.appOptions.customization, mapCustomizationElements);
+                }
                 Common.NotificationCenter.trigger("layout:changed", "main");
                 $("#loading-mask").hide().remove();
             },

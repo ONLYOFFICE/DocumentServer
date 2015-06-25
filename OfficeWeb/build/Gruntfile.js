@@ -35,7 +35,14 @@
     packageFile,
     revisionHash = "@@REVISION",
     revisionTimeStamp = "@@REVISIONDATE";
-    grunt.loadNpmTasks("grunt-contrib");
+    grunt.loadNpmTasks("grunt-contrib-clean");
+    grunt.loadNpmTasks("grunt-contrib-copy");
+    grunt.loadNpmTasks("grunt-contrib-uglify");
+    grunt.loadNpmTasks("grunt-contrib-less");
+    grunt.loadNpmTasks("grunt-contrib-requirejs");
+    grunt.loadNpmTasks("grunt-contrib-concat");
+    grunt.loadNpmTasks("grunt-contrib-imagemin");
+    grunt.loadNpmTasks("grunt-contrib-cssmin");
     grunt.loadNpmTasks("grunt-text-replace");
     grunt.loadNpmTasks("grunt-mocha");
     function doRegisterTask(name, callbackConfig) {
@@ -133,6 +140,8 @@
     doRegisterTask("underscore");
     doRegisterTask("zeroclipboard");
     doRegisterTask("bootstrap");
+    doRegisterTask("jszip");
+    doRegisterTask("jsziputils");
     doRegisterTask("requirejs", function (defaultConfig, packageFile) {
         return {
             uglify: {
@@ -157,10 +166,11 @@
                 files: packageFile["main"]["clean"]
             },
             less: {
-                options: {
-                    cleancss: true
-                },
                 production: {
+                    options: {
+                        compress: true,
+                        plugins: [new(require("less-plugin-clean-css"))()],
+                    },
                     files: {
                         "<%= pkg.main.less.files.dest %>": packageFile["main"]["less"]["files"]["src"]
                     }
@@ -208,6 +218,46 @@
                 }
             }
         });
+    });
+    grunt.registerTask("lessPostFix", function () {
+        if (!grunt.option("image-url")) {
+            grunt.config("replace.urlToUri", {
+                src: ["<%= pkg.main.less.files.dest %>"],
+                overwrite: true,
+                replacements: [{
+                    from: /url\(([^\)\'\"]+)/g,
+                    to: function (matchedWord, index, fullText, regexMatches) {
+                        return "data-uri('" + regexMatches + "'";
+                    }
+                },
+                {
+                    from: /filter\:\s?alpha\(opacity\s?=\s?[0-9]{1,3}\)\;/g,
+                    to : ""
+                }]
+            });
+            grunt.config("less.uriPostfix", {
+                options: {
+                    compress: true,
+                    ieCompat: false
+                },
+                files: {
+                    "<%= pkg.main.less.files.dest %>": "<%= pkg.main.less.files.dest %>"
+                }
+            });
+            grunt.config("clean.files", "<%= pkg.main.clean %>/resources/img");
+            grunt.task.run("replace:urlToUri", "less:uriPostfix", "clean");
+        }
+        grunt.config("replace.writeVersion", {
+            src: ["<%= pkg.api.copy.script.dest %>" + "/documents/api.js"],
+            overwrite: true,
+            replacements: [{
+                from: /(\#{2}BN\#)/,
+                to: function (matchedWord, index, fullText, regexMatches) {
+                    return "." + (process.env["BUILD_NUMBER"] || packageFile.build);
+                }
+            }]
+        });
+        grunt.task.run("replace:writeVersion");
     });
     grunt.registerTask("mobile-app-init", function () {
         grunt.initConfig({
@@ -301,8 +351,10 @@
     grunt.registerTask("deploy-underscore", ["underscore-init", "clean", "copy"]);
     grunt.registerTask("deploy-zeroclipboard", ["zeroclipboard-init", "clean", "copy"]);
     grunt.registerTask("deploy-bootstrap", ["bootstrap-init", "clean", "copy"]);
+    grunt.registerTask("deploy-jszip", ["jszip-init", "clean", "copy"]);
+    grunt.registerTask("deploy-jsziputils", ["jsziputils-init", "clean", "copy"]);
     grunt.registerTask("deploy-requirejs", ["requirejs-init", "clean", "uglify"]);
-    grunt.registerTask("deploy-app-main", ["main-app-init", "clean", "less", "replace:fixLessUrl", "requirejs", "concat", "imagemin", "copy"]);
+    grunt.registerTask("deploy-app-main", ["main-app-init", "clean", "less", "replace:fixLessUrl", "requirejs", "concat", "imagemin", "copy", "lessPostFix"]);
     grunt.registerTask("deploy-app-mobile", ["mobile-app-init", "clean", "uglify", "cssmin:styles", "copy"]);
     grunt.registerTask("deploy-app-embed", ["embed-app-init", "clean", "uglify", "less", "copy"]);
     doRegisterInitializeAppTask("documenteditor", "DocumentEditor", "documenteditor.json");
@@ -322,5 +374,6 @@
     grunt.registerTask("deploy-documenteditor", ["init-build-documenteditor", "init-config", "deploy-app"]);
     grunt.registerTask("deploy-spreadsheeteditor", ["init-build-spreadsheeteditor", "init-config", "deploy-app"]);
     grunt.registerTask("deploy-presentationeditor", ["init-build-presentationeditor", "init-config", "deploy-app"]);
+    grunt.option("image-url", true);
     grunt.registerTask("default", ["deploy-documenteditor", "deploy-spreadsheeteditor", "deploy-presentationeditor"]);
 };

@@ -48,7 +48,7 @@
         }
 
         &[disabled] .btn-icon {
-            background-position: -60px @top-position;
+            background-position: -40px @top-position;
         }
 
         &.active {
@@ -144,6 +144,14 @@
                 width: 16px;
                 height: 12px;
                 .apply-language-flag();
+            }
+        }
+
+        &.disabled {
+            cursor: default;
+            label, .icon-lang-flag {
+                cursor: default;
+                opacity: 0.4;
             }
         }
     }

@@ -54,6 +54,12 @@ Common.Gateway = new(function () {
         "processRightsChange": function (data) {
             $me.trigger("processrightschange", data);
         },
+        "refreshHistory": function (data) {
+            $me.trigger("refreshhistory", data);
+        },
+        "setHistoryData": function (data) {
+            $me.trigger("sethistorydata", data);
+        },
         "processMouse": function (data) {
             $me.trigger("processmouse", data);
         },
@@ -116,6 +122,22 @@ Common.Gateway = new(function () {
         requestEditRights: function () {
             _postMessage({
                 event: "onRequestEditRights"
+            });
+        },
+        requestHistory: function () {
+            _postMessage({
+                event: "onRequestHistory"
+            });
+        },
+        requestHistoryData: function (revision) {
+            _postMessage({
+                event: "onRequestHistoryData",
+                data: revision
+            });
+        },
+        requestHistoryClose: function (revision) {
+            _postMessage({
+                event: "onRequestHistoryClose"
             });
         },
         reportError: function (code, description) {

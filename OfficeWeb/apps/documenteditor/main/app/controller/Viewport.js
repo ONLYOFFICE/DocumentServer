@@ -45,8 +45,11 @@
             }).render();
             Common.NotificationCenter.on("layout:changed", _.bind(this.onLayoutChanged, this));
             $(window).on("resize", _.bind(this.onWindowResize, this));
+            var leftPanel = $("#left-menu"),
+            histPanel = $("#left-panel-history");
             this.viewport.hlayout.on("layout:resizedrag", function () {
                 this.api.Resize();
+                localStorage.setItem("de-mainmenu-width", histPanel.is(":visible") ? (histPanel.width() + SCALE_MIN) : leftPanel.width());
             },
             this);
             this.boxSdk = $("#editor_sdk");
@@ -57,6 +60,14 @@
             default:
                 this.viewport.vlayout.doLayout();
             case "rightmenu":
+                this.viewport.hlayout.doLayout();
+                break;
+            case "history":
+                var panel = this.viewport.hlayout.items[1];
+                if (panel.resize.el) {
+                    this.boxSdk.css("border-left", "");
+                    panel.resize.el.show();
+                }
                 this.viewport.hlayout.doLayout();
                 break;
             case "leftmenu":

@@ -66,6 +66,7 @@ var ASC_DOCS_API_USE_EMBEDDED_FONTS = "@@ASC_DOCS_API_USE_EMBEDDED_FONTS";
         this.documentId = undefined;
         this.documentUserId = undefined;
         this.documentUrl = "null";
+        this.documentUrlChanges = null;
         this.documentTitle = "null";
         this.documentTitleWithoutExtention = "null";
         this.documentFormat = "null";
@@ -371,6 +372,9 @@ var ASC_DOCS_API_USE_EMBEDDED_FONTS = "@@ASC_DOCS_API_USE_EMBEDDED_FONTS";
             this.User.asc_setId(this.DocInfo["UserId"]);
             this.User.asc_setUserName(this.DocInfo["UserName"]);
         }
+        if (undefined !== window["AscDesktopEditor"]) {
+            window["AscDesktopEditor"]["SetDocumentName"](this.documentTitle);
+        }
         if (this.DocInfo["OfflineApp"] && (true == this.DocInfo["OfflineApp"])) {
             this.isCoAuthoringEnable = false;
             window["scriptBridge"] = {};
@@ -486,20 +490,55 @@ var ASC_DOCS_API_USE_EMBEDDED_FONTS = "@@ASC_DOCS_API_USE_EMBEDDED_FONTS";
         });
     };
     spreadsheet_api.prototype.asc_Print = function (adjustPrint) {
+        if (window["AscDesktopEditor"]) {
+            window.AscDesktopEditor_PrintData = adjustPrint;
+            window["AscDesktopEditor"]["Print"]();
+            return;
+        }
         this.adjustPrint = adjustPrint ? adjustPrint : new asc_CAdjustPrint();
         this.asc_DownloadAs(c_oAscFileType.PDFPRINT);
     };
     spreadsheet_api.prototype.asc_Copy = function () {
+        if (window["AscDesktopEditor"]) {
+            window["AscDesktopEditorButtonMode"] = true;
+            var _e = {};
+            _e.ctrlKey = true;
+            _e.shiftKey = false;
+            _e.which = 67;
+            this.controller._onWindowKeyDown(_e);
+            window["AscDesktopEditorButtonMode"] = false;
+            return;
+        }
         var result = this.wb.copyToClipboardButton();
         this.wb.restoreFocus();
         return result;
     };
     spreadsheet_api.prototype.asc_Paste = function () {
+        if (window["AscDesktopEditor"]) {
+            window["AscDesktopEditorButtonMode"] = true;
+            var _e = {};
+            _e.ctrlKey = true;
+            _e.shiftKey = false;
+            _e.which = 86;
+            this.controller._onWindowKeyDown(_e);
+            window["AscDesktopEditorButtonMode"] = false;
+            return;
+        }
         var result = this.wb.pasteFromClipboardButton();
         this.wb.restoreFocus();
         return result;
     };
     spreadsheet_api.prototype.asc_Cut = function () {
+        if (window["AscDesktopEditor"]) {
+            window["AscDesktopEditorButtonMode"] = true;
+            var _e = {};
+            _e.ctrlKey = true;
+            _e.shiftKey = false;
+            _e.which = 88;
+            this.controller._onWindowKeyDown(_e);
+            window["AscDesktopEditorButtonMode"] = false;
+            return;
+        }
         var result = this.wb.cutToClipboardButton();
         this.wb.restoreFocus();
         return result;
@@ -831,48 +870,26 @@ var ASC_DOCS_API_USE_EMBEDDED_FONTS = "@@ASC_DOCS_API_USE_EMBEDDED_FONTS";
             dataType: "text"
         });
     };
-    spreadsheet_api.prototype._onOpenCommand = function (callback, url) {
+    spreadsheet_api.prototype._onOpenCommand = function (callback, data) {
         var t = this;
-        var sJsonUrl = g_sResourceServiceLocalUrl + url;
-        asc_ajax({
-            url: sJsonUrl,
-            dataType: "text",
-            success: function (result) {
-                var url;
-                var nIndex = sJsonUrl.lastIndexOf("/");
-                if (-1 !== nIndex) {
-                    url = sJsonUrl.substring(0, nIndex + 1);
-                } else {
-                    url = sJsonUrl;
-                }
-                if (Asc.c_oSerFormat.Signature === result.substring(0, Asc.c_oSerFormat.Signature.length)) {
-                    var wb = t.asc_OpenDocument(url, result);
-                    if (callback) {
-                        callback({
-                            returnCode: 0,
-                            val: wb
-                        });
-                    }
-                } else {
-                    result = {
-                        returnCode: c_oAscError.Level.Critical,
-                        val: c_oAscError.ID.Unknown
-                    };
-                    t.handlers.trigger("asc_onError", c_oAscError.ID.Unknown, c_oAscError.Level.Critical);
-                    if (callback) {
-                        callback(result);
-                    }
-                }
-            },
-            error: function () {
-                var result = {
+        g_fOpenFileCommand(data, this.documentUrlChanges, Asc.c_oSerFormat.Signature, function (error, result) {
+            if (error || !result.bSerFormat) {
+                var oError = {
                     returnCode: c_oAscError.Level.Critical,
                     val: c_oAscError.ID.Unknown
                 };
-                t.handlers.trigger("asc_onError", c_oAscError.ID.Unknown, c_oAscError.Level.Critical);
+                t.handlers.trigger("asc_onError", oError.val, oError.returnCode);
                 if (callback) {
-                    callback(result);
+                    callback(oError);
                 }
+                return;
+            }
+            var wb = t.asc_OpenDocument(result.url, result.data);
+            if (callback) {
+                callback({
+                    returnCode: 0,
+                    val: wb
+                });
             }
         });
     };
@@ -915,7 +932,8 @@ var ASC_DOCS_API_USE_EMBEDDED_FONTS = "@@ASC_DOCS_API_USE_EMBEDDED_FONTS";
                     "editorid": c_oEditorId.Spreadsheet,
                     "url": this.documentUrl,
                     "title": this.documentTitle,
-                    "embeddedfonts": this.isUseEmbeddedCutFonts
+                    "embeddedfonts": this.isUseEmbeddedCutFonts,
+                    "viewmode": this.asc_getViewerMode()
                 };
                 if (false && this.documentOpenOptions && this.documentOpenOptions["isEmpty"]) {
                     var sEmptyWorkbook = getEmptyWorkbook();
@@ -1675,6 +1693,9 @@ var ASC_DOCS_API_USE_EMBEDDED_FONTS = "@@ASC_DOCS_API_USE_EMBEDDED_FONTS";
                 t.lastSaveTime = null;
                 t.asc_EndAction(c_oAscAsyncActionType.Information, c_oAscAsyncAction.Save);
                 t.onUpdateDocumentModified(false);
+                if (undefined !== window["AscDesktopEditor"]) {
+                    window["AscDesktopEditor"]["OnSave"]();
+                }
             };
             this.collaborativeEditing.sendChanges();
         } else {
@@ -1705,6 +1726,52 @@ var ASC_DOCS_API_USE_EMBEDDED_FONTS = "@@ASC_DOCS_API_USE_EMBEDDED_FONTS";
     };
     spreadsheet_api.prototype._isLockedTabColor = function (index, callback) {
         asc_applyFunction(callback, true);
+    };
+    spreadsheet_api.prototype._getIsLockObjectSheet = function (lockInfo, callback) {
+        if (false === this.collaborativeEditing.isCoAuthoringExcellEnable()) {
+            asc_applyFunction(callback, true);
+            return;
+        }
+        if (false === this.collaborativeEditing.getCollaborativeEditing()) {
+            asc_applyFunction(callback, true);
+            callback = undefined;
+        }
+        if (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeMine, false)) {
+            asc_applyFunction(callback, true);
+            return;
+        } else {
+            if (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeOther, false)) {
+                asc_applyFunction(callback, false);
+                return;
+            }
+        }
+        this.collaborativeEditing.onStartCheckLock();
+        this.collaborativeEditing.addCheckLock(lockInfo);
+        this.collaborativeEditing.onEndCheckLock(callback);
+    };
+    spreadsheet_api.prototype._isLockedTabColor = function (index, callback) {
+        if (false === this.collaborativeEditing.isCoAuthoringExcellEnable()) {
+            asc_applyFunction(callback, true);
+            return;
+        }
+        var sheetId = this.wbModel.getWorksheet(index).getId();
+        var lockInfo = this.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Object, null, sheetId, c_oAscLockNameTabColor);
+        if (false === this.collaborativeEditing.getCollaborativeEditing()) {
+            asc_applyFunction(callback, true);
+            callback = undefined;
+        }
+        if (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeMine, false)) {
+            asc_applyFunction(callback, true);
+            return;
+        } else {
+            if (false !== this.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeOther, false)) {
+                asc_applyFunction(callback, false);
+                return;
+            }
+        }
+        this.collaborativeEditing.onStartCheckLock();
+        this.collaborativeEditing.addCheckLock(lockInfo);
+        this.collaborativeEditing.onEndCheckLock(callback);
     };
     spreadsheet_api.prototype._addWorksheet = function (name, i) {
         this.wbModel.createWorksheet(i, name);
@@ -2114,14 +2181,7 @@ var ASC_DOCS_API_USE_EMBEDDED_FONTS = "@@ASC_DOCS_API_USE_EMBEDDED_FONTS";
             ws.objectRender.cleanWorksheet();
         }
     };
-    spreadsheet_api.prototype.asc_addComment = function (oComment) {
-        if (oComment.bDocument) {
-            this.wb.cellCommentator.asc_addComment(oComment);
-        } else {
-            var ws = this.wb.getWorksheet();
-            ws.cellCommentator.asc_addComment(oComment);
-        }
-    };
+    spreadsheet_api.prototype.asc_addComment = function (oComment) {};
     spreadsheet_api.prototype.asc_changeComment = function (id, oComment) {
         if (oComment.bDocument) {
             this.wb.cellCommentator.asc_changeComment(id, oComment);
@@ -2681,6 +2741,9 @@ var ASC_DOCS_API_USE_EMBEDDED_FONTS = "@@ASC_DOCS_API_USE_EMBEDDED_FONTS";
         if (this.canSave) {
             this.handlers.trigger("asc_onDocumentModifiedChanged", bIsModified);
             this._onUpdateDocumentCanSave();
+            if (undefined !== window["AscDesktopEditor"]) {
+                window["AscDesktopEditor"]["onDocumentModifiedChanged"](bIsModified);
+            }
         }
     };
     spreadsheet_api.prototype.offlineModeInit = function () {
@@ -2947,102 +3010,41 @@ var ASC_DOCS_API_USE_EMBEDDED_FONTS = "@@ASC_DOCS_API_USE_EMBEDDED_FONTS";
     };
     spreadsheet_api.prototype.asc_nativeCalculate = function () {};
     spreadsheet_api.prototype.asc_nativePrint = function (_printer, _page) {
-        var _adjustPrint = new asc_CAdjustPrint();
+        var _adjustPrint = window.AscDesktopEditor_PrintData ? window.AscDesktopEditor_PrintData : new asc_CAdjustPrint();
+        window.AscDesktopEditor_PrintData = undefined;
         var _printPagesData = this.wb.calcPagesPrint(_adjustPrint);
-        var isEndPrint = _api.wb.printSheet(_printer, _printPagesData);
+        if (undefined === _printer && _page === undefined) {
+            var pdf_writer = new CPdfPrinter(this.wbModel.sUrlPath);
+            while (!this.wb.printSheet(pdf_writer, _printPagesData)) {}
+            if (undefined !== window["AscDesktopEditor"]) {
+                var pagescount = pdf_writer.DocumentRenderer.m_lPagesCount;
+                window["AscDesktopEditor"]["Print_Start"](g_sResourceServiceLocalUrl + this.documentId + "/", pagescount, "", -1);
+                for (var i = 0; i < pagescount; i++) {
+                    var _start = pdf_writer.DocumentRenderer.m_arrayPages[i].StartOffset;
+                    var _end = pdf_writer.DocumentRenderer.Memory.pos;
+                    if (i != (pagescount - 1)) {
+                        _end = pdf_writer.DocumentRenderer.m_arrayPages[i + 1].StartOffset;
+                    }
+                    window["AscDesktopEditor"]["Print_Page"](pdf_writer.DocumentRenderer.Memory.GetBase64Memory2(_start, _end - _start), pdf_writer.DocumentRenderer.m_arrayPages[i].Width, pdf_writer.DocumentRenderer.m_arrayPages[i].Height);
+                }
+                window["AscDesktopEditor"]["Print_End"]();
+            }
+            return;
+        }
+        while (!this.wb.printSheet(pdf_writer, _printPagesData)) {}
         return _printer.DocumentRenderer.Memory;
     };
     spreadsheet_api.prototype.asc_nativePrintPagesCount = function () {
         return 1;
     };
-    function asc_ajax(obj) {
-        var url = "",
-        type = "GET",
-        async = true,
-        data = null,
-        dataType = "text/xml",
-        error = null,
-        success = null,
-        httpRequest = null,
-        contentType = "application/x-www-form-urlencoded",
-        init = function (obj) {
-            if (typeof obj.url !== "undefined") {
-                url = obj.url;
-            }
-            if (typeof obj.type !== "undefined") {
-                type = obj.type;
-            }
-            if (typeof obj.async !== "undefined") {
-                async = obj.async;
-            }
-            if (typeof obj.data !== "undefined") {
-                data = obj.data;
-            }
-            if (typeof obj.dataType !== "undefined") {
-                dataType = obj.dataType;
-            }
-            if (typeof obj.error !== "undefined") {
-                error = obj.error;
-            }
-            if (typeof obj.success !== "undefined") {
-                success = obj.success;
-            }
-            if (typeof(obj.contentType) !== "undefined") {
-                contentType = obj.contentType;
-            }
-            if (window.XMLHttpRequest) {
-                httpRequest = new XMLHttpRequest();
-                if (httpRequest.overrideMimeType) {
-                    httpRequest.overrideMimeType(dataType);
-                }
-            } else {
-                if (window.ActiveXObject) {
-                    try {
-                        httpRequest = new ActiveXObject("Msxml2.XMLHTTP");
-                    } catch(e) {
-                        try {
-                            httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
-                        } catch(e) {}
-                    }
-                }
-            }
-            httpRequest.onreadystatechange = function () {
-                respons(this);
-            };
-            send();
-        },
-        send = function () {
-            httpRequest.open(type, url, async);
-            if (type === "POST") {
-                httpRequest.setRequestHeader("Content-Type", contentType);
-            }
-            httpRequest.send(data);
-        },
-        respons = function (httpRequest) {
-            switch (httpRequest.readyState) {
-            case 0:
-                break;
-            case 1:
-                break;
-            case 2:
-                break;
-            case 3:
-                break;
-            case 4:
-                if (httpRequest.status === 200 || httpRequest.status === 1223) {
-                    if (typeof success === "function") {
-                        success(httpRequest.responseText);
-                    }
-                } else {
-                    if (typeof error === "function") {
-                        error(httpRequest, httpRequest.statusText, httpRequest.status);
-                    }
-                }
-                break;
-            }
-        };
-        init(obj);
-    }
+    spreadsheet_api.prototype.asc_nativeGetPDF = function () {
+        var _ret = this.asc_nativePrint();
+        window["native"]["Save_End"]("", _ret.GetCurPosition());
+        return _ret.data;
+    };
+    window["AscDesktopEditor_Save"] = function () {
+        return window["Asc"]["editor"].asc_Save();
+    };
     asc["spreadsheet_api"] = spreadsheet_api;
     prot = spreadsheet_api.prototype;
     prot["asc_GetFontThumbnailsPath"] = prot.asc_GetFontThumbnailsPath;

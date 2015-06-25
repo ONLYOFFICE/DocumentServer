@@ -61,7 +61,6 @@
 
                 "../../Word/Drawing/HatchPattern.js",
                 "../../Word/Drawing/Graphics.js",
-				"../../Word/Drawing/Private/Graphics.js",
                 "../../Word/Drawing/Overlay.js",
                 "../../Word/Drawing/ShapeDrawer.js",
                 "../../PowerPoint/Drawing/Transitions.js",
@@ -146,7 +145,7 @@
 				"../../Excel/model/Workbook.js",
 				"../../Excel/model/CellInfo.js",
 				"../../Excel/model/AdvancedOptions.js",
-				"../../Common/Private/Locks.js",
+				"../../Common/Locks.js",
                 "../../Common/Shapes/EditorSettings.js",
                 "../../PowerPoint/themes/Themes.js"
             ],

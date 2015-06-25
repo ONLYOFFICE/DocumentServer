@@ -845,9 +845,8 @@ function CDrawingDocument() {
     this.SendChangeDocumentToApi = function (bIsAttack) {
         if (bIsAttack || !this.m_bIsSendApiDocChanged) {
             this.m_bIsSendApiDocChanged = true;
-            this.m_oWordControl.m_oApi.isDocumentModify = true;
+            this.m_oWordControl.m_oApi.SetDocumentModified(true);
             this.m_oWordControl.m_oApi.asc_fireCallback("asc_onDocumentChanged");
-            this.m_oWordControl.m_oApi.asc_fireCallback("asc_onDocumentModifiedChanged");
         }
     };
     this.InitGuiCanvasTextProps = function (div_id) {
@@ -2742,6 +2741,11 @@ function CThumbnailsManager() {
     this.onMouseWhell = function (e) {
         if (false === this.m_bIsScrollVisible || !oThis.m_oWordControl.m_oScrollThumbApi) {
             return;
+        }
+        if (undefined !== window["AscDesktopEditor"]) {
+            if (false === window["AscDesktopEditor"]["CheckNeedWheel"]()) {
+                return;
+            }
         }
         var delta = 0;
         if (undefined != e.wheelDelta && e.wheelDelta != 0) {

@@ -18,8 +18,8 @@
 -- Create schema onlyoffice
 --
 
-CREATE DATABASE IF NOT EXISTS onlyoffice DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
-USE onlyoffice;
+-- CREATE DATABASE IF NOT EXISTS onlyoffice DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+-- USE onlyoffice;
 
 --
 -- Drop tables

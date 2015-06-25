@@ -62,12 +62,112 @@
                     'onBack': onBack,
                     'onDocumentStateChange': onDocumentStateChange,
                     'onRequestEditRights': onRequestEditRights,
+//                    'onRequestHistory': onRequestHistory,
+//                    'onRequestHistoryData': onRequestHistoryData,
+//                    'onRequestHistoryClose': onRequestHistoryClose,
                     'onSave': onDocumentSave,
                     'onError': onError
                 }
             });
 
             // Document Editor event handlers
+            function onRequestHistory() {
+                docEditor.refreshHistory({
+                    'currentVersion': 3,
+                    'history': [
+                    {
+                        'user': {
+                            id: '8952d4ee-e8a5-42bf-86f0-6cd77801ec15',
+                            name: 'РўР°С‚СЊСЏРЅР° Р©РµСЂР±Р°РєРѕРІР°'
+                        },
+                        'changes': null,
+                        'created': '1/18/2015 6:38 PM',
+                        'version': 1,
+                        'version_group': 1,
+                        'key': 'wyX9AwRq_677SWKjhfk='
+                    },
+                    {
+                        'user': {
+                            id: '8952d4ee-e8a5-42bf-86f0-6cd77801ec15',
+                            name: 'РўР°С‚СЊСЏРЅР° Р©РµСЂР±Р°РєРѕРІР°'
+                        },
+                        'changes': [
+                            {
+                                'user': {
+                                    id: '8952d4ee-e8a5-42bf-86f0-6cd77801ec15',
+                                    name: 'РўР°С‚СЊСЏРЅР° Р©РµСЂР±Р°РєРѕРІР°'
+                                },
+                                'created': '1/19/2015 6:30 PM'
+                            },
+                            {
+                                'user': {
+                                    'userid': '8952d4ee-e8a5-42bf-11f0-6cd77801ec15',
+                                    'username': 'РђР»РµРєСЃР°РЅРґСЂ РўСЂРѕС„РёРјРѕРІ'
+                                },
+                                'created': '1/19/2015 6:32 PM'
+                            },
+                            {
+                                'user': {
+                                    id: '8952d4ee-e8a5-42bf-86f0-6cd77801ec15',
+                                    name: 'РўР°С‚СЊСЏРЅР° Р©РµСЂР±Р°РєРѕРІР°'
+                                },
+                                'created': '1/19/2015 6:38 PM'
+                            }
+                        ],
+                        'created': '2/19/2015 6:38 PM',
+                        'version': 2,
+                        'version_group': 1,
+                        'key': 'wyX9AwRq_677SWKjhfk='
+                    },
+                    {
+                        'user': {
+                            id: '895255ee-e8a5-42bf-86f0-6cd77801ec15',
+                            name: 'Me'
+                        },
+                        'changes': null,
+                        'created': '2/21/2015 6:38 PM',
+                        'version': 3,
+                        'version_group': 2,
+                        'key': 'wyX9AwRq_677SWKjhfk='
+                    },
+                    {
+                        'user': {
+                            id: '8952d4ee-e8a5-42bf-11f0-6cd77801ec15',
+                            name: 'РђР»РµРєСЃР°РЅРґСЂ РўСЂРѕС„РёРјРѕРІ'
+                        },
+                        'changes': null,
+                        'created': '2/22/2015 6:37 PM',
+                        'version': 4,
+                        'version_group': 3,
+                        'key': 'wyX9AwRq_677SWKjhfk='
+                    },
+                    {
+                        'user': {
+                            id: '8952d4ee-e8a5-42bf-11f0-6cd33801ec15',
+                            name: 'Р›РµРѕРЅРёРґ РћСЂР»РѕРІ'
+                        },
+                        'changes': null,
+                        'created': '2/24/2015 6:29 PM',
+                        'version': 5,
+                        'version_group': 3,
+                        'key': 'wyX9AwRq_677SWKjhfk='
+                    }]
+                });
+            }
+
+            function onRequestHistoryData(revision) {
+                docEditor.setHistoryData(
+                    {
+                        'version': revision.data,
+                        'url': 'http://isa2',
+                        'urlDiff': 'http://isa2'
+                    }
+                );
+            }
+
+            function onRequestHistoryClose() {
+                // reload page
+            }
 
             function onDocEditorReady(event) {
                 if (event.target) {
@@ -163,17 +263,23 @@
                         shareUrl        : 'http://tl.com/72b4la97',
                         toolbarDocked   : 'top'
                     }
-//                    ,branding: {
+                    ,customization: {
 //                        logoUrl: 'header logo url', // default size 88 x 30
+//                        logoUrlEmbedded: 'header logo url', // default size 88 x 30
 //                        backgroundColor: '#ffffff',
 //                        textColor: '#ff0000',
-//                        customer: 'SuperPuper',
-//                        customerAddr: 'New-York, 125f-25',
-//                        customerMail: 'support@gmail.com',
-//                        customerWww: 'www.superpuper.com',
-//                        customerInfo: 'Some info',
-//                        customerLogo: 'https://img.imgsmail.ru/r/default/portal/0.1.29/logo.png'
-//                    }
+//                        customer: {
+//                            name: 'SuperPuper',
+//                            address: 'New-York, 125f-25',
+//                            mail: 'support@gmail.com',
+//                            www: 'www.superpuper.com',
+//                            info: 'Some info',
+//                            logo: 'https://img.imgsmail.ru/r/default/portal/0.1.29/logo.png'
+//                        },
+//                        goback: {text: 'Go To London'}
+                        about: true,
+                        feedback: true
+                    }
                 };
             }
 

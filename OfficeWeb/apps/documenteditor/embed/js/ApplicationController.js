@@ -30,7 +30,8 @@
  *
  */
  var ApplicationController = new(function () {
-    var me, api, docConfig = {},
+    var me, api, config = {},
+    docConfig = {},
     embedConfig = {},
     permissions = {},
     maxPages = 0,
@@ -40,6 +41,7 @@
     embedCode = '<iframe allowtransparency="true" frameborder="0" scrolling="no" src="{embed-url}" width="{width}" height="{height}"></iframe>',
     maxZIndex = 9090,
     created = false;
+    Common.Analytics.initialize("UA-12442749-13", "Embedded ONLYOFFICE Document");
     if (typeof isBrowserSupported !== "undefined" && !isBrowserSupported()) {
         Common.Gateway.reportError(undefined, "Your browser is not supported.");
         return;
@@ -80,6 +82,7 @@
         }
     }
     function loadConfig(data) {
+        config = $.extend(config, data.config);
         embedConfig = $.extend(embedConfig, data.config.embedded);
         $("#id-short-url").val(embedConfig.shareUrl || "Unavailable");
         $("#id-textarea-embed").text(embedCode.replace("{embed-url}", embedConfig.embedUrl).replace("{width}", minEmbedWidth).replace("{height}", minEmbedHeight));
@@ -99,7 +102,7 @@
         if (typeof embedConfig.fullscreenUrl === "undefined") {
             $("#id-btn-fullscreen").hide();
         }
-        if (typeof data.config.canBackToFolder === "undefined" || !data.config.canBackToFolder) {
+        if (typeof config.canBackToFolder === "undefined" || !config.canBackToFolder) {
             $("#id-btn-close").hide();
         }
         if (embedConfig.toolbarDocked === "top") {
@@ -125,6 +128,8 @@
             docInfo.put_Format(docConfig.fileType);
             docInfo.put_VKey(docConfig.vkey);
             if (api) {
+                api.asc_registerCallback("asc_onGetEditorPermissions", onEditorPermissions);
+                api.asc_getEditorPermissions();
                 api.LoadDocument(docInfo);
                 api.Resize();
                 api.zoomFitToWidth();
@@ -206,6 +211,15 @@
         handlerToolbarSize();
         hidePreloader();
         Common.Analytics.trackEvent("Load", "Complete");
+    }
+    function onEditorPermissions(params) {
+        if (params.asc_getCanBranding() && (typeof config.customization == "object") && config.customization && config.customization.logoUrlEmbedded) {
+            $("#header-logo").css({
+                "background-image": 'url("' + config.customization.logoUrlEmbedded + '")',
+                "background-position": "0 center",
+                "background-repeat": "no-repeat"
+            });
+        }
     }
     function showMask() {
         $("#id-loadmask").modal({

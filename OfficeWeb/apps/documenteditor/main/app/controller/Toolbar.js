@@ -756,20 +756,24 @@
         onCopyPaste: function (copy, e) {
             var me = this;
             if (me.api) {
-                var value = window.localStorage.getItem("de-hide-copywarning");
-                if (! (value && parseInt(value) == 1) && this._state.show_copywarning) {
-                    (new Common.Views.CopyWarningDialog({
-                        handler: function (dontshow) {
-                            copy ? me.api.Copy() : me.api.Paste();
-                            if (dontshow) {
-                                window.localStorage.setItem("de-hide-copywarning", 1);
-                            }
-                            Common.NotificationCenter.trigger("edit:complete", me.toolbar);
-                        }
-                    })).show();
-                } else {
+                if (typeof window["AscDesktopEditor"] === "object") {
                     copy ? me.api.Copy() : me.api.Paste();
-                    Common.NotificationCenter.trigger("edit:complete", me.toolbar);
+                } else {
+                    var value = window.localStorage.getItem("de-hide-copywarning");
+                    if (! (value && parseInt(value) == 1) && this._state.show_copywarning) {
+                        (new Common.Views.CopyWarningDialog({
+                            handler: function (dontshow) {
+                                copy ? me.api.Copy() : me.api.Paste();
+                                if (dontshow) {
+                                    window.localStorage.setItem("de-hide-copywarning", 1);
+                                }
+                                Common.NotificationCenter.trigger("edit:complete", me.toolbar);
+                            }
+                        })).show();
+                    } else {
+                        copy ? me.api.Copy() : me.api.Paste();
+                        Common.NotificationCenter.trigger("edit:complete", me.toolbar);
+                    }
                 }
                 Common.component.Analytics.trackEvent("ToolBar", "Copy Warning");
             } else {
@@ -2302,7 +2306,11 @@
             });
             this.editMode = false;
         },
-        DisableToolbar: function (disable) {
+        DisableToolbar: function (disable, viewMode) {
+            if (viewMode !== undefined) {
+                this.editMode = !viewMode;
+            }
+            disable = disable || !this.editMode;
             var mask = $(".toolbar-mask");
             if (disable && mask.length > 0 || !disable && mask.length == 0) {
                 return;

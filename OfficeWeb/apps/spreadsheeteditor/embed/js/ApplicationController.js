@@ -30,7 +30,8 @@
  *
  */
  var ApplicationController = new(function () {
-    var me, api, docConfig = {},
+    var me, api, config = {},
+    docConfig = {},
     embedConfig = {},
     permissions = {},
     maxPages = 0,
@@ -40,6 +41,7 @@
     embedCode = '<iframe allowtransparency="true" frameborder="0" scrolling="no" src="{embed-url}" width="{width}" height="{height}"></iframe>',
     maxZIndex = 9090,
     created = false;
+    Common.Analytics.initialize("UA-12442749-13", "Embedded ONLYOFFICE Spreadsheet");
     if (typeof isBrowserSupported !== "undefined" && !isBrowserSupported()) {
         Common.Gateway.reportError(undefined, "Your browser is not supported.");
         return;
@@ -77,6 +79,7 @@
         }
     }
     function loadConfig(data) {
+        config = $.extend(config, data.config);
         embedConfig = $.extend(embedConfig, data.config.embedded);
         $("#id-short-url").val(embedConfig.shareUrl || "Unavailable");
         $("#id-textarea-embed").text(embedCode.replace("{embed-url}", embedConfig.embedUrl).replace("{width}", minEmbedWidth).replace("{height}", minEmbedHeight));
@@ -84,7 +87,7 @@
             if ($("#id-popover-social-container ul")) {
                 $("#id-popover-social-container ul").append('<li><div class="fb-like" data-href="' + embedConfig.shareUrl + '" data-send="false" data-layout="button_count" data-width="450" data-show-faces="false"></div></li>');
                 $("#id-popover-social-container ul").append('<li class="share-twitter"><a href="https://twitter.com/share" class="twitter-share-button" data-url="' + embedConfig.shareUrl + '">Tweet</a></li>');
-                $("#id-popover-social-container ul").append('<li class="share-mail"><a class="btn btn-xs btn-default" href="mailto:?subject=I have shared a document with you: ' + embedConfig.docTitle + "&body=I have shared a document with you: " + embedConfig.shareUrl + '"><span class="glyphicon glyphicon-envelope">Email</a></li>');
+                $("#id-popover-social-container ul").append('<li class="share-mail"><a class="btn btn-xs btn-default" href="mailto:?subject=I have shared a document with you: ' + embedConfig.docTitle + "&body=I have shared a document with you: " + encodeURIComponent(embedConfig.shareUrl) + '"><span class="glyphicon glyphicon-envelope">Email</a></li>');
             }
         }
         if (typeof embedConfig.shareUrl === "undefined") {
@@ -96,7 +99,7 @@
         if (typeof embedConfig.fullscreenUrl === "undefined") {
             $("#id-btn-fullscreen").hide();
         }
-        if (typeof data.config.canBackToFolder === "undefined" || !data.config.canBackToFolder) {
+        if (typeof config.canBackToFolder === "undefined" || !config.canBackToFolder) {
             $("#id-btn-close").hide();
         }
         if (embedConfig.toolbarDocked === "top") {
@@ -119,10 +122,18 @@
             docInfo.VKey = docConfig.vkey;
             docInfo.Origin = docConfig.origin;
             if (api) {
+                api.asc_registerCallback("asc_onGetEditorPermissions", onEditorPermissions);
+                api.asc_getEditorPermissions();
                 api.asc_enableKeyEvents(true);
                 api.asc_setViewerMode(true);
                 api.asc_LoadDocument(docInfo);
                 Common.Analytics.trackEvent("Load", "Start");
+            }
+            if (docConfig.title && !embedConfig.docTitle) {
+                var el = $("#id-popover-social-container ul .share-mail > a");
+                if (el.length) {
+                    el.attr("href", el.attr("href").replace(/:\sundefined&/, ": " + docConfig.title + "&"));
+                }
             }
         }
     }
@@ -175,6 +186,15 @@
         handlerToolbarSize();
         hidePreloader();
         Common.Analytics.trackEvent("Load", "Complete");
+    }
+    function onEditorPermissions(params) {
+        if (params.asc_getCanBranding() && (typeof config.customization == "object") && config.customization && config.customization.logoUrlEmbedded) {
+            $("#header-logo").css({
+                "background-image": 'url("' + config.customization.logoUrlEmbedded + '")',
+                "background-position": "0 center",
+                "background-repeat": "no-repeat"
+            });
+        }
     }
     function showMask() {
         $("#id-loadmask").modal({

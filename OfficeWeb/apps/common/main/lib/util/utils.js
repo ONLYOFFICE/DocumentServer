@@ -490,6 +490,27 @@ Common.Utils.showBrowserRestriction = function () {
     $("#loading-mask").hide().remove();
     $("#viewport").hide().remove();
 };
+Common.Utils.applyCustomization = function (config, elmap) {
+    for (var name in config) {
+        var $el;
+        if ( !! elmap[name]) {
+            $el = $(elmap[name]);
+            if ($el.length) {
+                var item = config[name];
+                if (item === false || item.visible === false) {
+                    $el.hide();
+                } else {
+                    if ( !! item.text) {
+                        $el.text(item.text);
+                    }
+                    if (item.visible === false) {
+                        $el.hide();
+                    }
+                }
+            }
+        }
+    }
+};
 String.prototype.strongMatch = function (regExp) {
     if (regExp && regExp instanceof RegExp) {
         var arr = this.toString().match(regExp);

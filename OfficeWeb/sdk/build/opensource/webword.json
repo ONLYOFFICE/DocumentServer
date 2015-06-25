@@ -105,7 +105,6 @@
                 "../../Word/Editor/FontClassification.js",
                 "../../Word/Editor/Spelling.js",
                 "../../Word/Drawing/Graphics.js",
-				"../../Word/Drawing/Private/Graphics.js",
                 "../../Word/Drawing/Overlay.js",
                 "../../Word/Drawing/HatchPattern.js",
                 "../../Word/Drawing/ShapeDrawer.js",
@@ -140,13 +139,12 @@
 				
 				"../../Excel/utils/utils.js",
 				"../../Excel/model/CellComment.js",
-				"../../Excel/model/Private/CellComment.js",
 				"../../Excel/model/Serialize.js",
 				"../../Excel/model/WorkbookElems.js",
 				"../../Excel/model/Workbook.js",
 				"../../Excel/model/CellInfo.js",
 				"../../Excel/model/AdvancedOptions.js",
-				"../../Common/Private/Locks.js",
+				"../../Common/Locks.js",
 				"../../Common/Shapes/EditorSettings.js"
             ],
             "dst": "../../Word/sdk-all.js"

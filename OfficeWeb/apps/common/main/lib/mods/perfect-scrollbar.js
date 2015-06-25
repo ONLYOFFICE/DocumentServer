@@ -211,6 +211,9 @@
                     scrollbarXLeft = containerWidth - scrollbarXWidth;
                 }
                 updateScrollbarCss();
+                if (settings.onChange) {
+                    settings.onChange(this);
+                }
             };
             var bindMouseScrollXHandler = function () {
                 var currentLeft, currentPageX;

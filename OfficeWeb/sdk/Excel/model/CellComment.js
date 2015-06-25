@@ -568,7 +568,34 @@ CCellCommentator.prototype.isViewerMode = function () {
     return this.worksheet.handlers.trigger("getViewerMode");
 };
 CCellCommentator.prototype.isLockedComment = function (oComment, callbackFunc) {
-    Asc.applyFunction(callbackFunc, true);
+    if (false === this.worksheet.collaborativeEditing.isCoAuthoringExcellEnable()) {
+        Asc.applyFunction(callbackFunc, true);
+        return;
+    }
+    var objectGuid = oComment.asc_getId();
+    if (objectGuid) {
+        var sheetId = CCellCommentator.sStartCommentId;
+        if (!oComment.bDocument) {
+            sheetId += this.worksheet.model.getId();
+        }
+        var lockInfo = this.worksheet.collaborativeEditing.getLockInfo(c_oAscLockTypeElem.Object, null, sheetId, objectGuid);
+        if (false === this.worksheet.collaborativeEditing.getCollaborativeEditing()) {
+            Asc.applyFunction(callbackFunc, true);
+            callbackFunc = undefined;
+        }
+        if (false !== this.worksheet.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeMine, false)) {
+            Asc.applyFunction(callbackFunc, true);
+            return;
+        } else {
+            if (false !== this.worksheet.collaborativeEditing.getLockIntersection(lockInfo, c_oAscLockTypes.kLockTypeOther, false)) {
+                Asc.applyFunction(callbackFunc, false);
+                return;
+            }
+        }
+        this.worksheet.collaborativeEditing.onStartCheckLock();
+        this.worksheet.collaborativeEditing.addCheckLock(lockInfo);
+        this.worksheet.collaborativeEditing.onEndCheckLock(callbackFunc);
+    }
 };
 CCellCommentator.prototype.moveRangeComments = function (rangeFrom, rangeTo) {
     if (rangeFrom && rangeTo) {

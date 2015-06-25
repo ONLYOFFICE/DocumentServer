@@ -50,6 +50,12 @@ function CIdCounter() {
     this.Set_Load = function (bValue) {
         this.m_bLoad = bValue;
     };
+    this.Clear = function () {
+        this.m_sUserId = null;
+        this.m_bLoad = true;
+        this.m_nIdCounterLoad = 0;
+        this.m_nIdCounterEdit = 0;
+    };
 }
 var g_oIdCounter = new CIdCounter();
 function CTableId() {
@@ -578,6 +584,11 @@ function CTableId() {
         return true;
     };
     this.Unlock = function (Data) {};
+    this.Clear = function () {
+        this.m_aPairs = {};
+        this.m_bTurnOff = false;
+        this.Add(this, g_oIdCounter.Get_NewId());
+    };
 }
 var g_oTableId = null;
 function CCollaborativeChanges() {

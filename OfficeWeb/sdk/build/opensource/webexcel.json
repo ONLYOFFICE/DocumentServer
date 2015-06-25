@@ -59,7 +59,6 @@
                 "../../Excel/model/History.js",
                 "../../Excel/model/UndoRedo.js",
                 "../../Excel/model/CellComment.js",
-				"../../Excel/model/Private/CellComment.js",
 				"../../Excel/view/mobileTouch.js",
 				"../../Excel/view/iscroll.js",
 				"../../Excel/view/PopUpSelector.js",
@@ -67,7 +66,6 @@
                 "../../Excel/view/CellTextRender.js",
                 "../../Excel/view/CellEditorView.js",
                 "../../Excel/view/WorksheetView.js",
-				"../../Excel/view/Private/WorksheetView.js",
                 "../../Excel/view/HandlerList.js",
                 "../../Excel/view/EventsController.js",
                 "../../Excel/view/WorkbookView.js",
@@ -109,7 +107,6 @@
                 "../../Excel/view/DrawingObjectsController.js",
 
                 "../../Excel/model/DrawingObjects/Graphics.js",
-				"../../Excel/model/DrawingObjects/Private/Graphics.js",
                 "../../Excel/model/DrawingObjects/Overlay.js",
                 "../../Excel/model/DrawingObjects/Controls.js",
 				"../../Excel/model/DrawingObjects/ShapeDrawer.js",
@@ -164,7 +161,6 @@
 
                 "../../Word/apiCommon.js",
                 "../../Excel/api.js",
-                "../../Excel/Private/api.js",
                 "../../Common/Shapes/EditorSettings.js"
             ],
             "dst": "../../Excel/sdk-all.js"

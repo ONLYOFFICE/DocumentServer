@@ -8322,9 +8322,13 @@ function Binary_DocumentTableReader(doc, oReadResult, openParams, stream, bAllow
                                                     this.oReadResult.bLastRun = true;
                                                 } else {
                                                     if (c_oSerRunType.object === type) {
+                                                        var oDrawing = new Object();
                                                         res = this.bcr.Read1(length, function (t, l) {
-                                                            return oThis.ReadObject(t, l, oParStruct);
+                                                            return oThis.ReadObject(t, l, oParStruct, oDrawing);
                                                         });
+                                                        if (null != oDrawing.content.GraphicObj) {
+                                                            oNewElem = oDrawing.content;
+                                                        }
                                                     } else {
                                                         res = c_oSerConstants.ReadUnknown;
                                                     }
@@ -8378,7 +8382,7 @@ function Binary_DocumentTableReader(doc, oReadResult, openParams, stream, bAllow
         }
         oDrawing.content = oParaDrawing;
     };
-    this.ReadObject = function (type, length, oParStruct) {
+    this.ReadObject = function (type, length, oParStruct, oDrawing) {
         var res = c_oSerConstants.ReadOk;
         var oThis = this;
         if (c_oSerParType.OMath === type) {
@@ -8391,15 +8395,7 @@ function Binary_DocumentTableReader(doc, oReadResult, openParams, stream, bAllow
             }
         } else {
             if (c_oSerRunType.pptxDrawing === type) {
-                var oNewElem = null;
-                var oDrawing = new Object();
                 this.ReadDrawing(type, length, oParStruct, oDrawing, res);
-                if (null != oDrawing.content.GraphicObj) {
-                    oNewElem = oDrawing.content;
-                    var oNewRun = new ParaRun(oParStruct.paragraph);
-                    oNewRun.Add_ToContent(0, oNewElem, false);
-                    oParStruct.addToContent(oNewRun);
-                }
             } else {
                 res = c_oSerConstants.ReadUnknown;
             }

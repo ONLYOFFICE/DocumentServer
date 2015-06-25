@@ -698,11 +698,16 @@ CFontSelect.prototype = {
         if (bIsDictionary !== false) {
             _len = fs.GetLong();
             this.m_wsFontPath = fs.GetString(_len >> 1);
-            var _found1 = this.m_wsFontPath.lastIndexOf("/");
-            var _found2 = this.m_wsFontPath.lastIndexOf("\\");
-            var _found = Math.max(_found1, _found2);
-            if (0 <= _found) {
-                this.m_wsFontPath = this.m_wsFontPath.substring(_found + 1);
+            if (undefined === window["AscDesktopEditor"]) {
+                var _found1 = this.m_wsFontPath.lastIndexOf("/");
+                var _found2 = this.m_wsFontPath.lastIndexOf("\\");
+                var _found = Math.max(_found1, _found2);
+                if (0 <= _found) {
+                    this.m_wsFontPath = this.m_wsFontPath.substring(_found + 1);
+                }
+            } else {
+                this.m_wsFontPath = this.m_wsFontPath.replace(/\\\\/g, "\\");
+                this.m_wsFontPath = this.m_wsFontPath.replace(/\\/g, "/");
             }
         }
         this.m_lIndex = fs.GetLong();

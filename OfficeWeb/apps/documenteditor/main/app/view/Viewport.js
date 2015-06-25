@@ -85,6 +85,16 @@
                     }
                 },
                 {
+                    el: items[3],
+                    rely: true,
+                    resize: {
+                        hidden: true,
+                        autohide: false,
+                        min: 300,
+                        max: 600
+                    }
+                },
+                {
                     el: items[1],
                     stretch: true
                 },

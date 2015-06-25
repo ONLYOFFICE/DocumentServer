@@ -201,14 +201,15 @@
                         font-size: 12px;
 
                         .settings-item-wrap {
-                            padding: 7px 2px 7px 20px;
+                            padding: 4px 2px 4px 20px;
 
                             .settings-icon {
                                 width: 20px;
                                 height: 20px;
-                                position: absolute;
                                 background-repeat: no-repeat;
                                 .background-ximage('@{app-image-path}/toolbar-menu.png', '@{app-image-path}/toolbar-menu@2x.png', 60px);
+                                margin: 0 5px 3px 0;
+                                vertical-align: middle;
 
                                 &.mnu-print {
                                     background-position: 0 -220px;
@@ -217,11 +218,6 @@
                                 &.mnu-settings-general {
                                     background-position: 0 -1141px;
                                 }
-                            }
-
-                            .caption {
-                                vertical-align: middle;
-                                padding-left: 25px;
                             }
                         }
 
@@ -465,7 +461,8 @@
             }
         }
 
-        #panel-info {
+        #panel-info,
+        #panel-rights {
             padding: 0 30px;
             table {
                 tr {

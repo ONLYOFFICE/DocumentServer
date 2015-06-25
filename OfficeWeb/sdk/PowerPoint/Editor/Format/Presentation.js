@@ -2162,8 +2162,7 @@ CPresentation.prototype = {
         editor.sync_CanUndoCallback(this.History.Can_Undo());
         editor.sync_CanRedoCallback(this.History.Can_Redo());
         if (true === History.Have_Changes()) {
-            editor.isDocumentModify = true;
-            editor.asc_fireCallback("asc_onDocumentModifiedChanged");
+            editor.SetDocumentModified(true);
             editor._onUpdateDocumentCanSave();
         } else {
             editor.SetUnchangedDocument();

@@ -699,6 +699,7 @@ function CMetafile(width, height) {
         Name: "",
         Replace: null
     };
+    this.StartOffset = 0;
 }
 CMetafile.prototype = {
     p_color: function (r, g, b, a) {
@@ -1170,6 +1171,7 @@ CDocumentRenderer.prototype = {
         this.m_arrayPages[this.m_arrayPages.length] = new CMetafile(width, height);
         this.m_lPagesCount = this.m_arrayPages.length;
         this.m_arrayPages[this.m_lPagesCount - 1].Memory = this.Memory;
+        this.m_arrayPages[this.m_lPagesCount - 1].StartOffset = this.Memory.pos;
         this.m_arrayPages[this.m_lPagesCount - 1].VectorMemoryForPrint = this.VectorMemoryForPrint;
         this.Memory.WriteByte(CommandType.ctPageStart);
         this.Memory.WriteByte(CommandType.ctPageWidth);

@@ -92,10 +92,13 @@
             this.api.asc_registerCallback("asc_onReplaceAll", _.bind(this.onApiTextReplaced, this));
             this.api.asc_registerCallback("asc_onСoAuthoringDisconnect", _.bind(this.onApiServerDisconnect, this));
             Common.NotificationCenter.on("api:disconnect", _.bind(this.onApiServerDisconnect, this));
-            if (this.mode.canCoAuthoring) {
+            if (this.mode.canCoAuthoring && this.mode.canChat) {
                 this.api.asc_registerCallback("asc_onCoAuthoringChatReceiveMessage", _.bind(this.onApiChatMessage, this));
             }
             this.leftMenu.getMenu("file").setApi(api);
+            if (this.mode.canUseHistory) {
+                this.getApplication().getController("Common.Controllers.History").setApi(this.api);
+            }
             return this;
         },
         setMode: function (mode) {
@@ -106,13 +109,20 @@
         },
         createDelayedElements: function () {
             if (this.mode.canCoAuthoring) {
-                this.leftMenu.btnComments[this.mode.isEdit ? "show" : "hide"]();
-                this.leftMenu.btnChat.show();
-                this.leftMenu.setOptionsPanel("chat", this.getApplication().getController("Common.Controllers.Chat").getView("Common.Views.Chat"));
-                this.leftMenu.setOptionsPanel("comment", this.getApplication().getController("Common.Controllers.Comments").getView("Common.Views.Comments"));
+                this.leftMenu.btnComments[this.mode.isEdit && this.mode.canComments ? "show" : "hide"]();
+                if (this.mode.canComments) {
+                    this.leftMenu.setOptionsPanel("comment", this.getApplication().getController("Common.Controllers.Comments").getView("Common.Views.Comments"));
+                }
+                this.leftMenu.btnChat[this.mode.canChat ? "show" : "hide"]();
+                if (this.mode.canChat) {
+                    this.leftMenu.setOptionsPanel("chat", this.getApplication().getController("Common.Controllers.Chat").getView("Common.Views.Chat"));
+                }
             } else {
                 this.leftMenu.btnChat.hide();
                 this.leftMenu.btnComments.hide();
+            }
+            if (this.mode.canUseHistory) {
+                this.leftMenu.setOptionsPanel("history", this.getApplication().getController("Common.Controllers.History").getView("Common.Views.History"));
             }
             Common.util.Shortcuts.resumeEvents();
             return this;
@@ -140,6 +150,30 @@
                     close_menu = false;
                 } else {
                     this.onCreateNew(undefined, "blank");
+                }
+                break;
+            case "history":
+                if (this.api.isDocumentModified()) {
+                    var me = this;
+                    this.api.asc_stopSaving();
+                    Common.UI.warning({
+                        closable: false,
+                        title: this.notcriticalErrorTitle,
+                        msg: this.leavePageText,
+                        buttons: ["ok", "cancel"],
+                        primary: "ok",
+                        callback: _.bind(function (btn) {
+                            if (btn == "ok") {
+                                me.api.asc_undoAllChanges();
+                                me.showHistory();
+                            } else {
+                                me.api.asc_continueSaving();
+                            }
+                        },
+                        this)
+                    });
+                } else {
+                    this.showHistory();
                 }
                 break;
             default:
@@ -231,7 +265,7 @@
             }
         },
         clickStatusbarUsers: function () {
-            if (this.mode.canCoAuthoring) {
+            if (this.mode.canCoAuthoring && this.mode.canChat) {
                 if (this.leftMenu.btnChat.pressed) {
                     this.leftMenu.close();
                 } else {
@@ -333,6 +367,14 @@
                 this.dlgSearch["hide"]();
             }
         },
+        SetDisabled: function (disable) {
+            this.mode.isEdit = !disable;
+            if (disable) {
+                this.leftMenu.close();
+            }
+            this.leftMenu.btnComments.setDisabled(disable);
+            this.leftMenu.btnChat.setDisabled(disable);
+        },
         onApiChatMessage: function () {
             this.leftMenu.markCoauthOptions();
         },
@@ -405,13 +447,13 @@
                 }
                 break;
             case "chat":
-                if (this.mode.canCoAuthoring) {
+                if (this.mode.canCoAuthoring && this.mode.canChat) {
                     Common.UI.Menu.Manager.hideAll();
                     this.leftMenu.showMenu("chat");
                 }
                 return false;
             case "comments":
-                if (this.mode.canCoAuthoring && this.mode.isEdit) {
+                if (this.mode.canCoAuthoring && this.mode.isEdit && this.mode.canComments) {
                     Common.UI.Menu.Manager.hideAll();
                     this.leftMenu.showMenu("comments");
                     this.getApplication().getController("Common.Controllers.Comments").focusOnInput();
@@ -419,11 +461,25 @@
                 return false;
             }
         },
+        showHistory: function () {
+            var maincontroller = DE.getController("Main");
+            if (!maincontroller.loadMask) {
+                maincontroller.loadMask = new Common.UI.LoadMask({
+                    owner: $("#viewport")
+                });
+            }
+            maincontroller.loadMask.setTitle(this.textLoadHistory);
+            maincontroller.loadMask.show();
+            Common.Gateway.requestHistory();
+        },
         textNoTextFound: "Text not found",
         newDocumentTitle: "Unnamed document",
         requestEditRightsText: "Requesting editing rights...",
         textReplaceSuccess: "Search has been done. {0} occurrences have been replaced",
-        textReplaceSkipped: "The replacement has been made. {0} occurrences were skipped."
+        textReplaceSkipped: "The replacement has been made. {0} occurrences were skipped.",
+        textLoadHistory: "Loading versions history...",
+        notcriticalErrorTitle: "Warning",
+        leavePageText: "All unsaved changes in this document will be lost.<br> Click 'Cancel' then 'Save' to save them. Click 'OK' to discard all the unsaved changes."
     },
     DE.Controllers.LeftMenu || {}));
 });

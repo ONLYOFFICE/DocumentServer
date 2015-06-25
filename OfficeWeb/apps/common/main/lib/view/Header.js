@@ -54,7 +54,7 @@ define(["backbone", "text!common/main/lib/template/Header.template", "core"], fu
             this.headerCaption = this.options.headerCaption;
             this.documentCaption = this.options.documentCaption;
             this.canBack = this.options.canBack;
-            this.branding = this.options.branding;
+            this.branding = this.options.customization;
         },
         render: function () {
             $(this.el).html(this.template({

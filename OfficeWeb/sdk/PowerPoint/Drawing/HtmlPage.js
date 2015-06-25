@@ -1348,6 +1348,11 @@ function CEditorPage(api) {
         if (false === oThis.m_oApi.bInit_word_control) {
             return;
         }
+        if (undefined !== window["AscDesktopEditor"]) {
+            if (false === window["AscDesktopEditor"]["CheckNeedWheel"]()) {
+                return;
+            }
+        }
         if (oThis.DemonstrationManager.Mode) {
             if (e.preventDefault) {
                 e.preventDefault();

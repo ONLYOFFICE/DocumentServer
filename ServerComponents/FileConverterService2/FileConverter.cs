@@ -39,6 +39,7 @@ using System.Net;
 using System.Xml;
 using System.Text;
 using System.Web;
+using System.Web.Script.Serialization;
 using FileConverterUtils2;
 using log4net;
 using log4net.Config;
@@ -60,6 +61,20 @@ namespace FileConverterService2
             }
             char[] oDelimiters = new char[] { '\n' };
             return (new string(parmChars)).Split(oDelimiters, StringSplitOptions.RemoveEmptyEntries);
+        }
+    }
+
+    public class ChangesHistoryData
+    {
+        public string userid;
+        public string username;
+        public string date;
+
+        public ChangesHistoryData(string _userId, string _userName, DateTime _date)
+        {
+            userid = _userId;
+            username = _userName;
+            date = _date.ToString(Constants.mc_sDateTimeFormat);
         }
     }
 
@@ -387,9 +402,15 @@ namespace FileConverterService2
                                 string sChangesAuthor = null;
                                 int nIndexFile = 0;
                                 StreamWriter oStreamWriter = null;
+                                StreamWriter oStreamWriterChangesJSON = null;
+                                Ionic.Zip.ZipFile oZipFile = null;
                                 try
                                 {
-                                    
+                                    List<ChangesHistoryData> arrChangesHistoryData = new List<ChangesHistoryData>();
+                                    string strFileNameChange = "";
+
+                                    oZipFile = new Ionic.Zip.ZipFile();
+
                                     for (int i = 0, length = aChanges.Count; i < length; ++i)
                                     {
                                         if (null == sChangesAuthor || sChangesAuthor != aChanges[i].userid)
@@ -403,9 +424,13 @@ namespace FileConverterService2
                                             }
                                             sChangesAuthor = aChanges[i].userid;
 
-                                            oStreamWriter = new StreamWriter(Path.Combine(sChangesDir, "changes" + (nIndexFile++) + ".json"));
+                                            strFileNameChange = Path.Combine(sChangesDir, string.Format("changes{0}.json", nIndexFile++));
+                                            oZipFile.AddFile(strFileNameChange, "");
+                                            oStreamWriter = new StreamWriter(strFileNameChange);
                                             oStreamWriter.Write("[");
                                             oStreamWriter.Write(aChanges[i].data);
+
+                                            arrChangesHistoryData.Add(new ChangesHistoryData(sChangesAuthor, aChanges[i].username, aChanges[i].date));
                                         }
                                         else
                                         {
@@ -421,6 +446,17 @@ namespace FileConverterService2
                                         oStreamWriter.Dispose();
                                         oStreamWriter = null;
                                     }
+
+                                    oStreamWriterChangesJSON = new StreamWriter(Path.Combine(sDirResult, "changesHistory.json"));
+                                    JavaScriptSerializer oJsSerializer = new JavaScriptSerializer();
+
+                                    oStreamWriterChangesJSON.Write(oJsSerializer.Serialize(arrChangesHistoryData));
+                                    oStreamWriterChangesJSON.Dispose();
+                                    oStreamWriterChangesJSON = null;
+
+                                    oZipFile.Save(Path.Combine(sDirResult, "changes.zip"));
+                                    oZipFile.Dispose();
+                                    oZipFile = null;
                                 }
                                 catch
                                 {
@@ -429,6 +465,10 @@ namespace FileConverterService2
                                 {
                                     if (null != oStreamWriter)
                                         oStreamWriter.Dispose();
+                                    if (null != oStreamWriterChangesJSON)
+                                        oStreamWriterChangesJSON.Dispose();
+                                    if (null != oZipFile)
+                                        oZipFile.Dispose();
                                 }
                             }
                         }

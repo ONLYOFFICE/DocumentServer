@@ -245,6 +245,16 @@ function CFontFileLoader(id) {
         return (0 == this.Status || 1 == this.Status);
     };
     this.LoadFontAsync = function (basePath, _callback) {
+        if (window["AscDesktopEditor"] !== undefined && this.CanUseOriginalFormat) {
+            if (-1 != this.Status) {
+                return true;
+            }
+            this.callback = null;
+            this.Status = 2;
+            window["AscDesktopEditor"]["LoadFontBase64"](this.Id);
+            this._callback_font_load();
+            return;
+        }
         if (ASC_DOCS_API_USE_FONTS_ORIGINAL_FORMAT && this.CanUseOriginalFormat && bIsSupportOriginalFormatFonts && !window["qtDocBridge"] && !window["scriptBridge"]) {
             this.LoadFontAsync2(basePath, _callback);
             return;

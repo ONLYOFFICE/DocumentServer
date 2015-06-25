@@ -167,7 +167,7 @@
             this.editorConfig = data.config;
         },
         setMode: function (permissions) {
-            this.permissions = permissions; ! (this.permissions.canCoAuthoring && this.permissions.isEdit) ? Common.util.Shortcuts.suspendEvents(this.hkComments) : Common.util.Shortcuts.resumeEvents(this.hkComments);
+            this.permissions = permissions; ! (this.permissions.canCoAuthoring && this.permissions.isEdit && this.permissions.canComments) ? Common.util.Shortcuts.suspendEvents(this.hkComments) : Common.util.Shortcuts.resumeEvents(this.hkComments);
         },
         setApi: function (api) {
             this.api = api;
@@ -187,22 +187,26 @@
         onCopyPaste: function (item) {
             var me = this;
             if (me.api) {
-                var value = window.localStorage.getItem("sse-hide-copywarning");
-                if (! (value && parseInt(value) == 1) && me.show_copywarning) {
-                    (new Common.Views.CopyWarningDialog({
-                        handler: function (dontshow) {
-                            (item.value == "cut") ? me.api.asc_Cut() : ((item.value == "copy") ? me.api.asc_Copy() : me.api.asc_Paste());
-                            if (dontshow) {
-                                window.localStorage.setItem("sse-hide-copywarning", 1);
-                            }
-                            Common.NotificationCenter.trigger("edit:complete", me.documentHolder);
-                        }
-                    })).show();
-                } else {
+                if (typeof window["AscDesktopEditor"] === "object") {
                     (item.value == "cut") ? me.api.asc_Cut() : ((item.value == "copy") ? me.api.asc_Copy() : me.api.asc_Paste());
-                    Common.NotificationCenter.trigger("edit:complete", me.documentHolder);
+                } else {
+                    var value = window.localStorage.getItem("sse-hide-copywarning");
+                    if (! (value && parseInt(value) == 1) && me.show_copywarning) {
+                        (new Common.Views.CopyWarningDialog({
+                            handler: function (dontshow) {
+                                (item.value == "cut") ? me.api.asc_Cut() : ((item.value == "copy") ? me.api.asc_Copy() : me.api.asc_Paste());
+                                if (dontshow) {
+                                    window.localStorage.setItem("sse-hide-copywarning", 1);
+                                }
+                                Common.NotificationCenter.trigger("edit:complete", me.documentHolder);
+                            }
+                        })).show();
+                    } else {
+                        (item.value == "cut") ? me.api.asc_Cut() : ((item.value == "copy") ? me.api.asc_Copy() : me.api.asc_Paste());
+                        Common.NotificationCenter.trigger("edit:complete", me.documentHolder);
+                    }
+                    Common.component.Analytics.trackEvent("ToolBar", "Copy Warning");
                 }
-                Common.component.Analytics.trackEvent("ToolBar", "Copy Warning");
             }
         },
         onInsertEntire: function (item) {
@@ -342,7 +346,7 @@
             }
         },
         onAddComment: function (item) {
-            if (this.api && this.permissions.canCoAuthoring && this.permissions.isEdit) {
+            if (this.api && this.permissions.canCoAuthoring && this.permissions.isEdit && this.permissions.canComments) {
                 this.api.asc_enableKeyEvents(false);
                 var controller = SSE.getController("Common.Controllers.Comments"),
                 cellinfo = this.api.asc_getCellInfo();
@@ -910,8 +914,8 @@
                             documentHolder.pmiColumnWidth.setVisible(iscolmenu || isallmenu);
                             documentHolder.pmiEntireHide.setVisible(iscolmenu || isrowmenu);
                             documentHolder.pmiEntireShow.setVisible(iscolmenu || isrowmenu);
-                            documentHolder.ssMenu.items[10].setVisible(iscellmenu && !iscelledit && this.permissions.canCoAuthoring);
-                            documentHolder.pmiAddComment.setVisible(iscellmenu && !iscelledit && this.permissions.canCoAuthoring);
+                            documentHolder.ssMenu.items[10].setVisible(iscellmenu && !iscelledit && this.permissions.canCoAuthoring && this.permissions.canComments);
+                            documentHolder.pmiAddComment.setVisible(iscellmenu && !iscelledit && this.permissions.canCoAuthoring && this.permissions.canComments);
                             documentHolder.pmiCellMenuSeparator.setVisible(iscellmenu || isrowmenu || iscolmenu || isallmenu || insfunc);
                             documentHolder.pmiEntireHide.isrowmenu = isrowmenu;
                             documentHolder.pmiEntireShow.isrowmenu = isrowmenu;

@@ -73,16 +73,21 @@ function scRGB_to_sRGB(value) {
 }
 function checkRasterImageId(rasterImageId) {
     var api_sheet = window["Asc"]["editor"];
-    var sFindString;
+    var sFindString, sFindString2;
     if (api_sheet) {
         sFindString = api_sheet.wbModel.sUrlPath + "media/";
     } else {
         sFindString = window.editor.DocumentUrl + "media/";
+        sFindString2 = documentOrigin + sFindString;
     }
     if (0 === rasterImageId.indexOf(sFindString)) {
         return rasterImageId.substring(sFindString.length);
     } else {
-        return rasterImageId;
+        if (0 === rasterImageId.indexOf(sFindString2)) {
+            return rasterImageId.substring(sFindString2.length);
+        } else {
+            return rasterImageId;
+        }
     }
 }
 var g_oThemeFontsName = {};

@@ -60,8 +60,8 @@ namespace FileConverterUtils2
         public const string mc_sPostgreProvider = "Npgsql";
         public static System.Globalization.CultureInfo mc_oCultureInfo = new System.Globalization.CultureInfo(0x409);
         public const string mc_sResourceServiceUrlRel = "/ResourceService.ashx?path=";
-
-        public const string mc_sWebClientUserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)";
+        
+        public const string mc_sWebClientUserAgent = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2427.7 Safari/537.36";
         public const int mc_nBufferSize = 1024 * 1024;
     }
     public class Utils
@@ -659,6 +659,7 @@ namespace FileConverterUtils2
         public bool embeddedfonts { get; set; }
         public bool innersave { get; set; }
         public string userid { get; set; }
+        public bool viewmode { get; set; }
         
         public int status { get; set; }
         public int status_info { get; set; }

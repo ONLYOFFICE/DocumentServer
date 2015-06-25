@@ -209,12 +209,7 @@
             this._settings[c_oAscTypeSelectElement.Shape].needShow = false;
         },
         onCoAuthoringDisconnect: function () {
-            if (this.rightmenu) {
-                this.rightmenu.SetDisabled("", true, true);
-            }
-            this.setMode({
-                isEdit: false
-            });
+            this.SetDisabled(true, false);
         },
         onInsertTable: function () {
             this._settings[c_oAscTypeSelectElement.Table].needShow = true;
@@ -274,6 +269,32 @@
                 this.rightmenu.SetActivePane(type, true);
                 this._settings[type].panel.ChangeSettings.call(this._settings[type].panel, this._settings[type].props);
             }
+        },
+        SetDisabled: function (disabled, allowMerge) {
+            if (this.rightmenu) {
+                this.rightmenu.paragraphSettings.disableControls(disabled);
+                this.rightmenu.shapeSettings.disableControls(disabled);
+                this.rightmenu.headerSettings.disableControls(disabled);
+                this.rightmenu.tableSettings.disableControls(disabled);
+                this.rightmenu.imageSettings.disableControls(disabled);
+                this.rightmenu.chartSettings.disableControls(disabled);
+                if (disabled) {
+                    this.rightmenu.btnText.setDisabled(disabled);
+                    this.rightmenu.btnTable.setDisabled(disabled);
+                    this.rightmenu.btnImage.setDisabled(disabled);
+                    this.rightmenu.btnHeaderFooter.setDisabled(disabled);
+                    this.rightmenu.btnShape.setDisabled(disabled);
+                    this.rightmenu.btnChart.setDisabled(disabled);
+                } else {
+                    var selectedElements = this.api.getSelectedElements();
+                    if (selectedElements.length > 0) {
+                        this.onFocusObject(selectedElements);
+                    }
+                }
+            }
+            this.setMode({
+                isEdit: !disabled
+            });
         }
     });
 });

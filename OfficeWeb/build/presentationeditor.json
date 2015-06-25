@@ -1,7 +1,7 @@
 {
     "name": "presentationeditor",
     "version": "3.0.0",
-    "build": 760,
+    "build": 759,
     "homepage": "http://www.onlyoffice.com",
     "sdk": {
         "clean": [
@@ -22,12 +22,7 @@
                         ],
                         "dest": "../deploy/sdk/Common/"
                     },
-                    {
-                        "expand": true,
-                        "cwd": "../sdk/Fonts/",
-                        "src": "**/**",
-                        "dest": "../deploy/sdk/Fonts/"
-                    },
+                    
                     {
                         "expand": true,
                         "cwd": "../sdk/PowerPoint/themes/",

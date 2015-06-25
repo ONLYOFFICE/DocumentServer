@@ -36,6 +36,7 @@
             id: undefined,
             username: "Guest",
             color: "#fff",
+            colorval: null,
             online: false
         }
     });

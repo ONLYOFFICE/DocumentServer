@@ -44,6 +44,7 @@
             return;
         }
         this.initControl();
+        Common.component.Analytics.initialize("UA-12442749-13", "Spreadsheet Mobile");
         var app = this.getApplication();
         this.api = new Asc.spreadsheet_api("id-sdkeditor", "", SSE.controller.ApiEvents, {},
         {});

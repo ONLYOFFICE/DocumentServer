@@ -1,16 +1,9 @@
 {
     "name": "spreadsheeteditor",
     "version": "3.0.0",
-    "build": 858,
+    "build": 857,
     "homepage": "http://www.onlyoffice.com",
     "private": true,
-    "dependencies": {
-        "grunt": "~0.4.2",
-        "grunt-contrib": "~0.9.0",
-        "grunt-exec": "~0.4.5",
-        "grunt-replace": "~0.7.3",
-        "grunt-html-minify": "~0.3.1"
-    },
     "sdk": {
         "clean": [
             "../deploy/sdk/Common",
@@ -42,12 +35,7 @@
                         "src": "*.cur",
                         "dest": "../deploy/sdk/Word/Images/"
                     },
-                    {
-                        "expand": true,
-                        "cwd": "../sdk/Fonts/",
-                        "src": "**/**",
-                        "dest": "../deploy/sdk/Fonts/"
-                    },
+                    
                     {
                         "src": "../sdk/Excel/sdk-all.js",
                         "dest": "../deploy/sdk/Excel/sdk-all.js"

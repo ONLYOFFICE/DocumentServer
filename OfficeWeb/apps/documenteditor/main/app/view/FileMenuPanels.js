@@ -398,8 +398,7 @@
         initialize: function (options) {
             Common.UI.BaseView.prototype.initialize.call(this, arguments);
             this.rendered = false;
-            this.template = _.template(['<table class="main">', "<tr>", '<td class="left"><label>' + this.txtTitle + "</label></td>", '<td class="right"><label id="id-info-title">-</label></td>', "</tr>", '<tr class="author">', '<td class="left"><label>' + this.txtAuthor + "</label></td>", '<td class="right"><span class="userLink" id="id-info-author">-</span></td>', "</tr>", '<tr class="placement">', '<td class="left"><label>' + this.txtPlacement + "</label></td>", '<td class="right"><label id="id-info-placement">-</label></td>', "</tr>", '<tr class="date">', '<td class="left"><label>' + this.txtDate + "</label></td>", '<td class="right"><label id="id-info-date">-</label></td>', "</tr>", '<tr class="divider date"></tr>', '<tr class="rights">', '<td class="left" style="vertical-align: top;"><label>' + this.txtRights + "</label></td>", '<td class="right"><div id="id-info-rights"></div></td>', "</tr>", '<tr class="edit-rights">', '<td class="left"></td><td class="right"><button id="id-info-btn-edit" class="btn normal dlg-btn primary" style="margin-right: 10px;width: auto;">' + this.txtBtnAccessRights + "</button></td>", "</tr>", '<tr class="divider rights"></tr>', "<tr>", '<td class="left" style="vertical-align: top;"><label>' + this.txtStatistics + "</label></td>", '<td class="right" style="vertical-align: top;"><div id="id-info-statistic">', "<table>", "<tr>", "<td><label>" + this.txtPages + "</label></td>", '<td><label id="id-info-pages"></label></td>', "</tr>", "<tr>", "<td><label>" + this.txtParagraphs + "</label></td>", '<td><label id="id-info-paragraphs"></label></td>', "</tr>", "<tr>", "<td><label>" + this.txtWords + "</label></td>", '<td><label id="id-info-words"></label></td>', "</tr>", "<tr>", "<td><label>" + this.txtSymbols + "</label></td>", '<td><label id="id-info-symbols"></label></td>', "</tr>", "<tr>", "<td><label>" + this.txtSpaces + "</label></td>", '<td><label id="id-info-spaces"></label></td>', "</tr>", "</table>", "</div></td>", "</tr>", "</table>"].join(""));
-            this.templateRights = _.template(["<table>", "<% _.each(users, function(item) { %>", "<tr>", '<td><span class="userLink"><%= Common.Utils.String.htmlEncode(item.user) %></span></td>', "<td><%= Common.Utils.String.htmlEncode(item.permissions) %></td>", "</tr>", "<% }); %>", "</table>"].join(""));
+            this.template = _.template(['<table class="main">', "<tr>", '<td class="left"><label>' + this.txtTitle + "</label></td>", '<td class="right"><label id="id-info-title">-</label></td>', "</tr>", '<tr class="author">', '<td class="left"><label>' + this.txtAuthor + "</label></td>", '<td class="right"><span class="userLink" id="id-info-author">-</span></td>', "</tr>", '<tr class="placement">', '<td class="left"><label>' + this.txtPlacement + "</label></td>", '<td class="right"><label id="id-info-placement">-</label></td>', "</tr>", '<tr class="date">', '<td class="left"><label>' + this.txtDate + "</label></td>", '<td class="right"><label id="id-info-date">-</label></td>', "</tr>", '<tr class="divider date"></tr>', "<tr>", '<td class="left" style="vertical-align: top;"><label>' + this.txtStatistics + "</label></td>", '<td class="right" style="vertical-align: top;"><div id="id-info-statistic">', "<table>", "<tr>", "<td><label>" + this.txtPages + "</label></td>", '<td><label id="id-info-pages"></label></td>', "</tr>", "<tr>", "<td><label>" + this.txtParagraphs + "</label></td>", '<td><label id="id-info-paragraphs"></label></td>', "</tr>", "<tr>", "<td><label>" + this.txtWords + "</label></td>", '<td><label id="id-info-words"></label></td>', "</tr>", "<tr>", "<td><label>" + this.txtSymbols + "</label></td>", '<td><label id="id-info-symbols"></label></td>', "</tr>", "<tr>", "<td><label>" + this.txtSpaces + "</label></td>", '<td><label id="id-info-spaces"></label></td>', "</tr>", "</table>", "</div></td>", "</tr>", "</table>"].join(""));
             this.infoObj = {
                 PageCount: 0,
                 WordsCount: 0,
@@ -421,11 +420,6 @@
             this.lblStatParagraphs = $("#id-info-paragraphs");
             this.lblStatSymbols = $("#id-info-symbols");
             this.lblStatSpaces = $("#id-info-spaces");
-            this.cntRights = $("#id-info-rights");
-            this.btnEditRights = new Common.UI.Button({
-                el: "#id-info-btn-edit"
-            });
-            this.btnEditRights.on("click", _.bind(this.changeAccessRights, this));
             this.rendered = true;
             this.updateInfo(this.doc);
             if (_.isUndefined(this.scroller)) {
@@ -464,13 +458,6 @@
                     this.lblPlacement.text(doc.info.folder);
                 }
                 this._ShowHideInfoItem("placement", doc.info.folder !== undefined && doc.info.folder !== null);
-                if (doc.info.sharingSettings) {
-                    this.cntRights.html(this.templateRights({
-                        users: doc.info.sharingSettings
-                    }));
-                }
-                this._ShowHideInfoItem("rights", doc.info.sharingSettings !== undefined && doc.info.sharingSettings !== null && this._readonlyRights !== true);
-                this._ShowHideInfoItem("edit-rights", !!this.sharingSettingsUrl && this.sharingSettingsUrl.length && this._readonlyRights !== true);
             } else {
                 this._ShowHideDocInfo(false);
             }
@@ -482,8 +469,6 @@
             this._ShowHideInfoItem("date", visible);
             this._ShowHideInfoItem("placement", visible);
             this._ShowHideInfoItem("author", visible);
-            this._ShowHideInfoItem("rights", visible);
-            this._ShowHideInfoItem("edit-rights", visible);
         },
         updateStatisticInfo: function () {
             if (this.api && this.doc) {
@@ -504,7 +489,6 @@
             return this;
         },
         setMode: function (mode) {
-            this.sharingSettingsUrl = mode.sharingSettingsUrl;
             return this;
         },
         _onGetDocInfoStart: function () {
@@ -556,6 +540,85 @@
             this.lblStatSymbols.text(this.infoObj.SymbolsCount);
             this.lblStatSpaces.text(this.infoObj.SymbolsWSCount);
         },
+        txtTitle: "Document Title",
+        txtAuthor: "Author",
+        txtPlacement: "Placement",
+        txtDate: "Creation Date",
+        txtStatistics: "Statistics",
+        txtPages: "Pages",
+        txtWords: "Words",
+        txtParagraphs: "Paragraphs",
+        txtSymbols: "Symbols",
+        txtSpaces: "Symbols with spaces",
+        txtLoading: "Loading..."
+    },
+    DE.Views.FileMenuPanels.DocumentInfo || {}));
+    DE.Views.FileMenuPanels.DocumentRights = Common.UI.BaseView.extend(_.extend({
+        el: "#panel-rights",
+        menu: undefined,
+        initialize: function (options) {
+            Common.UI.BaseView.prototype.initialize.call(this, arguments);
+            this.rendered = false;
+            this.template = _.template(['<table class="main">', '<tr class="rights">', '<td class="left" style="vertical-align: top;"><label>' + this.txtRights + "</label></td>", '<td class="right"><div id="id-info-rights"></div></td>', "</tr>", '<tr class="edit-rights">', '<td class="left"></td><td class="right"><button id="id-info-btn-edit" class="btn normal dlg-btn primary" style="margin-right: 10px;width: auto;">' + this.txtBtnAccessRights + "</button></td>", "</tr>", "</table>"].join(""));
+            this.templateRights = _.template(["<table>", "<% _.each(users, function(item) { %>", "<tr>", '<td><span class="userLink"><%= Common.Utils.String.htmlEncode(item.user) %></span></td>', "<td><%= Common.Utils.String.htmlEncode(item.permissions) %></td>", "</tr>", "<% }); %>", "</table>"].join(""));
+            this.menu = options.menu;
+        },
+        render: function () {
+            $(this.el).html(this.template());
+            this.cntRights = $("#id-info-rights");
+            this.btnEditRights = new Common.UI.Button({
+                el: "#id-info-btn-edit"
+            });
+            this.btnEditRights.on("click", _.bind(this.changeAccessRights, this));
+            this.rendered = true;
+            this.updateInfo(this.doc);
+            if (_.isUndefined(this.scroller)) {
+                this.scroller = new Common.UI.Scroller({
+                    el: $(this.el),
+                    suppressScrollX: true
+                });
+            }
+            return this;
+        },
+        show: function () {
+            Common.UI.BaseView.prototype.show.call(this, arguments);
+        },
+        hide: function () {
+            Common.UI.BaseView.prototype.hide.call(this, arguments);
+        },
+        updateInfo: function (doc) {
+            this.doc = doc;
+            if (!this.rendered) {
+                return;
+            }
+            doc = doc || {};
+            if (doc.info) {
+                if (doc.info.sharingSettings) {
+                    this.cntRights.html(this.templateRights({
+                        users: doc.info.sharingSettings
+                    }));
+                }
+                this._ShowHideInfoItem("rights", doc.info.sharingSettings !== undefined && doc.info.sharingSettings !== null && doc.info.sharingSettings.length > 0);
+                this._ShowHideInfoItem("edit-rights", !!this.sharingSettingsUrl && this.sharingSettingsUrl.length && this._readonlyRights !== true);
+            } else {
+                this._ShowHideDocInfo(false);
+            }
+        },
+        _ShowHideInfoItem: function (cls, visible) {
+            $("tr." + cls, this.el)[visible ? "show" : "hide"]();
+        },
+        _ShowHideDocInfo: function (visible) {
+            this._ShowHideInfoItem("rights", visible);
+            this._ShowHideInfoItem("edit-rights", visible);
+        },
+        setApi: function (o) {
+            this.api = o;
+            return this;
+        },
+        setMode: function (mode) {
+            this.sharingSettingsUrl = mode.sharingSettingsUrl;
+            return this;
+        },
         changeAccessRights: function (btn, event, opts) {
             var me = this;
             var win = new Common.Views.DocumentAccessDialog({
@@ -563,6 +626,7 @@
             });
             win.on("accessrights", function (obj, rights) {
                 me.doc.info.sharingSettings = rights;
+                me._ShowHideInfoItem("rights", me.doc.info.sharingSettings !== undefined && me.doc.info.sharingSettings !== null && me.doc.info.sharingSettings.length > 0);
                 me.cntRights.html(me.templateRights({
                     users: me.doc.info.sharingSettings
                 }));
@@ -574,24 +638,12 @@
             if (!this.rendered) {
                 return;
             }
-            this._ShowHideInfoItem("rights", false);
             this._ShowHideInfoItem("edit-rights", false);
         },
-        txtTitle: "Document Title",
-        txtAuthor: "Author",
-        txtPlacement: "Placement",
-        txtDate: "Creation Date",
         txtRights: "Persons who have rights",
-        txtStatistics: "Statistics",
-        txtPages: "Pages",
-        txtWords: "Words",
-        txtParagraphs: "Paragraphs",
-        txtSymbols: "Symbols",
-        txtSpaces: "Symbols with spaces",
-        txtLoading: "Loading...",
         txtBtnAccessRights: "Change access rights"
     },
-    DE.Views.FileMenuPanels.DocumentInfo || {}));
+    DE.Views.FileMenuPanels.DocumentRights || {}));
     DE.Views.FileMenuPanels.Help = Common.UI.BaseView.extend({
         el: "#panel-help",
         menu: undefined,

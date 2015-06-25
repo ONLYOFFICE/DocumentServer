@@ -616,6 +616,9 @@ define(["core", "common/main/lib/model/Comment", "common/main/lib/collection/Com
             if (hint && this.isSelectedComment && (0 === _.difference(this.uids, uids).length)) {
                 return;
             }
+            if (this.mode && !this.mode.canComments) {
+                hint = true;
+            }
             if (this.getPopover()) {
                 this.clearDummyComment();
                 if (this.isSelectedComment && (0 === _.difference(this.uids, uids).length)) {
@@ -817,7 +820,7 @@ define(["core", "common/main/lib/model/Comment", "common/main/lib/collection/Com
             this.view.update();
         },
         disableHint: function (comment) {
-            if (comment) {
+            if (comment && this.mode.canComments) {
                 comment.set("hint", false);
                 this.isSelectedComment = true;
             }

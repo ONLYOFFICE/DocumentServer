@@ -46,4 +46,12 @@
             });
         }
     });
+    Common.Collections.HistoryUsers = Backbone.Collection.extend({
+        model: Common.Models.User,
+        findUser: function (id) {
+            return this.find(function (model) {
+                return model.get("id") == id;
+            });
+        }
+    });
 });

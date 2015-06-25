@@ -1,19 +1,27 @@
 {
-    "name": "common",
-    "version": "0.0.0",
-    "homepage": "http://www.onlyoffice.com",
-    "private": true,
-    "dependencies": {
-        "lodash": "2.4.1",
-        "grunt": "0.4.2",
-        "grunt-contrib": "0.9.0",
-        "grunt-exec": "0.4.5",
-        "grunt-replace": "0.7.3",
-        "grunt-html-minify": "0.3.1",
-        "grunt-text-replace": "0.3.11",
-        "mocha": "1.18.2",
-        "chai": "1.9.1",
-        "grunt-mocha": "0.4.11",
-        "grunt-jscoverage": "0.1.1"
-    }
+  "name": "common",
+  "version": "0.0.0",
+  "homepage": "http://www.onlyoffice.com",
+  "private": true,
+  "dependencies": {
+    "lodash": "2.4.1",
+    "grunt": "0.4.5",
+    "grunt-exec": "0.4.5",
+    "grunt-replace": "0.7.3",
+    "grunt-html-minify": "0.3.1",
+    "grunt-text-replace": "0.3.11",
+    "mocha": "1.18.2",
+    "chai": "1.9.1",
+    "grunt-mocha": "0.4.11",
+    "grunt-jscoverage": "0.1.1",
+    "grunt-contrib-less": "^1.0.0",
+    "grunt-contrib-requirejs": "^0.4.4",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-copy": "^0.8.0",
+    "grunt-contrib-uglify": "^0.8.1",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-imagemin": "^0.9.4",
+    "grunt-contrib-cssmin": "^0.12.2",
+    "less-plugin-clean-css": "1.5.0"
+  }
 }

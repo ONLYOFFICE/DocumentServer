@@ -42,6 +42,8 @@ namespace FileConverterUtils2
     {
         public string data;
         public string userid;
+        public string username;
+        public DateTime date;
     }
     public class DocsChanges
     {
@@ -66,6 +68,8 @@ namespace FileConverterUtils2
                                 DocsChange oDocsChange = new DocsChange();
                                 oDocsChange.data = Convert.ToString(oReader["dc_data"]);
                                 oDocsChange.userid = Convert.ToString(oReader["dc_user_id_original"]);
+                                oDocsChange.username = Convert.ToString(oReader["dc_user_name"]);
+                                oDocsChange.date = Convert.ToDateTime(oReader["dc_date"]);
                                 aChanges.Add(oDocsChange);
                             }
                         }

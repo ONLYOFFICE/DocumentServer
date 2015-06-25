@@ -126,7 +126,7 @@ CHistory.prototype = {
         }
         return false;
     },
-    Undo: function () {
+    Undo: function (Options) {
         this.Check_UninonLastPoints();
         if (true != this.Can_Undo()) {
             return null;
@@ -138,14 +138,28 @@ CHistory.prototype = {
             this.LastState = this.Document.Get_SelectionState();
         }
         this.Document.Selection_Remove();
-        var Point = this.Points[this.Index--];
         this.Internal_RecalcData_Clear();
-        for (var Index = Point.Items.length - 1; Index >= 0; Index--) {
-            var Item = Point.Items[Index];
-            Item.Class.Undo(Item.Data);
-            Item.Class.Refresh_RecalcData(Item.Data);
+        var Point = null;
+        if (undefined !== Options && null !== Options && true === Options.All) {
+            while (this.Index >= 0) {
+                Point = this.Points[this.Index--];
+                for (var Index = Point.Items.length - 1; Index >= 0; Index--) {
+                    var Item = Point.Items[Index];
+                    Item.Class.Undo(Item.Data);
+                    Item.Class.Refresh_RecalcData(Item.Data);
+                }
+            }
+        } else {
+            Point = this.Points[this.Index--];
+            for (var Index = Point.Items.length - 1; Index >= 0; Index--) {
+                var Item = Point.Items[Index];
+                Item.Class.Undo(Item.Data);
+                Item.Class.Refresh_RecalcData(Item.Data);
+            }
         }
-        this.Document.Set_SelectionState(Point.State);
+        if (null != Point) {
+            this.Document.Set_SelectionState(Point.State);
+        }
         return this.RecalculateData;
     },
     Redo: function () {

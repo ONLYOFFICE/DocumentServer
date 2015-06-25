@@ -116,6 +116,12 @@ function CIdCounter() {
     this.Set_Load = function (bValue) {
         this.m_bLoad = bValue;
     };
+    this.Clear = function () {
+        this.m_sUserId = null;
+        this.m_bLoad = true;
+        this.m_nIdCounterLoad = 0;
+        this.m_nIdCounterEdit = 0;
+    };
 }
 function CTableId() {
     this.m_aPairs = {};
@@ -560,7 +566,12 @@ CTableId.prototype = {
         }
         return true;
     },
-    Unlock: function (Data) {}
+    Unlock: function (Data) {},
+    Clear: function () {
+        this.m_aPairs = {};
+        this.m_bTurnOff = false;
+        this.Add(this, g_oIdCounter.Get_NewId());
+    }
 };
 var g_oIdCounter = null;
 var g_oTableId = null;

@@ -41,6 +41,7 @@ var DOCUMENT_SPELLING_EXCEPTIONAL_WORDS = {
 };
 function CDocumentSpelling() {
     this.Use = true;
+    this.TurnOn = 1;
     this.ErrorsExceed = false;
     this.Paragraphs = {};
     this.Words = {};
@@ -51,6 +52,12 @@ function CDocumentSpelling() {
     this.Words = DOCUMENT_SPELLING_EXCEPTIONAL_WORDS;
 }
 CDocumentSpelling.prototype = {
+    TurnOff: function () {
+        this.TurnOn -= 1;
+    },
+    TurnOn: function () {
+        this.TurnOn += 1;
+    },
     Add_Paragraph: function (Id, Para) {
         this.Paragraphs[Id] = Para;
     },
@@ -90,6 +97,9 @@ CDocumentSpelling.prototype = {
         return Count;
     },
     Continue_CheckSpelling: function () {
+        if (0 == this.TurnOn) {
+            return;
+        }
         if (true === this.ErrorsExceed) {
             return;
         }
@@ -131,12 +141,19 @@ CDocumentSpelling.prototype = {
             Para.SpellChecker.Check(undefined, true);
         }
     },
-    Add_WaitingParagraph: function (Para) {
+    Add_WaitingParagraph: function (Para, RecalcId, Words, Langs) {
         var ParaId = Para.Get_Id();
-        if (undefined === this.WaitingParagraphs[ParaId]) {
-            this.WaitingParagraphs[Para.Get_Id()] = Para;
+        var WPara = this.WaitingParagraphs[ParaId];
+        if (undefined === WPara || RecalcId !== WPara.RecalcId || true !== this.private_CompareWordsAndLangs(WPara.Words, Words, WPara.Langs, Langs)) {
+            this.WaitingParagraphs[ParaId] = {
+                Words: Words,
+                Langs: Langs,
+                RecalcId: RecalcId
+            };
             this.WaitingParagraphsCount++;
+            return true;
         }
+        return false;
     },
     Check_WaitingParagraph: function (Para) {
         var ParaId = Para.Get_Id();
@@ -151,6 +168,17 @@ CDocumentSpelling.prototype = {
             delete this.WaitingParagraphs[ParaId];
             this.WaitingParagraphsCount--;
         }
+    },
+    private_CompareWordsAndLangs: function (Words1, Words2, Langs1, Langs2) {
+        if (undefined === Words1 || undefined === Words2 || undefined === Langs1 || undefined === Langs2 || Words1.length !== Words2.length || Words1.length !== Langs1.length || Words1.length !== Langs2.length) {
+            return false;
+        }
+        for (var nIndex = 0, nCount = Words1.length; nIndex < nCount; nIndex++) {
+            if (Words1[nIndex] !== Words2[nIndex] || Langs1[nIndex] !== Langs2[nIndex]) {
+                return false;
+            }
+        }
+        return true;
     }
 };
 function CParaSpellChecker(Paragraph) {
@@ -220,16 +248,16 @@ CParaSpellChecker.prototype = {
             }
         }
         if (0 < usrWords.length) {
-            editor.WordControl.m_oLogicDocument.Spelling.Add_WaitingParagraph(this.Paragraph);
-            this.RecalcId += "_checked";
-            spellCheck(editor, {
-                "type": "spell",
-                "ParagraphId": this.ParaId,
-                "RecalcId": this.RecalcId,
-                "ElementId": 0,
-                "usrWords": usrWords,
-                "usrLang": usrLang
-            });
+            if (true === editor.WordControl.m_oLogicDocument.Spelling.Add_WaitingParagraph(this.Paragraph, this.RecalcId, usrWords, usrLang)) {
+                spellCheck(editor, {
+                    "type": "spell",
+                    "ParagraphId": this.ParaId,
+                    "RecalcId": this.RecalcId,
+                    "ElementId": 0,
+                    "usrWords": usrWords,
+                    "usrLang": usrLang
+                });
+            } else {}
         } else {
             if (undefined != ParagraphForceRedraw) {
                 ParagraphForceRedraw.ReDraw();
@@ -507,8 +535,17 @@ CDocument.prototype.Restart_CheckSpelling = function () {
         this.Content[Index].Restart_CheckSpelling();
     }
 };
+CDocument.prototype.Stop_CheckSpelling = function () {
+    this.Spelling.Reset();
+};
 CDocument.prototype.Continue_CheckSpelling = function () {
     this.Spelling.Continue_CheckSpelling();
+};
+CDocument.prototype.TurnOff_CheckSpelling = function () {
+    this.Spelling.TurnOff();
+};
+CDocument.prototype.TurnOn_CheckSpelling = function () {
+    this.Spelling.TurnOn();
 };
 CDocumentContent.prototype.Restart_CheckSpelling = function () {
     var Count = this.Content.length;

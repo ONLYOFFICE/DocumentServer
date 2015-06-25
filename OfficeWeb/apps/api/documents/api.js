@@ -68,16 +68,30 @@
                     },
                     ...
                 ],
-                branding: {
+                customization: {
                     logoUrl: 'header logo url', // default size 88 x 30
+                    logoUrlEmbedded: 'header logo url', // default size 88 x 30
                     backgroundColor: 'header background color',
                     textColor: 'header text color',
-                    customer: 'SuperPuper',
-                    customerAddr: 'New-York, 125f-25',
-                    customerMail: 'support@gmail.com',
-                    customerWww: 'www.superpuper.com',
-                    customerInfo: 'Some info',
-                    customerLogo: ''
+                    customer: {
+                        name: 'SuperPuper',
+                        address: 'New-York, 125f-25',
+                        mail: 'support@gmail.com',
+                        www: 'www.superpuper.com',
+                        info: 'Some info',
+                        logo: ''
+                    },
+                    about: false,
+                    feedback: {
+                        visible: false,
+                        url: http://...
+                    },
+                    goback: {
+                        visible: false,
+                        text: 'Go to London'
+                    },
+                    chat: false,
+                    comments: false
                 }
             },
             events: {
@@ -126,8 +140,8 @@
             _config = config || {};
 
         extend(_config, DocsAPI.DocEditor.defaultConfig);
-        extend(_config.editorConfig, DocsAPI.DocEditor.defaultConfig.editorConfig);
-        _config.editorConfig.canBackToFolder = !!_config.events.onBack;
+        _config.editorConfig.canBackToFolder = _config.events && !!_config.events.onBack;
+        _config.editorConfig.canUseHistory = !!_config.events.onRequestHistory;
 
         var onMouseUp = function (evt) {
             _processMouse(evt);
@@ -286,6 +300,26 @@
             });
         };
 
+        var _refreshHistory = function(data, message) {
+            _sendCommand({
+                command: 'refreshHistory',
+                data: {
+                    data: data,
+                    message: message
+                }
+            });
+        };
+
+        var _setHistoryData = function(data, message) {
+            _sendCommand({
+                command: 'setHistoryData',
+                data: {
+                    data: data,
+                    message: message
+                }
+            });
+        };
+
         var _processMouse = function(evt) {
             var r = iframe.getBoundingClientRect();
             var data = {
@@ -310,12 +344,24 @@
             });
         };
 
+        (function() {
+            var result = /[\?\&]placement=(\w+)&?/.exec(window.location.search);
+            if (!!result && result.length) {
+                if (result[1] == 'desktop') {
+                    _config.editorConfig.targetApp = result[1];
+                    _config.editorConfig.canBackToFolder = false;
+                }
+            }
+        })();
+
         return {
             showError           : _showError,
             showMessage         : _showMessage,
             applyEditRights     : _applyEditRights,
             processSaveResult   : _processSaveResult,
             processRightsChange : _processRightsChange,
+            refreshHistory      : _refreshHistory,
+            setHistoryData      : _setHistoryData,
             serviceCommand      : _serviceCommand,
             attachMouseEvents   : _attachMouseEvents,
             detachMouseEvents   : _detachMouseEvents
@@ -329,12 +375,16 @@
         height: '100%',
         editorConfig: {
             lang: 'en',
-            canCoAuthoring: true
+            canCoAuthoring: true,
+            customization: {
+                about: false,
+                feedback: false
+            }
         }
     };
 
     DocsAPI.DocEditor.version = function() {
-        return '3.0b';
+        return '3.0b##BN#';
     };
 
     MessageDispatcher = function(fn, scope) {
@@ -441,6 +491,7 @@
         iframe.height = config.height;
         iframe.align = "top";
         iframe.frameBorder = 0;
+        iframe.name = "frameEditor";
 
         return iframe;
     }
@@ -455,8 +506,14 @@
 
     function extend(dest, src) {
         for (var prop in src) {
-            if (src.hasOwnProperty(prop) && typeof dest[prop] === 'undefined') {
-                dest[prop] = src[prop];
+            if (src.hasOwnProperty(prop)) {
+                if (typeof dest[prop] === 'undefined') {
+                    dest[prop] = src[prop];
+                } else
+                if (typeof dest[prop] === 'object' &&
+                        typeof src[prop] === 'object') {
+                    extend(dest[prop], src[prop])
+                }
             }
         }
         return dest;

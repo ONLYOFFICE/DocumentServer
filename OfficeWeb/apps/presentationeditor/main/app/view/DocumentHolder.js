@@ -581,7 +581,7 @@
                     me.api.asc_registerCallback("asc_onDialogAddHyperlink", _.bind(onDialogAddHyperlink, me));
                     me.api.asc_registerCallback("asc_doubleClickOnChart", onDoubleClickOnChart);
                 }
-                me.mode = mode; ! (me.mode.canCoAuthoring && me.mode.isEdit) ? Common.util.Shortcuts.suspendEvents(hkComments) : Common.util.Shortcuts.resumeEvents(hkComments);
+                me.mode = mode; ! (me.mode.canCoAuthoring && me.mode.isEdit && me.mode.canComments) ? Common.util.Shortcuts.suspendEvents(hkComments) : Common.util.Shortcuts.resumeEvents(hkComments);
                 me.editorConfig = {
                     user: mode.user
                 };
@@ -650,7 +650,7 @@
             }
         },
         addComment: function (item, e, eOpt) {
-            if (this.api && this.mode.canCoAuthoring && this.mode.isEdit) {
+            if (this.api && this.mode.canCoAuthoring && this.mode.isEdit && this.mode.canComments) {
                 this.suppressEditComplete = true;
                 this.api.asc_enableKeyEvents(false);
                 var controller = PE.getController("Common.Controllers.Comments");
@@ -673,20 +673,24 @@
         onCutCopyPaste: function (item, e) {
             var me = this;
             if (me.api) {
-                var value = window.localStorage.getItem("pe-hide-copywarning");
-                if (! (value && parseInt(value) == 1) && me.show_copywarning) {
-                    (new Common.Views.CopyWarningDialog({
-                        handler: function (dontshow) {
-                            (item.value == "cut") ? me.api.Cut() : ((item.value == "copy") ? me.api.Copy() : me.api.Paste());
-                            if (dontshow) {
-                                window.localStorage.setItem("pe-hide-copywarning", 1);
-                            }
-                            me.fireEvent("editcomplete", me);
-                        }
-                    })).show();
-                } else {
+                if (typeof window["AscDesktopEditor"] === "object") {
                     (item.value == "cut") ? me.api.Cut() : ((item.value == "copy") ? me.api.Copy() : me.api.Paste());
-                    me.fireEvent("editcomplete", me);
+                } else {
+                    var value = window.localStorage.getItem("pe-hide-copywarning");
+                    if (! (value && parseInt(value) == 1) && me.show_copywarning) {
+                        (new Common.Views.CopyWarningDialog({
+                            handler: function (dontshow) {
+                                (item.value == "cut") ? me.api.Cut() : ((item.value == "copy") ? me.api.Copy() : me.api.Paste());
+                                if (dontshow) {
+                                    window.localStorage.setItem("pe-hide-copywarning", 1);
+                                }
+                                me.fireEvent("editcomplete", me);
+                            }
+                        })).show();
+                    } else {
+                        (item.value == "cut") ? me.api.Cut() : ((item.value == "copy") ? me.api.Copy() : me.api.Paste());
+                        me.fireEvent("editcomplete", me);
+                    }
                 }
             } else {
                 me.fireEvent("editcomplete", me);
@@ -1330,7 +1334,7 @@
                         menuAddHyperlinkPara.hyperProps.value = new CHyperlinkProperty();
                         menuAddHyperlinkPara.hyperProps.value.put_Text(text);
                     }
-                    menuAddCommentPara.setVisible(!isInChart && me.api.can_AddQuotedComment() !== false && me.mode.canCoAuthoring);
+                    menuAddCommentPara.setVisible(!isInChart && me.api.can_AddQuotedComment() !== false && me.mode.canCoAuthoring && me.mode.canComments);
                     menuCommentParaSeparator.setVisible(menuAddCommentPara.isVisible() || menuAddHyperlinkPara.isVisible() || menuHyperlinkPara.isVisible());
                     menuAddHyperlinkPara.setDisabled(disabled);
                     menuHyperlinkPara.setDisabled(disabled);
@@ -1386,7 +1390,7 @@
                         menuAddHyperlinkTable.setDisabled(value.paraProps.locked || disabled);
                         menuHyperlinkTable.setDisabled(value.paraProps.locked || disabled);
                     }
-                    menuAddCommentTable.setVisible(me.api.can_AddQuotedComment() !== false && me.mode.canCoAuthoring);
+                    menuAddCommentTable.setVisible(me.api.can_AddQuotedComment() !== false && me.mode.canCoAuthoring && me.mode.canComments);
                     menuAddCommentTable.setDisabled(!_.isUndefined(value.paraProps) && value.paraProps.locked || disabled);
                     menuHyperlinkSeparator.setVisible(menuAddHyperlinkTable.isVisible() || menuHyperlinkTable.isVisible() || menuAddCommentTable.isVisible());
                 },
@@ -1515,7 +1519,7 @@
                     menuShapeAdvanced.setVisible(_.isUndefined(value.imgProps) && _.isUndefined(value.chartProps));
                     menuChartEdit.setVisible(_.isUndefined(value.imgProps) && !_.isUndefined(value.chartProps) && (_.isUndefined(value.shapeProps) || value.shapeProps.isChart));
                     menuImgShapeSeparator.setVisible(menuImageAdvanced.isVisible() || menuShapeAdvanced.isVisible() || menuChartEdit.isVisible());
-                    menuAddCommentImg.setVisible(me.api.can_AddQuotedComment() !== false && me.mode.canCoAuthoring);
+                    menuAddCommentImg.setVisible(me.api.can_AddQuotedComment() !== false && me.mode.canCoAuthoring && me.mode.canComments);
                     menuCommentSeparatorImg.setVisible(menuAddCommentImg.isVisible());
                     menuAddCommentImg.setDisabled(disabled);
                     menuImgShapeAlign.setDisabled(disabled);

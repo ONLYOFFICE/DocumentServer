@@ -36,6 +36,19 @@
     }
 }
 
+#left-panel-history {
+    &+.layout-resizer {
+        border-left: 0 none;
+        border-right: 0 none;
+
+        &.move {
+            border-left: 1px solid @gray-dark;
+            border-right: 1px solid @gray-dark;
+            opacity: 0.4;
+        }
+    }
+}
+
 .tool-menu-btns {
     width: 40px;
     height: 100%;
@@ -57,6 +70,9 @@
         height: 100%;
     }
     #left-panel-comments {
+        height: 100%;
+    }
+    #left-panel-history {
         height: 100%;
     }
 }
@@ -387,7 +403,8 @@
             }
         }
 
-        #panel-info {
+        #panel-info,
+        #panel-rights {
             padding: 0 30px;
             table {
                 tr {

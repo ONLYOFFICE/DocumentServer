@@ -103,6 +103,16 @@
                 caption: this.btnInfoCaption,
                 canFocused: false
             }), new Common.UI.MenuItem({
+                el: $("#fm-btn-rights", this.el),
+                action: "rights",
+                caption: this.btnRightsCaption,
+                canFocused: false
+            }), new Common.UI.MenuItem({
+                el: $("#fm-btn-history", this.el),
+                action: "history",
+                caption: this.btnHistoryCaption,
+                canFocused: false
+            }), new Common.UI.MenuItem({
                 el: $("#fm-btn-settings", this.el),
                 action: "opts",
                 caption: this.btnSettingsCaption,
@@ -129,6 +139,9 @@
                         menu: me
                     })).render(),
                     "info": (new DE.Views.FileMenuPanels.DocumentInfo({
+                        menu: me
+                    })).render(),
+                    "rights": (new DE.Views.FileMenuPanels.DocumentRights({
                         menu: me
                     })).render(),
                     "help": (new DE.Views.FileMenuPanels.Help({
@@ -162,16 +175,17 @@
             this.api.asc_enableKeyEvents(true);
         },
         applyMode: function () {
-            this.items[0][this.mode.canBack ? "show" : "hide"]();
-            this.items[0].$el.find("+.devider")[this.mode.canBack ? "show" : "hide"]();
             this.items[5][this.mode.canOpenRecent ? "show" : "hide"]();
             this.items[6][this.mode.canCreateNew ? "show" : "hide"]();
             this.items[6].$el.find("+.devider")[this.mode.canCreateNew ? "show" : "hide"]();
             this.items[3][this.mode.canDownload ? "show" : "hide"]();
             this.items[1][this.mode.isEdit ? "show" : "hide"]();
             this.items[2][!this.mode.isEdit && this.mode.canEdit ? "show" : "hide"]();
+            this.mode.canBack ? this.$el.find("#fm-btn-back").show().prev().show() : this.$el.find("#fm-btn-back").hide().prev().hide();
+            this.items[8][(this.document && this.document.info && (this.document.info.sharingSettings && this.document.info.sharingSettings.length > 0 || this.mode.sharingSettingsUrl && this.mode.sharingSettingsUrl.length)) ? "show" : "hide"]();
             this.panels["opts"].setMode(this.mode);
             this.panels["info"].setMode(this.mode).updateInfo(this.document);
+            this.panels["rights"].setMode(this.mode).updateInfo(this.document);
             if (this.mode.canCreateNew) {
                 if (this.mode.templates && this.mode.templates.length) {
                     $("a", this.items[6].$el).text(this.btnCreateNewCaption + "...");
@@ -189,12 +203,16 @@
                     })).render();
                 }
             }
+            if (this.mode.isDesktopApp) {}
             this.panels["help"].setLangConfig(this.mode.lang);
+            this.items[9][this.mode.canUseHistory ? "show" : "hide"]();
+            this.items[9].setDisabled(this.mode.isDisconnected);
         },
         setMode: function (mode, delay) {
             if (mode.isDisconnected) {
                 this.mode.canEdit = this.mode.isEdit = false;
                 this.mode.canOpenRecent = this.mode.canCreateNew = false;
+                this.mode.isDisconnected = mode.isDisconnected;
             } else {
                 this.mode = mode;
             }
@@ -230,6 +248,7 @@
         btnSaveCaption: "Save",
         btnDownloadCaption: "Download as...",
         btnInfoCaption: "Document Info...",
+        btnRightsCaption: "Access Rights...",
         btnCreateNewCaption: "Create New",
         btnRecentFilesCaption: "Open Recent...",
         btnPrintCaption: "Print",
@@ -237,7 +256,8 @@
         btnReturnCaption: "Back to Document",
         btnToEditCaption: "Edit Document",
         btnBackCaption: "Go to Documents",
-        btnSettingsCaption: "Advanced Settings..."
+        btnSettingsCaption: "Advanced Settings...",
+        btnHistoryCaption: "Versions History"
     },
     DE.Views.FileMenu || {}));
 });

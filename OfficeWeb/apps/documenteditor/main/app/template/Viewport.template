@@ -9,6 +9,7 @@
                 <div id="about-menu-panel" class="left-menu-full-ct" style="display:none;"></div>
                 <div id="editor_sdk" class="layout-item"></div>
                 <div id="right-menu" class="layout-item"></div>
+                <div id="left-panel-history" class="layout-item" />
             </div>
         </div>
         <div id="statusbar" class="layout-item"></div>

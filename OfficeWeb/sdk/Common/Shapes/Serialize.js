@@ -1332,8 +1332,9 @@ function BinaryPPTYLoader() {
                                 break;
                             case 3:
                                 s.Skip2(6);
-                                uni_fill.fill.setRasterImageId(s.GetString2());
-                                var _s = uni_fill.fill.RasterImageId;
+                                var sReadPath = s.GetString2();
+                                uni_fill.fill.setRasterImageId(sReadPath);
+                                var _s = sReadPath;
                                 var indS = _s.lastIndexOf("emf");
                                 if (indS == -1) {
                                     indS = _s.lastIndexOf("wmf");
@@ -1341,16 +1342,18 @@ function BinaryPPTYLoader() {
                                 if (indS != -1 && (indS == (_s.length - 3))) {
                                     _s = _s.substring(0, indS);
                                     _s += "svg";
+                                    sReadPath = _s;
                                     uni_fill.fill.setRasterImageId(_s);
                                 }
                                 if (this.IsThemeLoader) {
-                                    uni_fill.fill.setRasterImageId("theme" + (this.Api.ThemeLoader.CurrentLoadThemeIndex + 1) + "/media/" + uni_fill.fill.RasterImageId);
+                                    sReadPath = "theme" + (this.Api.ThemeLoader.CurrentLoadThemeIndex + 1) + "/media/" + sReadPath;
+                                    uni_fill.fill.setRasterImageId(sReadPath);
                                 }
                                 if (this.ImageMapChecker != null) {
-                                    this.ImageMapChecker[uni_fill.fill.RasterImageId] = true;
+                                    this.ImageMapChecker[sReadPath] = true;
                                 }
                                 if (this.IsUseFullUrl) {
-                                    this.RebuildImages.push(new CBuilderImages(uni_fill.fill, uni_fill.fill.RasterImageId));
+                                    this.RebuildImages.push(new CBuilderImages(uni_fill.fill, sReadPath));
                                 }
                                 s.Skip2(1);
                                 break;
@@ -4712,6 +4715,7 @@ function BinaryPPTYLoader() {
                     }
                     para_pr.DefaultRunPr.Set_FromObject(r_pr);
                 }
+                break;
             default:
                 s.SkipRecord();
             }
