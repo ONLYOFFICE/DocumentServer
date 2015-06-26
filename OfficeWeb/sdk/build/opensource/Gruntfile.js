@@ -79,7 +79,7 @@
             pkg: grunt.file.readJSON(defaultConfig),
             uglify: {
                 options: {
-                    banner: "/*\n" + ' * (c) Copyright Ascensio System SIA 2010-<%= grunt.template.today("yyyy") %>\n' + " *\n" + " * This Source Code Form is subject to the terms of the Mozilla Public License,\n" + " * v. 2.0.\n" + " * If a copy of the MPL was not distributed with this file, you can obtain one\n" + " * at http://mozilla.org/MPL/2.0/.\n" + " * You can contact Ascensio System SIA by email at support@onlyoffice.com\n" + " *\n" + " * Version: <%= pkg.info.version %> (build:<%= pkg.info.build %>)\n" + " */"
+                    banner: "/*\n" + ' * (c) Copyright Ascensio System SIA 2010-<%= grunt.template.today("yyyy") %>\n' + " *\n" + " * Version: <%= pkg.info.version %> (build:<%= pkg.info.build %>)\n" + " */"
                 },
                 sdk: {
                     src: packageFile["compile"]["sdk"]["src"],
