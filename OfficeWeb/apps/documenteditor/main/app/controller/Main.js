@@ -307,11 +307,9 @@
                                 arrColors.push(user.get("colorval"));
                                 var changes = version.changes,
                                 change, i;
-                                if (changes) {
-                                    if (changes.length > 0) {
-                                        arrVersions[arrVersions.length - 1].set("changeid", changes.length - 1);
-                                        arrVersions[arrVersions.length - 1].set("docIdPrev", docIdPrev);
-                                    }
+                                if (changes && changes.length > 0) {
+                                    arrVersions[arrVersions.length - 1].set("changeid", changes.length - 1);
+                                    arrVersions[arrVersions.length - 1].set("docIdPrev", docIdPrev);
                                     for (i = changes.length - 2; i >= 0; i--) {
                                         change = changes[i];
                                         user = usersStore.findUser(change.user.id);
@@ -337,6 +335,10 @@
                                             selected: false
                                         }));
                                         arrColors.push(user.get("colorval"));
+                                    }
+                                } else {
+                                    if (ver == 0 && versions.length == 1) {
+                                        arrVersions[arrVersions.length - 1].set("docId", version.key + "1");
                                     }
                                 }
                             }

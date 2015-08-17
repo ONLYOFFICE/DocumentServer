@@ -1272,24 +1272,30 @@ asc_docs_api.prototype.sync_DownloadAsCallBack = function () {
 asc_docs_api.prototype.sync_StartAction = function (type, id) {
     this.asc_fireCallback("asc_onStartAction", type, id);
     if (c_oAscAsyncActionType.BlockInteraction == type) {
-        this.IsLongActionCurrent++;
+        this.asc_IncrementCounterLongAction();
     }
 };
 asc_docs_api.prototype.sync_EndAction = function (type, id) {
     this.asc_fireCallback("asc_onEndAction", type, id);
     if (c_oAscAsyncActionType.BlockInteraction == type) {
-        this.IsLongActionCurrent--;
-        if (this.IsLongActionCurrent < 0) {
-            this.IsLongActionCurrent = 0;
+        this.asc_DecrementCounterLongAction();
+    }
+};
+asc_docs_api.prototype.asc_IncrementCounterLongAction = function () {
+    this.IsLongActionCurrent++;
+};
+asc_docs_api.prototype.asc_DecrementCounterLongAction = function () {
+    this.IsLongActionCurrent--;
+    if (this.IsLongActionCurrent < 0) {
+        this.IsLongActionCurrent = 0;
+    }
+    if (!this.asc_IsLongAction()) {
+        var _length = this.LongActionCallbacks.length;
+        for (var i = 0; i < _length; i++) {
+            this.LongActionCallbacks[i](this.LongActionCallbacksParams[i]);
         }
-        if (!this.asc_IsLongAction()) {
-            var _length = this.LongActionCallbacks.length;
-            for (var i = 0; i < _length; i++) {
-                this.LongActionCallbacks[i](this.LongActionCallbacksParams[i]);
-            }
-            this.LongActionCallbacks.splice(0, _length);
-            this.LongActionCallbacksParams.splice(0, _length);
-        }
+        this.LongActionCallbacks.splice(0, _length);
+        this.LongActionCallbacksParams.splice(0, _length);
     }
 };
 asc_docs_api.prototype.asc_IsLongAction = function () {
@@ -3574,6 +3580,12 @@ asc_docs_api.prototype.asc_getChartPreviews = function (chartType) {
 };
 asc_docs_api.prototype.sync_closeChartEditor = function () {
     this.asc_fireCallback("asc_onCloseChartEditor");
+};
+asc_docs_api.prototype.asc_stopSaving = function () {
+    this.asc_IncrementCounterLongAction();
+};
+asc_docs_api.prototype.asc_continueSaving = function () {
+    this.asc_DecrementCounterLongAction();
 };
 function CContextMenuData() {
     this.Type = c_oAscContextMenuTypes.Main;

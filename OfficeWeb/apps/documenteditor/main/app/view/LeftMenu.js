@@ -37,11 +37,12 @@
         template: _.template(menuTemplate),
         events: function () {
             return {
-                "click #left-btn-support": function () {
-                    window.open("http://feedback.onlyoffice.com/");
-                },
                 "click #left-btn-comments": _.bind(this.onCoauthOptions, this),
-                "click #left-btn-chat": _.bind(this.onCoauthOptions, this)
+                "click #left-btn-chat": _.bind(this.onCoauthOptions, this),
+                "click #left-btn-support": function () {
+                    var config = this.mode.customization;
+                    config && !!config.feedback && !!config.feedback.url ? window.open(config.feedback.url) : window.open("http://feedback.onlyoffice.com/");
+                }
             };
         },
         initialize: function () {

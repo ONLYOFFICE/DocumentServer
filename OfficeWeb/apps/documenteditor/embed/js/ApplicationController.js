@@ -213,12 +213,18 @@
         Common.Analytics.trackEvent("Load", "Complete");
     }
     function onEditorPermissions(params) {
-        if (params.asc_getCanBranding() && (typeof config.customization == "object") && config.customization && config.customization.logoUrlEmbedded) {
-            $("#header-logo").css({
-                "background-image": 'url("' + config.customization.logoUrlEmbedded + '")',
-                "background-position": "0 center",
-                "background-repeat": "no-repeat"
-            });
+        if (params.asc_getCanBranding() && (typeof config.customization == "object") && config.customization && config.customization.logo) {
+            var logo = $("#header-logo");
+            if (config.customization.logo.imageEmbedded) {
+                logo.css({
+                    "background-image": 'url("' + config.customization.logo.imageEmbedded + '")',
+                    "background-position": "0 center",
+                    "background-repeat": "no-repeat"
+                });
+            }
+            if (config.customization.logo.url) {
+                logo.attr("href", config.customization.logo.url);
+            }
         }
     }
     function showMask() {
@@ -450,7 +456,7 @@
             updateEmbedCode();
             api && api.asc_enableKeyEvents(true);
         });
-        $("#page-number").on("keypress", function (e) {
+        $("#page-number").on("keyup", function (e) {
             if (e.keyCode == 13) {
                 var newPage = parseInt($("#page-number").val());
                 if (newPage > maxPages) {
@@ -463,6 +469,9 @@
                     api.goToPage(newPage - 1);
                 }
             }
+        });
+        $("#page-number").on("focusout", function (e) {
+            api && api.asc_enableKeyEvents(true);
         });
         $("#id-btn-fullscreen").on("click", function () {
             openLink(embedConfig.fullscreenUrl);

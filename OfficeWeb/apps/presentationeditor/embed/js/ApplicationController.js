@@ -81,13 +81,13 @@
     function loadConfig(data) {
         config = $.extend(config, data.config);
         embedConfig = $.extend(embedConfig, data.config.embedded);
-        $("#id-short-url").text(embedConfig.shareUrl || "Unavailable");
+        $("#id-short-url").val(embedConfig.shareUrl || "Unavailable");
         $("#id-textarea-embed").text(embedCode.replace("{embed-url}", embedConfig.embedUrl).replace("{width}", minEmbedWidth).replace("{height}", minEmbedHeight));
         if (typeof embedConfig.shareUrl !== "undefined" && embedConfig.shareUrl != "") {
             if ($("#id-popover-social-container ul")) {
                 $("#id-popover-social-container ul").append('<li><div class="fb-like" data-href="' + embedConfig.shareUrl + '" data-send="false" data-layout="button_count" data-width="450" data-show-faces="false"></div></li>');
                 $("#id-popover-social-container ul").append('<li class="share-twitter"><a href="https://twitter.com/share" class="twitter-share-button" data-url="' + embedConfig.shareUrl + '">Tweet</a></li>');
-                $("#id-popover-social-container ul").append('<li class="share-mail"><a class="btn btn-mini" href="mailto:?subject=I have shared a document with you: ' + embedConfig.docTitle + "&body=I have shared a document with you: " + embedConfig.shareUrl + '"><i class="icon-envelope"></i>Email</a></li>');
+                $("#id-popover-social-container ul").append('<li class="share-mail"><a class="btn btn-xs btn-default" href="mailto:?subject=I have shared a document with you: ' + embedConfig.docTitle + "&body=I have shared a document with you: " + embedConfig.shareUrl + '"><span class="glyphicon glyphicon-envelope"></span>Email</a></li>');
             }
         }
         if (typeof embedConfig.shareUrl === "undefined") {
@@ -210,12 +210,18 @@
         Common.Analytics.trackEvent("Load", "Complete");
     }
     function onEditorPermissions(params) {
-        if (params.asc_getCanBranding() && (typeof config.customization == "object") && config.customization && config.customization.logoUrlEmbedded) {
-            $("#header-logo").css({
-                "background-image": 'url("' + config.customization.logoUrlEmbedded + '")',
-                "background-position": "0 center",
-                "background-repeat": "no-repeat"
-            });
+        if (params.asc_getCanBranding() && (typeof config.customization == "object") && config.customization && config.customization.logo) {
+            var logo = $("#header-logo");
+            if (config.customization.logo.imageEmbedded) {
+                logo.css({
+                    "background-image": 'url("' + config.customization.logo.imageEmbedded + '")',
+                    "background-position": "0 center",
+                    "background-repeat": "no-repeat"
+                });
+            }
+            if (config.customization.logo.url) {
+                logo.attr("href", config.customization.logo.url);
+            }
         }
     }
     function showMask() {
@@ -308,7 +314,7 @@
         if (visible) {
             if (owner) {
                 popover.css("display", "block");
-                var popoverData = owner.data("popover"),
+                var popoverData = owner.data("bs.popover"),
                 $tip = popoverData.tip(),
                 pos = popoverData.getPosition(false),
                 actualHeight = $tip[0].offsetHeight,
@@ -378,7 +384,7 @@
             }
             $("#id-btn-copy-short").button("copied");
             $("#id-btn-copy-short").addClass("copied");
-            clipShortUrl.setText($("#id-short-url").text());
+            clipShortUrl.setText($("#id-short-url").val());
             setTimeout(function () {
                 $("#id-btn-copy-short").button("reset");
                 $("#id-btn-copy-short").removeClass("copied");

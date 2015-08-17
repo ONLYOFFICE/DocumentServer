@@ -80,8 +80,12 @@
                 value = customer.address;
                 value && value.length ? this.lblCompanyAddress.text(value) : this.lblCompanyAddress.parents("tr").addClass("hidden");
                 (value = customer.mail) && value.length ? this.lblCompanyMail.attr("href", "mailto:" + value).text(value) : this.lblCompanyMail.parents("tr").addClass("hidden");
-                (value = customer.www) && value.length ? this.lblCompanyUrl.attr("href", "http://" + value).text(value) : this.lblCompanyUrl.parents("tr").addClass("hidden");
-                (value = customer.info) && value.length ? this.lblCompanyLic.text(value) : this.lblCompanyLic.parents("tr").addClass("hidden");
+                if ((value = customer.www) && value.length) {
+                    var http = !/^https?:\/{2}/i.test(value) ? "http://": "";
+                    this.lblCompanyUrl.attr("href", http + value).text(value);
+                } else {
+                    this.lblCompanyUrl.parents("tr").addClass("hidden");
+                } (value = customer.info) && value.length ? this.lblCompanyLic.text(value) : this.lblCompanyLic.parents("tr").addClass("hidden");
                 (value = customer.logo) && value.length ? this.divCompanyLogo.html('<img src="' + value + '" />') : this.divCompanyLogo.parents("tr").addClass("hidden");
             } else {
                 this.cntLicenseeInfo.addClass("hidden");

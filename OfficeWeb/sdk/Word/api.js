@@ -913,7 +913,7 @@ asc_docs_api.prototype.LoadFontsFromServer = function (_fonts) {
     this.FontLoader.LoadFontsFromServer(_fonts);
 };
 asc_docs_api.prototype.SetCollaborativeMarksShowType = function (Type) {
-    if (c_oAscCollaborativeMarksShowType.None !== this.CollaborativeMarksShowType && c_oAscCollaborativeMarksShowType.None === Type) {
+    if (c_oAscCollaborativeMarksShowType.None !== this.CollaborativeMarksShowType && c_oAscCollaborativeMarksShowType.None === Type && this.WordControl && this.WordControl.m_oLogicDocument) {
         this.CollaborativeMarksShowType = Type;
         CollaborativeEditing.Clear_CollaborativeMarks(true);
     } else {
@@ -2847,24 +2847,30 @@ asc_docs_api.prototype.sync_DownloadAsCallBack = function () {
 asc_docs_api.prototype.sync_StartAction = function (type, id) {
     this.asc_fireCallback("asc_onStartAction", type, id);
     if (c_oAscAsyncActionType.BlockInteraction == type) {
-        this.IsLongActionCurrent++;
+        this.asc_IncrementCounterLongAction();
     }
 };
 asc_docs_api.prototype.sync_EndAction = function (type, id) {
     this.asc_fireCallback("asc_onEndAction", type, id);
     if (c_oAscAsyncActionType.BlockInteraction == type) {
-        this.IsLongActionCurrent--;
-        if (this.IsLongActionCurrent < 0) {
-            this.IsLongActionCurrent = 0;
+        this.asc_DecrementCounterLongAction();
+    }
+};
+asc_docs_api.prototype.asc_IncrementCounterLongAction = function () {
+    this.IsLongActionCurrent++;
+};
+asc_docs_api.prototype.asc_DecrementCounterLongAction = function () {
+    this.IsLongActionCurrent--;
+    if (this.IsLongActionCurrent < 0) {
+        this.IsLongActionCurrent = 0;
+    }
+    if (!this.asc_IsLongAction()) {
+        var _length = this.LongActionCallbacks.length;
+        for (var i = 0; i < _length; i++) {
+            this.LongActionCallbacks[i](this.LongActionCallbacksParams[i]);
         }
-        if (!this.asc_IsLongAction()) {
-            var _length = this.LongActionCallbacks.length;
-            for (var i = 0; i < _length; i++) {
-                this.LongActionCallbacks[i](this.LongActionCallbacksParams[i]);
-            }
-            this.LongActionCallbacks.splice(0, _length);
-            this.LongActionCallbacksParams.splice(0, _length);
-        }
+        this.LongActionCallbacks.splice(0, _length);
+        this.LongActionCallbacksParams.splice(0, _length);
     }
 };
 asc_docs_api.prototype.asc_IsLongAction = function () {
@@ -6689,6 +6695,12 @@ asc_docs_api.prototype.asc_AddMath2 = function (Type) {
         this.WordControl.m_oLogicDocument.Paragraph_Add(MathElement);
     }
 };
+asc_docs_api.prototype.asc_stopSaving = function () {
+    this.asc_IncrementCounterLongAction();
+};
+asc_docs_api.prototype.asc_continueSaving = function () {
+    this.asc_DecrementCounterLongAction();
+};
 asc_docs_api.prototype.asc_showRevision = function (newObj) {
     if (!newObj.docId) {
         return;
@@ -6725,6 +6737,7 @@ asc_docs_api.prototype.asc_CloseFile = function () {
     History.Clear();
     g_oIdCounter.Clear();
     g_oTableId.Clear();
+    CollaborativeEditing.Clear();
     this.isApplyChangesOnOpenEnabled = true;
     var oLogicDocument = this.WordControl.m_oLogicDocument;
     oLogicDocument.Stop_Recalculate();
@@ -6963,6 +6976,7 @@ function CSpellCheckApi_desktop() {
     this.onSpellCheck = function (spellData) {
         SpellCheck_CallBack(spellData);
     };
+    this.disconnect = function () {};
 }
 window["AscDesktopEditor_Save"] = function () {
     return editor.asc_Save();

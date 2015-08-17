@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="TrackingService" %>
+﻿<%@ WebHandler Language="C#" CodeBehind="TrackingService.ashx.cs" Class="DocService.TrackingService" %>
 /*
  * (c) Copyright Ascensio System SIA 2010-2015
  *
@@ -32,24 +32,3 @@
  */
  
 
-
-using System;
-using System.Web;
-using System.Xml;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using FileConverterUtils2;
-
-public class TrackingService : IHttpHandler {
-
-    public void ProcessRequest (HttpContext context)
-    {
-
-    }
- 
-    public bool IsReusable {
-        get {
-            return false;
-        }
-    }
-}

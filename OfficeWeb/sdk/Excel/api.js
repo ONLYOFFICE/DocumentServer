@@ -2746,6 +2746,12 @@ var ASC_DOCS_API_USE_EMBEDDED_FONTS = "@@ASC_DOCS_API_USE_EMBEDDED_FONTS";
             }
         }
     };
+    spreadsheet_api.prototype.asc_stopSaving = function () {
+        this.waitSave = true;
+    };
+    spreadsheet_api.prototype.asc_continueSaving = function () {
+        this.waitSave = false;
+    };
     spreadsheet_api.prototype.offlineModeInit = function () {
         var t = this;
         if (window["scriptBridge"]) {
@@ -3225,6 +3231,8 @@ var ASC_DOCS_API_USE_EMBEDDED_FONTS = "@@ASC_DOCS_API_USE_EMBEDDED_FONTS";
     prot["asc_coAuthoringGetUsers"] = prot.asc_coAuthoringGetUsers;
     prot["asc_coAuthoringChatGetMessages"] = prot.asc_coAuthoringChatGetMessages;
     prot["asc_coAuthoringDisconnect"] = prot.asc_coAuthoringDisconnect;
+    prot["asc_stopSaving"] = prot.asc_stopSaving;
+    prot["asc_continueSaving"] = prot.asc_continueSaving;
     prot["asc_openNewDocument"] = prot.asc_openNewDocument;
     prot["asc_loadDocumentFromDisk"] = prot.asc_loadDocumentFromDisk;
     prot["asc_nativeOpenFile"] = prot.asc_nativeOpenFile;

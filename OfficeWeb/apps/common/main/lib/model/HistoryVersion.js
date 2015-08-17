@@ -47,6 +47,7 @@ define(["underscore", "backbone", "common/main/lib/component/BaseView"], functio
                 id: Common.UI.getId(),
                 url: "",
                 urlDiff: "",
+                urlGetTime: "",
                 docId: "",
                 docIdPrev: "",
                 arrColors: [],

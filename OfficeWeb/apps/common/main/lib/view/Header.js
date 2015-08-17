@@ -45,7 +45,8 @@ define(["backbone", "text!common/main/lib/template/Header.template", "core"], fu
         template: _.template(headerTemplate),
         events: {
             "click #header-logo": function (e) {
-                var newDocumentPage = window.open("http://www.onlyoffice.com");
+                var _url = !!this.branding && !!this.branding.logo && !!this.branding.logo.url ? this.branding.logo.url : "http://www.onlyoffice.com";
+                var newDocumentPage = window.open(_url);
                 newDocumentPage && newDocumentPage.focus();
             }
         },
@@ -70,10 +71,10 @@ define(["backbone", "text!common/main/lib/template/Header.template", "core"], fu
         setBranding: function (value) {
             var element;
             this.branding = value;
-            if (value && value.logoUrl) {
+            if (value && value.logo && value.logo.image) {
                 element = $("#header-logo");
                 if (element) {
-                    element.css("background-image", 'url("' + value.logoUrl + '")');
+                    element.css("background-image", 'url("' + value.logo.image + '")');
                 }
             }
         },

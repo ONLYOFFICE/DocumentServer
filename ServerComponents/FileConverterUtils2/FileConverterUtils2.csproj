@@ -33,35 +33,35 @@
   <ItemGroup>
     <Reference Include="ASC.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\wwwroot\Bin\ASC.Common.dll</HintPath>
+      <HintPath>..\..\..\DocService\Bin\ASC.Common.dll</HintPath>
     </Reference>
     <Reference Include="ASC.Core.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\wwwroot\Bin\ASC.Core.Common.dll</HintPath>
+      <HintPath>..\..\..\DocService\Bin\ASC.Core.Common.dll</HintPath>
     </Reference>
     <Reference Include="AWSSDK, Version=1.5.2.2, Culture=neutral, PublicKeyToken=cd2d24cd2bace800, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\wwwroot\Bin\AWSSDK.dll</HintPath>
+      <HintPath>..\..\..\DocService\Bin\AWSSDK.dll</HintPath>
     </Reference>
     <Reference Include="Enyim.Caching, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\wwwroot\Bin\Enyim.Caching.dll</HintPath>
+      <HintPath>..\..\..\DocService\Bin\Enyim.Caching.dll</HintPath>
     </Reference>
     <Reference Include="Ionic.Zip.Reduced, Version=1.9.1.5, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\wwwroot\Bin\Ionic.Zip.Reduced.dll</HintPath>
+      <HintPath>..\..\..\DocService\Bin\Ionic.Zip.Reduced.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\wwwroot\Bin\log4net.dll</HintPath>
+      <HintPath>..\..\..\DocService\Bin\log4net.dll</HintPath>
     </Reference>
     <Reference Include="MySql.Data, Version=6.3.6.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\wwwroot\Bin\MySql.Data.dll</HintPath>
+      <HintPath>..\..\..\DocService\Bin\MySql.Data.dll</HintPath>
     </Reference>
     <Reference Include="OpenMcdf, Version=1.5.4.22637, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\wwwroot\Bin\OpenMcdf.dll</HintPath>
+      <HintPath>..\..\..\DocService\Bin\OpenMcdf.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -125,6 +125,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy $(TargetPath) $(ProjectDir)..\..\..\wwwroot\Bin\</PostBuildEvent>
+    <PostBuildEvent>copy $(TargetPath) $(ProjectDir)..\..\..\DocService\Bin\</PostBuildEvent>
   </PropertyGroup>
 </Project>

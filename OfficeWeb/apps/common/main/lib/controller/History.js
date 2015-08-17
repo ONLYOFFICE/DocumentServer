@@ -57,12 +57,13 @@
         },
         onSelectRevision: function (picker, item, record) {
             var url = record.get("url"),
-            rev = record.get("revision");
+            rev = record.get("revision"),
+            urlGetTime = new Date();
             this.currentChangeId = record.get("changeid");
             this.currentArrColors = record.get("arrColors");
             this.currentDocId = record.get("docId");
             this.currentDocIdPrev = record.get("docIdPrev");
-            if (_.isEmpty(url)) {
+            if (_.isEmpty(url) || (urlGetTime - record.get("urlGetTime") > 5 * 60000)) {
                 _.delay(function () {
                     Common.Gateway.requestHistoryData(rev);
                 },
@@ -76,6 +77,10 @@
                 hist.asc_setCurrentChangeId(this.currentChangeId);
                 hist.asc_setArrColors(this.currentArrColors);
                 this.api.asc_showRevision(hist);
+                var commentsController = this.getApplication().getController("Common.Controllers.Comments");
+                if (commentsController) {
+                    commentsController.onApiHideComment();
+                }
             }
         },
         onSetHistoryData: function (opts) {
@@ -92,12 +97,14 @@
                 var data = opts.data;
                 var historyStore = this.getApplication().getCollection("Common.Collections.HistoryVersions");
                 if (historyStore && data !== null) {
-                    var rev, revisions = historyStore.findRevisions(data.version);
+                    var rev, revisions = historyStore.findRevisions(data.version),
+                    urlGetTime = new Date();
                     if (revisions && revisions.length > 0) {
                         for (var i = 0; i < revisions.length; i++) {
                             rev = revisions[i];
                             rev.set("url", opts.data.url);
                             rev.set("urlDiff", opts.data.urlDiff);
+                            rev.set("urlGetTime", urlGetTime);
                         }
                     }
                     var hist = new Asc.asc_CVersionHistory();
@@ -107,6 +114,10 @@
                     hist.asc_setCurrentChangeId(this.currentChangeId);
                     hist.asc_setArrColors(this.currentArrColors);
                     this.api.asc_showRevision(hist);
+                    var commentsController = this.getApplication().getController("Common.Controllers.Comments");
+                    if (commentsController) {
+                        commentsController.onApiHideComment();
+                    }
                 }
             }
         },

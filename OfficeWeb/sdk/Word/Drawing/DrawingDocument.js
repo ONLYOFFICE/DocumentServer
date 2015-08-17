@@ -3820,8 +3820,9 @@ function CDrawingDocument() {
             }
         } else {
             this.GuiCanvasTextProps = document.createElement("canvas");
-            this.GuiCanvasTextProps.style = "position:absolute;left:0;top:0;";
-            this.GuiCanvasTextProps.id = this.GuiCanvasTextPropsId;
+            this.GuiCanvasTextProps.style.position = "absolute";
+            this.GuiCanvasTextProps.style.left = "0px";
+            this.GuiCanvasTextProps.style.top = "0px";
             var _width = parseInt(_div_elem.offsetWidth);
             var _height = parseInt(_div_elem.offsetHeight);
             if (0 == _width) {

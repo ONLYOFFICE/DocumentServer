@@ -69,8 +69,11 @@
                     ...
                 ],
                 customization: {
-                    logoUrl: 'header logo url', // default size 88 x 30
-                    logoUrlEmbedded: 'header logo url', // default size 88 x 30
+                    logo: {
+                        image: url,
+                        imageEmbedded: url,
+                        url: http://...
+                    },
                     backgroundColor: 'header background color',
                     textColor: 'header text color',
                     customer: {

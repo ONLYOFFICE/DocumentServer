@@ -149,8 +149,8 @@
         <!-- vendors -->
 
         <script type="text/javascript" src="../../../vendor/touch/sencha-touch-all.js"></script>
-        <script type="text/javascript" src="../../../vendor/jquery/jquery-1.7.1.min.js"></script>
-        <script type="text/javascript" src="../../../vendor/sockjs/sockjs-0.3.min.js"></script>
+        <script type="text/javascript" src="../../../vendor/jquery/jquery.min.js"></script>
+        <script type="text/javascript" src="../../../vendor/sockjs/sockjs.min.js"></script>
         <script type="text/javascript" src="../../../vendor/underscore/underscore-min.js"></script>
         <script type="text/javascript" src="../../../vendor/xregexp/xregexp-all-min.js"></script>
 

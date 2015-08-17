@@ -68,9 +68,6 @@
   font-size: 12px;
   overflow: hidden;
 }
-.popover.top {
-  margin-top: -10px;
-}
 .viewer {
   position: absolute;
   margin: 0;
@@ -344,114 +341,6 @@ a.brand-logo {
   font-weight: bold;
   font-size: 1.6em;
   padding-bottom: 10px;
-}
-.popover .popover-content {
-  padding: 14px;
-}
-.popover .btn {
-  -webkit-border-radius: 2px;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
-}
-.popover.hyperlink .popover-content {
-  padding: 5px 10px;
-}
-.popover.hyperlink .popover-content p {
-  display: block;
-  word-wrap: break-word;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.popover.share {
-  width: 280px;
-}
-.popover.share .share-link .caption {
-  margin-right: 8px;
-  float: left;
-}
-.popover.share .share-link .uneditable-input {
-  font-size: 1em;
-  padding: 0 4px;
-  margin-right: 5px;
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  border-radius: 0;
-  cursor: auto;
-  -moz-user-select: text;
-  -khtml-user-select: text;
-  -webkit-user-select: text;
-  -ms-user-select: text;
-  user-select: text;
-}
-.popover.share .share-link .input-medium {
-  width: 130px;
-}
-.popover.share .share-link .btn {
-  float: right;
-}
-.popover.share .share-buttons ul {
-  height: 25px;
-  list-style-type: none;
-  margin: 5px 0 0;
-  overflow: hidden;
-}
-.popover.share .share-buttons ul li {
-  display: inline-block;
-  float: left;
-  margin: 1px 5px 0 0;
-  vertical-align: middle;
-}
-.popover.share .share-buttons ul li.share-mail {
-  float: right;
-  margin: 0;
-}
-.popover.share .share-buttons ul li.share-mail a {
-  padding: 2px 8px;
-}
-.popover.share .share-buttons ul li.share-mail i {
-  margin-right: 5px;
-}
-.popover.share .share-buttons ul li.share-twitter {
-  max-width: 100px;
-}
-.popover.embed {
-  width: 270px;
-}
-.popover.embed .size-manual {
-  margin-bottom: 10px;
-}
-.popover.embed .right {
-  float: right;
-}
-.popover.embed .caption {
-  margin-right: 8px;
-}
-.popover.embed input {
-  font-size: 1em;
-  padding: 0 4px;
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  border-radius: 0;
-  margin: 0;
-  margin-top: -1px;
-}
-.popover.embed input.input-mini {
-  width: 40px;
-}
-.popover.embed textarea {
-  width: 228px;
-  resize: none;
-  cursor: auto;
-  font-size: 1em;
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  border-radius: 0;
-}
-.popover.embed button {
-  float: right;
-  margin: 5px 0 15px;
-  width: 86px;
 }
 .modal.error .modal-footer {
   text-align: center;

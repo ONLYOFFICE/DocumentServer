@@ -32,7 +32,8 @@
  var sockjs = require("sockjs"),
 nodehun = require("nodehun"),
 config = require("./config.json"),
-logger = require("./../../Common/sources/logger");
+logger = require("./../../Common/sources/logger"),
+fs = require("fs");
 var arrDictionaries = {};
 (function () {
     var arrDictionariesConfig = config["dictionaries"];
@@ -43,15 +44,14 @@ var arrDictionaries = {};
         oDictTmp = arrDictionariesConfig[indexDict];
         oDictName = oDictTmp.name;
         pathTmp = __dirname + "/../Dictionaries/" + oDictName + "/" + oDictName + ".";
-        arrDictionaries[oDictTmp.id] = new nodehun.Dictionary(pathTmp + "aff", pathTmp + "dic");
+        arrDictionaries[oDictTmp.id] = new nodehun(fs.readFileSync(pathTmp + "aff"), fs.readFileSync(pathTmp + "dic"));
     }
 })();
 exports.install = function (server, callbackFunction) {
     var sockjs_opts = {
         sockjs_url: "./../../Common/sources/sockjs-0.3.min.js"
     },
-    sockjs_echo = sockjs.createServer(sockjs_opts),
-    dataHandler;
+    sockjs_echo = sockjs.createServer(sockjs_opts);
     sockjs_echo.on("connection", function (conn) {
         if (null == conn) {
             logger.error("null == conn");
@@ -60,9 +60,13 @@ exports.install = function (server, callbackFunction) {
         conn.on("data", function (message) {
             try {
                 var data = JSON.parse(message);
-                dataHandler[data.type](conn, data);
+                switch (data.type) {
+                case "spellCheck":
+                    spellCheck(conn, data);
+                    break;
+                }
             } catch(e) {
-                logger.error("error receiving response:" + e);
+                logger.error("error receiving response: %s", e);
             }
         });
         conn.on("error", function () {
@@ -75,52 +79,55 @@ exports.install = function (server, callbackFunction) {
     function sendData(conn, data) {
         conn.write(JSON.stringify(data));
     }
-    dataHandler = (function () {
-        function spellCheck(conn, data) {
-            function checkEnd() {
-                if (0 === data.usrWordsLength) {
-                    sendData(conn, {
-                        type: "spellCheck",
-                        spellCheckData: JSON.stringify(data)
-                    });
-                }
+    function spellCheck(conn, data) {
+        var oSpellInfo;
+        function checkEnd() {
+            if (0 === oSpellInfo.usrWordsLength) {
+                sendData(conn, {
+                    type: "spellCheck",
+                    spellCheckData: JSON.stringify(data)
+                });
             }
-            function spellSuggest(index, word, lang) {
-                var oDictionary = arrDictionaries[lang];
-                if (undefined === oDictionary) {
-                    data.usrCorrect[index] = false;
-                    --data.usrWordsLength;
-                    checkEnd();
+        }
+        function spellSuggest(index, word, lang) {
+            oSpellInfo.arrTimes[index] = new Date();
+            logger.info("start %s word = %s, lang = %s", data.type, word, lang);
+            var oDictionary = arrDictionaries[lang];
+            if (undefined === oDictionary) {
+                data.usrCorrect[index] = false;
+                --data.usrWordsLength;
+                checkEnd();
+            } else {
+                if ("spell" === data.type) {
+                    oDictionary.isCorrect(word, function (err, correct, origWord) {
+                        data.usrCorrect[index] = (!err && correct);
+                        logger.info("spell word = %s, lang = %s, time = %s", word, lang, new Date() - oSpellInfo.arrTimes[index]);
+                        --oSpellInfo.usrWordsLength;
+                        checkEnd();
+                    });
                 } else {
-                    if ("spell" === data.type) {
-                        oDictionary.spellSuggest(word, function (a, b) {
-                            data.usrCorrect[index] = a;
-                            --data.usrWordsLength;
+                    if ("suggest" === data.type) {
+                        oDictionary.spellSuggestions(word, function (err, correct, suggestions, origWord) {
+                            data.usrSuggest[index] = suggestions;
+                            logger.info("suggest word = %s, lang = %s, time = %s", word, lang, new Date() - oSpellInfo.arrTimes[index]);
+                            --oSpellInfo.usrWordsLength;
                             checkEnd();
                         });
-                    } else {
-                        if ("suggest" === data.type) {
-                            oDictionary.spellSuggestions(word, function (a, b) {
-                                data.usrSuggest[index] = b;
-                                --data.usrWordsLength;
-                                checkEnd();
-                            });
-                        }
                     }
                 }
             }
-            data = JSON.parse(data.spellCheckData);
-            data.usrCorrect = [];
-            data.usrSuggest = [];
-            data.usrWordsLength = data.usrWords.length;
-            for (var i = 0, length = data.usrWords.length; i < length; ++i) {
-                spellSuggest(i, data.usrWords[i], data.usrLang[i]);
-            }
         }
-        return {
-            spellCheck: spellCheck
+        data = JSON.parse(data.spellCheckData);
+        data.usrCorrect = [];
+        data.usrSuggest = [];
+        oSpellInfo = {
+            usrWordsLength: data.usrWords.length,
+            arrTimes: []
         };
-    } ());
+        for (var i = 0, length = data.usrWords.length; i < length; ++i) {
+            spellSuggest(i, data.usrWords[i], data.usrLang[i]);
+        }
+    }
     sockjs_echo.installHandlers(server, {
         prefix: "/doc/[0-9-.a-zA-Z_=]*/c",
         log: function (severity, message) {
@@ -128,4 +135,22 @@ exports.install = function (server, callbackFunction) {
         }
     });
     callbackFunction();
+};
+exports.spellSuggest = function (type, word, lang, callbackFunction) {
+    var oDictionary = arrDictionaries[lang];
+    if (undefined === oDictionary) {
+        callbackFunction(false);
+    } else {
+        if ("spell" === type) {
+            oDictionary.isCorrect(word, function (err, correct, origWord) {
+                callbackFunction(!err && correct);
+            });
+        } else {
+            if ("suggest" === type) {
+                oDictionary.spellSuggestions(word, function (err, correct, suggestions, origWord) {
+                    callbackFunction(suggestions);
+                });
+            }
+        }
+    }
 };

@@ -95,6 +95,9 @@
             if (this.mode.canCoAuthoring && this.mode.canChat) {
                 this.api.asc_registerCallback("asc_onCoAuthoringChatReceiveMessage", _.bind(this.onApiChatMessage, this));
             }
+            if (!this.mode.canLicense) {
+                this.api.SetCollaborativeMarksShowType(c_oAscCollaborativeMarksShowType.None);
+            }
             this.leftMenu.getMenu("file").setApi(api);
             if (this.mode.canUseHistory) {
                 this.getApplication().getController("Common.Controllers.History").setApi(this.api);
@@ -202,7 +205,7 @@
             default:
                 value = c_oAscCollaborativeMarksShowType.LastChanges;
             }
-            this.api.SetCollaborativeMarksShowType(value);
+            this.api.SetCollaborativeMarksShowType(this.mode.canLicense ? value : c_oAscCollaborativeMarksShowType.None);
             value = window.localStorage.getItem("de-settings-livecomment");
             (!(value !== null && parseInt(value) == 0)) ? this.api.asc_showComments() : this.api.asc_hideComments();
             value = window.localStorage.getItem("de-settings-fontrender");

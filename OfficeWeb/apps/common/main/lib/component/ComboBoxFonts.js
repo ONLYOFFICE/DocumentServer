@@ -317,13 +317,13 @@ define(["common/main/lib/component/ComboBox"], function () {
                 } else {
                     Common.UI.ComboBox.prototype.onAfterShowMenu.apply(this, arguments);
                 }
+                this.flushVisibleFontsTiles();
                 this.updateVisibleFontsTiles(null, 0);
             },
             onAfterHideMenu: function (e) {
                 if (this.lastValue !== this._input.val()) {
                     this._input.val(this.lastValue);
                 }
-                this.flushVisibleFontsTiles();
                 Common.UI.ComboBox.prototype.onAfterHideMenu.apply(this, arguments);
             },
             addItemToRecent: function (record) {

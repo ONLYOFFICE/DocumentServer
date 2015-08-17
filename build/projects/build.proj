@@ -39,13 +39,13 @@
     <CallTarget Targets="Common" />
     <MSBuild Projects="$(MSBuildProjectFullPath)" Properties="ProjectDir=$(InputDir)$(OfficeWeb)\sdk\build\opensource" Targets="BuildProject" />
     <MSBuild Projects="$(MSBuildProjectFullPath)" Properties="ProjectDir=$(InputDir)$(OfficeWeb)\build" Targets="BuildProject" />
-    <CallTarget Targets="DeployDocService" />
+    <CallTarget Targets="BuildDocService;DeployDocService" />
   </Target>
   <Target Name="Commercial">
     <CallTarget Targets="Common" />
     <MSBuild Projects="$(MSBuildProjectFullPath)" Properties="ProjectDir=$(InputDir)$(OfficeWeb)\sdk\build\deploy" Targets="BuildProject" Condition=" '$(SkipBuildSdk)'!='true' " />
     <MSBuild Projects="$(MSBuildProjectFullPath)" Properties="ProjectDir=$(InputDir)$(OfficeWeb)\build" Targets="BuildProject" />
-    <CallTarget Targets="DeployDocService" />
+    <CallTarget Targets="BuildDocService;DeployDocService" />
   </Target>
   <Target Name="Internal">
     <CallTarget Targets="Commercial" />
@@ -53,20 +53,23 @@
   <Target Name="CleanupOutputDir">
     <RemoveDir Directories="$(OutputDir)" ContinueOnError="false" />
   </Target>
-  <Target Name="DeployDocService">
+  <Target Name="BuildDocService">
     <ItemGroup>
-      <DocServiceFiles Include="$(InputDir)$(DocService)\**" />
       <ServerComponentsFiles Include="&#xD;				$(InputDir)$(ServerComponents)$(Bin)\FileConverterUtils2.dll;" />
       <ConfigFiles Include="&#xD;					$(InputDir)$(ServerComponents)$(Bin)\Settings.config;&#xD;					$(InputDir)$(ServerComponents)$(Bin)\ConnectionStrings.config;" />
-      <OfficeWebFiles Include="$(InputDir)$(OfficeWeb)\deploy\**" />
       <ThirdPartyFiles Include="$(InputDir)$(ThirdParty)$(Bin)\**" />
     </ItemGroup>
-    <RemoveDir Directories="$(InputDir)$(DocServiceUncompiled)" ContinueOnError="false" />
-    <Copy SourceFiles="@(DocServiceFiles)" DestinationFiles="@(DocServiceFiles-&gt;'$(InputDir)$(DocServiceUncompiled)\%(RecursiveDir)%(Filename)%(Extension)')" />
-    <Copy SourceFiles="@(ServerComponentsFiles)" DestinationFiles="@(ServerComponentsFiles-&gt;'$(InputDir)$(DocServiceUncompiled)$(Bin)\%(RecursiveDir)%(Filename)%(Extension)')" />
-    <Copy SourceFiles="@(ConfigFiles)" DestinationFiles="@(ConfigFiles-&gt;'$(InputDir)$(DocServiceUncompiled)\%(RecursiveDir)%(Filename)%(Extension)')" />
-    <Copy SourceFiles="@(ThirdPartyFiles)" DestinationFiles="@(ThirdPartyFiles-&gt;'$(InputDir)$(DocServiceUncompiled)$(Bin)\%(RecursiveDir)%(Filename)%(Extension)')" />
-    <AspNetCompiler VirtualPath="/" PhysicalPath="$(InputDir)$(DocServiceUncompiled)" TargetPath="$(OutputDir)$(DocService)" Force="true" />
+    <Copy SourceFiles="@(ServerComponentsFiles)" DestinationFiles="@(ServerComponentsFiles-&gt;'$(InputDir)$(DocService)$(Bin)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(ConfigFiles)" DestinationFiles="@(ConfigFiles-&gt;'$(InputDir)$(DocService)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(ThirdPartyFiles)" DestinationFiles="@(ThirdPartyFiles-&gt;'$(InputDir)$(DocService)$(Bin)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <MSBuild Projects="$(InputDir)$(DocService)\DocService.csproj" Properties="Configuration=Release;" />
+  </Target>
+  <Target Name="DeployDocService">
+    <ItemGroup>
+      <DocServiceFiles Include="$(InputDir)$(DocService)\**" Exclude="&#xD;					$(InputDir)$(DocService)\**\*.cs*;&#xD;					$(InputDir)$(DocService)$(Bin)$(DocService).dll.config;&#xD;					$(InputDir)$(DocService)\obj\**;" />
+      <OfficeWebFiles Include="$(InputDir)$(OfficeWeb)\deploy\**" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DocServiceFiles)" DestinationFiles="@(DocServiceFiles-&gt;'$(OutputDir)$(DocService)\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(OfficeWebFiles)" DestinationFiles="@(OfficeWebFiles-&gt;'$(OutputDir)$(DocService)$(OfficeWeb)\%(RecursiveDir)%(Filename)%(Extension)')" />
     <MakeDir Directories="$(OutputDir)$(DocService)$(AppData)" Condition="$(TargetOs) == 'Windows'" />
   </Target>
@@ -103,9 +106,6 @@
     <Copy SourceFiles="@(SpellCheckerServiceFiles)" DestinationFiles="@(SpellCheckerServiceFiles-&gt;'$(OutputDir)$(SpellCheckerService)\SpellChecker\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Exec Command="npm install" WorkingDirectory="$(OutputDir)$(SpellCheckerService)\SpellChecker" />
     <Exec Command="npm install" WorkingDirectory="$(OutputDir)$(SpellCheckerService)\Common" />
-    <Copy SourceFiles="@(NodehunFiles)" DestinationFiles="@(NodehunFiles-&gt;'$(OutputDir)$(SpellCheckerService)\SpellChecker\node_modules\nodehun\%(RecursiveDir)%(Filename)%(Extension)')" />
-    <Exec Command="node-gyp rebuild" WorkingDirectory="$(OutputDir)$(SpellCheckerService)\SpellChecker\node_modules\nodehun" />
-    <RemoveDir Directories="&#xD;				$(OutputDir)$(SpellCheckerService)\SpellChecker\node_modules\nodehun\src\hunspell\;" />
   </Target>
   <Target Name="CopyLicenseFiles">
     <ItemGroup>

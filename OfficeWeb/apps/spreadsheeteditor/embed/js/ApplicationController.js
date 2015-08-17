@@ -188,12 +188,18 @@
         Common.Analytics.trackEvent("Load", "Complete");
     }
     function onEditorPermissions(params) {
-        if (params.asc_getCanBranding() && (typeof config.customization == "object") && config.customization && config.customization.logoUrlEmbedded) {
-            $("#header-logo").css({
-                "background-image": 'url("' + config.customization.logoUrlEmbedded + '")',
-                "background-position": "0 center",
-                "background-repeat": "no-repeat"
-            });
+        if (params.asc_getCanBranding() && (typeof config.customization == "object") && config.customization && config.customization.logo) {
+            var logo = $("#header-logo");
+            if (config.customization.logo.imageEmbedded) {
+                logo.css({
+                    "background-image": 'url("' + config.customization.logo.imageEmbedded + '")',
+                    "background-position": "0 center",
+                    "background-repeat": "no-repeat"
+                });
+            }
+            if (config.customization.logo.url) {
+                logo.attr("href", config.customization.logo.url);
+            }
         }
     }
     function showMask() {
