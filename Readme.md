@@ -28,8 +28,9 @@ ONLYOFFICE Document Server is a part of **ONLYOFFICE Free Edition** that compris
 
 ##Documentation
 
-The easiest way to install ONLYOFFICE Document Server is to use the Docker image. You can also install it from the repository. The following documentation is available to the community depending on the way you choose:
+The easiest way to install ONLYOFFICE Document Server is to use the Docker image. You can also install it from the repository or compiling the source code. The following documentation is available to the community depending on the way you choose:
 
+* [Compiling ONLYOFFICE Document Server for a Local Server](http://helpcenter.onlyoffice.com/server/linux/document/compile-source-code.aspx "Compiling ONLYOFFICE Document Server for a Local Server")
 * [Installing ONLYOFFICE Document Server Linux Version](https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=4381391&doc=ZDdHWWYrTVJJMmpUTEVLRkNTOHhUSEplZklDQjQwQWVSajNhQ2VYamk4Zz0_IjQzODEzOTEi0 "Installing ONLYOFFICE Document Server Linux Version")
 * [Installing ONLYOFFICE Document Server Docker Version](https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=4356431&doc=TTlaTDdWdHA1Ny9PRFlHQUl0cDFDTFZhdnpBUFVVQmc0b0pNRnBzRndPTT0_IjQzNTY0MzEi0 "Installing ONLYOFFICE Document Server Docker Version")
 
