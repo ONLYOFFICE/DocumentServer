@@ -1,9 +1,0 @@
-{
-    "name": "common",
-    "version": "1.0.0",
-    "homepage": "http://www.onlyoffice.com",
-    "private": true,
-    "dependencies": {
-		"log4js": "0.6.22"
-    }
-}

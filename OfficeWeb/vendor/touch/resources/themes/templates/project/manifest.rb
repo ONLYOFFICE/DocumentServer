@@ -1,1 +1,0 @@
-stylesheet 'sencha-touch.scss'
