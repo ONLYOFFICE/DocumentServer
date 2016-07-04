@@ -40,15 +40,10 @@ License: [GNU AGPL v3.0](https://help.onlyoffice.com/products/files/doceditor.as
 
 SaaS version: [http://www.onlyoffice.com](http://www.onlyoffice.com "http://www.onlyoffice.com")
 
-## ONLYOFFICE One Click Installation
-
-ONLYOFFICE Document Server is a part of **ONLYOFFICE Free Edition** that comprises also Community Server and Mail Server. To get ONLYOFFICE Free Edition in one click, make use of [ONLYOFFICE One Click Installation](https://controlpanel.onlyoffice.com/ "ONLYOFFICE One Click Installation").
-
 ##Documentation
 
 The easiest way to install ONLYOFFICE Document Server is to use the Docker image. You can also install it from the repository or compiling the source code. The following documentation is available to the community depending on the way you choose:
 
-* [Compiling ONLYOFFICE Document Server for a Local Server](http://helpcenter.onlyoffice.com/server/linux/document/compile-source-code.aspx "Compiling ONLYOFFICE Document Server for a Local Server")
 * [Installing ONLYOFFICE Document Server Linux Version](http://helpcenter.onlyoffice.com/server/linux/document/linux-installation.aspx "Installing ONLYOFFICE Document Server Linux Version")
 * [Installing ONLYOFFICE Document Server Docker Version](http://helpcenter.onlyoffice.com/server/docker/document/docker-installation.aspx "Installing ONLYOFFICE Document Server Docker Version")
 
