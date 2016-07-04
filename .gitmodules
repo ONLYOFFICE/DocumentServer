@@ -10,3 +10,6 @@
 [submodule "server"]
 	path = server
 	url = https://github.com/ONLYOFFICE/server.git
+[submodule "dictionaries"]
+	path = dictionaries
+	url = https://github.com/ONLYOFFICE/dictionaries.git
