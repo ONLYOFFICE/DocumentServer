@@ -40,7 +40,7 @@ SaaS version: [http://www.onlyoffice.com](http://www.onlyoffice.com "http://www.
 
 ## ONLYOFFICE One Click Installation
 
-ONLYOFFICE Document Server is a part of **ONLYOFFICE Community Edition** that comprises also Community Server and Mail Server. To get ONLYOFFICE Free Edition in one click, make use of [ONLYOFFICE One Click Installation](https://controlpanel.onlyoffice.com/ "ONLYOFFICE One Click Installation").
+ONLYOFFICE Document Server is a part of **ONLYOFFICE Community Edition** that comprises also [Community Server](https://github.com/ONLYOFFICE/CommunityServer "Community Server") and [Mail Server](https://github.com/ONLYOFFICE/Docker-MailServer "Mail Server"). To get ONLYOFFICE Free Edition in one click, make use of [ONLYOFFICE One Click Installation](https://controlpanel.onlyoffice.com/ "ONLYOFFICE One Click Installation").
 
 ##Documentation
 
