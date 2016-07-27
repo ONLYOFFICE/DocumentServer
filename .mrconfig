@@ -1,4 +1,4 @@
-DEFAULT]
+[DEFAULT]
 git = git $@
 
 [core]
