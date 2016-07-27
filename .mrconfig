@@ -21,3 +21,6 @@ checkout = git clone git@github.com:ONLYOFFICE/document-server-package.git
 
 [document-server-integration]
 checkout = git clone git@github.com:ONLYOFFICE/document-server-integration.git
+
+[Docker-DocumentServer]
+checkout = git clone git@github.com:ONLYOFFICE/Docker-DocumentServer.git
