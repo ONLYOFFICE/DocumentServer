@@ -1,5 +1,10 @@
 # Change log
 
+## 4.0.3
+### Changes
+* Ability to use full-toolbar mode in editors with standard license.<br>
+Previously users of standard license are forced to use only compact toolbar.
+
 ## 4.0.2
 ### Fixes
 #### Spreadsheet Editor
