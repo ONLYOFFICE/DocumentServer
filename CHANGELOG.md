@@ -1,5 +1,21 @@
 # Change log
 
+## 4.1.0
+### New features
+#### Back-end
+* Use PostgreSQL instead of MySQL on back-end
+* Ability to filter users using ipfilter
+
+#### Editors
+* Whole-new code handling text input. Better support of languages using hieroglyphs
+* Whole-new copy-paste with better compatible with external sources
+
+### Changes
+* Improvements in opening of all supported formats
+
+### Fixes
+* A lot small bugfixes in all modules of product
+
 ## 4.0.3
 ### Changes
 * Ability to use full-toolbar mode in editors with standard license.<br>
