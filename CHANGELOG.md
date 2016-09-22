@@ -1,6 +1,6 @@
 # Change log
 
-## 4.1.0
+## 4.1.2
 ### New features
 #### Back-end
 * Use PostgreSQL instead of MySQL on back-end
