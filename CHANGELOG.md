@@ -1,5 +1,15 @@
 # Change log
 
+## 4.1.4
+### Fixes
+#### Back-end
+* ipfilter can use dns to lookup
+
+## 4.1.3
+### New features
+#### Plugins
+* Sample plugins are enabled by default
+
 ## 4.1.2
 ### New features
 #### Back-end
