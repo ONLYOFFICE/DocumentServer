@@ -1,5 +1,14 @@
 # Change log
 
+## 4.1.5
+### Fixes
+#### Editors
+* Fix copy-paste on macOS Sierra
+
+#### Plugins
+* Fix image load and OLE problems
+* Viewers do not show plugins any more
+
 ## 4.1.4
 ### Fixes
 #### Back-end
