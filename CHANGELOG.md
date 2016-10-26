@@ -1,5 +1,10 @@
 # Change log
 
+## 4.1.6
+### New features
+#### Editors
+* Add ability to hide menu bars in Editors via config
+
 ## 4.1.5
 ### Fixes
 #### Editors
