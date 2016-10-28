@@ -1,5 +1,10 @@
 # Change log
 
+## 4.1.7
+### Fixes
+#### Editors
+* Fix JS error on opening document in IE 9 and IE 10
+
 ## 4.1.6
 ### New features
 #### Editors
