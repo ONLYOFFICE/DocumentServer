@@ -1,5 +1,10 @@
 # Change log
 
+## 4.1.8
+### Fixes
+#### License
+* Minor fix for better license compatibility with 'Hide Menu' functionality
+
 ## 4.1.7
 ### Fixes
 #### Editors
