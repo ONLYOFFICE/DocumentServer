@@ -27,3 +27,6 @@ checkout = git clone git@github.com:ONLYOFFICE/Docker-DocumentServer.git
 
 [sdkjs-plugins]
 checkout = git clone git@github.com:ONLYOFFICE/sdkjs-plugins.git
+
+[desktop-sdk]
+checkout = git clone git@github.com:ONLYOFFICE/desktop-sdk.git
