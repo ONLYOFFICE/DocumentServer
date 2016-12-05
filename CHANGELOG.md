@@ -1,18 +1,18 @@
 # Change log
 
 ## 4.2.0
-## New Features
-### All Editors
+### New Features
+#### All Editors
 * Ability to set dash type for shapes
 * Redesigned embedded viewers
 * Better support of HiDPI systems
 
-### Document Editor
+#### Document Editor
 * Ability to set `Fit to Page` and `Fit to Width` as default zoom value
 * Ability to open and edit Footnotes
 * Redone Version History. Ability to hide minor features.
 
-### Spreadsheet Editor
+#### Spreadsheet Editor
 * Add ability to insert Equations in Spreadsheet Editor
 * Add new formula `SUMIFS`
 * Ability to select data from drop-down menu in context menu
@@ -22,18 +22,18 @@
 * Bring back `Freeze Panes` in `View Settings` menu
 * New algorithm for calculating cell height
 
-### Presentation Editor
+#### Presentation Editor
 * Ability to set `Fit to Width` as default zoom value
 * Add ability to insert Equations in Presentation Editor
 
-### Back-end
+#### Back-end
 * Update `nodejs` from 4.2.0 to current LTS release: 6.9.1
 
-## Fixes
-### Spreadsheet Editor
+### Fixes
+#### Spreadsheet Editor
 * Fixed issue [#63](https://github.com/ONLYOFFICE/DocumentServer/issues/63)
 
-### x2t
+#### x2t
 * Fixed issue [#55](https://github.com/ONLYOFFICE/DocumentServer/issues/55)
 
 ## 4.1.8
