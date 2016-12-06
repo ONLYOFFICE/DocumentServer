@@ -1,5 +1,19 @@
 # Change log
 
+## 4.2.1
+### Fixes
+#### Document Editor
+* Fix broken `Insert number of page` button
+* Fix problem with duplicate of last hieroglyph
+* Fix problem with changing chart type from 2D to 3D (bug #33284)
+
+#### Spreadsheet Editor
+* JS Error while adding chart in IE and Edge (bug #33597)
+* Fix problem with empty cell while changing sparklines (bug #33598)
+
+#### x2t
+* Improve compatibility with `doc` format
+
 ## 4.2.0
 ### New Features
 #### All Editors
@@ -10,6 +24,7 @@
 #### Document Editor
 * Ability to set `Fit to Page` and `Fit to Width` as default zoom value
 * Ability to open and edit Footnotes
+* Ability to insert number of pages in document
 * Redone Version History. Ability to hide minor features.
 
 #### Spreadsheet Editor
