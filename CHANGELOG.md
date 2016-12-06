@@ -20,6 +20,7 @@
 * Ability to set dash type for shapes
 * Redesigned embedded viewers
 * Better support of HiDPI systems
+* Update bootstrap to 3.3.7
 
 #### Document Editor
 * Ability to set `Fit to Page` and `Fit to Width` as default zoom value
@@ -29,6 +30,7 @@
 
 #### Spreadsheet Editor
 * Add ability to insert Equations in Spreadsheet Editor
+* Ability to open and edit Sparklines
 * Add new formula `SUMIFS`
 * Ability to select data from drop-down menu in context menu
 * Add multiselect support
