@@ -1,5 +1,25 @@
 # Change log
 
+## 4.2.3
+### Fixes
+#### Spreadsheet Editor
+* Fix using formulas with references on other sheets
+
+#### Presentation Editor
+* Fix timeout error while printing some pptx files.
+
+#### Document Convert
+* Fix problem with convert to pdf converted only first page
+
+#### Licensing
+* Without license file chat and comments buttons are unavailable. Also 
+edit customer information and logo image at header of editors is not supported.
+
+## 4.2.2
+### Fixes
+#### Presentation Editor
+* Fix problem with opening password-protected presentations
+
 ## 4.2.1
 ### Fixes
 #### Document Editor
