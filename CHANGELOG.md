@@ -1,5 +1,20 @@
 # Change log
 
+## 4.2.4
+### Fixes
+#### Document Editor
+* Fix problem with losing changes while several users enter text at same time (bug #33726)
+* Fix bug with positioning of cursor after function InsertContent.
+
+#### Spreadsheet Editor
+* Fix `Match` formula return value in some cases (bug #33735)
+
+#### Desktop Editor
+* Fix problems with copy-paste
+
+#### Back-end
+* Fix lost `Asana-Math` font in default installation, need for equations
+
 ## 4.2.3
 ### Fixes
 #### Spreadsheet Editor
