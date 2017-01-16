@@ -1,5 +1,17 @@
 # Change log
 
+## 4.2.5
+### Fixes
+#### All Editors
+* Fix a rare problem with saving file with specific type of Chart
+
+#### Presentation Editor
+* Fix a problem with saving file with notes, copied from Document Editor
+* Fix a problem with saving file with chart, copied from Presentation Editor
+
+#### Back-end
+* Fix closing connection until connection is fully opened
+
 ## 4.2.4
 ### Fixes
 #### Document Editor
