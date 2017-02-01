@@ -14,7 +14,8 @@
 #### Back-end
 * Fix compiling server, if `PRODUCT_VERSION` and `BUILD_NUMBER` variables are not defined
 
-## 4.2.6 - No public release
+## 4.2.6
+### No public release
 
 ## 4.2.5
 ### Fixes
