@@ -1,5 +1,21 @@
 # Change log
 
+## 4.2.7
+### Fixes
+### All Editors
+* Do not perform save if there is no changes to save
+
+#### Spreadsheet Editor
+* Fix assembling files with Ranges in rare cases
+
+#### Document Convert
+* Fix convert xlsx to csv
+
+#### Back-end
+* Fix compiling server, if `PRODUCT_VERSION` and `BUILD_NUMBER` variables are not defined
+
+## 4.2.6 - No public release
+
 ## 4.2.5
 ### Fixes
 #### All Editors
