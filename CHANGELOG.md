@@ -1,5 +1,17 @@
 # Change log
 
+## 4.2.8
+### Fixes
+#### Spreadsheet Editor
+* Fix entering symbols with diacritical sign (bug #33908)
+* Fix horizontal scroll by trackpad (bug #27197)
+
+#### Plugins
+* Allow interface customization using plugins
+
+#### Back-end
+* Minor fixes for logging and status codes
+
 ## 4.2.7
 ### Fixes
 ### All Editors
