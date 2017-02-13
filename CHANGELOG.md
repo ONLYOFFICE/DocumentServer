@@ -1,5 +1,14 @@
 # Change log
 
+## 4.2.9
+### New Features
+#### Spreadsheet Editor
+* Polish languages for formulas
+
+### Fixes
+#### Spreadsheet Editor
+* Fix wrong order of elements in equations (bug #34029)
+
 ## 4.2.8
 ### Fixes
 #### Spreadsheet Editor
