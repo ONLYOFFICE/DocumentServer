@@ -1,0 +1,32 @@
+[DEFAULT]
+git = git $@
+
+[core]
+checkout = git clone git@github.com:ONLYOFFICE/core.git
+
+[dictionaries]
+checkout = git clone git@github.com:ONLYOFFICE/dictionaries.git
+
+[sdkjs]
+checkout = git clone git@github.com:ONLYOFFICE/sdkjs.git
+
+[server]
+checkout = git clone git@github.com:ONLYOFFICE/server.git
+
+[web-apps]
+checkout = git clone git@github.com:ONLYOFFICE/web-apps.git
+
+[document-server-package]
+checkout = git clone git@github.com:ONLYOFFICE/document-server-package.git
+
+[document-server-integration]
+checkout = git clone git@github.com:ONLYOFFICE/document-server-integration.git
+
+[Docker-DocumentServer]
+checkout = git clone git@github.com:ONLYOFFICE/Docker-DocumentServer.git
+
+[sdkjs-plugins]
+checkout = git clone git@github.com:ONLYOFFICE/sdkjs-plugins.git
+
+[desktop-sdk]
+checkout = git clone git@github.com:ONLYOFFICE/desktop-sdk.git
