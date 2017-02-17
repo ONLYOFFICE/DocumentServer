@@ -117,7 +117,6 @@
 * Customization
 * Saving a copy of a document on the portal
 * Adding the information about updates in a new editor version
-* New interface
 
 ### Desktop and mobile editors tasks
 
