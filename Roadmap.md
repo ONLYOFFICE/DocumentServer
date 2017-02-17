@@ -57,7 +57,7 @@
 
 ### Server tasks
 
-Security
+* Security
 
 ### Common tasks for all Editors
 
