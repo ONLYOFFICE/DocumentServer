@@ -1,5 +1,16 @@
 # Change log
 
+## 4.2.10
+### Fixes
+#### Embedded viewers
+* Fix default position top for toolbar
+
+#### Licensing
+* Without license file chat and comments buttons are available.
+
+#### Back-end
+* Fix problem with jwt access tokens
+
 ## 4.2.9
 ### New Features
 #### Spreadsheet Editor
