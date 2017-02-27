@@ -50,10 +50,6 @@
 
 ## Version 5.0
 
-### Server tasks
-
-* Security
-
 ### Common tasks for all Editors
 
 * Korean, Chinese, Japanese and Arabic languages support improvement (vertical text + right-to-left) 
