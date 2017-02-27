@@ -4,11 +4,6 @@
 
 ## Version 4.5
 
-### Server tasks
-
-* Scalability and Clustering
-* Security
-
 ### Common tasks for all Editors
 
 * Charts Improvement (3D)
