@@ -1,5 +1,14 @@
 # Change log
 
+## 4.2.11
+### New features
+#### Editors
+* Add ability to hide `about` and left toolbar at all (only for licensed users)
+
+### Fixes
+#### Back-end
+* Fix jwt token without 'permissions' field breaks downloadAs
+
 ## 4.2.10
 ### Fixes
 #### Embedded viewers
