@@ -33,6 +33,7 @@
 * Fixed an issue with crop of shape group (bug #33110)
 
 #### Spreadsheet Editor
+* Fixed an issue with absolute reference when inserting a new row (#41)
 * Fixed an issue with AVERAGEA forumla with text format
 * Fixed an issue with broken workbook after list copy (bug #33588) 
 * Fixed an issue with formula recalculation by F4 hotkey (bug #32901)
