@@ -4,6 +4,7 @@
 ### New Features
 #### Editors
 * Full support of high-dpi monitors
+* Ability to set alternative text for shapes
 
 #### Document Editor
 * Undo-Redo in Fast co-edit
@@ -32,6 +33,34 @@
 * Ability to run documentserver on custom port
 * Ability to check and kick-out idled users
 * Ability to perform forced save (by timeout and by button)
+
+#### x2t
+* Extended reading xml (in pptx), sppr, txpr in chart without DrawingConverter
+* Faster working with chart without office_drawing
+* OfficeUtils - add sort for compress
+* Remove libxml2 from DocxFormat
+
+##### DOC
+* Background page
+
+##### XLS
+* Data validation
+* Decryptor
+
+##### ODF
+* Global settings for documents
+* SVG refactor
+* Background page (image, pattern, gradient)
+* Convert smart art
+* Sheet/Workbook views
+* Support convert OLE objects (and other embedded)
+
+##### RTF
+* Generate replacement text hyperlink if absent
+* Office digital signatures
+* Extended drawings
+* Custom shapes
+* Text in drawing shapes
 
 #### Plugins
 * A lot new plugins feature
