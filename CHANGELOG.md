@@ -2,6 +2,9 @@
 
 ## 4.3.0
 ### New Features
+#### Editors
+* Full support of high-dpi monitors
+
 #### Document Editor
 * Undo-Redo in Fast co-edit
 * Do not hide `All changes saved` in bottom toolbar
@@ -16,6 +19,7 @@
 * Added direction of sort on filter buttons
 * Added filter condition at statistical information
 * Added special paste feature 
+* Added support of surface chart
 * New cell borders styles (11 in total)
 
 #### Presentation Editor
@@ -26,6 +30,11 @@
 
 #### Back-end
 * Ability to run documentserver on custom port
+* Ability to check and kick-out idled users
+* Ability to perform forced save (by timeout and by button)
+
+#### Plugins
+* A lot new plugins feature
 
 ### Fixes
 #### Document Editor
