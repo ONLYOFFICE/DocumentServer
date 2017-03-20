@@ -35,10 +35,8 @@
 * Ability to perform forced save (by timeout and by button)
 
 #### x2t
-* Extended reading xml (in pptx), sppr, txpr in chart without DrawingConverter
-* Faster working with chart without office_drawing
-* OfficeUtils - add sort for compress
-* Remove libxml2 from DocxFormat
+* Optimization and speed-up
+* Better support of all formats, including (but not limited to):
 
 ##### DOC
 * Background page
@@ -83,9 +81,6 @@
 * Fixed an issue with cell size while drag'n'drop (bug #33607)
 * Fixed an issue with cursor size in @2x (bug #33606)
 * A whole lot more minor and big bugfixes
-
-#### x2t
-* Improve compatibility with all supported formats
 
 ## 4.2.11
 ### New features
