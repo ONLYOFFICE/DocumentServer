@@ -7,7 +7,7 @@
 * Ability to set alternative text for shapes
 
 #### Document Editor
-* Undo-Redo in Fast co-edit
+* Undo in Fast co-edit
 * Do not hide `All changes saved` in bottom toolbar
 * Adding and editing Footnotes
 * New languages for spellchecker (43 in total)
