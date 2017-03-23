@@ -24,7 +24,7 @@
 * New cell borders styles (11 in total)
 
 #### Presentation Editor
-* Undo-Redo in Fast co-edit
+* Undo in Fast co-edit
 
 #### Mobile Web Editors
 * Completely new mobile web editors
