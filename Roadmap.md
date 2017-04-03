@@ -10,7 +10,7 @@
 * Paste Options (Keep Source Formatting, Merge Formatting, Keep Text Only etc.)
 * Document Templates
 * Development of editors add-ons for versioning (Chrome & Mozilla)
-* Undo/redo for fast collaborative editing
+* Undo for Spreadsheet Editor in fast collaborative editing mode
 * Opening password-protected documents
 
 ### Document Editor improvement tasks
@@ -57,7 +57,7 @@
 * Border styles (double)
 * Symbol Insertion (Character Map)
 * Development of editors add-ons for versioning (Chrome & Mozilla)
-* Undo/redo for fast collaborative editing
+* Redo for all editors in fast collaborative editing mode
 * Commenting mode (restricted editing)
 * Protecting parts of a document from being edited
 * Protecting parts of a document from being copied
