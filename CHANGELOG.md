@@ -69,7 +69,9 @@
 * Fixed an issue with crop of shape group (bug #33110)
 
 #### Spreadsheet Editor
-* Fixed an issue with absolute reference when inserting a new row (#41)
+* Fixed an issue with absolute reference when inserting a new row (ONLYOFFICE/DocumentServer#41)
+* Fixed an issue with formulas translation (ONLYOFFICE/DesktopEditors#23)
+* Fixed an issue with password-protected xlsx (ONLYOFFICE/DesktopEditors#24)
 * Fixed an issue with non-breaking space (ONLYOFFICE/DesktopEditors#26)
 * Fixed an issue with AVERAGEA formula with text format
 * Fixed an issue with broken workbook after list copy (bug #33588) 
