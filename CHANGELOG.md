@@ -70,6 +70,7 @@
 
 #### Spreadsheet Editor
 * Fixed an issue with absolute reference when inserting a new row (ONLYOFFICE/DocumentServer#41)
+* Fixed an issue with onDocumentStateChange event (ONLYOFFICE/DocumentServer#88)
 * Fixed an issue with formulas translation (ONLYOFFICE/DesktopEditors#23)
 * Fixed an issue with password-protected xlsx (ONLYOFFICE/DesktopEditors#24)
 * Fixed an issue with non-breaking space (ONLYOFFICE/DesktopEditors#26)
