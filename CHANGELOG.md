@@ -1,5 +1,88 @@
 # Change log
 
+## 4.3.0
+### New Features
+#### Editors
+* Full support of high-dpi monitors
+* Ability to set alternative text for shapes
+
+#### Document Editor
+* Undo in Fast co-edit
+* Do not hide `All changes saved` in bottom toolbar
+* Adding and editing Footnotes
+* New languages for spellchecker (43 in total)
+
+#### Spreadsheet Editor
+* Support `AVERAGEIFS`, `COUNTIFS`, `SUMIFS` formulas
+* Formulas refactoring and improvements
+* Totally new Cell Format window with more options
+* Sort options window while sorting ranges
+* Added direction of sort on filter buttons
+* Added filter condition at statistical information
+* Added special paste feature 
+* Added support of surface chart
+* New cell borders styles (11 in total)
+
+#### Presentation Editor
+* Undo in Fast co-edit
+
+#### Mobile Web Editors
+* Completely new mobile web editors
+
+#### Back-end
+* Ability to run documentserver on custom port
+* Ability to check and kick-out idled users
+* Ability to perform forced save (by timeout and by button)
+
+#### x2t
+* Optimization and speed-up
+* Better support of all formats, including (but not limited to):
+
+##### DOC
+* Background page
+
+##### XLS
+* Data validation
+* Decryptor
+
+##### ODF
+* Global settings for documents
+* SVG refactor
+* Background page (image, pattern, gradient)
+* Convert smart art
+* Sheet/Workbook views
+* Support convert OLE objects (and other embedded)
+
+##### RTF
+* Generate replacement text hyperlink if absent
+* Office digital signatures
+* Extended drawings
+* Custom shapes
+* Text in drawing shapes
+
+#### Plugins
+* A lot new plugins feature
+
+### Fixes
+#### Document Editor
+* Fixed an issue with drag-n-drop a table inside a footnote (bug #33548)
+* Fixed an issue with crop of shape group (bug #33110)
+
+#### Spreadsheet Editor
+* Fixed an issue with absolute reference when inserting a new row (#41)
+* Fixed an issue with non-breaking space (ONLYOFFICE/DesktopEditors#26)
+* Fixed an issue with AVERAGEA formula with text format
+* Fixed an issue with broken workbook after list copy (bug #33588) 
+* Fixed an issue with formula recalculation by F4 hotkey (bug #32901)
+* Fixed an issue with SUMIFS formula (bug #33602)
+* Fixed an issue with inserting image size (bug #33604)
+* Fixed an issue with zero values sparklines (bug #33612)
+* Fixed an issue with changing number format while changing regional format (bug #31395)
+* Fixed an issue with replacing formula delimiters (bug #33608)
+* Fixed an issue with cell size while drag'n'drop (bug #33607)
+* Fixed an issue with cursor size in @2x (bug #33606)
+* A whole lot more minor and big bugfixes
+
 ## 4.2.11
 ### New features
 #### Editors
