@@ -48,7 +48,7 @@
 
 * Development of co-editing for the Spreadsheet Editor for iPad
 
-## Version 5.0
+## Planned for future versions
 
 ### Common tasks for all Editors
 
