@@ -1,4 +1,11 @@
 # Change log
+## 4.3.1
+### Fixes
+#### Spreadsheet Editor
+* Fix broken files if changing style of unsupported charts (bug #34650)
+* Fix stack error while copying a big array of formula data
+* Fix rendering 3d diagram in small area (bug #34632)
+* Fix change chart's range while applying preset
 
 ## 4.3.0
 ### New Features
