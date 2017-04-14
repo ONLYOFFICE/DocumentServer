@@ -1,4 +1,44 @@
 # Change log
+
+## 4.3.2
+### New features
+#### Plugins
+* New plugins - Photo Editor and Document Templates
+
+### Fixes
+#### Editors
+* Minor updates to translations
+* Fix Plugins icons in @2x (bug #34681)
+
+#### Document Editor
+* Fix moving image to header of another page (bug #34637)
+* Fix removing shape if undo of grouping is performed (bug #34654)
+
+#### Spreadsheet Editor
+* Fix decreasing size of 3D chart (bug #34685)
+* Fix problem with pasting formula, while clicking `paste only value`
+* Fix tooltip position in @2x (bug #34678)
+* Fix problem with shrink to fit (bug #34758)
+
+#### Presentation Editor
+* Fix problem with removing comment (bug #34773)
+
+#### Mobile Web Editors
+* Fix problem with opening viewer in OpenSource version
+
+#### Back-end
+* Fix infinity loop while URI.parse (bug #34716)
+* Fix connection leak on healthCheck
+
+#### docx
+* Fix broken docx file with copied chart in shape (bug #34695)
+
+#### document-server-integration
+* Fix problem with `Go Back` button
+
+#### Windows Installation
+* Fix downloading binaries from sourceforge
+
 ## 4.3.1
 ### Fixes
 #### Spreadsheet Editor
