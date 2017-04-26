@@ -1,5 +1,19 @@
 # Change log
 
+## 4.3.3
+### New features
+#### Document Editor
+* Kazakh language for spellchecker
+
+#### Docker
+* Ability to use PostgreSql storage as volume
+
+### Fixes
+#### Document Editor
+* Aligning of Footnotes setting in Firefox (bug #34840)
+* Fix colors for shapes (bug #34785)
+* Fix problem with shapes in table
+
 ## 4.3.2
 ### New features
 #### Plugins
