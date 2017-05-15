@@ -1,5 +1,6 @@
 [DEFAULT]
 git = git $@
+hub = hub $@
 
 [core]
 checkout = git clone git@github.com:ONLYOFFICE/core.git
