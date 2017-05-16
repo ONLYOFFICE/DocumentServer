@@ -15,4 +15,4 @@
 	url = https://github.com/ONLYOFFICE/dictionaries.git
 [submodule "sdkjs-plugins"]
 	path = sdkjs-plugins
-	url = git@github.com:ONLYOFFICE/sdkjs-plugins.git
+	url = https://github.com/ONLYOFFICE/sdkjs-plugins.git
