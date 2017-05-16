@@ -1,5 +1,16 @@
 # Change log
 
+## 4.3.4
+### Fixes
+#### Editors
+* Fix open error if sdk loads before fonts [sdkjs#118](https://github.com/ONLYOFFICE/sdkjs/pull/118)
+* Fix showing shape without gradient angle (bug #34887)
+* Show correct limited functionality notification in IE 9, IE 10
+
+#### Back-end
+* Fix using user data from JWT
+* Add logs for checkHealth of spellchecker
+
 ## 4.3.3
 ### New features
 #### Document Editor
