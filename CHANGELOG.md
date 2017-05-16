@@ -1,5 +1,11 @@
 # Change log
 
+## 4.4.0
+### New features
+#### Spreadsheet Editor
+* Formulas with conditional formatting
+* Ability to specify custom delimiter for CSV import\export
+
 ## 4.3.4
 ### Fixes
 #### Editors
