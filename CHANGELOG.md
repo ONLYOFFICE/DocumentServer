@@ -9,6 +9,10 @@
 		     `CSC`, `CSCH`, `FLOOR.MATH`, `FLOOR.PRECISE`, 
 		     `SEC`, `SECH`
 
+#### Presentation Editor
+* Ability to connect shapes via lines
+* Ability to specify columns for Text Areas
+
 ## 4.3.4
 ### Fixes
 #### Editors
