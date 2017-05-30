@@ -5,6 +5,9 @@
 #### Spreadsheet Editor
 * Formulas with conditional formatting
 * Ability to specify custom delimiter for CSV import\export
+* Add new formulas: `ACOT`, `ACOTH`, `ARABIC`, `COT`, `COTH`, 
+		     `CSC`, `CSCH`, `FLOOR.MATH`, `FLOOR.PRECISE`, 
+		     `SEC`, `SECH`
 
 ## 4.3.4
 ### Fixes
