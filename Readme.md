@@ -12,6 +12,8 @@ ONLYOFFICE Document Server contains the following components:
 * [core](https://github.com/ONLYOFFICE/core "core") - server core components of ONLYOFFICE Document Server which enable the conversion between the most popular office document formats (DOC, DOCX, ODT, RTF, TXT, PDF, HTML, EPUB, XPS, DjVu, XLS, XLSX, ODS, CSV, PPT, PPTX, ODP).
 * [sdkjs](https://github.com/ONLYOFFICE/sdkjs "sdkjs") - JavaScript SDK for the ONLYOFFICE Document Server which contains API for all the included components client-side interaction.
 * [web-apps](https://github.com/ONLYOFFICE/web-apps "web-apps") - the frontend for ONLYOFFICE Document Server which builds the program interface and allows the user create, edit, save and export text, spreadsheet and presentation documents using the common interface of a document editor.
+* [dictionaries](https://github.com/ONLYOFFICE/dictionaries "dictionaries") - the dictionaries of various languages used for spellchecking in ONLYOFFICE Document Server.
+* [sdkjs-plugins](https://github.com/ONLYOFFICE/sdkjs-plugins "sdkjs-plugins") - the add-ons for ONLYOFFICE Document Server used for the developers to add specific functions to the editors which are not directly related to the OOXML format.
 
 ## Functionality
 
