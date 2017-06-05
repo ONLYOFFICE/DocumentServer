@@ -1,5 +1,23 @@
 # Change log
 
+## 4.3.5
+### New Feature
+#### Document Editor
+* Add `showReviewChanges` option to config - auto-open review changes panel
+
+### Fixes
+#### Document Editor
+* Disable version history for pdf/djvu/xps
+* Fix problem with DropCap fonts
+
+#### Spreadsheet Editor
+* Limit to 1000 cell styles [DocumentServer#113](https://github.com/ONLYOFFICE/DocumentServer/issues/113)
+* Fix adding spacing while copying from Excel
+* Fix chart axis position
+
+#### Back-end
+* Fix crash on windows 2008r2
+
 ## 4.3.4
 ### Fixes
 #### Editors
