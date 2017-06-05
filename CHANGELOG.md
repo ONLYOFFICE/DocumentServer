@@ -5,9 +5,12 @@
 #### Spreadsheet Editor
 * Formulas with conditional formatting
 * Ability to specify custom delimiter for CSV import\export
-* Add new formulas: `ACOT`, `ACOTH`, `ARABIC`, `COT`, `COTH`, 
-		     `CSC`, `CSCH`, `FLOOR.MATH`, `FLOOR.PRECISE`, 
-		     `SEC`, `SECH`
+* Add new formulas: `ACOT`, `ACOTH`, `ARABIC`, `BASE`, `COT`, 
+		     `COTH`, `CEILING.MATH`, `CEILING.PRECISE`,
+		     `COMBINA`, `CSC`, `CSCH`, `DECIMAL`, `FLOOR.MATH`, 
+		     `FLOOR.PRECISE`, `IMCOSH`, `IMCOT`, `IMCSCH`, 
+ 		     `IMCSC`, `IMSECH`, `IMSEC`, `IMSINH`, `IMTAN`, 
+		     `ISO.CEILING`, `SEC`, `SECH`
 
 #### Presentation Editor
 * Ability to connect shapes via lines
