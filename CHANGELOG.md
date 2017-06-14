@@ -1,5 +1,10 @@
 # Change log
 
+## 4.3.6
+### Fixes
+#### Rebranding
+* Fix problems with logos
+
 ## 4.3.5
 ### New Feature
 #### Document Editor
