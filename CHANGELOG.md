@@ -30,11 +30,13 @@
 * Frozen pane now with shadow        
 * Translates for cell styles        
 * Search and replace by select
+* Option to hide solved comments
 
 #### Presentation Editor
 * Ability to connect shapes via lines
 * Ability to specify columns for Text Areas
 * Spellcheker in Presentation Editor
+* Option to hide solved comments
 
 ## 4.4.0
 ### No public release
