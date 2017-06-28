@@ -29,6 +29,7 @@
 * Update active cell color        
 * Frozen pane now with shadow        
 * Translates for cell styles        
+* Search and replace by select
 
 #### Presentation Editor
 * Ability to connect shapes via lines
