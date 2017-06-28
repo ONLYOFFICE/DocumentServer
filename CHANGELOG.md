@@ -8,6 +8,7 @@
 * Translates for Paragraph Styles
 * View mode with comments
 * Option to hide solved comments
+* Abitity to specify custom columns
 
 #### Spreadsheet Editor
 * Formulas with conditional formatting
@@ -30,6 +31,8 @@
 * Translates for cell styles        
 * Search and replace by select
 * Option to hide solved comments
+* Abitity to specify bullets and numbering for text in shape.
+* Ability to specify columns for Text Areas
 
 #### Presentation Editor
 * Ability to connect shapes via lines
@@ -37,6 +40,9 @@
 * Spellcheker in Presentation Editor
 * Option to hide solved comments
 * Ability to download as ODP
+
+#### Plugins
+* New type for plugin window (without borders, shadows, buttons)
 
 ## 4.4.0
 ### No public release
