@@ -36,6 +36,7 @@
 * Ability to specify columns for Text Areas
 * Spellcheker in Presentation Editor
 * Option to hide solved comments
+* Ability to download as ODP
 
 ## 4.4.0
 ### No public release
