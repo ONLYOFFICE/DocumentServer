@@ -33,10 +33,12 @@
 * Option to hide solved comments
 * Abitity to specify bullets and numbering for text in shape.
 * Ability to specify columns for Text Areas
+* Ability to add the connectors for the shapes
 
 #### Presentation Editor
 * Ability to connect shapes via lines
 * Ability to specify columns for Text Areas
+* Ability to create bullet and number lists in the shapes
 * Spellcheker in Presentation Editor
 * Option to hide solved comments
 * Ability to download as ODP
