@@ -1,6 +1,6 @@
 # Change log
 
-## 4.4.0
+## 4.4.1
 ### New features
 #### Spreadsheet Editor
 * Formulas with conditional formatting
@@ -15,6 +15,10 @@
 #### Presentation Editor
 * Ability to connect shapes via lines
 * Ability to specify columns for Text Areas
+* Spellcheker in Presentation Editor
+
+## 4.4.0
+### No public release
 
 ## 4.3.4
 ### Fixes
