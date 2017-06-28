@@ -5,6 +5,9 @@
 #### Document Editor
 * Special Paste
 * Rich text content support
+* Translates for Paragraph Styles
+* View mode with comments
+* Option to hide solved comments
 
 #### Spreadsheet Editor
 * Formulas with conditional formatting
@@ -22,6 +25,10 @@
         `PERCENTILE.INC`, `PERCENTRANK.EXC`, `PERCENTRANK.INC`,
         `RANK`, `RANK.AVG`, `RANK.EQ`, `TDIST`, `TINV`, `T.DIST`,
         `T.DIST.2T`, `T.DIST.RT`, `T.INV`, `T.INV.2T`, `XOR` functions
+* Exclue hidden rows from copy, autofill, formatting etc...
+* Update active cell color        
+* Frozen pane now with shadow        
+* Translates for cell styles        
 
 #### Presentation Editor
 * Ability to connect shapes via lines
