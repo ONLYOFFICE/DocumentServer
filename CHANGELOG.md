@@ -12,19 +12,18 @@
 #### Spreadsheet Editor
 * Formulas with conditional formatting
 * Ability to specify custom delimiter for CSV import\export
-* Added `ARABIC`, `ACOT`, `ACOTH`, `BASE`, `BETA.INV`, `BETADIST`,
-        `BETA.DIST`, `CEILING.PRECISE`, `CEILING.MATH`, `CHIDIST`,
-        `CHIINV`, `CHISQ.DIST`, `CHISQ.DIST.RT`, `CHISQ.INV`,
-        `CHISQ.INV.RT`, `COMBINA`, `CONCAT`, `CONFIDENCE.NORM`,
-        `CONFIDENCE.T`, `CSC`, `CSCH`, `DECIMAL`, `EXPON.DIST`, `FDIST`,
-        `FINV`, `F.DIST`, `F.DIST.RT`, `F.INV`, `F.INV.RT`, `GAMMA`,
-        `GAMMADIST`, `GAMMA.DIST`, `GAMMAINV`, `GAMMA.INV`, `GAMMALN.PRECISE`,
-        `GAUSS`, `IFNA`, `IMCOSH`, `IMCOT`, `IMCSC`, `IMCSCH`, `IMSEC`,
-        `IMSECH`, `IMSINH`, `IMTAN`, `ISO.CEILING`, `LOGNORM.DIST`,
-        `LOGNORM.INV`, `NUMBERVALUE`, `PERCENTILE.EXC`,
-        `PERCENTILE.INC`, `PERCENTRANK.EXC`, `PERCENTRANK.INC`,
-        `RANK`, `RANK.AVG`, `RANK.EQ`, `TDIST`, `TINV`, `T.DIST`,
-        `T.DIST.2T`, `T.DIST.RT`, `T.INV`, `T.INV.2T`, `XOR` functions
+* Added `ACOT`, `ACOTH`, `ARABIC`, `BASE`, `BETA.DIST`, `BETA.INV`, `BETADIST`,
+        `BINOM.DIST`, `BINOM.INV`, `CEILING.MATH`, `CEILING.PRECISE`,
+        `CHIDIST`, `CHIINV`, `CHISQ.DIST`, `CHISQ.DIST.RT`,
+        `CHISQ.INV`, `CHISQ.INV.RT`, `COMBINA`, `CONCAT`, `CONFIDENCE.NORM`,
+        `CONFIDENCE.T`, `COT`, `COTH`, `CSC`, `CSCH`, `EXPON.DIST`, `F.DIST`,
+        `F.DIST.RT`, `F.INV`, `F.INV.RT`, `FDIST`, `FINV`, `FLOOR.MATH`,
+        `FLOOR.PRECISE`, `GAMMA`, `GAMMA.DIST`, `GAMMA.INV`, `GAMMA.PRECISE`,
+        `GAMMADIST`, `GAMMAINV`, `GAUSS`, `IFNA`, `IMCOSH`, `IMCOT`, `IMCSC`,
+        `IMCSCH`, `IMSEC`, `IMSECH`, `IMSINH `, `IMTAN`, `ISO.CEILING`,
+        `LOGNORM.DIST`, `LOGNORM.INV`, `NUMBERVALUE`, `PERCENTILE.EXC`, `PERCENTILE.INC`,
+        `PERCENTRANK.EXC`, `PERCENTRANK.INC`, `RANK`, `RANK.AVG`, `RANK.EQ`, `SEC`, `SECH`,
+        `T.DIST`, `T.DIST.2T`, `T.DIST.RT`, `T.INV`, `T.INV.2T`, `TDIST`, `TINV`, `XOR` formulas
 * Exclude hidden rows from copy, autofill, formatting etc...
 * Update active cell color        
 * Frozen pane now with shadow        
