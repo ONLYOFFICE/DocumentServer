@@ -46,6 +46,12 @@
 #### Plugins
 * New type for plugin window (without borders, shadows, buttons)
 
+#### x2t
+* Speedup for opening ooxml: windows 200%, linux 20%
+* Better convertation from/to RTF
+* Better support of password protected ooxml, binary ms
+* Support of password protected ppt
+
 ## 4.4.0
 ### No public release
 
