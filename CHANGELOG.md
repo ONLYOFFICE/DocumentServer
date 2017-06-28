@@ -2,15 +2,26 @@
 
 ## 4.4.1
 ### New features
+#### Document Editor
+* Special Paste
+* Rich text content support
+
 #### Spreadsheet Editor
 * Formulas with conditional formatting
 * Ability to specify custom delimiter for CSV import\export
-* Add new formulas: `ACOT`, `ACOTH`, `ARABIC`, `BASE`, `COT`, 
-		     `COTH`, `CEILING.MATH`, `CEILING.PRECISE`,
-		     `COMBINA`, `CSC`, `CSCH`, `DECIMAL`, `FLOOR.MATH`, 
-		     `FLOOR.PRECISE`, `IMCOSH`, `IMCOT`, `IMCSCH`, 
- 		     `IMCSC`, `IMSECH`, `IMSEC`, `IMSINH`, `IMTAN`, 
-		     `ISO.CEILING`, `SEC`, `SECH`
+* Added `ARABIC`, `ACOT`, `ACOTH`, `BASE`, `BETA.INV`, `BETADIST`,
+        `BETA.DIST`, `CEILING.PRECISE`, `CEILING.MATH`, `CHIDIST`,
+        `CHIINV`, `CHISQ.DIST`, `CHISQ.DIST.RT`, `CHISQ.INV`,
+        `CHISQ.INV.RT`, `COMBINA`, `CONCAT`, `CONFIDENCE.NORM`,
+        `CONFIDENCE.T`, `CSC`, `CSCH`, `DECIMAL`, `EXPON.DIST`, `FDIST`,
+        `FINV`, `F.DIST`, `F.DIST.RT`, `F.INV`, `F.INV.RT`, `GAMMA`,
+        `GAMMADIST`, `GAMMA.DIST`, `GAMMAINV`, `GAMMA.INV`, `GAMMALN.PRECISE`,
+        `GAUSS`, `IFNA`, `IMCOSH`, `IMCOT`, `IMCSC`, `IMCSCH`, `IMSEC`,
+        `IMSECH`, `IMSINH`, `IMTAN`, `ISO.CEILING`, `LOGNORM.DIST`,
+        `LOGNORM.INV`, `NUMBERVALUE`, `PERCENTILE.EXC`,
+        `PERCENTILE.INC`, `PERCENTRANK.EXC`, `PERCENTRANK.INC`,
+        `RANK`, `RANK.AVG`, `RANK.EQ`, `TDIST`, `TINV`, `T.DIST`,
+        `T.DIST.2T`, `T.DIST.RT`, `T.INV`, `T.INV.2T`, `XOR` functions
 
 #### Presentation Editor
 * Ability to connect shapes via lines
