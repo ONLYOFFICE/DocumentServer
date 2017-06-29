@@ -34,7 +34,6 @@
 * Abitity to specify bullets and numbering for text in shape.
 * Ability to specify columns for Text Areas
 * Ability to add the connectors for the shapes
-* Add new chart type - `Surface`
 
 #### Presentation Editor
 * Ability to connect shapes via lines
