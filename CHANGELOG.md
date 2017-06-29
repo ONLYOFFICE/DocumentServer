@@ -41,7 +41,6 @@
 * Ability to specify columns for Text Areas
 * Ability to create bullet and number lists in the shapes
 * Spellcheker in Presentation Editor
-* Option to hide solved comments
 * Ability to download as ODP
 
 #### Plugins
