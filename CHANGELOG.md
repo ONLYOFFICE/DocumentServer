@@ -8,7 +8,7 @@
 * Translates for Paragraph Styles
 * View mode with comments
 * Option to hide solved comments
-* Abitity to specify custom columns
+* Ability to specify custom columns
 
 #### Spreadsheet Editor
 * Formulas with conditional formatting
@@ -48,7 +48,7 @@
 
 #### x2t
 * Speedup for opening ooxml: windows 200%, linux 20%
-* Better convertation from/to RTF
+* Better converting from/to RTF
 * Better support of password protected ooxml, binary ms
 * Support of password protected ppt
 
