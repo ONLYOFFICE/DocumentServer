@@ -34,7 +34,7 @@
 * Abitity to specify bullets and numbering for text in shape.
 * Ability to specify columns for Text Areas
 * Ability to add the connectors for the shapes
-* Support `Shift+Delete` and `Shift+Insert` for Cut-Paste
+* Support `Shift+Delete`, `Ctrl+Insert` and `Shift+Insert` for Cut-Paste
 
 #### Presentation Editor
 * Ability to connect shapes via lines
