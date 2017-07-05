@@ -1,5 +1,14 @@
 # Change log
 
+## 4.4.2
+### New features
+#### Spreadsheet Editor
+* Support some more new options in sparklines (bug#35296)
+
+### Fixes
+#### Document Builder
+* Fix problems with printing and saving to `pdf`
+
 ## 4.4.1
 ### New features
 #### Document Editor
