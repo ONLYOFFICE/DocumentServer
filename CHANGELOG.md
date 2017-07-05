@@ -1,5 +1,59 @@
 # Change log
 
+## 4.4.1
+### New features
+#### Document Editor
+* Special Paste
+* Rich text content support
+* Translates for Paragraph Styles
+* View mode with comments
+* Option to hide solved comments
+* Abitity to specify custom columns
+
+#### Spreadsheet Editor
+* Formulas with conditional formatting
+* Ability to specify custom delimiter for CSV import\export
+* Added `ACOT`, `ACOTH`, `ARABIC`, `BASE`, `BETA.DIST`, `BETA.INV`, `BETADIST`,
+        `BINOM.DIST`, `BINOM.INV`, `CEILING.MATH`, `CEILING.PRECISE`,
+        `CHIDIST`, `CHIINV`, `CHISQ.DIST`, `CHISQ.DIST.RT`,
+        `CHISQ.INV`, `CHISQ.INV.RT`, `COMBINA`, `CONCAT`, `CONFIDENCE.NORM`,
+        `CONFIDENCE.T`, `COT`, `COTH`, `CSC`, `CSCH`, `DECIMAL`, `EXPON.DIST`, `F.DIST`,
+        `F.DIST.RT`, `F.INV`, `F.INV.RT`, `FDIST`, `FINV`, `FLOOR.MATH`,
+        `FLOOR.PRECISE`, `GAMMA`, `GAMMA.DIST`, `GAMMA.INV`, `GAMMA.PRECISE`,
+        `GAMMADIST`, `GAMMAINV`, `GAUSS`, `IFNA`, `IMCOSH`, `IMCOT`, `IMCSC`,
+        `IMCSCH`, `IMSEC`, `IMSECH`, `IMSINH `, `IMTAN`, `ISO.CEILING`,
+        `LOGNORM.DIST`, `LOGNORM.INV`, `NUMBERVALUE`, `PERCENTILE.EXC`, `PERCENTILE.INC`,
+        `PERCENTRANK.EXC`, `PERCENTRANK.INC`, `RANK`, `RANK.AVG`, `RANK.EQ`, `SEC`, `SECH`,
+        `T.DIST`, `T.DIST.2T`, `T.DIST.RT`, `T.INV`, `T.INV.2T`, `TDIST`, `TINV`, `XOR` formulas
+* Exclude hidden rows from copy, autofill, formatting etc...
+* Update active cell color        
+* Frozen pane now with shadow        
+* Translates for cell styles        
+* Search and replace by select
+* Option to hide solved comments
+* Abitity to specify bullets and numbering for text in shape.
+* Ability to specify columns for Text Areas
+* Ability to add the connectors for the shapes
+
+#### Presentation Editor
+* Ability to connect shapes via lines
+* Ability to specify columns for Text Areas
+* Ability to create bullet and number lists in the shapes
+* Spellcheker in Presentation Editor
+* Ability to download as ODP
+
+#### Plugins
+* New type for plugin window (without borders, shadows, buttons)
+
+#### x2t
+* Speedup for opening ooxml: windows 200%, linux 20%
+* Better convertation from/to RTF
+* Better support of password protected ooxml, binary ms
+* Support of password protected ppt
+
+## 4.4.0
+### No public release
+
 ## 4.3.6
 ### Fixes
 #### Rebranding
