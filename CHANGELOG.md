@@ -52,6 +52,10 @@
 * Better support of password protected ooxml, binary ms
 * Support of password protected ppt
 
+### Fixes
+#### Spreadsheet Editor
+* Fix duplicate text after carriage return [DocumentServer#109](https://github.com/ONLYOFFICE/DocumentServer/issues/109)
+
 ## 4.4.0
 ### No public release
 
