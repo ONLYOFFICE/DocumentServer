@@ -10,13 +10,26 @@
 * Fix problem with setting tab several time (bug #34923)
 * Fix printing in Edge (bug #35323)
 * Fix help for moving shape by pixel (bug #24983)
+* Fix special paste in fast co-edit (bug #35310)
+* Fix duplicates in strict mode after special paste (bug #35312)
 
 #### Spreadsheet Editor
 * Fix box for `Show empty cells as` in Russian (bug #35299)
 * Fix sparkline type in setting window (bug #35296)
+* Hide not implemented formulas: `CUBEKPIMEMBER`, `CUBEMEMBER`, 
+`CUBEMEMBERPROPERTY`, `CUBERANKEDMEMBER`, `CUBESET`, 
+`CUBESETCOUNT`, `CUBEVALUE` (bug #35314)
+* Fix JS error in conditional formatting with formula and offset (duplicate variable) (bug #35334)
+* Fix JS error in SEARCH formula (bug #35340)
+* Fix freeze pane shadow not hiding (bug #35359)
 
 #### Presentation Editor
 * Fix changing presentation language if no shape selected (bug #35231)
+* Fix columns in placeholder (bug #35074)
+* Fix connector losing shape after moving shape in group (bug #35317) 
+* Fix disconnecting connect after ungrouping (bug #35316) 
+* Fix hidden markers for connector on chart and image (bug #35300)
+* Fix cell link after copy paste (bug #35362, [DocumentServer#122](https://github.com/ONLYOFFICE/DocumentServer/issues/122))
 
 #### Document Builder
 * Fix problems with printing and saving to `pdf`
