@@ -9,7 +9,7 @@
 #### Document Editor
 * Fix problem with setting tab several time (bug #34923)
 * Fix printing in Edge (bug #35323)
-* Fix help for moving shape by pixel (bug #24983)
+* Fix help for moving shape by pixel (bug #34983)
 * Fix special paste in fast co-edit (bug #35310)
 * Fix duplicates in strict mode after special paste (bug #35312)
 
