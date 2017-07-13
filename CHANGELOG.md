@@ -3,11 +3,26 @@
 ## 4.4.2
 ### New features
 #### Spreadsheet Editor
-* Support some more new options in sparklines (bug#35296)
+* Support some more new options in sparklines (bug #35296)
 
 ### Fixes
+#### Document Editor
+* Fix problem with setting tab several time (bug #34923)
+* Fix printing in Edge (bug #35323)
+* Fix help for moving shape by pixel (bug #24983)
+
+#### Spreadsheet Editor
+* Fix box for `Show empty cells as` in Russian (bug #35299)
+* Fix sparkline type in setting window (bug #35296)
+
+#### Presentation Editor
+* Fix changing presentation language if no shape selected (bug #35231)
+
 #### Document Builder
 * Fix problems with printing and saving to `pdf`
+
+#### Desktop Editor
+* Fix showing 'Changes saved' message (bug #35358)
 
 ## 4.4.1
 ### New features
