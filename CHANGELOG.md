@@ -31,6 +31,22 @@
 * Fix hidden markers for connector on chart and image (bug #35300)
 * Fix cell link after copy paste (bug #35362, [DocumentServer#122](https://github.com/ONLYOFFICE/DocumentServer/issues/122))
 
+#### x2t
+##### xls
+* Fix custom shape with connectors
+
+##### ods
+* Fix margins
+
+##### pptx
+* Fix audio wav files
+* Fix old standard ole
+
+##### ppt
+* Fix previous users picture
+* Fix read picture stream
+
+
 #### Document Builder
 * Fix problems with printing and saving to `pdf`
 
