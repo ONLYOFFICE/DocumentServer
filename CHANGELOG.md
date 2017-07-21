@@ -14,6 +14,7 @@
 * Fix duplicates in strict mode after special paste (bug #35312)
 * Fixed bug with moving cursor to the start of the document after removing content control.
 * Fix minor problems with co-edit in real time (bug #35398, #35399, #35400)
+* A lot of fixes in translations
 
 #### Spreadsheet Editor
 * Fix box for `Show empty cells as` in Russian (bug #35299)
@@ -26,6 +27,7 @@
 * Fix freeze pane shadow not hiding (bug #35359)
 * Fix showing hidden objects
 * Fix VLOOKUP format cell
+* A lot of fixes in translations
 
 #### Presentation Editor
 * Fix changing presentation language if no shape selected (bug #35231)
@@ -34,6 +36,7 @@
 * Fix disconnecting connect after ungrouping (bug #35316) 
 * Fix hidden markers for connector on chart and image (bug #35300)
 * Fix cell link after copy paste (bug #35362, [DocumentServer#122](https://github.com/ONLYOFFICE/DocumentServer/issues/122))
+* A lot of fixes in translations
 
 #### Mobile Document Editor 
 * Remove saving show-snaplines option
