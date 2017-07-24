@@ -1,5 +1,78 @@
 # Change log
 
+## 4.4.2
+### New features
+#### Spreadsheet Editor
+* Support some more new options in sparklines (bug #35296)
+
+### Fixes
+#### Document Editor
+* Fix problem with setting tab several time (bug #34923)
+* Fix printing in Edge (bug #35323)
+* Fix help for moving shape by pixel (bug #34983)
+* Fix special paste in fast co-edit (bug #35310)
+* Fix duplicates in strict mode after special paste (bug #35312)
+* Fixed bug with moving cursor to the start of the document after removing content control.
+* Fix minor problems with co-edit in real time (bug #35398, #35399, #35400)
+* A lot of fixes in translations
+
+#### Spreadsheet Editor
+* Fix box for `Show empty cells as` in Russian (bug #35299)
+* Fix sparkline type in setting window (bug #35296)
+* Hide not implemented formulas: `CUBEKPIMEMBER`, `CUBEMEMBER`, 
+`CUBEMEMBERPROPERTY`, `CUBERANKEDMEMBER`, `CUBESET`, 
+`CUBESETCOUNT`, `CUBEVALUE` (bug #35314)
+* Fix JS error in conditional formatting with formula and offset (duplicate variable) (bug #35334)
+* Fix JS error in SEARCH formula (bug #35340)
+* Fix freeze pane shadow not hiding (bug #35359)
+* Fix showing hidden objects
+* Fix VLOOKUP format cell
+* A lot of fixes in translations
+
+#### Presentation Editor
+* Fix changing presentation language if no shape selected (bug #35231)
+* Fix columns in placeholder (bug #35074)
+* Fix connector losing shape after moving shape in group (bug #35317) 
+* Fix disconnecting connect after ungrouping (bug #35316) 
+* Fix hidden markers for connector on chart and image (bug #35300)
+* Fix cell link after copy paste (bug #35362, [DocumentServer#122](https://github.com/ONLYOFFICE/DocumentServer/issues/122))
+* A lot of fixes in translations
+
+#### Mobile Document Editor 
+* Remove saving show-snaplines option
+
+#### Mobile Presentation Editor
+* Remove saving show-snaplines option
+
+#### x2t
+##### odt
+* Fix saving some files to odt (bug #35389)
+
+##### txt
+* Fix empty txt on opening (bug #35396)
+
+##### xls
+* Fix custom shape with connectors
+
+##### ods
+* Fix margins
+* Fix convert named range with formulas
+
+##### pptx
+* Fix audio wav files
+* Fix old standard ole
+
+##### ppt
+* Fix previous users picture
+* Fix read picture stream
+
+
+#### Document Builder
+* Fix problems with printing and saving to `pdf`
+
+#### Desktop Editor
+* Fix showing 'Changes saved' message (bug #35358)
+
 ## 4.4.1
 ### New features
 #### Document Editor
