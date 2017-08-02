@@ -17,6 +17,9 @@ checkout = git clone git@github.com:ONLYOFFICE/server.git
 [web-apps]
 checkout = git clone git@github.com:ONLYOFFICE/web-apps.git
 
+[web-apps-pro]
+checkout = git clone git@github.com:ONLYOFFICE/web-apps-pro.git
+
 [document-server-package]
 checkout = git clone git@github.com:ONLYOFFICE/document-server-package.git
 
