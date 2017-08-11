@@ -1,5 +1,19 @@
 # Change log
 
+## 4.4.3
+### Fixes
+#### Document Editor
+* Fix opening some docx (bug #35307)
+* Fix chart legend blocking in coedit (bug #35492)
+
+#### Spreadsheet Editor
+* Fix change shape size by yellow markers (bug #35451)
+* Fix case sensitive VLOOKUP and HLOOKUP (bug #35528, [DocumentServer#140](https://github.com/ONLYOFFICE/DocumentServer/issues/140))
+
+#### Presentation Editor
+* Fix comment reply duplication (bug #35408)
+* Fix bug with drag-and-drop chart into title
+ 
 ## 4.4.2
 ### New features
 #### Spreadsheet Editor
