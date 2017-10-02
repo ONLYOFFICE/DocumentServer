@@ -36,11 +36,11 @@
 ### Fixes
 #### Document Editor
 * A lot of bugs fixed
-* Fix COUNTIF formula ignores TRUE and FALSE ([DocumentServer#151](https://github.com/ONLYOFFICE/DocumentServer/issues/151))
-* Fix conditional formatting bugs
 
 #### Spreadsheet Viewer
 * Fix not working keys in IE11 ([DocumentServer#107](https://github.com/ONLYOFFICE/DocumentServer/issues/107))
+* Fix COUNTIF formula ignores TRUE and FALSE ([DocumentServer#151](https://github.com/ONLYOFFICE/DocumentServer/issues/151))
+* Fix conditional formatting bugs
 
 #### x2t
 * Fix a lot of user files
