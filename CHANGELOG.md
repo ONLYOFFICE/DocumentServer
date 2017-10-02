@@ -1,6 +1,7 @@
 # Change log
 
 ## 5.0.0
+### No public release - SAAS-only version
 ### New features
 #### Spreadsheet Editor
 * Ability to open and save Pivot tables
