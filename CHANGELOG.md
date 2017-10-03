@@ -1,5 +1,51 @@
 # Change log
 
+## 5.0.0
+### No public release - SAAS-only version
+### New features
+#### Spreadsheet Editor
+* Ability to open and save Pivot tables
+* 69 new formulas: `AGGREGATE`, `BESSELI`, `BESSELJ`, `BESSELK`, 
+`BESSELY`, `BINOM.DIST.RANGE`, `BITAND`, `BITLSHIFT`, `BITRSHIFT`, 
+`BITOR`, `BITXOR`, `CHITEST`, `CHISQ.TEST`, `COVARIANCE.P`, 
+`COVARIANCE.S`, `DAVERAGE`, `DAYS`, `DCOUNT`, `DCOUNTA`, 
+`DGET`, `DMAX`, `DPRODUCT`, `DSTDEV`, `DSUM`, `DVAR`, 
+`ECMA.CEILING`, `ERFC.PRECISE`, `FORECAST.LINEAR`, `ISFORMULA`, 
+`ISOWEEKNUM`, `MAXIFS`, `MINIFS`, `MINIFS`, `MODE.MULT`, `MODE.SNGL`, 
+`NEGBINOM.DIST`, `NETWORKDAYS.INTL`, `NORM.DIST`, `NORM.INV`, 
+`NORM.S.DIST`, `NORM.S.INV`, `QUARTILE.INC`, `QUARTILE.EXC`, 
+`PERMUTATIONA`, `POISSON.DIST`, `PHI`, `RRI`, `SKEW.P`, `SHEET`,
+`SHEETS`, `STDEV.P`, `STDEV.S`, `SWITCH`, `T.TEST`, `TEXTJOIN`, 
+`TRIMMEAN`, `TTEST`, `UNICODE`, `VAR.P`, `VAR.S`, `WEIBULL`,
+`WEIBULL.DIST`, `WORKDAY.INTL`, `Z.TEST`, `ZTEST`
+
+#### Presentation Editor
+* Ability to add, open and save presentation notes
+* Ability to open and save videos
+
+#### Back-end
+* DB optimization, faster opening big files
+* Ability to rebuild not-builded, forgotten files
+* Open files base64 -> typed array
+
+#### x2t
+* Read ooxml and xls files with marcos.
+* Support audio and video files in all document formats
+* Support pivot tables xls
+
+### Fixes
+#### Document Editor
+* A lot of bugs fixed
+
+#### Spreadsheet Viewer
+* Fix not working keys in IE11 ([DocumentServer#107](https://github.com/ONLYOFFICE/DocumentServer/issues/107))
+* Fix COUNTIF formula ignores TRUE and FALSE ([DocumentServer#151](https://github.com/ONLYOFFICE/DocumentServer/issues/151))
+* Fix conditional formatting bugs
+
+#### x2t
+* Fix a lot of user files
+* Fix ods formulas
+
 ## 4.4.4
 ### Windows-only release
 ### Fixes
