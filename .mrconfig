@@ -5,6 +5,9 @@ hub = hub $@
 [core]
 checkout = git clone git@github.com:ONLYOFFICE/core.git
 
+[core-ext]
+checkout = git clone git@github.com:ONLYOFFICE/core-ext.git
+
 [dictionaries]
 checkout = git clone git@github.com:ONLYOFFICE/dictionaries.git
 
