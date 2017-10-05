@@ -1,5 +1,47 @@
 # Change log
 
+## 5.0.1
+### No public release - SAAS-only version
+### New Feature
+#### Integration Example
+* Support OpenDocument Flat Document file type
+
+### Fixes
+#### All Editors
+* Update translations and help files
+* Fix logo rebranding (bug #35860)
+* Fix logo click
+* Fix input text after copy comment (bug #35851)
+
+#### Spreadsheet Editor
+* Fix "Ctrl+L" hotkey problem (bug #35854)
+* Fix "Alt+H" hotkey in Firefox (bug #35857)
+* Fix "Ctrl+=" hotkey in Firefox (bug #35853)
+* Fix recalculating absolute formulas (bug #28388)
+* Fix replacing text in pivot tables (bug #35858)
+* Fix incorrect symbols after copy-paste in shape (bug #35913)
+* Fix soring in some xlsx (bug #35904)
+* Fix table header sort (bug #35950)
+
+#### Presentation Editor
+* Fix slide preview mode controls (bug #35440)
+* Fix bugs with copy notes
+* Fix connector connection problem (bug #35867)
+* Fix connector problem with copy-paste (bug #35024)
+
+#### Plugins
+* Fix opening Symbols Table (bug #35875)
+* Fix hotkeys in Symbols Table (bug #35890)
+
+#### Convertation
+* Fix saving changes in html files
+
+#### Rpm
+* Fix working with enabled `SELinux`
+ 
+##### Windows
+* Use 64-bit nodejs
+
 ## 5.0.0
 ### No public release - SAAS-only version
 ### New features
