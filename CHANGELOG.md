@@ -1,5 +1,28 @@
 # Change log
 
+## 5.0.2
+### No public release - SAAS-only version
+### New Feature
+#### Back-end
+* Add builder service
+
+#### Plugins
+* Ability to autostart plugins
+
+### Fixes
+#### All Editors
+* Update translations
+
+#### Document Editor
+* Fix sending mail in mail-merge (bug #36007)
+
+#### Spreadsheet Editor
+* Fix loading table styles
+
+#### Presentation Editor
+* Fix bugs in Reporter mode
+* Fix moving slide (bug #36031)
+
 ## 5.0.1
 ### No public release - SAAS-only version
 ### New Feature
