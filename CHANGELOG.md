@@ -1,5 +1,27 @@
 # Change log
 
+## 5.0.3
+### New Feature
+#### All Editors
+* Update limitations messages.
+* Added Sogou Pinyin input in Chrome
+* Fix button outlines in Firefox
+
+#### Plugins
+* New plugins scheme (system & parallel working)
+
+### Fixes
+#### All Editors
+* Fix `Developer Mode` message rotate in IE11 (bug #36076)
+* Support of fods, fodt, fodp formats
+
+#### Presentation Editor
+* Fix reporter mode resize in IE
+
+#### Pluging
+* Bug with resize cursor in the plugins window
+* Fix JS error in running `PhotoEditor` (bug #36050)
+
 ## 5.0.2
 ### No public release - SAAS-only version
 ### New Feature
