@@ -6,4 +6,10 @@
 
 **What is the expected behavior?**
 
-**Which versions of DocumentServer, and which browser / OS are affected by this issue? Did this work in previous versions of DocumentServer?**
+**Did this work in previous versions of DocumentServer?**
+
+**DocumentServer version:**
+
+**Operating System:**
+
+**Browser version:**
