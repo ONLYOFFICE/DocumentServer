@@ -1,5 +1,53 @@
 # Change log
 
+## 5.0.3
+### New Feature
+#### Distribution
+* `onlyoffice-documentserver-integration` renamed to `onlyoffice-documentserver-ie`
+* New distribution type for developers - `onlyoffice-documentserver-de`
+
+#### All Editors
+* Update limitations messages.
+* Added Sogou Pinyin input in Chrome
+* Support of fods, fodt, fodp formats
+
+#### Plugins
+* New plugins scheme (system & parallel working)
+
+#### Windows Version
+* Add 'Accept license' dialog in installation
+
+### Fixes
+#### All Editors
+* Fix button outlines in Firefox
+* Fix `Developer Mode` message rotate in IE11 (bug #36076)
+
+#### Document Editor
+* Fix JS error while adding Text Art by Enter (bug #36134)
+* Fix cursor while rotating object (bug #36114)
+
+#### Presentation Editor
+* Fix reporter mode resize in IE
+* Fix bug with position of hyperlink tooltip and slide num tooltip
+* Fix slide resize bug
+* Fix search in text in placeholder (bug #36133)
+* Fix layout in reported mode
+* Fix js error in Tables_test.pptx (bug #17147) 
+
+#### Embedded viewer
+* Fix `Error code -23` (bug #36122)
+
+#### Back-end
+* Fix view mode was determined without consideration of permissions.comment
+
+#### RPM 
+* Fix using SELinux with custom ports
+
+#### Pluging
+* Bug with resize cursor in the plugins window
+* Fix JS error in running `PhotoEditor` (bug #36050)
+* Fix problems with scroll
+
 ## 5.0.2
 ### No public release - SAAS-only version
 ### New Feature
