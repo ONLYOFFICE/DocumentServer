@@ -1,5 +1,35 @@
 # Change log
 
+## 5.0.4
+### Fixes
+#### All Editors
+* Remove some unused code
+* Fix Poland language bug (altGr + x/c on firefox/edge)
+* Fix bug with images paths
+
+#### Document Editor
+* Fix bug with removing and adding items from listview (tab list)
+* Fix bug with creating several synchronize tips
+* Fix line end in thumbnails
+* Fix paste simple text to equations
+* Fix opening version history
+
+#### Spreadsheet Editor
+* Fix JS error for some pivot table styles (bug #36290) 
+* Check xfIndexNumber when merging styles to avoid errors with column styles
+* Fix conditional formatting while changing cell values (bug #36253)
+
+#### Presentation Editor
+* Don't disable prev-next buttons for slide demonstration
+* Fix presentation demonstration: start from beginning
+* Fix notes scroll
+* Fix insert text operation duration (bug 36208)
+* Fix browser zoom problem with reported pointer
+
+#### Back-end
+* Fix conversion task is lost when entering and leaving the editor quickly (endless opening)
+* Fix timeout error while first user do not performing save
+
 ## 5.0.3
 ### New Feature
 #### Distribution
