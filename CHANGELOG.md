@@ -4,7 +4,7 @@
 ### Fixes
 #### All Editors
 * Remove some unused code
-* Fix Poland language bug (altGr + x/c on firefox/edge)
+* Fix Polish language bug (altGr + x/c on firefox/edge)
 * Fix bug with images paths
 
 #### Document Editor
