@@ -52,6 +52,7 @@ The easiest way to install ONLYOFFICE Document Server is to use the Docker image
 
 * [Compiling ONLYOFFICE Document Server for a Local Server](http://helpcenter.onlyoffice.com/server/linux/document/compile-source-code.aspx "Compiling ONLYOFFICE Document Server for a Local Server")
 * [Installing ONLYOFFICE Document Server Linux Version](http://helpcenter.onlyoffice.com/server/linux/document/linux-installation.aspx "Installing ONLYOFFICE Document Server Linux Version")
+* [Installing ONLYOFFICE Document Server Windows Version](http://helpcenter.onlyoffice.com/server/windows/document/install-office-apps.aspx "Installing Document Server for Windows on a Local Server")
 * [Installing ONLYOFFICE Document Server Docker Version](http://helpcenter.onlyoffice.com/server/docker/document/docker-installation.aspx "Installing ONLYOFFICE Document Server Docker Version")
 
 ## User Feedback and Support
