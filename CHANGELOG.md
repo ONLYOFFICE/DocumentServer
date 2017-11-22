@@ -1,4 +1,11 @@
 # Change log
+## 5.1.0
+### New Features
+#### Spreadsheet Editor
+* 8 new formulas: `F.TEST`, `FORECAST.ETS`, `FORECAST.ETS.CONFINT`,
+`FORECAST.ETS.SEASONALITY`, `FORECAST.ETS.STAT`, `FORMULATEXT`,
+`IFS`, `PDURATION`
+
 ## 5.0.7
 ### New Features
 #### Licensing
