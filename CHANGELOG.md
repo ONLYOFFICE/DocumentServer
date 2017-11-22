@@ -30,7 +30,7 @@
 * Fix timeout error while first user do not performing save
 
 ## 5.0.3
-### New Feature
+### New Features
 #### Distribution
 * `onlyoffice-documentserver-integration` renamed to `onlyoffice-documentserver-ie`
 * New distribution type for developers - `onlyoffice-documentserver-de`
@@ -79,7 +79,7 @@
 
 ## 5.0.2
 ### No public release - SAAS-only version
-### New Feature
+### New Features
 #### Back-end
 * Add builder service
 
@@ -102,7 +102,7 @@
 
 ## 5.0.1
 ### No public release - SAAS-only version
-### New Feature
+### New Features
 #### Integration Example
 * Support OpenDocument Flat Document file type
 
@@ -345,7 +345,7 @@
 * Fix problems with logos
 
 ## 4.3.5
-### New Feature
+### New Features
 #### Document Editor
 * Add `showReviewChanges` option to config - auto-open review changes panel
 
