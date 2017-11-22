@@ -1,6 +1,9 @@
 # Change log
 ## 5.1.0
 ### New Features
+#### Document Editor
+* Ability to set Tab Leader symbols
+  
 #### Spreadsheet Editor
 * 8 new formulas: `F.TEST`, `FORECAST.ETS`, `FORECAST.ETS.CONFINT`,
 `FORECAST.ETS.SEASONALITY`, `FORECAST.ETS.STAT`, `FORMULATEXT`,
