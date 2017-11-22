@@ -3,11 +3,17 @@
 ### New Features
 #### Document Editor
 * Ability to set Tab Leader symbols
-  
+* Rename `Review` tab to `Collaboration`      
+
 #### Spreadsheet Editor
 * 8 new formulas: `F.TEST`, `FORECAST.ETS`, `FORECAST.ETS.CONFINT`,
 `FORECAST.ETS.SEASONALITY`, `FORECAST.ETS.STAT`, `FORMULATEXT`,
 `IFS`, `PDURATION`
+* New `None` Table Template
+
+### Fixes
+#### All Editors
+* A lot of bugs fixed
 
 ## 5.0.7
 ### New Features
