@@ -1,5 +1,4 @@
 # Change log
-
 ## 5.0.4
 ### Fixes
 #### All Editors
@@ -15,7 +14,7 @@
 * Fix opening version history
 
 #### Spreadsheet Editor
-* Fix JS error for some pivot table styles (bug #36290) 
+* Fix JS error for some pivot table styles (bug #36290)
 * Check xfIndexNumber when merging styles to avoid errors with column styles
 * Fix conditional formatting while changing cell values (bug #36253)
 
@@ -31,7 +30,7 @@
 * Fix timeout error while first user do not performing save
 
 ## 5.0.3
-### New Feature
+### New Features
 #### Distribution
 * `onlyoffice-documentserver-integration` renamed to `onlyoffice-documentserver-ie`
 * New distribution type for developers - `onlyoffice-documentserver-de`
@@ -62,7 +61,7 @@
 * Fix slide resize bug
 * Fix search in text in placeholder (bug #36133)
 * Fix layout in reported mode
-* Fix js error in Tables_test.pptx (bug #17147) 
+* Fix js error in Tables_test.pptx (bug #17147)
 
 #### Embedded viewer
 * Fix `Error code -23` (bug #36122)
@@ -70,7 +69,7 @@
 #### Back-end
 * Fix view mode was determined without consideration of permissions.comment
 
-#### RPM 
+#### RPM
 * Fix using SELinux with custom ports
 
 #### Pluging
@@ -80,7 +79,7 @@
 
 ## 5.0.2
 ### No public release - SAAS-only version
-### New Feature
+### New Features
 #### Back-end
 * Add builder service
 
@@ -103,7 +102,7 @@
 
 ## 5.0.1
 ### No public release - SAAS-only version
-### New Feature
+### New Features
 #### Integration Example
 * Support OpenDocument Flat Document file type
 
@@ -139,7 +138,7 @@
 
 #### Rpm
 * Fix working with enabled `SELinux`
- 
+
 ##### Windows
 * Use 64-bit nodejs
 
@@ -148,17 +147,17 @@
 ### New features
 #### Spreadsheet Editor
 * Ability to open and save Pivot tables
-* 69 new formulas: `AGGREGATE`, `BESSELI`, `BESSELJ`, `BESSELK`, 
-`BESSELY`, `BINOM.DIST.RANGE`, `BITAND`, `BITLSHIFT`, `BITRSHIFT`, 
-`BITOR`, `BITXOR`, `CHITEST`, `CHISQ.TEST`, `COVARIANCE.P`, 
-`COVARIANCE.S`, `DAVERAGE`, `DAYS`, `DCOUNT`, `DCOUNTA`, 
-`DGET`, `DMAX`, `DPRODUCT`, `DSTDEV`, `DSUM`, `DVAR`, 
-`ECMA.CEILING`, `ERFC.PRECISE`, `FORECAST.LINEAR`, `ISFORMULA`, 
-`ISOWEEKNUM`, `MAXIFS`, `MINIFS`, `MINIFS`, `MODE.MULT`, `MODE.SNGL`, 
-`NEGBINOM.DIST`, `NETWORKDAYS.INTL`, `NORM.DIST`, `NORM.INV`, 
-`NORM.S.DIST`, `NORM.S.INV`, `QUARTILE.INC`, `QUARTILE.EXC`, 
+* 69 new formulas: `AGGREGATE`, `BESSELI`, `BESSELJ`, `BESSELK`,
+`BESSELY`, `BINOM.DIST.RANGE`, `BITAND`, `BITLSHIFT`, `BITRSHIFT`,
+`BITOR`, `BITXOR`, `CHITEST`, `CHISQ.TEST`, `COVARIANCE.P`,
+`COVARIANCE.S`, `DAVERAGE`, `DAYS`, `DCOUNT`, `DCOUNTA`,
+`DGET`, `DMAX`, `DPRODUCT`, `DSTDEV`, `DSUM`, `DVAR`,
+`ECMA.CEILING`, `ERFC.PRECISE`, `FORECAST.LINEAR`, `ISFORMULA`,
+`ISOWEEKNUM`, `MAXIFS`, `MINIFS`, `MINIFS`, `MODE.MULT`, `MODE.SNGL`,
+`NEGBINOM.DIST`, `NETWORKDAYS.INTL`, `NORM.DIST`, `NORM.INV`,
+`NORM.S.DIST`, `NORM.S.INV`, `QUARTILE.INC`, `QUARTILE.EXC`,
 `PERMUTATIONA`, `POISSON.DIST`, `PHI`, `RRI`, `SKEW.P`, `SHEET`,
-`SHEETS`, `STDEV.P`, `STDEV.S`, `SWITCH`, `T.TEST`, `TEXTJOIN`, 
+`SHEETS`, `STDEV.P`, `STDEV.S`, `SWITCH`, `T.TEST`, `TEXTJOIN`,
 `TRIMMEAN`, `TTEST`, `UNICODE`, `VAR.P`, `VAR.S`, `WEIBULL`,
 `WEIBULL.DIST`, `WORKDAY.INTL`, `Z.TEST`, `ZTEST`
 
@@ -346,7 +345,7 @@
 * Fix problems with logos
 
 ## 4.3.5
-### New Feature
+### New Features
 #### Document Editor
 * Add `showReviewChanges` option to config - auto-open review changes panel
 
