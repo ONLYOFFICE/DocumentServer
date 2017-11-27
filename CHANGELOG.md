@@ -1,4 +1,43 @@
 # Change log
+## 5.0.5
+### New Features
+#### DesktopEditors
+* Added two types of restrictions for editing a document - OnlySignatures and View
+
+### Fixes
+#### All Editors
+* Fix red cross for images in some situations
+
+#### Spreadsheet Editors
+* Fix `a.Se is not a function` error while opening file (bug #36344)
+* Fix error with merge table colors
+* Fix merge cells after apply table template (bug #36405)
+
+#### Presentation Editor
+* Check buttons layout in reporter mode
+* Disable scroll to target in selectwheel (empty selection)
+* Fix applying image as background for several slides (bug #36399)
+* Fix mouse slide scroll without change zoom (bug #28096)
+
+#### Plugins
+* Fix calling plugins in non-tabbed interface [Docker-DocumentServer#84](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/84)
+* Fix crash on unknown ole-object resize
+* Yandex.Translate add progress bar
+
+#### x2t
+* Fix colors schemes for table cells (bug #36322)
+* Fix problem with image in footnote (bug #36380)
+
+#### Back-end
+* Fix calculate connections. exclude view users
+
+#### deb
+* Fix nodejs dependency (force NodeJS 6 LTS)
+
+#### Document Builder
+* Service key size reduced to 20 characters
+* Change HTTP error code from 403 to 402 in case of incorrect license
+
 ## 5.0.4
 ### Fixes
 #### All Editors
