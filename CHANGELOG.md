@@ -1,7 +1,7 @@
 # Change log
 ## 5.0.5
 ### New Features
-#### All Editor
+#### DesktopEditors
 * Added two types of restrictions for editing a document - OnlySignatures and View
 
 ### Fixes
