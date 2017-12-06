@@ -1,4 +1,21 @@
 # Change log
+## 5.0.6
+### New Features
+#### Licensing
+* New license type - by unique users count
+
+### Fixes
+#### Document Editor
+* JS Error while inserting empty cell to chart title (bug #36441)
+* Remove non-actual Rich Text Content Control help files
+* Hide Clipart plugin window if version history opened (bug #36464)
+
+#### Back-end
+* Long outbox request authorization headers are reduced (bug #36202)
+
+#### Windows Version
+* Fix jwt enabling in ds example
+
 ## 5.0.5
 ### New Features
 #### DesktopEditors
