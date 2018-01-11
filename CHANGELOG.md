@@ -1,6 +1,9 @@
 # Change log
 ## 5.0.7
 ### New Features
+#### Licensing
+* New license type - by unique users id's and access period
+
 #### Document Builder
 * Add a lot of getters and setters
 * New methods to AddSheet
