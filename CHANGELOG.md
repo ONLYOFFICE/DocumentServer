@@ -1,4 +1,50 @@
 # Change log
+## 5.0.7
+### New Features
+#### Document Builder
+* Add a lot of getters and setters
+* New methods to AddSheet
+
+#### Spreadsheet Editors
+* Add stirkeout, superscript and subscript in top toolbar (bug #26581)
+
+#### Help
+* New entries in help for each editor tab
+
+### Fixes
+#### All Editors
+* Update translations
+* Set focus out of the editor frame in IE/Edge
+
+#### Document Editor
+* Fix opening docx file with formula in MS Word (bug #36490)
+* Fix JS error while inserting Spreadsheet cell with comment (bug #36506)
+* Fix bug with inserting the content control in the math equation.
+* Fix reset selection from object in header/footer after keyboard move
+
+#### Spreadsheet Editors
+* Fix wrong dependence in formula with 3D Ref after removing sheet
+* Fix opening odt with chart
+* Fix calculating sparkline in some case (bug #36603)
+* Fix printing image outside of printed range (bug #36573)
+
+#### Presentation Editor
+* Fix shape blocking in coedit for users with different mode (bug #36435)
+* Fix chart `Constant proportions` working only once (bug #36494)
+* Fix JS error while inserting page number from Document Editor (bug #36508)
+* Fix JS error while undo of table (bug #36515)
+
+#### Back-end
+* Fix IIS URL Rewrite while uploading image
+* Fix ttf fonts not gziped
+
+#### Integration Example
+* Remove `Integration Edition` from logo
+
+#### x2t
+* Fix some DOCX, DOC, RTF files from users
+* Fix DOCX with MathType equations (bug #36524)
+
 ## 5.0.6
 ### New Features
 #### Licensing
