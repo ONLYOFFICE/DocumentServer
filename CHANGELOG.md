@@ -52,7 +52,7 @@
 * Support a lot of features in xls format (macros, controls etc.)
 * Speedup of opening ooxml files on 5-10%
 * Better compatibility with OpenFormat, RTF
-* Fix a lot of error in user-send files
+* Fix a lot of error in user-send files in all supported formats
 
 #### Document Builder
 * Add new `GetSheets`, `GetSheet`,  methods
