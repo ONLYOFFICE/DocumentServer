@@ -1,19 +1,54 @@
 # Change log
 ## 5.1.0
 ### New Features
+#### All Editors
+* New `no squares` font engine, find best replacement font for `□` characters
+* Ability to distribute data in tables
+* New fonts in default font set
+* Fully rewritten composite input for characters
+* New header and background color
+* Support of shape side panel for images
+
 #### Document Editor
 * Ability to set Tab Leader symbols
-* Rename `Review` tab to `Collaboration`      
+* Support of Table of Contents
+* New `Reference` tab
+* Rename `Review` tab to `Collaboration`  
+* Changes history in Strict Co-Edit
+* Rename `Display Modes` entries for Track Changes
 
 #### Spreadsheet Editor
 * 8 new formulas: `F.TEST`, `FORECAST.ETS`, `FORECAST.ETS.CONFINT`,
 `FORECAST.ETS.SEASONALITY`, `FORECAST.ETS.STAT`, `FORMULATEXT`,
 `IFS`, `PDURATION`
 * New `None` Table Template
+* New editing tools for Pivot Tables
+
+#### Presentation Editor
+* Special paste
+* Presentation level comments
+
+#### Document Builder
+* Add new `GetSheets`, `GetSheet`,  methods
+* Add `GetVisible`, `SetVisible`, `GetName` `GetIndex` for ApiWorksheet
+* Add getter and setter properties Visible in ApiWorksheet
+* Add getter property Index in ApiWorksheet
+* Add getter and setter properties Name in ApiWorksheet
+* Add getter property Sheets in Api
+* Add getter property ActiveCell in ApiWorksheet
+* Add function GetValue in ApiRange
+* Add getter property Value, function ForEach in ApiRange
+* Add function Format in Api
+* Add function GetCells in ApiWorksheet
+* Add getter property Cells in ApiWorksheet
+* Add function GetUsedRange in ApiWorksheet
+* Add getter property UsedRange in ApiWorksheet
+* Add function GetRowHeight in ApiWorksheet
 
 ### Fixes
 #### All Editors
 * A lot of bugs fixed
+* Fix toolbar icons problems
 
 ## 5.0.7
 ### New Features
