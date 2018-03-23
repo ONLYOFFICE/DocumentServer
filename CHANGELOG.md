@@ -29,6 +29,7 @@
 * Special paste of tables
 
 #### Spreadsheet Editor
+* Custom user cell styles are now placed before default ones
 * 8 new formulas: `F.TEST`, `FORECAST.ETS`, `FORECAST.ETS.CONFINT`,
 `FORECAST.ETS.SEASONALITY`, `FORECAST.ETS.STAT`, `FORMULATEXT`,
 `IFS`, `PDURATION`
