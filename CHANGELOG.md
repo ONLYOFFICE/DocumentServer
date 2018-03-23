@@ -8,14 +8,25 @@
 * Fully rewritten composite input for characters
 * New header and background color
 * Support of shape side panel for images
+* Change table size by drag'n'drop
+* New bullet list marker - `–`
+* Redone connection of second user to document in Strict mode
+* Increase supported document size (without media-content)
+* New help entries
+* Search in help
 
 #### Document Editor
 * Ability to set Tab Leader symbols
 * Support of Table of Contents
+* New `Navigation` left sidebar
 * New `Reference` tab
 * Rename `Review` tab to `Collaboration`  
 * Changes history in Strict Co-Edit
 * Rename `Display Modes` entries for Track Changes
+* File tab `Go to documents` opens in new tab
+* Ability to set negative top and bottom page margin
+* Copy paragraph style will not overwright custom run style
+* Special paste of tables
 
 #### Spreadsheet Editor
 * 8 new formulas: `F.TEST`, `FORECAST.ETS`, `FORECAST.ETS.CONFINT`,
@@ -23,10 +34,25 @@
 `IFS`, `PDURATION`
 * New `None` Table Template
 * New editing tools for Pivot Tables
+* New regional presets - `Deutsch (Schweiz)`, `Español (México)`,
+ `Nederlands (Nederland)`, `Slovenčina (Slovenská republika)`
+* New date formats `yy/m/d`, `yy/mm/dd`, `yyyy/m/d`
+* Increase cell count - 1,048,576 rows by 16,384 columns
+* CSV preview before opening
 
 #### Presentation Editor
 * Special paste
 * Presentation level comments
+
+#### Plugins
+* Added `Macros` plugin
+* Fix plugin autostart problem
+
+#### x2t
+* Support a lot of features in xls format (macros, controls etc.)
+* Speedup of opening ooxml files on 5-10%
+* Better compatibility with OpenFormat, RTF
+* Decryption of Doc (word1995 and earlier)
 
 #### Document Builder
 * Add new `GetSheets`, `GetSheet`,  methods
@@ -49,6 +75,7 @@
 #### All Editors
 * A lot of bugs fixed
 * Fix toolbar icons problems
+* Fix editing problems while connecting to document with a lot of changes
 
 ## 5.0.7
 ### New Features
