@@ -52,7 +52,6 @@
 * Support a lot of features in xls format (macros, controls etc.)
 * Speedup of opening ooxml files on 5-10%
 * Better compatibility with OpenFormat, RTF
-* Decryption of Doc (word1995 and earlier)
 
 #### Document Builder
 * Add new `GetSheets`, `GetSheet`,  methods
