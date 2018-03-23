@@ -38,7 +38,6 @@
 * New regional presets - `Deutsch (Schweiz)`, `Español (México)`,
  `Nederlands (Nederland)`, `Slovenčina (Slovenská republika)`
 * New date formats `yy/m/d`, `yy/mm/dd`, `yyyy/m/d`
-* Increase cell count - 1,048,576 rows by 16,384 columns
 * CSV preview before opening
 
 #### Presentation Editor
