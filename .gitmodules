@@ -16,3 +16,6 @@
 [submodule "sdkjs-plugins"]
 	path = sdkjs-plugins
 	url = https://github.com/ONLYOFFICE/sdkjs-plugins.git
+[submodule "core-fonts"]
+	path = core-fonts
+	url = https://github.com/ONLYOFFICE/core-fonts.git
