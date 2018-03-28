@@ -8,11 +8,29 @@ checkout = git clone git@github.com:ONLYOFFICE/core.git
 [core-ext]
 checkout = git clone git@github.com:ONLYOFFICE/core-ext.git
 
+[core-fonts]
+checkout = git clone git@github.com:ONLYOFFICE/core-fonts.git
+
+[desktop-sdk]
+checkout = git clone git@github.com:ONLYOFFICE/desktop-sdk.git
+
 [dictionaries]
 checkout = git clone git@github.com:ONLYOFFICE/dictionaries.git
 
+[Docker-DocumentServer]
+checkout = git clone git@github.com:ONLYOFFICE/Docker-DocumentServer.git
+
+[document-server-integration]
+checkout = git clone git@github.com:ONLYOFFICE/document-server-integration.git
+
+[document-server-package]
+checkout = git clone git@github.com:ONLYOFFICE/document-server-package.git
+
 [sdkjs]
 checkout = git clone git@github.com:ONLYOFFICE/sdkjs.git
+
+[sdkjs-plugins]
+checkout = git clone git@github.com:ONLYOFFICE/sdkjs-plugins.git
 
 [server]
 checkout = git clone git@github.com:ONLYOFFICE/server.git
@@ -22,18 +40,3 @@ checkout = git clone git@github.com:ONLYOFFICE/web-apps.git
 
 [web-apps-pro]
 checkout = git clone git@github.com:ONLYOFFICE/web-apps-pro.git
-
-[document-server-package]
-checkout = git clone git@github.com:ONLYOFFICE/document-server-package.git
-
-[document-server-integration]
-checkout = git clone git@github.com:ONLYOFFICE/document-server-integration.git
-
-[Docker-DocumentServer]
-checkout = git clone git@github.com:ONLYOFFICE/Docker-DocumentServer.git
-
-[sdkjs-plugins]
-checkout = git clone git@github.com:ONLYOFFICE/sdkjs-plugins.git
-
-[desktop-sdk]
-checkout = git clone git@github.com:ONLYOFFICE/desktop-sdk.git
