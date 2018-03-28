@@ -1,4 +1,82 @@
 # Change log
+## 5.1.0
+### New Features
+#### All Editors
+* New `no squares` font engine, find best replacement font for `□` characters
+* Ability to distribute data in tables
+* New fonts in default font set
+* Fully rewritten composite input for characters
+* New header and background color
+* Support of shape side panel for images
+* Change table size by drag'n'drop
+* New bullet list marker - `–`
+* Redone connection of second user to document in Strict mode
+* Increase supported document size (without media-content)
+* New help entries
+* Search in help
+
+#### Document Editor
+* Ability to set Tab Leader symbols
+* Support of Table of Contents
+* New `Navigation` left sidebar
+* New `Reference` tab
+* Rename `Review` tab to `Collaboration`  
+* Changes history in Strict Co-Edit
+* Rename `Display Modes` entries for Track Changes
+* File tab `Go to documents` opens in new tab
+* Ability to set negative top and bottom page margin
+* Copy paragraph style will not overwright custom run style
+* Special paste of tables
+
+#### Spreadsheet Editor
+* Custom user cell styles are now placed before default ones
+* 8 new formulas: `F.TEST`, `FORECAST.ETS`, `FORECAST.ETS.CONFINT`,
+`FORECAST.ETS.SEASONALITY`, `FORECAST.ETS.STAT`, `FORMULATEXT`,
+`IFS`, `PDURATION`
+* New `None` Table Template
+* New editing tools for Pivot Tables
+* New regional presets - `Deutsch (Schweiz)`, `Español (México)`,
+ `Nederlands (Nederland)`, `Slovenčina (Slovenská republika)`
+* New date formats `yy/m/d`, `yy/mm/dd`, `yyyy/m/d`
+* CSV preview before opening
+
+#### Presentation Editor
+* Special paste
+* Presentation level comments
+
+#### Plugins
+* Added `Macros` plugin
+* Fix plugin autostart problem
+
+#### x2t
+* Support a lot of features in xls format (macros, controls etc.)
+* Speedup of opening ooxml files on 5-10%
+* Better compatibility with OpenFormat, RTF
+* Fix a lot of error in user-send files in all supported formats
+
+#### Document Builder
+* Add new `GetSheets`, `GetSheet`,  methods
+* Add `GetVisible`, `SetVisible`, `GetName` `GetIndex` for ApiWorksheet
+* Add getter and setter properties Visible in ApiWorksheet
+* Add getter property Index in ApiWorksheet
+* Add getter and setter properties Name in ApiWorksheet
+* Add getter property Sheets in Api
+* Add getter property ActiveCell in ApiWorksheet
+* Add function GetValue in ApiRange
+* Add getter property Value, function ForEach in ApiRange
+* Add function Format in Api
+* Add function GetCells in ApiWorksheet
+* Add getter property Cells in ApiWorksheet
+* Add function GetUsedRange in ApiWorksheet
+* Add getter property UsedRange in ApiWorksheet
+* Add function GetRowHeight in ApiWorksheet
+
+### Fixes
+#### All Editors
+* A lot of bugs fixed
+* Fix toolbar icons problems
+* Fix editing problems while connecting to document with a lot of changes
+
 ## 5.0.7
 ### New Features
 #### Licensing
