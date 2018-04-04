@@ -2,13 +2,12 @@
 ## 5.1.1
 ### New Features
 #### All Editors
-* Add reconnection.attempts, reconnection.delay options to config
 * Update translations
 * New help entries
-* Add Spanish formula translations
 
 #### Spreadsheet Editor
 * Add `CONVERT`, `FTEST`, `HYPGEOM.DIST` formulas
+* Add Spanish formula translations
 
 #### Back-end
 * Add reconnection.attempts, reconnection.delay options to config - applicable for editor-server connection
@@ -38,7 +37,6 @@
 #### Spreadsheet Editor
 * Fix right mouse button error (#37330)
 * Fix inserting hieroglyphs from text editor (#37356)
-* Fix printing cell borders (#35367)
 * Fix bug with enter symbol point in formula autocompleate (#37300)
 * Fix bug with enter symbol `_` or `\` in start formula autocompleate (bug #37354)
 * Fix bug with enter Chinese numbers in formula autocompleate
@@ -66,10 +64,11 @@
 #### x2t
 * Fix reopening files with macros (#37323)
 * Fix opening some Docx user files
-* Fix opening some XLS user files 
+* Fix opening some XLS user files
 
 #### DesktopEditors
 * Fix gradient bug
+* Fix printing cell borders (#35367)
 
 ## 5.1.0
 ### New Features
