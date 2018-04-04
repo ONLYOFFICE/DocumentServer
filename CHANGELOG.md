@@ -1,4 +1,76 @@
 # Change log
+## 5.1.1
+### New Features
+#### All Editors
+* Add reconnection.attempts, reconnection.delay options to config
+* Update translations
+* New help entries
+* Add Spanish formula translations
+
+#### Spreadsheet Editor
+* Add `CONVERT`, `FTEST`, `HYPGEOM.DIST` formulas
+
+#### Back-end
+* Add reconnection.attempts, reconnection.delay options to config - applicable for editor-server connection
+* Add fonts folder to static content
+* Add sockjs config section for testing purposes
+
+### Fixes
+#### All Editors
+* Hide empty width glyphs fonts in font picker
+* Don't save changes for undo/redo in server build mode
+* Change size of image pasted form html
+* Fix problem in text selection with Shift
+* Fix redundant symbol in cell after undo-redo (#37343)
+* Fix error with repeated reconnection
+* Fix problems with icons of some buttons
+* Fix sync coedit button in top toolbar and menu (#37377)
+
+#### Document Editor
+* Fix right mouse buttom menu for TOC (#37241)
+* Fix usage Clip ParaDrawing by line top and bottom
+* Don't clip images in text arts
+* Add vertical clip for inline drawing
+* Fix problems in drawing inline objects
+* Fix bug in calculation text clip rect in documents
+* Fix `Cannot read property 'B8a' of null` error in some files (#37378)
+
+#### Spreadsheet Editor
+* Fix right mouse button error (#37330)
+* Fix inserting hieroglyphs from text editor (#37356)
+* Fix printing cell borders (#35367)
+* Fix bug with enter symbol point in formula autocompleate (#37300)
+* Fix bug with enter symbol `_` or `\` in start formula autocompleate (bug #37354)
+* Fix bug with enter Chinese numbers in formula autocompleate
+* Fix `Cannot read property 'toLocaleString'` error in some files (#37343)
+* Fix `Cannot read property '4''` error in some files (#37376)
+* Fix sheet context menu visibility (#37307)
+* Fix translations for formulas
+* Fix inserting function in opened cell (#37348)
+* Correct some formulas translations
+
+#### Presentation Editor
+* Fix hieroglyph problem in chart title (#37293)
+* Fix chart title focus problem in coedit (#37295)
+* Fix object selection problem in coedit (#37336)
+* Remove `console.log` about `End_CollaborationEditing`
+* Clamp scroll_central position
+* Bug with clearing cached canvas
+* Fix bug in calculation of slide layout bounds
+* Fix `Cannot read property 'Ec' of null` error in some files (#37386)
+
+#### Back-end
+* Fix font generation
+* Fix inconsistent database status after files assemble in case of rapid open/close connection
+
+#### x2t
+* Fix reopening files with macros (#37323)
+* Fix opening some Docx user files
+* Fix opening some XLS user files 
+
+#### DesktopEditors
+* Fix gradient bug
+
 ## 5.1.0
 ### New Features
 #### All Editors
