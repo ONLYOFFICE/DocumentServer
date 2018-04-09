@@ -22,6 +22,10 @@
 #### Back-end
 * Add `npm` dependency for deb and rpm package (fix [DocumentServer#271](https://github.com/ONLYOFFICE/DocumentServer/issues/271))
 
+#### x2t
+* Fix mac related build problems
+* ppt - fix shape geometry in files from newest ms office
+
 ## 5.1.1
 ### New Features
 #### All Editors
