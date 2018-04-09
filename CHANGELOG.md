@@ -1,4 +1,27 @@
 # Change log
+## 5.1.2
+### New features
+#### All Editors
+* Update help translations
+
+#### Document Editor
+* Support of multi comments baloon (bug 37422)
+
+### Fixes
+#### All editors
+* Fix crash on loading document in Safari 11.1
+* Fix undo after copy paste in coedit (bug 37424)
+
+#### Spreadsheet Editor
+* Fix copy paste in OpenSource menu (bug #37426)
+* Fix Spanish formulas translations
+
+#### Presentation Editor
+* Fix reporter mode in Safari
+
+#### Back-end
+* Add `npm` dependency for deb and rpm package (fix [DocumentServer#271](https://github.com/ONLYOFFICE/DocumentServer/issues/271))
+
 ## 5.1.1
 ### New Features
 #### All Editors
