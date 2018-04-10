@@ -5,7 +5,7 @@
 * Update help translations
 
 #### Document Editor
-* Support of multi comments baloon (bug 37422)
+* Support of multi comments baloon (bug #37422)
 
 ### Fixes
 #### All editors
