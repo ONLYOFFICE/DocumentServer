@@ -1,4 +1,39 @@
 # Change log
+## 5.1.2
+### New features
+#### All Editors
+* Update help translations
+
+#### Document Editor
+* Support of multi comments baloon (bug #37422)
+
+### Fixes
+#### All editors
+* Fix crash on loading document in Safari 11.1
+* Fix undo after copy paste in coedit (bug #37424)
+* Fix problems with some thai symbols (bug #37446) ([sdkjs#297](https://github.com/ONLYOFFICE/sdkjs/pull/297))
+
+#### Document Editor
+* Fix changing labels of Content Control ([sdkjs#296](https://github.com/ONLYOFFICE/sdkjs/pull/296))
+* Fix crash on pdf reconnect or check idle ([sdkjs#291](https://github.com/ONLYOFFICE/sdkjs/pull/291))
+* Fix search text in drawing formats ([sdkjs#292](https://github.com/ONLYOFFICE/sdkjs/pull/292))
+* Fix problem with loading pdf renamed to docx ([sdkjs#295](https://github.com/ONLYOFFICE/sdkjs/pull/295))
+
+#### Spreadsheet Editor
+* Fix copy paste in OpenSource menu (bug #37426)
+* Fix Spanish formulas translations
+* Fix open pivot tables with VALUES ([sdkjs#298](https://github.com/ONLYOFFICE/sdkjs/pull/298))
+
+#### Presentation Editor
+* Fix reporter mode in Safari
+
+#### Back-end
+* Fix file corruption after restore connection when version is assembled ([server#80](https://github.com/ONLYOFFICE/server/pull/80))
+
+#### x2t
+* Fix mac related build problems
+* ppt - fix shape geometry in files from newest ms office
+
 ## 5.1.1
 ### New Features
 #### All Editors
