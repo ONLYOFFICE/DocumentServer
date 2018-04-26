@@ -26,7 +26,7 @@
 * Update `icu` dependency from `5.5` to `6.0`
 
 #### Mobile Editors
-* Ability to go to editing mode from toolbar [web-apps#135](https://github.com/ONLYOFFICE/web-apps/pull/135))
+* Ability to go to editing mode from toolbar ([web-apps#135](https://github.com/ONLYOFFICE/web-apps/pull/135))
 
 #### Integration Example
 * Support of `ott`, `ots`, `otp` formats
@@ -39,7 +39,7 @@
 
 #### Document Editor
 * Fix displaying table after html convert (#37472)
-* Fix adding comment to whole doc (#37425, ([DocumentServer#287](https://github.com/ONLYOFFICE/DocumentServer/issue/287))) ([sdkjs#319](https://github.com/ONLYOFFICE/sdkjs/pull/319))
+* Fix adding comment to whole doc (#37425, [DocumentServer#287](https://github.com/ONLYOFFICE/DocumentServer/issue/287)) ([sdkjs#319](https://github.com/ONLYOFFICE/sdkjs/pull/319))
 * Fix copy Rich Text Content from table (#37546) ([sdkjs#320](https://github.com/ONLYOFFICE/sdkjs/pull/320))
 
 #### Spreadsheet Editor
