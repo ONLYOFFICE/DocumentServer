@@ -1,4 +1,61 @@
 # Change log
+## 5.1.3
+### New features
+#### All editors
+* New `View Settings` menu in top right corner
+* New selector for links type in CSE CPE
+* Ability to replace image via context menu (#11493)
+* Customize initial zoom for the embedded editors
+
+#### Document Editor
+* Implement an East Asian script and line break in hieroglyphs ([sdkjs#300](https://github.com/ONLYOFFICE/sdkjs/pull/304))
+* Add hotkey Ctrl+Shift+Num8 - show/hide non printable symbols
+* Add ability to export documents to RTF
+
+#### Spreadsheet Editor
+* Add support of French formulas
+* Ability to select Cell format via context menu (#16272)
+
+#### Preseentation Editor
+* Add hints to presentation themes (bug #21362)
+
+#### Document Builder
+* Add function to get the width of the current column ([sdkjs#315](https://github.com/ONLYOFFICE/sdkjs/pull/315))
+
+#### Back-End
+* Update `icu` dependency from `5.5` to `6.0`
+
+#### Mobile Editors
+* Ability to go to editing mode from toolbar ([web-apps#135](https://github.com/ONLYOFFICE/web-apps/pull/135))
+
+#### Integration Example
+* Support of `ott`, `ots`, `otp` formats
+
+### Fixes
+#### All editors
+* Improve compatibility with IE11 ([sdkjs#302](https://github.com/ONLYOFFICE/sdkjs/pull/302)) ([sdkjs#317](https://github.com/ONLYOFFICE/sdkjs/pull/317))
+* Fix downloading specific docx file (#37454) ([sdkjs#300](https://github.com/ONLYOFFICE/sdkjs/pull/300))
+* Fix crash on opening files with empty pie charts ([sdkjs#318](https://github.com/ONLYOFFICE/sdkjs/pull/318))
+
+#### Document Editor
+* Fix displaying table after html convert (#37472)
+* Fix adding comment to whole doc (#37425, [DocumentServer#287](https://github.com/ONLYOFFICE/DocumentServer/issue/287)) ([sdkjs#319](https://github.com/ONLYOFFICE/sdkjs/pull/319))
+* Fix copy Rich Text Content from table (#37546) ([sdkjs#320](https://github.com/ONLYOFFICE/sdkjs/pull/320))
+
+#### Spreadsheet Editor
+* Fix formula dependency and file assemble after add col/row ([sdkjs#312](https://github.com/ONLYOFFICE/sdkjs/pull/312))
+* Fix opening specific xlsx file (#37515) ([sdkjs#316](https://github.com/ONLYOFFICE/sdkjs/pull/316))
+
+#### Mobile Document Editor
+* Fix replacing text while creating new paragraph (#37456)
+
+#### Mobile Spreadsheet Editor
+* Fix bug with scrolling
+
+#### x2t
+* Fix doc users files with table ([core#71](https://github.com/ONLYOFFICE/core/pull/71))
+* Fix opepning docx, pptx, rtf, odf usersfiles ([core#75](https://github.com/ONLYOFFICE/core/pull/75)) ([core#76](https://github.com/ONLYOFFICE/core/pull/76))
+
 ## 5.1.2
 ### New features
 #### All Editors
