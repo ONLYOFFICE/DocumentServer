@@ -8,6 +8,15 @@
 #### Document Builder
 * Add function to get the width of the current column ([sdkjs#315](https://github.com/ONLYOFFICE/sdkjs/pull/315))
 
+#### Back-End
+* Update `icu` de to 6.0
+
+#### Mobile Editors
+* Ability to go to editing mode from toolbar [web-apps#135](https://github.com/ONLYOFFICE/web-apps/pull/135))
+
+#### Integration Example
+* Support of `ott`, `ots`, `otp` formats
+
 ### Fixes
 #### All editors
 * Improve compatibility with IE11 ([sdkjs#302](https://github.com/ONLYOFFICE/sdkjs/pull/302)) ([sdkjs#317](https://github.com/ONLYOFFICE/sdkjs/pull/317))
@@ -28,6 +37,10 @@
 
 #### Mobile Spreadsheet Editor
 * Fix bug with scrolling
+
+#### x2t
+* Fix doc users files with table ([core#71](https://github.com/ONLYOFFICE/core/pull/71))
+* Fix opepning docx, pptx, rtf, odf usersfiles ([core#75](https://github.com/ONLYOFFICE/core/pull/75)) ([core#76](https://github.com/ONLYOFFICE/core/pull/76))
 
 ## 5.1.2
 ### New features
