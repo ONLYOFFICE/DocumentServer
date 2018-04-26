@@ -23,7 +23,7 @@
 * Add function to get the width of the current column ([sdkjs#315](https://github.com/ONLYOFFICE/sdkjs/pull/315))
 
 #### Back-End
-* Update `icu` de to 6.0
+* Update `icu` dependency from `5.5` to `6.0`
 
 #### Mobile Editors
 * Ability to go to editing mode from toolbar [web-apps#135](https://github.com/ONLYOFFICE/web-apps/pull/135))
