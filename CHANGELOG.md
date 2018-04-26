@@ -1,9 +1,23 @@
 # Change log
 ## 5.1.3
 ### New features
+#### All editors
+* New `View Settings` menu in top right corner
+* New selector for links type in CSE CPE
+* Ability to replace image via context menu (#11493)
+* Customize initial zoom for the embedded editors
+
 #### Document Editor
 * Implement an East Asian script and line break in hieroglyphs ([sdkjs#300](https://github.com/ONLYOFFICE/sdkjs/pull/304))
 * Add hotkey Ctrl+Shift+Num8 - show/hide non printable symbols
+* Add ability to export documents to RTF
+
+#### Spreadsheet Editor
+* Add support of French formulas
+* Ability to select Cell format via context menu (#16272)
+
+#### Preseentation Editor
+* Add hints to presentation themes (bug #21362)
 
 #### Document Builder
 * Add function to get the width of the current column ([sdkjs#315](https://github.com/ONLYOFFICE/sdkjs/pull/315))
