@@ -1,4 +1,34 @@
 # Change log
+## 5.1.3
+### New features
+#### Document Editor
+* Implement an East Asian script and line break in hieroglyphs ([sdkjs#300](https://github.com/ONLYOFFICE/sdkjs/pull/304))
+* Add hotkey Ctrl+Shift+Num8 - show/hide non printable symbols
+
+#### Document Builder
+* Add function to get the width of the current column ([sdkjs#315](https://github.com/ONLYOFFICE/sdkjs/pull/315))
+
+### Fixes
+#### All editors
+* Improve compatibility with IE11 ([sdkjs#302](https://github.com/ONLYOFFICE/sdkjs/pull/302)) ([sdkjs#317](https://github.com/ONLYOFFICE/sdkjs/pull/317))
+* Fix downloading specific docx file (#37454) ([sdkjs#300](https://github.com/ONLYOFFICE/sdkjs/pull/300))
+* Fix crash on opening files with empty pie charts ([sdkjs#318](https://github.com/ONLYOFFICE/sdkjs/pull/318))
+
+#### Document Editor
+* Fix displaying table after html convert (#37472)
+* Fix adding comment to whole doc (#37425, ([DocumentServer#287](https://github.com/ONLYOFFICE/DocumentServer/issue/287))) ([sdkjs#319](https://github.com/ONLYOFFICE/sdkjs/pull/319))
+* Fix copy Rich Text Content from table (#37546) ([sdkjs#320](https://github.com/ONLYOFFICE/sdkjs/pull/320))
+
+#### Spreadsheet Editor
+* Fix formula dependency and file assemble after add col/row ([sdkjs#312](https://github.com/ONLYOFFICE/sdkjs/pull/312))
+* Fix opening specific xlsx file (#37515) ([sdkjs#316](https://github.com/ONLYOFFICE/sdkjs/pull/316))
+
+#### Mobile Document Editor
+* Fix replacing text while creating new paragraph (#37456)
+
+#### Mobile Spreadsheet Editor
+* Fix bug with scrolling
+
 ## 5.1.2
 ### New features
 #### All Editors
