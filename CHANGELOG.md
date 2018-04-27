@@ -13,7 +13,7 @@
 * Add ability to export documents to RTF
 
 #### Spreadsheet Editor
-* Add support of French formulas
+* Add French translation for formulas
 * Ability to select Cell format via context menu (#16272)
 
 #### Preseentation Editor
@@ -54,7 +54,7 @@
 
 #### x2t
 * Fix doc users files with table ([core#71](https://github.com/ONLYOFFICE/core/pull/71))
-* Fix opepning docx, pptx, rtf, odf usersfiles ([core#75](https://github.com/ONLYOFFICE/core/pull/75)) ([core#76](https://github.com/ONLYOFFICE/core/pull/76))
+* Fix opening docx, pptx, rtf, odf usersfiles ([core#75](https://github.com/ONLYOFFICE/core/pull/75)) ([core#76](https://github.com/ONLYOFFICE/core/pull/76))
 
 ## 5.1.2
 ### New features
