@@ -3,7 +3,7 @@
 ### New features
 #### All editors
 * New `View Settings` menu in top right corner
-* New selector for links type in CSE CPE
+* New selector for links type in Spreadsheet and Presentation Editor
 * Ability to replace image via context menu (#11493)
 * Customize initial zoom for the embedded editors
 
