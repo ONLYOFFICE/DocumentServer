@@ -39,7 +39,7 @@
 
 #### Document Editor
 * Fix displaying table after html convert (#37472)
-* Fix adding comment to whole doc (#37425, [DocumentServer#287](https://github.com/ONLYOFFICE/DocumentServer/issue/287)) ([sdkjs#319](https://github.com/ONLYOFFICE/sdkjs/pull/319))
+* Fix adding comment to whole doc (#37425, [DocumentServer#287](https://github.com/ONLYOFFICE/DocumentServer/issues/287)) ([sdkjs#319](https://github.com/ONLYOFFICE/sdkjs/pull/319))
 * Fix copy Rich Text Content from table (#37546) ([sdkjs#320](https://github.com/ONLYOFFICE/sdkjs/pull/320))
 
 #### Spreadsheet Editor
