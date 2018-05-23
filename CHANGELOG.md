@@ -1,4 +1,76 @@
 # Change log
+
+## 5.1.4
+### New feature
+#### All editors
+* Add warning when open file protected with password
+* Don't show resolved comments by default in Document and Spreadsheet editor
+
+#### Back-End
+* Add openProtectedFile option to disable opening password-protected files
+
+#### Deb and rpm
+* Remove upper version dependency of node.js
+* Remove `librabbitmq-tools` dependency
+
+#### x2t
+* Bump compatibilityMode setting. Prevent opening files in compatibility mode in Word 2016.
+* Windows: add long file names support
+
+### Fixes
+#### All editors
+* Update translations
+* Fix z-index for synchronize tooltip
+* Fix position for zoom buttons in the toolbar
+* Fix tab 'File' lost active state when click inner panels
+* Fix `Replace image by url` in context menu (#37651)
+* Fix copy comments from comment balloon (#37666, #35896)
+* Fix footnote dialog layout (#37660)
+* Fix layout for review changes dialog
+
+#### Document Editor
+* Fix getting parent cell in blocklevelstd
+* Fix justify chinese text (#37659) [DocumentServer#293](https://github.com/ONLYOFFICE/DocumentServer/issues/293))
+* Fix forcus problem with navigation sidebar in Firefox (#37460)
+* Fix setting option Realtime collaboration changes to "View All"
+* Fix proteced document window layout (#37658)
+
+#### Spreadsheet Editor
+* Fix enter formula with arrow keys and scroll
+* Fix multiselect autofit column width. Autofit only exist columns (#37555)
+* Fix formula dependency and file assemble after copying with drag and drop
+* Fix out of memory error in case of insert rows in file with many columns
+* Fix incorrect error for chart with empty dataset (#37762)
+
+#### Presentation Editor
+* Fix deleting placholder text in strict co-edit (#37712)
+* Fix duplicate comments in exported pptx (#37698)
+* Fix JS error while opening empty presentation in comment mode (#37679)
+
+#### Mobile Editors
+* Disable edit button while document loading
+* Fix formulas descriptions (#37691)
+* Fix round corners for module windows (#37700)
+
+#### Back-end
+* JWT: Remove payload field from jwt when 'inBody' option is on
+* Refactor install/uninstall shared libs
+
+#### Deb and rpm
+* Fix 'DS_COUNT: command not found' uninstall error in .deb
+* Fix uninstall error with documentserver-prepare4shutdown.sh problems in .deb
+* Fix libcurl dependency for Ubuntu 18.04
+
+##### x2t
+* Fix doc, rtf, xls users files
+* Fix exporting current list of XLSX to csv (#37579)
+* Fix opening specific pptx file (#37589)
+* Fix save comments for presentation (undelete ms office)
+* Fix opening specific RTF document (#37500)
+* Fix slide theme for ODT export (#37740)
+* Fix chart legend in ODS file (#37746)
+* Downgrade icu to 58.2 (compatible with WinXp, Win Vista)
+
 ## 5.1.3
 ### New features
 #### All editors
