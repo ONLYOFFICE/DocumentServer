@@ -77,7 +77,7 @@ The table below will help you to make the right choice.
 | Object insertion                | + | + | + |
 | Functions, formulas, equations  | + | + | + |
 | Table templates                 | + | + | + |
-| Pivot tables                    | - | + | + |
+| Pivot tables                    | - | +* | +* |
 | **Presentation Editor features** | **Community Edition** | **Integration Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
@@ -85,6 +85,8 @@ The table below will help you to make the right choice.
 | Presenter mode                  | - | + | + |
 | Notes                           | + | + | + |
 | | [Get it now](https://www.onlyoffice.com/download.aspx)  | [Start Free Trial](https://www.onlyoffice.com/connectors-request.aspx)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx)  |
+
+\* Changing style and deleting (Full support coming soon)
 
 ## Project Information
 
