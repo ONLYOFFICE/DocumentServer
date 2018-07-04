@@ -44,8 +44,8 @@ The table below will help you to make the right choice.
 | ------------- | ------------- | ------------- | ------------- |
 | | [Get it now](https://www.onlyoffice.com/download.aspx)  | [Start Free Trial](https://www.onlyoffice.com/connectors-request.aspx)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx)  |
 | Cost  | FREE  | [Go to the pricing page](https://www.onlyoffice.com/integration-edition-prices.aspx)  | [Go to the pricing page](https://www.onlyoffice.com/developer-edition-prices.aspx)  |
-| Simultaneous connections | up to 20 maximum  | up to 200 maximum  | up to 200 maximum  |
-| Number of users | up to 20 recommended | up to 400 recommended | up to 400 recommended  |
+| Simultaneous connections | up to 20 maximum  | As in chosen pricing plan | As in chosen pricing plan |
+| Number of users | up to 20 recommended | As in chosen pricing plan | As in chosen pricing plan |
 | License | GNU AGPL v.3 | Proprietary | Proprietary |
 | **Support** | **Community Edition** | **Integration Edition** | **Developer Edition** |
 | Documentation | [Help Center](https://helpcenter.onlyoffice.com/server/docker/opensource/index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/server/integration-edition/index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/server/integration-edition/index.aspx) |
