@@ -53,6 +53,7 @@ The table below will help you to make the right choice.
 | Premium support | [Buy Now](https://www.onlyoffice.com/support.aspx) | [Buy Now](https://www.onlyoffice.com/support.aspx) | [Buy Now](https://www.onlyoffice.com/support.aspx) |
 | **Interface** | **Community Edition** | **Integration Edition** | **Developer Edition** |
 | Tabbed interface | - | + | + |
+| White Label      | - | - | + |
 | **Plugins & Macros** | **Community Edition** | **Integration Edition** | **Developer Edition** |
 | Plugins                           | + | + | + |
 | Macros                            | + | + | + |
