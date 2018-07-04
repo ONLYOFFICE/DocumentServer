@@ -22,13 +22,69 @@ ONLYOFFICE Document Server includes the following editors:
 * ONLYOFFICE Document Editor
 * ONLYOFFICE Spreadsheet Editor
 * ONLYOFFICE Presentation Editor
- 
+
 The editors allow you to create, edit, save and export text, spreadsheet and presentation documents and additionally have the features:
 
 * Collaborative editing
 * Hieroglyph support
 * Reviewing
 * Spell-checking
+
+## ONLYOFFICE Document Server editions
+
+ONLYOFFICE offers different versions of its online document editors that can be deployed on your own servers ONLYOFFICE Document Server:
+
+* Community Edition
+* Integration Edition
+* Developer Edition
+
+The table below will help you to make the right choice.
+
+| Pricing and licensing | Community Edition | Integration Edition | Developer Edition |
+| ------------- | ------------- | ------------- | ------------- |
+| | [Get it now](https://www.onlyoffice.com/download.aspx)  | [Start Free Trial](https://www.onlyoffice.com/connectors-request.aspx)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx)  |
+| Cost  | FREE  | [Go to the pricing page](https://www.onlyoffice.com/integration-edition-prices.aspx)  | [Go to the pricing page](https://www.onlyoffice.com/developer-edition-prices.aspx)  |
+| Simultaneous connections | up to 20 maximum  | As in chosen pricing plan | As in chosen pricing plan |
+| Number of users | up to 20 recommended | As in chosen pricing plan | As in chosen pricing plan |
+| License | GNU AGPL v.3 | Proprietary | Proprietary |
+| **Support** | **Community Edition** | **Integration Edition** | **Developer Edition** |
+| Documentation | [Help Center](https://helpcenter.onlyoffice.com/server/docker/opensource/index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/server/integration-edition/index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/server/integration-edition/index.aspx) |
+| Standard support | [GitHub](https://github.com/ONLYOFFICE/DocumentServer/issues) or paid | One year support included | One year support included |
+| Premium support | [Buy Now](https://www.onlyoffice.com/support.aspx) | [Buy Now](https://www.onlyoffice.com/support.aspx) | [Buy Now](https://www.onlyoffice.com/support.aspx) |
+| **Interface** | **Community Edition** | **Integration Edition** | **Developer Edition** |
+| Tabbed interface | - | + | + |
+| White Label      | - | - | + |
+| **Plugins & Macros** | **Community Edition** | **Integration Edition** | **Developer Edition** |
+| Plugins                           | + | + | + |
+| Macros                            | + | + | + |
+| **Collaborative capabilities** | **Community Edition** | **Integration Edition** | **Developer Edition** |
+| Two co-editing modes              | + | + | + |
+| Comments                          | + | + | + |
+| Built-in chat                     | + | + | + |
+| Review and tracking changes       | + | + | + |
+| Display modes of tracking changes | - | + | + |
+| Version history                   | + | + | + |
+| **Document Editor features** | **Community Edition** | **Integration Edition** | **Developer Edition** |
+| Font and paragraph formatting   | + | + | + |
+| Object insertion                | + | + | + |
+| Content control                 | - | + | + |
+| Layout tools                    | + | + | + |
+| Table of contents               | + | + | + |
+| Navigation panel                | - | + | + |
+| Mail Merge                      | + | + | + |
+| **Spreadsheet Editor features** | **Community Edition** | **Integration Edition** | **Developer Edition** |
+| Font and paragraph formatting   | + | + | + |
+| Object insertion                | + | + | + |
+| Functions, formulas, equations  | + | + | + |
+| Table templates                 | + | + | + |
+| Pivot tables                    | - | + | + |
+| **Presentation Editor features** | **Community Edition** | **Integration Edition** | **Developer Edition** |
+| Font and paragraph formatting   | + | + | + |
+| Object insertion                | + | + | + |
+| Animations                      | + | + | + |
+| Presenter mode                  | - | + | + |
+| Notes                           | + | + | + |
+| | [Get it now](https://www.onlyoffice.com/download.aspx)  | [Start Free Trial](https://www.onlyoffice.com/connectors-request.aspx)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx)  |
 
 ## Project Information
 
