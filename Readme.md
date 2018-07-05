@@ -32,11 +32,13 @@ The editors allow you to create, edit, save and export text, spreadsheet and pre
 
 ## ONLYOFFICE Document Server editions
 
-ONLYOFFICE offers different versions of its online document editors that can be deployed on your own servers ONLYOFFICE Document Server:
+ONLYOFFICE offers different versions of its online document editors that can be deployed on your own servers.
 
-* Community Edition
-* Integration Edition
-* Developer Edition
+ONLYOFFICE Document Server:
+
+* Community Edition (`onlyoffice-documentserver` package)
+* Integration Edition (`onlyoffice-documentserver-ie` package)
+* Developer Edition (`onlyoffice-documentserver-de` package)
 
 The table below will help you to make the right choice.
 
@@ -77,7 +79,7 @@ The table below will help you to make the right choice.
 | Object insertion                | + | + | + |
 | Functions, formulas, equations  | + | + | + |
 | Table templates                 | + | + | + |
-| Pivot tables                    | - | + | + |
+| Pivot tables                    | - | +* | +* |
 | **Presentation Editor features** | **Community Edition** | **Integration Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
@@ -85,6 +87,8 @@ The table below will help you to make the right choice.
 | Presenter mode                  | - | + | + |
 | Notes                           | + | + | + |
 | | [Get it now](https://www.onlyoffice.com/download.aspx)  | [Start Free Trial](https://www.onlyoffice.com/connectors-request.aspx)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx)  |
+
+\* Changing style and deleting (Full support coming soon)
 
 ## Project Information
 
