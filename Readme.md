@@ -32,11 +32,13 @@ The editors allow you to create, edit, save and export text, spreadsheet and pre
 
 ## ONLYOFFICE Document Server editions
 
-ONLYOFFICE offers different versions of its online document editors that can be deployed on your own servers ONLYOFFICE Document Server:
+ONLYOFFICE offers different versions of its online document editors that can be deployed on your own servers.
 
-* Community Edition
-* Integration Edition
-* Developer Edition
+ONLYOFFICE Document Server:
+
+* Community Edition (`onlyoffice-documentserver` package)
+* Integration Edition (`onlyoffice-documentserver-ie` package)
+* Developer Edition (`onlyoffice-documentserver-de` package)
 
 The table below will help you to make the right choice.
 
