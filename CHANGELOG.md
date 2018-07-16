@@ -1,5 +1,85 @@
 # Change log
 
+## 5.1.5
+
+### New feature
+
+#### Back-End
+
+* Add license connections and users limit error to log
+* Add license warning limit percents to config and log
+* Add check license file for Connections or UserCount errors.  
+Add constants UsersCountOS and ConnectionsOS for license result
+
+### Fixes
+
+#### All editors
+
+* Update translations
+* Fix JS error while changing shape connector (bug #37788)
+* Fix error while changing default tab in shape (bug #38084)
+* Fix opening custom color for shape (bug #37841)
+
+#### Spreadsheet Editor
+
+* Fix deleting comments (bug #37772)
+* Fix check pane and opening some xlsx files (bug #38113)
+* Fix hyphenation position for chinese symbols with wrap
+* Fix missed french and spanish formulas
+* Fix missed region formats
+* Disable table settings when cell is edited
+
+#### Presentation Editor
+
+* Fix copy-paste placeholder in fast coedit (bug #37922)
+* Fix bug copy/paste slide with picture (bug #37928)
+* Fix placeholder titles in Chinese (bug #37927) ([onlyoffice-owncloud#189](https://github.com/ONLYOFFICE/onlyoffice-owncloud/issues/189))
+
+#### Mobile Editors
+
+* Fix browser hangup while adding shapes (bug #37601)
+* Fix js error in specific xlsx file (bug #37824) ([DocumentServer#311](https://github.com/ONLYOFFICE/DocumentServer/issues/311))
+* Fix incorrect info while loading document (bug #37687)
+* Fix closing document while pressing `Back` button (bug #37649)
+* Fix settings icon placement (bug #37738)
+
+#### PDF Viewer
+
+* Fix browser hangup on `adSm.pdf` (bug #37466)
+
+#### Docker
+
+* Fix recursive gzip on container restart ([DocumentServer#317](https://github.com/ONLYOFFICE/DocumentServer/issues/317))
+
+#### Convert Services
+
+* Fix opening some xps files (bug #37565)
+* Fix problem with the clip in the EMF (bug #36423)
+* Fix bug with calculating inverse matrix in PDF
+
+#### x2t
+
+* Fix shape position in xls ([DocumentServer#308](https://github.com/ONLYOFFICE/DocumentServer/issues/308)))
+* Fix losing document after reopen xlsx file (bug #37892) ([DocumentServer#316](https://github.com/ONLYOFFICE/DocumentServer/issues/316))
+* Fix open file with unknown picture format
+
+##### odf
+
+* Fix table width in odt (bug #37832)
+* Fix users files
+
+##### rtf
+
+* Fix reading rtf comments
+* Fix opening file with image in shape (bug #37902)
+* Fix users files
+* Fix saving plugin data (bug #34747)
+
+##### xls
+
+* Fix problems with multichart files (bug #37945, 37946)
+* Fix users files
+
 ## 5.1.4
 ### New feature
 #### All editors
