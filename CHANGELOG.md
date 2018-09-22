@@ -61,15 +61,51 @@
 
 * Rename sheets in the mobile editor (bug #37701)
 
+#### Server
+
+* Add savefile request handler
+* Rename crypted->encrypted, transfer replyStr to saveUrl handler
+* Add savefile request handler
+* [chat] Add useridoriginal to all messages
+* [lock] Use userId instead of sessionId in locks ([server#91](https://github.com/ONLYOFFICE/server/pull/91))
+* Add faked file type for PDFA
+* [config] Add spawnOptions for x2t
+* Use title param in ConvertService.ashx
+* Use forked statsd to support ubuntu 18.04
+* Branding now int. Check string and boolean for old version
+* Use new key 'plugins' instead of 'branding' (revert to boolean)
+* [log] Add reSave to mark repeated changes saving
+* Add info/json handler for license
+* Add `/info` page
+
+### Package
+
+* Use package version for disable cache prefix
+* Set up custom port in example url in IIS
+* Redone storing configs in  `local.json`
+* Add support of logrotate
+* Use package version in server urls instead of date
+* deb: Add libcurl3-gnutls dependency
+* Update license
+
+#### Plugins
+
+* [clipart] Show message when error has occurred
+
+#### document-server-integration
+
+* Support of `ott`, `ots`, `otp` formats
+
 ### Fixes
 
 #### All Editors
 
-* Fix lossing comment from other user (bug #37570)
+* Fix comment loss from other user (bug #37570)
 
 #### DocumentEditor
 
 * Disable bookmarks in the document headers (bug #38957)
+* Fix `XML Parsing Error` in Firefox (bug #36960)
 
 #### Spreadsheet Editor
 
@@ -78,6 +114,33 @@
  even if it was not selected (through the selection of a row / column)
 * Fix selection when selecting row/col/all
 * Hide options for headings, gridlines, freeze panes in the viewer (bug #38033)
+
+#### Server
+
+* Fix max file size for convert (bug #37559)
+* Fix installation on any linux system by using `useradd` ([server#89](https://github.com/ONLYOFFICE/server/pull/89))
+* Fix fillForms mode
+* Fix healthcheck service in case of disconnected redis or rabbitmq
+* [jwt] Do not reduce authorization header in case of inBody option
+* Improve average calculation at server start
+* Forbid svg image pasting
+
+#### Package
+
+* Update innodependencyinstaller to fix requirements detection
+
+#### Plugins
+* [clipart] Fix clipart zero size
+* [macros] fix error while adding one (bug #38408)
+
+#### document-server-integration
+
+* Fix adding several files at once (bug #37017)
+* Fix uploading big files
+* Fix comment mode available only for Spreadsheet Editor
+* Java: fix encoding space and path problems
+* PHP: fix a lot of problems with urls
+* Some more fixes
 
 ## 5.1.5
 
