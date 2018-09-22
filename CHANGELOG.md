@@ -42,6 +42,7 @@
 * Change encoding format for csv files (bug #36998)
 * Enable closing window when save to csv
 * Save page options to file before printing
+* Add ability to view Combo Charts
 * The following API functions are added: `GetRows`, `GetCols`, `GetCount`,
  `GetHidden`, `SetHidden`, `GetColumnWidth`, `SetColumnWidth`, `GetRowHeight`,
  `SetRowHeight`, `GetWpar`, `SetOffset`, `GetAdress`, `SetLeftMargin`, `GetLeftMargin`,
