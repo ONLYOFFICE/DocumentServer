@@ -97,6 +97,12 @@
 
 * Support of `ott`, `ots`, `otp` formats
 
+#### Docker Image
+
+* Use nodejs 8
+* Output logs to console and correct support of `docker logs`
+* Do not require interactive flag to start container
+
 ### Fixes
 
 #### All Editors
