@@ -101,6 +101,7 @@
 #### All Editors
 
 * Fix comment loss from other user (bug #37570)
+* A lot of bug fixed in all editors
 
 #### DocumentEditor
 
