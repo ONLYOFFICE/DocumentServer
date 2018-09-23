@@ -93,10 +93,6 @@
 
 * [clipart] Show message when error has occurred
 
-#### document-server-integration
-
-* Support of `ott`, `ots`, `otp` formats
-
 #### Docker Image
 
 * Use nodejs 8
