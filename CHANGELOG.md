@@ -76,7 +76,7 @@
 * Use new key 'plugins' instead of 'branding' (revert to boolean)
 * [log] Add reSave to mark repeated changes saving
 * Add info/json handler for license
-* Add `/info` page
+* Add `/info` page (available only from localhost)
 
 ### Package
 
