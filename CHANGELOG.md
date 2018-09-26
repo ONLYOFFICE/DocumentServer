@@ -6,7 +6,6 @@
 
 #### All Editors
 
-* New menu with tabbed interface for DocumentServer OpenSource (previously only for paid version)
 * Customize initial zoom for the embedded editors
 * Customize availability of help in the editor
 * Add File and Plugins tabs for viewers
