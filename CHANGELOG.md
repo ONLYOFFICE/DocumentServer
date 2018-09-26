@@ -145,6 +145,9 @@
 * PHP: fix a lot of problems with urls
 * Some more fixes
 
+#### x2t
+* A lot of user files fixed
+
 ## 5.1.5
 
 ### New feature
