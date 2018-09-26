@@ -133,6 +133,7 @@
 * Update innodependencyinstaller to fix requirements detection
 
 #### Plugins
+
 * [clipart] Fix clipart zero size
 * [macros] fix error while adding one (bug #38408)
 
@@ -146,6 +147,7 @@
 * Some more fixes
 
 #### x2t
+
 * A lot of user files fixed
 
 ## 5.1.5
