@@ -78,7 +78,7 @@
 * Add info/json handler for license
 * Add `/info` page (available only from localhost)
 
-### Package
+#### Package
 
 * Use package version for disable cache prefix
 * Set up custom port in example url in IIS
