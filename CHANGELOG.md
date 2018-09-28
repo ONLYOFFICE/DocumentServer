@@ -1,5 +1,155 @@
 # Change log
 
+## 5.2.0
+
+### New Features
+
+#### All Editors
+
+* Customize initial zoom for the embedded editors
+* Customize availability of help in the editor
+* Add File and Plugins tabs for viewers
+* Mark username by color in the comments, review changes, chat messages
+* Show edit-mode users in format
+* Don't duplicate online users in the left chat panel
+* Sort comments in the popover by ascending creation time
+
+#### Document Editor
+
+* Ability to work with bookmarks
+* Ability to add/change hyperlinks anchored to bookmarks/headings
+* Change numbering value, start/continue numbering
+* Ability to continue numberings
+* Content controls settings (highlight and appearance)
+* Review changes and comments are in combined window
+* Add page presets А0, А1, А2, А6 (bug #36583)
+* Enable closing chart dialog while loading (bug #36870)
+* Change encoding format for txt files (bug #36998)
+* Add mode for filling forms
+* Enable closing window when save to txt
+* Enable inserting shapes when shape is selected
+* Check new revisions in fast co-editing mode
+* Save track-changes option for file key
+
+#### Spreadsheet Editor
+
+* Set options for saving in PDF format (bug #34914)
+* Cell settings in the right panel
+* Add Layout tab: save margins, page size, orientation for sheets,
+ align/arrange, group/ungroup objects (shapes, images, charts)
+* Added hint for autofilters
+* Change encoding format for csv files (bug #36998)
+* Enable closing window when save to csv
+* Save page options to file before printing
+* Add ability to view Combo Charts
+* The following API functions are added: `GetRows`, `GetCols`, `GetCount`,
+ `GetHidden`, `SetHidden`, `GetColumnWidth`, `SetColumnWidth`, `GetRowHeight`,
+ `SetRowHeight`, `GetWpar`, `SetOffset`, `GetAdress`, `SetLeftMargin`, `GetLeftMargin`,
+ `SetRightMargin`, `GetRightMargin`, `SetTopMargin`, `GetTopMargin`, `SetBottomMargin`,
+  `GetBottomMargin`, `SetPageOrientation`, `GetPageOrientation`, `GetSelection`
+* The following API properties are added: `Rows`, `Cols`, `Count`, `Hidden`,
+ `ColumnWidth`, `Width`, `RowHeight`, `Height`, `MergeArea`, `WrapText`, `LeftMargin`,
+ `Orientation`, `PrintHeadings`, `PrintGridlines`, `Selection`
+
+#### Presentation Editors
+
+* Add hints to presentation themes (bug #21362)
+* Add presenter preview in the viewer (bug #37499)
+* Enable closing chart dialog while loading (bug #36870)
+
+#### Mobile Web Editors
+
+* Rename sheets in the mobile editor (bug #37701)
+
+#### Server
+
+* Add savefile request handler
+* Rename crypted->encrypted, transfer replyStr to saveUrl handler
+* Add savefile request handler
+* [chat] Add useridoriginal to all messages
+* [lock] Use userId instead of sessionId in locks ([server#91](https://github.com/ONLYOFFICE/server/pull/91))
+* Add faked file type for PDFA
+* [config] Add spawnOptions for x2t
+* Use title param in ConvertService.ashx
+* Use forked statsd to support ubuntu 18.04
+* Branding now int. Check string and boolean for old version
+* Use new key 'plugins' instead of 'branding' (revert to boolean)
+* [log] Add reSave to mark repeated changes saving
+* Add info/json handler for license
+* Add `/info` page (available only from localhost)
+
+#### Package
+
+* Use package version for disable cache prefix
+* Set up custom port in example url in IIS
+* Redone storing configs in  `local.json`
+* Add support of logrotate
+* Use package version in server urls instead of date
+* deb: Add libcurl3-gnutls dependency
+* Update license
+
+#### Plugins
+
+* [clipart] Show message when error has occurred
+
+#### Docker Image
+
+* Use nodejs 8
+* Output logs to console and correct support of `docker logs`
+* Do not require interactive flag to start container
+
+### Fixes
+
+#### All Editors
+
+* Fix comment loss from other user (bug #37570)
+* A lot of bug fixed in all editors
+
+#### DocumentEditor
+
+* Disable bookmarks in the document headers (bug #38957)
+* Fix `XML Parsing Error` in Firefox (bug #36960)
+
+#### Spreadsheet Editor
+
+* Fix change active cell in selection across merge. Previously, passing
+ through the first cell of the merge range, we fell into the merge range,
+ even if it was not selected (through the selection of a row / column)
+* Fix selection when selecting row/col/all
+* Hide options for headings, gridlines, freeze panes in the viewer (bug #38033)
+
+#### Server
+
+* Fix max file size for convert (bug #37559)
+* Fix installation on any linux system by using `useradd` ([server#89](https://github.com/ONLYOFFICE/server/pull/89))
+* Fix fillForms mode
+* Fix healthcheck service in case of disconnected redis or rabbitmq
+* [jwt] Do not reduce authorization header in case of inBody option
+* Improve average calculation at server start
+* Forbid svg image pasting
+
+#### Package
+
+* Update innodependencyinstaller to fix requirements detection
+
+#### Plugins
+
+* [clipart] Fix clipart zero size
+* [macros] fix error while adding one (bug #38408)
+
+#### document-server-integration
+
+* Fix adding several files at once (bug #37017)
+* Fix uploading big files
+* Fix comment mode available only for Spreadsheet Editor
+* Java: fix encoding space and path problems
+* PHP: fix a lot of problems with urls
+* Some more fixes
+
+#### x2t
+
+* A lot of user files fixed
+
 ## 5.1.5
 
 ### New feature
