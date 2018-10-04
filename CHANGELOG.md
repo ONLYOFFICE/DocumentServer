@@ -1,5 +1,17 @@
 # Change log
 
+## 5.2.2
+
+### Fixes
+
+#### rpm
+
+* Fix `DS_PORT` problem while installing with `ONLYOFFICE Enterprise Edition`
+
+## 5.2.1
+
+### No public release
+
 ## 5.2.0
 
 ### New Features
