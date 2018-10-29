@@ -10,7 +10,7 @@
 
 #### Spreadsheet Editor
 
-* Completely rewritten scroll, faster, more stable and feature rich
+* Enhanced completely rewritten scroll
 
 #### Document Builder
 
