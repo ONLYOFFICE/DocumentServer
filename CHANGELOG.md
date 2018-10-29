@@ -73,6 +73,7 @@
 * Fix double columns borders (bug #39392)
 * Fix rendering last rows in some files (bug #39394)
 * Disable cell settings when editor is disconnected
+* Fix print and calculate. Speed up prepate cache
 
 #### Presentation Editor
 
