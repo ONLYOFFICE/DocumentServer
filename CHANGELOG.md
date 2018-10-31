@@ -116,7 +116,7 @@
 
 * Fix `‘/var/run/rabbitmq’: Permission denied` on container restart ([Docker-DocumentServer#92](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/92))
 * Remove volume `/etc/onlyoffice`  (fix start on `minishift`)
-* setup logrotate config rights
+* Setup logrotate config rights
 
 ## 5.2.2
 
