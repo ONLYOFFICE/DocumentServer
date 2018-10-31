@@ -1,5 +1,117 @@
 # Change log
 
+## 5.2.3
+
+### New Features
+
+#### All Editors
+
+* Updated translations
+
+#### Spreadsheet Editor
+
+* Enhanced completely rewritten scroll
+
+#### Document Builder
+
+* Add new functions `setLocale` and `getLocale`
+
+#### Server
+
+* Add logging for SaveLock
+* Ability to copy changes and files with browser error to special directory
+
+#### x2t
+
+* Odf - refactoring convert word-arts from/to ooxml; convert form controls in spreadsheets
+* OdfFormatwriter - convert bookmarks
+
+### Fixes
+
+#### All Editors
+
+* Fix bug with cff fonts (glyph loader)
+* Show LoadingScriptError error in case of sdk-all.js loading faiure
+* Fix `Cannot read property '$icon' of undefined` while `ctrl+s` in chart editor (bug #39254)
+* Remove 'command+h' hotkey for MacOs
+
+#### Document Editor
+
+* Fix opening docx with track changes and math created by aspose
+* Fix problem with reading the Id of a content control
+* Fix crash in `CNumberingLvlLegacy.ReadFromBinary`
+* Fix problem with selecting tables
+* Fix the problem with replacing misspelled word
+* Fix the bug with pressing the tab key
+* Fix the critical issue with locking the document on the undo in the fast collaboration
+* Fix lost `Hide Degree` menu entry for equations (bug #39135)
+* Fix the problem when recalculating in co-editing
+* Fix the problem with processing the pageDown button in co-editing
+* Fix `Cannot read property 'eb' of nul` while deleting table column (bug #39252)
+* Fix problem with render while replacing text (bug #39269)
+* Fix `Cannot read property 'length' of null` while opening file (bug #39210)
+* Fix problem with saving/loading table state on undo/redo
+* Fix showing charts added by macros (bug #39304)
+* Fix the problem with calculating a large tables separated by columns
+
+#### Spreadsheet Editor
+
+* Fix crash on build file with comment changes
+* Fix incorrect chart for area with autofilter (bug #39168)
+* Fix incorrect select cells while changing formula by keyboard (bug #39181)
+* Fix brower hangup in some file with formula (bug #39190)
+* Fix incorrect display of doughnut chart with autofilter (bug #39200)
+* Fix incorrect `IF` formula values (bug #39233)
+* Fix problem with replace count (bug #39273)
+* Fix `Cannot read property 'Zb' of null` while copy deleted shape (bug #39312)
+* Fix `Maximum call stack size exceeded` while opening fullscreen (bug #38972)
+* Fix `this.dPc is not a function` while soring (bug #39397)
+* Fix undo for filter in specific files (bug #39402)
+* Fix scroll to end of table (bug #21946)
+* Fix sorting first row in some files (bug #39397)
+* Fix soring range if there is filtered data (bug #39410)
+* Fix double columns borders (bug #39392)
+* Fix rendering last rows in some files (bug #39394)
+* Disable cell settings when editor is disconnected
+* Fix print and calculate. Speed up prepate cache
+
+#### Presentation Editor
+
+* Fix `Cannot read property 'Ia' of null` while opening some pptx (bug #39191)
+* Fix problem with negative spacing
+* Fix `Cannot read property 'W' of undefined` while copy table (bug #39264)
+
+#### Embedded viewer
+
+* Show error while opening passsword protected files (bug #39251)
+* Fix js error while opening txt (bug #39250)
+
+#### Server
+
+* Fix license info endDate for trial
+* Fix `Cannot read property 'time' of null`
+* Change logrotate conf dir
+
+#### x2t
+
+* Set default value for math nodes with val attribute and COnOfftype
+* Fix empty rtf (bug #39172)
+* Fix opening some ods (bug #39192)
+* graphics - metafile - fix convert to rastr on linux without set fonts
+* PptxFormat - fix binary convert mathType version over 3.0
+* Fix document structure for specific file (bug #39236)
+* Fix opening in MS word some file (bug #39216)
+* Fix opening specific docx file (bug #39248)
+* XlsFormatReader - fix users file (external defined names)
+* PptFormatReader - fix users files
+* PptxFormat fix some user files
+* OdfFormat, OdfFormatWriter - fix after testing
+* Disable truetype fonts convertasion in html viewer
+* Fix open some rtf files (bug #39315)
+* Fix selecting row in pdf file (bug #39214)
+* Fix crash on empty dash pen
+* Fix writing only last ConditionalFormatting from Editor.bin (bug #39391)
+
 ## 5.2.2
 
 ### Fixes
