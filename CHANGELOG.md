@@ -112,6 +112,12 @@
 * Fix crash on empty dash pen
 * Fix writing only last ConditionalFormatting from Editor.bin (bug #39391)
 
+#### Docker Image
+
+* Fix `‘/var/run/rabbitmq’: Permission denied` on container restart ([Docker-DocumentServer#92](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/92))
+* Remove volume `/etc/onlyoffice`  (fix start on `minishift`)
+* setup logrotate config rights
+
 ## 5.2.2
 
 ### Fixes
