@@ -1,5 +1,111 @@
 # Change log
 
+## 5.2.4
+
+### New Features
+
+#### All Editors
+
+* Enable text/html drag'n'drop to editors
+* Ability to set custom logo without link (bug #39696)
+* Update `sdkjs` npm requirements
+
+#### Spreadsheet Editor
+
+* Support of R1C1 references style
+
+#### Document Builder
+
+* Add method AddComment to ApiRange
+
+#### Plugins
+
+* Add translation for plugins name and description
+
+#### x2t
+
+* OdfFormatReader - write part tables
+
+### Fixes
+
+#### All Editors
+
+* Fix race condition of sequence "unLockDocument", "isSaveLock"
+* Fix building source for custom publisher name with quotes
+* Fix special paste icon while inserting ClipArt (bug #39462)
+* Show conversion error in case of pdf renamed to docx
+* Fix bug with solid fill without color
+* Fix logo didn't show in FF and IE
+* Fix opening presenter view on owncloud\nextcloud (bug #39559)
+* Fix bug when apply new font (current font name and new name are empty)
+* Fix bug: open document language dialog when `doc.lang = es-AR`
+
+#### Document Editor
+
+* Fix error after discarding changing font name in combo box
+* Fix input of korean, chinese and japanese symbols in Content Control (bug #39724)
+* Fix the problem with recalculating a document with large tables
+* Fix the problem with accept/reject an uncalculated revision change
+* Fix the problem with checking CanUpdateTarget for a table
+* Fix bug with recalculating a document when deleting a section
+* Fix bug with moving cursor through a block-level sdt
+* Fix the problem with checking complex fields in selection
+* Fix the problem with updating cursor in collaborative editing
+* Fix bug with moving cursor through a table
+* Fix bug with recalculating large tables
+* Fix the problem with moving an image inside a large table
+* Fix bug with accept/reject the change in review
+* Fix the problem with updating current position in table after accepting changes
+* Fix bug with special paste of paragraph with numbering
+
+#### Spreadsheet Editor
+
+* Fix scrolling issues in specific file (bug #39395)
+* Fix issue with open only one SheetView to avoid property conflicts(tabSelected) (bug #39511)
+* Fix freeze while cut paste several columns (bug #37965)
+* Fix incorrect `sum` formula for copied sheet (bug #39548)
+* Fix JS error while entering more data than cell width (bug #39623)
+* Fix incorrect digit count while using `Decrease Decimal` (bug #39661)
+* Fix opening file with 'si', 'formula' without 'ref'
+* Fix opening specific file with chart (bug #39902)
+* Fix js error while copy specific sheet in file (bug #39921)
+* Fix chinese translation for "textPoweredBy" (([web-apps#142](https://github.com/ONLYOFFICE/web-apps/pull/142)))
+
+#### Presentation Editors
+
+* Fix opening specific ppt file (bug #39901)
+
+#### Document Viewer
+
+* Fix using translator plugin with `pdf` and `xps` (bug #36645)
+
+#### Mobile Web Editors
+
+* Fix "SecurityError: Blocked a frame with origin from accessing a cross-origin frame" on apple devices
+* Fix bug: set active tab when it's not visible in Spreadsheets
+
+#### Back-end
+
+* Fix error in case of 'changesError' command without docId
+* Fix ignoring 'access_log off;'
+
+#### x2t
+
+* Fix loss of grouped shape in odt (bug #39467)
+* Fix convert of wmf file (bug #39533)
+* Fix bug with metadata in UTF16 format
+* Fix convert of specific xls (bug #39541)
+* OdfFormat - refactoring same auto shapes
+* Fix convert vml -> drawing_ml
+* Fix opening some specifiс pptx (bug #39747, #39745)
+* DocFormat - fix after testing
+
+#### Docker Image
+
+* Fix Docker-compose 503 Service Unavailable ([Docker-DocumentServer#133](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/133))
+* Fix `DB_NAME` issue ([Docker-DocumentServer#134](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/134))
+* Fix log rotation
+
 ## 5.2.3
 
 ### New Features
