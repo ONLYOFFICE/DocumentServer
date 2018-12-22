@@ -1,5 +1,17 @@
 # Change log
 
+## 5.2.6
+
+### Fixes
+
+#### Document Editor
+
+* Fix issue with moving nesting tables (bug #40096)
+
+## 5.2.5
+
+### No public release
+
 ## 5.2.4
 
 ### New Features
