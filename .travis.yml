@@ -1,4 +1,5 @@
-language: nodejs
+language: node_js
+node_js: "10"
 
 install: npm install markdownlint --save-dev
 script: markdownlint CHANGELOG.md
