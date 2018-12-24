@@ -139,14 +139,14 @@
 #### All Editors
 
 * Fix bug with cff fonts (glyph loader)
-* Show LoadingScriptError error in case of sdk-all.js loading faiure
+* Show LoadingScriptError error in case of sdk-all.js loading failure
 * Fix `Cannot read property '$icon' of undefined` while
   `ctrl+s` in chart editor (bug #39254)
 * Remove 'command+h' hotkey for MacOs
 
 #### Document Editor
 
-* Fix opening docx with track changes and math created by aspose
+* Fix opening docx with track changes and math created by Aspose
 * Fix problem with reading the Id of a content control
 * Fix crash in `CNumberingLvlLegacy.ReadFromBinary`
 * Fix problem with selecting tables
@@ -174,15 +174,15 @@
 * Fix problem with replace count (bug #39273)
 * Fix `Cannot read property 'Zb' of null` while copy deleted shape (bug #39312)
 * Fix `Maximum call stack size exceeded` while opening fullscreen (bug #38972)
-* Fix `this.dPc is not a function` while soring (bug #39397)
+* Fix `this.dPc is not a function` while sorting (bug #39397)
 * Fix undo for filter in specific files (bug #39402)
 * Fix scroll to end of table (bug #21946)
 * Fix sorting first row in some files (bug #39397)
-* Fix soring range if there is filtered data (bug #39410)
+* Fix sorting range if there is filtered data (bug #39410)
 * Fix double columns borders (bug #39392)
 * Fix rendering last rows in some files (bug #39394)
 * Disable cell settings when editor is disconnected
-* Fix print and calculate. Speed up prepate cache
+* Fix print and calculate. Speed up prepare cache
 
 #### Presentation Editor
 
@@ -510,9 +510,9 @@
 
 * Fix getting parent cell in blocklevelstd
 * Fix justify chinese text (#37659) [DocumentServer#293](https://github.com/ONLYOFFICE/DocumentServer/issues/293))
-* Fix forcus problem with navigation sidebar in Firefox (#37460)
+* Fix focus problem with navigation sidebar in Firefox (#37460)
 * Fix setting option Realtime collaboration changes to "View All"
-* Fix proteced document window layout (#37658)
+* Fix protected document window layout (#37658)
 
 #### Spreadsheet Editor
 
@@ -644,7 +644,7 @@
 
 #### Document Editor
 
-* Support of multi comments baloon (bug #37422)
+* Support of multi comments balloon (bug #37422)
 
 ### Fixes
 
@@ -716,7 +716,7 @@
 
 #### Document Editor
 
-* Fix right mouse buttom menu for TOC (#37241)
+* Fix right mouse button menu for TOC (#37241)
 * Fix usage Clip ParaDrawing by line top and bottom
 * Don't clip images in text arts
 * Add vertical clip for inline drawing
@@ -728,9 +728,9 @@
 
 * Fix right mouse button error (#37330)
 * Fix inserting hieroglyphs from text editor (#37356)
-* Fix bug with enter symbol point in formula autocompleate (#37300)
-* Fix bug with enter symbol `_` or `\` in start formula autocompleate (bug #37354)
-* Fix bug with enter Chinese numbers in formula autocompleate
+* Fix bug with enter symbol point in formula autocomplete (#37300)
+* Fix bug with enter symbol `_` or `\` in start formula autocomplete (bug #37354)
+* Fix bug with enter Chinese numbers in formula autocomplete
 * Fix `Cannot read property 'toLocaleString'` error in some files (#37343)
 * Fix `Cannot read property '4''` error in some files (#37376)
 * Fix sheet context menu visibility (#37307)
@@ -796,7 +796,7 @@
 * Rename `Display Modes` entries for Track Changes
 * File tab `Go to documents` opens in new tab
 * Ability to set negative top and bottom page margin
-* Copy paragraph style will not overwright custom run style
+* Copy paragraph style will not overwrite custom run style
 * Special paste of tables
 
 #### Spreadsheet Editor
@@ -1153,7 +1153,7 @@
 * Fix recalculating absolute formulas (bug #28388)
 * Fix replacing text in pivot tables (bug #35858)
 * Fix incorrect symbols after copy-paste in shape (bug #35913)
-* Fix soring in some xlsx (bug #35904)
+* Fix sorting in some xlsx (bug #35904)
 * Fix table header sort (bug #35950)
 
 #### Presentation Editor
@@ -1216,7 +1216,7 @@
 
 #### x2t
 
-* Read ooxml and xls files with marcos.
+* Read ooxml and xls files with macros.
 * Support audio and video files in all document formats
 * Support pivot tables xls
 
@@ -1392,7 +1392,7 @@
 * Translates for cell styles
 * Search and replace by select
 * Option to hide solved comments
-* Abitity to specify bullets and numbering for text in shape.
+* Ability to specify bullets and numbering for text in shape.
 * Ability to specify columns for Text Areas
 * Ability to add the connectors for the shapes
 * Support `Shift+Delete`, `Ctrl+Insert` and `Shift+Insert` for Cut-Paste
