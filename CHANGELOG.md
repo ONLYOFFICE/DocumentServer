@@ -1,4 +1,4 @@
-# Change log
+# Changed log
 
 ## 5.2.4
 
