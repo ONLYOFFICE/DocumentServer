@@ -1,4 +1,4 @@
-personal_ws-1.1 en 403 utf-8
+personal_ws-1.1 en 413 utf-8
 ACOT
 ACOTH
 ActiveCell
@@ -172,6 +172,7 @@ healthCheck
 HiDPI
 HLOOKUP
 hotkey
+hotkeys
 html
 HYPGEOM
 icu
@@ -228,6 +229,7 @@ MINIFS
 minishift
 MULT
 multichart
+multicomments
 multiselect
 MySQL
 Nederland
@@ -299,6 +301,8 @@ Rebranding
 reconnection
 rect
 redis
+refactor
+Refactor
 refactoring
 replyStr
 republika
@@ -384,6 +388,7 @@ useradd
 UserCount
 userId
 useridoriginal
+username
 UsersCountOS
 usersfiles
 UTF

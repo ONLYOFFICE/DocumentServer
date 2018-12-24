@@ -644,7 +644,7 @@
 
 #### Document Editor
 
-* Support of multi comments balloon (bug #37422)
+* Support of multicomments balloon (bug #37422)
 
 ### Fixes
 
