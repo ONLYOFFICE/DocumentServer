@@ -1,5 +1,17 @@
 language: node_js
 node_js: "10"
 
-install: npm install -g markdownlint-cli
-script: markdownlint CHANGELOG.md
+addons:
+  apt:
+    packages:
+      - aspell
+      - aspell-en
+
+jobs:
+  include:
+    - stage: markdownlint
+      script: 
+      - npm install -g markdownlint-cli
+      - markdownlint CHANGELOG.md
+    - stage: spellcheck
+      script: cat CHANGELOG.md | aspell --lang=en --encoding=utf-8 --personal=./.aspell.en.pws list
