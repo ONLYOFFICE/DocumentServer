@@ -12,6 +12,6 @@ install: npm install -g markdownlint-cli
 jobs:
   include:
     - stage: markdownlint
-      script: ./test 1
+      script: markdownlint CHANGELOG.md
     - stage: spellcheck
       script: cat CHANGELOG.md | aspell --lang=en --encoding=utf-8 --personal=./.aspell.en.pws list
