@@ -1563,7 +1563,7 @@
 
 #### Editors
 
-* Full support of high-dpi monitors
+* Full support of HiDPI monitors
 * Ability to set alternative text for shapes
 
 #### Document Editor

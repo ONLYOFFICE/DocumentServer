@@ -171,6 +171,7 @@ healthcheck
 healthCheck
 HiDPI
 HLOOKUP
+hotkey
 html
 HYPGEOM
 icu
@@ -212,6 +213,7 @@ LoadingScriptError
 localhost
 LOGNORM
 logrotate
+lookup
 LTS
 macOS
 MacOs
@@ -219,6 +221,7 @@ mathType
 MathType
 MAXIFS
 MergeArea
+metadata
 metafile
 México
 MINIFS
@@ -296,9 +299,11 @@ Rebranding
 reconnection
 rect
 redis
+refactoring
 replyStr
 republika
 reSave
+resize
 RowHeight
 RRI
 rtf
