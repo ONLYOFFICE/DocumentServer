@@ -7,11 +7,11 @@ addons:
       - aspell
       - aspell-en
 
-install: npm install -g markdownlint-cli
-
 jobs:
   include:
     - stage: markdownlint
-      script: markdownlint CHANGELOG.md
+      script: 
+      - npm install -g markdownlint-cli
+      - markdownlint CHANGELOG.md
     - stage: spellcheck
       script: cat CHANGELOG.md | aspell --lang=en --encoding=utf-8 --personal=./.aspell.en.pws list
