@@ -28,7 +28,7 @@
 #### All Editors
 
 * Fix error in comparing solid fill
-* Fix some german translations
+* Fix some deutsch translations
 
 #### Document Editor
 
@@ -77,11 +77,11 @@
 * Fix watermark border for some files (bug #39935)
 * Fix some odf user files
 * Fix shape and cell text layout in some xls (bug #39961)
-* Fix missing text format in specific odp (bug #39983)
-* Fix incorrect numbering in odp (bug #39976)
+* Fix missing text format in specific ODP (bug #39983)
+* Fix incorrect numbering in ODP (bug #39976)
 * Fix lost list in notes of ppt (bug #39929)
 * Fix convertation of some xls (bug #40065)
-* Fix rotation of shape in specific odp file (bug #39979)
+* Fix rotation of shape in specific ODP file (bug #39979)
 * Fix showing cells values of Time format in ods file (bug #40106)
 * Fix some shape in ppt files (bug #40115)
 * Fix shapes with no fill in ppt (bug #40116)
