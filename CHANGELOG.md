@@ -28,7 +28,7 @@
 #### All Editors
 
 * Fix error in comparing solid fill
-* Fix some deutsch translations
+* Fix German translation
 
 #### Document Editor
 
@@ -80,7 +80,7 @@
 * Fix missing text format in specific ODP (bug #39983)
 * Fix incorrect numbering in ODP (bug #39976)
 * Fix lost list in notes of ppt (bug #39929)
-* Fix convertation of some xls (bug #40065)
+* Fix convert of some xls (bug #40065)
 * Fix rotation of shape in specific ODP file (bug #39979)
 * Fix showing cells values of Time format in ods file (bug #40106)
 * Fix some shape in ppt files (bug #40115)
