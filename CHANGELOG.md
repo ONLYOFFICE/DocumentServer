@@ -1,5 +1,93 @@
 # Change log
 
+## 5.2.7
+
+### New Features
+
+#### All Editors
+
+* Update documentation
+* Update nodehun
+
+#### Spreadsheet Editor
+
+* New `sv-SE`, `sv-FI` regional settings
+
+#### Spreadsheet Viewer
+
+* Add ability to change row height or column width in view mode without saving changes
+
+#### Plugins
+
+* Ability to send params to plugin (user, doc information)
+* Ability to translate plugins
+* New `Highlight Code` and `Thesaurus` plugins
+
+### Fixes
+
+#### All Editors
+
+* Fix error in comparing solid fill
+* Fix German translation
+
+#### Document Editor
+
+* Fix problem with updating current position when moving border of the table
+* Fix problem with clearing text properties
+* Fix problem with opening specific docx file (bug #39941)
+* Fix a problem with large nesting of tables (bug #39963)
+* Fix JS Error while click in header with loading image (bug #39940)
+* Fix a problem with recalculating table (bug #39945)
+* Fix bug with recalculating of a footnote in vertically merged cells
+* Fix bug with losing changes when moving table
+* Fix bug with selection marks when adding a table row
+* Fix bug with receiving selection bounds when moving the border of the table
+* Fix bug with clearing selection marks in paragraph
+* Fix bug with recalculating nested table
+* Fix the problem of using End/Home buttons in non recalculated paragraph
+* Fix bug with copy-paste when selecting a numbering
+* Fix a header/footer entry issue
+* Fix bug with adding an extra rows when inserting a table content
+* Fix a problem with copying table cell properties
+
+#### Spreadsheet Editor
+
+* Fix blocking save button on open chart frame (bug #39827)
+* Fix problem with copy paste hidden range with function (bug #40017)
+* Fix issue with calculating `SUMPRODUCT` (bug #40109)
+* Fix recalculate formulas into hidden filters area
+* Fix apply autofilter to empty column by right click menu
+* Fix calculate gradient without distance in conditional formatting (bug #40160)
+
+#### Presentation Editor
+
+* Fix error in copying slide notes
+
+#### Spreadsheet Viewer
+
+* Fix playback of youtube video (bug #40174)
+
+#### Plugins
+
+* Fix problem with double url in youtube plugin (bug #36103)
+
+#### x2t
+
+* Fix showing marked list in some PPT (bug #39929)
+* Fix watermark border for some files (bug #39935)
+* Fix some odf user files
+* Fix shape and cell text layout in some xls (bug #39961)
+* Fix missing text format in specific ODP (bug #39983)
+* Fix incorrect numbering in ODP (bug #39976)
+* Fix lost list in notes of ppt (bug #39929)
+* Fix convert of some xls (bug #40065)
+* Fix rotation of shape in specific ODP file (bug #39979)
+* Fix showing cells values of Time format in ods file (bug #40106)
+* Fix some shape in ppt files (bug #40115)
+* Fix shapes with no fill in ppt (bug #40116)
+* Fix opening xlsx file with image in in header (bug #40124)
+* Fix a lot more user files
+
 ## 5.2.6
 
 ### Fixes
