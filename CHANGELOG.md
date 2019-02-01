@@ -61,7 +61,7 @@
 
 #### x2t
 
-* Fix a lot of users files
+* A lot of users' files fixed
 * Fix MS Office error while opening xlsx with image in header (bug #40124)
 * Fix font while opening specific xls file (bug #40178)
 
