@@ -38,7 +38,9 @@
 #### Spreadsheet Editor
 
 * Fix color change after Convert to range for table (bug #38747)
-* Fix display cell value in Safari (bug #39878), ([DocumentServer#477](https://github.com/ONLYOFFICE/DocumentServer/issues/477)), ([DocumentServer#467](https://github.com/ONLYOFFICE/DocumentServer/issues/467))
+* Fix display cell value in Safari (bug #39878),
+  ([DocumentServer#477](https://github.com/ONLYOFFICE/DocumentServer/issues/477)),
+  ([DocumentServer#467](https://github.com/ONLYOFFICE/DocumentServer/issues/467))
 * Fix display hidden column (bug #40352)
 * Fix creating history point on signatureLine adding
 * Fix display values of second sheet on first sheet (bug #40038)
