@@ -8,14 +8,14 @@
 
 * Update copyrights to 2019 and actual Latvian address
 * Update npm-shrinkwrap to actual
-* Chinese as document language (without spellcheck) ([DocumentServer#479](https://github.com/ONLYOFFICE/DocumentServer/issues/479))
+* Chinese as document language (without spellchecker) ([DocumentServer#479](https://github.com/ONLYOFFICE/DocumentServer/issues/479))
 * Updated translations
 
 #### Plugins
 
 * Add support of system plugins
 
-#### Backend
+#### Back-end
 
 * Add robots.txt handler
 
@@ -33,7 +33,7 @@
 
 * Fix border display in some docx files (bug #39461)
 * Fix the problem of correcting of hit an drawing anchor in select
-* Fix color of conent control border on preview (bug #40330)
+* Fix color of content control border on preview (bug #40330)
 
 #### Spreadsheet Editor
 
@@ -47,7 +47,7 @@
 * Fix maximum call stack error while copy do Documents or Presentations
 * Fix cell scroll in specific files (bug #40294)
 * Fix js error while opening some xls file (bug #39529)
-* Fix js erorr while opening settings
+* Fix js error while opening settings
 * Fix printing file with custom sheet size (bug #40275)
 
 #### Presentation Editor
@@ -57,9 +57,9 @@
 * Fix opening presentation with unused theme'
 * Fix pptx shape display (bug #39169)
 
-#### Backend
+#### Back-end
 
-* Fix problem with jsw callback url ([DocumentServer#472](https://github.com/ONLYOFFICE/DocumentServer/issues/472))
+* Fix problem with jwt callback url ([DocumentServer#472](https://github.com/ONLYOFFICE/DocumentServer/issues/472))
 
 #### x2t
 
