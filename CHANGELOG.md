@@ -1,5 +1,70 @@
 # Change log
 
+## 5.2.8
+
+### New Features
+
+#### All Editors
+
+* Update copyrights to 2019 and actual Latvian address
+* Update npm-shrinkwrap to actual
+* Chinese as document language (without spellcheck) ([DocumentServer#479](https://github.com/ONLYOFFICE/DocumentServer/issues/479))
+* Updated translations
+
+#### Plugins
+
+* Add support of system plugins
+
+#### Backend
+
+* Add robots.txt handler
+
+#### x2t
+
+* xls - write default theme
+
+### Fixes
+
+#### All Editors
+
+* Fix copying chart without `txPr`
+
+#### Document Editor
+
+* Fix border display in some docx files (bug #39461)
+* Fix the problem of correcting of hit an drawing anchor in select
+* Fix color of conent control border on preview (bug #40330)
+
+#### Spreadsheet Editor
+
+* Fix color change after Convert to range for table (bug #38747)
+* Fix display cell value in Safari (bug #39878), ([DocumentServer#477](https://github.com/ONLYOFFICE/DocumentServer/issues/477)), ([DocumentServer#467](https://github.com/ONLYOFFICE/DocumentServer/issues/467))
+* Fix display hidden column (bug #40352)
+* Fix creating history point on signatureLine adding
+* Fix display values of second sheet on first sheet (bug #40038)
+* Fix maximum call stack error while copy do Documents or Presentations
+* Fix cell scroll in specific files (bug #40294)
+* Fix js error while opening some xls file (bug #39529)
+* Fix js erorr while opening settings
+* Fix printing file with custom sheet size (bug #40275)
+
+#### Presentation Editor
+
+* Fix bug with resize after fullscreen (view position detect)
+* Fix problem with connection drawing
+* Fix opening presentation with unused theme'
+* Fix pptx shape display (bug #39169)
+
+#### Backend
+
+* Fix problem with jsw callback url ([DocumentServer#472](https://github.com/ONLYOFFICE/DocumentServer/issues/472))
+
+#### x2t
+
+* Fix a lot of users files
+* Fix MS Office error while opening xlsx with image in header (bug #40124)
+* Fix font while opening specific xls file (bug #40178)
+
 ## 5.2.7
 
 ### New Features
