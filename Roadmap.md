@@ -2,120 +2,126 @@
 
 **ONLYOFFICE Document Server** is an online office suite comprising viewers and editors for texts, spreadsheets and presentations, fully compatible with Office Open XML formats: .docx, .xlsx, .pptx and enabling collaborative editing in real time. This document provides the roadmap of the planned **ONLYOFFICE Document Server** changes.
 
-## Version 4.5
+## Version 5.5
 
-### Common tasks for all Editors
+### Common tasks for all editors
 
-* Charts Improvement (3D)
-* Paste Options (Keep Source Formatting, Merge Formatting, Keep Text Only etc.)
-* Document Templates
-* Development of editors add-ons for versioning (Chrome & Mozilla)
-* Undo for Spreadsheet Editor in fast collaborative editing mode
-* Opening password-protected documents
+* Bug fixes
+* 3D in AutoShapes and pictures
+* Mobile versions (improvements)
+* Equation editor (AutoCorrect)
+* Undo/redo for fast collaborative editing 
+* Development of plugins (Thesaurus, DocuSign, Sent to, show the statistics of words/symbols for the selected text)
+* Draw attention of the users in comments with the help of @username (@mentions)
 
 ### Document Editor improvement tasks
 
-* Versioning
-* Mail Merge
-* Footnotes, Endnotes 
-* Proportional table resize
-* AutoCorrect
+* Setting custom column width (row height) in the table
+* Distribute column (Distribute row) in the table
+* Forms
+* Formulas in tables
 
 ### Spreadsheet Editor improvement tasks
 
-* Formulas in AutoShapes
-* Adjustable cell format (number, currency, etc.)
+* Print (preview + header/footer + page breaks)
+* Adjustable cells format (numerical, monetary, etc.)
+* Improvement of auto-filters (there are no settings of style parameters for spreadsheets, spreadsheet resize using mouse, the auto-adding of lines within the formatted spreadsheets)
 * Pivot tables
-* Multiselect
-* Conditional Formatting
-* Sparklines
+* Conditional formating (rework)
+* Modify the algorithm of auto-filling (make various options, for example, copy formatting only)
+* Spelling check
 
 ### Presentation Editor improvement tasks
 
-* Slide Notes
-* Columns (settings)
-* Improvement in opening PPT + ODP
-* Formulas in AutoShapes
-
-### Interface tasks
-
-* Customization
-* Renaming a file from the editor interface
-* Embedded viewers update
-* Web-based mobile version update
+* Automatically fit text size in AutoShape
+* Improvement of hyperlinks (internal links - an analog of the ability to assign actions to inserted objects)
 
 ### Desktop and mobile editors tasks
 
-* Development of co-editing for the Spreadsheet Editor for iPad
+* Development of interface for presentation editor for iPad
+* Print preview in all desktop editors
+
 
 ## Planned for future versions
 
-### Common tasks for all Editors
+### Server tasks
 
-* Korean, Chinese, Japanese and Arabic languages support improvement (vertical text + right-to-left) 
-* Korean, Chinese, Japanese and Arabic languages support improvement (canvas-based font rendering) 
+* Security
+* Opening files on client (loading images, shapes and charts)
+
+### Common tasks for all editors
+
+* Bug fixes
+* Speedup on drawing and loading
+* 3D in AutoShapes and pictures
+* Mobile versions (improvement)
+* Improvement to the asian (Korean, Chinese and Japanese) and arabic languages support (vertical text + right-to-left)
+* Improvement to  the asian languages support (Korean, Chinese and Japanese) (canvas-based font rendering)
 * Border styles (double)
-* Symbol Insertion (Character Map)
+* Paste options (keep source formatting, merge formatting, keep text only, etc.)
+* Document templates
 * Development of editors add-ons for versioning (Chrome & Mozilla)
-* Redo for all editors in fast collaborative editing mode
+* Undo/redo for fast collaborative editing 
 * Commenting mode (restricted editing)
 * Protecting parts of a document from being edited
 * Protecting parts of a document from being copied
-* PDF Editor
-* Comparing two documents (+Merging into a single document)
+* PDF editor
+* Comparing two documents (+merge)
+* Opening files on client
+* Development of plugins (Thesaurus, DocuSign, Sent to, show the statistics of words/symbols for the selected text)
+* Divide the file settings and the user settings (will be applied to all the files independent of the browser and the computer)
 
 ### Document Editor improvement tasks
 
-* Headings setup + table of contents + internal links
-* Footnotes, Endnotes
-* Setting custom column width (row height) in a table
-* Columns and rows distribution in a table
-* Combining and splitting of lists
+* Review (rework)
+* Footnotes (endnotes)
+* The exact height of the rows in the table
+* Support of % in brush
 * Backgrounds
 * Different underlining (double line, wavy line, etc.)
 * Frames for pictures, templates
-* Non-breaking paragraph (wrapping)
+* Inextricable paragraph (wrap)
 * Links between the titles
+* Improvement for the insertion of pictures (search via internet, add from ONLYOFFICE, download pictures from the document, ClipArt)
 * Hidden text
-* Watermarks (maybe as a plug-in)
+* AutoCorrect
+* Watermarks (interface)
 * Forms
+* Fields
+* Drawing canvas support
 
 ### Spreadsheet Editor improvement tasks
 
 * Effects (like in MS Office 2013)
 * Backgrounds
-* Print (Preview + header / footer + page breaks)
 * Formula bar (improvements)
-* Versioning
+* Version history
+* Review
+* Conditional formating (rework)
 * Data
-* Sheet and Data Protection
-* Splitting the window into several editor windows 
-* Modify the algorithm of auto-filling (make various options, for example, copy formatting only etc.)
+* Sheet and data protection
+* Splitting the window for several editors
+* Forms
 
 ### Presentation Editor improvement tasks
 
 * Vertical text
 * Animation
-* Hide / restore slide
-* Header /footer + slide number + date and time
+* Header/footer + slide number + date and time
 * Video + audio
 * Themes
-* Theme Editor
-* Hyperlinks improvement (internal links - an analog of the ability to assign actions to inserted objects)
+* Theme editor
+* SmartArt support
 
 ### Interface tasks
-
 * Customization
-* Saving a copy of a document on the portal
 * Adding the information about updates in a new editor version
+* Toolbar adaptation for various screen resolutions
 
 ### Desktop and mobile editors tasks
-
-* Development of an interface for the Document Editor for Android
-* Development of an interface for the Presentation Editor for iPad
-* Development of an interface for the Spreadsheet and Presentation Editors for Android
-* Development of co-editing for the Document Editor for iPad
-* Development of SDK and API of the common file manager for all editors on the base of WebDAV (for the integrators' usability)
+* Development of interface for document editor for Android
+* Development of interface for spreadsheet and presentation editors for Android
+* Development of SDK and API of general files manager for all editors on base of WebDAV (for usability by integrators)
 
 ## Project Information
 
