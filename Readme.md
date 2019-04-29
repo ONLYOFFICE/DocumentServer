@@ -44,15 +44,15 @@ The table below will help you to make the right choice.
 
 | Pricing and licensing | Community Edition | Integration Edition | Developer Edition |
 | ------------- | ------------- | ------------- | ------------- |
-| | [Get it now](https://www.onlyoffice.com/download.aspx)  | [Start Free Trial](https://www.onlyoffice.com/connectors-request.aspx)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx)  |
-| Cost  | FREE  | [Go to the pricing page](https://www.onlyoffice.com/integration-edition-prices.aspx)  | [Go to the pricing page](https://www.onlyoffice.com/developer-edition-prices.aspx)  |
+| | [Get it now](https://www.onlyoffice.com/download.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/connectors-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
+| Cost  | FREE  | [Go to the pricing page](https://www.onlyoffice.com/integration-edition-prices.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Go to the pricing page](https://www.onlyoffice.com/developer-edition-prices.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
 | Simultaneous connections | up to 20 maximum  | As in chosen pricing plan | As in chosen pricing plan |
 | Number of users | up to 20 recommended | As in chosen pricing plan | As in chosen pricing plan |
 | License | GNU AGPL v.3 | Proprietary | Proprietary |
 | **Support** | **Community Edition** | **Integration Edition** | **Developer Edition** |
 | Documentation | [Help Center](https://helpcenter.onlyoffice.com/server/docker/opensource/index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/server/integration-edition/index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/server/integration-edition/index.aspx) |
 | Standard support | [GitHub](https://github.com/ONLYOFFICE/DocumentServer/issues) or paid | One year support included | One year support included |
-| Premium support | [Buy Now](https://www.onlyoffice.com/support.aspx) | [Buy Now](https://www.onlyoffice.com/support.aspx) | [Buy Now](https://www.onlyoffice.com/support.aspx) |
+| Premium support | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) |
 | **Interface** | **Community Edition** | **Integration Edition** | **Developer Edition** |
 | Tabbed interface | - | + | + |
 | White Label      | - | - | + |
@@ -86,13 +86,13 @@ The table below will help you to make the right choice.
 | Animations                      | + | + | + |
 | Presenter mode                  | - | + | + |
 | Notes                           | + | + | + |
-| | [Get it now](https://www.onlyoffice.com/download.aspx)  | [Start Free Trial](https://www.onlyoffice.com/connectors-request.aspx)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx)  |
+| | [Get it now](https://www.onlyoffice.com/download.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/connectors-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
 
 \* Changing style and deleting (Full support coming soon)
 
 ## Project Information
 
-Official website: [http://www.onlyoffice.org](http://onlyoffice.org "http://www.onlyoffice.org")
+Official website: [https://www.onlyoffice.com](https://www.onlyoffice.com/?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)
 
 Code repository: [https://github.com/ONLYOFFICE/DocumentServer](https://github.com/ONLYOFFICE/DocumentServer "https://github.com/ONLYOFFICE/DocumentServer")
 
@@ -100,7 +100,7 @@ Docker Image: [https://github.com/ONLYOFFICE/Docker-DocumentServer](https://gith
 
 License: [GNU AGPL v3.0](https://help.onlyoffice.com/products/files/doceditor.aspx?fileid=4358397&doc=K0ZUdlVuQzQ0RFhhMzhZRVN4ZFIvaHlhUjN2eS9XMXpKR1M5WEppUk1Gcz0_IjQzNTgzOTci0 "GNU AGPL v3.0")
 
-SaaS version: [http://www.onlyoffice.com](http://www.onlyoffice.com "http://www.onlyoffice.com")
+SaaS version: [https://www.onlyoffice.com](https://www.onlyoffice.com/cloud-office.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)
 
 ## ONLYOFFICE One Click Installation
 
