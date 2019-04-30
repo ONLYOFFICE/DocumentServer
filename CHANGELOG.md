@@ -1,5 +1,66 @@
 # Change log
 
+### 5.3.0
+
+### New Features
+
+#### All Editors
+
+* New placements for undo-redo, save and print button in top toolbar
+* 250 document languages (mostly without spellcheck)
+* Completely redone font engine (Better support of CJK fonts and much more)
+* Ability to flip and rotate shape/images
+* Ability to crop images
+* Adding bookmark do not close bookmark window
+* Comments are show in all edit-view modes
+* New hotkeys on MacOS
+* New license flag `customization`
+* Load images from storage
+* Add options for objects align (align to page, margin, slide)
+* New hints for autoshapes (Bug #20091)
+
+#### Document Editor
+
+* Formulas in Tables
+* Save as DOTX, PDF-A, OTT
+* Show review changes in view mode
+* Can't remove review changes of another user
+* Can't remove a comments of another user (option `customization.commentAuthorOnly` = `true`)
+* Add description for moved text and move to changed text in Review mode
+* Get link to bookmark
+* Search selected text
+
+#### Spreadsheet Editor
+
+* Български, Svenska (Finland), Svenska (Sverige) number format
+* Translates of formulas to Italian
+* Go to link by click, not control click
+* `ASC`, `BETAINV`, `HYPERLINK` formulas
+* Support of Print areas
+* Ability to set exact text orientations in degrees
+* Text to column Wizards
+* Paste Text Wizard
+* Save as XLTX, PDF-A, OTS
+* Support of Array Formula
+* Icon and Data Bars Conditional Formating
+* Gradient and Texture cell fill
+* Show hint with function/arguments description when typing function
+* Show min and max values in status bar
+* Distribute objects
+
+#### Presentation Editor
+
+* Save as POTX, PDF-A, OTP
+* Add font rendering option
+* Search and replace text
+* Internal hyperlinks: entering the slide number manually
+
+### Removal
+
+#### All Editors
+
+* Remove photo editor plugin
+
 ## 5.2.8
 
 ### New Features
