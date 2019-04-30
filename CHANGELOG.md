@@ -1,6 +1,6 @@
 # Change log
 
-### 5.3.0
+## 5.3.0
 
 ### New Features
 
@@ -25,7 +25,8 @@
 * Save as DOTX, PDF-A, OTT
 * Show review changes in view mode
 * Can't remove review changes of another user
-* Can't remove a comments of another user (option `customization.commentAuthorOnly` = `true`)
+* Can't remove a comments of another user
+  (option `customization.commentAuthorOnly` = `true`)
 * Add description for moved text and move to changed text in Review mode
 * Get link to bookmark
 * Search selected text
