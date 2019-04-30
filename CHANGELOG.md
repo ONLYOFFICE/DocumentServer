@@ -17,7 +17,7 @@
 * New license flag `customization`
 * Load images from storage
 * Add options for objects align (align to page, margin, slide)
-* New hints for autoshapes (Bug #20091)
+* New hints for shapes (Bug #20091)
 
 #### Document Editor
 
@@ -43,7 +43,7 @@
 * Paste Text Wizard
 * Save as XLTX, PDF-A, OTS
 * Support of Array Formula
-* Icon and Data Bars Conditional Formating
+* Icon and Data Bars Conditional Formatting
 * Gradient and Texture cell fill
 * Show hint with function/arguments description when typing function
 * Show min and max values in status bar
