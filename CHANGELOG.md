@@ -48,6 +48,7 @@
 * Show hint with function/arguments description when typing function
 * Show min and max values in status bar
 * Distribute objects
+* Redone cut cell process (cell not removed after cut immediately)
 
 #### Presentation Editor
 
