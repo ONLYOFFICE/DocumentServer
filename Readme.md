@@ -53,6 +53,9 @@ The table below will help you to make the right choice.
 | Documentation | [Help Center](https://helpcenter.onlyoffice.com/server/docker/opensource/index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/server/integration-edition/index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/server/integration-edition/index.aspx) |
 | Standard support | [GitHub](https://github.com/ONLYOFFICE/DocumentServer/issues) or paid | One year support included | One year support included |
 | Premium support | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) |
+| **Services** | **Community Edition** | **Integration Edition** | **Developer Edition** |
+| Conversion Service                | + | + | + |
+| Document Builder Service          | - | + | + |
 | **Interface** | **Community Edition** | **Integration Edition** | **Developer Edition** |
 | Tabbed interface                       | - | + | + |
 | White Label                            | - | - | + |
