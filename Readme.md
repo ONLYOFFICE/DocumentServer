@@ -55,7 +55,7 @@ The table below will help you to make the right choice.
 | Premium support | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) |
 | **Services** | **Community Edition** | **Integration Edition** | **Developer Edition** |
 | Conversion Service                | + | + | + |
-| Document Builder Service          | - | + | + |
+| Document Builder Service          | + | + | + |
 | **Interface** | **Community Edition** | **Integration Edition** | **Developer Edition** |
 | Tabbed interface                       | - | + | + |
 | White Label                            | - | - | + |
