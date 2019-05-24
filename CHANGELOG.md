@@ -8,7 +8,7 @@
 
 * Tabbed Interface in OpenSource version
 * New placements for undo-redo, save and print button in top toolbar
-* 250 document languages (mostly without spellcheck)
+* 250 document languages (mostly without spellchecker)
 * Completely redone font engine (Better support of CJK fonts and much more)
 * Ability to flip and rotate shape/images
 * Ability to crop images
