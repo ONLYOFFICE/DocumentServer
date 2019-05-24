@@ -19,6 +19,7 @@
 * Load images from storage
 * Add options for objects align (align to page, margin, slide)
 * New hints for shapes (Bug #20091)
+* Completely new photo editor plugin
 
 #### Document Editor
 
@@ -58,11 +59,9 @@
 * Search and replace text
 * Internal hyperlinks: entering the slide number manually
 
-### Removal
+#### Fixes
 
-#### All Editors
-
-* Remove photo editor plugin
+* A lot of fixes in every subsystem
 
 ## 5.2.8
 
