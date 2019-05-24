@@ -20,4 +20,4 @@ jobs:
       script: 
       - SPELLCHECK_OUT=$(cat CHANGELOG.md | aspell --lang=en --encoding=utf-8 --personal=./.aspell.en.pws list)
       - echo $SPELLCHECK_OUT
-      - if [[ $(echo -n $SPELLCHECK_OUT | wc -l) -ne 0 ]]; then exit 1 ; fi
+      - if [[ $(echo -n $SPELLCHECK_OUT | wc -c) -ne 1 ]]; then exit 1 ; fi
