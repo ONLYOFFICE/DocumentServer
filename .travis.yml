@@ -17,4 +17,7 @@ jobs:
       - npm install -g markdownlint-cli
       - markdownlint CHANGELOG.md
     - stage: spellcheck
-      script: if [[ $(cat CHANGELOG.md | aspell --lang=en --encoding=utf-8 --personal=./.aspell.en.pws list | wc -l) -ne 0 ]]; then exit 1 ; fi
+      script: 
+      - SPELLCHECK_OUT=$(cat CHANGELOG.md | aspell --lang=en --encoding=utf-8 --personal=./.aspell.en.pws list)
+      - echo $SPELLCHECK_OUT
+      - if [[ $(echo -n $SPELLCHECK_OUT | wc -c) -ne 0 ]]; then exit 1 ; fi
