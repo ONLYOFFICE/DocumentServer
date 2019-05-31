@@ -57,7 +57,7 @@ The table below will help you to make the right choice.
 | Conversion Service                | + | + | + |
 | Document Builder Service          | + | + | + |
 | **Interface** | **Community Edition** | **Integration Edition** | **Developer Edition** |
-| Tabbed interface                       | - | + | + |
+| Tabbed interface                       | + | + | + |
 | White Label                            | - | - | + |
 | Integrated test example (node.js)*     | - | + | + |
 | **Plugins & Macros** | **Community Edition** | **Integration Edition** | **Developer Edition** |
@@ -68,27 +68,27 @@ The table below will help you to make the right choice.
 | Comments                          | + | + | + |
 | Built-in chat                     | + | + | + |
 | Review and tracking changes       | + | + | + |
-| Display modes of tracking changes | - | + | + |
+| Display modes of tracking changes | + | + | + |
 | Version history                   | + | + | + |
 | **Document Editor features** | **Community Edition** | **Integration Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
-| Content control                 | - | + | + |
+| Content control                 | + | + | + |
 | Layout tools                    | + | + | + |
 | Table of contents               | + | + | + |
-| Navigation panel                | - | + | + |
+| Navigation panel                | + | + | + |
 | Mail Merge                      | + | + | + |
 | **Spreadsheet Editor features** | **Community Edition** | **Integration Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
 | Functions, formulas, equations  | + | + | + |
 | Table templates                 | + | + | + |
-| Pivot tables                    | - | +** | +** |
+| Pivot tables                    | +** | +** | +** |
 | **Presentation Editor features** | **Community Edition** | **Integration Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
 | Animations                      | + | + | + |
-| Presenter mode                  | - | + | + |
+| Presenter mode                  | + | + | + |
 | Notes                           | + | + | + |
 | | [Get it now](https://www.onlyoffice.com/download.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/connectors-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
 
