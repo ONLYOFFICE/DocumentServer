@@ -1,5 +1,61 @@
 # Change log
 
+## 5.3.1
+
+### New Features
+
+#### Document Editor
+
+* Add support for calculating tabs in word2013 style that lies to the right of the right margin
+
+### Fixes
+
+#### All Editors
+
+* Fix a lot of bugs with drawings positioning
+* Fix build on actual gcc ([DocumentServer#575](https://github.com/ONLYOFFICE/DocumentServer/issues/575))
+
+#### Document Editor
+
+* Fix JS error while entering text in content control in specific docx (bug #41687)
+* Fix the problem with calculating numbering value with merged cells (bug #41699)
+* Fix JS error while undo entered text in review mode (bug #41708)
+* Fix deleting whole TOC field after selecting it (bug #41714)
+* Fix showing numbering as changes for review in specific document (bug #41518)
+* Fix opening Modelling_scholarly_communication_report_final1.docx (bug #41717)
+* Fix crash on refresh recalculated data
+* Fix bug with moving object in group
+* Fix the problem with rendering WMF files (bug #41495)
+
+#### Spreadsheet Editor
+
+* Fix undo moved cell in print area (bug #41723)
+
+#### Mobile Web Editors
+
+* Fix adding shape in table (bug #41676)
+* Fix inserting formulas on iOS
+* Fix blocking app after adding image by url (bug #41677)
+
+#### DocumentBuilder
+
+* Fix errors in DocumentBuilder documentation
+
+#### Package
+
+* Fix 1click installation
+* Fix rpm update v5.2.8 -> v5.3.0
+* Remove .m4 files from packages
+* Fix ds example startup after upgrade
+* Fix 'onlyoffice: ERROR (no such group)' error
+* Fix example startup after update
+* Fix update with custom nginx config
+
+#### Docker
+
+* Fix docker compose startup error ([Docker-DocumentServer#163](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/163))
+* Fix DocumentBuilder return "urls": {} if `/var/lib/onlyoffice` mounted ([Docker-DocumentServer#164](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/164))
+
 ## 5.3.0
 
 ### New Features
