@@ -6,7 +6,8 @@
 
 #### Document Editor
 
-* Add support for calculating tabs in word2013 style that lies to the right of the right margin
+* Add support for calculating tabs in word2013 style that lies to the
+ right of the right margin
 
 ### Fixes
 
