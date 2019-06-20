@@ -34,7 +34,7 @@
 #### Back-end
 
 * Fix some false error messages
-* Fix unknown issuer name while download by httpS
+* Fix unknown issuer name while download by https
 
 ## 5.3.1
 
