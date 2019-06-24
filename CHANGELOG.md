@@ -1,5 +1,41 @@
 # Change log
 
+## 5.3.2
+
+### Fixes
+
+#### All Editors
+
+* Fix some more problems with SVG
+
+#### Document Editor
+
+* Fix JS error while scrolling in mail merge window (bug #41787)
+* Fix JS error while opening some specific docx (bug #41847)
+* Fix JS error while using final mode in review mode (bug #41846)
+* Fix the problem with updating positions in the inner
+  classes within a paragraph (bug #41848)
+* Do not add changes to reviews with changes of the text properties
+  if in fact there have been no changes (bug #41833)
+* Fix critical bug on setup hideContentControlTrack property
+* Fix show changes of second user if show changes disabled (bug #41576)
+* Fix the problem with accepting/rejecting review changes
+
+#### Spreadsheet Editor
+
+* Fix JS error for `Replace all` in some cases (bug #41760)
+* Fix column index error while insertion
+* Fix add changes to history on drawing sparklines
+
+#### Plugins
+
+* Suppress logging locale load error for plugins
+
+#### Back-end
+
+* Fix some false error messages
+* Fix unknown issuer name while download by https
+
 ## 5.3.1
 
 ### New Features
