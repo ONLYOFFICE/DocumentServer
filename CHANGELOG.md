@@ -12,7 +12,7 @@
 
 #### All Editors
 
-* Fix order of spellcheck correction entries ([DesktopEditors#224](https://github.com/ONLYOFFICE/DesktopEditors/issues/224))
+* Fix order of spellchecker correction entries ([DesktopEditors#224](https://github.com/ONLYOFFICE/DesktopEditors/issues/224))
 
 #### Document Editor
 
