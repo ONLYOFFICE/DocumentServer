@@ -25,6 +25,10 @@
 
 * Fix background color of slide
 
+#### x2t
+
+* Decode xlsx escaped chars (bug #36575, #41890)
+
 #### Windows Version
 
 * Fix misprint on redis configure page
