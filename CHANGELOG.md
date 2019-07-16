@@ -1,5 +1,42 @@
 # Change log
 
+## 5.3.4
+
+### New Features
+
+#### Plugins
+
+* Translations for Photo Editor plugin
+
+### Fixes
+
+#### All Editors
+
+* Fix order of spellchecker correction entries ([DesktopEditors#224](https://github.com/ONLYOFFICE/DesktopEditors/issues/224))
+
+#### Document Editor
+
+* Fix JS error while undo insert empty row in table (bug #41995)
+* Fix the problem with adding an equation inside a hyperlink
+* Fix composite input in Firefox ([DocumentServer#601](https://github.com/ONLYOFFICE/DocumentServer/issues/601))
+* Fix crash while opening file with math created by aspose
+
+#### Presentation Editor
+
+* Fix background color of slide
+
+#### x2t
+
+* Decode xlsx escaped chars (bug #36575, #41890)
+
+#### Windows Version
+
+* Fix misprint on redis configure page
+
+## 5.3.3
+
+### No public release
+
 ## 5.3.2
 
 ### Fixes
