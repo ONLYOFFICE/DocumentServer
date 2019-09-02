@@ -15,7 +15,7 @@
 * Ability to show shadow for images/shapes
 * Add mentions to comments
 * Show multi-gradient fill in shapes (bug #40719)
-* Add `onRequestSaveAs` api event for saving file to storage
+* Add `onRequestSaveAs` Api event for saving file to storage
 * Add `onRequestInsertImage` event and `insertImage`
   method for inserting image from storage
 
