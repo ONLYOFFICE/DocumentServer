@@ -44,6 +44,7 @@
 * `Print selection` option for slide
 * Ability to set Headers and Footers
 * Ability to insert slide number
+* Ability to insert date/time
 * Add tooltip for table styles
 
 #### Plugins
