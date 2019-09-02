@@ -15,6 +15,9 @@
 * Ability to show shadow for images/shapes
 * Add mentions to comments
 * Show multi-gradient fill in shapes (bug #40719)
+* Add `onRequestSaveAs` api event for saving file to storage
+* Add `onRequestInsertImage` event and `insertImage`
+  method for inserting image from storage
 
 #### Document Editor
 
@@ -23,6 +26,8 @@
 * Ability to print selection
 * Ability to save docx in mode compatible with old versions
 * Add tooltip for table styles
+* Add `onRequestMailMergeRecipients` event and
+  `setMailMergeRecipients` method for mail  merge
 
 #### Spreadsheet Editor
 
