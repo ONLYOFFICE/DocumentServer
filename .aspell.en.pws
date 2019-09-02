@@ -1,4 +1,4 @@
-personal_ws-1.1 en 438 utf-8
+personal_ws-1.1 en 440 utf-8
 ACOT
 ACOTH
 ActiveCell
@@ -94,6 +94,7 @@ DCOUNT
 DCOUNTA
 de
 Decryptor
+Deprecations
 DesktopEditors
 Deutsch
 DGET
@@ -275,6 +276,7 @@ onlyoffice
 ONLYOFFICE
 OnlySignatures
 ooxml
+openclipart
 OpenDocument
 OpenFormat
 openProtectedFile
