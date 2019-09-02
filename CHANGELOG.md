@@ -1,5 +1,50 @@
 # Change log
 
+## 5.4.0
+
+### New Features
+
+#### All Editors
+
+* More options for Paragraph Spacing
+* Ability to set paragraph Outline level
+* Ability to get current color scheme
+* Redone Document Info page
+* Better and more templates for tables
+
+#### Document Editor
+
+* Ability create new style - next style same as previous
+* Ability to add watermarks
+
+#### Spreadsheet Editor
+
+* Ability to change look of chart elements
+* Ability to set Headers and Footers
+* New tab for working with formulas
+* Ability to group data
+* Spellchecker
+* Support of Print area
+
+#### Presentation Editor
+
+* New themes for slides
+* `Print selection` option for slide
+* Ability to set Headers and Footers
+* Ability to insert slide number
+
+### Fixes
+
+#### All Editors
+
+* A lot of bugs fixed
+
+### Deprecations
+
+#### All Editors
+
+* Clipart plugin removed (third party service openclipart.org in unavailable)
+
 ## 5.3.4
 
 ### New Features
