@@ -1,5 +1,107 @@
 # Change log
 
+## 5.4.0
+
+### New Features
+
+#### All Editors
+
+* More options for Paragraph Spacing
+* Ability to set paragraph Outline level
+* Ability to get current color scheme
+* Redone Document Info page
+* Better and more templates for tables
+* Select languages using keyboard (bug #24317)
+* Ability to show shadow for images/shapes
+* Add mentions to comments
+* Show multi-gradient fill in shapes (bug #40719)
+* Add `onRequestSaveAs` Api event for saving file to storage
+* Add `onRequestInsertImage` event and `insertImage`
+  method for inserting image from storage
+
+#### Document Editor
+
+* Ability create new style - next style same as previous
+* Ability to add watermarks
+* Ability to print selection
+* Ability to save docx in mode compatible with old versions
+* Add tooltip for table styles
+* Add `onRequestMailMergeRecipients` event and
+  `setMailMergeRecipients` method for mail  merge
+
+#### Spreadsheet Editor
+
+* Ability to change look of chart elements
+* Ability to set Headers and Footers
+* New tab for working with formulas
+* Ability to group data
+* Spellchecker
+* Support of Print area
+* Ability to resize autofilter window
+* Show the number of cells in autofilter window
+* Save 10 last used functions
+* Set default value for regional settings (bug #41549)
+* Asynchronous loading of formulas
+
+#### Presentation Editor
+
+* New themes for slides
+* `Print selection` option for slide
+* Ability to set Headers and Footers
+* Ability to insert slide number
+* Ability to insert date/time
+* Add tooltip for table styles
+
+#### Plugins
+
+* Asynchronous loading of plugins
+
+#### Mobile All Editors
+
+* Redone Document Info page
+* Ability to set color scheme
+* Ability to set unit of measurement
+* Show comments
+* Show users editing the document
+
+#### Mobile Document Editor
+
+* Ability to view/accept/reject review changes
+* Ability to set display mode for review changes
+* Ability to add footnotes
+* Download to RTF format
+* Merge/split table cells
+* Add settings for non-printing characters
+* Add settings for commenting display
+
+#### Mobile Spreadsheet Editor
+
+* Work with autofilters (bug #34113)
+* Add settings for commenting display
+* Add regional settings
+* Ability to set R1C1 mode
+* Add settings for formula language
+* Additional settings for search in the spreadsheet
+* Add settings for headings and gridlines
+* Add layout settings (page size, orientation, margins)
+* Ability to freeze panes from context menu
+
+#### Embedded Viewers
+
+* Translate embedded viewers (bug 31297)
+
+### Fixes
+
+#### All Editors
+
+* A lot of bugs fixed
+
+### Deprecations
+
+#### All Editors
+
+* Clipart plugin removed (third party service openclipart.org in unavailable)
+
 ## 5.3.4
 
 ### New Features
