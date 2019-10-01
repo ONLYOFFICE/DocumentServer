@@ -69,7 +69,7 @@
 
 * Fix fonts picker bugs
 * Support flv format
-* Fix display some unicode font names (bug #42926) ([DocumentServer#651](https://github.com/ONLYOFFICE/DocumentServer/issues/651))
+* Fix display some utf font names (bug #42926) ([DocumentServer#651](https://github.com/ONLYOFFICE/DocumentServer/issues/651))
 * Fix GenerateGuid
 * Fix building of ICU ([DocumentServer#656](https://github.com/ONLYOFFICE/DocumentServer/issues/656))
 
