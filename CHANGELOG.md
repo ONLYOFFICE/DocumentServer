@@ -1,5 +1,115 @@
 # Change log
 
+## 5.4.1
+
+### New Features
+
+#### Spreadsheet Editor
+
+* Added `sv` locale to number formats
+
+#### Presentation Editor
+
+* Support themes thumbnails params
+
+#### document-server-integration
+
+* Add `blockcontent` mode
+
+### Fixes
+
+#### All Editors
+
+* Fix detecting document info as document change (bug #42717)
+* Fix paste in canvas after opening settings
+* Fix some issues with loading of translations
+* Fix issues with title in black theme (bug #42882)
+
+#### Document Editor
+
+* Fix the problem with drawing a track around a content
+  control (bug #42657)
+* Fix the problem with accept/reject in case when moved text
+  gets into selection (bug #42665)
+* Fix the problem with deleting text that was previously
+  added by the same user (bug #41242)
+* Fix "No image uploaded" for Watermark background (bug #42832)
+* Fix rules unit of measurements (bug #42608)
+* Fix some watermark bugs
+* Fix style list in `Create New Style` window on small
+  window size (bug #42799)
+* Fix changing display mode for track changes
+  (without plugins tab)
+
+#### Spreadsheet Editor
+
+* Fix opening some files with pivot table without pivot style
+* Fix JS error in `SUBTOTAL` function (bug #42833)
+* Fix scale options while printing (bug #34704)
+* Fix adding image from storage (bug #42789)
+* Fix auto-sum icon
+* Fix button icons (chat, comments)
+
+#### Back-end
+
+* Fix core.zip url for develop environment
+
+#### Plugins
+
+* Fix Thesaurus plugin ([sdkjs-plugins#78](https://github.com/ONLYOFFICE/sdkjs-plugins/issues/78))
+* OCR uses remote scripts
+
+#### document-server-integration
+
+* Fix `Open File location` on custom port ([document-server-integration#63](https://github.com/ONLYOFFICE/document-server-integration/issues/63))
+
+#### x2t
+
+##### Common
+
+* Fix fonts picker bugs
+* Support flv format
+* Fix display some UTF font names (bug #42926) ([DocumentServer#651](https://github.com/ONLYOFFICE/DocumentServer/issues/651))
+* Fix GenerateGuid
+* Fix building of ICU ([DocumentServer#656](https://github.com/ONLYOFFICE/DocumentServer/issues/656))
+
+##### doc
+
+* Fix extended comments
+
+##### docx
+
+* Fix bookmarks saving inside hyperlink
+
+##### xls
+
+* Fix marker filters in some xls (bug #42239)
+* Fix image size in save to xls (bug #42618)
+* Fix group data display (bug #42216)
+
+##### xlsx
+
+* Fix tooltip for data validation (bug #42667)
+* Fix Excel recovery error for files with comments (bug #42968)
+* Remove reply duplicates (bug #42969)
+
+##### odf
+
+* Fix error in headers/footers
+* Fix print areas (bug #42654)
+* Fix column width (bug #42790)
+* Fix cell color (bug #42932)
+* Fix link to formatted as table (bug #42938)
+
+##### rtf
+
+* Fix some issues
+
+#### Docker
+
+* Fix token not working correctly with docker-compose ([Docker-DocumentServer#175](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/175))
+* Fix amp ssl links ([Docker-DocumentServer#183](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/183))
+
 ## 5.4.0
 
 ### New Features
