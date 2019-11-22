@@ -1,5 +1,56 @@
 # Change log
 
+## 5.4.2
+
+### New Features
+
+#### All Editors
+
+* Rename `web-apps-pro` repo to `web-apps`
+
+#### Plugins
+
+* Add plugin methods to move the cursor to the start/end 
+  of the document (`MoveCursorToStart`, `MoveCursorToEnd`)
+  (bug #41521)
+
+#### Backend
+
+* Add custom public key support
+
+### Fixes
+
+#### Document Editor
+
+* Fix the problem with removing previously added text by 
+  other user in the review mode (bug #43183)
+* Fix the problem with moving text in the review mode
+  (bug #43238)
+* Fix the problem of inserting a table over another table 
+* Fix the problem with reviewed numbering 
+* Fix some problems with watermarks
+* Fix license error while inserting chart for DocumentServer
+  with custom logo (bug #43314)
+
+#### Plugins
+
+* Fix starting PhotoEditor plugin (bug #42473)
+* Fix issues with YouTube plugin
+
+#### Embedded mode
+
+* Fix autofocus in embedded mode
+* Fix hiding download button and settings menu.
+
+#### Installation
+
+* Fix issue with cyrillic encoding messages in win installation
+* Remove unused installation dependency - `boost-regex` (or similar)
+
+#### x2t
+
+* Fix issue with cell height for xls -> xlsx convert (bug #43072)
+
 ## 5.4.1
 
 ### New Features
