@@ -10,7 +10,7 @@
 
 #### Plugins
 
-* Add plugin methods to move the cursor to the start/end 
+* Add plugin methods to move the cursor to the start/end
   of the document (`MoveCursorToStart`, `MoveCursorToEnd`)
   (bug #41521)
 
@@ -22,12 +22,12 @@
 
 #### Document Editor
 
-* Fix the problem with removing previously added text by 
+* Fix the problem with removing previously added text by
   other user in the review mode (bug #43183)
 * Fix the problem with moving text in the review mode
   (bug #43238)
-* Fix the problem of inserting a table over another table 
-* Fix the problem with reviewed numbering 
+* Fix the problem of inserting a table over another table
+* Fix the problem with reviewed numbering
 * Fix some problems with watermarks
 * Fix license error while inserting chart for DocumentServer
   with custom logo (bug #43314)
