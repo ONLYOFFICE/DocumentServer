@@ -6,7 +6,7 @@
 
 #### All Editors
 
-* Rename `web-apps-pro` repo to `web-apps`
+* Rename `web-apps-pro` repository to `web-apps`
 
 #### Plugins
 
@@ -14,7 +14,7 @@
   of the document (`MoveCursorToStart`, `MoveCursorToEnd`)
   (bug #41521)
 
-#### Backend
+#### Back-end
 
 * Add custom public key support
 
@@ -39,7 +39,7 @@
 
 #### Embedded mode
 
-* Fix autofocus in embedded mode
+* Fix focus in embedded mode
 * Fix hiding download button and settings menu.
 
 #### Installation
