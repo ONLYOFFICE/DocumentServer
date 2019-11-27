@@ -16,6 +16,6 @@
 [submodule "core-fonts"]
 	path = core-fonts
 	url = https://github.com/ONLYOFFICE/core-fonts.git
-[submodule "web-apps-pro"]
-	path = web-apps-pro
-	url = https://github.com/ONLYOFFICE/web-apps-pro.git
+[submodule "web-apps"]
+	path = web-apps
+	url = https://github.com/ONLYOFFICE/web-apps.git
