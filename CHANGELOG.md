@@ -1,5 +1,70 @@
 # Change log
 
+## 5.5.0
+
+### New Features
+
+#### All Editors
+
+* Loading speed improvements
+* `Symbol table` now is system component, not a plugin
+* New button `Top Toolbar -> Collaboration -> Remove comments`
+* Replace `Default Size` button to `Actual Size`
+
+#### Document Editor
+
+* Adding content control (available only for paid version)
+* Ability to remove table cells
+* Ability to insert several rows\columns
+* Ability to add titles for shapes, table and levels
+* New content control types (Picture, Combo box, Drop-down list, Date, Checkbox)
+* New options for margins
+* New options for bullet lists
+* Ability to draw and erase table
+
+#### Spreadsheet Editor
+
+* Ability to recalculate all formulas
+* Ability to insert header-footer
+* New scale options
+* New options for cell fill
+* Ability to set Cell Snapping
+* Sheets multi-select
+* Add Hungarian localization
+* Bullets and numbering options from context menu
+* Ability to change bullets marker
+* New spellchecker options
+* Ability to sort by several columns
+* Option for setting separators
+
+#### Presentation Editor
+
+* Ability to add object to slide template
+* Ability to reset slide
+* New list settings
+
+#### Mobile Editors
+
+* Mobile editors available only for paid version
+* Ability to save custom colors
+* ONLYOFFICE logo added to header (with ability to customize it)
+
+#### Package
+
+* Remove `nodejs` dependency
+
+#### Docker
+
+* ubuntu 18.04 as base image
+
+#### Server
+
+* Ability to convert to `PDF\A` via ConvertService
+
+### Fixes
+
+* All components received countless fixed
+
 ## 5.4.2
 
 ### New Features
