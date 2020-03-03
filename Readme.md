@@ -60,6 +60,7 @@ The table below will help you to make the right choice.
 | Tabbed interface                       | + | + | + |
 | White Label                            | - | - | + |
 | Integrated test example (node.js)*     | - | + | + |
+| Mobile web editors                     | - | + | + |
 | **Plugins & Macros** | **Community Edition** | **Integration Edition** | **Developer Edition** |
 | Plugins                           | + | + | + |
 | Macros                            | + | + | + |
