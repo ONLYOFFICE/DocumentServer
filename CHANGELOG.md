@@ -25,7 +25,6 @@
 #### Spreadsheet Editor
 
 * Ability to recalculate all formulas
-* Ability to insert header-footer
 * New scale options
 * New options for cell fill
 * Ability to set Cell Snapping
@@ -34,7 +33,7 @@
 * Bullets and numbering options from context menu
 * Ability to change bullets marker
 * New spellchecker options
-* Ability to sort by several columns
+* Ability to sort by several columns\rows
 * Option for setting separators
 
 #### Presentation Editor
@@ -42,6 +41,7 @@
 * Ability to add object to slide template
 * Ability to reset slide
 * New list settings
+* Ability to add object to placeholder
 
 #### Mobile Editors
 
