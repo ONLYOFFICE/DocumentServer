@@ -21,7 +21,7 @@
 * New options for margins
 * New options for bullet lists
 * Ability to draw and erase table
-* Ability to edit gutter
+* Ability to edit gutter and mirror margins
 
 #### Spreadsheet Editor
 
