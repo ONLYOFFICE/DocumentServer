@@ -1,5 +1,59 @@
 # Change log
 
+## 5.5.1
+
+### New features
+
+#### All Editors
+
+* Add instruction how to build all products
+
+#### Spreadsheet Editor
+
+* Added support of reading drop-down lists.
+* Added support of reading data validation.
+
+### Fixes
+
+#### All Editors
+
+* Fixed an issue with missing 1.5x icons ([DocumentServer#812](https://github.com/ONLYOFFICE/DocumentServer/issues/812))
+* Bulgarian, Chinese, Czech, Deutsch, French, Italian, Russian, Spanish, Turkish
+  localization improvements
+* Added support of Danish, Finnish, Hungarian, Indonesian, Norwegian, Swedish localization
+* Fixed some security issues
+* Update copyright year
+* Fix some more issues with user files
+
+#### Document Editor
+
+* Fixed an issue with comment duplication in other editors (bug #44689)
+
+#### Spreadsheet Editor
+
+* Better support of TIME function (bug #44849)
+
+#### Back-end
+
+* Reading license file disabled in Community Edition
+* Fixed an issue with missing license file in log files (bug #44694), ([DocumentServer#814](https://github.com/ONLYOFFICE/DocumentServer/issues/814))
+* Fixed some database-related security issues
+* Fix mariadb support
+* Database optimizations for better performance
+* Fixed an issue with disabling Download As option after reconnected
+  client (bug #44757)
+* Fix PostgreSQL command for citus compatibility
+
+#### x2t
+
+* Fixed some security issues
+* Fixed an issues with DOC, RTF and XLSX formats(bug 44756) (bug 44934) (bug 44840)
+* Fixed corrupting of mime-type after some DOCX editing (Bug 44957)
+
+#### Docker
+
+* Fix for grep for creating table, so it stops throwing a failure
+
 ## 5.5.0
 
 ### New Features
