@@ -39,7 +39,7 @@
 * Fixed an issue with missing license file in log files (bug #44694), ([DocumentServer#814](https://github.com/ONLYOFFICE/DocumentServer/issues/814))
 * Fixed some database-related security issues
 * Fix mariadb support
-* Database optimizations for better performance
+* Database optimization for better performance
 * Fixed an issue with disabling Download As option after reconnected
   client (bug #44757)
 * Fix PostgreSQL command for citus compatibility
