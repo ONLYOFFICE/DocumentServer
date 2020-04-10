@@ -115,6 +115,7 @@
 #### Server
 
 * Ability to convert to `PDF\A` via ConvertService
+* Redis is not required for OpenSource version
 
 ### Fixes
 
