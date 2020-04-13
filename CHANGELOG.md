@@ -37,7 +37,7 @@
 
 * Reading license file disabled in Community Edition
 * Fixed an issue with missing license file in log files (bug #44694), ([DocumentServer#814](https://github.com/ONLYOFFICE/DocumentServer/issues/814))
-* Fixed some database-related security issues
+* Fixed some database-related security issues (CVE-2020-11537)
 * Fix mariadb support
 * Database optimization for better performance
 * Fixed an issue with disabling Download As option after reconnected
@@ -46,7 +46,7 @@
 
 #### x2t
 
-* Fixed some security issues
+* Fixed some security issues (CVE-2020-11534, CVE-2020-11535, CVE-2020-11536)
 * Fixed an issues with DOC, RTF and XLSX formats(bug 44756) (bug 44934) (bug 44840)
 * Fixed corrupting of mime-type after some DOCX editing (Bug 44957)
 
