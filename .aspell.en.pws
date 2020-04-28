@@ -109,6 +109,7 @@ DMAX
 dns
 DocFormat
 docId
+docservice
 DocumentBuilder
 DocumentEditor
 documentserver
@@ -152,6 +153,7 @@ FTEST
 fullscreen
 GAMMADIST
 GAMMAINV
+gc
 gcc
 GenerateGuid
 GetAdress
