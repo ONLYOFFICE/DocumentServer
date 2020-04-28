@@ -106,7 +106,7 @@
 
 #### Package
 
-* Remove `nodejs` dependency. All servers now single binary.
+* Remove `nodejs` dependency. Each service now is a single binary.
 
 #### Docker
 
