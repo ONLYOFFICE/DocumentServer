@@ -106,7 +106,7 @@
 
 #### Package
 
-* Remove `nodejs` dependency
+* Remove `nodejs` dependency. All servers now single binary.
 
 #### Docker
 
@@ -115,7 +115,8 @@
 #### Server
 
 * Ability to convert to `PDF\A` via ConvertService
-* Redis is not required for OpenSource version
+* Redis is not required for `onlyoffice-documentserver` (OpenSource version)
+* `gc` service is now part of `docservice`
 
 ### Fixes
 
