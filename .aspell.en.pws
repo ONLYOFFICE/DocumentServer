@@ -1,18 +1,19 @@
-personal_ws-1.1 en 459 utf-8
+personal_ws-1.1 en 472 utf-8
 ACOT
 ACOTH
 ActiveCell
 AddComment
 AddSheet
 adSm
+AllFontsGen
 altGr
 Api
 ApiRange
 ApiWorksheet
 Asana
-aspose
 ASC
 ashx
+aspose
 Aspose
 autocomplete
 autofill
@@ -41,6 +42,7 @@ boolean
 brower
 bugfixes
 builded
+callbackUrl
 CanUpdateTarget
 cff
 changesError
@@ -51,8 +53,8 @@ CHIINV
 chinese
 CHISQ
 CHITEST
-CJK
 citus
+CJK
 clipart
 Clipart
 ClipArt
@@ -84,7 +86,6 @@ csv
 CSV
 ctrl
 Ctrl
-cyrillic
 CUBEKPIMEMBER
 CUBEMEMBER
 CUBEMEMBERPROPERTY
@@ -93,6 +94,7 @@ CUBESET
 CUBESETCOUNT
 CUBEVALUE
 CVE
+cyrillic
 dataset
 DAVERAGE
 DCOUNT
@@ -147,6 +149,7 @@ flv
 fodp
 fods
 fodt
+ForcePathStyle
 ForEach
 FORMULATEXT
 FTEST
@@ -211,6 +214,7 @@ IMTAN
 inBody
 innodependencyinstaller
 InsertContent
+insertImage
 INTL
 INV
 iOS
@@ -219,7 +223,6 @@ ISFORMULA
 ISOWEEKNUM
 isSaveLock
 japanese
-insertImage
 js
 JS
 json
@@ -245,14 +248,15 @@ mariadb
 mathType
 MathType
 MAXIFS
+Mendeley
 MergeArea
 metadata
 metafile
 México
 MINIFS
 minishift
-MoveCursorToStart
 MoveCursorToEnd
+MoveCursorToStart
 MULT
 multi
 multichart
@@ -312,12 +316,14 @@ PDFA
 PDURATION
 PERCENTRANK
 PERMUTATIONA
+pgPoolExtraOptions
 PhotoEditor
 PHP
 placholder
 Pluging
 PostgreSql
 PostgreSQL
+postrm
 POTX
 ppt
 PptFormatReader
@@ -336,10 +342,10 @@ Rebranding
 reconnection
 rect
 redis
-regex
 refactor
 Refactor
 refactoring
+regex
 replyStr
 republika
 reSave
@@ -393,6 +399,7 @@ spawnOptions
 specifi
 Spellcheker
 ssl
+sslEnabled
 startup
 statsd
 STDEV
@@ -438,11 +445,13 @@ username
 UsersCountOS
 usersfiles
 UTF
+util
 verysilent
 VLOOKUP
 vml
 wav
 WEIBULL
+wget
 WinXp
 wmf
 WrapText
@@ -454,9 +463,11 @@ xlsx
 XLSX
 XLTX
 xps
+XSS
 Yandex
 youtube
 yy
 yyyy
 Zb
+Zotero
 ZTEST

@@ -1,5 +1,84 @@
 # Change log
 
+## 5.5.3
+
+### New Features
+
+#### All Editors
+
+* Added skeleton loader in embedded viewer
+
+#### Document Editor
+
+* Added Mendeley and Zotero plugins
+* Ability to add several table rows/columns (Bug #20179)
+
+#### Back-end
+
+* Added JSON logger
+* New options: `sslEnabled` and `s3ForcePathStyle`
+* Added pgPoolExtraOptions (connection options)
+* Reduced fonts cache size for AllFontsGen working
+
+### Fixes
+
+#### All Editors
+
+* Fixed crash while writing a chart with equations in title/axis.
+* Fixed an XSS injection in macros names (Bug 45345)
+
+#### Document Editor
+
+* Fixed an editor crashing after adding new rows in table
+  in collaborative editing (Bug #45144)
+* Fixed an editor crashing after searching and replacing
+  in some DOCX files (Bug #45252)
+* Fixed displaying of some DOCX files (Bug #44975, Bug #45204)
+* Fixed displaying of some RTF files (Bug #45122)
+* Fixed scrolling to bookmark in some corrupted DOCX files (Bug #45391)
+
+#### Spreadsheet Editor
+
+* Data validation fixes and improvements.
+* Fixed a crash on opening some XLSX files (Bug #45093, [Documentserver#833](https://github.com/ONLYOFFICE/DocumentServer/issues/833))
+* Fixed filling cells with formula in R1C1 mode (Bug #44730)
+* Fixed recalculating formulas in some XLSX files (Bug #45368)
+* Fixed XSS injection in data validation tip (Bug #45112)
+* Fixed a crash with edit type of cells filling (Bug #45394)
+* Fix some missed icons (Bug #45276)
+
+#### Mobile Editors
+
+* Font picker refactoring
+
+#### Back-end
+
+* Fixed missed require `util` in logger
+* Fixed wrong callbackUrl after updating DS without dropping DB
+* Fix security problem with JWT token when uploading image
+
+#### x2t
+
+* Fixed an issue with wrong encode of some CSV files (Bug #45171).
+* Fixed converting some DOCX files (Bug #44709)
+* Fixed converting some RTF files (Bug #45150, Bug #45166, Bug #45195)
+* Fixed security issue with builder and working with local files
+* Fixed writing corrupted DOCX file with chart in group shape
+
+#### Package
+
+* Use dropping tables instead drop databases database in deb `postrm` scrip
+* Replace `wget` with `curl` for prepare4shutdown (Bug #45264)
+* Fix security issues with accessing info page (Bug #45295)
+
+#### Plugins
+
+* Add and fix translations in macros plugin
+
+## 5.5.2
+
+### No public release
+
 ## 5.5.1
 
 ### New features
