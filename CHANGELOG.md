@@ -6,13 +6,13 @@
 
 #### All Editors
 
-* Fix problems with AutoColor of shapes
+* Fix problems with Auto-Color of shapes
 * Fix problems with copy-paste images
 
 #### Document Editor
 
 * Fix bug with bookmark opening
-* Fix bug resetting comment guid while opening
+* Fix bug resetting comment GUID while opening
 * Fix wrong 'undo'/'redo' state for 'comparing' mode
 
 #### Presentation Editor
@@ -21,13 +21,13 @@
 
 #### Back-end
 
-* Remove `redis` as dependency for CommunityEdition
+* Remove `redis` as dependency for Community Edition
   (it was not used, but required to install)
 * Fix logrotate command for Fedora-based Linux ([DocumentServer#902](https://github.com/ONLYOFFICE/DocumentServer/issues/902))
 * JWT: Fix uploading encrypted image
 * Fix problem with forced save and embedding mode (Bug #45406)
 * Fix unexpected commands in collaboration editing
-* Fix sending Redis custom option (Commerical Version Only) ([DocuemntServer#764](https://github.com/ONLYOFFICE/DocumentServer/issues/764))
+* Fix sending Redis custom option (Commercial Version Only) ([DocuemntServer#764](https://github.com/ONLYOFFICE/DocumentServer/issues/764))
 
 #### Plugins
 
