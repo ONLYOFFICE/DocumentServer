@@ -46,7 +46,7 @@
 
 ### Server tasks
 
-* Security
+* Security improvements
 * Opening files on client (loading images, shapes and charts)
 
 ### Common tasks for all editors
