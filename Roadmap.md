@@ -92,7 +92,7 @@
 
 ### Spreadsheet Editor improvement tasks
 
-* Effects (like in MS Office 2013)
+* Effects 
 * Backgrounds
 * Formula bar (improvements)
 * Version history
