@@ -1,5 +1,75 @@
 # Change log
 
+## 5.6.0
+
+*From this release we changing numbering scheme of DocumentServer.*  
+*This is a bugfix release.*  
+*Next major release with a bunch of new features will be 6.0.0*  
+
+### Fixes
+
+#### All Editors
+
+* Fix problems with Auto-Color of shapes
+* Fix problems with copy-paste images
+* German, French, Italian, Portuguese and Russian translations improvements.
+
+#### Document Editor
+
+* Fix bug with bookmark opening
+* Fix bug resetting comment GUID while opening
+* Fix wrong `undo`/`redo` state for `comparing` mode
+* Fixed in issue with auto-color feature for graphical
+  objects in some DOCX user files (Bug #45460)
+* Fixed an issue with increasing font size in some DOCX user files (Bug #44852)
+* Fixed incorrect displaying of some PDF user files
+  (Bug #45336, Bug #39097, Bug #19078)
+* Fixed incorrect displaying of watermark on CJK languages (Bug #45886)
+* Fixed an export of some DOCX user files to PDF (Bug #45319)
+
+#### Spreadsheet Editor
+
+* Fixed invalid icon in cells border menu (Bug #45910)
+* Fixed an error with copy and past format table in some XLSX files (Bug #45731)
+* Fixed an error with format table creation in some XLSX files (Bug #45773)
+* Fixed an error with entering big data in last partially view cell (Bug #45653)([DocumentServer#903](https://github.com/ONLYOFFICE/DocumentServer/issues/903))
+
+#### Presentation Editor
+
+* Fix `List Settings` window on German (Bug #45417)
+
+#### Mobile Editors
+
+* Fixed an issue with text selection on iOS devices (Bug #45844)
+* Fixed an error while presentation slides are swiping (Bug #42758)([DocumentServer#923](https://github.com/ONLYOFFICE/DocumentServer/issues/923))
+* Fixed an appearance of first slide creating after theme was changed (Bug #45610)
+
+#### Back-end
+
+* Remove `redis` as dependency for Community Edition
+  (it was not used, but required to install)
+* Fix logrotate command for Fedora-based Linux ([DocumentServer#902](https://github.com/ONLYOFFICE/DocumentServer/issues/902))
+* JWT: Fix uploading encrypted image
+* Fixed an issue with saving intermediate version while document
+  is opened for view another user (Bug #45406)
+* Fix unexpected commands in collaboration editing
+* Fix sending Redis custom option (Commercial Version Only) ([DocumentServer#764](https://github.com/ONLYOFFICE/DocumentServer/issues/764))
+* Changed a messages in license exceeding windows (Bug #45819)
+* Fixed an conversion error while opening ePub and HTML files on CentOS 7 (Bug #31323).
+* Fixed deb package `postinstall` typo.
+* Removed unused `Microsoft Visual C++ 2010 Redistributable`
+  dependency for Windows
+
+#### Plugins
+
+* Fix `GetCurrentContentControlPr` method
+
+#### x2t
+
+* Fix missing page numbers for rtf -> docx (Bug #45439)
+* Fixed an issue with increasing font size in some RTF user files (Bug #45439).
+* Fix table width for rtf -> docx (Bug #45477)
+
 ## 5.5.3
 
 ### New Features
