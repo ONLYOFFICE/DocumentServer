@@ -46,7 +46,7 @@
 
 ### Server tasks
 
-* Security
+* Security improvements
 * Opening files on client (loading images, shapes and charts)
 
 ### Common tasks for all editors
@@ -92,7 +92,7 @@
 
 ### Spreadsheet Editor improvement tasks
 
-* Effects (like in MS Office 2013)
+* Effects 
 * Backgrounds
 * Formula bar (improvements)
 * Version history
