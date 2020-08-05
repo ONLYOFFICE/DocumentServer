@@ -1,5 +1,18 @@
 # Change log
 
+## 5.6.1
+
+### Fixes
+
+#### Back-end
+
+* Fix Path Traversal vulnerability via Convert Service param (Bug #45976)
+
+#### Docker
+
+* Fix `!=: unary operator expected` while starting
+  `onlyoffice/documentserver` (Bug #45985)
+
 ## 5.6.0
 
 *From this release we changing numbering scheme of DocumentServer.*  
