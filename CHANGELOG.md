@@ -1,5 +1,13 @@
 # Change log
 
+## 5.6.2
+
+### Fixes
+
+#### Back-end
+
+* Fix Path Traversal vulnerability via `savefile` param (Bug #46037)
+
 ## 5.6.1
 
 ### Fixes
