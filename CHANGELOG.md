@@ -1,5 +1,13 @@
 # Change log
 
+## 5.6.3
+
+### Fixes
+
+#### Back-end
+
+* Fix Path Traversal vulnerability via image upload params (Bug #46113)
+
 ## 5.6.2
 
 ### Fixes
