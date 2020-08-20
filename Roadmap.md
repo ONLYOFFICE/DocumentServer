@@ -2,7 +2,8 @@
 
 This document provides the roadmap of the planned ONLYOFFICE Document Server changes.
 
-This is an updated and corrected version of the roadmap. We also reserve the right to change it when necessary.
+This is an updated and corrected version of the roadmap.
+We also reserve the right to change it when necessary.
 
 ## Version 6.0
 
@@ -16,7 +17,7 @@ This is an updated and corrected version of the roadmap. We also reserve the rig
 * Document templates
 * Undo/redo for fast collaborative editing
 * Protecting parts of documents from being edited/copied
-* Multiple clipboard 
+* Multiple clipboard
 * Plugins development
 
 ### Document editor
@@ -33,14 +34,15 @@ This is an updated and corrected version of the roadmap. We also reserve the rig
 * Inextricable paragraph (wrap)
 * Drawing Canvas support
 
-
 ### Spreadsheet editor
 
-* Speedup 
+* Speedup
 * Effects
 * Backgrounds
 * Adjustable cell format (numerical, monetary, etc)
-* Improvement of auto-filters (there are no settings of style parameters for spreadsheets, spreadsheet resize using mouse, the auto-adding of lines within the formatted spreadsheets)
+* Improvement of auto-filters (there are no settings of
+  style parameters for spreadsheets, spreadsheet resize using mouse,
+  the auto-adding of lines within the formatted spreadsheets)
 * Version History
 * Review
 * Formulas improvements (new formulas  + speedup + wizard)
@@ -48,9 +50,11 @@ This is an updated and corrected version of the roadmap. We also reserve the rig
 * Pivot charts
 * Data (Drop-down lists)
 * Sheet and data protection
-* Conditional formatting (correct display for data bars formatting, support for gradient for data bars)
+* Conditional formatting (correct display for
+  data bars formatting, support for gradient for data bars)
 * Slicers (without pivot support)
-* Autofilling algorithm  modification ( adding various options, for example, copy formatting only)
+* Autofilling algorithm  modification (adding various options,
+  for example, copy formatting only)
 * Forms
 
 ### Presentation editor
@@ -65,7 +69,7 @@ This is an updated and corrected version of the roadmap. We also reserve the rig
 
 * Adding the information about updates in a new version
 * Toolbar adaptation for various screen resolutions
-* Customization 
+* Customization
 
 ### Desktop and mobile editors
 
@@ -84,5 +88,3 @@ This is an updated and corrected version of the roadmap. We also reserve the rig
 ### Backend
 
 * Scalability and clustering for commercial builds
-
-
