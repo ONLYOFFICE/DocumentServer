@@ -15,7 +15,7 @@ jobs:
     - stage: markdownlint
       script: 
       - npm install -g markdownlint-cli
-      - markdownlint CHANGELOG.md Roadmap.md
+      - markdownlint CHANGELOG.md ROADMAP.md
     - stage: spellcheck
       script: 
       - SPELLCHECK_OUT=$(cat CHANGELOG.md | aspell --lang=en --encoding=utf-8 --personal=./.aspell.en.pws list)
