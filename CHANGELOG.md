@@ -1,5 +1,15 @@
 # Change log
 
+## 5.6.4
+
+### Fixes
+
+#### Convert
+
+* Fix several vulnerabilities in `x2t` (Bug #46348, Bug #46352, Bug #46353,
+  Bug #46384, Bug #46434, Bug #46436)
+* Fix vulnerability in TXT converter (Bug #46437)
+
 ## 5.6.3
 
 ### Fixes
