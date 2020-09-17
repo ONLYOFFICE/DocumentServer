@@ -6,7 +6,7 @@
 
 #### document-server-integration
 
-* From now on uses `Apache` license instead of `MIT`
+* Uses `Apache` license instead of `MIT`
 
 ### Fixes
 
