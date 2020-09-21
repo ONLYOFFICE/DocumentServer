@@ -1,5 +1,27 @@
 # Change log
 
+## 5.6.5
+
+### New Features
+
+#### document-server-integration
+
+* Uses `Apache` license instead of `MIT`
+
+### Fixes
+
+#### x2t
+
+* Fix `SIGABR` on ODT color (Bug #46499)([DocumentServer#989](https://github.com/ONLYOFFICE/DocumentServer/issues/989))
+
+#### Back End
+
+* Fix connecting document server with MySQL to community server
+
+#### Package
+
+* Fix package type in info.json for `documentserver-ee` and `documentserver-ie`
+
 ## 5.6.4
 
 ### Fixes
