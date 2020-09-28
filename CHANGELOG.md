@@ -9,7 +9,7 @@
 * AutoFit settings for shape
 * Ability to insert special characters
 * Autorun settings for macros
-* Ability to select an image from document manager for watermarks, shapes and slides filling
+* Selecting an image from storage for watermarks, shapes and slides filling
 * Added an autocorrection list
 * Redesign of color selection component
 * Ability to change a position and size of chart elements
@@ -44,7 +44,7 @@
 * Delimiter settings for Special Paste and Text to Columns dialogue
 * LINEST function
 * Hotkeys Ctrl+Shift+'Plus sign' and Ctrl+Shift+'Minus sign' for date and time insertion
-* Hotkey Shift+F3 for a function insertion 
+* Hotkey Shift+F3 for a function insertion
 * Status bar settings
 * New mouse actions for work with format tables
 
