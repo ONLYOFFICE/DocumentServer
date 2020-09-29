@@ -6,7 +6,7 @@
 
 #### All Editors
 
-* AutoFit settings for shape
+* Autofit settings for shape
 * Ability to insert special characters
 * Autorun settings for macros
 * Selecting an image from storage for watermarks, shapes and slides filling
@@ -65,7 +65,7 @@
 #### Back-end
 
 * Check licensed number of editor connections for cluster
-* Do not start forcesave for encrypted files
+* Do not start force save for encrypted files
 * Fixed insert jpeg images in encrypted files
 
 ### Fixes
