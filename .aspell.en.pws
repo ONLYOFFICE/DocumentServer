@@ -16,11 +16,13 @@ ashx
 aspose
 Aspose
 autocomplete
+autocorrection
 autofill
 autofilter
 autofilters
 autofit
 Autofit
+Autorun
 autostart
 AVERAGEA
 AVERAGEIFS
@@ -153,6 +155,7 @@ flv
 fodp
 fods
 fodt
+forced
 ForcePathStyle
 ForEach
 FORMULATEXT
@@ -229,6 +232,7 @@ ISFORMULA
 ISOWEEKNUM
 isSaveLock
 japanese
+jpeg
 js
 JS
 json
@@ -240,6 +244,7 @@ LeftMargin
 libcurl
 librabbitmq
 libs
+LINEST
 linux
 listview
 LoadingScriptError
@@ -363,6 +368,7 @@ RRI
 rtf
 RTF
 SAAS
+save
 savefile
 SaveLock
 saveUrl
