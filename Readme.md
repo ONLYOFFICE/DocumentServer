@@ -4,7 +4,7 @@
 
 ONLYOFFICE Document Server is a free collaborative online office suite comprising viewers and editors for texts, spreadsheets and presentations, fully compatible with Office Open XML formats: .docx, .xlsx, .pptx and enabling collaborative editing in real time.
 
-Starting from version 6.0, Document Server is now distributed under a new name - ONLYOFFICE Docs. 
+Starting from version 6.0, Document Server is distributed under a new name - ONLYOFFICE Docs. 
 
 ONLYOFFICE Docs can be used as a part of [ONLYOFFICE Workspace](#onlyoffice-workspace) or with third-party sync&share solutions (e.g. Nextcloud, ownCloud, Seafile) to enable collaborative editing within their interface.
 
@@ -40,7 +40,7 @@ The editors allow you to create, edit, save and export text, spreadsheet and pre
 
 ONLYOFFICE offers different versions of its online document editors that can be deployed on your own servers.
 
-ONLYOFFICE Docs:
+ONLYOFFICE Docs (packaged as Document Server):
 
 * Community Edition (`onlyoffice-documentserver` package)
 * Enterprise Edition (`onlyoffice-documentserver-ee` package)
