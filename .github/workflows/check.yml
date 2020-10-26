@@ -1,0 +1,26 @@
+name: check
+on: [push]
+jobs:
+  markdownlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 12
+        uses: actions/setup-node@v1
+        with:
+            node-version: 12
+      - name: run markdownlint linter
+        run: |
+          npm install -g markdownlint-cli
+          markdownlint CHANGELOG.md ROADMAP.md
+  spellchecker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: setup aspell
+        run: sudo apt-get -y update && sudo apt-get -y install aspell aspell-en
+      - name: run spellchecker
+        run: |
+          SPELLCHECK_OUT=$(cat CHANGELOG.md | aspell --lang=en --encoding=utf-8 --personal=./.aspell.en.pws list)
+          echo $SPELLCHECK_OUT
+          if [[ $(echo -n $SPELLCHECK_OUT | wc -c) -ne 0 ]]; then exit 1 ; fi
