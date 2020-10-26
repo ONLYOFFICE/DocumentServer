@@ -7,7 +7,7 @@
 #### All Editors
 
 * Autofit settings for shape
-* Abelity to insert special characters
+* Ability to insert special characters
 * Autorun settings for macros
 * Selecting an image from storage for watermarks, shapes and slides filling
 * Added an autocorrection list
