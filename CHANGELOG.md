@@ -22,7 +22,7 @@
 
 #### Back-end
 
-* Fix some several vulnerabilities
+* Fix several vulnerabilities
 * Fix Path Traversal vulnerability via `download as` params
 * Fix ER_DATA_TOO_LONG: Data too long for column 'callback' at row 1
 * Fix problem with generating new presentation theme (Bug #46754)
