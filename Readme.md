@@ -4,6 +4,12 @@
 
 ONLYOFFICE Document Server is a free collaborative online office suite comprising viewers and editors for texts, spreadsheets and presentations, fully compatible with Office Open XML formats: .docx, .xlsx, .pptx and enabling collaborative editing in real time.
 
+Starting from version 6.0, Document Server is distributed under a new name - ONLYOFFICE Docs. 
+
+ONLYOFFICE Docs can be used as a part of [ONLYOFFICE Workspace](#onlyoffice-workspace) or with third-party sync&share solutions (e.g. Nextcloud, ownCloud, Seafile) to enable collaborative editing within their interface.
+
+It has three editions - [Community, Enterprise, and Developer](#onlyoffice-docs-editions). 
+
 ## Components
 
 ONLYOFFICE Document Server contains the following components:
@@ -34,44 +40,46 @@ The editors allow you to create, edit, save and export text, spreadsheet and pre
 
 ONLYOFFICE offers different versions of its online document editors that can be deployed on your own servers.
 
-ONLYOFFICE Document Server:
+ONLYOFFICE Docs (packaged as Document Server):
 
 * Community Edition (`onlyoffice-documentserver` package)
-* Integration Edition (`onlyoffice-documentserver-ie` package)
+* Enterprise Edition (`onlyoffice-documentserver-ee` package)
 * Developer Edition (`onlyoffice-documentserver-de` package)
 
 The table below will help you to make the right choice.
 
-| Pricing and licensing | Community Edition | Integration Edition | Developer Edition |
+| Pricing and licensing | Community Edition | Enterprise Edition | Developer Edition |
 | ------------- | ------------- | ------------- | ------------- |
-| | [Get it now](https://www.onlyoffice.com/download.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/connectors-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
-| Cost  | FREE  | [Go to the pricing page](https://www.onlyoffice.com/integration-edition-prices.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Go to the pricing page](https://www.onlyoffice.com/developer-edition-prices.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
+| | [Get it now](https://www.onlyoffice.com/download.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/enterprise-edition-free.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
+| Cost  | FREE  | [Go to the pricing page](https://www.onlyoffice.com/enterprise-edition.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Go to the pricing page](https://www.onlyoffice.com/developer-edition-prices.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
 | Simultaneous connections | up to 20 maximum  | As in chosen pricing plan | As in chosen pricing plan |
 | Number of users | up to 20 recommended | As in chosen pricing plan | As in chosen pricing plan |
+| Clusterization | - | + | + |
 | License | GNU AGPL v.3 | Proprietary | Proprietary |
-| **Support** | **Community Edition** | **Integration Edition** | **Developer Edition** |
-| Documentation | [Help Center](https://helpcenter.onlyoffice.com/server/docker/opensource/index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/server/integration-edition/index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/server/integration-edition/index.aspx) |
+| **Support** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
+| Documentation | [Help Center](https://helpcenter.onlyoffice.com/server/docker/opensource/index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/server/enterprise.aspx) | [Help Center](https://helpcenter.onlyoffice.com/server/integration-edition/index.aspx) |
 | Standard support | [GitHub](https://github.com/ONLYOFFICE/DocumentServer/issues) or paid | One year support included | One year support included |
 | Premium support | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) |
-| **Services** | **Community Edition** | **Integration Edition** | **Developer Edition** |
+| **Services** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Conversion Service                | + | + | + |
 | Document Builder Service          | + | + | + |
-| **Interface** | **Community Edition** | **Integration Edition** | **Developer Edition** |
+| **Interface** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Tabbed interface                       | + | + | + |
 | White Label                            | - | - | + |
 | Integrated test example (node.js)*     | - | + | + |
 | Mobile web editors                     | - | + | + |
-| **Plugins & Macros** | **Community Edition** | **Integration Edition** | **Developer Edition** |
+| Access to pro features via desktop     | - | + | - |
+| **Plugins & Macros** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Plugins                           | + | + | + |
 | Macros                            | + | + | + |
-| **Collaborative capabilities** | **Community Edition** | **Integration Edition** | **Developer Edition** |
+| **Collaborative capabilities** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Two co-editing modes              | + | + | + |
 | Comments                          | + | + | + |
 | Built-in chat                     | + | + | + |
 | Review and tracking changes       | + | + | + |
 | Display modes of tracking changes | + | + | + |
 | Version history                   | + | + | + |
-| **Document Editor features** | **Community Edition** | **Integration Edition** | **Developer Edition** |
+| **Document Editor features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
 | Adding Content control          | - | + | + |
@@ -81,27 +89,45 @@ The table below will help you to make the right choice.
 | Navigation panel                | + | + | + |
 | Mail Merge                      | + | + | + |
 | Comparing Documents             | - | + | + |
-| **Spreadsheet Editor features** | **Community Edition** | **Integration Edition** | **Developer Edition** |
+| **Spreadsheet Editor features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
 | Functions, formulas, equations  | + | + | + |
 | Table templates                 | + | + | + |
-| Pivot tables                    | +** | +** | +** |
-| **Presentation Editor features** | **Community Edition** | **Integration Edition** | **Developer Edition** |
+| Pivot tables                    | + | + | + |
+| Conditional formatting  for viewing | +** | +** | +** |
+| **Presentation Editor features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
 | Animations                      | + | + | + |
 | Presenter mode                  | + | + | + |
 | Notes                           | + | + | + |
-| | [Get it now](https://www.onlyoffice.com/download.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/connectors-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
+| **Security features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
+| End-to-end encryption via Private Rooms  | + | + | - |
+| | [Get it now](https://www.onlyoffice.com/download.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/enterprise-edition-free.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
 
 \* Note that by default DocumentServer Community Edition does not contain any document management system.  
-Integration Edition and Developer Edition versions include integrated test examples (simplest DMS to test the editors).   
+Enterprise Edition and Developer Edition versions include integrated test examples (simplest DMS to test the editors).   
 For Community version, please use the [ONLYOFFICE Community Server](https://github.com/ONLYOFFICE/CommunityServer/) or [check out integration](https://www.onlyoffice.com/connectors.aspx) with 3rd party platforms, e.g. ownCloud/Nextcloud
 
-\** Changing style and deleting (Full support coming soon)
+\** Support for all conditions and gradient. Adding/Editing capabilities are coming soon
 
-## Project Information
+## Documentation
+
+The easiest way to install ONLYOFFICE Document Server is to use the Docker image. You can also install it from the repository or compile it from source code. The following documentation is available to the community depending on the way you choose:
+
+* [Compiling ONLYOFFICE Document Server for a Local Server](http://helpcenter.onlyoffice.com/server/linux/document/compile-source-code.aspx "Compiling ONLYOFFICE Document Server for a Local Server")
+* [Installing ONLYOFFICE Document Server Linux Version](http://helpcenter.onlyoffice.com/server/linux/document/linux-installation.aspx "Installing ONLYOFFICE Document Server Linux Version")
+* [Installing ONLYOFFICE Document Server Windows Version](http://helpcenter.onlyoffice.com/server/windows/document/install-office-apps.aspx "Installing Document Server for Windows on a Local Server")
+* [Installing ONLYOFFICE Document Server Docker Version](http://helpcenter.onlyoffice.com/server/docker/document/docker-installation.aspx "Installing ONLYOFFICE Document Server Docker Version")
+
+## ONLYOFFICE Workspace
+
+ONLYOFFICE Docs packaged as Document Server is a part of **ONLYOFFICE Workspace** that also includes ONLYOFFICE Groups packaged as [Community Server](https://github.com/ONLYOFFICE/CommunityServer "Community Server"), [Mail Server](https://github.com/ONLYOFFICE/Docker-MailServer "Mail Server"), Control Panel and Talk (instant messaging app). 
+
+It can also be integrated with third-party sync and share solutions. 
+
+## Project information
 
 Official website: [https://www.onlyoffice.com](https://www.onlyoffice.com/?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)
 
@@ -111,20 +137,11 @@ Docker Image: [https://github.com/ONLYOFFICE/Docker-DocumentServer](https://gith
 
 License: [GNU AGPL v3.0](https://onlyo.co/38YZGJh)
 
-SaaS version: [https://www.onlyoffice.com/cloud-office.aspx](https://www.onlyoffice.com/cloud-office.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)
+ONLYOFFICE Docs on official website: [http://www.onlyoffice.com/office-suite.aspx](http://www.onlyoffice.com/office-suite.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)
 
-## ONLYOFFICE One Click Installation
+ONLYOFFICE Workspace on official website: [http://www.onlyoffice.com/office-suite.aspx](https://www.onlyoffice.com/workspace.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)
 
-ONLYOFFICE Document Server is a part of **ONLYOFFICE Community Edition** that comprises also [Community Server](https://github.com/ONLYOFFICE/CommunityServer "Community Server") and [Mail Server](https://github.com/ONLYOFFICE/Docker-MailServer "Mail Server"). To get ONLYOFFICE Free Edition in one click, make use of [ONLYOFFICE One Click Installation](https://controlpanel.onlyoffice.com/ "ONLYOFFICE One Click Installation").
-
-## Documentation
-
-The easiest way to install ONLYOFFICE Document Server is to use the Docker image. You can also install it from the repository or compiling the source code. The following documentation is available to the community depending on the way you choose:
-
-* [Compiling ONLYOFFICE Document Server for a Local Server](http://helpcenter.onlyoffice.com/server/linux/document/compile-source-code.aspx "Compiling ONLYOFFICE Document Server for a Local Server")
-* [Installing ONLYOFFICE Document Server Linux Version](http://helpcenter.onlyoffice.com/server/linux/document/linux-installation.aspx "Installing ONLYOFFICE Document Server Linux Version")
-* [Installing ONLYOFFICE Document Server Windows Version](http://helpcenter.onlyoffice.com/server/windows/document/install-office-apps.aspx "Installing Document Server for Windows on a Local Server")
-* [Installing ONLYOFFICE Document Server Docker Version](http://helpcenter.onlyoffice.com/server/docker/document/docker-installation.aspx "Installing ONLYOFFICE Document Server Docker Version")
+List of available integrations: [http://www.onlyoffice.com/all-connectors.aspx](http://www.onlyoffice.com/all-connectors.aspx "http://www.onlyoffice.com/all-connectors.aspx")
 
 ## User Feedback and Support
 
