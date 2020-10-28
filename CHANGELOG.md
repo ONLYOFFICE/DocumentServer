@@ -1,5 +1,36 @@
 # Change log
 
+## 6.0.1
+
+### Fixes
+
+#### All Editors
+
+* Actualize Help
+
+#### Document Editor
+
+* Fix losing comments added to docx (Bug #46770)
+
+#### Spreadsheet Editor
+
+* Fix pivot refresh in R1C1 (Bug #46052)
+
+#### Convert
+
+* Fix error while opening specific xls (Bug #46728)
+
+#### Back-end
+
+* Fix several vulnerabilities
+* Fix Path Traversal vulnerability via `download as` params
+* Fix ER_DATA_TOO_LONG: Data too long for column 'callback' at row 1
+* Fix problem with generating new presentation theme (Bug #46754)
+
+#### Installation
+
+* Fix cluster mode setup
+
 ## 6.0.0
 
 ### New Features
