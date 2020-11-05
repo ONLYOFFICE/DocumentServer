@@ -10,14 +10,14 @@ We also reserve the right to change it when necessary.
 ### All editors
 
 * New options for operations with objects: 
-  - setting an arbitrary angle for a gradient fill
-  - setting the picker position using a spinner in the fill settings for shapes, Text Art, etc; 
-  - buttons for adding/removing the current picker
-  - adding a new picker - without changing the current view of the gradient
+  * setting an arbitrary angle for a gradient fill
+  * setting the picker position using a spinner in the fill settings for shapes, Text Art, etc 
+  * buttons for adding/removing the current picker
+  * adding a new picker - without changing the current view of the gradient
 * New options for proofing: 
-  - editing AutoCorrect options for math equations
-  - recognized functions
-  - autoformatting as you type
+  * editing AutoCorrect options for math equations
+  * recognized functions
+  * autoformatting as you type
 * Icons for context menu
 * New File panel
 * `Help` parameter for plugins
