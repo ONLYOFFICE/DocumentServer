@@ -1,5 +1,29 @@
 # Change log
 
+## 6.0.2
+
+### New Features
+
+#### Integration Example
+
+* Integration example now included in open-source version
+
+### Fixes
+
+#### All Editors
+
+* Fix problem with insert BMP image in doc (Bug #47276)
+
+#### Installation
+
+* Fix problem with DB clean
+  (`onlyoffice-documentserver.postinst: 124: [: false: unexpected operator`)
+  ([DocumentServer#1043](https://github.com/ONLYOFFICE/DocumentServer/issues/1043))
+
+#### Back end
+
+* Fix some issue with PostgreSQL before 9.5 (bug #45406)
+
 ## 6.0.1
 
 ### Fixes
