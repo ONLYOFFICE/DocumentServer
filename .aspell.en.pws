@@ -40,6 +40,7 @@ BITRSHIFT
 BITXOR
 blockcontent
 blocklevelstd
+BMP
 boolean
 brower
 bugfix
@@ -334,6 +335,7 @@ placholder
 Pluging
 PostgreSql
 PostgreSQL
+postinst
 postinstall
 postrm
 POTX
