@@ -66,7 +66,7 @@ The table below will help you to make the right choice.
 | **Interface** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Tabbed interface                       | + | + | + |
 | White Label                            | - | - | + |
-| Integrated test example (node.js)*     | - | + | + |
+| Integrated test example (node.js)     | + | + | + |
 | Mobile web editors                     | - | + | + |
 | Access to pro features via desktop     | - | + | - |
 | **Plugins & Macros** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
@@ -95,7 +95,8 @@ The table below will help you to make the right choice.
 | Functions, formulas, equations  | + | + | + |
 | Table templates                 | + | + | + |
 | Pivot tables                    | + | + | + |
-| Conditional formatting  for viewing | +** | +** | +** |
+| Conditional formatting  for viewing | +* | +* | +* |
+| Sheet Views                     | - | + | + |
 | **Presentation Editor features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
@@ -106,11 +107,7 @@ The table below will help you to make the right choice.
 | End-to-end encryption via Private Rooms  | + | + | - |
 | | [Get it now](https://www.onlyoffice.com/download.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/enterprise-edition-free.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
 
-\* Note that by default DocumentServer Community Edition does not contain any document management system.  
-Enterprise Edition and Developer Edition versions include integrated test examples (simplest DMS to test the editors).   
-For Community version, please use the [ONLYOFFICE Community Server](https://github.com/ONLYOFFICE/CommunityServer/) or [check out integration](https://www.onlyoffice.com/connectors.aspx) with 3rd party platforms, e.g. ownCloud/Nextcloud
-
-\** Support for all conditions and gradient. Adding/Editing capabilities are coming soon
+\* Support for all conditions and gradient. Adding/Editing capabilities are coming soon
 
 ## Documentation
 
