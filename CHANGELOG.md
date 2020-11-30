@@ -46,6 +46,10 @@
 
 * All components received countless fixes
 
+#### Back-end
+
+* `ttf-mscorefonts-installer` is now optional dependency.
+
 ## 6.0.2
 
 ### New Features
