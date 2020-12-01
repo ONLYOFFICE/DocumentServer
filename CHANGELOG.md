@@ -1,5 +1,55 @@
 # Change log
 
+## 6.1.0
+
+### New Features
+
+#### All Editors
+
+* Complete redone html-based formats (`ePub`, `mht`, `html`)
+* `fb2` format can be opened in viewer
+* Add ability to set review permissions by groups
+* Redone gradient control and ability to set custom angle for gradient fill
+* New icons in context menu
+* Add support of AutoFormat as you type
+* Apply button in File menu always visible
+* Ability to copy comment from left sidebar
+
+#### Document Editor
+
+* Ability to show line numbering
+* Ability to add cross-reference
+* Add support of endnotes
+* Ability to edit AutoCorrect list
+* Select Data button in Chart Editor
+
+#### Spreadsheet Editor
+
+* Ability to work with sheet view (available only for paid version)
+* Support of editing data ranges in Chart
+* Redone cell editor height change
+* New cursor for column\row hover
+* Ability to hide freeze pane shadow
+* Pivot Table can be inserted from `Insert` tab
+
+#### Plugins
+
+* Translate plugin uses Google Translate, instead of Yandex
+* Add ability to add help to plugin
+
+#### Embedded Viewer
+
+* Print button in Embedded viewer
+* Removed deprecated Google+ share
+
+### Fixes
+
+* All components received countless fixes
+
+#### Back-end
+
+* `ttf-mscorefonts-installer` is now optional dependency.
+
 ## 6.0.2
 
 ### New Features
@@ -65,7 +115,7 @@
 * Ability to insert special characters
 * Autorun settings for macros
 * Selecting an image from storage for watermarks, shapes and slides filling
-* Added an autocorrection list
+* Added an AutoCorrect list
 * Redesign of color selection component
 * Ability to change a position and size of chart elements
 * Hotkey Ctrl + 0 for zoom resetting
