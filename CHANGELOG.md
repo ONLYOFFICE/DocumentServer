@@ -8,7 +8,6 @@
 
 * Complete redone html-based formats (`ePub`, `mht`, `html`)
 * `fb2` format can be opened in viewer
-* Add ability to set review permissions by groups
 * Redone gradient control and ability to set custom angle for gradient fill
 * New icons in context menu
 * Add support of AutoFormat as you type
@@ -21,6 +20,7 @@
 * Ability to add cross-reference
 * Add support of endnotes
 * Ability to edit AutoCorrect list
+* Add ability to set review permissions by groups
 * Select Data button in Chart Editor
 
 #### Spreadsheet Editor
