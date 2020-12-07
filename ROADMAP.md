@@ -9,7 +9,7 @@ We also reserve the right to change it when necessary.
 
 ### All editors
 
-* Setting font size manually
+* Setting font size up to 300px (up to 409px in spreadsheets) manually
 * Navigating through fields (text box, combobox) using Tab/Shift+Tab
 
 ### Document editor
@@ -24,7 +24,7 @@ We also reserve the right to change it when necessary.
 * Slicers for pivot tables
 * Data validation settings for cells
 * Custom number format
-* New functions: growth, trend, logest, unique
+* `GROWTH`, `TREND`, `LOGEST`, `UNIQUE` functions
 
 ### Presentation editor
 
