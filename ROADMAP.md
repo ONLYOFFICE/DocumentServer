@@ -5,6 +5,51 @@ This document provides the roadmap of the planned ONLYOFFICE Document Server cha
 This is an updated and corrected version of the roadmap.
 We also reserve the right to change it when necessary.
 
+## Version 6.2 
+
+### All editors
+
+* Setting font size manually
+* Navigating through fields (text box, combobox) using Tab/Shift+Tab
+
+### Document editor
+
+* Forms tab
+* New options to work with text fields
+* Table of figures
+
+### Spreadsheet editor
+
+* Autoexpansion for formatted tables
+* Slicers for pivot tables
+* Data validation settings for cells
+* Custom number format
+* New functions: growth, trend, logest, unique
+
+### Presentation editor
+
+* Autoformat as you type settings
+* Increment/decrement font size buttons on the toolbar
+
+### Plugins
+
+* Enabling Track Changes in all docs by default 
+
+### Desktop 
+
+* New Document Server integration scheme
+
+### iOS app
+
+* The source code of the documents module is public
+
+### API
+
+`customization.trackChanges` parameter to enable/disable Track Changes by default
+
+`customization.toolbarHideFileName` to hide the doc's name from the toolbar
+
+
 ## Version 6.1
 
 ### All editors
