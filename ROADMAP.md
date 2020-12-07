@@ -5,7 +5,7 @@ This document provides the roadmap of the planned ONLYOFFICE Document Server cha
 This is an updated and corrected version of the roadmap.
 We also reserve the right to change it when necessary.
 
-## Version 6.2 
+## Version 6.2
 
 ### All editors
 
@@ -33,7 +33,7 @@ We also reserve the right to change it when necessary.
 
 ### Plugins
 
-* Enabling Track Changes in all docs by default 
+* Enabling Track Changes in all docs by default
 
 ### Desktop 
 
@@ -48,7 +48,6 @@ We also reserve the right to change it when necessary.
 `customization.trackChanges` parameter to enable/disable Track Changes by default
 
 `customization.toolbarHideFileName` to hide the doc's name from the toolbar
-
 
 ## Version 6.1
 
