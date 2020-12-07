@@ -35,7 +35,7 @@ We also reserve the right to change it when necessary.
 
 * Enabling Track Changes in all docs by default
 
-### Desktop 
+### Desktop
 
 * New Document Server integration scheme
 
