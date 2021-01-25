@@ -13,6 +13,7 @@
 
 * Fix JS error while clicking on table in specific docx (Bug #47871)
 * Fix JS error while pressing Escape adding free form line (Bug #47958)
+* Fix opening `Mail Merge` specific file  (Bug #47747)
 
 #### Spreadsheet Editor
 
