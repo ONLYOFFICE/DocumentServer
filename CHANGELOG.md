@@ -1,5 +1,58 @@
 # Change log
 
+## 6.1.1
+
+### Fixes
+
+#### All Editors
+
+* Fix display units `none` for chart (Bug #43017)
+* Show custom message for protected files
+
+#### Document Editor
+
+* Fix JS error while clicking on table in specific docx (Bug #47871)
+* Fix JS error while pressing Escape adding free form line (Bug #47958)
+* Fix opening `Mail Merge` specific file  (Bug #47747)
+
+#### Spreadsheet Editor
+
+* Fix JS error while clicking on link in shape (Bug #47864)
+* Fix translate for Freeze Pane Shadows (Bug #47739)
+
+#### Mobile Editors
+
+* Fix error while showing comment (Bug #47765)
+
+#### Server
+
+* Fix missing `/info` page (Bug #47819)
+* Fix ??? symbols in chinese fonts (Bug #47995)([DocumentServer#1099](https://github.com/ONLYOFFICE/DocumentServer/issues/1099))
+
+#### Installation
+
+* Once again fix problem with DB clean
+  (`onlyoffice-documentserver.postinst: 124: [: false: unexpected operator`)
+  ([DocumentServer#1043](https://github.com/ONLYOFFICE/DocumentServer/issues/1043))
+  ([DocumentServer#1088](https://github.com/ONLYOFFICE/DocumentServer/issues/1088))
+
+#### x2t
+
+* Fix problem detecting fodt, fods, fodp files (Bug #47775)
+* Fix saving image placeholder to odt (Bug #47278)
+* Fix saving file with image name to odt (Bug #47638)
+* Fix opening link in specific doc file (Bug #47574)
+
+#### ePub
+
+* Fix `%20` symbol in some ePub files
+
+#### Plugins
+
+* Fix plugin custom width (Bug #47845)
+* Fix translator plugin for IE11 (Bug #47773)
+* New icons for translator plugin
+
 ## 6.1.0
 
 ### New Features
