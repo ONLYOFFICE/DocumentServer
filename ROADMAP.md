@@ -24,7 +24,7 @@ We also reserve the right to change it when necessary.
 * Slicers for pivot tables
 * Data validation settings for cells
 * Custom number format
-* `GROWTH`, `TREND`, `LOGEST`, `UNIQUE` functions
+* `GROWTH`, `TREND`, `LOGEST`, `UNIQUE`, `MUNIT`, `RANDARRAY` functions
 
 ### Presentation editor
 
