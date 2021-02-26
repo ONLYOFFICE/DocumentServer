@@ -18,9 +18,9 @@
 
 #### Spreadsheet Editor
 
-* Ability to insert slices in pivot table
-* Ability to cancel auto-expansion of tables
+* Ability to insert slicers in pivot tables
 * Data Validation settings
+* Ability to cancel auto-expansion of tables
 * Support of custom number format
 * `GROWTH`, `TREND`, `LOGEST`, `UNIQUE`, `RANDARRAY` functions support
 
