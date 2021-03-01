@@ -253,6 +253,7 @@ linux
 listview
 LoadingScriptError
 localhost
+LOGEST
 LOGNORM
 logrotate
 lookup
@@ -354,6 +355,7 @@ PrintHeadings
 QUARTILE
 rabbitmq
 rastr
+RANDARRAY
 ReadFromBinary
 Realtime
 rebranding

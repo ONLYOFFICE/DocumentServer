@@ -1,5 +1,42 @@
 # Change log
 
+## 6.2.0
+
+### New Features
+
+#### All Editors
+
+* Ability to use Tab/Shift+Tab in some dialog windows
+* Change color of loader to darker one
+* Ability to setup font size 300pt (409pt for Spreadsheets)
+* New translation to Belarusian, Catalan, Greek, Lao, Romanian
+* Beta versions has new `beta` mark in left toolbar
+
+#### Document Editor
+
+* Ability to insert Table of Figures
+
+#### Spreadsheet Editor
+
+* Ability to insert slicers in pivot tables
+* Data Validation settings
+* Ability to cancel auto-expansion of tables
+* Support of custom number format
+* `GROWTH`, `TREND`, `LOGEST`, `UNIQUE`, `RANDARRAY` functions support
+
+#### Presentation Editor
+
+* Ability to setup auto-format as you type
+* Buttons for increase-decrease font size
+
+#### Back-end
+
+* Mark person clicking the force-save button as file author
+
+### Fixes
+
+* All components received countless fixes
+
 ## 6.1.1
 
 ### Fixes
