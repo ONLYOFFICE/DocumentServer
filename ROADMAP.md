@@ -5,6 +5,44 @@ This document provides the roadmap of the planned ONLYOFFICE Document Server cha
 This is an updated and corrected version of the roadmap.
 We also reserve the right to change it when necessary.
 
+## Version 6.3
+
+### All editors
+
+* Dark theme
+* Adding/editing/deleting passwords in the online version
+* 150% scaling
+* Adding files to Favorites folder*
+* New chart types (line and scatter)
+* Entering names for anonymous users
+
+\* Should be implemented in DMS as well
+
+### Document editor
+
+* Forms tab
+* Button to change wrapping settings on the toolbar (Layout tab)
+* Changing indent in the paragraph settings on the right panel
+* Changing text case
+* Changing list levels
+* Fixed color set in the color picker for forms/content controls
+* Saving Track Changes status to file
+* Downloading files as/saving as HTML, FB2, EPUB
+
+### Spreadsheet editor
+
+* Combo chart settings
+* `XLOOKUP` function
+* Grouping/ungrouping data in pivot tables
+* New cell formats: dd/mm, dd/mm/yyyy, dd/mm/yy
+* New currency for cell format - Croatian kuna
+
+### Presentation editor
+
+* Transparency setting to slide properties in the right panel
+* Column setting for text in a shape on the toolbar
+* Buttons for changing text case and highlighting text with color
+
 ## Version 6.2
 
 ### All editors
@@ -14,7 +52,7 @@ We also reserve the right to change it when necessary.
 
 ### Document editor
 
-* Forms tab
+* Forms tab (moved to v6.3)
 * New options to work with text fields
 * Table of figures
 
