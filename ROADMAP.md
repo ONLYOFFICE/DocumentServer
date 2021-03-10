@@ -12,9 +12,11 @@ We also reserve the right to change it when necessary.
 * Dark theme
 * Adding/editing/deleting passwords in the online version
 * 150% scaling
-* Adding files to Favorites folder
+* Adding files to Favorites folder*
 * New chart types (line and scatter)
 * Entering names for anonymous users
+
+\* Should be implemented in DMS as well
 
 ### Document editor
 
