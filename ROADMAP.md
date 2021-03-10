@@ -51,7 +51,7 @@ We also reserve the right to change it when necessary.
 
 ### Document editor
 
-* Forms tab
+* Forms tab (moved to v6.3)
 * New options to work with text fields
 * Table of figures
 
