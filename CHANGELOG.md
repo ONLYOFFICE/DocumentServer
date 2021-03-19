@@ -305,7 +305,7 @@
 
 #### Back-end
 
-* Fix Path Traversal vulnerability via image upload params (Bug #46113)
+* Fix Path Traversal vulnerability via image upload params (Bug #46113)(CVE-2021-3199)
 
 ## 5.6.2
 
@@ -321,7 +321,7 @@
 
 #### Back-end
 
-* Fix Path Traversal vulnerability via Convert Service param (Bug #45976)
+* Fix Path Traversal vulnerability via Convert Service param (Bug #45976)(CVE-2021-25833)
 
 #### Docker
 
