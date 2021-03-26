@@ -34,6 +34,7 @@ We also reserve the right to change it when necessary.
 * Combo chart settings
 * `XLOOKUP` function
 * Grouping/ungrouping data in pivot tables
+* Left/right indent to align cell content
 * New cell formats: dd/mm, dd/mm/yyyy, dd/mm/yy
 * New currency for cell format - Croatian kuna
 
