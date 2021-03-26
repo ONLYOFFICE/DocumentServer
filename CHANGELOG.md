@@ -187,6 +187,7 @@
 #### Back-end
 
 * Fix several vulnerabilities
+* Fix CVE-2021-25832
 * Fix Path Traversal vulnerability via `download as` params
 * Fix ER_DATA_TOO_LONG: Data too long for column 'callback' at row 1
 * Fix problem with generating new presentation theme (Bug #46754)
@@ -296,7 +297,7 @@
 #### Convert
 
 * Fix several vulnerabilities in `x2t` (Bug #46348, Bug #46352, Bug #46353,
-  Bug #46384, Bug #46434, Bug #46436)
+  Bug #46384, Bug #46434, Bug #46436) (CVE-2021-25831, CVE-2021-25829, CVE-2021-25830)
 * Fix vulnerability in TXT converter (Bug #46437)
 
 ## 5.6.3
