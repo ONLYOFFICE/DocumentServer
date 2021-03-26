@@ -507,6 +507,7 @@
 
 #### Document Editor
 
+* Ability to compare documents (available only for paid version) 
 * Adding content control (available only for paid version)
 * Ability to remove table cells
 * Ability to insert several rows\columns
