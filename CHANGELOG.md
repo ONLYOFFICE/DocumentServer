@@ -1,5 +1,24 @@
 # Change log
 
+## 6.2.1
+
+### Fixes
+
+#### Document Editor
+
+* Fix data loss after opening document reviewed by user (Bug #48920)
+  ([DocumentServer#1159](https://github.com/ONLYOFFICE/DocumentServer/issues/1159))
+* Fix JS error while entering text after cursor mouse move (Bug #49090)
+* Fix opening docx file with chart in MS Office (Bug #49219)
+
+#### Spreadsheet Editor
+
+* Fix copy from Document to Spreadsheet (Bug #49013)
+
+#### Integration
+
+* Fix missing plugin tab (Bug #49007)
+
 ## 6.2.0
 
 ### New Features
