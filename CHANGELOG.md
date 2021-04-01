@@ -15,6 +15,10 @@
 
 * Fix copy from Document to Spreadsheet (Bug #49013)
 
+#### Presentation Editor
+
+* Fix broken PPTX while opening in Microsoft PowerPoint (Bug #49258)([DocumentServer#1191](https://github.com/ONLYOFFICE/DocumentServer/issues/1191))
+
 #### Integration
 
 * Fix missing plugin tab (Bug #49007)
