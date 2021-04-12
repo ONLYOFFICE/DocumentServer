@@ -1,5 +1,23 @@
 # Change log
 
+## 6.2.2
+
+### Fixes
+
+#### Server
+
+* Remove ability to execute DocumentBuilder scripts from Editors
+* Fix vulnerability with 'insert image from url' and 'compare document from url`
+
+#### x2t
+
+* Fix convert time for specific document (Bug #49434)
+* Fix broken pptx file after open in Presentation Editor (Bug #49429, #49202)
+
+#### Docker
+
+* Fix instruction for using Let's Encrypt ([Docker-DocumentServer#349](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/349))
+
 ## 6.2.1
 
 ### Fixes
