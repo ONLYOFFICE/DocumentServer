@@ -52,7 +52,6 @@ We also reserve the right to change it when necessary.
 
 ### Document editor
 
-* Forms tab
 * New options to work with text fields
 * Table of figures
 
