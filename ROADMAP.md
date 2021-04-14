@@ -20,7 +20,6 @@ We also reserve the right to change it when necessary.
 
 ### Document editor
 
-* Forms tab
 * Button to change wrapping settings on the toolbar (Layout tab)
 * Changing indent in the paragraph settings on the right panel
 * Changing text case
@@ -53,7 +52,7 @@ We also reserve the right to change it when necessary.
 
 ### Document editor
 
-* Forms tab (moved to v6.3)
+* Forms tab
 * New options to work with text fields
 * Table of figures
 
