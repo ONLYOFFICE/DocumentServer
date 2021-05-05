@@ -14,6 +14,8 @@ We also reserve the right to change it when necessary.
 * 150% scaling
 * Adding files to Favorites folder*
 * New chart types (line and scatter)
+* Hints on creating macros
+* New scheme for the spellchecker (local work)
 * Entering names for anonymous users
 
 \* Should be implemented in DMS as well
@@ -42,6 +44,7 @@ We also reserve the right to change it when necessary.
 * Transparency setting to slide properties in the right panel
 * Column setting for text in a shape on the toolbar
 * Buttons for changing text case and highlighting text with color
+* Preserving animations already added to the presentation.
 
 ## Version 6.2
 
