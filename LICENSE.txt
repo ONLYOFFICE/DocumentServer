@@ -645,16 +645,17 @@ the "copyright" line and a pointer to where the full notice is found.
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish street,
-    Riga, Latvia, EU, LV-1050
+    You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
+    street, Riga, Latvia, EU, LV-1050
 
-   The  interactive user interfaces in modified source and object code versions
-   of the Program must display Appropriate Legal Notices, as required under 
-   Section 5 of the GNU AGPL version 3.
+    The  interactive user interfaces in modified source and object code
+    version of the Program must display Appropriate Legal Notices, as required
+    under Section 5 of the GNU AGPL version 3.
 
-   Pursuant to Section 7(b) of the License you must retain the original Product
-   logo when distributing the program. Pursuant to Section 7(e) we decline to
-   grant you any rights under trademark law for use of our trademarks.
+    Pursuant to Section 7(b) of the License you must retain the original 
+    Product logo when distributing the program. Pursuant to Section 7(e) we
+    decline to grant you any rights under trademark law for use of our
+    trademarks.
 
 Also add information on how to contact you by electronic and paper mail.
 
