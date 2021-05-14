@@ -114,6 +114,7 @@ DGET
 dir
 djvu
 DMAX
+DMS
 dns
 DocFormat
 docId
@@ -385,6 +386,7 @@ Schweiz
 sdk
 sdkjs
 sdt
+SharedWorker
 SECH
 SecurityError
 selectwheel
@@ -444,6 +446,7 @@ TINV
 TOC
 toLocaleString
 tooltip
+tooltips
 trackpad
 TRIMMEAN
 truetype
@@ -489,6 +492,7 @@ XLSX
 XLTX
 xps
 XSS
+XLOOKUP
 Yandex
 youtube
 yy

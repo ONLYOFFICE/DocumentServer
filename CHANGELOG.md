@@ -8,7 +8,7 @@
 
 * Interface Themes support
 * 150% interface scaling support
-* Spellchecker implemented as SharedWorker. No more backend service for spellchecker
+* Spellchecker implemented as SharedWorker. No more back-end service for spellchecker
 * Ability to add file to favorites (must be supported on DMS side)
 * Password protection support
 * New chart types (lines and scatter)
@@ -24,7 +24,7 @@
 * Change Register operation in Top Toolbar
 * Change List Level operation
 * Track changes mode redone, ability to save it to file
-* Export to html, fb2, epub
+* Export to html, fb2, ePub
 
 #### Spreadsheet Editor
 
