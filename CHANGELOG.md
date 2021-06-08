@@ -1,5 +1,63 @@
 # Change log
 
+## 6.3.1
+
+### New Features
+
+#### Back End
+
+* Add 'license' command to CommandService.ashx
+
+### Fixes
+
+#### All Editors
+
+* Fix fonts in Help entries (Bug #50473)
+* Fix several issues related to Dark Theme (Bugs #50284, #50416, #50459, #50656)
+
+#### Document Editor
+
+* Fix opening files with broken `en-ZA` dict (Bug #50471)
+* Fix hieroglyph rotation in 150% zoom (Bug #50482)
+* Fix file password reset for `Mail Merge` (Bug #50474)
+* Fix applying changes in some specific file (Bug #50604)
+* Fix parser error for files with continuous space in name (Bug #50466)
+* Fix opening documents with deleting password (Bug #50481)
+* Fix document print after adding password (Bug #49716)
+
+#### Spreadsheet Editor
+
+* Fix JS error while opening xlsx file (Bug #50509)
+* Fix Format as Table in specific file (Bug #50489)
+* Fix inserting line in specific file (Bug #50521)
+* Fix unnecessary memory consumption in pivot tables
+* Fix incorrect `IF` formula calculation (Bug #50549)
+* Fix JS error while changing zoom while editing cell (Bug #50642)
+* Escape sheet name for regexp on changing sheet name or on deleting sheets
+* Fix losses ole-objects on opening
+
+#### Presentation Editor
+
+* Fix table templates preview on different scales (Bug #50446)
+* Fix JS error while changing specific shape (Bug #50607)
+* Fix theme preview for small size windows (Bug #50578)
+
+#### build_tools
+
+* Fix build on Debian 10 and all actual versions of Ubuntu
+* Fix config location and port for running compiled DocumentServer
+
+#### x2t
+
+* Fix ppt => pptx convert (Bug #50383)
+* Fix cell color for xls => xlsx convert (Bug #46852)
+* Fix missing data in xls (Bug #50426)
+* Fix empty rtf file (Bug #50434)
+
+#### Plugins
+
+* Adapt `Marcos` plugin for dark theme (Bug #49768)
+
 ## 6.3.0
 
 ### New Features
