@@ -34,8 +34,8 @@ We also reserve the right to change it when necessary.
 * Ability to assign a macro to be executed when you click on a graphic object
 * Descriptions and names of function arguments in Polish, 
   Japanese, Korean, Latvian, Lao, Norwegian, Romanian, Slovak,
-  Slovenian, Swedish, Turkish, Vietnamese, Catalan, Czech, Chinese, Danish, Dutch, Finnish, Greek, Hungarian, 
-  Indonesian, Bulgarian, Portuguese, Ukrainian
+  Slovenian, Swedish, Turkish, Vietnamese, Catalan, Czech, Chinese, Danish, Dutch,
+  Finnish, Greek, Hungarian, Indonesian, Bulgarian, Portuguese, Ukrainian
 * Hyperlinks autocorrect
 * Presets for Freeze Panes
 * Setting for displaying zeros in cells (Show zeros)
