@@ -14,7 +14,7 @@ We also reserve the right to change it when necessary.
 * Support for chart styles
 * Chart styles for people with disabilities
 * New previews for bulleted, numbered, multi-level lists
-* Focus processing for modal windows: you can navigate controls (checkbox, radiobox, button with text) using Tab/Shift+Tab
+* Navigating controls (checkbox, radiobox, button with text) using Tab/Shift+Tab
 * Updated work on the client:
   * Decoding pictures in all popular raster formats
   * Working with zip archives (open / save / edit)
