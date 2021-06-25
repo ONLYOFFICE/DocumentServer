@@ -14,7 +14,7 @@ We also reserve the right to change it when necessary.
 * Support for chart styles
 * Chart styles for people with disabilities
 * New previews for bulleted, numbered, multi-level lists
-* Focus processing for a number of modal windows: you can navigate controls (such as checkbox, radiobox, button with text) using Tab/Shift+Tab
+* Focus processing for modal windows: you can navigate controls (checkbox, radiobox, button with text) using Tab/Shift+Tab
 * Updated work on the client:
   * Decoding pictures in all popular raster formats
   * Working with zip archives (open / save / edit)
@@ -53,7 +53,7 @@ We also reserve the right to change it when necessary.
 
 * `requestClose` method for closing the editor
 * Differentiation of access rights to commenting
-* Setting the co-editing mode when loading the editor and the ability to prohibit changing it
+* Setting the default co-editing mode and ability to prohibit changing it
 * `customization.hideNotes` parameter to hide the notes panel in presentations
 * New methods and properties for `ApiRange` for `apiBuilder` (spreadsheets)
 * Support for the basic version of the WOPI protocol
