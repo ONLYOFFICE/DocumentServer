@@ -5,6 +5,60 @@ This document provides the roadmap of the planned ONLYOFFICE Document Server cha
 This is an updated and corrected version of the roadmap.
 We also reserve the right to change it when necessary.
 
+## Version 6.4
+
+### All editors
+
+* 125% and 175% scaling
+* Resolving all comments
+* Support for chart styles
+* Chart styles for people with disabilities
+* New previews for bulleted, numbered, multi-level lists
+* Focus processing for a number of modal windows: you can navigate controls (such as checkbox, radiobox, button with text) using Tab/Shift+Tab
+* Updated work on the client:
+  * Decoding pictures in all popular raster formats
+  * Working with zip archives (open / save / edit)
+  * Digital signatures
+
+### Document editor
+
+* Converting text to tables and vice versa
+* Auto-capitalization for the 1st word in a sentence
+
+### Spreadsheet editor
+
+* Adding/setting/deleting conditional formatting
+* Adding sparklines
+* Importing data from txt and csv
+* Changing select on Tab+Enter
+* Ability to assign a macro to be executed when you click on a graphic object
+* Descriptions and names of function arguments in Polish, Japanese, Korean, Latvian, Lao, Norwegian, Romanian, Slovak, Slovenian, Swedish, Turkish, Vietnamese, Catalan, Czech, Chinese, Danish, Dutch, Finnish, Greek, Hungarian, Indonesian, Bulgarian, Portuguese, Ukrainian
+* Hyperlinks autocorrect
+* Presets for Freeze Panes
+* Setting for displaying zeros in cells (Show zeros)
+* Argument names in the function setting dialog
+* Storing comment threads in a spreadsheet
+
+### Presentation editor
+
+* Version history
+* Setting to hide the notes panel
+* Auto-capitalization for the 1st word in a sentence
+
+### Mobile web editors
+
+* Rework on ReactJS
+
+### API updates
+
+* `requestClose` method for closing the editor
+* Differentiation of access rights to commenting
+* Setting the co-editing mode when loading the editor and the ability to prohibit changing it
+* `customization.hideNotes` parameter to hide the notes panel in presentations
+* New methods and properties for `ApiRange` for `apiBuilder` (spreadsheets)
+* Support for the basic version of the WOPI protocol
+* `editorConfig.customization.uiTheme` to set the interface theme
+
 ## Version 6.3
 
 ### All editors
