@@ -32,7 +32,7 @@ We also reserve the right to change it when necessary.
 * Importing data from txt and csv
 * Changing select on Tab+Enter
 * Ability to assign a macro to be executed when you click on a graphic object
-* Descriptions and names of function arguments in Polish, 
+* Descriptions and names of function arguments in Polish,
   Japanese, Korean, Latvian, Lao, Norwegian, Romanian, Slovak,
   Slovenian, Swedish, Turkish, Vietnamese, Catalan, Czech, Chinese, Danish, Dutch,
   Finnish, Greek, Hungarian, Indonesian, Bulgarian, Portuguese, Ukrainian
