@@ -9,6 +9,7 @@ We also reserve the right to change it when necessary.
 
 ### All editors
 
+* Web Application Open Platform Interface (WOPI) support
 * 125% and 175% scaling
 * Resolving all comments
 * Support for chart styles
@@ -59,7 +60,6 @@ We also reserve the right to change it when necessary.
 * Setting the default co-editing mode and ability to prohibit changing it
 * `customization.hideNotes` parameter to hide the notes panel in presentations
 * New methods and properties for `ApiRange` for `apiBuilder` (spreadsheets)
-* Support for the basic version of the WOPI protocol
 * `editorConfig.customization.uiTheme` to set the interface theme
 
 ## Version 6.3
