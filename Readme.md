@@ -51,13 +51,13 @@ The table below will help you to make the right choice.
 | Pricing and licensing | Community Edition | Enterprise Edition | Developer Edition |
 | ------------- | ------------- | ------------- | ------------- |
 | | [Get it now](https://www.onlyoffice.com/download.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/enterprise-edition-free.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
-| Cost  | FREE  | [Go to the pricing page](https://www.onlyoffice.com/enterprise-edition.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Go to the pricing page](https://www.onlyoffice.com/developer-edition-prices.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
+| Cost  | FREE  | [Go to the pricing page](https://www.onlyoffice.com/docs-enterprise-prices.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Go to the pricing page](https://www.onlyoffice.com/developer-edition-prices.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
 | Simultaneous connections | up to 20 maximum  | As in chosen pricing plan | As in chosen pricing plan |
 | Number of users | up to 20 recommended | As in chosen pricing plan | As in chosen pricing plan |
 | Clusterization | - | + | + |
 | License | GNU AGPL v.3 | Proprietary | Proprietary |
 | **Support** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
-| Documentation | [Help Center](https://helpcenter.onlyoffice.com/server/docker/opensource/index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/server/enterprise.aspx) | [Help Center](https://helpcenter.onlyoffice.com/server/integration-edition/index.aspx) |
+| Documentation | [Help Center](https://helpcenter.onlyoffice.com/installation/docs-community-index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/installation/docs-enterprise-index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/installation/docs-developer-index.aspx) |
 | Standard support | [GitHub](https://github.com/ONLYOFFICE/DocumentServer/issues) or paid | One year support included | One year support included |
 | Premium support | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) |
 | **Services** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
@@ -67,7 +67,7 @@ The table below will help you to make the right choice.
 | Tabbed interface                       | + | + | + |
 | White Label                            | - | - | + |
 | Integrated test example (node.js)     | + | + | + |
-| Mobile web editors                     | - | + | + |
+| Mobile web editors                     | - | +* | +* |
 | Access to pro features via desktop     | - | + | - |
 | **Plugins & Macros** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Plugins                           | + | + | + |
@@ -95,7 +95,7 @@ The table below will help you to make the right choice.
 | Functions, formulas, equations  | + | + | + |
 | Table templates                 | + | + | + |
 | Pivot tables                    | + | + | + |
-| Conditional formatting  for viewing | +* | +* | +* |
+| Conditional formatting  for viewing | +** | +** | +** |
 | Sheet Views                     | - | + | + |
 | **Presentation Editor features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
@@ -107,7 +107,9 @@ The table below will help you to make the right choice.
 | End-to-end encryption via Private Rooms  | + | + | - |
 | | [Get it now](https://www.onlyoffice.com/download.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/enterprise-edition-free.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
 
-\* Support for all conditions and gradient. Adding/Editing capabilities are coming soon
+\** If supported by DMS
+
+\** Support for all conditions and gradient. Adding/Editing capabilities are coming soon
 
 ## Documentation
 
