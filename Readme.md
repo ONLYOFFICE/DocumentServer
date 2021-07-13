@@ -65,7 +65,9 @@ The table below will help you to make the right choice.
 | Document Builder Service          | + | + | + |
 | **Interface** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Tabbed interface                       | + | + | + |
-| White Label                            | - | - | + |
+| Dark theme                             | + | + | + |
+| 150% scaling                           | + | + | + |
+| White label                            | - | - | + |
 | Integrated test example (node.js)     | + | + | + |
 | Mobile web editors                     | - | +* | +* |
 | Access to pro features via desktop     | - | + | - |
@@ -95,19 +97,20 @@ The table below will help you to make the right choice.
 | Functions, formulas, equations  | + | + | + |
 | Table templates                 | + | + | + |
 | Pivot tables                    | + | + | + |
+| Data validation                 | + | + | + |
 | Conditional formatting  for viewing | +** | +** | +** |
 | Sheet Views                     | - | + | + |
 | **Presentation Editor features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
-| Animations                      | + | + | + |
+| Transitions                  | + | + | + |
 | Presenter mode                  | + | + | + |
 | Notes                           | + | + | + |
 | **Security features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | End-to-end encryption via Private Rooms  | + | + | - |
 | | [Get it now](https://www.onlyoffice.com/download.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/enterprise-edition-free.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
 
-\** If supported by DMS
+\* If supported by DMS
 
 \** Support for all conditions and gradient. Adding/Editing capabilities are coming soon
 
@@ -115,10 +118,10 @@ The table below will help you to make the right choice.
 
 The easiest way to install ONLYOFFICE Document Server is to use the Docker image. You can also install it from the repository or compile it from source code. The following documentation is available to the community depending on the way you choose:
 
-* [Compiling ONLYOFFICE Document Server for a Local Server](http://helpcenter.onlyoffice.com/server/linux/document/compile-source-code.aspx "Compiling ONLYOFFICE Document Server for a Local Server")
-* [Installing ONLYOFFICE Document Server Linux Version](http://helpcenter.onlyoffice.com/server/linux/document/linux-installation.aspx "Installing ONLYOFFICE Document Server Linux Version")
-* [Installing ONLYOFFICE Document Server Windows Version](http://helpcenter.onlyoffice.com/server/windows/document/install-office-apps.aspx "Installing Document Server for Windows on a Local Server")
-* [Installing ONLYOFFICE Document Server Docker Version](http://helpcenter.onlyoffice.com/server/docker/document/docker-installation.aspx "Installing ONLYOFFICE Document Server Docker Version")
+* [Compiling ONLYOFFICE Document Server for a local server](http://helpcenter.onlyoffice.com/server/linux/document/compile-source-code.aspx "Compiling ONLYOFFICE Document Server for a Local Server")
+* [Installing ONLYOFFICE Document Server Linux version](http://helpcenter.onlyoffice.com/server/linux/document/linux-installation.aspx "Installing ONLYOFFICE Document Server Linux Version")
+* [Installing ONLYOFFICE Document Server Windows version](http://helpcenter.onlyoffice.com/server/windows/document/install-office-apps.aspx "Installing Document Server for Windows on a Local Server")
+* [Installing ONLYOFFICE Document Server Docker version](http://helpcenter.onlyoffice.com/server/docker/document/docker-installation.aspx "Installing ONLYOFFICE Document Server Docker Version")
 
 ## ONLYOFFICE Workspace
 
