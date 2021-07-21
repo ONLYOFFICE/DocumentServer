@@ -118,10 +118,10 @@ The table below will help you to make the right choice.
 
 The easiest way to install ONLYOFFICE Document Server is to use the Docker image. You can also install it from the repository or compile it from source code. The following documentation is available to the community depending on the way you choose:
 
-* [Compiling ONLYOFFICE Document Server for a local server](http://helpcenter.onlyoffice.com/server/linux/document/compile-source-code.aspx "Compiling ONLYOFFICE Document Server for a Local Server")
-* [Installing ONLYOFFICE Document Server Linux version](http://helpcenter.onlyoffice.com/server/linux/document/linux-installation.aspx "Installing ONLYOFFICE Document Server Linux Version")
-* [Installing ONLYOFFICE Document Server Windows version](http://helpcenter.onlyoffice.com/server/windows/document/install-office-apps.aspx "Installing Document Server for Windows on a Local Server")
-* [Installing ONLYOFFICE Document Server Docker version](http://helpcenter.onlyoffice.com/server/docker/document/docker-installation.aspx "Installing ONLYOFFICE Document Server Docker Version")
+* [Compiling ONLYOFFICE Document Server for a local server](https://helpcenter.onlyoffice.com/server/linux/document/compile-source-code.aspx "Compiling ONLYOFFICE Document Server for a Local Server")
+* [Installing ONLYOFFICE Document Server Linux version](https://helpcenter.onlyoffice.com/server/linux/document/linux-installation.aspx "Installing ONLYOFFICE Document Server Linux Version")
+* [Installing ONLYOFFICE Document Server Windows version](https://helpcenter.onlyoffice.com/server/windows/document/install-office-apps.aspx "Installing Document Server for Windows on a Local Server")
+* [Installing ONLYOFFICE Document Server Docker version](https://helpcenter.onlyoffice.com/server/docker/document/docker-installation.aspx "Installing ONLYOFFICE Document Server Docker Version")
 
 ## ONLYOFFICE Workspace
 
@@ -139,16 +139,16 @@ Docker Image: [https://github.com/ONLYOFFICE/Docker-DocumentServer](https://gith
 
 License: [GNU AGPL v3.0](https://onlyo.co/38YZGJh)
 
-ONLYOFFICE Docs on official website: [http://www.onlyoffice.com/office-suite.aspx](http://www.onlyoffice.com/office-suite.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)
+ONLYOFFICE Docs on official website: [https://www.onlyoffice.com/office-suite.aspx](https://www.onlyoffice.com/office-suite.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)
 
 ONLYOFFICE Workspace on official website: [https://www.onlyoffice.com/workspace.aspx](https://www.onlyoffice.com/workspace.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)
 
-List of available integrations: [http://www.onlyoffice.com/all-connectors.aspx](http://www.onlyoffice.com/all-connectors.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)
+List of available integrations: [https://www.onlyoffice.com/all-connectors.aspx](https://www.onlyoffice.com/all-connectors.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)
 
 ## User Feedback and Support
 
 If you have any problems with or questions about [ONLYOFFICE Document Server][2], please visit our official forum to find answers to your questions: [dev.onlyoffice.org][1] or you can ask and answer ONLYOFFICE development questions on [Stack Overflow][3].
 
-  [1]: http://dev.onlyoffice.org
+  [1]: https://dev.onlyoffice.org
   [2]: https://github.com/ONLYOFFICE/DocumentServer
-  [3]: http://stackoverflow.com/questions/tagged/onlyoffice
+  [3]: https://stackoverflow.com/questions/tagged/onlyoffice
