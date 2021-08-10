@@ -1,5 +1,13 @@
 # Change log
 
+## 6.3.2
+
+### Fixes
+
+#### Document Editor
+
+* Fix display data in `Navigation` panel (Bug #51297)([DocumentServer#1368](https://github.com/ONLYOFFICE/DocumentServer/issues/1368))
+
 ## 6.3.1
 
 ### New Features
