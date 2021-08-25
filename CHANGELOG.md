@@ -33,7 +33,11 @@
 * Change select by pressing `tab` + `enter`
 * Data import from txt, csv
 * Ability to run macros on mouse click over graphic object
-* A lot new languages for formulas
+* A lot new languages for formulas description (Belarusian, Bulgarian,
+  Catalan, Chinese, Czech, Danish, Dutch, Finnish, Greek,
+  Hungarian, Indonesian, Japanese, Korean, Lao, Latvian,
+  Norwegian, Polish, Portuguese, Romanian, Slovak,
+  Slovenian, Swedish, Turkish, Ukrainian, Vietnamese)
 * Add setting for hyperlink auto-correction
 * Freeze panes presets
 * Setting for `show zeros` in cells
