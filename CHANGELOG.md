@@ -17,7 +17,7 @@
 * Ability to set user permissions for comment mode
 * Ability to view unique user link count on info page
 * Ability to force co-edit mode via config
-* Improved render of CKJ fonts in PDF files
+* Improved render of CJK fonts in PDF files
 
 ### Document Editor
 
