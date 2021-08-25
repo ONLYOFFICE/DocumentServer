@@ -6,6 +6,7 @@
 
 ### All Editors
 
+* Add support of Web Application Open Platform Interface (WOPI) protocol
 * Major improvements in support of chart styles
 * Ability to Resolve all comments
 * Change list symbols render
@@ -16,6 +17,7 @@
 * Ability to set user permissions for comment mode
 * Ability to view unique user link count on info page
 * Ability to force co-edit mode via config
+* Improved render of CKJ fonts in PDF files
 
 ### Document Editor
 
@@ -30,18 +32,27 @@
 * Ability to add sparklines
 * Change select by pressing `tab` + `enter`
 * Data import from txt, csv
-* Ability to add macros on mouse click over graphic object
+* Ability to run macros on mouse click over graphic object
 * A lot new languages for formulas
 * Add setting for hyperlink auto-correction
 * Freeze panes presets
 * Setting for `show zeros` in cells
 * Chain comments support
+* Add argument names to function wizard
 
 #### Presentation Editor
 
 * Version History
 * Ability to hide notes panel
 * Auto-capitalize first letter
+
+#### Mobile Editors
+
+* Mobile web editors completely rewritten on React
+
+### Fixes
+
+* All components received countless fixes
 
 ## 6.3.2
 
