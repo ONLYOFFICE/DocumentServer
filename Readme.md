@@ -50,7 +50,7 @@ The table below will help you to make the right choice.
 
 | Pricing and licensing | Community Edition | Enterprise Edition | Developer Edition |
 | ------------- | ------------- | ------------- | ------------- |
-| | [Get it now](https://www.onlyoffice.com/download.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/enterprise-edition-free.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
+| | [Get it now](https://www.onlyoffice.com/download-docs.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS#docs-community)  | [Start Free Trial](https://www.onlyoffice.com/download-docs.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS#docs-enterprise)  | [Start Free Trial](https://www.onlyoffice.com/download-docs.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS#docs-developer)  |
 | Cost  | FREE  | [Go to the pricing page](https://www.onlyoffice.com/docs-enterprise-prices.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Go to the pricing page](https://www.onlyoffice.com/developer-edition-prices.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
 | Simultaneous connections | up to 20 maximum  | As in chosen pricing plan | As in chosen pricing plan |
 | Number of users | up to 20 recommended | As in chosen pricing plan | As in chosen pricing plan |
@@ -108,7 +108,7 @@ The table below will help you to make the right choice.
 | Notes                           | + | + | + |
 | **Security features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | End-to-end encryption via Private Rooms  | + | + | - |
-| | [Get it now](https://www.onlyoffice.com/download.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/enterprise-edition-free.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  | [Start Free Trial](https://www.onlyoffice.com/developer-edition-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)  |
+| | [Get it now](https://www.onlyoffice.com/download-docs.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS#docs-community)  | [Start Free Trial](https://www.onlyoffice.com/download-docs.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS#docs-enterprise)  | [Start Free Trial](https://www.onlyoffice.com/download-docs.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS#docs-developer)  |
 
 \* If supported by DMS
 
@@ -118,10 +118,10 @@ The table below will help you to make the right choice.
 
 The easiest way to install ONLYOFFICE Document Server is to use the Docker image. You can also install it from the repository or compile it from source code. The following documentation is available to the community depending on the way you choose:
 
-* [Compiling ONLYOFFICE Document Server for a local server](https://helpcenter.onlyoffice.com/server/linux/document/compile-source-code.aspx "Compiling ONLYOFFICE Document Server for a Local Server")
-* [Installing ONLYOFFICE Document Server Linux version](https://helpcenter.onlyoffice.com/server/linux/document/linux-installation.aspx "Installing ONLYOFFICE Document Server Linux Version")
-* [Installing ONLYOFFICE Document Server Windows version](https://helpcenter.onlyoffice.com/server/windows/document/install-office-apps.aspx "Installing Document Server for Windows on a Local Server")
-* [Installing ONLYOFFICE Document Server Docker version](https://helpcenter.onlyoffice.com/server/docker/document/docker-installation.aspx "Installing ONLYOFFICE Document Server Docker Version")
+* [Compiling ONLYOFFICE Document Server for a local server](https://helpcenter.onlyoffice.com/installation/docs-community-compile.aspx "Compiling ONLYOFFICE Document Server for a Local Server")
+* [Installing ONLYOFFICE Document Server Linux version](https://helpcenter.onlyoffice.com/installation/docs-community-install-ubuntu.aspx "Installing ONLYOFFICE Document Server Linux Version")
+* [Installing ONLYOFFICE Document Server Windows version](https://helpcenter.onlyoffice.com/installation/docs-community-install-windows.aspx "Installing Document Server for Windows on a Local Server")
+* [Installing ONLYOFFICE Document Server Docker version](https://helpcenter.onlyoffice.com/installation/docs-community-install-docker.aspx "Installing ONLYOFFICE Document Server Docker Version")
 
 ## ONLYOFFICE Workspace
 
