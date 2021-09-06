@@ -16,7 +16,7 @@ We also reserve the right to change it when necessary.
 
 ### Document editor
 
-* Ability to choose the display mode for review changes: 
+* Ability to choose the display mode for review changes:
 Show by click in balloons, Show by hover in tooltips
 * Ability to choose mail merge data from a local file and from URL
 * Hyperlinks autocorrect
@@ -35,25 +35,25 @@ Show by click in balloons, Show by hover in tooltips
 ### Presentation editor
 
 * Ability to show animations contained in a file
-* Moving slide transition settings from the right-side panel 
+* Moving slide transition settings from the right-side panel
 to the `Transitions` tab of the top toolbar
 * Hyperlinks autocorrect
 
 ### API updates
 
 * Ability to add additional interface themes
-* New  `outputtype: "ooxml", "odf"` types in the  `conversionapi` to convert 
+* New  `outputtype: "ooxml", "odf"` types in the  `conversionapi` to convert
 files to any format (docx, docm, xlsx, xlsm, pptx, pptm, or odt, ods, odp)
-* When opening documents with macros, the `downloadAs` panel contains 
+* When opening documents with macros, the `downloadAs` panel contains
 the docm, xlsm, pptm formats (determined by the `fileType` parameter)
-* `assemblyFormatAsOrigin` parameter is enabled by default to save 
+* `assemblyFormatAsOrigin` parameter is enabled by default to save
 the assemblied file in the same format, in which it is opened
-* New `review` section and new `hideReviewDisplay`, `showReviewChanges`, 
-`reviewDisplay`, `trackChanges`, `hoverMode` parameters 
+* New `review` section and new `hideReviewDisplay`, `showReviewChanges`,
+`reviewDisplay`, `trackChanges`, `hoverMode` parameters
 in the `customization` section of the document editor config
-* New `fileType parameter` for `onDownloadAs`, `onRequestSaveAs`, 
+* New `fileType parameter` for `onDownloadAs`, `onRequestSaveAs`,
 `onRequestRestore`
-* Ability to insert several images from the portal using 
+* Ability to insert several images from the portal using
 the `insertImage` method
 
 ## Version 6.4
