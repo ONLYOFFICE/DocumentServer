@@ -1,5 +1,95 @@
 # Change log
 
+## 6.4.1
+
+### New Features
+
+#### Viewers
+
+* Support of `oxps` file format on view
+
+### Fixes
+
+#### All Editors
+
+* Major improvements in setting East Asia font names in interface
+* Fix several issues with 125% and 175% scales (Bug #51946, Bug #49877,
+  Bug #52329, Bug #52486, Bug #50724, Bug #52486)
+* Fix IE11 problem (Bug #52520)
+
+#### Document Editor
+
+* Fix `To next change` problem in Simple Markup (Bug #52204)
+* Fix problem selecting table in specific docx (Bug #52239)
+* Fix delimiter while insert cross-reference (Bug #51827)
+* Fix JS error for convert table to text for specific docx (Bug #52229)
+* Add some exceptions for auto-capitalization (Bug #52357)
+* Fix table border while saving PDF (Bug #52223)
+* Fix cell spacing in some specific docx (Bug #52435)
+* Fix table position for specific docx (Bug #52468)
+* Fix non-empty changes set for empty document (Bug #52556)
+* Fix page number position for specific document (Bug #52470)
+* Fix lost space symbol while inserting text (Bug #52070)
+* Fix convert to table single line (Bug #52603)
+* Fix JS error while opening some specific docx (Bug #52697)
+* Fix issues with dark theme and `New style from selection` (Bug #52672)
+
+#### Spreadsheet Editor
+
+* Fix problem with headers print (Bug #52231)
+* Fix memory leak in specific xlsx (Bug #52270)
+* Fix chart legend for specific xlsx (Bug #52118)
+* Fix changing item to percent conditional formatting (Bug #52189)
+* Fix deleting dropdown while using Clear All (Bug #44855)
+* Fix maximum call stack error for chart for whole column (Bug #52551)
+
+#### Presentation Editor
+
+* Fix JS error while duplicate slide (Bug #52550)([DocumentServer#1423](https://github.com/ONLYOFFICE/DocumentServer/issues/1423))
+* Fix chart style select (Bug #52113)
+
+#### Back End
+
+* Major redone of `AllFontsGen` for better support CJK fonts
+* Fix `logrotate` config (Bug #49523)
+* WOPI is disabled by default
+
+#### x2t
+
+* Fix `Date` conditional formatting when saving as ODS (Bug #51935)
+* Fix convert text to table borders in specific file (Bug #52159)
+* Fix conditional formatting with Begins with while saving to ODS (Bug #51937)
+* Fix broken pptx file after convert from ppt (Bug #52191)
+* Fix page color while converting rtf to docx (Bug #50003)
+* Fix convert docx to odt for specific files (Bug #52240)
+* Fix convert failure for specific pptx file (Bug #52259)
+* Fix image loss while docx -> rtf convert (Bug #52395)
+* Fix broken docx file after doc -> docx convert (Bug #52607)
+
+#### Mobile web editors
+
+* Fix locked cell names (Bug #52308)
+* Fix memory leak for specific docx file (Bug #52137)
+* Fix text input in emulator (Bug #52371)
+* Fix text selection in some specific cases (Bug #51121)
+* Fix context menu flickering (Bug #52512)
+
+#### Integration Example
+
+* Nodejs: Fix support of IE11
+* Add support of oxps files
+* Actualize sample templates
+* Fix nodejs example on custom port (Bug #50977)(Bug #52552)
+
+#### plugins
+
+* Actualize `macros` plugin libraries
+* Fix language select for `translate` plugin
+
+#### Docker
+
+* New `WOPI_ENABLED` environment variable
+
 ## 6.4.0
 
 ### New Features
