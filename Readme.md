@@ -1,4 +1,4 @@
-[![License](https://img.shields.io/badge/License-GNU%20AGPL%20V3-green.svg?style=flat)](https://www.gnu.org/licenses/agpl-3.0.en.html) ![Release](https://img.shields.io/badge/Release-v6.4-blue.svg?style=flat)
+[![License](https://img.shields.io/badge/License-GNU%20AGPL%20V3-green.svg?style=flat)](https://www.gnu.org/licenses/agpl-3.0.en.html) ![Release](https://img.shields.io/badge/Release-v6.4.1-blue.svg?style=flat)
 
 ## Overview
 
@@ -66,9 +66,9 @@ The table below will help you to make the right choice.
 | **Interface** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Tabbed interface                       | + | + | + |
 | Dark theme                             | + | + | + |
-| 150% scaling                           | + | + | + |
+| 125%, 150%, 175%, 200% scaling         | + | + | + |
 | White label                            | - | - | + |
-| Integrated test example (node.js)     | + | + | + |
+| Integrated test example (node.js)      | + | + | + |
 | Mobile web editors                     | - | +* | +* |
 | Access to pro features via desktop     | - | + | - |
 | **Plugins & Macros** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
@@ -98,12 +98,13 @@ The table below will help you to make the right choice.
 | Table templates                 | + | + | + |
 | Pivot tables                    | + | + | + |
 | Data validation                 | + | + | + |
-| Conditional formatting  for viewing | +** | +** | +** |
+| Conditional formatting          | + | + | + |
+| Sparklines                      | + | + | + |
 | Sheet Views                     | - | + | + |
 | **Presentation Editor features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
-| Transitions                  | + | + | + |
+| Transitions                     | + | + | + |
 | Presenter mode                  | + | + | + |
 | Notes                           | + | + | + |
 | **Security features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
@@ -111,8 +112,6 @@ The table below will help you to make the right choice.
 | | [Get it now](https://www.onlyoffice.com/download-docs.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS#docs-community)  | [Start Free Trial](https://www.onlyoffice.com/download-docs.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS#docs-enterprise)  | [Start Free Trial](https://www.onlyoffice.com/download-docs.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS#docs-developer)  |
 
 \* If supported by DMS
-
-\** Support for all conditions and gradient. Adding/Editing capabilities are coming soon
 
 ## Documentation
 
