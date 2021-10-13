@@ -213,6 +213,7 @@ HLOOKUP
 hotkey
 hotkeys
 html
+htmlutils
 https
 HYPGEOM
 icu
@@ -448,6 +449,7 @@ thai
 TINV
 TOC
 toLocaleString
+toolbarNoTabs
 tooltip
 tooltips
 trackpad

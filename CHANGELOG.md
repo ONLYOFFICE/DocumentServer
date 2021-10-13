@@ -6,7 +6,7 @@
 
 #### All Editors
 
-* Fix JS errors while copy chart from CDE to CPE (Bug #52844)
+* Fix JS errors while copy chart from Document Editor to Presentation Editor (Bug #52844)
 * Fix `htmlutils.js` not found for `toolbarNoTabs` (Bug #52849)([DocumentServer#1445](https://github.com/ONLYOFFICE/DocumentServer/issues/1445))
 
 #### Documents Editor
@@ -21,7 +21,7 @@
 #### Integration Example
 
 * Major updates in all components
-* Fix some issues in `wopi` view
+* Fix some issues in `WOPI` view
 
 ## 6.4.1
 
