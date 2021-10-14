@@ -1,5 +1,29 @@
 # Change log
 
+## 6.4.2
+
+### Fixes
+
+#### All Editors
+
+* Fix JS errors while copy chart from Document Editor
+  to Presentation Editor (Bug #52844)
+* Fix `htmlutils.js` not found for `toolbarNoTabs` option (Bug #52849)([DocumentServer#1445](https://github.com/ONLYOFFICE/DocumentServer/issues/1445))
+
+#### Documents Editor
+
+* Fix JS error while comparing some specific docx files (Bug #52909)
+* Fix JS error while undo in compare mode (Bug #52865)
+
+#### Spreadsheet Editor
+
+* Fix lost gradient in some files (Bug #52801)
+
+#### Integration Example
+
+* Major updates in all components
+* Fix some issues in `WOPI` view
+
 ## 6.4.1
 
 ### New Features
