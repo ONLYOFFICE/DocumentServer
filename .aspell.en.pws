@@ -43,6 +43,7 @@ blockcontent
 blocklevelstd
 BMP
 boolean
+br
 brower
 bugfix
 bugfixes
@@ -344,6 +345,7 @@ PhotoEditor
 PHP
 placholder
 Pluging
+PNG
 PostgreSql
 PostgreSQL
 postinst
