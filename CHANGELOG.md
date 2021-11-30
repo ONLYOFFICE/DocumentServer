@@ -8,7 +8,6 @@
 
 * New sort types for Comment left sidebar
 * Ability to call menu entries by pressing `alt+key`
-* New entries in `File -> Create new` menu
 * New canvas zoom options (up to 500%)
 * Ability to customize dark menu logo from API
 
