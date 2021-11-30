@@ -37,6 +37,10 @@
 * New setting for AutoFormat as you type -> hyperlinks and network paths
 * Ability to save presentation to `bmp` and `png`
 
+### Fixes
+
+* All components received countless fixes
+
 ## 6.4.2
 
 ### Fixes
