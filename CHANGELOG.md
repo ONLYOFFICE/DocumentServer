@@ -1,5 +1,42 @@
 # Change log
 
+## 7.0.0
+
+### New Features
+
+#### All Editors
+
+* New sort types for Comment left sidebar
+* Ability to call menu entries by pressing `alt+key`
+* New entries in `File -> Create new` menu
+* New canvas zoom options (up to 500%)
+* Ability to customize dark menu logo from API
+
+#### Document Editors
+
+* Completely new mode for creating, filling and sharing forms
+* Dark Mode (dark canvas background and other interface changes)
+* New settings to change review mode `Track Changes Display`
+* Ability to select local file for `Mail Merge`
+* New setting for AutoFormat as you type -> hyperlinks and network paths
+
+#### Spreadsheet Editor
+
+* Version History
+* Ability to protect spreadsheet files and separate sheets
+* Ability to show other users cursor in co-edit mode
+* Ability to separate sheets and status bar
+* `pt-br` formulas description and translation
+* Do not loose Query Table data
+* Copy sheet with drag-n-drop with holding `ctrl`
+
+#### Presentation Editors
+
+* Ability to display animations
+* Slide animation settings moved to top Tab
+* New setting for AutoFormat as you type -> hyperlinks and network paths
+* Ability to save presentation to `bmp` and `png`
+
 ## 6.4.2
 
 ### Fixes
