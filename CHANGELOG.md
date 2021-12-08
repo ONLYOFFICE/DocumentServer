@@ -13,6 +13,8 @@
 
 #### Document Editors
 
+* Ability to add Content Controls and
+  use File Comparison is available in OpenSource version
 * Completely new mode for creating, filling and sharing forms
 * Dark Mode (dark canvas background and other interface changes)
 * New settings to change review mode `Track Changes Display`
@@ -22,6 +24,7 @@
 #### Spreadsheet Editor
 
 * Version History
+* Ability to use Sheet Views is available in OpenSource version 
 * Ability to protect spreadsheet files and separate sheets
 * Ability to show other users cursor in co-edit mode
 * Ability to separate sheets and status bar

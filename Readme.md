@@ -84,13 +84,13 @@ The table below will help you to make the right choice.
 | **Document Editor features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
-| Adding Content control          | - | + | + |
+| Adding Content control          | + | + | + |
 | Editing Content control         | + | + | + |
 | Layout tools                    | + | + | + |
 | Table of contents               | + | + | + |
 | Navigation panel                | + | + | + |
 | Mail Merge                      | + | + | + |
-| Comparing Documents             | - | + | + |
+| Comparing Documents             | + | + | + |
 | **Spreadsheet Editor features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
@@ -100,7 +100,7 @@ The table below will help you to make the right choice.
 | Data validation                 | + | + | + |
 | Conditional formatting          | + | + | + |
 | Sparklines                      | + | + | + |
-| Sheet Views                     | - | + | + |
+| Sheet Views                     | + | + | + |
 | **Presentation Editor features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
