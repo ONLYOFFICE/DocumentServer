@@ -107,6 +107,10 @@ The table below will help you to make the right choice.
 | Transitions                     | + | + | + |
 | Presenter mode                  | + | + | + |
 | Notes                           | + | + | + |
+| **Form creator features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
+| Adding form fields              | + | + | + |
+| Form preview                    | + | + | + |
+| Saving as PDF                   | + | + | + |
 | **Security features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | End-to-end encryption via Private Rooms  | + | + | - |
 | | [Get it now](https://www.onlyoffice.com/download-docs.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS#docs-community)  | [Start Free Trial](https://www.onlyoffice.com/download-docs.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS#docs-enterprise)  | [Start Free Trial](https://www.onlyoffice.com/download-docs.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS#docs-developer)  |
