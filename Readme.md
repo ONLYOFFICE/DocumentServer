@@ -59,7 +59,7 @@ The table below will help you to make the right choice.
 | **Support** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Documentation | [Help Center](https://helpcenter.onlyoffice.com/installation/docs-community-index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/installation/docs-enterprise-index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/installation/docs-developer-index.aspx) |
 | Standard support | [GitHub](https://github.com/ONLYOFFICE/DocumentServer/issues) or paid | One year support included | One year support included |
-| Premium support | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) |
+| Premium support | [Contact Us](mailto:sales@onlyoffice.com) | [Contact Us](mailto:sales@onlyoffice.com) | [Contact Us](mailto:sales@onlyoffice.com) |
 | **Services** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Conversion Service                | + | + | + |
 | Document Builder Service          | + | + | + |
@@ -70,7 +70,6 @@ The table below will help you to make the right choice.
 | White label                            | - | - | + |
 | Integrated test example (node.js)      | + | + | + |
 | Mobile web editors                     | - | +* | +* |
-| Access to pro features via desktop     | - | + | - |
 | **Plugins & Macros** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Plugins                           | + | + | + |
 | Macros                            | + | + | + |
@@ -84,13 +83,13 @@ The table below will help you to make the right choice.
 | **Document Editor features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
-| Adding Content control          | - | + | + |
+| Adding Content control          | + | + | + |
 | Editing Content control         | + | + | + |
 | Layout tools                    | + | + | + |
 | Table of contents               | + | + | + |
 | Navigation panel                | + | + | + |
 | Mail Merge                      | + | + | + |
-| Comparing Documents             | - | + | + |
+| Comparing Documents             | + | + | + |
 | **Spreadsheet Editor features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
@@ -100,13 +99,17 @@ The table below will help you to make the right choice.
 | Data validation                 | + | + | + |
 | Conditional formatting          | + | + | + |
 | Sparklines                      | + | + | + |
-| Sheet Views                     | - | + | + |
+| Sheet Views                     | + | + | + |
 | **Presentation Editor features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Font and paragraph formatting   | + | + | + |
 | Object insertion                | + | + | + |
 | Transitions                     | + | + | + |
 | Presenter mode                  | + | + | + |
 | Notes                           | + | + | + |
+| **Form creator features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
+| Adding form fields              | + | + | + |
+| Form preview                    | + | + | + |
+| Saving as PDF                   | + | + | + |
 | **Security features** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | End-to-end encryption via Private Rooms  | + | + | - |
 | | [Get it now](https://www.onlyoffice.com/download-docs.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS#docs-community)  | [Start Free Trial](https://www.onlyoffice.com/download-docs.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS#docs-enterprise)  | [Start Free Trial](https://www.onlyoffice.com/download-docs.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS#docs-developer)  |
