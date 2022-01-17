@@ -70,7 +70,6 @@ The table below will help you to make the right choice.
 | White label                            | - | - | + |
 | Integrated test example (node.js)      | + | + | + |
 | Mobile web editors                     | - | +* | +* |
-| Access to pro features via desktop     | - | + | - |
 | **Plugins & Macros** | **Community Edition** | **Enterprise Edition** | **Developer Edition** |
 | Plugins                           | + | + | + |
 | Macros                            | + | + | + |
