@@ -5,7 +5,58 @@ This document provides the roadmap of the planned ONLYOFFICE Document Server cha
 This is an updated and corrected version of the roadmap.
 We also reserve the right to change it when necessary.
 
-## Version 6.5
+## Version 7.1
+
+### All editors
+
+* New menu for inserting autoshapes
+* Ability to edit points of a selected autoshape
+* Ability to open new diagram types: Pyramid, Bar (Pyramid),
+vertical and horizontal cylinders, vertical and horizontal cones
+* Ability to crop a selected image to shape
+* Sorting comments on the left sidebar by group
+* Ability to see your file protection password when entering it
+
+### Forms
+
+* Ability to zoom a form
+
+### Document editor
+
+* Ability to use the Page Thumbnails panel and to display
+the document's contents on the left sidebar for PDF files
+* Ability to use special symbols when searching documents
+* Ability to add a period with double-space
+
+### Spreadsheet editor
+
+* New view settings: Combine sheet and status bars,
+Always show toolbar, Interface theme, Show frozen panes shadow
+* New currency: CFP franc
+* Using tips when working with formulas for tables
+* Ability to set a text qualifier when importing text from TXT/CSV
+* Using a built-in preview panel before printing out a spreadsheet
+
+### Presentation editor
+
+* Ability to duplicate slides using the `Add slide` menu
+* Ability to move a slide to beginning/end using a slide context menu
+* Ability to insert recently used shapes using a new panel on the `Insert` tab
+* Ability to add a period with double-space
+
+### API updates
+
+* The last `callbackUrl`  is needed for sending a link to a compiled file
+if a file was edited by the same user on different tabs
+* New environment variable `X2T_MEMORY_LIMIT` limiting memory
+for the x2t process
+* New sections `Features` and `Layout` for `Customization`,
+the following parameters are renamed: `leftMenu` -> `layout.leftMenu`,
+`rightMenu` -> `layout.rightMenu`, `toolbar` -> `layout.toolbar`,
+`statusBar` -> `layout.statusBar`, `spellcheck` -> `features.spellcheck`
+* Ability to see the `customer_id` and the build type on `index.html`
+
+## Version 7.0
 
 ### All editors
 
