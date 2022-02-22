@@ -1,5 +1,64 @@
 # Change log
 
+## 7.0.1
+
+### New Features
+
+#### Spreadsheet Editor
+
+* `French (Switzerland)` regional setting (Bug #53978)
+
+### Fixes
+
+#### All Editors
+
+* Fix problem with broken `About` customization (Bug #55647)
+
+#### Document Editor
+
+* Fix changes in text position (Bug #54485)
+* Fix JS error while changing font in some files (Bug #55280)
+* Fix the problem with calculating the position
+  of flow objects lying in a table cell (Bug #51933)
+* Fix the problem with calculating the position of
+  a drawing object in the header (Bug #55398)
+* Fix the problem with calculating header/footer.
+  Forbid to change the page number of a header
+  when calculation in progress (Bug #55403)
+* Fix the problem with calculating the position
+  of a drawing lying in a table cell
+  with vertical alignment to the bottom or center (Bug #55406)
+* Fix the problem with calculating page count stage (Bug #55458)
+* Fix the problem with text position calculation for rotated table cells (Bug #54200)
+* Fix `Shift + (` shortcut (Bug #55356)
+
+#### Spreadsheet Editor
+
+* Fix opening protected workbook in Excel (Bug #55027)
+* Fix JS error while Find and Replace empty cell (Bug #54999)
+* Fix compatibility of some files with Excel (Bug #54956)
+
+#### Presentation Editor
+
+* Fix shape position in slideshow mode (Bug #55068)
+
+#### Forms
+
+* Fix problem with license end (Bug #54910)
+* Fix problem float characters limit (Bug #55410)
+
+#### Mobile Editor
+
+* Fix print and download permission problems (Bug #55043)
+
+#### Back End
+
+* Fix Remote Code Execution (Bug #54819)
+
+#### Package
+
+* Fix `rpm` update with some custom `local.json` values (Bug #50603)
+
 ## 7.0.0
 
 ### New Features
