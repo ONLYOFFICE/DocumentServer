@@ -6,6 +6,7 @@
 
 #### All Editors
 
+* ARM version
 * New menu for inserting shapes (with list of recent used)
 * Ability to edit points of a selected shapes
 * Ability to open new diagram types: Pyramid, Bar (Pyramid),
@@ -92,7 +93,7 @@
   `X-LOOL-WOPI-IsModifiedByUser`,
   `X-LOOL-WOPI-IsAutosave`,
   `X-LOOL-WOPI-IsExitSave`
-* Performance improvements via update build components
+* Performance improvements via build components update
 
 ### Fixes
 
