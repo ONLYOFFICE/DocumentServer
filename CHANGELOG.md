@@ -34,7 +34,7 @@
   All operations are performed on the client side.
 * Ability to use the Page Thumbnails panel and to
   display the document's contents on the left sidebar for PDF files
-* Support for external and internal links in PDF files via Control + Left mouse button
+* Support for external and internal links in PDF opening
 * Ability to use Hand/Select tools in PDF viewer
 * The Document Info section of the Data tab contains
   information about PDF, XPS, DJVU files
