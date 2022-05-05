@@ -56,6 +56,10 @@
 * Ability to insert recently used shapes using a new panel on the Insert tab
 * Ability to add a period with double-space
 
+#### Forms
+
+* Ability to zoom a form
+
 #### API
 
 * The last callbackUrl is needed for sending a link
