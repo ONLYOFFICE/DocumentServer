@@ -92,6 +92,7 @@
   `X-LOOL-WOPI-IsModifiedByUser`,
   `X-LOOL-WOPI-IsAutosave`,
   `X-LOOL-WOPI-IsExitSave`
+* Performance improvements via update build components
 
 ### Fixes
 
