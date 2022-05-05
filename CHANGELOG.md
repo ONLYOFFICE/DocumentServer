@@ -6,7 +6,7 @@
 
 #### All Editors
 
-* New menu for inserting shapes
+* New menu for inserting shapes (with list of recent used)
 * Ability to edit points of a selected shapes
 * Ability to open new diagram types: Pyramid, Bar (Pyramid),
   vertical and horizontal cylinders, vertical and horizontal cones
@@ -25,10 +25,12 @@
 * Ability to accept/reject changes from the context menu
 * Ability to use special symbols when searching within documents
 * Ability to add a period with a double-space
+* Add Chinese/Japanese/Italian language to Watermark settings
 
 #### Document Viewer
 
 * New viewer for PDF, XPS, DJVU files with major performance improvements
+  All operations are performed on the client side.
 * Ability to use the Page Thumbnails panel and to
   display the document's contents on the left sidebar for PDF files
 * Support for external and internal links in PDF files via Control + Left mouse button
@@ -47,10 +49,13 @@
 * Using tips when working with formulas for tables
 * Ability to set a text qualifier when importing text from TXT/CSV
 * Support for XLSB files for opening
+* New context menu for moving sheets
+* Groups can be opened and closed in view/comments mode
 
 #### Presentation Editor
 
 * New toolbar tabs: Animation, View
+* Animations can be added to the presentation
 * Ability to duplicate slides using the Add slide menu
 * Ability to move a slide to beginning/end using a slide context menu
 * Ability to insert recently used shapes using a new panel on the Insert tab
@@ -60,18 +65,25 @@
 
 * Ability to zoom a form
 
+#### Mobile Editors
+
+* Dark themes in mobile web editors and viewers
+* New button to show lists in spreadsheet
+
 #### API
 
 * The last callbackUrl is needed for sending a link
  to a compiled file if a file was edited by the same user on different tabs
-* New sections Features and Layout for Customization,
-  the following parameters are renamed:
+* New sections Features and Layout for Customization.
+  Ability to customize interface, toolbar, left, right, bottom sidebar
+* The following parameters are renamed:
   `leftMenu` -> `layout.leftMenu`,
   `rightMenu` -> `layout.rightMenu`,
   `toolbar` -> `layout.toolbar`,
   `statusBar` -> `layout.statusBar`,
   `spellcheck` -> `features.spellcheck`
 * Ability to see the customer_id and the build type on index.html
+* A lot of other changes in API, described [here](https://api.onlyoffice.com/editors/changelog#71)
 
 #### Back end
 
