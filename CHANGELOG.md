@@ -1,5 +1,82 @@
 # Change log
 
+## 7.1.0
+
+### New Features
+
+#### All Editors
+
+* New menu for inserting shapes
+* Ability to edit points of a selected shapes
+* Ability to open new diagram types: Pyramid, Bar (Pyramid),
+  vertical and horizontal cylinders, vertical and horizontal cones
+* Ability to crop a selected image to shape
+* Sorting comments on the left sidebar by group
+* Ability to see your file protection password when entering it
+* Support for SmartArt objects without converting into a group of objects
+* New interface languages: Galego/Galician, Azerbaijani
+* Notifications appear when connection is lost and being restored
+* Gradient fill icon shows the chosen colors
+
+#### Document Editor
+
+* Ability to convert PDF/XPS files into editable files
+* New toolbar tab: View
+* Ability to accept/reject changes from the context menu
+* Ability to use special symbols when searching within documents
+* Ability to add a period with a double-space
+
+#### Document Viewer
+
+* New viewer for PDF, XPS, DJVU files with major performance improvements
+* Ability to use the Page Thumbnails panel and to
+  display the document's contents on the left sidebar for PDF files
+* Support for external and internal links in PDF files via Control + Left mouse button
+* Ability to use Hand/Select tools in PDF viewer
+* The Document Info section of the Data tab contains
+  information about PDF, XPS, DJVU files
+
+#### Spreadsheet Editor
+
+* Using a built-in preview panel before printing out a spreadsheet
+* New view settings: Combine sheet and status bars,
+  Always show toolbar,
+  Interface theme,
+  Show frozen panes shadow
+* New currencies as per ISO 4217 without needing to change the locale
+* Using tips when working with formulas for tables
+* Ability to set a text qualifier when importing text from TXT/CSV
+* Support for XLSB files for opening
+
+#### Presentation Editor
+
+* New toolbar tabs: Animation, View
+* Ability to duplicate slides using the Add slide menu
+* Ability to move a slide to beginning/end using a slide context menu
+* Ability to insert recently used shapes using a new panel on the Insert tab
+* Ability to add a period with double-space
+
+#### API
+
+* The last callbackUrl is needed for sending a link
+ to a compiled file if a file was edited by the same user on different tabs
+* New sections Features and Layout for Customization,
+  the following parameters are renamed:
+  `leftMenu` -> `layout.leftMenu`,
+  `rightMenu` -> `layout.rightMenu`,
+  `toolbar` -> `layout.toolbar`,
+  `statusBar` -> `layout.statusBar`,
+  `spellcheck` -> `features.spellcheck`
+* Ability to see the customer_id and the build type on index.html
+
+#### Back end
+
+* New environment variable X2T_MEMORY_LIMIT limiting memory for the x2t process
+* [WOPI] New headers for putFile request:
+  `X-LOOL-WOPI-IsModifiedByUser`,
+  `X-LOOL-WOPI-IsAutosave`,
+  `X-LOOL-WOPI-IsExitSave`
+
 ## 7.0.1
 
 ### New Features
