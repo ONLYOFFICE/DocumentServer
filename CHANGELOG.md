@@ -77,6 +77,10 @@
   `X-LOOL-WOPI-IsAutosave`,
   `X-LOOL-WOPI-IsExitSave`
 
+### Fixes
+
+* All components received countless fixes
+
 ## 7.0.1
 
 ### New Features
