@@ -6,7 +6,7 @@
 
 #### All Editors
 
-* ARM version
+* ARM version for some systems
 * New menu for inserting shapes (with list of recent used)
 * Ability to edit points of a selected shapes
 * Ability to open new diagram types: Pyramid, Bar (Pyramid),
