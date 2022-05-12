@@ -1,5 +1,104 @@
 # Change log
 
+## 7.1.0
+
+### New Features
+
+#### All Editors
+
+* ARM version for some systems
+* New menu for inserting shapes (with list of recent used)
+* Ability to edit points of a selected shapes
+* Ability to open new diagram types: Pyramid, Bar (Pyramid),
+  vertical and horizontal cylinders, vertical and horizontal cones
+* Ability to crop a selected image to shape
+* Sorting comments on the left sidebar by group
+* Ability to see your file protection password when entering it
+* Support for SmartArt objects without converting into a group of objects
+* New interface languages: Galego/Galician, Azerbaijani
+* Notifications appear when connection is lost and being restored
+* Gradient fill icon shows the chosen colors
+
+#### Document Editor
+
+* Ability to convert PDF/XPS files into editable files
+* New toolbar tab: View
+* Ability to accept/reject changes from the context menu
+* Ability to use special symbols when searching within documents
+* Ability to add a period with a double-space
+* Add Chinese/Japanese/Italian language to Watermark settings
+
+#### Document Viewer
+
+* New viewer for PDF, XPS, DJVU files with major performance improvements
+  All operations are performed on the client side.
+* Ability to use the Page Thumbnails panel and to
+  display the document's contents on the left sidebar for PDF files
+* Support for external and internal links in PDF opening
+* Ability to use Hand/Select tools in PDF viewer
+* The Document Info section of the Data tab contains
+  information about PDF, XPS, DJVU files
+
+#### Spreadsheet Editor
+
+* Using a built-in preview panel before printing out a spreadsheet
+* New `View` tab with settings like: Combine sheet and status bars,
+  Always show toolbar,
+  Interface theme,
+  Show frozen panes shadow
+* New currencies as per ISO 4217 without needing to change the locale
+* Using tips when working with formulas for tables
+* Ability to set a text qualifier when importing text from TXT/CSV
+* Support for XLSB files for opening
+* New context menu for moving sheets
+* Groups can be opened and closed in view/comments mode
+
+#### Presentation Editor
+
+* New toolbar tabs: Animation, View
+* Animations can be added to the presentation
+* Ability to duplicate slides using the Add slide menu
+* Ability to move a slide to beginning/end using a slide context menu
+* Ability to insert recently used shapes using a new panel on the Insert tab
+* Ability to add a period with double-space
+
+#### Forms
+
+* Ability to zoom a form
+
+#### Mobile Editors
+
+* Dark themes in mobile web editors and viewers
+* New button to show lists in spreadsheet
+
+#### API
+
+* The last callbackUrl is needed for sending a link
+ to a compiled file if a file was edited by the same user on different tabs
+* New sections Features and Layout for Customization.
+  Ability to customize interface, toolbar, left, right, bottom sidebar
+* The following parameters are renamed:
+  `leftMenu` -> `layout.leftMenu`,
+  `rightMenu` -> `layout.rightMenu`,
+  `toolbar` -> `layout.toolbar`,
+  `statusBar` -> `layout.statusBar`,
+  `spellcheck` -> `features.spellcheck`
+* Ability to see the customer_id and the build type on index.html
+* A lot of other changes in API, described [here](https://api.onlyoffice.com/editors/changelog#71)
+
+#### Back end
+
+* New environment variable X2T_MEMORY_LIMIT limiting memory for the x2t process
+* [WOPI] New headers for putFile request:
+  `X-LOOL-WOPI-IsModifiedByUser`,
+  `X-LOOL-WOPI-IsAutosave`,
+  `X-LOOL-WOPI-IsExitSave`
+* Performance improvements via build components update
+
+### Fixes
+
+* All components received countless fixes
+
 ## 7.0.1
 
 ### New Features

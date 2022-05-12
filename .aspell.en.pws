@@ -1,4 +1,4 @@
-personal_ws-1.1 en 472 utf-8
+personal_ws-1.1 en 522 utf-8
 ACOT
 ACOTH
 ActiveCell
@@ -50,6 +50,7 @@ bugfixes
 builded
 callbackUrl
 CanUpdateTarget
+CentOS
 cff
 changesError
 checkbox
@@ -61,7 +62,6 @@ CHISQ
 CHITEST
 citus
 CJK
-CentOS
 clipart
 Clipart
 ClipArt
@@ -169,6 +169,8 @@ ForEach
 FORMULATEXT
 FTEST
 fullscreen
+Galego
+Galician
 GAMMADIST
 GAMMAINV
 gc
@@ -237,7 +239,10 @@ INTL
 INV
 iOS
 ipfilter
+IsAutosave
+IsExitSave
 ISFORMULA
+IsModifiedByUser
 ISOWEEKNUM
 isSaveLock
 japanese
@@ -250,6 +255,7 @@ JWT
 korean
 lang
 LeftMargin
+leftMenu
 libcurl
 librabbitmq
 libs
@@ -262,6 +268,7 @@ LOGEST
 LOGNORM
 logrotate
 lookup
+LOOL
 LTS
 macOS
 MacOs
@@ -274,9 +281,9 @@ MergeArea
 metadata
 metafile
 México
+mht
 MINIFS
 minishift
-mht
 MoveCursorToEnd
 MoveCursorToStart
 mscorefonts
@@ -359,18 +366,19 @@ PptxFormat
 Preseentation
 PrintGridlines
 PrintHeadings
+putFile
 QUARTILE
 rabbitmq
-rastr
 RANDARRAY
+rastr
 ReadFromBinary
 Realtime
 rebranding
 Rebranding
-Redistributable
 reconnection
 rect
 redis
+Redistributable
 refactor
 Refactor
 refactoring
@@ -379,6 +387,7 @@ replyStr
 republika
 reSave
 resize
+rightMenu
 RowHeight
 RRI
 rtf
@@ -392,7 +401,6 @@ Schweiz
 sdk
 sdkjs
 sdt
-SharedWorker
 SECH
 SecurityError
 selectwheel
@@ -410,6 +418,7 @@ SetRightMargin
 SetRowHeight
 SetTopMargin
 SetVisible
+SharedWorker
 SheetView
 showReviewChanges
 shrinkwrap
@@ -418,6 +427,7 @@ SIGABR
 signatureLine
 Slovenčina
 Slovenská
+SmartArt
 snaplines
 SNGL
 sockjs
@@ -434,6 +444,7 @@ ssl
 sslEnabled
 startup
 statsd
+statusBar
 STDEV
 stirkeout
 SUMIFS
@@ -492,20 +503,21 @@ wmf
 WOPI
 WrapText
 xfIndexNumber
+XLOOKUP
 xls
 XLS
+XLSB
 XlsFormatReader
 xlsx
 XLSX
 XLTX
 xps
 XSS
-XLOOKUP
 Yandex
 youtube
 yy
 yyyy
+ZA
 Zb
 Zotero
-ZA
 ZTEST
