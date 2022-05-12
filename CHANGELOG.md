@@ -42,7 +42,7 @@
 #### Spreadsheet Editor
 
 * Using a built-in preview panel before printing out a spreadsheet
-* New view settings: Combine sheet and status bars,
+* New `View` tab with settings like: Combine sheet and status bars,
   Always show toolbar,
   Interface theme,
   Show frozen panes shadow
