@@ -94,6 +94,8 @@
   `X-LOOL-WOPI-IsAutosave`,
   `X-LOOL-WOPI-IsExitSave`
 * Performance improvements via build components update
+* `ttf-mscorefonts-installer` is now mandatory dependency for Linux version, for
+  better compatibility with ooxml files
 
 ### Fixes
 
