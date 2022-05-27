@@ -1,5 +1,61 @@
 # Change log
 
+## 7.1.1
+
+### Fixes
+
+#### All Editors
+
+* Fix rendering list of fonts if there is a lot of fonts (Bug #46495)
+* Fix rendering of some Chinese fonts (Bug #48564)([DocumentServer#1142](https://github.com/ONLYOFFICE/DocumentServer/issues/1142))
+* Update help entries
+
+#### Document Editor
+
+* Fix lost text box in Header (Bug #56940)
+* Fix incorrect table width for some doc file (Bug #56901)
+* Fix convert of some docx files (Bug #57068, Bug #57177)
+* Fix color of SmartArt figures in docx -> odt convert (Bug #57104)
+* Fix page count in specific doc file (Bug #57334)
+* Fix insert page with merge cells and drag'n'drop (Bug #57305)
+* Fix zoom while touch-pad scrolling (Bug #56029)
+* Hide "Create new" for offline pdf/djvu/xps files
+
+#### Spreadsheet Editor
+
+* Fix all sheets display while saving as pdf (Bug #49163)
+* Fix zoom change with touch-pad on MacOS (Bug #57249)
+
+#### Presentation Editor
+
+* Fix re-save of some pptx files (Bug #57070)
+* Fix test align for some ODP files (Bug #57214)
+* Fix saving SmartArt in groups (Bug #57112)
+* Fix crash on drawing animation labels by shape track
+
+#### PDF Viewer
+
+* Fix lost text in PDF -> ODT (Bug #57274)
+* Fix lost text in PDF -> image convert (Bug #57363)
+* Fix calling translate plugin (Bug #53808)
+
+#### Mobile Web
+
+* Fix merged button on tablets (Bug #56884)
+* Fix interface move after close find & replace (Bug #56966)
+* Fix tooltip for function description (Bug #56968)
+
+#### Document Builder
+
+* Fix broken presentation after using `ApiSlide.ApplyTheme` (Bug #57062)
+
+#### Back End
+
+* Fix crash with config with undefined permissions
+* Increase connectionAndInactivity to reduce ESOCKETTIMEDOUT
+  error on download and save
+* Return inBody param for backwards compatibility with changes2forgotten
+
 ## 7.1.0
 
 ### New Features
