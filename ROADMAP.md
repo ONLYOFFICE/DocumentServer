@@ -56,11 +56,13 @@ in the right panel
 positioning of images, tables, and charts
 
 ### Mobile
+
 * New interface language: Indonesian
 * New features in the Document Editor: header navigation,
 ability to add table of contents and configure its setting
 
 ### Plugins
+
 * New translation mechanic in plugins: ability to add `langs.json`
 to folder with translations;  first there is a request for a full match
 in file name and language, then up to the `-` symbol
@@ -74,6 +76,7 @@ is supported. Currently it is used for Portuguese (Portugal) and
 Chinese (Traditional, Taiwan)
 
 ### WOPI
+
 * Ability to open embedded viewer in WOPI discovery
 
 ## Version 7.1
