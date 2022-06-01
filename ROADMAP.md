@@ -5,6 +5,80 @@ This document provides the roadmap of the planned ONLYOFFICE Document Server cha
 This is an updated and corrected version of the roadmap.
 We also reserve the right to change it when necessary.
 
+## Version 7.2
+
+### All editors
+
+* Ability to rename document at the top of the editor window
+* Warning when a macro makes a request to any URL
+* Search field is reworked
+* The `View` tab is available in read-only mode and comment mode
+* Ability to edit OLE objects
+* Advanced settings are reworked
+* Ability to enable/disable using the Option key to navigate
+the editors via keyboard
+* Web editor interface theme can be synchronized with the
+system theme
+* New web editor info: the `About` section contains build number
+* New search panel in the embedded versions of the
+Document Editor and the Spreadsheet Editor
+* Top toolbar is reworked
+* New interface languages: Basque, Malay,
+Portuguese (Portugal), Chinese (Traditional, Taiwan)
+
+### Forms
+
+* New interface language: Indonesian
+* Ability to add tags
+
+### Document Editor
+
+* New interface language: Indonesian
+* PDF viewer navigation panel is renamed and has its own settings:
+expand/collapse all, expand to level X, font size, wrap headings
+* Ability to remove headers/footers via toolbar
+* Ability to include current title in the table of contents via toolbar
+and designated button
+* New spellcheck settings in the advanced settings
+
+### Spreadsheet Editor
+
+* Ability to use custom images as bullets in bullet lists
+* Ability to switch rows/columns using the diagram settings
+in the right panel
+
+### Presentation Editor
+
+* New spellcheck settings in the advanced settings
+* Support for PPSX files, they open in preview mode
+* Ability to use custom images as bullets in bullet lists
+* Reworked advanced settings' `Placement` tab for precise
+positioning of images, tables, and charts
+
+### Mobile
+
+* New interface language: Indonesian
+* New features in the Document Editor: header navigation,
+ability to add table of contents and configure its setting
+
+### Plugins
+
+* New translation mechanic in plugins: ability to add `langs.json`
+to folder with translations;  first there is a request for a full match
+in file name and language, then up to the `-` symbol
+
+### API updates
+
+* New feature: live viewer for tracking changes in real-time
+* The Document Server information contains live viewer/editor data
+* New interface translation support: 4-letter language designation
+is supported. Currently it is used for Portuguese (Portugal) and
+Chinese (Traditional, Taiwan)
+
+### WOPI
+
+* Ability to open embedded viewer in WOPI discovery
+
 ## Version 7.1
 
 ### All editors
