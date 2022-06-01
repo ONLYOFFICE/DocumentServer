@@ -1,4 +1,4 @@
-personal_ws-1.1 en 522 utf-8
+personal_ws-1.1 en 526 utf-8
 ACOT
 ACOTH
 ActiveCell
@@ -9,7 +9,9 @@ AllFontsGen
 altGr
 Api
 ApiRange
+ApiSlide
 ApiWorksheet
+ApplyTheme
 Asana
 ASC
 ashx
@@ -78,6 +80,7 @@ ConditionalFormatting
 conf
 config
 configs
+connectionAndInactivity
 ConnectionsOS
 COnOfftype
 convertasion
@@ -149,6 +152,7 @@ endnotes
 ePub
 EQ
 ERFC
+ESOCKETTIMEDOUT
 Español
 ETS
 EXC
