@@ -29,7 +29,7 @@
 #### Presentation Editor
 
 * Fix re-save of some pptx files (Bug #57070)
-* Fix test align for some ODP files (Bug #57214)
+* Fix text align for some ODP files (Bug #57214)
 * Fix saving SmartArt in groups (Bug #57112)
 * Fix crash on drawing animation labels by shape track
 
