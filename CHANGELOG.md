@@ -1,5 +1,73 @@
 # Change log
 
+## 7.2.0
+
+### New Features
+
+#### All Editors
+
+* JWT with random key enabled by default. This fix CVE-2021-43445,
+  CVE-2021-43447, CVE-2021-43448, CVE-2021-43449
+* Random secret key by default. Fix CVE-2021-43444
+* Show warning on macros execution if connection to another host. Fix CVE-2021-43446
+* Smaller button on top toolbar
+* `Same as system` color scheme option
+* More options in `View` tab
+* Redone of icons in header line
+* Ability to rename file from header (Should be supported by DMS)
+* Redone of settings page
+* Exact build number in `About` page
+* New `Live viewer`  - ability to see changes in view mode
+ (Should be supported by DMS)
+* New interface languages - `pt-PT`, `zh-TW`, `eu-ES`, `ms-MY`, `hy-AM`
+* Redone of color selection component
+* New option to disable alternative menu on macOS
+* Fully redone search window
+* New hotkeys for `Special Paste`
+* `Cut` and `Select All` button on Top Toolbar
+* Major improvements in Font engine (For languages like Bengali or Sinhala)
+* Ligatures support
+* Ability to insert tables as OLE object
+* Ability to set image as marked list item and correct display of such lists
+* New advanced settings `Placement` tab for shapes\charts\images
+* Major improvements in `EMF` files rendering
+
+#### Document Editor
+
+* Ability  to remove Header/Footer from toolbar
+* Ability to insert current heading in TOC
+* New warning if there is no TOC in document
+* Navigation panel renamed to `Headings`
+* Major improvements in `pdf`, `djvu`, `xps` convert to `docx`
+* Greek letters as numbered list items
+
+##### Spreadsheet Editor
+
+* Ability to `Switch rows and columns` for Chart
+* New `Italiano (Svizzera)` language for regional settings
+* Row number highlight for filter
+* Remove `First sheet` and `Last sheet` from bottom toolbar
+* Selection of copied range
+* `Get link to this range` in context menu
+* Pivot table option - `Auto-fit column widths on update`
+* 1904 date system support
+
+##### Presentation Editor
+
+* Animation with Custom path
+
+#### Forms
+
+* Search in embedded and forms mode
+* Change field width for `Comb of characters`-enabled field
+* Ability to set tag for field
+* New `Format` and `Allowed Symbols` settings for field
+* New field types - `Phone number`, `Email Address` and `Complex Field`
+
+### Fixes
+
+* All components received countless fixes
+
 ## 7.1.1
 
 ### Fixes

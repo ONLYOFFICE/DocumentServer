@@ -1,4 +1,4 @@
-personal_ws-1.1 en 526 utf-8
+personal_ws-1.1 en 533 utf-8
 ACOT
 ACOTH
 ActiveCell
@@ -155,6 +155,7 @@ ERFC
 ESOCKETTIMEDOUT
 Español
 ETS
+eu
 EXC
 EXPON
 fb
@@ -222,6 +223,7 @@ hotkeys
 html
 htmlutils
 https
+hy
 HYPGEOM
 icu
 ie
@@ -249,6 +251,7 @@ ISFORMULA
 IsModifiedByUser
 ISOWEEKNUM
 isSaveLock
+Italiano
 japanese
 jpeg
 js
@@ -429,6 +432,7 @@ shrinkwrap
 si
 SIGABR
 signatureLine
+Sinhala
 Slovenčina
 Slovenská
 SmartArt
@@ -458,6 +462,7 @@ Svenska
 Sverige
 svg
 SVG
+Svizzera
 tabSelected
 TDIST
 TEXTJOIN
@@ -474,6 +479,7 @@ TRIMMEAN
 truetype
 TTEST
 ttf
+TW
 txPr
 txt
 ubuntu
@@ -523,5 +529,6 @@ yy
 yyyy
 ZA
 Zb
+zh
 Zotero
 ZTEST
