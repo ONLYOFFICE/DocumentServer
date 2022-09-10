@@ -10,7 +10,7 @@
   CVE-2021-43447, CVE-2021-43448, CVE-2021-43449
 * Random secret key by default. Fix CVE-2021-43444
 * Show warning on macros execution if connection to another host. Fix CVE-2021-43446
-* Smaller button on top toolbar
+* Top toolbar optimizations for smaller screens
 * `Same as system` color scheme option
 * More options in `View` tab
 * Redone of icons in header line
