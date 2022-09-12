@@ -74,6 +74,10 @@
 * Auto detect of DB type in `deb` package
 * `arm64` and `amd64` docker images use same tag
 
+###### Back-end
+
+* `WOPI` discovery action for embedded viewer
+
 ##### Customization
 
 * Ability to set phone in `About` page
