@@ -33,7 +33,7 @@
 * Ligatures support
 * Ability to insert tables as OLE object
 * Ability to set image as marked list item and correct display of such lists
-* Major improvements in `EMF` files rendering
+* Major improvements in `EMF` and `WMF` files rendering
 * Completely new plugin marketplace
 
 #### Document Editor
