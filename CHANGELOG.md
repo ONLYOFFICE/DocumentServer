@@ -43,7 +43,7 @@
 * New warning if there is no TOC in document
 * Navigation panel renamed to `Headings`
 * Major improvements in `pdf`, `djvu`, `xps` convert to `docx`
-* Greek letters as numbered list items
+* Correct display greek letters as numbered list items
 
 ##### Spreadsheet Editor
 
