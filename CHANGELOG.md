@@ -9,8 +9,10 @@
 * JWT with random key enabled by default. This fix CVE-2021-43445,
   CVE-2021-43447, CVE-2021-43448, CVE-2021-43449
 * Random secret key by default. Fix CVE-2021-43444
+* Fix CVE-2022-32212 by upgrading nodejs version
 * Show warning on macros execution if connection to another host. Fix CVE-2021-43446
 * Top toolbar optimizations for smaller screens
+* New `Dark Contrast` color scheme
 * `Same as system` color scheme option
 * More options in `View` tab
 * Redone of icons in header line
@@ -19,9 +21,10 @@
 * Exact build number in `About` page
 * New `Live viewer`  - ability to see changes in view mode
  (Should be supported by DMS)
+* Stat page will show statistics for `Live viewer` 
 * New interface languages - `pt-PT`, `zh-TW`, `eu-ES`, `ms-MY`, `hy-AM`
 * Redone of color selection component
-* New option to disable alternative menu on macOS
+* New option to disable alternative menu
 * Fully redone search window
 * New hotkeys for `Special Paste`
 * `Cut` and `Select All` button on Top Toolbar
@@ -63,6 +66,15 @@
 * Ability to set tag for field
 * New `Format` and `Allowed Symbols` settings for field
 * New field types - `Phone number`, `Email Address` and `Complex Field`
+
+##### Installation
+
+* Auto detect of DB type in `deb` package
+* `arm64` and `amd64` docker images use same tag
+
+##### Customization
+
+* Ability to set phone in `About` page
 
 ### Fixes
 
