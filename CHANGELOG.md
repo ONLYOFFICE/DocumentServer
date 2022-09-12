@@ -21,7 +21,7 @@
 * Exact build number in `About` page
 * New `Live viewer`  - ability to see changes in view mode
  (Should be supported by DMS)
-* Stat page will show statistics for `Live viewer` 
+* Stat page will show statistics for `Live viewer`
 * New interface languages - `pt-PT`, `zh-TW`, `eu-ES`, `ms-MY`, `hy-AM`
 * Redone of color selection component
 * New option to disable alternative menu
@@ -43,7 +43,7 @@
 * New warning if there is no TOC in document
 * Navigation panel renamed to `Headings`
 * Major improvements in `pdf`, `djvu`, `xps` convert to `docx`
-* Correct display greek letters as numbered list items
+* Correct display Greek letters as numbered list items
 
 ##### Spreadsheet Editor
 
