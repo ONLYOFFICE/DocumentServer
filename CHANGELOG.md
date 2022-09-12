@@ -29,6 +29,7 @@
 * New hotkeys for `Special Paste`
 * `Cut` and `Select All` button on Top Toolbar
 * Major improvements in Font engine (For languages like Bengali or Sinhala)
+  (Only in Document Editor and Presentation Editor)
 * Ligatures support
 * Ability to insert tables as OLE object
 * Ability to set image as marked list item and correct display of such lists
