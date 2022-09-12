@@ -14,7 +14,7 @@
 * Top toolbar optimizations for smaller screens
 * New `Dark Contrast` color scheme
 * `Same as system` color scheme option
-* More options in `View` tab
+* More options in `View` tab. View tab available in comment and view mode
 * Redone of icons in header line
 * Ability to rename file from header (Should be supported by DMS)
 * Redone of settings page
@@ -33,8 +33,8 @@
 * Ligatures support
 * Ability to insert tables as OLE object
 * Ability to set image as marked list item and correct display of such lists
-* New advanced settings `Placement` tab for shapes\charts\images
 * Major improvements in `EMF` files rendering
+* Completely new plugin marketplace
 
 #### Document Editor
 
@@ -59,6 +59,7 @@
 ##### Presentation Editor
 
 * Animation with Custom path
+* New advanced settings `Placement` tab for shapes\charts\images
 
 #### Forms
 
