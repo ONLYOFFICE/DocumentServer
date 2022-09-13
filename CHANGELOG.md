@@ -27,7 +27,7 @@
 * New option to disable alternative menu
 * Completely redesigned search inside the document
 * New hotkeys for `Special Paste`
-* Added `Cut` and `Select All` buttons to the toolbar next to `Сopy`\`Paste`
+* Added `Cut` and `Select All` buttons to the toolbar next to `Copy`\`Paste`
 * Major improvements in Font engine (For languages like Bengali or Sinhala)
   (Only in Document Editor and Presentation Editor)
 * Ligatures support
