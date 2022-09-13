@@ -12,8 +12,8 @@
 * Fix CVE-2022-32212 by upgrading nodejs version
 * Show warning on macros execution if connection to another host. Fix CVE-2021-43446
 * Top toolbar optimizations for smaller screens
-* New `Dark Contrast` color scheme
-* `Same as system` color scheme option
+* Added the ability to choose "Contrast Dark" or "System default"
+  interface theme (Bug 59010)
 * More options in `View` tab. View tab available in comment and view mode
 * Redone of icons in header line
 * Ability to rename file from header (Should be supported by DMS)
@@ -25,14 +25,14 @@
 * New interface languages - `pt-PT`, `zh-TW`, `eu-ES`, `ms-MY`, `hy-AM`
 * Redone of color selection component
 * New option to disable alternative menu
-* Fully redone search window
+* Completely redesigned search inside the document
 * New hotkeys for `Special Paste`
-* `Cut` and `Select All` button on Top Toolbar
+* Added `Cut` and `Select All` buttons to the toolbar next to `Сopy`\`Paste`
 * Major improvements in Font engine (For languages like Bengali or Sinhala)
   (Only in Document Editor and Presentation Editor)
 * Ligatures support
 * Ability to insert tables as OLE object
-* Ability to set image as marked list item and correct display of such lists
+* Support for images as a bulleted list and the ability to work with them
 * Major improvements in `EMF` and `WMF` files rendering
 * Completely new plugin marketplace
 
