@@ -100,7 +100,7 @@
   `ApiParagraph.AddCaptionCrossRef();`
 * New methods to replace elements:
   
-  ```
+  ```javascript
   ApiParagraph.GetPosInParent();
   ApiParagraph.ReplaceByElement();
 
@@ -111,11 +111,11 @@
   ApiBlockLvlSdt.ReplaceByElement();
   ```
 
-* New methods to get size in EMU for drawings 
+* New methods to get size in EMU for drawings
   `ApiDrawing.GetWidth();` and `ApiDrawing.GetHeight();`
 * Add new methods for chart:
 
-  ```
+  ```javascript
   ApiChart.ApplyChartStyle();
   ApiChart.SetPlotAreaFill();
   ApiChart.SetPlotAreaOutLine();
