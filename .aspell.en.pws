@@ -1,8 +1,14 @@
-personal_ws-1.1 en 534 utf-8
+personal_ws-1.1 en 563 utf-8
 ACOT
 ACOTH
 ActiveCell
+AddBookmarkCrossRef
+AddCaptionCrossRef
 AddComment
+AddEndnoteCrossRef
+AddFootnoteCrossRef
+AddHeadingCrossRef
+AddNumberedCrossRef
 AddSheet
 adSm
 AllFontsGen
@@ -12,6 +18,7 @@ Api
 ApiRange
 ApiSlide
 ApiWorksheet
+ApplyChartStyle
 ApplyTheme
 Asana
 ASC
@@ -183,12 +190,19 @@ gc
 gcc
 GenerateGuid
 GetAdress
+GetAllCaptionParagraphs
+GetAllHeadingParagraphs
+GetAllNumberedParagraphs
 GetBottomMargin
 GetCells
 GetCols
 GetColumnWidth
 GetCount
 GetCurrentContentControlPr
+GetEndNotesFirstParagraphs
+GetFontNames
+GetFootnotesFirstParagraphs
+GetHeight
 GetHidden
 GetIndex
 GetLeftMargin
@@ -207,6 +221,7 @@ GetTopMargin
 GetUsedRange
 GetValue
 GetVisible
+GetWidth
 GetWpar
 glyphs
 gnutls
@@ -347,6 +362,7 @@ owncloud
 oxps
 pageDown
 ParaDrawing
+Paragarph
 param
 params
 passsword
@@ -416,14 +432,26 @@ SELinux
 sessionId
 SetBottomMargin
 SetColumnWidth
+SetDataPointFill
+SetDataPointOutLine
 SetHidden
 SetLeftMargin
+SetLegendFill
+SetLegendOutLine
 setLocale
 setMailMergeRecipients
+SetMarkerFill
+SetMarkerOutLine
 SetOffset
 SetPageOrientation
+SetPlotAreaFill
+SetPlotAreaOutLine
 SetRightMargin
 SetRowHeight
+SetSeriesFill
+SetSeriesOutLine
+SetTitleFill
+SetTitleOutLine
 SetTopMargin
 SetVisible
 SharedWorker

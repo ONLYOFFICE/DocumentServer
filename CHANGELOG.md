@@ -82,6 +82,60 @@
 
 * Ability to set phone in `About` page
 
+##### Api
+
+* `GetFontNames()` methods for `Paragarph` and `Run`
+* New methods to get cross-reference data:
+  `ApiDocument.GetAllNumberedParagraphs();`,
+  `ApiDocument.GetAllHeadingParagraphs();`,
+  `ApiDocument.GetFootnotesFirstParagraphs();`,
+  `ApiDocument.GetEndNotesFirstParagraphs();`,
+  `ApiDocument.GetAllCaptionParagraphs();`
+* New methods to set cross-reference data:
+  `ApiParagraph.AddNumberedCrossRef();`,
+  `ApiParagraph.AddHeadingCrossRef();`,
+  `ApiParagraph.AddBookmarkCrossRef();`,
+  `ApiParagraph.AddFootnoteCrossRef();`,
+  `ApiParagraph.AddEndnoteCrossRef();`,
+  `ApiParagraph.AddCaptionCrossRef();`
+* New methods to replace elements:
+  
+  ```
+  ApiParagraph.GetPosInParent();
+  ApiParagraph.ReplaceByElement();
+
+  ApiTable.GetPosInParent();
+  ApiTable.ReplaceByElement();
+  
+  ApiBlockLvlSdt.GetPosInParent();
+  ApiBlockLvlSdt.ReplaceByElement();
+  ```
+
+* New methods to get size in EMU for drawings 
+  `ApiDrawing.GetWidth();` and `ApiDrawing.GetHeight();`
+* Add new methods for chart:
+
+  ```
+  ApiChart.ApplyChartStyle();
+  ApiChart.SetPlotAreaFill();
+  ApiChart.SetPlotAreaOutLine();
+  ApiChart.SetSeriesFill();
+  ApiChart.SetSeriesOutLine();
+  ApiChart.SetDataPointFill();
+  ApiChart.SetDataPointOutLine();
+  ApiChart.SetMarkerFill();
+  ApiChart.SetMarkerOutLine();
+  ApiChart.SetTitleFill();
+  ApiChart.SetTitleOutLine();
+  ApiChart.SetLegendFill();
+  ApiChart.SetLegendOutLine();
+  ```  
+
+* Improve support of regexps in code like `String.replace(/\s/g, "")`
+* Improvements in `oRange.GetValue` and `oRange.GetValue2`
+
+* Fixes for several methods
+
 ### Fixes
 
 * All components received countless fixes
