@@ -133,7 +133,8 @@
 
 * Improve support of regexps in code like `String.replace(/\s/g, "")`
 * Improvements in `oRange.GetValue` and `oRange.GetValue2`
-
+* Dozens of new methods for different objects.
+  More detailed list at [here](https://api.onlyoffice.com/docbuilder/changelog)
 * Fixes for several methods
 
 ### Fixes
