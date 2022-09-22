@@ -44,6 +44,8 @@
 * Navigation panel renamed to `Headings`
 * Major improvements in `pdf`, `djvu`, `xps` convert to `docx`
 * Correct display Greek letters as numbered list items
+* New types of multilevel lists, which can be applied to Headers
+* Redone changes apply in Review mode
 
 ##### Spreadsheet Editor
 
