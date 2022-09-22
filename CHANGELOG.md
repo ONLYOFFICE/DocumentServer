@@ -1,5 +1,148 @@
 # Change log
 
+## 7.2.0
+
+### New Features
+
+#### All Editors
+
+* JWT with random key enabled by default. This fix CVE-2021-43445,
+  CVE-2021-43447, CVE-2021-43448, CVE-2021-43449
+* Random secret key by default. Fix CVE-2021-43444
+* Fix CVE-2022-32212 by upgrading nodejs version
+* Show warning on macros execution if connection to another host. Fix CVE-2021-43446
+* Top toolbar optimizations for smaller screens
+* Added the ability to choose "Contrast Dark" or "System default"
+  interface theme (Bug 59010)
+* More options in `View` tab. View tab available in comment and view mode
+* Redone of icons in header line
+* Ability to rename file from header (Should be supported by DMS)
+* Redone of settings page
+* Exact build number in `About` page
+* New `Live viewer`  - ability to see changes in view mode
+ (Should be supported by DMS)
+* Stat page will show statistics for `Live viewer`
+* New interface languages - `pt-PT`, `zh-TW`, `eu-ES`, `ms-MY`, `hy-AM`
+* Redone of color selection component
+* New option to disable alternative menu
+* Completely redesigned search inside the document
+* New hotkeys for `Special Paste`
+* Added `Cut` and `Select All` buttons to the toolbar next to `Copy`\`Paste`
+* Major improvements in Font engine (For languages like Bengali or Sinhala)
+  (Only in Document Editor and Presentation Editor)
+* Ligatures support
+* Ability to insert tables as OLE object
+* Support for images as a bulleted list and the ability to work with them
+* Major improvements in `EMF` and `WMF` files rendering
+* Completely new plugin marketplace
+
+#### Document Editor
+
+* Ability  to remove Header/Footer from toolbar
+* Ability to insert current heading in TOC
+* New warning if there is no TOC in document
+* Navigation panel renamed to `Headings`
+* Major improvements in `pdf`, `djvu`, `xps` convert to `docx`
+* Correct display Greek letters as numbered list items
+* New types of multilevel lists, which can be applied to Headers
+* Redone changes apply in Review mode
+
+##### Spreadsheet Editor
+
+* Ability to `Switch rows and columns` for Chart
+* New `Italiano (Svizzera)` language for regional settings
+* Row number highlight for filter
+* Remove `First sheet` and `Last sheet` from bottom toolbar
+* Selection of copied range
+* `Get link to this range` in context menu
+* Pivot table option - `Auto-fit column widths on update`
+* 1904 date system support
+
+##### Presentation Editor
+
+* Animation with Custom path
+* New advanced settings `Placement` tab for shapes\charts\images
+
+#### Forms
+
+* Search in embedded and forms mode
+* Change field width for `Comb of characters`-enabled field
+* Ability to set tag for field
+* New `Format` and `Allowed Symbols` settings for field
+* New field types - `Phone number`, `Email Address` and `Complex Field`
+
+##### Installation
+
+* Auto detect of DB type in `deb` package
+* `arm64` and `amd64` docker images use same tag
+
+###### Back-end
+
+* `WOPI` discovery action for embedded viewer
+
+##### Customization
+
+* Ability to set phone in `About` page
+
+##### Api
+
+* `GetFontNames()` methods for `Paragarph` and `Run`
+* New methods to get cross-reference data:
+  `ApiDocument.GetAllNumberedParagraphs();`,
+  `ApiDocument.GetAllHeadingParagraphs();`,
+  `ApiDocument.GetFootnotesFirstParagraphs();`,
+  `ApiDocument.GetEndNotesFirstParagraphs();`,
+  `ApiDocument.GetAllCaptionParagraphs();`
+* New methods to set cross-reference data:
+  `ApiParagraph.AddNumberedCrossRef();`,
+  `ApiParagraph.AddHeadingCrossRef();`,
+  `ApiParagraph.AddBookmarkCrossRef();`,
+  `ApiParagraph.AddFootnoteCrossRef();`,
+  `ApiParagraph.AddEndnoteCrossRef();`,
+  `ApiParagraph.AddCaptionCrossRef();`
+* New methods to replace elements:
+  
+  ```javascript
+  ApiParagraph.GetPosInParent();
+  ApiParagraph.ReplaceByElement();
+
+  ApiTable.GetPosInParent();
+  ApiTable.ReplaceByElement();
+  
+  ApiBlockLvlSdt.GetPosInParent();
+  ApiBlockLvlSdt.ReplaceByElement();
+  ```
+
+* New methods to get size in EMU for drawings
+  `ApiDrawing.GetWidth();` and `ApiDrawing.GetHeight();`
+* Add new methods for chart:
+
+  ```javascript
+  ApiChart.ApplyChartStyle();
+  ApiChart.SetPlotAreaFill();
+  ApiChart.SetPlotAreaOutLine();
+  ApiChart.SetSeriesFill();
+  ApiChart.SetSeriesOutLine();
+  ApiChart.SetDataPointFill();
+  ApiChart.SetDataPointOutLine();
+  ApiChart.SetMarkerFill();
+  ApiChart.SetMarkerOutLine();
+  ApiChart.SetTitleFill();
+  ApiChart.SetTitleOutLine();
+  ApiChart.SetLegendFill();
+  ApiChart.SetLegendOutLine();
+  ```  
+
+* Improve support of regexps in code like `String.replace(/\s/g, "")`
+* Improvements in `oRange.GetValue` and `oRange.GetValue2`
+* Dozens of new methods for different objects.
+  More detailed list at [here](https://api.onlyoffice.com/docbuilder/changelog)
+* Fixes for several methods
+
+### Fixes
+
+* All components received countless fixes
+
 ## 7.1.1
 
 ### Fixes
