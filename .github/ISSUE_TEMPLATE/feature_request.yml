@@ -1,0 +1,14 @@
+name: "Feature request"
+description: "Use this form to suggest a feature."
+body:
+  - type: checkboxes
+    attributes:
+      label: "This issue is unique."
+      options:
+      - label: "I have used the [search tool](https://github.com/ONLYOFFICE/DocumentServer/issues?q=) and did not find an issue describing my idea."
+        required: true
+  - type: textarea
+    attributes:
+      label: Your idea.
+    validations:
+      required: true
