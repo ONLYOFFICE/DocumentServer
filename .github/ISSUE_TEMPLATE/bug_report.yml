@@ -1,0 +1,63 @@
+name: "Bug report"
+description: "Use this template if you're running into issues with DocumentServer"
+body:
+  - type: checkboxes
+    id: unique
+    attributes:
+      label: "This issue is unique."
+      options:
+      - label: "I have used the [search tool](https://github.com/ONLYOFFICE/DocuemntServer/issues?q=) and did not find an issue describing my bug."
+        required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System of DocumentServer
+      description: "If you know this bug occurs on multiple operating systems, select all you have tested."
+      multiple: true
+      options:
+      - Windows Server
+      - Linux (DEB package)
+      - Linux (RPM package)
+      - Docker
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: "Version information"
+      description: "Please provide the exact version of the app you are using. You can check it in `About` tab"
+      placeholder: "Example: 6.3.1.56"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Expected Behavior"
+      description: "What did you expect to happen? Did this work in previous versions of DocumentServer?"
+      placeholder: "Example: When the text color is set to white it should be white, regardless of the font size."
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: "Actual Behavior"
+      description: "What did actually happen?"
+      placeholder: "Example: When the text size is 16 and the font color is set to white then the text is gray."
+    validations:
+      required: true
+  - type: textarea
+    id: repro-steps
+    attributes:
+      label: "Reproduction Steps"
+      description: "Provide information on how to reproduce this bug. Make sure your instructions are clear."
+      placeholder: |
+        Example:
+        1. Change font size to 16
+        2. Set font color to white      
+        3. Observe as the text is not white
+  - type: textarea
+    id: additional
+    attributes:
+      label: "Additional information"
+      description: "If you have any screenshots, videos, or other information that you feel is necessary to explain the issue, feel free to attach them here."
+      placeholder: "Example: My screen resolution is 1920x1080p"
