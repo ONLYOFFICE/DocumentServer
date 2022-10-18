@@ -62,6 +62,7 @@
 
 #### Forms
 
+* Major improvements in saving forms to PDF
 * Implement save text field formats to PDF (Bug #58901)
 * Add default form key when creating new forms
 * Fix image track display (Bug #59120)
@@ -95,6 +96,7 @@
 #### API
 
 * Fix `Api.CreatePictureForm` method (Bug #59159)
+* New methods to work with Review mode via API
 
 #### Mobile Web Editors
 
