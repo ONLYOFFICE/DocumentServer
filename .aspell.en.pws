@@ -1,4 +1,4 @@
-personal_ws-1.1 en 572 utf-8
+personal_ws-1.1 en 580 utf-8
 ACOT
 ACOTH
 ActiveCell
@@ -31,6 +31,7 @@ ASC
 ashx
 aspose
 Aspose
+authChanges
 autocomplete
 AutoCorrect
 autofill
@@ -66,6 +67,7 @@ bugfixes
 builded
 callbackUrl
 CanUpdateTarget
+CAs
 CentOS
 cff
 changesError
@@ -104,6 +106,7 @@ COTH
 COUNTIF
 COUNTIFS
 COVARIANCE
+CreatePictureForm
 crypted
 CSC
 CSCH
@@ -306,6 +309,7 @@ MacOs
 mariadb
 mathType
 MathType
+maxChangesSize
 MAXIFS
 Mendeley
 MergeArea
@@ -375,6 +379,7 @@ Paragarph
 param
 params
 passsword
+pathurl
 pdf
 PDFA
 PDURATION
@@ -423,6 +428,7 @@ reSave
 resize
 rightMenu
 RowHeight
+rPrChange
 RRI
 rtf
 RTF
@@ -489,6 +495,7 @@ specifi
 Spellcheker
 ssl
 sslEnabled
+startRPC
 startup
 statsd
 statusBar
@@ -556,6 +563,7 @@ XLOOKUP
 xls
 XLS
 XLSB
+xlsb
 XlsFormatReader
 xlsx
 XLSX

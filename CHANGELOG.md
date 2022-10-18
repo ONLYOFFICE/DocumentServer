@@ -1,5 +1,115 @@
 # Change log
 
+## 7.2.1
+
+### New Features
+
+#### All Editors
+
+* Major improvements in fonts render engine. Removal of `Alternative input` settings
+
+### Fixes
+
+#### All Editors
+
+* Fix `Help` closing (Bug #59315)
+
+#### Document Editor
+
+* Fix numbering in Portuguese or Basque language (Bug #59091)
+* Fix the problem with updating content of a Ref field (Bug #58606)
+* Fix the problem with review types when splitting paragraph (Bug #58512)
+* Fix the problem with special paste button (Bug #59149)
+* Fix crash on opening docx (Bug #59212)
+* Fix the problem with reading `rPrChange` property and review such files (Bug #59205)
+* Fix scrolling in co-edit view mode (Bug #57928)
+* Fix the problem with performing the global undo (Bug #59270)
+* Fix the problem with set the bold property for text in the complex script
+  (Bug #59289)
+* Fix special paste position (Bug #59139)
+
+#### Spreadsheet Editor
+
+* Fix hangup on opening xlsx file (Bug #58112)
+* Fix special paste via hotkey (Bug #59148)
+
+#### Presentation Editor
+
+* Fix animations problems (Bug #59301)
+* Fix opening pptx file (Bug #59308)
+
+#### Convert
+
+* Fix xlsb to xlsx conversion (Bug #59002)
+* Fix broken docx with 3D charts (Bug #58814)
+* Fix some specific files in ppt to pptx conversion (Bug #59074, Bug #59106,
+  Bug #59108, Bug #59261, Bug #59276, Bug #59277, Bug #59281, #59261)
+* Fix some specific files in xlsx to ods conversion (Bug #59118)
+* Fix metadata loss in PDF (Bug #59153)
+* Fix problems with opening xps files (Bug #59119)
+* Fix empty presentation for ods to pptx conversion (Bug #59220)
+* Fix xlsx to ods conversion (Bug #59221, Bug #59353)
+* Fix xls to xlsx conversion (Bug #59209)
+* Fix rtf to docx conversion (Bug #59322)
+* Fix doc to docx conversion (Bug #59329)
+* Fix csv number formats (Bug #59357)
+* Improve EMF images rendering
+
+#### PDF Viewer
+
+* Fix search highlight (Bug #59069)
+* Fix tooltip language for preview (Bug #59087)
+
+#### Forms
+
+* Implement save text field formats to PDF (Bug #58901)
+* Add default form key when creating new forms
+* Fix image track display (Bug #59120)
+* Fix the problem with highlight of a fixed form (Bug #59105)
+* Fix duplicating fixed forms when saving to PDF
+* Fix saving form field format (Bug #58901)
+* Fix the problem with converting complex field to fixed form (Bug #59262)
+* Fix field detection in selection (Bug #59278)
+* Fix the problem with entering text to form (Bug #59290)
+* Fix context menu for some forms files (Bug #59278)
+* Fix the problem with working with complex fields and simple fields (Bug #59345)
+* Fix keys list problems (Bug #59377)
+* Fix the problem with cancel filling the form on form blur (Bug #59373)
+* Fix the problem with key of complex forms (Bug #59374)
+* Fix complex form filling problem for forms with same key (Bug #59375)
+* Fix the problem with printing form borders filled with placeholders (Bug #59378)
+
+#### Back-end
+
+* Calling separate callback for each `pathurl` request
+* Fix forgotten migration ([DocumentServer#1911](https://github.com/ONLYOFFICE/DocumentServer/issues/1911))
+* Set timeout for entire conversion
+* Add `pathurl` command to startRPC
+* Check connection status before sending changes
+* Add `editor.maxChangesSize` limit to document changes in config
+* Fix bug with using built-in Root CAs instead of Windows Store.
+* Check license on live viewer authorization
+* Add alias field for multi tenancy
+* Add acknowledge to authChanges
+
+#### API
+
+* Fix `Api.CreatePictureForm` method (Bug #59159)
+
+#### Mobile Web Editors
+
+* Fix SmartArt rendering (Bug #58867)
+* Fix hangup on duplicate slide (Bug #59102)
+* Fix hidden separator in dark theme (Bug #58272)
+
+#### Docker
+
+* Fix build of image (Bug #59310)([Docker-DocumentServer#506](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/506))
+
+#### Integration Example
+
+* Fixed several issues in different examples
+
 ## 7.2.0
 
 ### New Features
