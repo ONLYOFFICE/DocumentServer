@@ -17,7 +17,6 @@
 #### Document Editor
 
 * Fix numbering in Portuguese or Basque language (Bug #59091)
-* Fix the problem with updating content of a Ref field (Bug #58606)
 * Fix the problem with review types when splitting paragraph (Bug #58512)
 * Fix the problem with special paste button (Bug #59149)
 * Fix crash on opening docx (Bug #59212)
@@ -68,17 +67,15 @@
 * Fix image track display (Bug #59120)
 * Fix the problem with highlight of a fixed form (Bug #59105)
 * Fix duplicating fixed forms when saving to PDF
-* Fix saving form field format (Bug #58901)
 * Fix the problem with converting complex field to fixed form (Bug #59262)
-* Fix field detection in selection (Bug #59278)
 * Fix the problem with entering text to form (Bug #59290)
-* Fix context menu for some forms files (Bug #59278)
 * Fix the problem with working with complex fields and simple fields (Bug #59345)
 * Fix keys list problems (Bug #59377)
 * Fix the problem with cancel filling the form on form blur (Bug #59373)
 * Fix the problem with key of complex forms (Bug #59374)
 * Fix complex form filling problem for forms with same key (Bug #59375)
 * Fix the problem with printing form borders filled with placeholders (Bug #59378)
+* Fix the problem with updating content of a Ref field (Bug #58606, Bug #59278)
 
 #### Back-end
 
