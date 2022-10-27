@@ -103,6 +103,8 @@
 
 #### Docker
 
+* Update base image to `ubuntu:22.04`. Please update `docker-engine`
+  to latest stable version (`20.10.21` as of writing this doc)
 * Fix build of image (Bug #59310)([Docker-DocumentServer#506](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/506))
 
 #### Integration Example
