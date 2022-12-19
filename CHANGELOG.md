@@ -37,7 +37,7 @@
 #### Back-end
 
 * Major improvements of js compilation during convertions
-  through сreating js caches with fonts
+  through creating js caches with fonts
 * Fix file collection with setting `FileConverter.converter.errorfiles`
 * Add idle session close log and `clientLog` command
 * Add `onDocumentContentReady` log message
