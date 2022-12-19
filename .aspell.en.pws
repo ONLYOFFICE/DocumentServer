@@ -14,6 +14,7 @@ adSm
 AllFontsGen
 altGr
 amd
+amqp
 Api
 ApiBlockLvlSdt
 ApiChart
@@ -80,6 +81,7 @@ CHISQ
 CHITEST
 citus
 CJK
+clientLog
 clipart
 Clipart
 ClipArt
@@ -101,6 +103,7 @@ ConnectionsOS
 COnOfftype
 convertasion
 Convertation
+convertions
 ConvertService
 COTH
 COUNTIF
@@ -231,6 +234,7 @@ GetTopMargin
 GetUsedRange
 GetValue
 GetVisible
+GetVisibleRegion
 GetWidth
 GetWpar
 glyphs
@@ -267,9 +271,11 @@ inBody
 innodependencyinstaller
 InsertContent
 insertImage
+integrations
 INTL
 INV
 iOS
+iPadOS
 ipfilter
 IsAutosave
 IsExitSave
@@ -354,6 +360,7 @@ ODP
 ods
 odt
 ODT
+onDocumentContentReady
 onDocumentStateChange
 onlyoffice
 ONLYOFFICE
@@ -438,6 +445,7 @@ savefile
 SaveLock
 saveUrl
 Schweiz
+ScrollToAbsolutePosition
 sdk
 sdkjs
 sdt
@@ -535,6 +543,7 @@ undelete
 ungroup
 ungrouping
 unLockDocument
+uri
 URI
 url
 urls
@@ -557,6 +566,7 @@ wget
 WinXp
 wmf
 WOPI
+WordControl
 WrapText
 xfIndexNumber
 XLOOKUP
