@@ -54,7 +54,7 @@
 #### Docker
 
 * Fix port parsing from `amqp_uri` if host contains digits including IP (Bug #59483)([Docker-DocumentServer#215](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/215))
-* Add base image and postgresql version build arguments
+* Add base image and PostgreSQL version build arguments
 * Fix errors when starting the container on CentOS 9 (Bug #59481)([Docker-DocumentServer#522](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/522))
 
 #### Integration Example
