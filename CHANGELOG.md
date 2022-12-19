@@ -23,7 +23,7 @@
 
 * Fix print from the integrations (Bug #59466)
 * Fix hangup on opening xlsx file (Bug #59549)
-* Fix displaying of the descriptions in `Function Arguments` window 
+* Fix displaying of the descriptions in `Function Arguments` window
   for non-English formula languages
 
 #### Presentation Editor
@@ -36,7 +36,7 @@
 
 #### Back-end
 
-* Major improvements of js compilation during convertions 
+* Major improvements of js compilation during convertions
   through сreating js caches with fonts
 * Fix file collection with setting `FileConverter.converter.errorfiles`
 * Add idle session close log and `clientLog` command
@@ -44,7 +44,7 @@
 
 #### API
 
-* Fix `GetVisibleRegion` method 
+* Fix `GetVisibleRegion` method
 * Add `WordControl.ScrollToAbsolutePosition` method
 
 #### Mobile Web Editors
