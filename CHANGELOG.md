@@ -1,5 +1,66 @@
 # Change log
 
+## 7.2.2
+
+### Fixes
+
+#### All Editors
+
+* Change selection font for base math font
+
+#### Document Editor
+
+* Fix the document bouncing in fast co-edit mode (Bug #59647) ([DocumentServer#1955](https://github.com/ONLYOFFICE/DocumentServer/issues/1955))
+* Fix ability to review the document by anonymous users (Bug #59592)
+* Fix changing `Unit of Measurement` property in `Advanced Settings` (Bug #59911)
+* Fix the problem with compiling text properties of paragraph numbering (Bug #59324)
+* Fix comment highlight rendering (Bug #59640)
+* Fix calculating end info of the paragraph (Bug #59997, #60026)
+* Fix printing selection for some documents (Bug #60167)
+* Fix calculating the end info of a paragraph in table (Bug #60115)
+
+#### Spreadsheet Editor
+
+* Fix print from the integrations (Bug #59466)
+* Fix hangup on opening xlsx file (Bug #59549)
+* Fix displaying of the descriptions in `Function Arguments` window
+  for non-English formula languages
+
+#### Presentation Editor
+
+* Fix applying auto-correction in the equations (Bug #59529) ([DocumentServer#1960](https://github.com/ONLYOFFICE/DocumentServer/issues/1960))
+
+#### Convert
+
+* Fix some specific files in docx to png conversion (Bug #59923)
+
+#### Back-end
+
+* Major improvements of js compilation during convertions
+  through creating js caches with fonts
+* Fix file collection with setting `FileConverter.converter.errorfiles`
+* Add idle session close log and `clientLog` command
+* Add `onDocumentContentReady` log message
+
+#### API
+
+* Fix `GetVisibleRegion` method
+* Add `WordControl.ScrollToAbsolutePosition` method
+
+#### Mobile Web Editors
+
+* Fix the editors loading in some integrations on iOS and iPadOS (Bug #59604)
+
+#### Docker
+
+* Fix port parsing from `amqp_uri` if host contains digits including IP (Bug #59483)([Docker-DocumentServer#215](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/215))
+* Add base image and PostgreSQL version build arguments
+* Fix errors when starting the container on CentOS 9 (Bug #59481)([Docker-DocumentServer#522](https://github.com/ONLYOFFICE/Docker-DocumentServer/issues/522))
+
+#### Integration Example
+
+* Fixed several issues with jwt in different examples
+
 ## 7.2.1
 
 ### New Features
