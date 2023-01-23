@@ -1,10 +1,10 @@
 # Change log
 
-# 7.3.0
+## 7.3.0
 
-## New Features
+### New Features
 
-### All Editors
+#### All Editors
 
 * Equation quick access panel
 * 3D Rotation settings for 3D charts
@@ -24,13 +24,13 @@
 * Changed metafiles conversion to `SVG`
 * Reading and writing `PDF` are combined in a single library to optimize work
 
-## Document Editor
+#### Document Editor
 
 * Support for entering equations in two modes (`Unicode` and `LaTeX`)
 * Ability to protect a document by setting a restriction on editing
 * Button for accessing to statistics in the status bar
 
-## Spreadsheet Editor
+#### Spreadsheet Editor
 
 * Watch Window
 * Ability to select multiple items using ctrl/shift in the Watch Window
@@ -42,7 +42,7 @@
 * Grouping for pivot table templates and cell styles
 * Changed preview size for cell styles
 
-## Presentation Editor
+#### Presentation Editor
 
 * Support for entering equations in two modes (`Unicode` and `LaTeX`)
 * Guides and Gridlines settings in the `View` tab and the context menu
@@ -50,13 +50,13 @@
 * Special Paste parameters for a slide
 * Ability to save a shape (graphic object) as a picture in the context menu
 
-## Forms
+#### Forms
 
 * New fields: `Date and time`, `Zip Code`, `Credit Card`
 * Managing roles: adding, editing, removing roles, assigning them to fields
 * Ability to preview the `DOCXF` file from the point of view of each created role
 
-## Back-end
+#### Back-end
 
 * Scheme for editing old binary formats with automatic conversion to 
   [ooxml](https://docs.microsoft.com/en-us/microsoft-365/cloud-storage-partner-program/online/scenarios/conversion) for the `WOPI` protocol
@@ -73,11 +73,11 @@
   Intended to be used for calling from other scripts etc.
 * `jsonwebtocken` library is updated to v9.0.0.
 
-## x2t
+#### x2t
 
 - Refactoring and optimizing the conversion code
 
-## Customization
+#### Customization
 
 * Parameter for customizing the font of the interface elements (buttons, tabs, captions etc.) 
   in the configuration file: `customization`->`font`->`name: "font name"`. The setting is available
@@ -86,12 +86,12 @@
   `customization`->`layout`->`leftMenu`->`mode: true`/`false` (show/hide),
   `customization`->`layout`->`rightMenu->mode: true`/`false` (show/hide)
 
-## Api
+#### Api
 
 * New `GetRange` method for the `ApiRange` class, which allows getting a substring from the
   Range object.
 
-## Fixes
+### Fixes
 
 * Fix the vulnerability with adding an admin to Nextcloud via macros (Bug #60088).
 * Fix the XSS vulnerability when creating a new style
