@@ -67,8 +67,9 @@
 * Page for converting files from old formats for the `WOPI` protocol
 * Library for exchanging data with the server changed
   from [sockjs](https://www.npmjs.com/package/sockjs) to [socket.io](https://socket.io/)
-* Service manager in the onlyoffice-documentserver packages changed from `supervisord` to `systemd`
-  to get rid of excess dependence and simplify functionality for end users 
+* Service manager in the onlyoffice-documentserver packages changed
+  from `supervisord` to `systemd`
+  to get rid of excess dependence and simplify functionality for end users
 * Ability to work in the non-interactive mode added to the configuration script
   of the document-server `rpm` package.   Configuring is performed via parameters.
   The `-h` parameter is used to display all the available parameters.
@@ -81,24 +82,26 @@
 
 #### Customization
 
-* Parameter for customizing the font of the interface elements (buttons, tabs, captions etc.)
-  in the configuration file: `customization`->`font`->`name: "font name"`. The setting is available
-  for users with the extended license.
-* Parameters for initial state of the left and right panel display in the configuration file:
+* Parameter for customizing the font of the interface elements (buttons, tabs,
+  captions etc.) in the configuration file: 
+  `customization`->`font`->`name: "font name"`.
+  The setting is available for users with the extended license.
+* Parameters for initial state of the left and right panel display
+  in the configuration file:
   `customization`->`layout`->`leftMenu`->`mode: true`/`false` (show/hide),
   `customization`->`layout`->`rightMenu->mode: true`/`false` (show/hide)
 
 #### Api
 
-* New `GetRange` method for the `ApiRange` class, which allows getting a substring from the
-  Range object.
+* New `GetRange` method for the `ApiRange` class, which allows getting
+  a substring from the Range object.
 
 ### Fixes
 
 * Fix the vulnerability with adding an admin to Nextcloud via macros (Bug #60088)
 * Fix the XSS vulnerability when creating a new style
 * All components received countless fixes
- 
+
 ## 7.2.2
 
 ### Fixes
