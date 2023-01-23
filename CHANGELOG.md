@@ -83,7 +83,7 @@
 #### Customization
 
 * Parameter for customizing the font of the interface elements (buttons, tabs,
-  captions etc.) in the configuration file: 
+  captions etc.) in the configuration file:
   `customization`->`font`->`name: "font name"`.
   The setting is available for users with the extended license.
 * Parameters for initial state of the left and right panel display
