@@ -5,6 +5,7 @@
 ## New Features
 
 ### All Editors
+
 * Equation quick access panel
 * 3D Rotation settings for 3D charts
 * Display of chart error bars (for opening only)
@@ -15,7 +16,8 @@
 * Width of the styles / themes panel now fits the whole number of items
 * Grouping for table templates
 * Cell styles in the OLE object editor
-* Ability to resize dialog windows for editing charts, OLE objects, and mail merge recipients
+* Ability to resize dialog windows for editing charts, OLE objects,
+  and mail merge recipients
 * Unified appearance for dialog windows, context menus, toolbar, etc.
 * Optimizing display of captions in the toolbar buttons
 * Improving display of comments
@@ -56,16 +58,20 @@
 
 ## Back-end
 
-* Scheme for editing old binary formats with automatic conversion to [ooxml](https://docs.microsoft.com/en-us/microsoft-365/cloud-storage-partner-program/online/scenarios/conversion) for the `WOPI` protocol
-* `/cool/convert-to/<format>` or `/lool/convert-to/<format>` file conversion service like in [Collabora](https://sdk.collaboraonline.com/docs/conversion_api.html) for the `WOPI` protocol
+* Scheme for editing old binary formats with automatic conversion to 
+  [ooxml](https://docs.microsoft.com/en-us/microsoft-365/cloud-storage-partner-program/online/scenarios/conversion) for the `WOPI` protocol
+* `/cool/convert-to/<format>` or `/lool/convert-to/<format>` file conversion 
+  service like in [Collabora](https://sdk.collaboraonline.com/docs/conversion_api.html) for the `WOPI` protocol
 * Page for converting files from old formats for the `WOPI` protocol
-* Library for exchanging data with the server changed from [sockjs](https://www.npmjs.com/package/sockjs) to [socket.io](https://socket.io/)
+* Library for exchanging data with the server changed 
+  from [sockjs](https://www.npmjs.com/package/sockjs) to [socket.io](https://socket.io/)
 * Service manager in the onlyoffice-documentserver packages changed from `supervisord` to `systemd`
   to get rid of excess dependence and simplify functionality for end users 
-- Ability to work in the non-interactive mode added to the configuration script of the document-server `rpm` package.  
-  Configuring is performed via parameters. The `-h` parameter is used to display all the available parameters.  
+* Ability to work in the non-interactive mode added to the configuration script
+  of the document-server `rpm` package.   Configuring is performed via parameters. 
+  The `-h` parameter is used to display all the available parameters.  
   Intended to be used for calling from other scripts etc.
-- `jsonwebtocken` library is updated to v9.0.0.
+* `jsonwebtocken` library is updated to v9.0.0.
 
 ## x2t
 
@@ -73,9 +79,9 @@
 
 ## Customization
 
-* Parameter for customizing the font of the interface elements (buttons, tabs, captions etc.) in the
-  configuration file: `customization`->`font`->`name: "font name"`. The setting is available for users with
-  the extended license.
+* Parameter for customizing the font of the interface elements (buttons, tabs, captions etc.) 
+  in the configuration file: `customization`->`font`->`name: "font name"`. The setting is available
+  for users with the extended license.
 * Parameters for initial state of the left and right panel display in the configuration file:
   `customization`->`layout`->`leftMenu`->`mode: true`/`false` (show/hide),
   `customization`->`layout`->`rightMenu->mode: true`/`false` (show/hide)
