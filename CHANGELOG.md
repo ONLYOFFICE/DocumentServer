@@ -34,8 +34,8 @@
 
 * Watch Window
 * Ability to select multiple items using ctrl/shift in the Watch Window
-* Support for new functions: `TEXTBEFORE`, `TEXTAFTER`, `TEXTSPLIT`, `VSTACK`, `HSTACK`, `TOROW`,
-  `TOCOL`, `WRAPROWS`,  `WRAPCOLS`, `TAKE`, `DROP`, `CHOOSEROWS`, `CHOOSECOLS`
+* Support for new functions: `TEXTBEFORE`, `TEXTAFTER`, `TEXTSPLIT`, `VSTACK`, `HSTACK`,
+ `TOROW`, `TOCOL`, `WRAPROWS`,  `WRAPCOLS`, `TAKE`, `DROP`, `CHOOSEROWS`, `CHOOSECOLS`
 * Support for updating links to external files and the ability to create these links
 * Ability to add a link between files within the portal using `Paste Special`
 * Ability to insert data from the `XML` file (XML Spreadsheet 2003 is supported)
@@ -58,28 +58,30 @@
 
 #### Back-end
 
-* Scheme for editing old binary formats with automatic conversion to 
-  [ooxml](https://docs.microsoft.com/en-us/microsoft-365/cloud-storage-partner-program/online/scenarios/conversion) for the `WOPI` protocol
-* `/cool/convert-to/<format>` or `/lool/convert-to/<format>` file conversion 
-  service like in [Collabora](https://sdk.collaboraonline.com/docs/conversion_api.html) for the `WOPI` protocol
+* Scheme for editing old binary formats with automatic conversion to
+  [ooxml](https://docs.microsoft.com/en-us/microsoft-365/cloud-storage-partner-program/online/scenarios/conversion)
+  for the `WOPI` protocol
+* `/cool/convert-to/<format>` or `/lool/convert-to/<format>` file conversion
+  service like in [Collabora](https://sdk.collaboraonline.com/docs/conversion_api.html)
+  for the `WOPI` protocol
 * Page for converting files from old formats for the `WOPI` protocol
-* Library for exchanging data with the server changed 
+* Library for exchanging data with the server changed
   from [sockjs](https://www.npmjs.com/package/sockjs) to [socket.io](https://socket.io/)
 * Service manager in the onlyoffice-documentserver packages changed from `supervisord` to `systemd`
   to get rid of excess dependence and simplify functionality for end users 
 * Ability to work in the non-interactive mode added to the configuration script
-  of the document-server `rpm` package.   Configuring is performed via parameters. 
-  The `-h` parameter is used to display all the available parameters.  
+  of the document-server `rpm` package.   Configuring is performed via parameters.
+  The `-h` parameter is used to display all the available parameters.
   Intended to be used for calling from other scripts etc.
 * `jsonwebtocken` library is updated to v9.0.0.
 
 #### x2t
 
-- Refactoring and optimizing the conversion code
+* Refactoring and optimizing the conversion code
 
 #### Customization
 
-* Parameter for customizing the font of the interface elements (buttons, tabs, captions etc.) 
+* Parameter for customizing the font of the interface elements (buttons, tabs, captions etc.)
   in the configuration file: `customization`->`font`->`name: "font name"`. The setting is available
   for users with the extended license.
 * Parameters for initial state of the left and right panel display in the configuration file:
@@ -93,7 +95,7 @@
 
 ### Fixes
 
-* Fix the vulnerability with adding an admin to Nextcloud via macros (Bug #60088).
+* Fix the vulnerability with adding an admin to Nextcloud via macros (Bug #60088)
 * Fix the XSS vulnerability when creating a new style
 * All components received countless fixes
  
