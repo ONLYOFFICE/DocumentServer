@@ -88,7 +88,9 @@
   The setting is available for users with the extended license.
 * Parameters for initial state of the left and right panel display
   in the configuration file:
+  
   `customization`->`layout`->`leftMenu`->`mode: true`/`false` (show/hide),
+  
   `customization`->`layout`->`rightMenu->mode: true`/`false` (show/hide)
 
 #### Api
