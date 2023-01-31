@@ -1,5 +1,109 @@
 # Change log
 
+## 7.3.0
+
+### New Features
+
+#### All Editors
+
+* Equation quick access panel
+* 3D Rotation settings for 3D charts
+* Display of chart error bars (for opening only)
+* Inserting Smart Art objects
+* Uzbek dictionaries for spell checking: `Uzbek (Cyrillic)` and `Uzbek (Latin)`
+* Presets for inserting horizontal and vertical text boxes
+* Ability to hide left and right panel on the `View` tab of the top toolbar
+* Width of the styles / themes panel now fits the whole number of items
+* Grouping for table templates
+* Cell styles in the OLE object editor
+* Ability to resize dialog windows for editing charts, OLE objects,
+  and mail merge recipients
+* Unified appearance for dialog windows, context menus, toolbar, etc.
+* Optimizing display of captions in the toolbar buttons
+* Improving display of comments
+* Changed metafiles conversion to `SVG`
+* Reading and writing `PDF` are combined in a single library to optimize work
+
+#### Document Editor
+
+* Support for entering equations in two modes (`Unicode` and `LaTeX`)
+* Ability to protect a document by setting a restriction on editing
+* Button for accessing to statistics in the status bar
+
+#### Spreadsheet Editor
+
+* Watch Window
+* Ability to select multiple items using ctrl/shift in the Watch Window
+* Support for new functions: `TEXTBEFORE`, `TEXTAFTER`, `TEXTSPLIT`, `VSTACK`, `HSTACK`,
+ `TOROW`, `TOCOL`, `WRAPROWS`,  `WRAPCOLS`, `TAKE`, `DROP`, `CHOOSEROWS`, `CHOOSECOLS`
+* Support for updating links to external files and the ability to create these links
+* Ability to add a link between files within the portal using `Paste Special`
+* Ability to insert data from the `XML` file (XML Spreadsheet 2003 is supported)
+* Grouping for pivot table templates and cell styles
+* Changed preview size for cell styles
+
+#### Presentation Editor
+
+* Support for entering equations in two modes (`Unicode` and `LaTeX`)
+* Guides and Gridlines settings in the `View` tab and the context menu
+* Tooltips when moving guides and the ability to remove the selected guide
+* Special Paste parameters for a slide
+* Ability to save a shape (graphic object) as a picture in the context menu
+
+#### Forms
+
+* New fields: `Date and time`, `Zip Code`, `Credit Card`
+* Managing roles: adding, editing, removing roles, assigning them to fields
+* Ability to preview the `DOCXF` file from the point of view of each created role
+
+#### Back-end
+
+* Scheme for editing old binary formats with automatic conversion to
+  [ooxml](https://docs.microsoft.com/en-us/microsoft-365/cloud-storage-partner-program/online/scenarios/conversion)
+  for the `WOPI` protocol
+* `/cool/convert-to/<format>` or `/lool/convert-to/<format>` file conversion
+  service like in [Collabora](https://sdk.collaboraonline.com/docs/conversion_api.html)
+  for the `WOPI` protocol
+* Page for converting files from old formats for the `WOPI` protocol
+* Library for exchanging data with the server changed
+  from [sockjs](https://www.npmjs.com/package/sockjs) to [socket.io](https://socket.io/)
+* Service manager in the onlyoffice-documentserver packages changed
+  from `supervisord` to `systemd`
+  to get rid of excess dependence and simplify functionality for end users
+* Ability to work in the non-interactive mode added to the configuration script
+  of the document-server `rpm` package.   Configuring is performed via parameters.
+  The `-h` parameter is used to display all the available parameters.
+  Intended to be used for calling from other scripts etc.
+* `jsonwebtocken` library is updated to v9.0.0.
+
+#### x2t
+
+* Refactoring and optimizing the conversion code
+
+#### Customization
+
+* Parameter for customizing the font of the interface elements (buttons, tabs,
+  captions etc.) in the configuration file:
+  `customization`->`font`->`name: "font name"`.
+  The setting is available for users with the extended license.
+* Parameters for initial state of the left and right panel display
+  in the configuration file:
+  
+  `customization`->`layout`->`leftMenu`->`mode: true`/`false` (show/hide),
+  
+  `customization`->`layout`->`rightMenu->mode: true`/`false` (show/hide)
+
+#### Api
+
+* New `GetRange` method for the `ApiRange` class, which allows getting
+  a substring from the Range object.
+
+### Fixes
+
+* Fix the vulnerability with adding an admin to Nextcloud via macros (Bug #60088)
+* Fix the XSS vulnerability when creating a new style
+* All components received countless fixes
+
 ## 7.2.2
 
 ### Fixes
