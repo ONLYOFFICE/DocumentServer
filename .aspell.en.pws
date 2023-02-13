@@ -150,7 +150,6 @@ DocumentBuilder
 DocumentEditor
 documentserver
 DocumentServer
-documentserver-prepare4shutdown
 docx
 Docx
 DOCX
@@ -420,6 +419,7 @@ ppt
 PptFormatReader
 pptx
 PptxFormat
+prepare4shutdown
 Preseentation
 PrintGridlines
 PrintHeadings
