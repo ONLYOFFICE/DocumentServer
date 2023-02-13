@@ -150,11 +150,13 @@ DocumentBuilder
 DocumentEditor
 documentserver
 DocumentServer
+documentserver-prepare4shutdown
 docx
 Docx
 DOCX
 DOCXF
 DOTX
+double
 downloadAs
 dPc
 DPRODUCT
@@ -464,6 +466,7 @@ SecurityError
 selectwheel
 SELinux
 sessionId
+sessionIdle
 SetBottomMargin
 SetColumnWidth
 SetDataPointFill
