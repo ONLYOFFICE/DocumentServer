@@ -6,20 +6,20 @@
 
 #### Back-end
 
-Fix work of `sessionIdle` parameter (Bug #61049)
-Fix disconnect reason for `socket.io`
-Fix work of `documentserver-prepare4shutdown` script (Bug #60982)
-Revert to classic `socket.io` upgrade to fix connection issue with proxy
-Fix database creation without `onlyoffice` owner (Bug #59826)
+* Fix work of `sessionIdle` parameter (Bug #61049)
+* Fix disconnect reason for `socket.io`
+* Fix work of shutdown script (Bug #60982)
+* Revert to classic `socket.io` upgrade to fix connection issue with proxy
+* Fix database creation without `onlyoffice` owner (Bug #59826)
 
 #### API
 
-Fix bug with double messages from editor
+* Fix bug with double messages from editor
 
 #### Docker
 
-Fix building docker image (Bug #61002)
-Install `rabbitmq-server` from default ubuntu repo
+* Fix building docker image (Bug #61002)
+* Install `rabbitmq-server` from default ubuntu repo
 
 ## 7.3.1
 
