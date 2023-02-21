@@ -6,7 +6,7 @@ body:
     attributes:
       label: "This issue is unique."
       options:
-      - label: "I have used the [search tool](https://github.com/ONLYOFFICE/DocuemntServer/issues?q=) and did not find an issue describing my bug."
+      - label: "I have used the [search tool](https://github.com/ONLYOFFICE/DocumentServer/issues?q=) and did not find an issue describing my bug."
         required: true
   - type: dropdown
     id: os
