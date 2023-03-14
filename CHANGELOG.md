@@ -21,7 +21,7 @@
 * Fix display of a nested table (Bug #60963)
 * Fix crash when changing the `LaTeX` modes in a graphical formula (Bug #60998)
 * Fix letter case in the `DOC` file (Bug #60894)
-* Fix crash in the `Unicode` / `LaTex` modes
+* Fix crash in the `Unicode` / `LaTeX` modes
   in a graphical formula (Bug #61094)
 * Fix display of changes in the document when counting pages (Bug #60567)
 * Fix display of graphical formulas created
@@ -100,7 +100,7 @@
 * Extend length of the jwt token to 32 symbols according to NIST SP 800-117
 * Fix a bug with the multiple `update version` error
 * Add the changes2forgotten source
-* Fix the `session token` check after disconnecting Spreadheet Editor
+* Fix the `session token` check after disconnecting Spreadsheet Editor
 * Revert `token.browser` for backward compatibility with changes2forgotten
 * Remove unused upgrade scripts of the database
 * Remove the unused `doc_changes2` schema in the database
@@ -152,7 +152,7 @@
 
 #### API
 
-* Add the `locale` parameter to the plugin getName method
+* Add the `locale` parameter to the plugin `GetName` method
 * Add sending the plugin event on inserting OLE objects to a document
 * Add the `GetPageCount` and `GetAllTables` methods
 * Add special characters replacement for the `SearchAndReplace` method
