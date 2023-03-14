@@ -164,7 +164,7 @@
 * Fix display of images after editing in the Photo Editor plugin (Bug #61261)
 * Fix crash when adding a quote or a bibliography using
   the Zotero plugin (Bug #61306)
-* Mark `pluginMethod_InsertOleObjec`t and `pluginMethod_ChangeOleObjects`
+* Mark `pluginMethod_InsertOleObject` and `pluginMethod_ChangeOleObjects`
   as async methods
 * Wrap info about the cursor change
 
