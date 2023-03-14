@@ -15,7 +15,7 @@
 
 #### Document Editor
 
-* Fix the XSS vulnerability in the search and replace panel (Bug #60109)
+* Fix the XSS vulnerability CVE-2022-47412 in the search and replace panel (Bug #60109)
 * Fix font size in the `DOCX` file (Bug #60911)
 * Fix crash when opening the DOCX file (Bug #60958)
 * Fix display of a nested table (Bug #60963)
