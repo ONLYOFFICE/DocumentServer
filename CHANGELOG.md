@@ -1,5 +1,173 @@
 # Change log
 
+## 7.3.3
+
+### Fixes
+
+#### All Editors
+
+* Fix crash when using Shift+← and Ctrl+→ in a graphical formula (Bug #60984) ([DocumentServer#2131](https://github.com/ONLYOFFICE/DocumentServer/issues/2131))
+* Fix distance between labels and the axis
+* Fix points label position (max min axis orientation)
+* Fix bug with picking symbol fonts (and new scheme for the symbols map)
+* Fix bug with "Connection is restored" in version history
+* Fix updating other user cursor for the obfuscated version
+
+#### Document Editor
+
+* Fix the XSS vulnerability CVE-2022-47412 in the search and replace panel (Bug #60109)
+* Fix font size in the `DOCX` file (Bug #60911)
+* Fix crash when opening the DOCX file (Bug #60958)
+* Fix display of a nested table (Bug #60963)
+* Fix crash when changing the `LaTeX` modes in a graphical formula (Bug #60998)
+* Fix letter case in the `DOC` file (Bug #60894)
+* Fix crash in the `Unicode` / `LaTeX` modes
+  in a graphical formula (Bug #61094)
+* Fix display of changes in the document when counting pages (Bug #60567)
+* Fix display of graphical formulas created
+  in Microsoft Equation Editor 3.0 (MEE) (Bug #61103)
+* Fix a conversion error in the `ODT` file (Bug #61117)
+* Fix the button name in the Title window in French (Bug #61080)
+* Fix saving the selection color when converting `OTT` to `ODT` (Bug #61031)
+* Fix an error when saving a file in the Internet Explorer browser (Bug #61173)
+* Fix display of a date in Dutch (Bug #61223)
+* Fix copying / pasting text from MS Word to the Document Editor (Bug #61356)
+* Fix crash when pasting text without keeping its
+  original formatting (Bug #61409)
+* Fix crash when selecting a table in the `DOCX` file (Bug #61448)
+* Fix display of text in the `DOC` file (Bug #59639)
+* Fix deleting a table when opening the `DOCX` file (Bug #61412)
+* Fix display of data when sending to email (Bug #61300)
+* Fix crash when updating cross references (Bug #61489)
+* Fix numbering in headings (Bug #61550)
+* Fix crash when changing the style of text in the `DOCX` file (Bug #61549)
+* Add handling the Adding complex fields
+* Add a class for working with the Adding fields data
+* Implement the field ID to identify complex fields using plugins
+* Add a method for plugins to remove the complex field wrapper
+* Add a method for plugins to change editing restrictions
+* Fix description of editing restrictions for plugins
+* Remove unnecessary check for `ConvertContentView`
+* Implement accepting / rejecting for the new review change type
+* Add support for the `FORMTEXT` fields as complex fields
+* Add a new type of the review change for a table row
+* Fix the review `tablePr` change detection during selection
+* Fix calculation for tables with an entire vertically merged row
+* Fix table correction when loading a document
+* Fix numbering in headings (Bug #61564)
+* Fix rounding images in the `DOCX` file (Bug #61577)
+
+#### Spreadsheet Editor
+
+* Fix copying / pasting an image from an external source (Bug #60962) ([DocumentServer#2153](https://github.com/ONLYOFFICE/DocumentServer/issues/2153))
+* Fix crash when opening the `XLSX` file (Bug #60926)
+* Fix selecting a sheet with Ctrl+Shift+Space (Bug #60932)
+* Fix crash when printing a workbook from version history (Bug #60973)
+* Fix updating links which contain spaces in their titles (Bug #60980)
+* Fix crash when opening a workbook for commenting (Bug #61052)
+* Fix display of dates when saving a workbook to the `ODS` format (Bug #61089) ([DocumentServer#2102](https://github.com/ONLYOFFICE/DocumentServer/issues/2102))
+* Fix removing a comment in the `ODS` file (Bug #61054)
+* Fix an error when opening the `XLSX` file (Bug #61406)
+* Fix crash when searching and replacing within the cell range (Bug #61572)
+
+#### Presentation Editor
+
+* Fix crash in a graphical formula (Bug #60939)
+* Fix display of the `WMF` image in the `PPTX` file (Bug #61090) ([DocumentServer#2100](https://github.com/ONLYOFFICE/DocumentServer/issues/2100))
+* Fix crash when opening the paragraph advanced settings
+  in the `PPTX` file (Bug #61363)
+* Fix crash when copying and autoshape and a graphical formula (Bug #61345)
+
+#### Forms
+
+* Fix display of a text field in co-editing (Bug #60920)
+* Fix updating roles in co-editing (Bug #60921)
+* Fix determination of the role for the Checkbox field (Bug #60922)
+* Fix a field mask in the `OFORM` file (Bug #60945)
+* Change display of a dropdown list (Bug #60986)
+* Fix changing roles when saving a file (Bug #61070)
+* Fix crash when filling in a form on the server with sdk
+  without forms (Bug #61297)
+* Fix crash when connecting to the server with sdk without forms (Bug #61297)
+
+#### PDF Viewer
+
+* Fix display of an image in the `PDF` file (Bug #61014)
+* Fix changing size of the `PDF` before opening
+
+#### Back-end
+
+* Extend length of the jwt token to 32 symbols according to NIST SP 800-117
+* Fix a bug with the multiple `update version` error
+* Add the changes2forgotten source
+* Fix the `session token` check after disconnecting Spreadsheet Editor
+* Revert `token.browser` for backward compatibility with changes2forgotten
+* Remove unused upgrade scripts of the database
+* Remove the unused `doc_changes2` schema in the database
+* Add the `extendSession` params to log
+* Add a space to the line break in the `changesError` message
+  so that Cloudwatch treats it as a single entry
+
+#### Mobile
+
+* Fix display of a warning when opening the `XLSX` file
+  with external links (Bug #60297)
+* Fix hangup when inserting an object (Bug #61182)
+* Fix calling the file manager in the `DOCXF` viewing mode (Bug #61314)
+* Add a window with the warning about saving to an editable format
+  for the PDF and XPS files (Bug #61340)
+* Fix scrolling slides (Bug #59816)
+* Fix crash in the free Community Edition version
+  of the mobile editor (Bug #61396)
+* Fix display of the Standard view icon when opening the editor (Bug #58866)
+* Fix setup of the mobile offset when the editor is not initialized
+
+#### Convert
+
+* Fix a conversion error of the `XLS` file (Bug #61222)
+* Fix a conversion error of the `XLS` file (Bug #61294)
+* Fix a conversion error of the `DOCX` file to `PNG` (Bug #61357)
+* Fix a conversion error of the `HTML` file to `PNG` (Bug #61296)
+* Fix an error when opening the `ODP` file after conversion
+  PPTX to ODP (Bug #61445)
+* Fix a conversion error of the `DOCX` file to `HTML` (Bug #61318)
+* Fix an error when opening the `ODS` file after conversion
+  the `XLSX` file to `ODS` (Bug #61353)
+* Fix an error when opening the `XLSX`  file after conversion
+  the `ODS` file to `XLSX` (Bug #60339)
+* Fix a conversion error of the `DOCX` file to `PNG` (Bug #61475)
+* Fix a conversion error of the `DPS` file to `PPTX` (Bug #61508)
+* Fix an error when converting the `PPT` file to `PPTX` (Bug #61459)
+* Fix an error when opening a file in LibreOffice after converting
+  the `DOCX` file to `ODT` (Bug 61588)
+
+#### Customization
+
+* Fix display of the Feedback and support button in the mobile editor
+  with `customization.feedback: false` (Bug #61123)
+* Fix display of the Feedback and support button in the mobile editor
+  with `customization.help: false` (Bug #61135)
+* Fix display of the logo when setting up `loaderName` or `loaderLogo`
+  and loading the editors mobile version (Bug #59658)
+
+#### API
+
+* Add the `locale` parameter to the plugin `GetName` method
+* Add sending the plugin event on inserting OLE objects to a document
+* Add the `GetPageCount` and `GetAllTables` methods
+* Add special characters replacement for the `SearchAndReplace` method
+
+#### Plugins
+
+* Fix the Remove / Install button state in the Plugin Manager (Bug #61030)
+* Fix initialization of event `onChangeContentControl` in the plugin (Bug #61194)
+* Fix display of images after editing in the Photo Editor plugin (Bug #61261)
+* Fix crash when adding a quote or a bibliography using
+  the Zotero plugin (Bug #61306)
+* Mark `pluginMethod_InsertOleObject` and `pluginMethod_ChangeOleObjects`
+  as async methods
+* Wrap info about the cursor change
+
 ## 7.3.2
 
 ### Fixes

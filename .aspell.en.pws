@@ -32,6 +32,7 @@ ASC
 ashx
 aspose
 Aspose
+async
 authChanges
 autocomplete
 AutoCorrect
@@ -42,6 +43,7 @@ autofit
 Autofit
 AutoFormat
 Autorun
+autoshape
 autostart
 AVERAGEA
 AVERAGEIFS
@@ -71,6 +73,7 @@ CanUpdateTarget
 CAs
 CentOS
 cff
+ChangeOleObjects
 changesError
 checkbox
 checkHealth
@@ -87,6 +90,7 @@ clientLog
 clipart
 Clipart
 ClipArt
+Cloudwatch
 CNumberingLvlLegacy
 coedit
 CollaborationEditing
@@ -105,6 +109,7 @@ ConnectionsOS
 COnOfftype
 convertasion
 Convertation
+ConvertContentView
 convertions
 ConvertService
 COTH
@@ -182,6 +187,7 @@ ETS
 eu
 EXC
 EXPON
+extendSession
 fb
 FDIST
 FI
@@ -195,6 +201,7 @@ fodt
 forced
 ForcePathStyle
 ForEach
+FORMTEXT
 FORMULATEXT
 FTEST
 fullscreen
@@ -209,6 +216,7 @@ GetAdress
 GetAllCaptionParagraphs
 GetAllHeadingParagraphs
 GetAllNumberedParagraphs
+GetAllTables
 GetBottomMargin
 GetCells
 GetCols
@@ -224,6 +232,7 @@ GetIndex
 GetLeftMargin
 getLocale
 GetName
+GetPageCount
 GetPageOrientation
 GetPosInParent
 GetRange
@@ -277,6 +286,7 @@ inBody
 innodependencyinstaller
 InsertContent
 insertImage
+InsertOleObject
 integrations
 INTL
 INV
@@ -311,6 +321,8 @@ libs
 LINEST
 linux
 listview
+loaderLogo
+loaderName
 LoadingScriptError
 localhost
 LOGEST
@@ -332,6 +344,7 @@ MergeArea
 metadata
 metafile
 metafiles
+MEE
 México
 mht
 MINIFS
@@ -351,6 +364,7 @@ NEGBINOM
 NETWORKDAYS
 nextcloud
 nginx
+NIST
 nodehun
 nodejs
 NodeJS
@@ -371,6 +385,8 @@ ODP
 ods
 odt
 ODT
+OFORM
+onChangeContentControl
 onDocumentContentReady
 onDocumentStateChange
 onlyoffice
@@ -408,6 +424,7 @@ PhotoEditor
 PHP
 placholder
 Pluging
+pluginMethod
 png
 PNG
 PostgreSql
@@ -462,6 +479,7 @@ ScrollToAbsolutePosition
 sdk
 sdkjs
 sdt
+SearchAndReplace
 SECH
 SecurityError
 selectwheel
@@ -534,6 +552,7 @@ svg
 SVG
 Svizzera
 systemd
+tablePr
 tabSelected
 TDIST
 TEXTAFTER
