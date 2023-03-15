@@ -112,7 +112,6 @@
 
 * Fix display of a warning when opening the `XLSX` file
   with external links (Bug #60297)
-* Fix hangup when inserting an object (Bug #61182)
 * Fix calling the file manager in the `DOCXF` viewing mode (Bug #61314)
 * Add a window with the warning about saving to an editable format
   for the PDF and XPS files (Bug #61340)
