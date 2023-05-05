@@ -4,7 +4,7 @@
 
 [ONLYOFFICE Docs](https://www.onlyoffice.com/office-suite.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)* is a free collaborative online office suite comprising viewers and editors for texts, spreadsheets and presentations, forms and PDF, fully compatible with Office Open XML formats: .docx, .xlsx, .pptx and enabling collaborative editing in real time.
 
-ONLYOFFICE Docs can be used as a part of [ONLYOFFICE Workspace](#onlyoffice-workspace) or with third-party sync&share solutions (e.g. Nextcloud, ownCloud, Seafile) to enable collaborative editing within their interface.
+ONLYOFFICE Docs can be used as a part of [ONLYOFFICE Workspace](https://www.onlyoffice.com/workspace.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubCS) or with [third-party sync&share solutions](https://www.onlyoffice.com/all-connectors.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS) (e.g. Nextcloud, ownCloud, Seafile) to enable collaborative editing within their interface.
 
 It has three editions - [Community, Enterprise, and Developer](#onlyoffice-docs-editions). 
 
@@ -119,41 +119,22 @@ The table below will help you to make the right choice.
 \** If supported by DMS  
 \*** End-to-end encryption via Private Rooms requires ONLYOFFICE Workspace
 
-## Documentation
+## How to Install on a local server
 
-The easiest way to install ONLYOFFICE Docs is to use the Docker image. You can also install it from the repository or compile it from source code. The following documentation is available to the community depending on the way you choose:
+The easiest way to install ONLYOFFICE Docs is to use **the Docker image** ([the official source code](https://github.com/ONLYOFFICE/Docker-DocumentServer))
 
-* [Compiling ONLYOFFICE Docs for a local server](https://helpcenter.onlyoffice.com/installation/docs-community-compile.aspx)
-* [Installing ONLYOFFICE Docs for Linux on a local server](https://helpcenter.onlyoffice.com/installation/docs-community-install-ubuntu.aspx)
-* [Installing ONLYOFFICE Docs for Windows on a local server](https://helpcenter.onlyoffice.com/installation/docs-community-install-windows.aspx)
-* [Installing ONLYOFFICE Docs Docker version](https://helpcenter.onlyoffice.com/installation/docs-community-install-docker.aspx)
+* [Installing ONLYOFFICE Docs Docker](https://helpcenter.onlyoffice.com/installation/docs-community-install-docker.aspx)
+* [Installing ONLYOFFICE Docs for Linux](https://helpcenter.onlyoffice.com/installation/docs-community-install-ubuntu.aspx)
+* [Installing ONLYOFFICE Docs for Windows](https://helpcenter.onlyoffice.com/installation/docs-community-install-windows.aspx)
 
-## ONLYOFFICE Workspace
+## How to Build
 
-ONLYOFFICE Docs packaged as Document Server is a part of **ONLYOFFICE Workspace** that also includes ONLYOFFICE Groups packaged as [Community Server](https://github.com/ONLYOFFICE/CommunityServer), [Mail Server](https://github.com/ONLYOFFICE/Docker-MailServer), Control Panel and Talk (instant messaging app). 
+Instructions for building ONLYOFFICE Docs for a local server from source code are in [our helpcenter](https://helpcenter.onlyoffice.com/installation/docs-community-compile.aspx).
 
-It can also be integrated with third-party sync and share solutions. 
+## License
 
-## Project information
-
-Official website: [https://www.onlyoffice.com](https://www.onlyoffice.com?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)
-
-Code repository: [https://github.com/ONLYOFFICE/DocumentServer](https://github.com/ONLYOFFICE/DocumentServer)
-
-Docker Image: [https://github.com/ONLYOFFICE/Docker-DocumentServer](https://github.com/ONLYOFFICE/Docker-DocumentServer)
-
-License: [GNU AGPL v3.0](https://onlyo.co/38YZGJh)
-
-ONLYOFFICE Docs on official website: [https://www.onlyoffice.com/office-suite.aspx](https://www.onlyoffice.com/office-suite.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)
-
-ONLYOFFICE Workspace on official website: [https://www.onlyoffice.com/workspace.aspx](https://www.onlyoffice.com/workspace.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)
-
-List of available integrations: [https://www.onlyoffice.com/all-connectors.aspx](https://www.onlyoffice.com/all-connectors.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDS)
+ONLYOFFICE Docs is licensed under the GNU Affero Public License, version 3.0. See [LICENSE](https://onlyo.co/38YZGJh) for more information.
 
 ## User Feedback and Support
 
-If you have any problems with or questions about [ONLYOFFICE Docs][2], please visit our official forum to find answers to your questions: [forum.onlyoffice.com][1] or you can ask and answer ONLYOFFICE development questions on [Stack Overflow][3].
-
-  [1]: https://forum.onlyoffice.com
-  [2]: https://github.com/ONLYOFFICE/DocumentServer
-  [3]: https://stackoverflow.com/questions/tagged/onlyoffice
+If you have any problems with or questions about ONLYOFFICE Docs, please visit our official forum to find answers to your questions: [forum.onlyoffice.com](https://forum.onlyoffice.com) or you can ask and answer ONLYOFFICE development questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/onlyoffice).
