@@ -5,6 +5,126 @@ This document provides the roadmap of the planned ONLYOFFICE Document Server cha
 This is an updated and corrected version of the roadmap.
 We also reserve the right to change it when necessary.
 
+## Version 7.4
+
+### All editors
+
+* File menu reworked: added file names, new Protect tab
+* New interface languages: Sinhala (Sri Lanka)
+* New locale: Dansk (Danmark)
+* Support for opening the following formats: MHTML, SXC, ET, ETT, SXI, DPS, DPT, SXW, STW, WPS, WPT
+* New embedded Help language: Turkish
+* New feature: text tips for color palettes
+* New feature: headers for columns in lists
+* New feature: Draw tab
+* New feature: Eyedropper for color palettes
+* New interface scaling options: 250/300/350/400/450/500%
+* New feature: saving objects as pictures
+* New feature: copy formatting for graphic objects
+* New diagram type: Radar
+* New feature: opacity setting for border lines of graphic objects
+* Plugin Manager: added Search bar and categories
+
+### Forms
+
+* New feature: no form field filling in edit mode
+* New feature: Default value field on the right panel
+* New feature: add new form without exiting the current one
+* Fixed-form tracking fix
+* New API method: filling forms in the interface
+* Minor bug fixes
+
+### Document Editor
+
+* New feature: advanced settings for layout columns
+* Updated list settings: advanced settings for numbered and multi-level lists, the Recently Used tab for list types, creating lists in the dialogue window
+* New feature: Combine documents
+* New feature: exceptions for letter capitalization in AutoCorrect
+* Support for saving documents in PNG and JPG formats
+
+### Spreadsheet Editor
+
+* New feature: Print range for spreadsheets
+* New formula language: Armenian
+* New feature: First page number in print settings
+* New feature: Page Break Preview on the View tab
+* New feature: Change case
+* New number formats: Short Date and Long Date
+* New feature: Show Values as for pivot tables
+* New contextual menu items for pivot tables
+* New functions: SEQUENCE, XMATCH, EXPAND, FILTER, ARRAYTOTEXT, SORT
+* New feature: protecting ranges while selecting certain users with editing rights
+* The Allow edit ranges button moved to the Protect sheet dialogue window
+* Support for saving spreadsheets in PNG and JPG formats
+
+### Presentation Editor
+
+* New feature: exceptions for letter capitalization in AutoCorrect
+
+### Desktop Editors
+
+* New interface language: Sinhala 
+* New feature: cloud document templates
+* New printing settings: number of copies, duplex, quick print
+* New Linux system setting: System theme option is now unavailable
+
+### Mobile
+
+* New formula languages
+
+### Plugins
+
+* Zotero plugin updated to 1.0.1: updating bibliography and citation fields, data synchronization with Zotero, converting fields to text for improved compatibility with other editors
+
+### API updates
+
+* New database: Dameng
+* New feature: font size customization
+* New license check parameter: start_date
+* New WOPI discovery parameters: mobileView and mobileEdit action to open mobile editors
+* New plugin methods to return and replace the current word/sentence
+* New editor configuration parameter: hiding the Draw tab
+* node-redis connector updated to 4.6.5
+* JS core debug in Chrome
+* New feature added: pluginsmanager
+
+## Version 7.3
+
+### All editors
+
+* Styles panel now fits the whole number of visible styles
+* Table templates are now categorized
+* New feature: 3D rotation for diagrams
+* New dictionaries: Uzbek (Cyrillic + Latin)
+* New feature: presets for inserting text boxes
+* New feature: hiding right and left sidebars via the View tab
+* New feature: quick access panel for equations
+* New feature: changing the size of dialog windows for charts, OLE-objects and Mail Merge recipients
+* New feature: error bars
+* New feature: inserting Smart Art objects
+
+### Document Editor
+
+* Support for equations in Unicode and LaTeX
+* New feature: word count in the status bar
+* Document password protection update: editing rights restriction
+
+### Spreadsheet Editor
+
+* Templates for tables, pivot tables, cell styles are now categorized
+* New feature: Watch Window for functions
+* New Paste Special feature: links to other files within the portal
+* New functions added: TEXTBEFORE, TEXTAFTER, TEXTSPLIT, VSTACK, HSTACK, TOROW, TOCOL, WRAPROWS, WRAPCOLS, TAKE, DROP, CHOOSEROWS, CHOOSECOLS
+
+### Presentation Editor
+
+* New setting: adjusting guidelines via the View tab
+* New feature: Paste Special for slides
+
+### Mobile
+
+* New feature: Sharing Settings
+
 ## Version 7.2
 
 ### All editors
