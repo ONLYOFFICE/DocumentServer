@@ -19,7 +19,10 @@ ONLYOFFICE Docs contains the following components:
 * [sdkjs](https://github.com/ONLYOFFICE/sdkjs) - JavaScript SDK for the ONLYOFFICE Docs which contains API for all the included components client-side interaction.
 * [web-apps](https://github.com/ONLYOFFICE/web-apps) - the frontend for ONLYOFFICE Docs which builds the program interface and allows the user create, edit, save and export text, spreadsheet and presentation documents using the common interface of a document editor.
 * [dictionaries](https://github.com/ONLYOFFICE/dictionaries) - the dictionaries of various languages used for spellchecking in ONLYOFFICE Docs.
-* [sdkjs-plugins](https://github.com/ONLYOFFICE/sdkjs-plugins) - the add-ons for ONLYOFFICE Docs used for the developers to add specific functions to the editors which are not directly related to the OOXML format.
+
+## Plugins
+
+ONLYOFFICE Docs offer support for plugins allowing developers to add specific features to the editors that are not directly related to the OOXML format. For more information see [our API](https://api.onlyoffice.com/plugin/basic) or visit github [plugins repo](https://github.com/ONLYOFFICE/onlyoffice.github.io).
 
 ## Functionality
 
