@@ -10,9 +10,10 @@ We also reserve the right to change it when necessary.
 ### All editors
 
 * File menu reworked: added file names, new Protect tab
-* New interface languages: Sinhala (Sri Lanka)
+* New interface language: Sinhala (Sri Lanka)
 * New locale: Dansk (Danmark)
-* Support for opening the following formats: MHTML, SXC, ET, ETT, SXI, DPS, DPT, SXW, STW, WPS, WPT
+* Support for opening the following formats: MHTML, SXC, ET, ETT, SXI, DPS,
+DPT, SXW, STW, WPS, WPT
 * New embedded Help language: Turkish
 * New feature: text tips for color palettes
 * New feature: headers for columns in lists
@@ -37,7 +38,8 @@ We also reserve the right to change it when necessary.
 ### Document Editor
 
 * New feature: advanced settings for layout columns
-* Updated list settings: advanced settings for numbered and multi-level lists, the Recently Used tab for list types, creating lists in the dialogue window
+* Updated list settings: advanced settings for numbered and multi-level lists,
+the Recently Used tab for list types, creating lists in the dialogue window
 * New feature: Combine documents
 * New feature: exceptions for letter capitalization in AutoCorrect
 * Support for saving documents in PNG and JPG formats
@@ -63,10 +65,14 @@ We also reserve the right to change it when necessary.
 
 ### Desktop Editors
 
-* New interface language: Sinhala 
+* New interface language: Sinhala
 * New feature: cloud document templates
-* New printing settings: number of copies, duplex, quick print
-* New Linux system setting: System theme option is now unavailable
+* New printing settings: number of copies, duplex
+* Reworked Linux system setting: System theme option is now unavailable
+
+### Mobile web editors
+
+* New interface language: Sinhala (Sri Lanka)
 
 ### Mobile
 
@@ -74,14 +80,16 @@ We also reserve the right to change it when necessary.
 
 ### Plugins
 
-* Zotero plugin updated to 1.0.1: updating bibliography and citation fields, data synchronization with Zotero, converting fields to text for improved compatibility with other editors
+* Zotero plugin updated to 1.0.1: updating bibliography and citation fields,
+data synchronization with Zotero, converting fields to text for improved compatibility with other editors
 
 ### API updates
 
 * New database: Dameng
 * New feature: font size customization
 * New license check parameter: start_date
-* New WOPI discovery parameters: mobileView and mobileEdit action to open mobile editors
+* New WOPI discovery parameters: mobileView and mobileEdit action to open 
+mobile editors
 * New plugin methods to return and replace the current word/sentence
 * New editor configuration parameter: hiding the Draw tab
 * node-redis connector updated to 4.6.5
@@ -99,7 +107,8 @@ We also reserve the right to change it when necessary.
 * New feature: presets for inserting text boxes
 * New feature: hiding right and left sidebars via the View tab
 * New feature: quick access panel for equations
-* New feature: changing the size of dialog windows for charts, OLE-objects and Mail Merge recipients
+* New feature: changing the size of dialog windows for charts, OLE-objects
+and Mail Merge recipients
 * New feature: error bars
 * New feature: inserting Smart Art objects
 
@@ -114,12 +123,17 @@ We also reserve the right to change it when necessary.
 * Templates for tables, pivot tables, cell styles are now categorized
 * New feature: Watch Window for functions
 * New Paste Special feature: links to other files within the portal
-* New functions added: TEXTBEFORE, TEXTAFTER, TEXTSPLIT, VSTACK, HSTACK, TOROW, TOCOL, WRAPROWS, WRAPCOLS, TAKE, DROP, CHOOSEROWS, CHOOSECOLS
+* New functions added: TEXTBEFORE, TEXTAFTER, TEXTSPLIT, VSTACK, HSTACK, TOROW,
+TOCOL, WRAPROWS, WRAPCOLS, TAKE, DROP, CHOOSEROWS, CHOOSECOLS
 
 ### Presentation Editor
 
 * New setting: adjusting guidelines via the View tab
 * New feature: Paste Special for slides
+
+### Desktop Editors
+
+* New printing setting: quick print
 
 ### Mobile
 
