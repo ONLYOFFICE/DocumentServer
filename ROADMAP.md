@@ -81,14 +81,15 @@ the Recently Used tab for list types, creating lists in the dialogue window
 ### Plugins
 
 * Zotero plugin updated to 1.0.1: updating bibliography and citation fields,
-data synchronization with Zotero, converting fields to text for improved compatibility with other editors
+data synchronization with Zotero, converting fields to text for
+improved compatibility with other editors
 
 ### API updates
 
 * New database: Dameng
 * New feature: font size customization
 * New license check parameter: start_date
-* New WOPI discovery parameters: mobileView and mobileEdit action to open 
+* New WOPI discovery parameters: mobileView and mobileEdit action to open
 mobile editors
 * New plugin methods to return and replace the current word/sentence
 * New editor configuration parameter: hiding the Draw tab
