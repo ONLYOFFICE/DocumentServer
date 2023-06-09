@@ -115,7 +115,7 @@ It’s possible to get/replace a word/sentence both entirely and partially,
 before the cursor and after the cursor.
 It is regulated by the `part`=`entirely`|`beforeCursor`|`afterCursor` parameter
 
-```
+```javascript
 asc_editor.GetCurrentWord(part)
 asc_editor.ReplaceCurrentWord(replaceString, part)
 asc_editor.GetCurrentSentence(part)
