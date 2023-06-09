@@ -9,7 +9,8 @@
 * Add the Draw tab to the editors
 * Add the ability to add/choose color using the Eyedropper tool in the editors
 * Add the ability to copy formatting between graphical object
-* Completely rework the Protect tab template in the settings panel of the File menu, add titles
+* Completely rework the Protect tab template in the settings panel
+  of the `File` menu, add titles
 * Add the ability to save objects as images in the context menu
 * Add opacity settings for borders of autoshapes, images, Text Art objects, charts
 * Add the support of radar charts
@@ -53,7 +54,7 @@
   protected ranges, sorting, conditional formatting)
 * Add the ability to set the first page number for the workbook sheet
 * Add translation of formulas into Armenian
- 
+
 #### Presentation Editor
 
 * Add the exception list for autocorrect of capital letters
@@ -110,23 +111,28 @@
 #### API
 
 * Add new methods for plugins to get and replace the current word/sentence
-It’s possible to get/replace a word/sentence both entirely and partially, before the cursor and after the cursor. 
+It’s possible to get/replace a word/sentence both entirely and partially,
+before the cursor and after the cursor.
 It is regulated by the `part`=`entirely`|`beforeCursor`|`afterCursor` parameter
+
 ```
 asc_editor.GetCurrentWord(part)
 asc_editor.ReplaceCurrentWord(replaceString, part)
 asc_editor.GetCurrentSentence(part)
 asc_editor.ReplaceCurrentSentence(replaceString, part)
 ```
+
 * Add new methods to `ApiBuilder`
 `ApiComment.GetCommentId` – returns a unique identifier of the comment created
   in the builder, it can be used again in this file in the future
 * Fix an issue with working `ApiDocument.GetCommentById`
 `ApiDocument.InsertTextForm` – inserts a text form instead of the selected text
-into a document. It’s also possible to turn the selected text into a Placeholder of this form
+into a document. It’s also possible to turn the selected text into
+a Placeholder of this form
 * For plugins, add the `onInsertOleObjects` event with the `OLEObjectData`
 parameter (the array of objects), which works when inserting `OLE objects`
-into a document. The `InsertOleObject`, `ChangeOleObjects` plugin methods are marked as asynchronous
+into a document. The `InsertOleObject`, `ChangeOleObjects` plugin methods
+are marked as asynchronous
 
 #### Plugins
 
