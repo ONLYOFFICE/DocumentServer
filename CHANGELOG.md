@@ -1,5 +1,137 @@
 # Change log
 
+## 7.4.0
+
+### New features
+
+#### All Editors
+
+* Add the Draw tab to the editors
+* Add the ability to add/choose color using the Eyedropper tool in the editors
+* Add the ability to copy formatting between graphical object
+* Completely rework the Protect tab template in the settings panel of the File menu, add titles
+* Add the ability to save objects as images in the context menu
+* Add opacity settings for borders of autoshapes, images, Text Art objects, charts
+* Add the support of radar charts
+* Add the support of the `MHTML`, `SXC`, `ET`, `ETT`, `SXI`, `DPS`, `DPT`,
+  `SXV`, `STW`, `WPS`, `WPT` formats for opening in the editors
+* Change the component for displaying lists (add column headers)
+* Add the interface translation into Sinhala (si-LK, Sinhala (Sri Lanka))
+* Add Danish (da-DK (Dansk (Danmark)) to the regional settings
+* Add hints for color names
+* Add help in Turkish
+* Add the support for 250/300/350/400/450/500% interface scaling
+
+#### Document Editor
+
+* Add the ability to combine documents
+* Add advanced settings for columns
+* Add advanced settings for numbered and multilevel lists
+* Add sections for recently used lists and lists in the current document in the presets
+* Add the ability to create a new list using the settings dialog
+* Add the ability to save a document to `PNG` and `JPG`
+* Add the exception list for autocorrect of capital letters
+
+#### Spreadsheet Editor
+
+* Add the support for new functions: `SEQUENCE`, `XMATCH`, `EXPAND`, `FILTER`,
+  `ARRAYTOTEXT`, `SORT`
+* Add the ability to protect ranges by specifying permissions for editing for
+  certain people. For other users, the range will be view-only
+* Add the ability to change case of text)
+* Add page break preview
+* Add the ability to save a spreadsheet to `PNG` and `JPG`
+* Replace the Current sheet option with the Active sheets one
+* Add the ability to set a page range for printing
+* Add the ability to set the First page number in the print settings
+* Add the long and short formats of dates to the number format presets
+* Add menu items for working with pivot tables to the context menu
+* Add the `Show values` as setting for pivot tables
+* Rework the dialog window with sheet protection settings
+  (move the `Allow edit ranges` button from the toolbar to the dialog window)
+* Change layout for some dialog windows containing lists (named ranges,
+  protected ranges, sorting, conditional formatting)
+* Add the ability to set the first page number for the workbook sheet
+* Add translation of formulas into Armenian
+ 
+#### Presentation Editor
+
+* Add the exception list for autocorrect of capital letters
+
+#### Forms
+
+* Change the fixed form snapping. The form position is now calculated from
+  the beginning of the page
+* Add the ability to add a new form without leaving the current one
+* Improve track rendering for fixed forms
+* Disable the ability to fill out forms in the editing mode
+* Remain the ability to fill out forms in the viewing mode
+  (the `ViewForms` button)
+* Add a new API method for filling forms via the interface
+* The current form now has the same fill as the others in the editing mode
+* Fix minor issues with functioning of smaller forms inside complex ones
+* Added the `Default value` field to the right panel due to disabling
+  the ability to fill out forms in the editing mode
+* Add the number of results to the Search box
+
+#### Back-end
+
+* Add the support for the start_date parameter in the server license
+  for supporting licenses which will work in the future
+* User with an empty `user id` is considered as [anonymous](https://api.onlyoffice.com/editors/anonymoususers)
+
+#### WOPI
+
+* Add new parameters to `WOPI discovery`: [mobileView](https://learn.microsoft.com/en-us/microsoft-365/cloud-storage-partner-program/online/discovery#mobileview)
+  and `mobileEdit` action for opening the mobile version of the editors
+  It works via the API type parameter: [mobile](https://api.onlyoffice.com/editors/config/#type)
+
+#### Mobile
+
+* Add new formula languages in the Spreadsheet Editor
+* Add suggestions for formulas in the Spreadsheet Editor
+
+#### Docker
+
+* Use a `unix socket` by default
+* Use the default `supervisord` configuration
+* Return the `init.d` supervisor file
+
+#### Customization
+
+* Add the parameter to customize the font size of interface elements (buttons,
+  tabs, labels, etc.) in the editor configuration file:
+  `customization`->`font`->`size`
+  The setting is available for users with an extended license
+* Add the parameter to hide the `Draw` tab in the editor configuration file:
+  `customization`->`layout`->`toolbar`->`draw`: `true`/`false` (show/hide)
+  The setting is available for users with an extended license
+
+#### API
+
+* Add new methods for plugins to get and replace the current word/sentence
+It’s possible to get/replace a word/sentence both entirely and partially, before the cursor and after the cursor. 
+It is regulated by the `part`=`entirely`|`beforeCursor`|`afterCursor` parameter
+```
+asc_editor.GetCurrentWord(part)
+asc_editor.ReplaceCurrentWord(replaceString, part)
+asc_editor.GetCurrentSentence(part)
+asc_editor.ReplaceCurrentSentence(replaceString, part)
+```
+* Add new methods to `ApiBuilder`
+`ApiComment.GetCommentId` – returns a unique identifier of the comment created
+  in the builder, it can be used again in this file in the future
+* Fix an issue with working `ApiDocument.GetCommentById`
+`ApiDocument.InsertTextForm` – inserts a text form instead of the selected text
+into a document. It’s also possible to turn the selected text into a Placeholder of this form
+* For plugins, add the `onInsertOleObjects` event with the `OLEObjectData`
+parameter (the array of objects), which works when inserting `OLE objects`
+into a document. The `InsertOleObject`, `ChangeOleObjects` plugin methods are marked as asynchronous
+
+#### Plugins
+
+* Add the `pluginsmanager` utility for installing/removing plugins in the server
+
 ## 7.3.3
 
 ### Fixes
