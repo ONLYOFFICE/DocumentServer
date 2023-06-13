@@ -17,6 +17,7 @@
 * Add the support of the `MHTML`, `SXC`, `ET`, `ETT`, `SXI`, `DPS`, `DPT`,
   `SXV`, `STW`, `WPS`, `WPT` formats for opening in the editors
 * Change the component for displaying lists (add column headers)
+* Add the number of results to the Search box
 * Add the interface translation into Sinhala (si-LK, Sinhala (Sri Lanka))
 * Add Danish (da-DK (Dansk (Danmark)) to the regional settings
 * Add hints for color names
@@ -73,7 +74,6 @@
 * Fix minor issues with functioning of smaller forms inside complex ones
 * Added the `Default value` field to the right panel due to disabling
   the ability to fill out forms in the editing mode
-* Add the number of results to the Search box
 
 #### Back-end
 
