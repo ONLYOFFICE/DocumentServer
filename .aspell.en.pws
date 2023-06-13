@@ -11,13 +11,16 @@ AddHeadingCrossRef
 AddNumberedCrossRef
 AddSheet
 adSm
+afterCursor
 AllFontsGen
 altGr
 amd
 amqp
 Api
 ApiBlockLvlSdt
+ApiBuilder
 ApiChart
+ApiComment
 ApiDocument
 ApiDrawing
 ApiParagraph
@@ -27,7 +30,9 @@ ApiTable
 ApiWorksheet
 ApplyChartStyle
 ApplyTheme
+ARRAYTOTEXT
 Asana
+asc
 ASC
 ashx
 aspose
@@ -35,6 +40,7 @@ Aspose
 async
 authChanges
 autocomplete
+autocorrect
 AutoCorrect
 autofill
 autofilter
@@ -44,9 +50,11 @@ Autofit
 AutoFormat
 Autorun
 autoshape
+autoshapes
 autostart
 AVERAGEA
 AVERAGEIFS
+beforeCursor
 BESSELI
 BESSELJ
 BESSELK
@@ -133,6 +141,9 @@ CUBESETCOUNT
 CUBEVALUE
 CVE
 cyrillic
+da
+Danmark
+Dansk
 dataset
 DAVERAGE
 DCOUNT
@@ -145,6 +156,7 @@ Deutsch
 DGET
 dir
 djvu
+DK
 DMAX
 DMS
 dns
@@ -183,6 +195,7 @@ EQ
 ERFC
 ESOCKETTIMEDOUT
 Español
+ETT
 ETS
 eu
 EXC
@@ -221,8 +234,12 @@ GetBottomMargin
 GetCells
 GetCols
 GetColumnWidth
+GetCommentById
+GetCommentId
 GetCount
 GetCurrentContentControlPr
+GetCurrentSentence
+GetCurrentWord
 GetEndNotesFirstParagraphs
 GetFontNames
 GetFootnotesFirstParagraphs
@@ -287,7 +304,9 @@ innodependencyinstaller
 InsertContent
 insertImage
 InsertOleObject
+InsertTextForm
 integrations
+init
 INTL
 INV
 io
@@ -304,6 +323,7 @@ Italiano
 japanese
 javascript
 jpeg
+JPG
 js
 JS
 json
@@ -321,6 +341,7 @@ libs
 LINEST
 linux
 listview
+LK
 loaderLogo
 loaderName
 LoadingScriptError
@@ -347,8 +368,10 @@ metafiles
 MEE
 México
 mht
+MHTML
 MINIFS
 minishift
+mobileEdit
 MoveCursorToEnd
 MoveCursorToStart
 mscorefonts
@@ -386,9 +409,11 @@ ods
 odt
 ODT
 OFORM
+OLEObjectData
 onChangeContentControl
 onDocumentContentReady
 onDocumentStateChange
+onInsertOleObjects
 onlyoffice
 ONLYOFFICE
 OnlySignatures
@@ -425,6 +450,7 @@ PHP
 placholder
 Pluging
 pluginMethod
+pluginsmanager
 png
 PNG
 PostgreSql
@@ -458,6 +484,9 @@ Refactor
 refactoring
 regex
 ReplaceByElement
+ReplaceCurrentSentence
+ReplaceCurrentWord
+replaceString
 replyStr
 repo
 republika
@@ -541,6 +570,8 @@ statsd
 statusBar
 STDEV
 stirkeout
+Sri
+STW
 substring
 SUMIFS
 SUMPRODUCT
@@ -551,6 +582,9 @@ Sverige
 svg
 SVG
 Svizzera
+SXC
+SXI
+SXV
 systemd
 tablePr
 tabSelected
@@ -583,6 +617,7 @@ uncalculated
 undelete
 ungroup
 ungrouping
+unix
 unLockDocument
 uri
 URI
@@ -599,6 +634,7 @@ usersfiles
 UTF
 util
 verysilent
+ViewForms
 VLOOKUP
 VSTACK
 vml
@@ -609,6 +645,8 @@ WinXp
 wmf
 WOPI
 WordControl
+WPS
+WPT
 WrapText
 WRAPCOLS
 WRAPROWS
@@ -622,6 +660,7 @@ XlsFormatReader
 xlsx
 XLSX
 XLTX
+XMATCH
 xps
 XSS
 Yandex
