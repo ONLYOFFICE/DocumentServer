@@ -5,6 +5,63 @@ This document provides the roadmap of the planned ONLYOFFICE Document Server cha
 This is an updated and corrected version of the roadmap.
 We also reserve the right to change it when necessary.
 
+## Version 7.5
+
+### All editors
+
+* Working on RTL in the editors core
+* The ability to sign a file in the web version
+* Switching to the common history for all editors
+* Advanced settings for the `AutoCorrect` feature
+* Work with styles and hidden styles
+* New types of charts
+* The ability to add words to the dictionary for spell
+checking in the web version
+* Support for SVG
+
+### Forms
+
+* Improvement of form fields. Advanced settings
+* Field templates. Working on new fields
+* Filling in forms by roles. Signing forms. Application for signing
+
+### Document Editor
+
+* Development of automatic hyphenation
+
+### Spreadsheet Editor
+
+* Support for `Undo` in the Fast co-editing mode
+* Inserting images into headers/footers
+* New types of formulas
+* The ability to display only formulas in cells
+* The ability to save spreadsheets to the .csv format with
+a separator which differs from comma
+* The `Show details` feature for working with a Pivot Table.
+Improvement of the ability to open data on a new sheet
+by double-clicking a value in a Pivot Table
+* Autocompletion for days of the week and months
+when stretching a cell value
+
+### Presentation Editor
+
+* New types of animations and transitions
+
+### PDF Viewer
+
+* Support for the PDF forms. Annotations
+
+### Server
+
+* Support for mssql, oracle, and other databases
+
+### Mobile editors
+
+* Support for protection
+* Working on the common engine for the native part of mobile applications.
+The ability to download sdk on Android and edit files on portals natively,
+instead of using the mobile web version
+
 ## Version 7.4
 
 ### All editors
@@ -62,13 +119,6 @@ the Recently Used tab for list types, creating lists in the dialogue window
 ### Presentation Editor
 
 * New feature: exceptions for letter capitalization in AutoCorrect
-
-### Desktop Editors
-
-* New interface language: Sinhala
-* New feature: cloud document templates
-* New printing settings: number of copies, duplex
-* Reworked Linux system setting: System theme option is now unavailable
 
 ### Mobile web editors
 
@@ -131,10 +181,6 @@ TOCOL, WRAPROWS, WRAPCOLS, TAKE, DROP, CHOOSEROWS, CHOOSECOLS
 
 * New setting: adjusting guidelines via the View tab
 * New feature: Paste Special for slides
-
-### Desktop Editors
-
-* New printing setting: quick print
 
 ### Mobile
 
