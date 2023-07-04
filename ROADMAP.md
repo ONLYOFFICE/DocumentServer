@@ -55,12 +55,6 @@ when stretching a cell value
 
 * Support for mssql, oracle, and other databases
 
-### Desktop Editors
-
-* Preview when opening csv and autodetection of encoding and separators
-* Opening the HTML files in different types of editors depending
-on the file contents (instead of using Document Editor only)
-
 ### Mobile editors
 
 * Support for protection
@@ -126,13 +120,6 @@ the Recently Used tab for list types, creating lists in the dialogue window
 
 * New feature: exceptions for letter capitalization in AutoCorrect
 
-### Desktop Editors
-
-* New interface language: Sinhala
-* New feature: cloud document templates
-* New printing settings: number of copies, duplex
-* Reworked Linux system setting: System theme option is now unavailable
-
 ### Mobile web editors
 
 * New interface language: Sinhala (Sri Lanka)
@@ -194,10 +181,6 @@ TOCOL, WRAPROWS, WRAPCOLS, TAKE, DROP, CHOOSEROWS, CHOOSECOLS
 
 * New setting: adjusting guidelines via the View tab
 * New feature: Paste Special for slides
-
-### Desktop Editors
-
-* New printing setting: quick print
 
 ### Mobile
 
