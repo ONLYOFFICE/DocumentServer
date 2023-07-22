@@ -99,6 +99,7 @@ clipart
 Clipart
 ClipArt
 Cloudwatch
+Cmd
 CNumberingLvlLegacy
 coedit
 CollaborationEditing
@@ -163,6 +164,7 @@ dns
 DocFormat
 docId
 docservice
+DocSpace
 DocumentBuilder
 DocumentEditor
 documentserver
@@ -408,6 +410,7 @@ ODP
 ods
 odt
 ODT
+oform
 OFORM
 OLEObjectData
 onChangeContentControl
@@ -491,6 +494,7 @@ replyStr
 repo
 republika
 reSave
+resaving
 resize
 rightMenu
 RowHeight
@@ -617,6 +621,7 @@ uncalculated
 undelete
 ungroup
 ungrouping
+unhandled
 unix
 unLockDocument
 uri
