@@ -25,8 +25,8 @@
 
 #### Document Editor
 
-* Fix XXS when obtaining data for `Mail Merge`
-* Fix XXS when adding a `Caption` and `Cross-reference`
+* Fix XSS when obtaining data for `Mail Merge`
+* Fix XSS when adding a `Caption` and `Cross-reference`
 * Limit the number of recent lists in the Recently used section
 * Fix offset of selection when moving to a monitor with different scaling
 * Fix reset of the `Copy style` action after the first use
@@ -43,7 +43,7 @@
 
 #### Spreadsheet Editor
 
-* Fix XXS in the `Edit Series` field when editing the range of an added chart
+* Fix XSS in the `Edit Series` field when editing the range of an added chart
 * Bring the case of drop-down list items in the `Pivot Table` properties
   to unified appearance
 * Fix missing data in the first cell when importing from `TXT`/`CSV`
