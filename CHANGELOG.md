@@ -1,5 +1,100 @@
 # Change log
 
+## 7.4.1
+
+### New features
+
+#### Document Editor
+
+* Add Chinese font size system (for Chinese Simplified)
+
+### Fixes
+
+#### All Editors
+
+* Fix hanging of the editor after switching the editor theme when a form
+  is being filled out in the next tab
+* Improve the algorithm for selecting a color name in the palette
+  on the `Draw` tab
+* Fix using bitmap glyphs when Italic is enabled forcefully ([DocumentServer#2271](https://github.com/ONLYOFFICE/DocumentServer/issues/2271))
+* Fix displaying of an image used as the fill of a SmartArt object after
+  saving a document
+* Fix an error when entering text into SmartArt after selecting
+* Update the interface translation into Chinese Traditional
+* Add new pages to Help in French
+
+#### Document Editor
+
+* Fix XSS when obtaining data for `Mail Merge`
+* Fix XSS when adding a `Caption` and `Cross-reference`
+* Limit the number of recent lists in the Recently used section
+* Fix offset of selection when moving to a monitor with different scaling
+* Fix reset of the `Copy style` action after the first use
+* Fix duplicating paragraph numbering in the document outline ([DocumentServer#2273](https://github.com/ONLYOFFICE/DocumentServer/issues/2273))
+* Fix hanging of the editor after using `Mail Merge` and clicking
+  on a paragraph
+* Fix hanging of the editor after removing a table and a paragraph
+  in some `DOCX` documents
+* Fix hanging of the editor when using the Copy and Paste options
+  in some `DOCX` documents ([DocumentServer#2299](https://github.com/ONLYOFFICE/DocumentServer/issues/2299))
+* Fix displaying of the `Save as oform` and `Mark as favorite` toolbar icons
+  for the interface scaling >200%
+* Fix an error when adding or updated the Table of Contents in the `DOCX` file
+
+#### Spreadsheet Editor
+
+* Fix XSS in the `Edit Series` field when editing the range of an added chart
+* Bring the case of drop-down list items in the `Pivot Table` properties
+  to unified appearance
+* Fix missing data in the first cell when importing from `TXT`/`CSV`
+
+#### Presentation Editor
+
+* Fix hanging of the editor when changing text alignment with a date and
+  the `Update automatically` parameter
+* Fix displaying of an image made in the Photo Editor plugin
+* Fix displaying of a watermark in the slide show mode, if the Settings
+  plugin is installed ([DocumentServer#1433](https://github.com/ONLYOFFICE/DocumentServer/issues/1433))
+
+#### Back-end
+
+* Fix delay when transferring data in the co-editing mode after setting
+  a password for a document
+* Fix undefined `err.stack` in node-redis
+* Add prefix support to the example button
+* Add connectivity via virtual path
+
+#### Mobile
+
+* Fix saving changes in documents on the DocSpace portal
+* Fix work of buttons for actions with changes in the Review Change tab
+  in the "Tracked changes" protection mode
+* Fix work of the Cmd + C / Cmd + V / Cmd + X keys on iOS or iPadOS with
+  an external keyboard
+* Fix work of the "Tracked changes" document protection mode when reopening
+  a document
+* Fix necessity to switch to the editing mode after enabling
+  the "Tracked changes" protection
+
+#### Convert
+
+* Fix the vulnerability which allows adding a third party image to a document
+  when converting via x2t
+* Fix the vulnerability which allows reading information from a third party
+  file after converting a modified document via x2t
+* Fix some data loss when converting `DJVU` to `PDF`
+* Fix appearing excess content after converting the `HTML` file to `DOCX`
+* Fix loss of an image on a slide after resaving the `PPTX` file
+
+#### Docker
+
+* Fix unhandled exception in cache response
+
+#### Customization
+
+* Fix incorrect cursor position when hovering on the slide list in
+  a presentation if the `customization.toolbar:false` parameter is used
+
 ## 7.4.0
 
 ### New features
