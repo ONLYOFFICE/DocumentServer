@@ -239,6 +239,8 @@ are marked as asynchronous
 
 #### All Editors
 
+* Fix the vulnerability CVE-2023-30186 with memory exhaustion
+  during work with `NativeEngine` function (Bug #60433)
 * Fix crash when using Shift+← and Ctrl+→ in a graphical formula (Bug #60984) ([DocumentServer#2131](https://github.com/ONLYOFFICE/DocumentServer/issues/2131))
 * Fix distance between labels and the axis
 * Fix points label position (max min axis orientation)
