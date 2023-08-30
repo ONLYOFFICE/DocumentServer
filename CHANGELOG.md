@@ -135,7 +135,7 @@
   `ARRAYTOTEXT`, `SORT`
 * Add the ability to protect ranges by specifying permissions for editing for
   certain people. For other users, the range will be view-only
-* Add the ability to change case of text)
+* Add the ability to change case of text
 * Add page break preview
 * Add the ability to save a spreadsheet to `PNG` and `JPG`
 * Replace the Current sheet option with the Active sheets one
