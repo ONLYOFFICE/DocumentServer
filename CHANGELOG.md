@@ -80,12 +80,13 @@
 * Slide placeholders have alternative descriptions
 * `SmartArt` insertion is available via a slide placeholder
 * Change the color of the Presentation Editor header
-* Add the ability to navigate to the specific slide with the consecutive 
+* Add the ability to navigate to the specific slide with the consecutive
   pressing of the *slide number* + `Enter` when previewing a presentation
 * Change the keyboard shortcut for starting a presentation on macOS:
   `Cmd` + `Shift` + `Return` is used
 
 #### Forms
+
 * Bring settings on the right toolbar to unified appearance
 
 #### PDF Editor
@@ -107,11 +108,13 @@
 
 * Add commands for working with `forgotten files`: `getForgotten`, `deleteForgotten`,
   `getForgottenList` to [`coauthoring/CommandService.ashx`](https://api.onlyoffice.com/editors/command/)
-* Add the [conversion error](https://api.onlyoffice.com/editors/conversionapi#error-codes) -9
-  to Conversion API for displaying the editor selection dialog
+* Add the [conversion error](https://api.onlyoffice.com/editors/conversionapi#error-codes)
+  -9 to Conversion API for displaying the editor selection dialog
 * Add parameters to the server config:
-  `optionsCluster` (connection via [`node-redis`](https://github.com/redis/node-redis/blob/master/docs/clustering.md), 
-  `iooptionsClusterNodes`, `iooptionsClusterOptions` (connection via [`ioredis`](https://github.com/redis/ioredis#cluster)
+  `optionsCluster` (connection via
+  [`node-redis`](https://github.com/redis/node-redis/blob/master/docs/clustering.md),
+  `iooptionsClusterNodes`, `iooptionsClusterOptions` (connection via
+  [`ioredis`](https://github.com/redis/ioredis#cluster)
   for connection to the `redis cluster`
 * Add the `formdata` parameter, which contains `json` with data of
   the submitted form, to [`Callback handler`](https://api.onlyoffice.com/editors/callback)
