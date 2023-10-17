@@ -13,6 +13,7 @@ AddSheet
 adSm
 afterCursor
 AllFontsGen
+allowPrivateIPAddressForSignedRequests
 altGr
 amd
 amqp
@@ -40,6 +41,7 @@ Aspose
 async
 authChanges
 autocomplete
+Autocompletion
 autocorrect
 AutoCorrect
 autofill
@@ -151,6 +153,7 @@ DCOUNT
 DCOUNTA
 de
 Decryptor
+deleteForgotten
 Deprecations
 DesktopEditors
 Deutsch
@@ -210,12 +213,14 @@ fillForms
 FINV
 firefox
 flv
+Fn
 fodp
 fods
 fodt
 forced
 ForcePathStyle
 ForEach
+formdata
 FORMTEXT
 FORMULATEXT
 FTEST
@@ -245,6 +250,8 @@ GetCurrentWord
 GetEndNotesFirstParagraphs
 GetFontNames
 GetFootnotesFirstParagraphs
+getForgotten
+getForgottenList
 GetHeight
 GetHidden
 GetIndex
@@ -268,6 +275,7 @@ GetUsedRange
 GetValue
 GetVisible
 GetVisibleRegion
+GetWatermarkSettings
 GetWidth
 GetWpar
 glyphs
@@ -312,6 +320,8 @@ init
 INTL
 INV
 io
+iooptionsClusterNodes
+iooptionsClusterOptions
 iOS
 iPadOS
 ipfilter
@@ -382,8 +392,10 @@ multi
 multichart
 multicomments
 multiselect
+multitenancy
 MySQL
 NativeEngine
+natively
 Nederland
 Nederlands
 NEGBINOM
@@ -400,6 +412,7 @@ num
 Num
 numberings
 NUMBERVALUE
+Numpad
 odf
 Odf
 ODF
@@ -421,15 +434,20 @@ onInsertOleObjects
 onlyoffice
 ONLYOFFICE
 OnlySignatures
+onRequestCompareFile
 onRequestInsertImage
 onRequestMailMergeRecipients
+onRequestOpen
 onRequestSaveAs
+onRequestSelectDocument
+onRequestSelectSpreadsheet
 ooxml
 openclipart
 OpenDocument
 OpenFormat
 openProtectedFile
 OpenSource
+optionsCluster
 oRange
 otp
 ots
@@ -536,6 +554,9 @@ SetOffset
 SetPageOrientation
 SetPlotAreaFill
 SetPlotAreaOutLine
+setRequestedDocument
+setRequestedSpreadsheet
+setRevisedFile
 SetRightMargin
 SetRowHeight
 SetSeriesFill
@@ -544,6 +565,7 @@ SetTitleFill
 SetTitleOutLine
 SetTopMargin
 SetVisible
+SetWatermarkSettings
 SharedWorker
 SheetView
 showReviewChanges
@@ -559,6 +581,7 @@ snaplines
 SNGL
 sockjs
 Sogou
+SORTBY
 sourceforge
 spanish
 sparkline

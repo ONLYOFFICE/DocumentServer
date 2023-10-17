@@ -1,5 +1,154 @@
 # Change log
 
+## 7.5.0
+
+### New features
+
+#### All Editors
+
+* Interface scaling is preserved for future sessions
+* Add a menu for quick access to the most popular symbols to the button
+  for inserting symbols
+* Support for `SVG`
+* Add a setting to hide the toolbar for equation
+* Add hints for images in `SmartArt` objects
+* Add the ability to open files protected with a password in the embedded
+  viewer
+* Add the ability to edit points of the autoshape border to the right panel
+* Add the support for 225 and 275 interface scaling
+* Only `Ctrl` + `.` / `Ctrl` + `,` keyboard shortcuts are now used
+  for superscript/subscript characters
+* Change keyboard shortcuts for moving through the text on macOS:
+
+  `Cmd` + `Arrow Left` – moving to the beginning of the line
+  
+  `Cmd` + `Arrow Right` – moving to the end of the line
+  
+  `Option` + `Arrow Left` – moving one word to the left
+  
+  `Option` + `Arrow Right`  – moving one word to the right
+  
+  Removing one word to the left: `Ctrl` + `Backspace` replaced with
+  `Option` + `Delete`
+  
+  Removing one word to the right: `Ctrl` + `Fn` + `Delete` replaced with
+  `Option` + `Fn` + `Delete`
+
+#### Document Editor
+
+* Automatic hyphenation
+* Change the selection logic, add the `Smart paragraph selection` setting
+* Add the `Remove content control when contents are edited` setting
+* Change behavior of the `Accept`/`Reject` review buttons in the toolbar
+* Disable the `Zoom out` action for the `Ctrl` + `Numpad keyboard` shortcut due
+  to the conflict with inserting an em dash
+* Change the keyboard shortcut for strikeout text formatting on macOS:
+  `Ctrl` + `5` replaced with `Cmd` + `Shift` + `X`
+* Change the keyboard shortcut for inserting ellipsis on macOS:
+  `Ctrl` + `Option` + `.` replaced with `Option` + `;`
+
+#### Spreadsheet Editor
+
+* The ability to display only formulas in cells
+* Trace precedents / dependents
+* New function: `SORTBY`
+* Margins presets for printing
+* Add the ability to set a number format in the field settings
+  for `Pivot Tables`
+* The `Show details` feature for working with a `Pivot Table`
+* Improvement of the ability to open data on a new sheet by double-clicking
+  a value in a `Pivot Table`
+* Autocompletion for days of the week and months when stretching a cell value
+* Drag-and-drop for columns and rows
+* Add filters by date and the ability to display data with the "Date" format
+  in the form of a tree in the `Autofilter` window
+* Inserting images into headers/footers
+* External data update for the currently edited source file
+* `CSV` files preserve recently used Delimiter and Encoding settings in `Local
+  storage` for future sessions
+* Insert page breaks
+* Add the ability to open the source for external links
+* Add the `Alt` + `Down` keyboard shortcut for opening the `Autofilter` window
+  when the header of a column with a filter is selected
+
+#### Presentation Editor
+
+* Add the `Morph` transition
+* Assigning names to objects
+* Selecting a slide for the start of numeration
+* `Notes` and `Handouts` in headers/footers settings
+* Slide placeholders have alternative descriptions
+* `SmartArt` insertion is available via a slide placeholder
+* Change the color of the Presentation Editor header
+* Add the ability to navigate to the specific slide with the consecutive
+  pressing of the *slide number* + `Enter` when previewing a presentation
+* Change the keyboard shortcut for starting a presentation on macOS:
+  `Cmd` + `Shift` + `Return` is used
+
+#### Forms
+
+* Bring settings on the right toolbar to unified appearance
+
+#### PDF Editor
+
+* Support for the `PDF form`, annotations, comments, draw
+
+#### Security
+
+* Fix vulnerability which allows reading data from memory when converting `DOC`
+  to `DOCX`
+* Fix vulnerability which allows adding a third party image to a document when
+  converting `HTML` to `DOCX`
+* Fix vulnerability which allows performing manipulations on the client machine
+  when converting `HTML` to `DOCX`
+* Fix vulnerability which allows finding out the `JWT secret` of a third party
+  server via the `XLSB` file conversion
+
+#### Back-end
+
+* Add commands for working with `forgotten files`: `getForgotten`, `deleteForgotten`,
+  `getForgottenList` to [`coauthoring/CommandService.ashx`](https://api.onlyoffice.com/editors/command/)
+* Add the [conversion error](https://api.onlyoffice.com/editors/conversionapi#error-codes)
+  -9 to Conversion API for displaying the editor selection dialog
+* Add parameters to the server config:
+  `optionsCluster` (connection via
+  [`node-redis`](https://github.com/redis/node-redis/blob/master/docs/clustering.md),
+  `iooptionsClusterNodes`, `iooptionsClusterOptions` (connection via
+  [`ioredis`](https://github.com/redis/ioredis#cluster)
+  for connection to the `redis cluster`
+* Add the `formdata` parameter, which contains `json` with data of
+  the submitted form, to [`Callback handler`](https://api.onlyoffice.com/editors/callback)
+* Add the `allowPrivateIPAddressForSignedRequests` flag, which prohibits
+  requests via local links in the multitenancy mode, to the server config
+* Assigning license restrictions for tenants in the server multitenancy mode
+* Add the ability to override the `default.json` server config for a tenant
+  in the multitenancy mode
+
+#### Mobile
+
+* The ability to download sdk on Android and edit files on portals natively,
+  instead of using the mobile web version
+* Version history
+* Change the color of the Presentation Editor header
+* Web version of the editors on iOS devices now opens in full and not as
+  a mobile version
+
+#### API
+
+* Add methods: `GetWatermarkSettings`, `SetWatermarkSettings`
+* Add the `onRequestSelectDocument` event, `setRequestedDocument` method
+  instead of `onRequestCompareFile/setRevisedFile`, which are no longer
+  supported
+* Add the `onRequestSelectSpreadsheet` event, `setRequestedSpreadsheet`
+  method instead of `onRequestMailMergeRecipients`/`setMailMergeRecipients`,
+  which are no longer supported
+* Add the `onRequestOpen` integrator event for opening an external data source
+
+#### Plugins
+
+* Restore working capacity from China
+* Add `Developer mode` for the `Plugin Manager`
+
 ## 7.4.1
 
 ### New features
