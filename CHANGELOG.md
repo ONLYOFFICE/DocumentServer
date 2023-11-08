@@ -12,7 +12,7 @@
 
 #### Document Editor
 
-* Fixed crashing if equation contains "&" or "@" symbols [DocumentServer#2455](https://github.com/ONLYOFFICE/DocumentServer/issues/2455)
+* Fixed crashing if equation contains "&" or "@" symbols ([DocumentServer#2455](https://github.com/ONLYOFFICE/DocumentServer/issues/2455))
 * Fixed crashing on transformation of some equations to Professional mode
 * Fixed hanging of the editor after copied data is inserted and equation is added
 * Fixed incorrect painting inserted Text Art
@@ -36,7 +36,7 @@
   context menu
 * Fixed print issue for Header/Footer
 * Fixed recalculation of `COUNTIFS` function if arguments were changed
-* Fixed incorrect calculating of `COUNTIFS` function [DocumentServer#2459](https://github.com/ONLYOFFICE/DocumentServer/issues/2459)
+* Fixed incorrect calculating of `COUNTIFS` function ([DocumentServer#2459](https://github.com/ONLYOFFICE/DocumentServer/issues/2459))
 * Fixed displaying data in the Filter window in some `XLSX` files
 * Fixed appearance of the Sheet view mode when `High contrast` theme activated
 * Fixed reseting of the Page fields by Delete key in the Print dialog
@@ -79,7 +79,7 @@
 
 * Fixed hanging of the editor on opening some `XLSX` files
 * Fixed a conversion error of the `DOCX` file
-* Fixed incorrect page size after converting some `ODT` files to `DOCX` [DocumentServer#2456](https://github.com/ONLYOFFICE/DocumentServer/issues/2456)
+* Fixed incorrect page size after converting some `ODT` files to `DOCX` ([DocumentServer#2456](https://github.com/ONLYOFFICE/DocumentServer/issues/2456))
 * Fixed the error after resaving some `ODS` files
 * Fixed an image loss after converting some `XML` files to `DOCX`
 * Fixed hang up on opening some `PDF` files created with LibreOffice
