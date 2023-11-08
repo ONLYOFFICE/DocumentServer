@@ -29,6 +29,7 @@ ApiRange
 ApiSlide
 ApiTable
 ApiWorksheet
+Appearance
 ApplyChartStyle
 ApplyTheme
 ARRAYTOTEXT
@@ -44,6 +45,7 @@ autocomplete
 Autocompletion
 autocorrect
 AutoCorrect
+autocorrection
 autofill
 autofilter
 autofilters
@@ -192,12 +194,14 @@ DVAR
 eb
 Ec
 ECMA
+editorType
 ee
 endDate
 endnotes
 ePub
 EQ
 ERFC
+Esc
 ESOCKETTIMEDOUT
 Español
 ETT
@@ -332,6 +336,7 @@ IsModifiedByUser
 ISOWEEKNUM
 isSaveLock
 Italiano
+iterations
 japanese
 javascript
 jpeg
@@ -514,6 +519,7 @@ repo
 republika
 reSave
 resaving
+reseting
 resize
 rightMenu
 RowHeight
