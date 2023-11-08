@@ -16,7 +16,7 @@
 * Fixed crashing on transformation of some equations to Professional mode
 * Fixed hanging of the editor after copied data is inserted and equation is added
 * Fixed incorrect painting inserted Text Art
-* Fixed autocorrection of the equation to the power with few itterations
+* Fixed autocorrection of the equation to the power with few iterations
 * Fixed autocorrection "\dots" in the LaTeX mode
 * Fixed equations transformation for brackets with "\open" and "\close"
 * Fixed moving the part of number to the power after transformation
@@ -32,7 +32,7 @@
 * Fixed crashing after deleting "`", "^" or "`" symbols on some keyboard layouts
 * Fixed issue when cell border became hidden due to hide row with part of
   merged cell
-* Fixed apearance of editor gridlines for zoom of the window 200% and more
+* Fixed appearance of editor gridlines for zoom of the window 200% and more
 * Fixed equation transformation for Linear/Professional mode switching from
   context menu
 * Fixed print issue for Header/Footer
