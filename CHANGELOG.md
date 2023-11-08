@@ -70,6 +70,7 @@
 * Fixed work of `Alt` + `Page Up` / `Alt` + `Page Down` keyboard shortcuts
 
 #### Security
+
 * Fixed XSS when adding `Sheet view` name and opening `Version history`
 * Fixed XSS when entering into cell and opening format list
 * Fixed the vulnerability which allows adding a third party image to a document
