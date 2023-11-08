@@ -23,13 +23,12 @@
   of some equations
 * Fixed activation of the option "Allow overlap" in some `DOCX` files
 * Fixed hiding of Shapes styles list when mouse button was pressed longer
-* Fixed image rotation in Microsoft Word after saving and opening some `DOCX` files
 * Improved translations for Chinese (Simplified)
 
 #### Spreadsheet Editor
 
 * Fixed hanging of the editor after image was inserted and operation was canceled
-* Fixed crashing after deleting "`", "^" or "`" symbols on some keyboard layouts
+* Fixed crashing after deleting "^" or "`" symbols on some keyboard layouts
 * Fixed issue when cell border became hidden due to hide row with part of
   merged cell
 * Fixed appearance of editor gridlines for zoom of the window 200% and more
