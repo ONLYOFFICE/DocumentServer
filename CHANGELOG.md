@@ -48,7 +48,7 @@
 * Dialog for converting old `OFORM` files to `PDF`
 * For the radio button field, add the setting for the name of the selected
   element (Radio button choice)
-* Add a chain of tips when working with docxf files
+* Add a chain of tips when working with `DOCXF` files
 
 #### Security
 
@@ -104,13 +104,13 @@
 
 * Add the ability to set an avatar for the current user using the editor
   config: `config.editorConfig.user.image` (this image will not be visible
-  for other users)`
+  for other users)
 
 #### API
 
 * Add the following methods: `GetFreezePanesType`, `SetFreezePanesType`, and
   the `FreezePanes` property
-* Add the `GetFreezePanes` method and the `FreezePanes` property to `ApiWorkseet`
+* Add the `GetFreezePanes` method and the `FreezePanes` property to `ApiWorksheet`
 * Add the `ApiFreezePanes` class with the following methods: `FreezeAt`,
   `FreezeColumns`, `FreezeRows`, `GetLocation`, `Unfreeze`
 * Add the following methods for obtaining and filling out form data
