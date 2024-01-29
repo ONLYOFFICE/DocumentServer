@@ -7,8 +7,8 @@
 * Move adding a comment to the entire document from the bottom of the comments
   panel to the settings button
 * Add a button for adding a comment to text to the header of the comments panel
-  (similar to the button in the toolbar)
-*  Add the interface translation into Serbian (sr-Latn-RS, Serbian (Latin,
+  similar to the button in the toolbar
+* Add the interface translation into Serbian (sr-Latn-RS, Serbian (Latin,
   Serbia and Montenegro)) and Arabic (ar-SA, Arabic - Saudi Arabia)
 * Add Indonesian language id-id (Indonesian (Indonesia)),
   en-id (English (Indonesia)) to the regional settings
