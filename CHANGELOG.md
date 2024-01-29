@@ -1,5 +1,7 @@
 # Change log
 
+## 8.0.0
+
 ### New features
 
 #### All Editors
