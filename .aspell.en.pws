@@ -24,6 +24,7 @@ ApiChart
 ApiComment
 ApiDocument
 ApiDrawing
+ApiFreezePanes
 ApiParagraph
 ApiRange
 ApiSlide
@@ -32,7 +33,9 @@ ApiWorksheet
 Appearance
 ApplyChartStyle
 ApplyTheme
+ar
 ARRAYTOTEXT
+arrData
 Asana
 asc
 ASC
@@ -123,6 +126,7 @@ COnOfftype
 convertasion
 Convertation
 ConvertContentView
+conversionapi
 convertions
 ConvertService
 COTH
@@ -225,8 +229,13 @@ forced
 ForcePathStyle
 ForEach
 formdata
+formsdataurl
 FORMTEXT
 FORMULATEXT
+FreezeAt
+FreezeColumns
+FreezeRows
+FreezePanes
 FTEST
 fullscreen
 Galego
@@ -256,11 +265,14 @@ GetFontNames
 GetFootnotesFirstParagraphs
 getForgotten
 getForgottenList
+GetFreezePanes
+GetFreezePanesType
 GetHeight
 GetHidden
 GetIndex
 GetLeftMargin
 getLocale
+GetLocation
 GetName
 GetPageCount
 GetPageOrientation
@@ -350,6 +362,7 @@ JWT
 korean
 lang
 LaTeX
+Latn
 LeftMargin
 leftMenu
 libcurl
@@ -389,9 +402,12 @@ MHTML
 MINIFS
 minishift
 mobileEdit
+mobileForceView
 MoveCursorToEnd
 MoveCursorToStart
 mscorefonts
+mssql
+msSqlExtraOptions
 MULT
 multi
 multichart
@@ -426,6 +442,7 @@ OdfFormatReader
 OdfFormatwriter
 OdfFormatWriter
 ODP
+oDrawing
 ods
 odt
 ODT
@@ -446,6 +463,7 @@ onRequestOpen
 onRequestSaveAs
 onRequestSelectDocument
 onRequestSelectSpreadsheet
+onRequestUsers
 ooxml
 openclipart
 OpenDocument
@@ -454,11 +472,13 @@ openProtectedFile
 OpenSource
 optionsCluster
 oRange
+oracleExtraOptions
 otp
 ots
 ott
 owncloud
 oxps
+nPage
 pageDown
 ParaDrawing
 Paragarph
@@ -527,6 +547,7 @@ rPrChange
 RRI
 rtf
 RTF
+RTL
 SAAS
 save
 savefile
@@ -548,6 +569,7 @@ SetBottomMargin
 SetColumnWidth
 SetDataPointFill
 SetDataPointOutLine
+SetFreezePanesType
 SetHidden
 SetLeftMargin
 SetLegendFill
@@ -570,6 +592,7 @@ SetSeriesOutLine
 SetTitleFill
 SetTitleOutLine
 SetTopMargin
+setUsers
 SetVisible
 SetWatermarkSettings
 SharedWorker
@@ -596,6 +619,7 @@ Sparklines
 spawnOptions
 specifi
 Spellcheker
+Sql
 ssl
 sslEnabled
 startRPC
@@ -604,6 +628,7 @@ statsd
 statusBar
 STDEV
 stirkeout
+sr
 Sri
 STW
 substring
@@ -646,6 +671,7 @@ TW
 txPr
 txt
 ubuntu
+UI
 unary
 uncalculated
 undelete
@@ -679,6 +705,7 @@ wget
 WinXp
 wmf
 WOPI
+WOPISrc
 WordControl
 WPS
 WPT

@@ -1,5 +1,136 @@
 # Change log
 
+## 8.0.0
+
+### New features
+
+#### All Editors
+
+* Move adding a comment to the entire document from the bottom of the comments
+  panel to the settings button
+* Add a button for adding a comment to text to the header of the comments panel
+  similar to the button in the toolbar
+* Add the interface translation into Serbian (sr-Latn-RS, Serbian (Latin,
+  Serbia and Montenegro)) and Arabic (ar-SA, Arabic - Saudi Arabia)
+* Add Indonesian language id-id (Indonesian (Indonesia)),
+  en-id (English (Indonesia)) to the regional settings
+* All buttons that do not fit in height should be placed into More button:
+  category buttons, as well as plugins that were opened in the left panel
+* Add the setting to enable support for Screen readers
+* Add RTL support (beta) to the editors UI
+
+#### Document Editor
+
+* Add partially support for bidirectional text
+
+#### Spreadsheet Editor
+
+* Add the new Goal Seek functionality
+* Add the new Series tool for creating number sequences
+* Implement a wizard for inserting charts: display a list of recommended charts
+  and previews for all types of charts based on the selected data
+* Expand cell filling settings
+* Add the Expand/Collapse menu item to the toolbar and the context menu
+  of Pivot tables
+* Add the ability to center a sheet horizontally and vertically when printing
+* Add the ability to get a link to the selected range in the viewing mode
+
+#### Presentation Editor
+
+* Add the ability to set the final color for animation effects that change
+  color
+* Make animation effect icons inactive if the effect cannot be applied
+  to an object
+* Add partially support for bidirectional text
+
+#### Forms
+
+* Switching from the `OFORM` to `PDF` format containing forms in accordance
+  with the OOXML format
+* Dialog for converting old `OFORM` files to `PDF`
+* For the radio button field, add the setting for the name of the selected
+  element (Radio button choice)
+* Add a chain of tips when working with `DOCXF` files
+
+#### Security
+
+* Fix vulnerability which allows adding a third-party audio file to a document
+  when converting `PPT` to `PPTX`
+* Fix vulnerability which leads to buffer overflow when converting `ODP`
+  to `PDF`
+* Fix vulnerability which leads to buffer overflow when converting `PPT`
+  to `PPTX`
+* Fix vulnerability which allows performing manipulations on the client
+  machine when converting `HTML` to `DOCX`
+* Fix XSS in the Shape name field when applying an Animation
+* Fix XSS in the Math Autocorrect field when saving the field value
+* Fix XSS in the Spreadsheet Editor cell when opening the Number format list
+* Fix XSS in the Sheet name value when applying Search
+* Fix  XSS in the Custom Number Format when opening a list
+* Fix XSS in the Dropdown List field when opening it
+
+#### Back-end
+
+* Add the `formsdataurl` parameter to the Callback handler (to replace
+  `formdata`), which contains a link to the `json` file with data from filled
+  forms when sending with the `Submit` button
+* Add support for Oracle and MS Sql Server databases. For connecting, the `oracle`
+  and `mssql` database type is used (DB_TYPE in the Docker version)
+
+  Advanced connection [settings](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connection-strings)
+  for oracle - `oracleExtraOptions`
+
+  Advanced connection [settings](https://github.com/tediousjs/node-mssql#tedious)
+  for mssql - `msSqlExtraOptions`
+* Add the JSON  `watermark` parameter to conversionapi for inserting
+  a watermark when rendering to `PDF` and images
+
+#### WOPI
+
+* Add the `query param` `WOPISrc` to requests from browser to server to send
+  requests to a single server. For `WOPI`, the parameter sent by an integrator
+  is used, for Docs API,  the `document key` is specified in `WOPISrc`
+
+#### Mobile
+
+* Add the ability to switch to the system theme
+* Change the interface for working with forms
+* Add formula search and list of recently used formulas in the mobile
+  Spreadsheet Editor
+* Add the ability to add a custom cell format in the mobile Spreadsheet Editor
+* Add switching to the reading or editing mode when opening the mobile Document
+  Editor based on the `mobileForceView` parameter in the configuration file
+* Add the ability to set the document language in the mobile Document Editor
+
+#### Customization
+
+* Add the ability to set an avatar for the current user using the editor
+  config: `config.editorConfig.user.image` (this image will not be visible
+  for other users)
+
+#### API
+
+* Add the following methods: `GetFreezePanesType`, `SetFreezePanesType`, and
+  the `FreezePanes` property
+* Add the `GetFreezePanes` method and the `FreezePanes` property to `ApiWorksheet`
+* Add the `ApiFreezePanes` class with the following methods: `FreezeAt`,
+  `FreezeColumns`, `FreezeRows`, `GetLocation`, `Unfreeze`
+* Add the following methods for obtaining and filling out form data
+  to the Builder of the Document Editor:
+  `ApiDocument.prototype.GetFormsData = function()`,
+  `ApiDocument.prototype.SetFormsData = function(arrData)`
+* Add the `ApiDocument.prototype.AddDrawingToPage =
+  function(oDrawing, nPage, x, y)` method for adding any `ApiDrawing`
+  to a given page
+* Add the ability to set avatars for users using the `onRequestUsers`
+  integrator event with the `data.c="info”` parameter and the `setUsers` method
+
+#### Plugins
+
+* Add the ability to launch several visual plugins simultaneously (a separate
+  button should be added to the left panel for each plugin)
+* Move background plugins to the Background Plugins button menu
+
 ## 7.5.1
 
 ### Fixes
