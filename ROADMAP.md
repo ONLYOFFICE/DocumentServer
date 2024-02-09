@@ -5,6 +5,138 @@ This document provides the roadmap of the planned ONLYOFFICE Document Server cha
 This is an updated and corrected version of the roadmap.
 We also reserve the right to change it when necessary.
 
+## Version 8.1
+
+### All editors
+* Continuing work on RTL in the editors core. Support for
+determining correct alignment for various text types
+* Working on support for fonts on the user's machine in a browser
+* Ability to open the "file stream" on the client. It is required
+to support opening and saving encrypted files in a browser
+* Working on switching to an "honest cluster", where each server
+is independent
+* Working on private rooms in the browser version via opening
+on the client
+* Switching to the common history for all editors
+* Working on support for Screen Readers in the interface
+* Support for new types of charts
+* Support for trend lines in charts
+
+### PDF Editor
+* Co-editing annotations in PDF. Ability to save PDF to the file manager
+* Ability to rotate pages in PDF
+
+### Forms
+* Filling in forms by roles
+* Improvements for working with fields: Combo box and
+Dropdown list improvement
+* Navigation by fields
+* A new form field: "Dynamic table"
+
+### Document Editor
+* Showing deleted text in the version history
+
+### Spreadsheet Editor
+* Support for Undo in the Fast co-editing mode 
+* Working on the IMPORTRANGE function
+
+### Presentation Editor
+* Working on the slide sorter
+
+### API
+* Improvement of API for implementing custom toolbar buttons
+into any panel
+* Improvement of API for the ability to show the plugin panel
+on the right
+
+## Version 8.0
+
+### All editors
+
+* The ability to launch several visual plugins simultaneously
+(a separate button should be added to the left panel for each plugin)
+* Moving background plugins to the Background Plugins button menu
+* Moving the option to add a comment to the entire document from the bottom
+of the comments panel to the settings button
+* A button for adding a comment to text in the header
+of the comments panel (similar to the button in the toolbar)
+* Indonesian language id-id (Indonesian (Indonesia)),
+en-id (English (Indonesia)) in the regional settings
+* The ability to set avatars for users using the `onRequestUsers`
+integrator event with the `data.c="info"` parameter and the `setUsers` method
+* The ability to set an avatar for the current user using the editor config:
+`config.editorConfig.user.image` (this image will not be visible for other users)
+* The interface translation into Serbian (sr-Latn-RS, Serbian
+(Latin, Serbia and Montenegro)) and Arabic (ar-SA, Arabic - Saudi Arabia)
+* The More button on the left and right panels. All buttons that do not fit
+in height should be placed into it: category buttons,
+as well as plugins that were opened in the left panel.
+Remove the separator that separates the category buttons from the plugins.
+* The setting to enable support for screen readers
+* RTL interface support, currently in beta
+* Window management buttons should be redesigned to correspond to Linux
+
+### Forms
+
+* For the radio button field, adding the setting for the name of the selected
+element (Radio button choice)
+* Chain of tips when working with docxf files
+* The .oform format should no longer be supported.
+Forms should be saved as PDFs with corresponding metadata
+
+### Spreadsheet Editor
+
+* The ability to center a sheet horizontally and vertically when printing
+* The ability to get a link to the selected range in the viewing mode
+* The new Goal Seek functionality. It allows to determine
+which numbers should be substituted into the formula
+to get the desired and known result
+* A wizard for inserting charts: display a list of recommended charts
+and previews for all types of charts based on the selected data
+* The new Series tool for creating number sequences
+* Expanding cell filling settings
+* Adding the Expand/Collapse menu item to the toolbar
+and the context menu of pivot tables
+
+### Presentation Editor
+
+* The ability to set the final color for animation effects that change color
+* Making animation effect icons inactive if the effect cannot be applied to an object
+
+### PDF Editor
+
+* The ability to save changes made in fillable PDF-forms
+* The Date Picker for a text form with a date format in PDF
+
+### Server
+
+* Adding the `formsdataurl` parameter to the Callback handler (to replace `formdata`),
+which contains a link to the json file with data from filled forms
+when sending with the Submit button
+* Adding the following methods to API: `GetFreezePanesType`, `SetFreezePanesType`,
+and the `FreezePanes` property
+* Adding the `GetFreezePanes` method and the `FreezePanes` property to ApiWorksheet
+* Adding the `ApiFreezePanes` class with the following methods: `FreezeAt`,
+`FreezeColumns`, `FreezeRows`, `GetLocation`, `Unfreeze`
+* Adding the following methods for obtaining and filling out form data to the Builder
+of the Document Editor: `ApiDocument.prototype.GetFormsData = function()`,
+`ApiDocument.prototype.SetFormsData = function(arrData)`
+* Adding the `ApiDocument.prototype.AddDrawingToPage = function(oDrawing, nPage, x, y)`
+method for adding any ApiDrawing to a given page
+* Support for mssql and oracle databases
+* Adding JSON `watermark` parameter to `conversion.api`
+
+### Mobile editors
+
+* The ability to switch to the system theme
+* Changing the interface for working with forms
+* Add formula search and list of recently used formulas
+in the mobile Spreadsheet Editor
+* The ability to add a custom cell format in the mobile Spreadsheet Editor
+* Switching to the reading or editing mode when opening the mobile Document Editor
+based on the `mobileForceView` parameter in the configuration file
+* The ability to set the document language in the mobile Document Editor
+
 ## Version 7.5
 
 ### All editors
