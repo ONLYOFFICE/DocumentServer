@@ -8,6 +8,7 @@ We also reserve the right to change it when necessary.
 ## Version 8.1
 
 ### All editors
+
 * Continuing work on RTL in the editors core. Support for
 determining correct alignment for various text types
 * Working on support for fonts on the user's machine in a browser
@@ -23,10 +24,12 @@ on the client
 * Support for trend lines in charts
 
 ### PDF Editor
+
 * Co-editing annotations in PDF. Ability to save PDF to the file manager
 * Ability to rotate pages in PDF
 
 ### Forms
+
 * Filling in forms by roles
 * Improvements for working with fields: Combo box and
 Dropdown list improvement
@@ -34,16 +37,20 @@ Dropdown list improvement
 * A new form field: "Dynamic table"
 
 ### Document Editor
+
 * Showing deleted text in the version history
 
 ### Spreadsheet Editor
-* Support for Undo in the Fast co-editing mode 
+
+* Support for Undo in the Fast co-editing mode
 * Working on the IMPORTRANGE function
 
 ### Presentation Editor
+
 * Working on the slide sorter
 
 ### API
+
 * Improvement of API for implementing custom toolbar buttons
 into any panel
 * Improvement of API for the ability to show the plugin panel
@@ -71,7 +78,7 @@ integrator event with the `data.c="info"` parameter and the `setUsers` method
 * The More button on the left and right panels. All buttons that do not fit
 in height should be placed into it: category buttons,
 as well as plugins that were opened in the left panel.
-Remove the separator that separates the category buttons from the plugins.
+Remove the separator that separates the category buttons from the plugins
 * The setting to enable support for screen readers
 * RTL interface support, currently in beta
 * Window management buttons should be redesigned to correspond to Linux
@@ -121,7 +128,8 @@ and the `FreezePanes` property
 * Adding the following methods for obtaining and filling out form data to the Builder
 of the Document Editor: `ApiDocument.prototype.GetFormsData = function()`,
 `ApiDocument.prototype.SetFormsData = function(arrData)`
-* Adding the `ApiDocument.prototype.AddDrawingToPage = function(oDrawing, nPage, x, y)`
+* Adding the
+`ApiDocument.prototype.AddDrawingToPage = function(oDrawing, nPage, x, y)`
 method for adding any ApiDrawing to a given page
 * Support for mssql and oracle databases
 * Adding JSON `watermark` parameter to `conversion.api`
