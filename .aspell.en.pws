@@ -90,6 +90,7 @@ CentOS
 cff
 ChangeOleObjects
 changesError
+ChartSheetSubstream
 checkbox
 checkHealth
 CHIDIST
@@ -154,7 +155,9 @@ da
 Danmark
 Dansk
 dataset
+DatePicker
 DAVERAGE
+DBNum
 DCOUNT
 DCOUNTA
 de
@@ -166,6 +169,7 @@ Deutsch
 DGET
 dir
 djvu
+DjVU
 DK
 DMAX
 DMS
@@ -181,6 +185,7 @@ DocumentServer
 docx
 Docx
 DOCX
+docxf
 DOCXF
 DOTX
 double
@@ -294,6 +299,7 @@ GetVisibleRegion
 GetWatermarkSettings
 GetWidth
 GetWpar
+GlobalsSubstream
 glyphs
 gnutls
 gridlines
@@ -372,6 +378,7 @@ LINEST
 linux
 listview
 LK
+loadContent
 loaderLogo
 loaderName
 LoadingScriptError
@@ -382,6 +389,7 @@ logrotate
 lookup
 lool
 LOOL
+LTR
 LTS
 macOS
 MacOs
@@ -494,6 +502,7 @@ PERMUTATIONA
 pgPoolExtraOptions
 PhotoEditor
 PHP
+PIVOTVIEW
 placholder
 Pluging
 pluginMethod
@@ -506,6 +515,7 @@ postinst
 postinstall
 postrm
 POTX
+PowerShell
 ppt
 PptFormatReader
 pptx
@@ -537,6 +547,7 @@ replaceString
 replyStr
 repo
 republika
+recalc
 reSave
 resaving
 reseting
@@ -680,6 +691,7 @@ ungrouping
 unhandled
 unix
 unLockDocument
+UpdateXti
 uri
 URI
 url
