@@ -175,7 +175,7 @@
   `formdata`), which contains a link to the `json` file with data from filled
   forms when sending with the `Submit` button
 * Add support for Oracle and MS Sql Server databases. For connecting, the `oracle`
-  and `mssql` database type is used (DB_TYPE in the Docker version)
+  and `mssql` database type is used
 
   Advanced connection [settings](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connection-strings)
   for oracle - `oracleExtraOptions`
