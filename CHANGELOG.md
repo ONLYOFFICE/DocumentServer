@@ -1,5 +1,105 @@
 # Change log
 
+## 8.0.1
+
+### Fixes
+
+#### Document Editor
+
+* Fix crash when clicking comment inside a math equation ([DocumentServer#2556](https://github.com/ONLYOFFICE/DocumentServer/issues/2556))
+* Fix crash when using the Insert caption feature with the Include chapter
+  number option
+* Fix crash when inserting a copied image using `Ctrl`
+* Fix a problem with rendering collaboration highlight
+* Fix an issue with highlighting searching results in some `DOCX` files
+* Fix display of highlighting a comment added to RTL text
+* Fix text label for Table of Contents in the RTL UI
+* Fix an issue with shaping text with different direction (RTL and LTR)
+* Improve the calculation of the cursor position in case when it is between
+  text with different directions (RTL and LTR)
+* Fix an issue with correction of a text selection when passing through
+  a complex field
+* Fix an issue with calculating the current cursor position while selecting
+  elements in table
+* Fix selection for the hidden part of complex fields
+* Fix an issue with selection draw and cursor positioning in complex fields
+* Fix position of diacritics when typing in Arabic
+* Hide non-printing characters in header/footer label
+* Decrease the height of the header/footer label
+
+#### Spreadsheet Editor
+
+* Fix stopping work of the editor when exporting some `XLSX` files to
+  `PNG`/`JPEG`
+* Fix display of the `DBNum1` number format when opening some `XLSX` files
+* Fix appearing artifacts when inserting an image via Drag-n-Drop and moving it
+* Fix saving the current sheet only when exporting a work book to `PNG`/`JPEG`
+* Fix display of the #REF! error when adding the `VLOOKUP` formula with
+  an argument which is a reference to another file
+
+#### Presentation Editor
+
+* Fix stopping work of the editor when opening some `PPTX` files
+  ([DocumentServer#2591](https://github.com/ONLYOFFICE/DocumentServer/issues/2591))
+
+#### Forms
+
+* Fix crash when expanding the Date field in the forms edited in third-party
+  editors
+* Fix closing a drop-down list in some `PDF` forms with the Turn on screen
+  reader support option enabled
+* Change the default date-time format for a DatePicker form
+
+#### PDF Editor
+
+* Fix crash when opening some `DjVU` files
+* Fix annotations offset when exporting to `PDF`
+* Fix the color of the worksheet borders with the Light interface theme
+
+#### Security
+
+* Fixed the vulnerability in 'PIVOTVIEW::loadContent' method when converting
+  `XLS` to `XLSX`
+* Fixed the vulnerability in 'GlobalsSubstream::UpdateXti()' method when
+  converting `XLS` to `XLSX`
+* Fixed the vulnerability in 'ChartSheetSubstream::recalc' method when
+  converting `XLS` to `XLSX`
+* Fixed the vulnerability which leads to buffer overflow when converting
+  `ODP` to `PPTX`
+* Fixed the vulnerability which allows adding a third party file to a document
+  while converting `HTML` to `DOCX`
+* Fixed the ability to execute the PowerShell commands when converting
+  `DOC` to `PDF`
+
+#### Convert
+
+* Fixed files corruption after converting some `ODT` files to `DOCX`
+* Fixed adding the excess 'Default Extension="docxf" parameter when converting
+  `DOCXF` to `DOCX`
+* Fixed display of a date as a number when opening some `XLS` files
+* Fixed losing contents of the cell with an added comment after exporting to `ODS`
+* Fixed files corruption after converting some `DOC` files to `DOCX`
+* Fixed document appearance in another editors after export some `DOCX` files
+* Fixed data loss when converting some `DOC` to `DOCX` ([DocumentServer#2588](https://github.com/ONLYOFFICE/DocumentServer/issues/2588))
+* Fixed stopping work of some `XLS` to `CSV` conversion
+* Fixed files corruption after converting some `ODS` files to `XLSX`
+* Fixed data loss on opening some `TXT` files
+* Fixed files corruption after converting some `XLSB` files to `XLSX`
+
+#### Mobile
+
+* Fix stopping work of the editor if "document"."info" is missing in
+  the initialization config
+* Fix appearing the keyboard when opening a document in the Reader Mode
+* Fix an issue with selection bounds in the Reader mode
+* Fix text scale in charts for Reader mode
+* Improve the table view in Reader mode
+* Improve the view of table and paragraph in Reader mode
+* Fix display of the toolbar when scrolling a document in the Reader mode
+* Fix the search results position in the RTL UI
+* Fix work of handwriting input in the form fields
+* Fix work of `OFORM` to `PDF` conversion
+
 ## 8.0.0
 
 ### New features
@@ -75,7 +175,7 @@
   `formdata`), which contains a link to the `json` file with data from filled
   forms when sending with the `Submit` button
 * Add support for Oracle and MS Sql Server databases. For connecting, the `oracle`
-  and `mssql` database type is used (DB_TYPE in the Docker version)
+  and `mssql` database type is used
 
   Advanced connection [settings](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connection-strings)
   for oracle - `oracleExtraOptions`
