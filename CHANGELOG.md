@@ -63,7 +63,7 @@
 * The thickness of the frame for required fields is now 2px with any zoom
 * Added a button to switch to the editing mode (similar to the button
   in the editor header) for forms opened in the View or Fill forms mode
-* The presence of this button depends on the integrator's subscription
+* The presence of this button depends on subscription of the integrator
   to the `onRequestEditRights` event and the `permissions.edit` rights
   (in case of a viewer)
 
