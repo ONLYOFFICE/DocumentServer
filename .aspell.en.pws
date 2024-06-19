@@ -30,6 +30,7 @@ ApiRange
 ApiSlide
 ApiTable
 ApiWorksheet
+api
 Appearance
 ApplyChartStyle
 ApplyTheme
@@ -86,6 +87,7 @@ builded
 callbackUrl
 CanUpdateTarget
 CAs
+CDataStream
 CentOS
 cff
 ChangeOleObjects
@@ -114,6 +116,7 @@ CollaborationEditing
 ColumnWidth
 COMBINA
 CommandService
+commandSetPassword
 commentAuthorOnly
 compatibilityMode
 CONCAT
@@ -134,12 +137,14 @@ COTH
 COUNTIF
 COUNTIFS
 COVARIANCE
+CPPTUserInfo
 CreatePictureForm
 crypted
 CSC
 CSCH
 csv
 CSV
+CSvmFile
 ctrl
 Ctrl
 CUBEKPIMEMBER
@@ -151,6 +156,7 @@ CUBESETCOUNT
 CUBEVALUE
 CVE
 cyrillic
+Cyrl
 da
 Danmark
 Dansk
@@ -203,6 +209,7 @@ DVAR
 eb
 Ec
 ECMA
+editMode
 editorType
 ee
 endDate
@@ -230,17 +237,20 @@ Fn
 fodp
 fods
 fodt
+folderPath
 forced
 ForcePathStyle
 ForEach
 formdata
 formsdataurl
+formsubmit
 FORMTEXT
 FORMULATEXT
 FreezeAt
 FreezeColumns
 FreezeRows
 FreezePanes
+fs
 FTEST
 fullscreen
 Galego
@@ -281,6 +291,7 @@ GetLocation
 GetName
 GetPageCount
 GetPageOrientation
+GETPIVOTDATA
 GetPosInParent
 GetRange
 GetRightMargin
@@ -309,6 +320,7 @@ gziped
 healthcheck
 healthCheck
 hideContentControlTrack
+hideRightMenu
 HiDPI
 HLOOKUP
 hotkey
@@ -323,10 +335,12 @@ icu
 ie
 IFNA
 IIS
+imageDark
 IMCOSH
 IMCOT
 IMCSC
 IMCSCH
+IMPORTRANGE
 IMSEC
 IMSECH
 IMSINH
@@ -350,6 +364,7 @@ ipfilter
 IsAutosave
 IsExitSave
 ISFORMULA
+isForward
 IsModifiedByUser
 ISOWEEKNUM
 isSaveLock
@@ -361,6 +376,7 @@ jpeg
 JPG
 js
 JS
+jsdoc
 json
 jsonwebtocken
 jwt
@@ -381,6 +397,7 @@ LK
 loadContent
 loaderLogo
 loaderName
+LoadExternal
 LoadingScriptError
 localhost
 LOGEST
@@ -436,6 +453,7 @@ nodehun
 nodejs
 NodeJS
 npm
+NSSW
 nul
 num
 Num
@@ -465,6 +483,7 @@ onlyoffice
 ONLYOFFICE
 OnlySignatures
 onRequestCompareFile
+onRequestEditRights
 onRequestInsertImage
 onRequestMailMergeRecipients
 onRequestOpen
@@ -478,6 +497,7 @@ OpenDocument
 OpenFormat
 openProtectedFile
 OpenSource
+oProperties
 optionsCluster
 oRange
 oracleExtraOptions
@@ -496,9 +516,11 @@ passsword
 pathurl
 pdf
 PDFA
+PDFs
 PDURATION
 PERCENTRANK
 PERMUTATIONA
+persistentStorage
 pgPoolExtraOptions
 PhotoEditor
 PHP
@@ -523,11 +545,20 @@ PptxFormat
 Preseentation
 PrintGridlines
 PrintHeadings
+privateKey
+PtgArea
+PtgList
+PtgName
+PtgNameX
+PtgParen
+PtgRef
 putFile
+px
 QUARTILE
 rabbitmq
 RANDARRAY
 rastr
+ReadEmrTextBase
 ReadFromBinary
 Realtime
 rebranding
@@ -606,6 +637,8 @@ SetTopMargin
 setUsers
 SetVisible
 SetWatermarkSettings
+sharding
+shardkey
 SharedWorker
 SheetView
 showReviewChanges
@@ -666,6 +699,7 @@ TEXTSPLIT
 textPoweredBy
 thai
 TINV
+TLS
 TOC
 TOCOL
 toLocaleString
@@ -691,6 +725,7 @@ ungrouping
 unhandled
 unix
 unLockDocument
+UpdateDefineNames
 UpdateXti
 uri
 URI
@@ -714,11 +749,14 @@ vml
 wav
 WEIBULL
 wget
+WinSW
 WinXp
 wmf
+wopi
 WOPI
 WOPISrc
 WordControl
+WorkBookStream
 WPS
 WPT
 WrapText
