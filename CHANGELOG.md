@@ -118,8 +118,10 @@
 * Files opened using `WOPI`: Save Copy as [added](https://learn.microsoft.com/en-us/microsoft-365/cloud-storage-partner-program/rest/files/putrelativefile#post-wopifilesfile_id)
 * When opening `PDFs` in form filling mode using `WOPI`, new discovery action
   formsubmit is [active](https://learn.microsoft.com/en-us/microsoft-365/cloud-storage-partner-program/online/discovery#formsubmit)
-* [Added](https://api.onlyoffice.com/editors/wopi/hostpage) the `docs_api_config` parameter of the editor opening form
-  via `WOPI` which passes a part of the config for opening the editor to the Docs API
+* [Added](https://api.onlyoffice.com/editors/wopi/hostpage) the
+  `docs_api_config` parameter of the editor opening form
+  via `WOPI` which passes a part of the config for opening the editor
+  to the `Docs API`
 * Added query param `WOPISrc` for sending requests to one server. Now,
   the parameter sent by the integrator is used for `WOPI`; for `Docs API`, `document
   key` is written in `WOPISrc`
@@ -141,8 +143,8 @@
 * The `customization.goback.requestClose parameter` is no longer supported
 * Value for `customization`->`hideRightMenu` is `true` by default
 * Added the parameter which hides the logo in Mobile and Embed:
-  `customization`->`logo`->`visible`: `true`/`false` (`true` by default), whether to show
-  the logo or not
+  `customization`->`logo`->`visible`: `true`/`false` (`true` by default),
+  whether to show the logo or not
 * Implemented customization of the logo in the header
   (the `customization`->`logo`->`image`/`imageDark` parameter)
 * Added a parameter to hide the button for switching editing modes
@@ -153,10 +155,12 @@
 
 * Plugins can make changes to the interface
 * Added a plugin method for the document editor to search for and highlight
-  the next/previous occurrence of a given text `api.prototype.SearchNext = function(oProperties, isForward)`
+  the next/previous occurrence of a given text
+  `api.prototype.SearchNext = function(oProperties, isForward)`
 * In the information for the context menu in plugins, added flags indicating
   that we are editing the header/footer, as well as added flags indicating that
-  the menu is called above the header/footer area (if we are not currently editing it)
+  the menu is called above the header/footer area (if we are not currently
+  editing it)
 
 #### Package
 
