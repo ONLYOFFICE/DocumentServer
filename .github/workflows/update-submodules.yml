@@ -3,10 +3,13 @@ name: Update submodules
 on: workflow_dispatch
 
 jobs:
+
   update-submodules:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.PUSH_TOKEN }}
 
