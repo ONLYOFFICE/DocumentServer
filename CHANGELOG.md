@@ -193,9 +193,9 @@
 #### Package
 
 * Fixed stopping work of the server after executing `logrotate` in EXE packages
-* Fixed hanging of the `DsProxy` service in exe packages, if the document
+* Fixed hanging of the `DsProxy` service in EXE packages, if the document
   is open for editing
-* Fixed validation of connection to `rabbitmq` when installing the exe package,
+* Fixed validation of connection to `rabbitmq` when installing the EXE package,
   if a non-root `vhost` is used [DocumentServer#2773](https://github.com/ONLYOFFICE/DocumentServer/issues/2773)
 
 ## 8.1.0
