@@ -40,6 +40,7 @@ arrData
 Asana
 asc
 ASC
+AscWord
 ashx
 aspose
 Aspose
@@ -56,12 +57,14 @@ autofilters
 autofit
 Autofit
 AutoFormat
+autohyphenation
 Autorun
 autoshape
 autoshapes
 autostart
 AVERAGEA
 AVERAGEIFS
+AxcExt
 beforeCursor
 BESSELI
 BESSELJ
@@ -203,6 +206,7 @@ DropCap
 dropdown
 ds
 DS
+DsProxy
 DSTDEV
 DSUM
 DVAR
@@ -217,6 +221,7 @@ endnotes
 ePub
 EQ
 ERFC
+errorCode
 Esc
 ESOCKETTIMEDOUT
 Español
@@ -224,9 +229,11 @@ ETT
 ETS
 eu
 EXC
+EXE
 EXPON
 extendSession
 fb
+FDB
 FDIST
 FI
 fillForms
@@ -370,6 +377,7 @@ ISOWEEKNUM
 isSaveLock
 Italiano
 iterations
+IVAXIS
 japanese
 javascript
 jpeg
@@ -452,6 +460,7 @@ NIST
 nodehun
 nodejs
 NodeJS
+nonprinting
 npm
 NSSW
 nul
@@ -460,6 +469,7 @@ Num
 numberings
 NUMBERVALUE
 Numpad
+NumPr
 odf
 Odf
 ODF
@@ -524,6 +534,7 @@ persistentStorage
 pgPoolExtraOptions
 PhotoEditor
 PHP
+PIVOTCACHEDEFINITION
 PIVOTVIEW
 placholder
 Pluging
@@ -560,6 +571,7 @@ RANDARRAY
 rastr
 ReadEmrTextBase
 ReadFromBinary
+ReadStandartEncryptionInfo
 Realtime
 rebranding
 Rebranding
@@ -605,6 +617,7 @@ SECH
 SecurityError
 selectwheel
 SELinux
+SERIESAXIS
 sessionId
 sessionIdle
 SetBottomMargin
@@ -637,6 +650,7 @@ SetTopMargin
 setUsers
 SetVisible
 SetWatermarkSettings
+sharded
 sharding
 shardkey
 SharedWorker
@@ -695,6 +709,8 @@ TDIST
 TEXTAFTER
 TEXTBEFORE
 TEXTJOIN
+TextPr
+TextShaper
 TEXTSPLIT
 textPoweredBy
 thai
@@ -726,6 +742,7 @@ unhandled
 unix
 unLockDocument
 UpdateDefineNames
+updateversion
 UpdateXti
 uri
 URI
@@ -743,6 +760,7 @@ UTF
 util
 verysilent
 ViewForms
+vhost
 VLOOKUP
 VSTACK
 vml
@@ -769,6 +787,7 @@ XLS
 XLSB
 xlsb
 XlsFormatReader
+XLSM
 xlsx
 XLSX
 XLTX
