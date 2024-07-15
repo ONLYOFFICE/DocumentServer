@@ -1,5 +1,203 @@
 # Change log
 
+## 8.1.1
+
+### New features
+
+#### All Editors
+
+* Added `TIFF` to supported image formats
+
+### Fixes
+
+#### All Editors
+
+* Fixed missing Image button in the SmartArt objects of the Picture type
+* Fixed work of the `highlight-toolbar-tab-underline` parameter in the custom
+  themes
+
+#### Document Editor
+
+* Fixed crash when applying an autocorrect command in an expression
+* Fixed crash when copying or cutting an image pasted from the clipboard
+* Fixed crash when pasting a copied list using Keep text only
+* Fixed crash when moving autoshape
+* Fixed crash in TextShaper when using composite input
+* Fixed scroll to target when updating the position of a view port
+  in collaborative editing [DocumentServer#2428](https://github.com/ONLYOFFICE/DocumentServer/issues/2428)
+* Added the ability to prevent scrolling to the current position when
+  performing any action
+* Fixed review types for added paragraphs
+* Fixed missing the current change in review when receiving spellcheck variants
+* Fixed the recalculation of the document when changing the autohyphenation
+  option
+* Fixed spaces when converting table to text
+* Fixed an issue with collecting related levels for the current numbering level
+* Added table to track revisions check when adding new table or new row
+  to the table
+* Fixed an issue with simple text paste when track revisions is turned on
+* Fixed freeze when moving through review changes
+* Implemented display/accept/reject for review change of a table cell
+* Fixed an issue with accepting/rejecting review changes inside a block-level
+  sdt [DocumentServer#2669](https://github.com/ONLYOFFICE/DocumentServer/issues/2669)
+* Fixed an issue with recalculating table
+* Fixed clearing table cells before moving them
+* Fixed cursor moving down when selected table cells
+* Fixed display of images when opening some `DOCX` files
+* Fixed an issue with reading numbering properties in styles and refactor
+  using `AscWord.NumPr` class
+* Fixed clearing the text properties for an inline-level sdt and merge method
+  for `TextPr`
+* Fixed incorrect display of autoshape shadow transparency when the No Fill
+  option is activated
+* Fixed display of nonprinting characters when opening some `DOCX` files
+  in the viewing mode
+
+#### Spreadsheet Editor
+
+* Fixed crash in TextShaper after replacing the entered text in the autoshape
+* Fixed crash for some usages of the `IMPORTRANGE` formula
+* Fixed crash when entering Korean characters into the formula bar in Firefox
+* Fixed incorrect formula conversion when using a link to a file
+* Fixed crash when opening some `XLSX` files [DocumentServer#2782](https://github.com/ONLYOFFICE/DocumentServer/issues/2782)
+* Fixed inserting an empty column after moving a column
+  with data [DocumentServer#2499](https://github.com/ONLYOFFICE/DocumentServer/issues/2499)
+* Fixed changing line height after applying Merge and Wrap Text, if the text
+  extends the cell boundaries
+* Colors of row and column headers when hovering the cursor now correspond
+  to color schemes
+* Fixed formula calculation if there is an intersection with a formatted table
+  [DocumentServer#2799](https://github.com/ONLYOFFICE/DocumentServer/issues/2799)
+* Fixed formula calculation if they contain Named ranges
+* Fixed creating named ranges in languages with ligatures
+* Fixed applying a number format when calculating a formula in the total row
+  of a formatted table
+* Fixed display of shadow of objects after scrolling a sheet
+* Fixed updating of the `IMPORTRANGE` formula arguments after updating external
+  links
+
+#### Presentation Editor
+
+* Fixed crash after applying Reset slide in certain `PPTX` files
+* Fixed crash after copying a slide in the Normal mode and pasting
+  in the Slide Master mode
+* Fixed crash when opening the Notes and handouts insertion menu
+* Fixed the issue with weak characters in RTL at the end of the line
+* Fixed presence of the Insert image from file / Insert image from URL buttons
+  for SmartArt objects of the Picture type in the Master Slide mode
+* Fixed the issue: formatting on layouts in the Add Slides button is displayed
+  after the changes are made again in the Slide Master mode
+* Fixed display of the name when inserting a Table placeholder
+* Fixed applying a theme to the added slide
+* Fixed display of a comment when switching to the Slide Master mode
+* Fixed the size of placeholders on layouts after removing placeholders
+  on the parent layout and applying Duplicate Slide Master
+* Fixed work of the Play/Pause buttons in the viewing window
+  in the Slideshow mode
+* Fixed layering of objects when they are grouped when opening some
+  `PPTX` files [DocumentServer#2573](https://github.com/ONLYOFFICE/DocumentServer/issues/2573)
+* Fixed work of internal hyperlinks when using the Next Slide parameters
+* Fixed work of `Enter` / `Space` / `Arrow Right` / `Arrow Left` keys
+  in the Slideshow mode
+* Fixed reset of object selection after copying using Drag-and-drop
+* Fixed display of shadow in the Slideshow mode
+* Fixed duplicating Slide Master when moving it using Drag-and-drop
+  in the Slides tab
+* Fixed display of text formatting applied on the parent layout
+* Fixed incorrect date indication in Header and Footer
+* Fixed applying Background theme after creating a custom theme via
+  Slide settings and using the Apply to All Slides option
+* Fixed display of custom theme layout when opening some `PPTX` files
+* Fixed marker overlapping when moving it along the Animation Pane timeline
+
+#### Forms
+
+* Fixed crash when filling in fields in some forms [DocumentServer#2768](https://github.com/ONLYOFFICE/DocumentServer/issues/2768)
+* Prevent a checkbox from toggling when moving it
+* Fixed the conversion of a fixed form to an inline
+* Improved finding anchor position around inline forms
+* Fixed the ability to change data in fields when submitting the form
+* Fixed "errorCode: -85" when trying to apply Force Save for a file with a form
+
+#### PDF Editor
+
+* Changed the default tool from Hand to Selection
+* Added the ability to disable the mini panel when selecting text
+  in Advanced Settings
+* Fixed crash when opening some `PDF` files
+* Fixed crash after several deletions of pages and insertion of
+  a graphic element
+* Fixed crash when removing table rows when editing some `PDF` files
+* Fixed stopping work of the editor after exiting without saving changes
+* Fixed crash when moving around a table using `Tab`
+* Fixed crash when opening Page Thumbnails in some `PDF` files
+* Fixed highlighting of hyperlinks when opening `PDF` files
+* Fixed work of composite input in comments
+* Fixed filling with color instead of image when opening some `PDF` files
+* Fixed work of Undo after changing the text orientation in the `PDF` file
+* Fixed transparency of a Watermark when opening some `PDF` files
+* Fixed offset of the Select toolbar when selecting words in some `PDF` files
+* Fixed text content loss when opening some `PDF` files
+* Fixed the Text box content loss after exporting the `PDF` file
+* Fixed saving objects located after a link
+
+#### Security
+
+* Fixed the vulnerability in the `AxcExt::serialize`, `SERIESAXIS::serialize`
+  and `SS::serialize_default` functions which causes crash when converting
+  `XLS` to `XLSX`
+* Fixed Segmentation fault in the `ChartSheetSubstream::serialize_legend` and
+  `ChartSheetSubstream::serialize_plot_area` methods when converting `XLS` to `XLSX`
+* Fixed Segmentation fault in the `IVAXIS::serialize`
+  `PIVOTCACHEDEFINITION::serialize_definitions` and `FDB::serialize` functions
+  when converting `XLS` to `XLSX`
+* Fixed Heap Buffer Overflow in the `ReadStandartEncryptionInfo` function
+
+#### Back-end
+
+* Set `DEFAULT_SHARD_KEY` from environment as shardkey in case of integrator
+  did not pass this param
+* Enforce request without shardkey to run synchronously in sharded cluster
+* Don't send "updateversion" status to viewer when opening Version history
+  for `PDF`
+
+#### Convert
+
+* Fixed an issue when converting large `XLSX` files with
+  the `thumbnail.first:true` parameter
+* Fixed crash when converting some `XLS` files to `XLSB`
+* Fixed crash when exporting `DOCX` documents, containing autoshapes, to `HTML`
+* Fixed crash when opening some `DOC` files
+* Fixed crash when opening some `DOCX` files
+* Fixed crash when converting some `XLSM` files to `XLSB`
+* Fixed stopping work of the editor when opening some `XLSX` files, containing
+  `EMF` images
+* Fixed compliance with the `PDF/A` format after exporting a `DOCX` document
+* Fixed an error when opening in third-party editors the `XLSX` file obtained
+  when converting `XLSB`
+* Fixed crash when converting some `XLS` files to XLSB
+* Fixed text loss in `SVG` images after exporting the `DOCX` document
+  to a different format
+* Fixed the reason of errors in the integrator logs after exiting the edited
+  `PDF` file
+* Fixed display of presentation theme after exporting some `PPTX` to `PDF/A`
+* Fixed the "Decimal" and "Use 1000 separator" options loss when exporting
+  `XLSX` to `CSV` [DesktopEditors#821](https://github.com/ONLYOFFICE/DesktopEditors/issues/821)
+
+#### Mobile
+
+* Fixed decreasing performance when scrolling `PDF` files
+* Fixed appearing the keyboard when tapping on an open `PDF` file
+* Fixed decreasing performance when zooming slides in `PPTX` files
+
+#### Package
+
+* Fixed stopping work of the server after executing `logrotate` in EXE packages
+* Fixed hanging of the `DsProxy` service in EXE packages, if the document
+  is open for editing
+* Fixed validation of connection to `rabbitmq` when installing the EXE package,
+  if a non-root `vhost` is used [DocumentServer#2773](https://github.com/ONLYOFFICE/DocumentServer/issues/2773)
+
 ## 8.1.0
 
 ### New features
