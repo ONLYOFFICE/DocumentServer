@@ -5,6 +5,57 @@ This document provides the roadmap of the planned ONLYOFFICE Document Server cha
 This is an updated and corrected version of the roadmap.
 We also reserve the right to change it when necessary.
 
+## Version 8.2
+
+### All editors
+
+* Continuing work on RTL in the editors core. Support for
+determining correct alignment for various text types
+* Ability to add custom fields to the file information
+* Release of the first version of the Visio file viewer
+* Working on "floating for a specific selection" tabs in the toolbar
+* Working on support for fonts on the user's machine in a browser
+* Ability to open the "file stream" on the client. It is required
+to support opening and saving encrypted files in a browser
+* Working on private rooms in the browser version via opening
+on the client
+* Support for new types of charts
+
+### PDF Editor
+
+* Co-editing PDFs. Saving PDFs to the storage
+* Improved text recognition
+
+### Forms
+
+* Collection of form data
+
+### Document Editor
+
+* Support for docGrid for Asian regions
+* Support for customXml
+* Ability to add a frame
+* Support for special frame types
+* Showing deleted text in the version history
+
+### Spreadsheet Editor
+
+* Support for RTL in the Spreadsheet Editor
+* Support for old CheckBox types
+* Support for Undo in the Fast co-editing mode
+
+### Presentation Editor
+
+* Drawing on slides in the slide show mode
+
+### Mobile Editors
+
+* Switching to a common scheme in mobile applications
+
+### API
+
+* Methods for working with pivot tables
+
 ## Version 8.1
 
 ### All editors
