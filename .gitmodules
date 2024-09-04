@@ -1,48 +1,48 @@
 [submodule "core"]
 	path = core
-	url = https://github.com/ONLYOFFICE/core.git
+	url = ../core.git
 [submodule "core-fonts"]
 	path = core-fonts
-	url = https://github.com/ONLYOFFICE/core-fonts.git
+	url = ../core-fonts.git
 [submodule "dictionaries"]
 	path = dictionaries
-	url = https://github.com/ONLYOFFICE/dictionaries.git
+	url = ../dictionaries.git
 [submodule "sdkjs"]
 	path = sdkjs
-	url = https://github.com/ONLYOFFICE/sdkjs.git
+	url = ../sdkjs.git
 [submodule "server"]
 	path = server
-	url = https://github.com/ONLYOFFICE/server.git
+	url = ../server.git
 [submodule "web-apps"]
 	path = web-apps
-	url = https://github.com/ONLYOFFICE/web-apps.git
+	url = ../web-apps.git
 [submodule "sdkjs-plugins/plugin-highlightcode"]
 	path = sdkjs-plugins/plugin-highlightcode
-	url = https://github.com/ONLYOFFICE/plugin-highlightcode
+	url = ../plugin-highlightcode
 [submodule "sdkjs-plugins/plugin-macros"]
 	path = sdkjs-plugins/plugin-macros
-	url = https://github.com/ONLYOFFICE/plugin-macros
+	url = ../plugin-macros
 [submodule "sdkjs-plugins/plugin-mendeley"]
 	path = sdkjs-plugins/plugin-mendeley
-	url = https://github.com/ONLYOFFICE/plugin-mendeley
+	url = ../plugin-mendeley
 [submodule "sdkjs-plugins/plugin-ocr"]
 	path = sdkjs-plugins/plugin-ocr
-	url = https://github.com/ONLYOFFICE/plugin-ocr
+	url = ../plugin-ocr
 [submodule "sdkjs-plugins/plugin-photoeditor"]
 	path = sdkjs-plugins/plugin-photoeditor
-	url = https://github.com/ONLYOFFICE/plugin-photoeditor
+	url = ../plugin-photoeditor
 [submodule "sdkjs-plugins/plugin-speech"]
 	path = sdkjs-plugins/plugin-speech
-	url = https://github.com/ONLYOFFICE/plugin-speech
+	url = ../plugin-speech
 [submodule "sdkjs-plugins/plugin-thesaurus"]
 	path = sdkjs-plugins/plugin-thesaurus
-	url = https://github.com/ONLYOFFICE/plugin-thesaurus
+	url = ../plugin-thesaurus
 [submodule "sdkjs-plugins/plugin-translator"]
 	path = sdkjs-plugins/plugin-translator
-	url = https://github.com/ONLYOFFICE/plugin-translator
+	url = ../plugin-translator
 [submodule "sdkjs-plugins/plugin-youtube"]
 	path = sdkjs-plugins/plugin-youtube
-	url = https://github.com/ONLYOFFICE/plugin-youtube
+	url = ../plugin-youtube
 [submodule "sdkjs-plugins/plugin-zotero"]
 	path = sdkjs-plugins/plugin-zotero
-	url = https://github.com/ONLYOFFICE/plugin-zotero
+	url = ../plugin-zotero
