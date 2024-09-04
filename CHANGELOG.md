@@ -1,5 +1,17 @@
 # Change log
 
+## 8.1.3
+
+### Fixes
+
+#### All Editors
+
+* Fixed bugs with cursor and interface objects positioning in Chromium browsers
+
+## 8.1.2
+
+### No public release
+
 ## 8.1.1
 
 ### New features
