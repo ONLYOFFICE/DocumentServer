@@ -12,49 +12,64 @@ We also reserve the right to change it when necessary.
 * Continuing work on RTL in the editors core. Support for
 determining correct alignment for various text types
 * Ability to add custom fields to the file information
-* Release of the first version of the Visio file viewer
 * Working on "floating for a specific selection" tabs in the toolbar
 * Working on support for fonts on the user's machine in a browser
-* Ability to open the "file stream" on the client. It is required
-to support opening and saving encrypted files in a browser
-* Working on private rooms in the browser version via opening
-on the client
-* Support for new types of charts
+* Support for new types of charts for opening
+* Optimization of script loading to speed up opening all editors
+* Own rendering of some SmartArt objects instead of recorded images in the file
+* Seamless reconnection after inactivity in the document
+* New numbered list presets for Arabic interface
+* Ability to send email notifications about warnings related to license and quota
+* Java wrapper for Document Builder
+* New toolbar style
 
 ### PDF Editor
 
 * Co-editing PDFs. Saving PDFs to the storage
 * Improved text recognition
+* Ability to add a signature to a PDF file as an image,
+draw, write as text
 
 ### Forms
 
 * Collection of form data
+* Signature field
+* Ability to sign a form as an image, draw, write as text
 
 ### Document Editor
 
-* Support for docGrid for Asian regions
+* Support for old CheckBox types
 * Support for customXml
 * Ability to add a frame
 * Support for special frame types
+* Wrapping around tables
 * Showing deleted text in the version history
+* Inserting the contents of a third-party document
+* Adding fields
 
 ### Spreadsheet Editor
 
-* Support for RTL in the Spreadsheet Editor
-* Support for old CheckBox types
-* Support for Undo in the Fast co-editing mode
+* Support for RTL in the Spreadsheet Editor. Correct placement
+of cells on a sheet
+* Support for smooth scroll
+* Support for iterative calculations
 
 ### Presentation Editor
 
 * Drawing on slides in the slide show mode
+* Acceleration of opening files due to delayed loading of images
+* Random transition
 
 ### Mobile Editors
 
-* Switching to a common scheme in mobile applications
+* Support for custom functions in the mobile web version
+* Ability to switch to a tile view of the file list in the document manager
+on iOS and Android
 
 ### API
 
 * Methods for working with pivot tables
+* Methods for working with presentations, charts
 
 ## Version 8.1
 
