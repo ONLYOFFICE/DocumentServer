@@ -96,11 +96,9 @@ on the client
 
 ### Forms
 
-* Filling in forms by roles
 * Improvements for working with fields: Combo box and
 Dropdown list improvement
 * Navigation by fields
-* A new form field: "Dynamic table"
 
 ### Document Editor
 
