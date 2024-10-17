@@ -97,6 +97,7 @@ ChangeOleObjects
 changesError
 ChartSheetSubstream
 checkbox
+CheckBox
 checkHealth
 CHIDIST
 CHIINV
@@ -177,6 +178,7 @@ DesktopEditors
 Deutsch
 DGET
 dir
+DirTree
 djvu
 DjVU
 DK
@@ -213,6 +215,7 @@ DVAR
 eb
 Ec
 ECMA
+ECMADecryptor
 editMode
 editorType
 ee
@@ -240,6 +243,7 @@ fillForms
 FINV
 firefox
 flv
+FormattedDiskPageCHPX
 Fn
 fodp
 fods
@@ -247,7 +251,9 @@ fodt
 folderPath
 forced
 ForcePathStyle
+forceView
 ForEach
+FormattedDiskPagePAPX
 formdata
 formsdataurl
 formsubmit
@@ -409,6 +415,7 @@ LoadExternal
 LoadingScriptError
 localhost
 LOGEST
+logoUrl
 LOGNORM
 logrotate
 lookup
@@ -447,7 +454,9 @@ multichart
 multicomments
 multiselect
 multitenancy
+mysql
 MySQL
+mysqlExtraOptions
 NativeEngine
 natively
 Nederland
@@ -523,6 +532,7 @@ Paragarph
 param
 params
 passsword
+PasswordToOpen
 pathurl
 pdf
 PDFA
@@ -615,6 +625,7 @@ sdt
 SearchAndReplace
 SECH
 SecurityError
+SectionPropertiesMapping
 selectwheel
 SELinux
 SERIESAXIS
@@ -680,6 +691,7 @@ Spellcheker
 Sql
 ssl
 sslEnabled
+standardView
 startRPC
 startup
 statsd
@@ -724,6 +736,7 @@ toolbarNoTabs
 tooltip
 tooltips
 trackpad
+trendlines
 TRIMMEAN
 truetype
 TTEST
@@ -792,6 +805,7 @@ xlsx
 XLSX
 XLTX
 XMATCH
+XORCrypt
 xps
 XSS
 Yandex

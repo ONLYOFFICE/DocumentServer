@@ -1,5 +1,162 @@
 # Change log
 
+## 8.2.0
+
+### New features
+
+#### All Editors
+
+* Optimization of script loading to speed up opening all editors
+* Own rendering of some SmartArt objects instead of recorded images in the file
+* Updated dictionaries for Spellcheck and Hyphenation
+* Support for new types of charts for opening: Histogram, Waterfall, and Funnel
+* Improved display of Chart labels for Date axes, Values, and Categories
+* Improved touch screen support in the full version of editors
+* New Gray interface theme
+* The appearance of the Version History panel has been changed
+* Updated styles for file renaming
+* Menu items in the File menu have been regrouped and icons have been added
+* Theme and toolbar settings are moved to a separate Appearance category in the
+  File menu - Advanced Settings
+* Added the Tab style setting - view of tabs (Fill or Line) in the File menu -
+  Advanced Settings
+* Added the Use toolbar color as tabs background setting
+* Ability to add custom fields to the file information
+* Ability to view/add/edit custom fields without pressing the Apply button
+* Reorganized fields with file information in the File menu - Info
+* Improved work with the Lists of languages - the name of the language
+  and region is now duplicated in English
+* Implemented search in the Language list by name and in the target language,
+  as well as in English
+
+#### Document Editor
+
+* Support for old CheckBox types
+* Added the ability to Insert the contents of a third-party document
+* New numbered list presets for Arabic interface
+* Added the highlight of deleted text in the selected file version
+* Ability to add and edit complex fields using field instructions
+
+#### Spreadsheet Editor
+
+* Improved support for smooth scroll
+* Support for iterative calculations
+* Added the ability to switch the direction of cell placement
+* Added a button for setting the number format with separators to the toolbar
+* Ability to display pages in real scale in the Print preview window
+* The Pivot Table toolbar tab is only displayed when using the pivot table,
+  and is otherwise hidden
+* The Pivot Table settings right panel now unfolds when adding
+  a new Pivot Table
+* Added the ability to display trendlines (Equation on chart) to the Chart –
+  Advanced Settings
+
+#### Presentation Editor
+
+* Acceleration of opening files due to rendering the slide before loading
+  of images
+* Implemented a more visual way of selecting animation from the extended list
+
+* Added the `Random` transition
+
+#### Forms
+
+* Added a Signature field with the ability to upload a prepared image
+
+#### PDF Editor
+
+* Added ability to save `PDFs` to the storage
+* Added co-editing `PDFs`
+* Added correct processing of cropped/combined shapes when opening files
+* Added Gradient support
+* Improved text recognition
+
+#### Security
+
+* Fixed the XSS injection in the Tooltip of the Animation Pane
+* Fixed the vulnerability that allowed bypassing document access rights
+  and making changes to it
+* Fixed the vulnerabilities in the `FormattedDiskPagePAPX`,
+  `SectionPropertiesMapping`, `FormattedDiskPageCHPX`, and `XORCrypt` functions
+  leading to Heap Buffer Overflow when converting to the `DOC` format
+* Fixed the vulnerabilities in the `ECMADecryptor`, and `DirTree`
+  functions leading to Buffer over-read when converting to the `DOC` format
+
+#### Back-end
+
+* Ability to send email notifications about warnings related to license
+  and quota
+* Added cache reset when regenerating fonts, in the path to the scripts,
+  the hash after the version number will be unique for each server
+* Added the `mysqlExtraOptions` object with the ability to pass additional
+  settings of the `node-mysql2` [module](https://sidorares.github.io/node-mysql2/docs/examples/connections/create-connection#connectionoptions)
+  for connection to MySQL, including SSL
+* Added the `servicesCoAuthoring.server.forceSaveUsingButtonWithoutChanges`
+  option to save the file when force saving by pressing the button without changes
+* Added the `users` parameter, similar to `users` in [callback handler](https://api.onlyoffice.com/editors/callback#users)
+  in the response to the
+  [`info`](https://api.onlyoffice.com/editors/command/info) command
+
+#### WOPI
+
+* Added the `Password` and `PasswordToOpen` parameters to the `convert-to`
+  request
+
+#### Customization
+
+* Extend support for the
+  [`editorConfig.region`](https://api.onlyoffice.com/editors/config/editor#region)
+  parameter in the editor's config:
+
+  in all editors, this parameter is used to define the default unit
+  of measurement (for regions us-..., ca-... inches are used by default,
+  unless otherwise specified in the
+  [`customization.unit`](https://api.onlyoffice.com/editors/config/editor/customization#unit)
+  parameter;
+
+  support for the [`editorConfig.location`](https://api.onlyoffice.com/editors/config/editor#location)
+  parameter, which was used previously, will be discontinued;
+  
+  the `region` parameter also sets the default numeric format and date/time
+  format in the Spreadsheet Editor, as it was in previous versions
+* Added parameters for toolbar appearance configuration:
+
+  `customization.features.tabStyle.mode` and `change` for a tab style
+
+  `customization.features.tabBackground.mode` and `change` for a tab background
+
+  `customization.logo.imageLight` = “logoUrl” for a light header
+
+  `customization.logo.imageDark` =”logoUrl” for a dark header
+* Common logo for all themes can be specified in the `customization.logo.image` parameter
+* Support for the `customization.toolbarNoTabs` parameter has been
+  discontinued, instead use `customization.features.tabStyle=line`
+  and `customization.features.tabBackground=toolbar`
+
+#### API
+
+* Added methods for implementing Undo/Redo through plugins
+
+  `api.prototype.Undo = function()`
+
+  `api.prototype.Redo = function()`
+
+  `api.prototype.CanUndo = function()`
+
+  `api.prototype.CanRedo = function()`
+
+#### Mobile
+
+* Added processing of the `standardView` parameters for displaying the editor
+  in the standard view and `forceView` for display in the read-only mode
+* Added support for custom functions based on `jsdoc`
+
+#### Plugins
+
+* Commercial editions now require the installation of plugins via
+  the Plugin manager
+* The Macros button has been moved to the View tab
+
 ## 8.1.3
 
 ### Fixes
