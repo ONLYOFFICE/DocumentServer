@@ -56,7 +56,6 @@
 * Acceleration of opening files due to rendering the slide before loading
   of images
 * Implemented a more visual way of selecting animation from the extended list
-
 * Added the `Random` transition
 
 #### Forms
@@ -96,6 +95,10 @@
 * Added the `users` parameter, similar to `users` in [callback handler](https://api.onlyoffice.com/editors/callback#users)
   in the response to the
   [`info`](https://api.onlyoffice.com/editors/command/info) command
+* The `handlers` `ConvertService.ashx` and `coauthoring/CommandService.ashx`
+  are deprecated, it is recommended to use `converter` and `command` instead
+* The ability to make a `GET` request to `converter` and `command`
+  is deprecated, it is recommended to use `POST` instead
 
 #### WOPI
 
