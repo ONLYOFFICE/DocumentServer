@@ -53,6 +53,7 @@ AutoCorrect
 autocorrection
 autofill
 autofilter
+AutoFilter
 autofilters
 autofit
 Autofit
@@ -353,6 +354,7 @@ IMCOSH
 IMCOT
 IMCSC
 IMCSCH
+IME
 IMPORTRANGE
 IMSEC
 IMSECH
@@ -698,6 +700,7 @@ statsd
 statusBar
 STDEV
 stirkeout
+strikethrough
 sr
 Sri
 STW
@@ -726,6 +729,7 @@ TextShaper
 TEXTSPLIT
 textPoweredBy
 thai
+TIF
 TINV
 TLS
 TOC
