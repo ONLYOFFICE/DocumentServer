@@ -23,7 +23,8 @@
 
 #### Spreadsheet Editor
 
-* Fixed stopping work of the editor when opening some `XLSX` files
+* Fixed stopping work of the editor when deleting a formula rom a cell
+  in some `XLSX` files
 * Fixed disappearing formulas when opening some `XLSX` files
 * Fixed the ability to scroll a sheet horizontally using
   `Shift` + `Mouse wheel`
