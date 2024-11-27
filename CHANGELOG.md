@@ -41,6 +41,8 @@
 * Fixed saving some `SVG` images when exporting `DOCX` to `PDF`
   ([DocumentServer#2792](https://github.com/ONLYOFFICE/DocumentServer/issues/2792))
 * Fixed removing a section break after converting some `RTF` files to `DOCX`
+* Fixed the ability to set the cursor in a paragraph after adding
+  Content Control Picture
 * Fixed removing the Title and Tag properties when moving the Content Control
   that contains an image
 * Fixed losing the Drop-down list that was added and modified
