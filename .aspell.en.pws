@@ -202,6 +202,7 @@ DOCXF
 DOTX
 double
 downloadAs
+dParty
 dPc
 DPRODUCT
 drag'n'drop
@@ -447,6 +448,7 @@ mobileEdit
 mobileForceView
 MoveCursorToEnd
 MoveCursorToStart
+MoveToNextReviewChange
 mscorefonts
 mssql
 msSqlExtraOptions
@@ -620,6 +622,7 @@ savefile
 SaveLock
 saveUrl
 Schweiz
+screenreader
 ScrollToAbsolutePosition
 sdk
 sdkjs
