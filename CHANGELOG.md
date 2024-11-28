@@ -18,8 +18,8 @@
   in the Header if it contains the page number
 * Fixed slow scrolling of documents if the document extends the visible area
 * Fixed stopping work of the editor when comparing some `DOCX` documents
-* Fixed selection of a word when placing the cursor in it if the Justified
-  alignment is applied to the line
+* Fixed text selection when clicking on a paragraph with Justified
+  alignment
 
 #### Spreadsheet Editor
 
@@ -58,12 +58,11 @@
 
 * Fixed the ability to work in a third-party application located
   on the same page with mobile editors
-* Fixed appearing the keyboard when opening documents in the view mode
-  and touching the screen
+* Fixed appearing the keyboard when touching a document where text input
+  is not possible
 * Fixed zooming out page content after increasing zoom in the Standard view
   and switching to the Mobile view
-* Fixed the ability to enter text in the Samsung Internet browser
-  on some devices
+* Fixed the ability to enter text in browsers on some devices
 * Fixed appearing the Magnifying glass tool when scrolling a document
 
 #### Compilation
