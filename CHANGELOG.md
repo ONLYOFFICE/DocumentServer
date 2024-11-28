@@ -1,5 +1,75 @@
 # Change log
 
+## 8.2.2
+
+### Fixes
+
+#### All Editors
+
+* Fixed the ability to read out a document in the Firefox browser using
+  the screenreader ([DocumentServer#2837](https://github.com/ONLYOFFICE/DocumentServer/issues/2837))
+* Fixed displaying some chart types when opening the `DOCX` or `PPTX` documents
+* Fixed availability of buttons on the right panel when the zoom is higher
+  than 200%
+
+#### Document Editor
+
+* Fixed stopping work of the editor when working with the Text box
+  in the Header if it contains the page number
+* Fixed slow scrolling of documents if the document extends the visible area
+* Fixed stopping work of the editor when comparing some `DOCX` documents
+* Fixed text selection when clicking on a paragraph with Justified
+  alignment
+
+#### Spreadsheet Editor
+
+* Fixed stopping work of the editor when deleting a formula from a cell
+  in some `XLSX` files
+* Fixed disappearing formulas when opening some `XLSX` files
+* Fixed the ability to scroll a sheet horizontally using
+  `Shift` + `Mouse wheel`
+* Fixed stopping work of the editor when merging all cells on a sheet
+* Fixed loss of graphic objects rendering after rotating them
+  in the Sheet Right-to-left mode
+* Fixed missing the Multi-Select/Clear Filter of Slicer buttons after scrolling
+  horizontally or vertically
+
+#### PDF Editor
+
+* Fixed stopping work of the editor when adding a matrix in a math equation
+* Fixed the short-term absence of an image added by one of the users
+  in co-editing
+* Fixed incorrect selection of paragraphs in the Select tool mode when opening
+  `XPS`/`OXPS` files
+* Fixed flickering of a column with text when selecting an adjacent one
+  in some `PDF` files
+
+#### Convert
+
+* Fixed losing an image added to `watermark.fill` after converting the `DOCX`
+  files to `PDF`
+
+#### API
+
+* Fixed work of the `MoveToNextReviewChange` method with external access
+  to a document using a connector
+
+#### Mobile
+
+* Fixed the ability to work in a third-party application located
+  on the same page with mobile editors
+* Fixed appearing the keyboard when touching a document where text input
+  is not possible
+* Fixed zooming out page content after increasing zoom in the Standard view
+  and switching to the Mobile view
+* Fixed the ability to enter text in browsers on some devices
+* Fixed appearing the Magnifying glass tool when scrolling a document
+
+#### Compilation
+
+* Fixed missing files in the `core/Common/3dParty/` folder during compilation
+  ([build_tools#884](https://github.com/ONLYOFFICE/build_tools/issues/884))
+  
 ## 8.2.1
 
 ### Fixes
