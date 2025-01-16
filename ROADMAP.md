@@ -5,6 +5,67 @@ This document provides the roadmap of the planned ONLYOFFICE Document Server cha
 This is an updated and corrected version of the roadmap.
 We also reserve the right to change it when necessary.
 
+## Version 8.3
+
+### All editors
+
+* Working on private rooms in the browser version via opening
+on the client
+* Continuing work on RTL in the editors core. Support for
+determining correct alignment for various text types
+* Ability to open the "file stream" on the client. It is required
+to support opening and saving encrypted files in a browser
+* Updating a file without reloading
+* Switching to Service Worker for caching scripts in a browser
+* Support for new types of charts for creating
+* Working on support for fonts on the user's machine in a browser
+* Ability to customize hot keys
+* Ability to customize the toolbar
+
+### PDF Editor
+
+* Support for Undo in the Fast co-editing mode
+* Stamp annotations
+* Ability to add a signature to a PDF file as an image,
+draw, write as text
+
+### Forms
+
+* Working with roles
+* Ability to submit and sign at the same time
+* Ability to sign a form by drawing or writing text
+
+### Document Editor
+
+* Protecting parts of the document from changes.
+Ability of the toolbar to work in these parts
+* Ability to show Field Codes instead of the result.
+Creating a field via Ctrl+F9. Ability to switch the code
+via Shift+F9 and all codes via Alt+F9
+* Support for customXml
+* Design tab
+* Ability to add a frame
+
+### Spreadsheet Editor
+
+* Support for RTL in the Spreadsheet Editor. Correct placement
+of the sheet list. Ability to set the placement for new sheets.
+Saving the placement on the sheet to a file
+* Support for Undo in the Fast co-editing mode
+
+### Presentation Editor
+
+* Drawing on slides in the slide show mode
+* Design tab
+
+### Diagram Viewer
+
+* Release of the first version of the Diagram Viewer
+
+### Mobile Editors
+
+* Switching to a common scheme in mobile applications
+
 ## Version 8.2
 
 ### All editors
