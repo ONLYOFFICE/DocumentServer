@@ -1,7 +1,5 @@
 # Change log
 
-# Change log
-
 ## 8.3.0
 
 ### New features
@@ -95,12 +93,12 @@
 
 * Added the ability to update the editor when the file version changes without
   the need to reboot. The following scenarios are possible:
-  - the file version was updated when opening the editor;
-  - the connection was lost while working, and after restoring it, it was found
+  * the file version was updated when opening the editor;
+  * the connection was lost while working, and after restoring it, it was found
   that the file version had changed (if there are no unsaved changes in the document).
 For the new scheme to work, the following have been added:
-  - the `onRequestRefreshFile` event, which should be processed by the integrator;
-  - the `refreshFile` method, to which it is necessary to transfer the data
+  * the `onRequestRefreshFile` event, which should be processed by the integrator;
+  * the `refreshFile` method, to which it is necessary to transfer the data
   recommended for opening the document (according to [documentation](https://api.onlyoffice.com/docs/docs-api/additional-api/signature/browser/#opening-file))
 In case of using Wopi, the file version will be updated without the need for
   changes on the part of the integrator.
@@ -136,13 +134,13 @@ If the integrator has not implemented support for the new scheme, the work
   responsible for settings of the button for submitting completed forms.
   The configuration now looks like this:
   `submitForm`:
-  - `visible`: `true/false` — controls the display of the button (`true`
+  * `visible`: `true/false` — controls the display of the button (`true`
   by default)
-  - `resultMessage`: `'text'` / `''` / `null` / `undefined` — specifies
+  * `resultMessage`: `'text'` / `''` / `null` / `undefined` — specifies
   the message displayed after the form is submitted:
-  - `''` (empty string) — the message is not displayed
-  - `null` / `undefined` — the default text is displayed
-  - `'text'` — the custom message is displayed
+  * `''` (empty string) — the message is not displayed
+  * `null` / `undefined` — the default text is displayed
+  * `'text'` — the custom message is displayed
 * Preserved backward compatibility with previous versions where
   the `submitForm` parameter could take the `true`/`false` values to control
   the button visibility
