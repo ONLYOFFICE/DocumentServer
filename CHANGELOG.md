@@ -1,5 +1,164 @@
 # Change log
 
+# Change log
+
+## 8.3.0
+
+### New features
+
+#### All Editors
+
+* Added support for logical operations on shapes (unite, combine, fragment,
+  intersect, subtract)
+* Added the Opacity option for images
+* Added the ability to reset Crop for images in the right panel
+  and context menu
+* Added the interface translation into Albanian (sq-AL, Albanian (Albania))
+* Added new languages to the list of exceptions for text AutoCorrect
+* Implemented RTL interface support for the embedded viewer
+* Blocking dialogs that require the editor restart are replaced
+  with notifications
+* Connection status notifications are moved from the status bar to the top
+  of the editor
+
+#### Document Editor
+
+* Implemented support for `customXml` and `dataBinding`, when the content
+  of the content control is binded to an element in a custom xml
+* When editing protected documents, the tools available for the selected part
+  are activated
+* Added the ability to change the main direction of the paragraph
+* Add the support of the HWP and HWPX formats for opening in the editors
+* Added support for opening the Pages (.pages) file format
+* Added a setting for character-by-character comparing and merging documents
+* Implemented the ability to edit the complex field instruction in the context
+  of the editor itself
+
+#### Spreadsheet Editor
+
+* Added support for opening the Numbers (.numbers) file format
+* Added support for Calculated items for Pivot tables
+* Updated the appearance of the function wizard and argument descriptions
+* Added the weekdays/month/years options when autofilling cells
+* In the Advanced Settings, added the Default sheet direction option when
+  creating a new sheet
+* In the External links window, added the option to automatically update
+  external links
+* Added the feature to automatically detect a separator when opening `CSV` files
+* Added the ability to undo basic actions when co-editing
+* Added the Show horizontal/vertical scroll bar options
+  to the Advanced Settings
+
+#### Presentation Editor
+
+* Added support for opening the Keynote (.key) file format
+* The Themes, Colors and Slide size tools are moved from the Home panel to the
+  new Design tab
+* Added the Rename Master/Layout options to the slide context menu of the Slide
+  Master mode
+* Added the Hand/Select buttons for switching the cursor type in the
+  Slideshow mode
+* Added the Start slideshow from the beginning button to the Quick Access
+  toolbar
+* Added the ability to draw on slides in the Slideshow/Presenter View modes
+
+#### Forms
+
+* Increased the default size of the fixed text field
+* Changed logic for calculating the top indent for multi-line text fields with
+  small height
+
+#### PDF Editor
+
+* Added support for Stamp annotations
+* Improved processing of images cropped using shapes
+* Added support for gradients
+* Improved text recognition
+* Added the function to undo actions in the co-editing mode
+* Added the ability to select several pages on the thumbnail panel using
+  `Ctrl`/`Shift` for group actions
+* Added the Opacity option for Highlight/Strikeout/Underline annotations
+* Added a quick panel to change color, add a comment or delete
+  the Highlight/Strikeout/Underline annotation
+
+#### Security
+
+* Fixed unsafe cryptographic algorithm in the `createDecipheriv` function
+* Fixed the possibility of injection by operating system commands in `build_tools`
+* Fixed the possibility of injection by operating system commands when building
+  a Docker container
+* Removed recommended values for "wopi", "email" and "rabbitmq" sections
+  in the `default.json` configuration file
+* Removed unsafe handler in the `exports.uploadImageFileOld` function
+
+#### Back-end
+
+* Added the ability to update the editor when the file version changes without
+  the need to reboot. The following scenarios are possible:
+  - the file version was updated when opening the editor;
+  - the connection was lost while working, and after restoring it, it was found
+  that the file version had changed (if there are no unsaved changes in the document).
+For the new scheme to work, the following have been added:
+  - the `onRequestRefreshFile` event, which should be processed by the integrator;
+  - the `refreshFile` method, to which it is necessary to transfer the data
+  recommended for opening the document (according to [documentation](https://api.onlyoffice.com/docs/docs-api/additional-api/signature/browser/#opening-file))
+In case of using Wopi, the file version will be updated without the need for
+  changes on the part of the integrator.
+If the integrator has not implemented support for the new scheme, the work
+  will be carried out as before — via the `onOutdatedVersion` event
+* Added [Service Worker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
+  to control caching of statics on the editors page
+* The [drop](https://api.onlyoffice.com/docs/docs-api/additional-api/command-service/drop/)
+  command without the users parameter now closes editing for all users editing
+  the key document
+* Added the ability to use the multitenancy Boolean field without the alias
+  text field, which will be considered obsolete after issuing licenses is completed
+* Added the integrator onUserActionRequired event, which comes if it is
+  necessary to enter a password or select an encoding/separator when opening a file
+* Added the ability to use `RabbitMQ quorum queues`. Settings that contained
+  the queue name `"queuedelayed": "ds.delayed"` are now objects where it is
+  possible to set the [setting](https://amqp-node.github.io/amqplib/channel_api.html#channel_assertQueue)
+  including the quorum queue type
+
+#### Customization
+
+* Added `customization.mobile.info` to hide the Document Info button on mobile
+  devices
+* Added the `customization.pointerMode: 'hand'/'select'` parameter to set
+  the cursor type when opening
+* Added support for the `customization.compactToolbar` setting in the viewing
+  mode
+* Added the `customization.slidePlayerBackground` parameter to set
+  the background in the Slideshow mode
+* Added the `customization.wordHeadingsColor` parameter to set the default
+  color for heading styles
+* Updated the `customization.submitForm` configuration parameter, which is
+  responsible for settings of the button for submitting completed forms.
+  The configuration now looks like this:
+  `submitForm`:
+  - `visible`: `true/false` — controls the display of the button (`true`
+  by default)
+  - `resultMessage`: `'text'` / `''` / `null` / `undefined` — specifies
+  the message displayed after the form is submitted:
+  - `''` (empty string) — the message is not displayed
+  - `null` / `undefined` — the default text is displayed
+  - `'text'` — the custom message is displayed
+* Preserved backward compatibility with previous versions where
+  the `submitForm` parameter could take the `true`/`false` values to control
+  the button visibility
+
+#### Mobile
+
+* Added the ability to draw
+* Added the Switch to Desktop button to switch to the desktop mode and return
+  to mobile using the File menu > Switch to Mobile
+
+#### Package
+
+* Added the new ONLYOFFICE DocumentServer Prerequisites installer containing
+  all the necessary components for the installation of the product which makes
+  it possible to install it without an Internet connection
+
 ## 8.2.1
 
 ### Fixes
