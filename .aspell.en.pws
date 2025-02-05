@@ -55,6 +55,7 @@ autofill
 autofilter
 AutoFilter
 autofilters
+autofilling
 autofit
 Autofit
 AutoFormat
@@ -73,6 +74,7 @@ BESSELK
 BESSELY
 BETADIST
 BETAINV
+binded
 BINOM
 BITAND
 BITLSHIFT
@@ -123,6 +125,7 @@ COMBINA
 CommandService
 commandSetPassword
 commentAuthorOnly
+compactToolbar
 compatibilityMode
 CONCAT
 ConditionalFormatting
@@ -143,8 +146,10 @@ COUNTIF
 COUNTIFS
 COVARIANCE
 CPPTUserInfo
+createDecipheriv
 CreatePictureForm
 crypted
+cryptographic
 CSC
 CSCH
 csv
@@ -159,6 +164,7 @@ CUBERANKEDMEMBER
 CUBESET
 CUBESETCOUNT
 CUBEVALUE
+customXml
 CVE
 cyrillic
 Cyrl
@@ -166,6 +172,7 @@ da
 Danmark
 Dansk
 dataset
+dataBinding
 DatePicker
 DAVERAGE
 DBNum
@@ -178,6 +185,7 @@ Deprecations
 DesktopEditors
 Deutsch
 DGET
+dialogs
 dir
 DirTree
 djvu
@@ -346,6 +354,8 @@ https
 HSTACK
 hy
 HYPGEOM
+HWP
+HWPX
 icu
 ie
 IFNA
@@ -505,15 +515,18 @@ onInsertOleObjects
 onlyoffice
 ONLYOFFICE
 OnlySignatures
+onOutdatedVersion
 onRequestCompareFile
 onRequestEditRights
 onRequestInsertImage
 onRequestMailMergeRecipients
 onRequestOpen
+onRequestRefreshFile
 onRequestSaveAs
 onRequestSelectDocument
 onRequestSelectSpreadsheet
 onRequestUsers
+onUserActionRequired
 ooxml
 openclipart
 OpenDocument
@@ -556,6 +569,7 @@ pluginMethod
 pluginsmanager
 png
 PNG
+pointerMode
 PostgreSql
 PostgreSQL
 postinst
@@ -580,7 +594,9 @@ PtgRef
 putFile
 px
 QUARTILE
+queuedelayed
 rabbitmq
+RabbitMQ
 RANDARRAY
 rastr
 ReadEmrTextBase
@@ -596,6 +612,7 @@ Redistributable
 refactor
 Refactor
 refactoring
+refreshFile
 regex
 ReplaceByElement
 ReplaceCurrentSentence
@@ -609,6 +626,7 @@ reSave
 resaving
 reseting
 resize
+resultMessage
 rightMenu
 RowHeight
 rPrChange
@@ -677,6 +695,7 @@ si
 SIGABR
 signatureLine
 Sinhala
+slidePlayerBackground
 Slovenčina
 Slovenská
 SmartArt
@@ -707,6 +726,7 @@ strikethrough
 sr
 Sri
 STW
+submitForm
 substring
 SUMIFS
 SUMPRODUCT
@@ -764,6 +784,7 @@ unLockDocument
 UpdateDefineNames
 updateversion
 UpdateXti
+uploadImageFileOld
 uri
 URI
 url
@@ -795,6 +816,7 @@ WOPI
 WOPISrc
 WordControl
 WorkBookStream
+wordHeadingsColor
 WPS
 WPT
 WrapText
@@ -812,6 +834,7 @@ xlsx
 XLSX
 XLTX
 XMATCH
+xml
 XORCrypt
 xps
 XSS
