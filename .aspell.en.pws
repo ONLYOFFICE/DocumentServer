@@ -91,6 +91,7 @@ bugfix
 bugfixes
 builded
 callbackUrl
+Callout
 CanUpdateTarget
 CAs
 CDataStream
@@ -396,6 +397,7 @@ ISOWEEKNUM
 isSaveLock
 Italiano
 iterations
+ItextSharp
 IVAXIS
 japanese
 javascript
@@ -577,6 +579,7 @@ postinstall
 postrm
 POTX
 PowerShell
+PPSX
 ppt
 PptFormatReader
 pptx

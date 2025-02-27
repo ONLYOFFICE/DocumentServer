@@ -1,5 +1,168 @@
 # Change log
 
+## 8.3.1
+
+### New features
+
+#### PDF Editor
+
+* Added the ability to move pages in `PDF` files ([DocumentServer#1749](https://github.com/ONLYOFFICE/DocumentServer/issues/3052))
+
+#### Customization
+
+* Added the parameter which hides tips about new features
+  `customization.features.featuresTips`: `false`/`true`
+
+### Fixes
+
+#### All Editors
+
+#### Document Editor
+
+* Fixed stopping work of the editor when pasting a large amount of copied data
+* Fixed crash after entering the minus sign after the equation
+  ([DocumentServer#3120](https://github.com/ONLYOFFICE/DocumentServer/issues/3120))
+* Fixed crash after entering a character before the division sign
+  ([DocumentServer#3119](https://github.com/ONLYOFFICE/DocumentServer/issues/3119))
+* Fixed stopping work of the editor when building some `DOCX` files where
+  the table of contents was updated
+* Fixed an issue with undone changes when turning off and on the "Show changes
+  from other users" option in the live viewer
+* Fixed crash of the editor when pasting text in the Track Changes mode in some
+  `DOCX` files
+* Fixed stopping work of the editor when removing a paragraph
+  in the Track Changes mode in some `DOCX` files
+* Fixed reset of the Text direction > RTL option when placing the cursor
+  in a new paragraph using Double click
+* Fixed incorrect display of characters when entering text in RTL before saving
+  the document
+* Fixed replacing the less than sign to the greater than sign when opening
+  a document with RTL contents
+* Fixed the movement of picture content control with track handler
+* Fixed selecting table cells after removing a comment added to the cells
+* Fixed display of Content Controls frames nested within another one
+  if the cursor is positioned in one of the nested ones
+* Fixed the calculation of line breaks in the East-Asian text
+* Fixed replacing the heading color with blue after building a document
+  if the color was changed to another one using
+  `customization.wordHeadingsColor`
+* Fixed changing text alignment when opening some `DOCX` files
+* Fixed line break position when there is an inline math equation when opening
+  some `DOCX` files
+
+#### Spreadsheet Editor
+
+* Fixed crash of the editor after undoing an action on a sheet deleted
+  by another user in Fast co-editing
+* Fixed stopping work of the editor when entering data in some `XLSX` files
+  ([DocumentServer#3140](https://github.com/ONLYOFFICE/DocumentServer/issues/3140))
+* Fixed crash of the editor after redoing the sheet movement
+* Fixed stopping work of the editor after trying to select a value in a cell
+  in some `XLSX` files
+* Fixed incorrect recalculation of the `TAKE` function in some formulas
+* Fixed loss of a hyperlink in the resulting workbook when using
+  the `IMPORTRANGE` formula
+* Fixed the #NAME error when recalculating the `IF` function
+  in some `XLSX` files
+* Fixed the imaginary ability to continue editing after connection break
+* Fixed the #NAME error after adding an external link to a named range
+* Fixed work of the Scale with document options for headers and footers
+  when printing if the document scale is set to Fit All Columns on One Page
+* Fixed appearing the warning after entering a formula
+  via the Insert Function window
+* Fixed activation of the Undo button after an incorrect attempt to enter
+  a formula
+* Fixed the "Invalid regular expression" error when creating Calculates Items
+  in some `XLSX` files
+* Fixed the "There are one or more circular references where a formula refers"
+  error when opening some `XLSX` files
+* Fixed errors in formula calculations when opening some `XLS` files
+* Fixed saving the sorting specified in the view if the `XLSX` file is opened
+  in the "Without access to change the filter" mode
+* Fixed saving the Freeze Panes position after reloading the `XLSX` document
+  ([DocumentServer#3124](https://github.com/ONLYOFFICE/DocumentServer/issues/3124))
+* Fixed filling of filtered/hidden data in cells in the view mode (Sheet View)
+* Fixed appearing the empty row after moving between two others
+* Fixed the ability to scroll the sheet when filling cells with data on HiDPI monitors
+* Fixed work of horizontal sheet scrolling with `Shift` + `Mouse Wheel`
+  on macOS ([DocumentServer#3040](https://github.com/ONLYOFFICE/DocumentServer/issues/3040))
+
+#### Presentation Editor
+
+* Fixed crash of the editor when opening some `PPSX` files
+* Fixed stopping work of the editor when exporting some `PPTX` files to `PDF`
+* Fixed data loss when copying a placeholder with a slide number to other slides
+* Fixed the ability to exit the Slideshow mode using `Esc` after drawing
+* Fixed display of a new theme name after applying the Rename Master option
+  without reloading the editor page
+* Fixed an issue with table display when exporting some `PPTX` files to `ODP`
+* Fixed display of the first characters of a word when using the Morph
+  transition with the Words / Letters parameter ([DocumentServer#3096](https://github.com/ONLYOFFICE/DocumentServer/issues/3096))
+* Fixed changing the Flip parameter for images after exporting
+  some `PPTX` files to `ODF`
+* Fixed shifting of the Draw icon on the toolbar in the Slideshow mode
+  in Firefox
+
+#### Forms
+
+* Fixed conversion of a form file to a regular `PDF` file when exporting
+* Fixed display of the Required field frame for a nested field
+  in the Complex field
+
+#### PDF Editor
+
+* Fixed stopping work of the editor when inserting a stamp if the cursor
+  is positioned in a text comment
+* Fixed crash when undoing adding a Text Comment in some `PDF` files
+* Fixed stopping work when clicking Edit Text in some `PDF` files
+* Fixed crash when clicking in Text Callout
+* Fixed the ability to save the `PDF` file if the cursor is positioned
+  in the Text Comment window
+* Fixed data loss when opening some `PDF` files created
+  in the ItextSharp library
+* Fixed missing blocking of elements on the page when editing them
+  by another user in co-editing
+* Fixed the ability to insert contents to the page removed by another user
+* Fixed data loss after copying contents of some `PDF` files and pasting
+  the contents into the Document Editor
+* Fixed adding a stamp outside the page after rotating it
+
+#### Convert
+
+* Fixed an issue that caused an error when opening the result of converting
+  some `XLS` files to `XLSX` in third-party editors
+* Fixed appearing a table in the header when converting some `ODT` files
+  to `DOCX`
+* Fixed appearing an indent before text in tables when converting some `ODT`
+  files to `DOCX`
+* Fixed losing graphic objects when opening a file in third-party editors
+  after converting some `DOCX` files to `ODT`
+* Fixed losing text in autoshapes when converting some `ODT` files to `DOCX`
+* Fixed offset of multilevel list items when opening some `ODT` files
+* Fixed changing the fill when converting some `ODP` files to `PPTX`
+* Fixed changing the text style when converting some `ODT` files to `DOCX`
+* Fixed changing the indents of table of contents numbering when converting
+  some `ODT` files to `DOCX`
+* Fixed applying the footnote property to the text following it when converting
+  some `ODT` files to `DOCX`
+* Fixed removal of headings numbering when converting some `ODT` files to `DOCX`
+* Fixed losing an image when converting some `ODT` files to `DOCX`
+* Fixed changing the appearance of an arrow when converting some `DOCX`
+  files to `PDF`
+* Fixed display of images when opening some `ODS` files
+* Fixed missing images when opening some `Pages` files
+* Fixed changing the font size when converting some `ODT` files to `DOCX`
+
+#### Mobile
+
+* Fixed clearing drawn objects after applying the Erase entire screen option
+* Fixed the ability to select a color with a stylus in the drawing mode
+
+#### Package
+
+* Fixed an error when installing the RabbitMQ components during offline
+  installation
+
 ## 8.3.0
 
 ### New features
