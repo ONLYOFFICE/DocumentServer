@@ -81,7 +81,8 @@
 * Fixed stopping the process of converting some `PAGES` files to `PNG`
 * Fixed stopping the process of converting some `HTM` and `HTML` files
   to the binary format
-* Fixed stopping the process of converting some `HWPX` files to `DOCT`
+* Fixed stopping the process of converting some `HWPX` files
+  to the binary format
 * Fixed stopping the process of converting some `POT` files to `PPTT`
 * Fixed stopping the process of converting some `PPTX` files to `PPTT`
 * Fixed stopping the process of converting some `DOCX` files to most formats
