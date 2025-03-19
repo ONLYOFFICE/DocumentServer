@@ -349,6 +349,7 @@ HiDPI
 HLOOKUP
 hotkey
 hotkeys
+HTM
 html
 htmlutils
 https
@@ -485,6 +486,7 @@ NIST
 nodehun
 nodejs
 NodeJS
+NoHistory
 nonprinting
 npm
 NSSW
@@ -580,6 +582,7 @@ postrm
 POTX
 PowerShell
 PPSX
+PPTT
 ppt
 PptFormatReader
 pptx
