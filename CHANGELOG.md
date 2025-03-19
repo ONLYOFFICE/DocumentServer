@@ -1,5 +1,95 @@
 # Change log
 
+## 8.3.2
+
+### Fixes
+
+#### All Editors
+
+#### Document Editor
+
+* Fixed crash when pasting content into a document in NoHistory mode
+* Fixed stopping work of the editor when exiting the header/footer editing mode
+  in some scenarios
+* Fixed an error when processing comments and data when opening
+  some `DOCX` files
+* Fixed an issue with calculation of a float shape position in the header
+* Fixed navigation using the Arrow Left / Arrow Right keys in Arabic text
+  ([DocumentServer#3114](https://github.com/ONLYOFFICE/DocumentServer/issues/3114))
+* Fixed the cursor position when entering LTR text in a RTL paragraph
+* Fixed calculation of the cursor position for the last line of a RTL paragraph
+* Fixed the display of margins for a RTL paragraph
+* Fixed alignment for a RTL paragraph in some edge cases
+* Fixed the order of text wrapping ranges for RTL paragraphs
+* Fixed the handle horizontal ruler for RTL paragraphs
+* Fixed calculation of the first line indentation
+* Fixed missing line breaks in equations when opening some `DOCX` files
+* Fixed calculation of indent range start for RTL paragraphs
+* Fixed an issue with parsing props in plugin method for adding a content control
+* Fixed display of days of the week in the Date Picker Content Controls
+  in the RTL UI mode
+* Fixed display of arrows of the Increase / Decrease indent buttons
+  in the RTL UI mode
+* Fixed display of the Line Numbers button in the RTL UI mode
+
+#### Spreadsheet Editor
+
+* Fixed an error when opening `CSV` files in the Embedded mode
+* Fixed stopping work of the editor when inserting a new row if several other
+  rows are selected in the `XLSX`file
+* Fixed stopping work of the editor when applying changes to the document after
+  inserting a hyperlink to a new worksheet
+* Fixed crash of the editor when entering some variations of the `IF` formula
+* Fixed missing chart when opening some `ODS` files
+* Fixed an error that occurred in third-party editors when opening some
+  exported `XLSX` files with external links
+* Fixed display of the WMF images when opening some `ODS` files
+* Fixed copying/pasting the Locked Cell property in the Protect Sheet mode
+  ([DocumentServer#2385](https://github.com/ONLYOFFICE/DocumentServer/issues/2385))
+* Fixed an error that occurred when opening some `XLSX` files for viewing
+
+#### Presentation Editor
+
+* Fixed an error that occurred in third-party editors when opening
+  some exported `PPTX` files ([DocumentServer#2951](https://github.com/ONLYOFFICE/DocumentServer/issues/2951))
+* Fixed using the Merge shapes option in Fast co-editing mode when opening
+  some `PPTX` files
+* Fixed work of the Eraser Screen option in the Presenter window
+* Fixed highlighting of the active color in the Ink color menu of the Draw tool
+  in the Presenter window
+* Fixed display of the Ink color menu of the Draw tool for the window boundary
+  values in the Presenter window
+
+#### PDF Editor
+
+* Fixed stopping work of the editor when clicking on the background area
+  of the document when opening some `PDF` files
+
+#### PDF Form
+
+* Fixed an issue with clearing forms related to the specified role
+* Fixed an issue with using the Next/Prev buttons to navigate only to forms
+  associated with the role (If the role is specified)
+* Fixed changing roles order
+
+#### Security
+
+* Fixed the XSS vulnerability when opening files via the WOPI protocol
+
+#### Convert
+
+* Fixed stopping the process of converting some `PAGES` files to `PNG`
+* Fixed stopping the process of converting some `HTM` and `HTML` files
+  to the binary format
+* Fixed stopping the process of converting some `HWPX` files
+  to the binary format
+* Fixed stopping the process of converting some `POT` files to `PPTT`
+* Fixed stopping the process of converting some `PPTX` files to `PPTT`
+* Fixed stopping the process of converting some `PDF` files
+* Fixed stopping the process of converting some `DOCX` files to most formats
+* Fixed stopping the process of converting some `XLS` files to `XLSB`
+* Fixed stopping the process of converting some `ODS` files to `XLSB`
+
 ## 8.3.1
 
 ### New features
@@ -59,6 +149,7 @@
 * Fixed crash of the editor after redoing the sheet movement
 * Fixed stopping work of the editor after trying to select a value in a cell
   in some `XLSX` files
+* Fixed an error when expanding the dropdown list in some `XLSX` files
 * Fixed incorrect recalculation of the `TAKE` function in some formulas
 * Fixed loss of a hyperlink in the resulting workbook when using
   the `IMPORTRANGE` formula
