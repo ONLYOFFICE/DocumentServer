@@ -85,6 +85,7 @@
   to the binary format
 * Fixed stopping the process of converting some `POT` files to `PPTT`
 * Fixed stopping the process of converting some `PPTX` files to `PPTT`
+* Fixed stopping the process of converting some `PDF` files
 * Fixed stopping the process of converting some `DOCX` files to most formats
 * Fixed stopping the process of converting some `XLS` files to `XLSB`
 * Fixed stopping the process of converting some `ODS` files to `XLSB`
