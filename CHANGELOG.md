@@ -18,7 +18,8 @@
 * Replaced Latin commas with Arabic ones when using Arabic format
   in the "Date & time" window
 * Fixed an issue with calculating position for an empty RTL template
-* Fixed changing the Wrapping Style value when applying Merge shapes / Arrange > Group
+* Fixed changing the Wrapping Style value when applying
+  Merge shapes / Arrange > Group
 * Enabled standard ligatures for Arabic text writing ([DocumentServer#3115](https://github.com/ONLYOFFICE/DocumentServer/issues/3115))
 * Fixed the display of Borders and Fill when rendering an RTL paragraph
 * Fixed incorrect work when comparing files at the word level, where a word
