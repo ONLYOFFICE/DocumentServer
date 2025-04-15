@@ -1,5 +1,86 @@
 # Change log
 
+## 8.3.3
+
+### Fixes
+
+#### All Editors
+
+#### Document Editor
+
+* Fixed calculation for an RTL paragraph ([DocumentServer#2590](https://github.com/ONLYOFFICE/DocumentServer/issues/2590))
+* Fixed the display of the Bullets / Numbering / Multilevel style thumbnails
+  for an RTL paragraph
+* Fixed the display of numbered lists (bullets) for an RTL paragraph
+  ([DocumentServer#3118](https://github.com/ONLYOFFICE/DocumentServer/issues/3118))
+* Fixed the display of the date for Arabic in the Formats list
+  of the "Date & time" window
+* Replaced Latin commas with Arabic ones when using Arabic format
+  in the "Date & time" window
+* Fixed an issue with calculating position for an empty RTL template
+* Fixed changing the Wrapping Style value when applying Merge shapes / Arrange > Group
+* Enabled standard ligatures for Arabic text writing ([DocumentServer#3115](https://github.com/ONLYOFFICE/DocumentServer/issues/3115))
+* Fixed the display of Borders and Fill when rendering an RTL paragraph
+* Fixed incorrect work when comparing files at the word level, where a word
+  and a paragraph mark were deleted
+* Fixed adding TextArt for a paragraph with RTL direction
+  ([DocumentServer#3132](https://github.com/ONLYOFFICE/DocumentServer/issues/3132))
+* Fixed autonumbering for Indian numbers added via Unicode (U+0660 - U+0669)
+* Fixed the ability to select a numbered list deleted in the review mode
+* Fixed the display of words with tabulation according to the main direction
+  of the text
+* Fixed calculation of the non-printing tab stop character position and correct
+  work with the tab stop marker on the horizontal ruler for an RTL paragraph
+* Fixed an issue with the cursor placement in Arabic text for a paragraph
+  with LTR direction
+* Fixed incorrect display of French quotes « » (U+00AB and U+00BB )
+  for RTL text ([DocumentServer#3177](https://github.com/ONLYOFFICE/DocumentServer/issues/3177))
+* Fixed calculation of the tab stop position in some edge situations
+* Fixed an issue with calculating the right edge for a paragraph with fill
+  and border
+
+#### Spreadsheet Editor
+
+* Fixed stopping work of the editor when entering some formulas
+  with circular references
+* Fixed deleting a sheet when dragging it to another one
+  in the Fast co-editing mode
+* Fixed crash when opening a document created in the previous version
+  of the application
+* Fixed hanging of the editor when calculating some functions that
+  work with an array
+
+#### Presentation Editor
+
+* Fixed stopping work of the editor when opening the numbered list panel
+* Fixed an error when saving/opening the `PPTX` file with animation applied
+  to several Lines objects ([DocumentServer#3191](https://github.com/ONLYOFFICE/DocumentServer/issues/3191))
+* Fixed an issue with maintaining direction for RTL text when opening
+  some `PPT` files
+* Fixed generating unique Shape name identifier for the Lines objects
+  ([DocumentServer#3192](https://github.com/ONLYOFFICE/DocumentServer/issues/3192))
+* Fixed incorrect translations of tools in the Draw menu of the Presenter View window
+
+#### PDF Editor
+
+* Fixed an error when opening some`PDF` files containing fields to fill in
+* Fixed the position of drawing the selection in a text comment
+  for some `PDF` files
+* Fixed the ability to change the stamp size in `PDF` files
+
+#### Convert
+
+* Fixed stopping work of the editor when converting some `PPTX` files
+  to image formats
+* Fixed crash when converting some `XLSX` files to `XLSB`
+* Restored compatibility with third-party editors after converting some `XLSX`
+  files to `XLSB` via binary format
+
+#### Customization
+
+* Fixed hiding the Save option in the Customize Quick Access Toolbar menu when
+  setting `layout`.`header`.`save` to `false`
+
 ## 8.3.2
 
 ### Fixes
