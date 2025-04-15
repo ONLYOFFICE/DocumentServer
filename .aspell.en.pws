@@ -60,6 +60,7 @@ autofit
 Autofit
 AutoFormat
 autohyphenation
+autonumbering
 Autorun
 autoshape
 autoshapes
@@ -751,6 +752,7 @@ tablePr
 tabSelected
 TDIST
 TEXTAFTER
+TextArt
 TEXTBEFORE
 TEXTJOIN
 TextPr
