@@ -1,26 +1,48 @@
-name: check
-on: [push]
+name: Markdown Lint & Spellcheck
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'CHANGELOG.md'
+      - 'ROADMAP.md'
+      - '.markdownlint.json'
+      - '.aspell.*.pws'
+
 jobs:
   markdownlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js 18
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: DavidAnson/markdownlint-cli2-action@v16
         with:
-            node-version: 18
-      - name: run markdownlint linter
-        run: |
-          npm install -g markdownlint-cli
-          markdownlint CHANGELOG.md ROADMAP.md
-  spellchecker:
+          globs: |
+            CHANGELOG.md
+            ROADMAP.md
+
+  spellcheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: setup aspell
-        run: sudo apt-get -y update && sudo apt-get -y install aspell aspell-en
-      - name: run spellchecker
+      - uses: actions/checkout@v4
+      - name: Setup aspell
         run: |
-          SPELLCHECK_OUT=$(cat CHANGELOG.md | aspell --lang=en --encoding=utf-8 --personal=./.aspell.en.pws list)
-          echo $SPELLCHECK_OUT
-          if [[ $(echo -n $SPELLCHECK_OUT | wc -c) -ne 0 ]]; then exit 1 ; fi
+          sudo apt-get -y update
+          sudo apt-get -y install aspell aspell-en
+      - name: Run spellcheck
+        run: |
+          set -eux
+          temp=$(mktemp)
+          cat CHANGELOG.md \
+            | aspell \
+              --lang=en \
+              --encoding=utf-8 \
+              --personal=./.aspell.en.pws \
+              list \
+            | sort -u \
+            > $temp
+          if [ -s $temp ]; then
+            cat $temp
+            exit 1
+          fi
