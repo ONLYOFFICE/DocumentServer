@@ -499,6 +499,14 @@
   all the necessary components for the installation of the product which makes
   it possible to install it without an Internet connection
 
+## 8.2.3
+
+### Fixes
+
+#### Security
+
+* Fixed the XSS vulnerability when opening files via the WOPI protocol
+
 ## 8.2.2
 
 ### Fixes
