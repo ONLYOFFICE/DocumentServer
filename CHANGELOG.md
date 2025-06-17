@@ -1,5 +1,376 @@
 # Change log
 
+## 9.0.0
+
+### New features
+
+#### All Editors
+
+* Added new interface themes: Modern Light and Modern Dark
+* Added saving of the last selected languages in spellcheck lists
+* Added Arabic spellcheck dictionary used in sixteen dialects
+* Added AI-powered macro generation from descriptions and VBA-to-JavaScript
+  conversion
+* Added the interface translation into Urdu (ur-PK, Urdu (Pakistan))
+* Added support for TextArt text settings inside chart labels
+* Added support for drawing the Up/Down Bars chart elements
+
+#### Document Editor
+
+* Added correct display of previews for paragraph numbers for RTL
+* Improved positioning and settings of TextArt for RTL
+* Improved drawing of borders and fill for paragraphs with RTL direction
+* Enabled accurate cursor navigation with arrow keys based on the paragraph's
+  text direction
+* Added the ability to display numbers using Hindi digits
+* Added a setting in the File menu for selecting the preferred font size:
+  Western/Chinese for the Chinese interface language (Chinese (Simplified))
+* Added a Borders button to the Home toolbar to quickly set paragraph settings
+* Added support for the `MD` format for reading
+
+#### Spreadsheet Editor
+
+* Added support for displaying bidirectional text
+* Added the ability to select external data from another spreadsheet
+
+#### Presentation Editor
+
+* Added the ability to set the paragraph direction (Text Direction > RTL)
+  on the toolbar and in the advanced settings
+* Added the ability to view animations with text
+* Added the "Preserve" option to the Slide Master context menu
+
+#### Forms
+
+* Changed the appearance of the Signature and Image fields: the placeholder
+  and signature icon are now always displayed
+* Improved user experience when filling in the Signature and Image fields
+* Added a new `"type": "signature"` for the Signature field, used in the process
+  of filling out forms
+
+#### PDF Editor
+
+* Added the ability to set RTL direction for text
+* The Edit Text option is available in the Community Edition build
+* Implemented a `PDF` form editor
+* Added copying pages between `PDF` files
+
+#### Diagrams
+
+* Release of the first version of the Diagram Viewer with the ability
+  to open `VSD` and `VSDX` files
+
+#### Convert
+
+* Added conversion of the `XLSB` format to the editor's internal format,
+  allowing editing and saving in `XLSX` without preliminary conversion
+
+#### Back-end
+
+* Added support for Azure Blob Storage (`storage.name = "storage-az"`)
+  for editor cache. To use, specify the endpoint, `bucketName`
+  and `credentials` (`accessKeyId` and `secretAccessKey`)
+* Added flag `storage.useDirectStorageUrls` (`bool`), which controls the issuance
+  of links to external storages: direct links or proxying through the server
+* Added the ability to prepare static editor data (`html`, `css`, `js`, `fonts`)
+  in the browser cache before opening the document using the
+  `?preload=placeholder` parameter to the link to `api.js` or a hidden `iframe`
+  with `preload.html` located next to `api.js`
+* Added setting `runtimeConfig.filePath` - path to dynamic server config,
+  allowing to change parameters without restarting, similar to tenant configs
+* Added the ability to set parameters and keys of AI models used in editors
+  on the /info page
+* Added the ability for the server administrator to add own dictionaries
+
+#### Customization
+
+* Added parameter `customization.forceWesternFontSize`: `false`/`true`
+  for setting by integrators
+* Added a parameter to hide the icon with the user's avatar/initials
+  in the header: `customization.layout.header.user`: `true`/`false`.
+  The setting is available to users with the extended license
+
+#### API
+
+<details><summary>Added methods for creating/adding custom <code>ContentControls</code></summary>
+
+```javascript
+ApiDocument.prototype.AddCheckBoxContentControl = function(checkBoxPr)
+ApiDocument.prototype.AddPictureContentControl = function(width, height)
+ApiDocument.prototype.AddComboBoxContentControl = function(list, selected)
+ApiDocument.prototype.AddDropDownListContentControl = function(list, selected)
+ApiDocument.prototype.AddDatePickerContentControl = function(datePickerPr)
+Api.prototype.CreateCheckBoxContentControl = function(checkBoxPr)
+Api.prototype.CreatePictureContentControl = function(width, height)
+Api.prototype.CreateComboBoxContentControl = function(list, selected)
+Api.prototype.CreateDropDownListContentControl = function(list, selected)
+Api.prototype.CreateDatePickerContentControl = function(datePickerPr)
+```
+
+</details>
+<details><summary>Added the ability to get <code>CustomXml</code> collection</summary>
+
+```javascript
+ApiDocument.prototype.GetCustomXmlParts = function()
+```
+
+</details>
+<details><summary>Added support for handling the <code>Custom XML</code> collection</summary>
+
+```javascript
+ApiCustomXmlParts.prototype.Add = function(xml)
+ApiCustomXmlParts.prototype.GetCount = function()
+ApiCustomXmlParts.prototype.GetById = function(xmlPartId)
+ApiCustomXmlParts.prototype.GetByNamespace = function(namespace)
+ApiCustomXmlParts.prototype.GetAll = function()
+```
+
+</details>
+<details><summary>Enabled functionality for managing the <code>Custom XML</code> collection element</summary>
+
+```javascript
+ApiCustomXmlPart.prototype.GetId = function()
+ApiCustomXmlPart.prototype.GetNodes = function(xPath)
+ApiCustomXmlPart.prototype.GetXml = function()
+ApiCustomXmlPart.prototype.Delete = function()
+ApiCustomXmlPart.prototype.DeleteAttribute = function(xPath, name)
+ApiCustomXmlPart.prototype.InsertAttribute = function(xPath, name, value)
+ApiCustomXmlPart.prototype.GetAttribute = function(xPath, name)
+ApiCustomXmlPart.prototype.UpdateAttribute = function(xPath, name, value)
+ApiCustomXmlPart.prototype.DeleteElement = function(xPath)
+ApiCustomXmlPart.prototype.InsertElement = function(xPath, xmlStr, index)
+ApiCustomXmlPart.prototype.UpdateElement = function(xPath, xmlStr)
+```
+
+</details>
+<details><summary>Added support for individual <code>CustomXML</code> nodes</summary>
+
+```javascript
+ApiCustomXmlNode.prototype.GetNodes = function(xPath)
+ApiCustomXmlNode.prototype.GetXPath = function ()
+ApiCustomXmlNode.prototype.GetNodeName = function()
+ApiCustomXmlNode.prototype.GetNodeValue = function()
+ApiCustomXmlNode.prototype.GetXml = function()
+ApiCustomXmlNode.prototype.GetText = function()
+ApiCustomXmlNode.prototype.SetNodeValue = function(xml)
+ApiCustomXmlNode.prototype.SetText = function(text)
+ApiCustomXmlNode.prototype.SetXml = function (xml)
+ApiCustomXmlNode.prototype.Delete = function()
+ApiCustomXmlNode.prototype.GetParent = function()
+ApiCustomXmlNode.prototype.Add = function(nodeName)
+ApiCustomXmlNode.prototype.GetAttributes = function()
+ApiCustomXmlNode.prototype.SetAttribute = function(name, value)
+ApiCustomXmlNode.prototype.UpdateAttribute = function(name, value)
+ApiCustomXmlNode.prototype.DeleteAttribute = function(name)
+ApiCustomXmlNode.prototype.GetAttribute = function(name)
+```
+
+</details>
+<details><summary>Added methods to link <code>ContentControl</code> and <code>CustomXML</code></summary>
+
+```javascript
+ApiInlineLvlSdt.prototype.SetDataBinding = function(xmlMapping)
+ApiInlineLvlSdt.prototype.GetDataBinding = function()
+ApiInlineLvlSdt.prototype.UpdateFromXmlMapping = function()
+ApiInlineLvlSdt.prototype.GetDataForXmlMapping = function()
+ApiBlockLvlSdt.prototype.SetDataBinding = function(xmlMapping)
+ApiBlockLvlSdt.prototype.GetDataBinding = function()
+ApiBlockLvlSdt.prototype.UpdateFromXmlMapping = function()
+ApiBlockLvlSdt.prototype.GetDataForXmlMapping = function()
+```
+
+</details>
+<details><summary>Added method for inserting formulas</summary>
+
+```javascript
+ApiPresentation.prototype.AddMathEquation(sText, sFormat)
+```
+
+</details>
+<details><summary>Added new class <code>ApiNotesPage</code> for working with notes</summary>
+
+```javascript
+ApiNotesPage.prototype.GetBodyShape()
+ApiNotesPage.prototype.AddBodyShapeText(sText)
+```
+
+</details>
+<details><summary>Added methods to the <code>ApiSlide</code> class</summary>
+
+```javascript
+ApiSlide.prototype.GetNotesPage()
+ApiSlide.prototype.AddNotesText(sText)
+```
+
+</details>
+<details><summary>Added methods for getting presentation objects</summary>
+
+```javascript
+ApiPresentation.prototype.GetAllOleObjects()
+ApiPresentation.prototype.GetAllCharts()
+ApiPresentation.prototype.GetAllShapes()
+ApiPresentation.prototype.GetAllImages()
+ApiPresentation.prototype.GetAllDrawings()
+```
+
+</details>
+<details><summary>Added methods for getting all slide templates</summary>
+
+```javascript
+ApiMaster.prototype.GetAllLayouts()
+```
+
+</details>
+<details><summary>Added <code>ApiCore</code> and <code>ApiCustomProperties</code> classes for working with file metadata</summary>
+
+```javascript
+ApiCore.prototype.SetCategory = function (sCategory)
+ApiCore.prototype.GetCategory = function ()
+ApiCore.prototype.SetContentStatus = function (sStatus)
+ApiCore.prototype.GetContentStatus = function ()
+ApiCore.prototype.SetCreated = function (oCreated)
+ApiCore.prototype.GetCreated = function ()
+ApiCore.prototype.SetCreator = function (sCreator)
+ApiCore.prototype.GetCreator = function ()
+ApiCore.prototype.SetDescription = function (sDescription)
+ApiCore.prototype.GetDescription = function ()
+ApiCore.prototype.SetIdentifier = function (sIdentifier)
+ApiCore.prototype.GetIdentifier = function ()
+ApiCore.prototype.SetKeywords = function (sKeywords)
+ApiCore.prototype.GetKeywords = function ()
+ApiCore.prototype.SetLanguage = function (sLanguage)
+ApiCore.prototype.GetLanguage = function ()
+ApiCore.prototype.SetLastModifiedBy = function (sLastModifiedBy)
+ApiCore.prototype.GetLastModifiedBy = function ()
+ApiCore.prototype.SetLastPrinted = function (oLastPrinted)
+ApiCore.prototype.GetLastPrinted = function ()
+ApiCore.prototype.SetModified = function (oModified)
+ApiCore.prototype.GetModified = function ()
+ApiCore.prototype.SetRevision = function (sRevision)
+ApiCore.prototype.GetRevision = function ()
+ApiCore.prototype.SetSubject = function (sSubject)
+ApiCore.prototype.GetSubject = function ()
+ApiCore.prototype.SetTitle = function (sTitle)
+ApiCore.prototype.GetTitle = function ()
+ApiCore.prototype.SetVersion = function (sVersion)
+ApiCore.prototype.GetVersion = function ()
+ApiCustomProperties.prototype.AddStringProperty = function (sName, sValue)
+ApiCustomProperties.prototype.AddNumberProperty = function (sName, nValue)
+ApiCustomProperties.prototype.AddDateProperty = function (sName, oValue)
+ApiCustomProperties.prototype.AddBoolProperty = function (sName, bValue)
+ApiCustomProperties.prototype.GetPropertyValueByName = function (sName)
+```
+
+</details>
+<details><summary>Added methods for getting instances of new classes in the editor API</summary>
+
+```javascript
+ApiDocument.prototype.GetCore()
+ApiDocument.prototype.GetCustomProperties()
+Api.prototype.GetCore()
+Api.prototype.GetCustomProperties()
+ApiPresentation.prototype.GetCore()
+ApiPresentation.prototype.GetCustomProperties()
+```
+
+</details>
+<details><summary>Added methods for switching the visual presentation of <code>Content Controls</code>,
+accepting values: <code>"boundingBox"</code>, <code>"hidden"</code></summary>
+
+```javascript
+ApiInlineLvlSdt.prototype.SetAppearance = function(type)
+ApiInlineLvlSdt.prototype.GetAppearance = function()
+ApiBlockLvlSdt.prototype.SetAppearance = function(type)
+ApiBlockLvlSdt.prototype.GetAppearance = function()
+```
+
+</details>
+<details><summary>Added methods for getting/setting the role and tag to the base class
+for all forms, as well as the ability to set the role when creating a form
+through the general form setting <code>FormPrBase.role</code></summary>
+
+```javascript
+ApiFormBase.prototype.GetTag = function()
+ApiFormBase.prototype.SetTag = function(tag)
+ApiFormBase.prototype.GetRole = function()
+ApiFormBase.prototype.SetRole = function(role)
+```
+
+</details>
+<details><summary>Added methods to get forms by selected role or key</summary>
+
+```javascript
+ApiDocument.prototype.GetFormsByRole = function(role)
+ApiDocument.prototype.GetFormsByKey = function(key)
+```
+
+</details>
+<details><summary>Added method to get list of keys linked to the given role</summary>
+
+```javascript
+ApiDocument.prototype.GetFormKeysByRole = function(role)
+```
+
+</details>
+<details><summary>Added a method to get the form value directly by key (for a group of radio buttons, it returns Choice, i.e. the name of the selected item)</summary>
+
+```javascript
+ApiDocument.prototype.GetFormValueByKey = function(key)
+```
+
+</details>
+<details><summary>Added methods for date field to work via built-in JavaScript date class</summary>
+
+```javascript
+ApiDateForm.prototype.SetDate = function(date)
+ApiDateForm.prototype.GetDate = function()
+```
+
+</details>
+<details><summary>Added <code>fontSlot</code> parameter to <code>GetFontFamily</code> method, accepting values:
+  <code>"ascii"</code>, <code>"eastAsia"</code>, <code>"hAnsi"</code>, <code>"cs"</code></summary></details>
+<details><summary>Added automatic font calculation from the theme in the `GetFontFamily`
+  method, if specified through the theme</summary>
+  
+```javascript
+ApiTextPr.prototype.GetFontFamily = function(fontSlot)
+```
+
+</details>
+<details><summary>Added a method to access the role management class, returning an object
+  of the new <code>ApiFormRoles</code> type</summary>
+
+```javascript
+ApiDocument.prototype.GetFormRoles = function()
+```
+
+</details>
+<details><summary>Added methods for working with the <code>ApiFormRoles</code> class</summary>
+
+```javascript
+ApiFormRoles.prototype.Add = function(name, props)
+ApiFormRoles.prototype.Remove = function(name, delegateRole)
+ApiFormRoles.prototype.GetCount = function()
+ApiFormRoles.prototype.GetAllRoles = function()
+ApiFormRoles.prototype.HaveRole = function(name)
+ApiFormRoles.prototype.GetRoleColor = function(name)
+ApiFormRoles.prototype.SetRoleColor = function(name, color)
+ApiFormRoles.prototype.MoveUp = function(name)
+ApiFormRoles.prototype.MoveDown = function(name)
+```
+
+</details>
+
+#### Plugins
+
+* Added the ability to add custom buttons using a plugin for `ContentControl`
+  in the document editor
+
+#### Mobile
+
+* Enabled slide thumbnail panel adjustment upon device orientation change
+
+
 ## 8.3.3
 
 ### Fixes
