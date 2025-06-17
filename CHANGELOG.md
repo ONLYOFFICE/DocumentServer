@@ -92,9 +92,7 @@
 
 #### API
 
-<details>
-
-<summary>Added methods for creating/adding custom <code>ContentControls</code></summary>
+* Added methods for creating/adding custom `ContentControls`
 
 ```javascript
 ApiDocument.prototype.AddCheckBoxContentControl = function(checkBoxPr)
@@ -109,19 +107,13 @@ Api.prototype.CreateDropDownListContentControl = function(list, selected)
 Api.prototype.CreateDatePickerContentControl = function(datePickerPr)
 ```
 
-</details>
-<details>
-
-<summary>Added the ability to get <code>CustomXml</code> collection</summary>
+* Added the ability to get `CustomXml` collection
 
 ```javascript
 ApiDocument.prototype.GetCustomXmlParts = function()
 ```
 
-</details>
-<details>
-
-<summary>Added support for handling the <code>Custom XML</code> collection</summary>
+* Added support for handling the `Custom XML` collection
 
 ```javascript
 ApiCustomXmlParts.prototype.Add = function(xml)
@@ -131,10 +123,7 @@ ApiCustomXmlParts.prototype.GetByNamespace = function(namespace)
 ApiCustomXmlParts.prototype.GetAll = function()
 ```
 
-</details>
-<details>
-
-<summary>Enabled functionality for managing the <code>Custom XML</code> collection element</summary>
+* Enabled functionality for managing the `Custom XML` collection element
 
 ```javascript
 ApiCustomXmlPart.prototype.GetId = function()
@@ -150,10 +139,7 @@ ApiCustomXmlPart.prototype.InsertElement = function(xPath, xmlStr, index)
 ApiCustomXmlPart.prototype.UpdateElement = function(xPath, xmlStr)
 ```
 
-</details>
-<details>
-
-<summary>Added support for individual <code>CustomXML</code>nodes</summary>
+* Added support for individual `CustomXML` nodes
 
 ```javascript
 ApiCustomXmlNode.prototype.GetNodes = function(xPath)
@@ -175,10 +161,7 @@ ApiCustomXmlNode.prototype.DeleteAttribute = function(name)
 ApiCustomXmlNode.prototype.GetAttribute = function(name)
 ```
 
-</details>
-<details>
-
-<summary>Added methods to link <code>ContentControl</code> and <code>CustomXML</code></summary>
+* Added methods to link `ContentControl` and `CustomXML`
 
 ```javascript
 ApiInlineLvlSdt.prototype.SetDataBinding = function(xmlMapping)
@@ -191,39 +174,27 @@ ApiBlockLvlSdt.prototype.UpdateFromXmlMapping = function()
 ApiBlockLvlSdt.prototype.GetDataForXmlMapping = function()
 ```
 
-</details>
-<details>
-
-<summary>Added method for inserting formulas</summary>
+* Added method for inserting formulas
 
 ```javascript
 ApiPresentation.prototype.AddMathEquation(sText, sFormat)
 ```
 
-</details>
-<details>
-
-<summary>Added new class <code>ApiNotesPage</code> for working with notes</summary>
+* Added new class `ApiNotesPage` for working with notes
 
 ```javascript
 ApiNotesPage.prototype.GetBodyShape()
 ApiNotesPage.prototype.AddBodyShapeText(sText)
 ```
 
-</details>
-<details>
-
-<summary>Added methods to the <code>ApiSlide</code> class</summary>
+* Added methods to the `ApiSlide` class
 
 ```javascript
 ApiSlide.prototype.GetNotesPage()
 ApiSlide.prototype.AddNotesText(sText)
 ```
 
-</details>
-<details>
-
-<summary>Added methods for getting presentation objects</summary>
+* Added methods for getting presentation objects
 
 ```javascript
 ApiPresentation.prototype.GetAllOleObjects()
@@ -233,20 +204,14 @@ ApiPresentation.prototype.GetAllImages()
 ApiPresentation.prototype.GetAllDrawings()
 ```
 
-</details>
-<details>
-
-<summary>Added methods for getting all slide templates</summary>
+* Added methods for getting all slide templates
 
 ```javascript
 ApiMaster.prototype.GetAllLayouts()
 ```
 
-</details>
-<details>
-
-<summary>Added <code>ApiCore</code> and <code>ApiCustomProperties</code>
- classes for working with file metadata</summary>
+* Added `ApiCore` and `ApiCustomProperties` classes
+  for working with file metadata
 
 ```javascript
 ApiCore.prototype.SetCategory = function (sCategory)
@@ -286,11 +251,8 @@ ApiCustomProperties.prototype.AddBoolProperty = function (sName, bValue)
 ApiCustomProperties.prototype.GetPropertyValueByName = function (sName)
 ```
 
-</details>
-<details>
-
-<summary>Added methods for getting instances of new classes
- in the editor API</summary>
+* Added methods for getting instances of new classes
+  in the editor API
 
 ```javascript
 ApiDocument.prototype.GetCore()
@@ -301,12 +263,9 @@ ApiPresentation.prototype.GetCore()
 ApiPresentation.prototype.GetCustomProperties()
 ```
 
-</details>
-<details>
-
-<summary>Added methods for switching the visual presentation
- of <code>Content Controls</code>, accepting values: <code>"boundingBox"</code>, 
-<code>"hidden"</code></summary>
+* Added methods for switching the visual presentation
+  of `Content Controls`, accepting values: `"boundingBox"`,
+  `"hidden"`
 
 ```javascript
 ApiInlineLvlSdt.prototype.SetAppearance = function(type)
@@ -315,12 +274,9 @@ ApiBlockLvlSdt.prototype.SetAppearance = function(type)
 ApiBlockLvlSdt.prototype.GetAppearance = function()
 ```
 
-</details>
-<details>
-
-<summary>Added methods for getting/setting the role and tag to the base class
+* Added methods for getting/setting the role and tag to the base class
 for all forms, as well as the ability to set the role when creating a form
-through the general form setting <code> FormPrBase.role</code></summary>
+through the general form setting `FormPrBase.role`
 
 ```javascript
 ApiFormBase.prototype.GetTag = function()
@@ -329,77 +285,51 @@ ApiFormBase.prototype.GetRole = function()
 ApiFormBase.prototype.SetRole = function(role)
 ```
 
-</details>
-<details>
-
-<summary>Added methods to get forms by selected role or key</summary>
+* Added methods to get forms by selected role or key
 
 ```javascript
 ApiDocument.prototype.GetFormsByRole = function(role)
 ApiDocument.prototype.GetFormsByKey = function(key)
 ```
 
-</details>
-<details>
-
-<summary>Added method to get list of keys linked to the given role</summary>
+* Added method to get list of keys linked to the given role
 
 ```javascript
 ApiDocument.prototype.GetFormKeysByRole = function(role)
 ```
 
-</details>
-<details>
-
-<summary>Added a method to get the form value directly by key (for a group
- of radio buttons, it returns Choice, i.e. the name of the selected item)</summary>
+* Added a method to get the form value directly by key (for a group
+ of radio buttons, it returns Choice, i.e. the name of the selected item)
 
 ```javascript
 ApiDocument.prototype.GetFormValueByKey = function(key)
 ```
 
-</details>
-<details>
-
-<summary>Added methods for date field to work via built-in JavaScript
- date class</summary>
+* Added methods for date field to work via built-in JavaScript
+ date class
 
 ```javascript
 ApiDateForm.prototype.SetDate = function(date)
 ApiDateForm.prototype.GetDate = function()
 ```
 
-</details>
-<details>
+* Added `fontSlot` parameter to `GetFontFamily` method, accepting values:
+  `"ascii"`, `"eastAsia"`, `"hAnsi"`, `"cs"`
+* Added automatic font calculation from the theme
+  in the `GetFontFamily` method, if specified through the theme
 
-<summary>Added <code>fontSlot</code> parameter to <code>GetFontFamily</code>
- method, accepting values: <code>"ascii"</code>, <code>"eastAsia"</code>, 
- <code>"hAnsi"</code>, <code>"cs"</code></summary>
-</details>
-<details>
-
-<summary>Added automatic font calculation from the theme 
-in the <code>GetFontFamily</code> method, if specified through the theme</summary>
-  
 ```javascript
 ApiTextPr.prototype.GetFontFamily = function(fontSlot)
 ```
 
-</details>
-<details>
-
-<summary>Added a method to access the role management class, 
-returning an object of the new <code>ApiFormRoles</code> type</summary>
+* Added a method to access the role management class,
+  returning an object of the new `ApiFormRoles` type
 
 ```javascript
 ApiDocument.prototype.GetFormRoles = function()
 ```
 
-</details>
-<details>
-
-<summary>Added methods for working with the <code>ApiFormRoles</code>
- class</summary>
+* Added methods for working with the `ApiFormRoles` class
 
 ```javascript
 ApiFormRoles.prototype.Add = function(name, props)
@@ -412,8 +342,6 @@ ApiFormRoles.prototype.SetRoleColor = function(name, color)
 ApiFormRoles.prototype.MoveUp = function(name)
 ApiFormRoles.prototype.MoveDown = function(name)
 ```
-
-</details>
 
 #### Plugins
 
