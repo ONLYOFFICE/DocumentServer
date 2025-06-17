@@ -58,7 +58,7 @@
 #### Diagrams
 
 * Release of the first version of the Diagram Viewer with the ability
-  to open `VSD` and `VSDX` files
+  to open `VSDX` files
 
 #### Convert
 
