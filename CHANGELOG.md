@@ -1,5 +1,32 @@
 # Change log
 
+## 9.0.2
+
+### Fixes
+
+#### All Editors
+
+* The default Tab style view has been changed to a Line for modern themes
+
+#### Document Editor
+
+* Fixed the problem with header/footer calculation
+* Fixed an issue with the first calculation of the document when opened
+  document has collaborative changes
+
+#### Spreadsheet Editor
+
+* Fixed the editor crash when exporting `XLSX` files to `PDF`
+
+#### Forms
+
+* Fixed the opening of filled `PDF Forms` in Form and Virtual Data Rooms
+  on DocSpace
+
+## 9.0.1
+
+### No public release
+
 ## 9.0.0
 
 ### New features
