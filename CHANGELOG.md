@@ -16,7 +16,7 @@
 
 #### Spreadsheet Editor
 
-* Fixed the editor chash when exporting `XLSX` files to `PDF`
+* Fixed the editor crash when exporting `XLSX` files to `PDF`
 
 #### Forms
 
