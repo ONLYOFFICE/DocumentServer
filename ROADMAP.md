@@ -5,6 +5,47 @@ This document provides the roadmap of the planned ONLYOFFICE Document Server cha
 This is an updated and corrected version of the roadmap.
 We also reserve the right to change it when necessary.
 
+## Version 9.1
+
+### All editors
+
+* Working on implementing AI in editors
+* Ability to customize the toolbar
+* Ability to use fonts on the user's client
+* Font scaling settings
+* Ability to configure parts of a document for editing
+in protected mode
+* Ability to customize the quick toolbar
+* Working on a one-line toolbar
+* Additional text settings for all text data on charts
+
+### PDF Editor
+
+* AI field for storing history in pdf forms
+* Saving to pdf on client
+
+### Forms
+
+* New field for forms “dynamic table”
+* Navigation by fields
+* Combo box and Dropdown list improvement
+
+### Document Editor
+
+* docGrid support for Asian regions
+* Adding a Style Set for the Design tab
+* Ability to add borders for a page
+* Table wrapping settings
+
+### Spreadsheet Editor
+
+* AI functions for the Spreadsheet Editor
+* Getting data from third-party databases
+
+### Presentation Editor
+
+* New animations with text
+
 ## Version 8.3
 
 ### All editors
