@@ -1,5 +1,119 @@
 # Change log
 
+## 9.0.3
+
+### New features
+
+#### Spreadsheet Editor
+
+* Enabled the ability to insert a range of cells as an image
+  using navigator.clipboard ([DocumentServer#985](https://github.com/ONLYOFFICE/DocumentServer/issues/985))
+
+#### Customization
+
+* Added the ability to hide the document title in the toolbar
+  using the `customization.toolbarHideFileName` parameter
+
+### Fixes
+
+#### All Editors
+
+* The display of the cursor and text selection is now limited by the size
+  of the object/shape
+* Fixed some icons for Modern themes when the interface scale
+  is higher than 200%
+* Improved appearance of the autoshape Merge/Flip icons for the Modern themes
+
+#### Document Editor
+
+* Fixed stopping work of the editor when editing footer in some `DOCX` files
+* Fixed errors during Compare/Combine/Text from file operations with files
+  containing images
+* Fixed a crash when restoring a placeholder with a list when deleting
+  Content Control content
+* Fixed significant increasing of the file size due to including CJK fonts
+  when exporting to `PDF` ([DocumentServer#2934](https://github.com/ONLYOFFICE/DocumentServer/issues/2934))
+
+#### Spreadsheet Editor
+
+* Fixed stopping work of the editor when trying to reference
+  a cell with a formula ([DocumentServer#3314](https://github.com/ONLYOFFICE/DocumentServer/issues/3314))
+* Fixed appearing the #NAME error in the final file when using
+  a custom function and exporting to `PDF`
+* Fixed a problem with saving custom function to a file
+* Fixed an issue with autofitting row height when changing column width
+  if Wrap Text is applied to a cell
+* Fixed display of the Zoom option value in the bottom toolbar in RTL UI
+  with the Sheet RTL option disabled
+* Fixed the incorrect position of the percent sign in the status bar for Zoom
+  with Chinese (Simplified) ([DocumentServer#3313](https://github.com/ONLYOFFICE/DocumentServer/issues/3313))
+
+#### Presentation Editor
+
+* Fixed stopping work of the editor when applying some animations
+  from the Emphasis Effects section to an image
+* Fixed the editor crash when deleting slides sequentially from preview panel
+* Fixed stopping work of the editor when copying all content on the slide
+  in some `PPTX` files
+* Fixed incorrect translations of tools in the Draw menu
+  of the Presenter View window
+
+#### Forms
+
+* Fixed stopping work of the editor after applying the TextArt setting
+  to the Signature field
+* Fixed stopping work of the editor when restoring a file connection
+  after a long period of inactivity
+* Fixed cursor change for Content Control buttons
+* Fixed missing the Clear Fields icons in the form viewing mode
+  for the Modern themes
+
+#### PDF Editor
+
+* Fixed stopping work of the editor when performing Cut/Paste operations
+  simultaneously on the thumbnail panel
+* Fixed display of the text after breaking and restoring a session when working
+  with some `PDF` files
+* Fixed saving form field settings when there are no other changes
+  in the editor
+* Blocked the ability to change the contents of the document
+  when the connection is lost
+* Fixed an error when trying to copy page contents from the thumbnail panel
+  for `XPS/DjVu`
+* Blocked the ability to display of the form field titles in the embedded mode
+* Fixed display of the form field highlight when undoing and redoing actions
+* Fixed blocking the ability to enter text immediately after inserting
+  a Text Comment
+
+#### Diagram
+
+* Fixed display of the slide in the working area when opening some `VSTX` files
+
+#### Convert
+
+* Fixed crash when converting some `DOCX` files to an image
+* Fixed crash when converting some `HWP` files to the binary format
+* Fixed endless conversion of some `HWP` files to the binary format
+* Fixed endless conversion of some `DOC` files to the binary format
+* Fixed the appearance of an error when opening the result of converting
+  some `HWP` files to `DOCX` in third-party editors
+* Fixed crash when converting some `DOC` files to the binary format
+* Fixed the appearance of an error when opening the result of converting
+  some `XLS` files to `XLSX` in third-party editors
+* Fixed crash when converting some `DOCX` files to the binary format
+* Fixed the difference in display of autoshapes after converting
+  some `VSDX` files to `PNG`
+
+#### Back-end
+
+* Fixed Configuration save error when saving or resetting AI settings
+  on /info when using own runtime.json
+
+#### Mobile
+
+* Fixed the ability to copy contents when initializing the editor
+  with the `permissions.copy: false` parameter
+
 ## 9.0.2
 
 ### Fixes
