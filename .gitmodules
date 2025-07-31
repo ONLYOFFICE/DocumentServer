@@ -1,21 +1,3 @@
-[submodule "core"]
-	path = core
-	url = ../core.git
-[submodule "core-fonts"]
-	path = core-fonts
-	url = ../core-fonts.git
-[submodule "dictionaries"]
-	path = dictionaries
-	url = ../dictionaries.git
-[submodule "sdkjs"]
-	path = sdkjs
-	url = ../sdkjs.git
-[submodule "server"]
-	path = server
-	url = ../server.git
-[submodule "web-apps"]
-	path = web-apps
-	url = ../web-apps.git
 [submodule "sdkjs-plugins/plugin-highlightcode"]
 	path = sdkjs-plugins/plugin-highlightcode
 	url = ../plugin-highlightcode
@@ -46,3 +28,24 @@
 [submodule "sdkjs-plugins/plugin-zotero"]
 	path = sdkjs-plugins/plugin-zotero
 	url = ../plugin-zotero
+[submodule "core"]
+	path = core
+	url = https://github.com/InnovXcare/ofc-core
+[submodule "sdkjs"]
+	path = sdkjs
+	url = https://github.com/InnovXcare/ofc-sdkjs
+[submodule "web-apps"]
+	path = web-apps
+	url = https://github.com/InnovXcare/ofc-web-apps
+[submodule "server"]
+	path = server
+	url = https://github.com/InnovXcare/ofc-server
+[submodule "dictionaries"]
+	path = dictionaries
+	url = https://github.com/InnovXcare/ofc-dictionaries
+[submodule "core-fonts"]
+	path = core-fonts
+	url = https://github.com/InnovXcare/ofc-core-fonts
+[submodule "build-tools"]
+	path = build-tools
+	url = https://github.com/InnovXcare/ofc-build-tools
