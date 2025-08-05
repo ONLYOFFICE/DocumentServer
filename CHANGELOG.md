@@ -1,5 +1,125 @@
 # Change log
 
+## 9.0.4
+
+### New features
+
+* Added support for woff2 fonts
+* Added the Suggest a Feature item to the editors File menu
+
+#### Document Editor
+
+* Improved usability when working with allowed areas
+
+#### Customization
+
+* Added the customization.suggestFeature parameter
+* Added AI, Photo Editor, MathType, OCR, Typograf, Doc2md, LanguageTool,
+DeepL, Thesaurus, Speech input and Zotero plugins to the server version
+distribution with ONLYOFFICE branding
+
+### Fixes
+
+#### All Editors
+
+* Fixed display of the scroll bar for the Modern Dark theme
+* Fixed display of the table creation matrix in the Insert -> Table menu
+for the Modern Light / Dark themes
+* Fixed display of the error window when the connection is broken
+after 2 minutes of waiting
+* Fixed incorrect undo after composite input of text into an autoshape
+in the Fast Co-editing mode
+
+#### Document Editor
+
+* Fixed the sequence of recording table settings to the file
+* Forbidden execution of the Javascript code for a custom property in a document
+* Fixed re-applying text formatting in an autoshape using hotkeys
+* Fixed an error when reading a color with the "automatic" value
+or writing it to a file
+* Disabled the ability to delete text outside the allowed area for filling in
+* Fixed deletion of characters when opening the `TXT` file for editing
+* Fixed display of the password request window to remove file protection
+in MS Word
+* Fixed recalculating the position of an autoshape with
+the `Resize shape to fit text`
+flag when changing text formatting
+* Fixed crash when autocorrecting in a graphical formula (equation)
+* Fixed display of the Abstract Numbering Definition Identifier numbering
+in the `DOCX` file
+* Removed an incorrect item in the Paste options menu for
+the "Chart Editor" window
+
+#### Spreadsheet Editor
+
+* Fixed positioning of RTL text and graphics when saving the `XLSX` file
+to an image
+* Fixed hanging of the editor when copying rows / columns in some browsers
+* Fixed formatting change for several cells with mixed text format
+* Fixed the size of the pasted image of the copied area when scale
+is higher than 100%
+* Fixed display of scroll bars when uploading a new version of the `XLSX` file
+after connection break
+* Fixed crash when copying / pasting a cell with conditional formatting
+in the `XLSX` file
+* Fixed calculation of number of pages when saving the `ODS` file to `PNG`/`JPG`
+* Fixed display of percent sign (%) in combination with a number
+* Fixed an error when opening the saved `ODS` file in MS Excel
+* Fixed the position when pasting a copied cell range as a Picture (Paste options)
+for an RTL file
+* Fixed display of text in the Formula bar in RTL languages
+* Fixed crash when when opening a sheet with charts in the `XLSX` file
+where multiple gradient points are used
+* Fixed crash when when resizing a line chart with a lot of data in the `XLSX` file
+
+#### Presentation Editor
+
+* Fixed an error when clicking in the working area after deleting all slides
+in the `ODP` file
+* Fixed translation of the "Transitions" tab in Danish
+
+#### Forms
+
+* Fixed display of field names in Adobe Acrobat with the same name
+specified in Cyrillic
+* Fixed display of text for the field with the Password format
+* Fixed input of text in the form field if the page is rotated
+* Fixed locking of the Format list when the Multiline option is enabled
+for the Text field
+
+#### PDF Editor
+
+* Fixed opening of the context menu after connection break
+* Fixed adding comments to stamps
+* Fixed applying the AutoFit option if the Scroll Long Text is not enabled
+
+#### Convert
+
+* Fixed crash when converting some `PPTX` files to `JPG` / `PNG` / `PDF`
+* Fixed crash when converting the `XLSM` file to `XLSB` via x2t
+* Fixed crash when converting the `PPTX` file to `PNG` via x2t
+* Fixed crash when converting the `XLSM` file to `PNG` via x2t
+* Fixed display of the “x” symbol after converting the `DOC` file to `DOCX`
+* Fixed crash when converting the `DOCX` file to `JPG` / `PNG` / `PDF` via x2t
+* Fixed crash when converting the `ODT` file to `DOCT` via x2t
+* Fixed crash when converting the `ODS` file to `JPG` / `PNG` / `PDF` via x2t
+* Fixed crash when converting the `ODS` file to `XLST` via x2t
+* Fixed crash when converting a binary file containing an `SVG` image
+to `XLSX` via x2t
+* Fixed crash when converting the `KEY` file to `PPTT` via x2t
+
+#### Backend
+
+* Fixed an issue with synchronization of the AI settings in k8s
+between several document servers
+* Fixed slow `PDF` opening in the WOPI test example if JWT is disabled
+
+#### Mobile
+
+* Fixed display of the `Switch to desktop` button on the toolbar for tablets
+* Fixed the order of slides in the slideshow mode
+* Fixed an error when clicking an image on a slide in the `PPTX` file
+
 ## 9.0.3
 
 ### New features
