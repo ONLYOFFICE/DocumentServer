@@ -1,6 +1,6 @@
 mkdir -p $(pwd)/../data
 mkdir -p $(pwd)/../server/FileConverter/bin
-docker run -i -t -p 80:80 -p 25432:5432 -p 25672:5672 -p 26379:6379 --restart=always -e ALLOW_PRIVATE_IP_ADDRESS=true \
+docker run -i -t -p 80:80 -p 25432:5432 -p 23306:3306  -p 25672:5672 -p 26379:6379 --restart=always -e ALLOW_PRIVATE_IP_ADDRESS=true \
     -v $(pwd)/../sdkjs:/var/www/onlyoffice/documentserver/sdkjs \
     -v $(pwd)/../web-apps:/var/www/onlyoffice/documentserver/web-apps  \
     -v $(pwd)/../server:/var/www/onlyoffice/documentserver/server \

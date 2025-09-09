@@ -31,3 +31,15 @@ docker run -i -t -p 80:80 -p 25432:5432 -p 25672:5672 -p 26379:6379 --restart=al
     documentserver-develop
 
 ```
+
+## change postgressql listener
+```
+File  /etc/postgresql/16/main/postgresql.conf
+#listen_addresses = 'localhost' -> listen_addresses = '*'
+
+File /etc/postgresql/16/main/pg_hba.conf
+add -> host all all 0.0.0.0/0 md5
+
+service postgresql restart
+
+````
