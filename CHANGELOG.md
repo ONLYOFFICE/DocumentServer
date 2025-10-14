@@ -1,5 +1,215 @@
 # Change log
 
+## 9.1.0
+
+### New features
+
+#### All Editors
+
+* Added external data for charts. When copying between editors, it’s possible
+  to select either an embedded file or a link to the source
+* Added the ability to enable/disable chart elements
+* Added support for the Explosion option (separating a segment of pie
+  and doughnut 2d charts) for opening
+* Added support for the `HEIF` images
+* Added the ability to configure the display of resolved/open comments
+  in the left panel
+
+#### Document Editor
+
+* Implemented support for breaking sections within block content controls
+  with any nesting level
+* Added a full-featured chart editor. Embedded `XLSX` files are now opened
+  instead of loading values from the chart cache
+* Added support for the `HWPML` text document format for viewing
+* Added support for inserting mathematical formulas from the MathML format
+
+#### Spreadsheet Editor
+
+* Add a setting for a general text direction in a cell
+* Added support for date filters in pivot tables
+* Added some Form Controls (Check Box, Combo Box, List Box, Spin Button,
+  Scroll Bar, Button) for opening
+* Improved the logic of formulas for mixed data types
+* Reduced memory consumption during formula calculations
+* Optimized calculation of the `VLOOKUP` and `XLOOKUP` formulas
+* Added highlighting of active arguments when entering a formula
+* Added translation of formulas into Serbian (Cyrillic), Serbian (Latin)
+  and Chinese (Traditional)
+* Added support for inserting mathematical formulas from the MathML format
+* Moved formatted table settings from the right panel to the Table Design
+  tab of the top toolbar. The tab appears only when we are working within
+  a table
+* Added the ability to rename a sheet by double-clicking on its name
+  without opening additional windows
+
+#### Presentation Editor
+
+* Added a full-featured chart editor. Embedded `XLSX` files are now opened
+  instead of loading values from the chart cache
+* Moved Master Slide settings from the Insert tab to a separate tab
+  of the top toolbar
+
+#### Forms
+
+* Improved user experience when working with fields
+* Renamed the View Form and Manage Roles buttons to Preview
+  and Manage Recipient Roles
+* Added support for inserting mathematical formulas from the MathML format
+
+#### PDF Editor
+
+* Added functionality for hiding confidential information - Redact
+* Added new annotation types to the Comment section
+* Implemented work with Smart Art
+* Added support for charts
+* Implemented copying and pasting graphic elements and forms
+
+#### Security
+
+* Fixed the XSS vulnerability when processing hyperlinks in documents
+* Fixed the vulnerability which allows writing arbitrary files
+  to the file system when converting via x2t
+* Fixed the vulnerability which allows reading arbitrary files
+  in the file system when converting `EPUB` via ConvertService
+* Fixed the vulnerability in endpoint `info/config` which allows changing
+  the server configuration
+
+#### Convert
+
+* Added the ability to convert `PDF` and `PPTX` to `TXT` directly
+
+#### Back-end
+
+* Added the admin panel for viewing the server status and partially setting up
+  the configuration
+* Added the `storage.commandOptions.s3` and `storage.commandOptions.az`
+  settings for customizing storage commands, for example, for enabling AWS KMS
+  or setting up Azure Blob Storage
+* Changed the `storage.useDirectStorageUrls=false` value: DocServer now returns
+  internal links by default
+* Added the `oracleExtraOptions.thin` setting for connecting to Oracle
+  in the Thick Mode using Oracle Instant Client in a cluster
+* Removed the public scheme from the PostgreSQL DB. Now the administrator can
+  specify any scheme when creating a database and specify it in the server
+  configuration and the `pgPoolExtraOptions` section
+* Added the `DB_SCHEMA` parameter which allows selecting a scheme in DB.
+  Works only for PostgreSQL and MSSQL, for other databases it is ignored
+  (deb, docker, rpm)
+
+#### WOPI
+
+* Added support for the `UserCanOnlyComment` parameter in [`CheckFileInfo`](https://api.onlyoffice.com/docs/docs-api/using-wopi/wopi-rest-api/checkfileinfo/)
+  for opening in the commenting mode. The behavior is similar to
+  `document.permissions.comment` in our API
+* Added opening in the View mode with an error message if it was not possible
+  to set a lock on a file when opening the editor
+
+#### API
+
+* Added classes and methods for working with pivot table filters
+
+`ApiPivotField`
+
+```javascript
+ApiPivotField.prototype.GetPivotFilters()
+ApiPivotField.prototype.AutoSort(order, field, property)
+ApiPivotField.prototype.AutoSortField
+ApiPivotField.prototype.AutoSortOrder
+```
+
+`ApiPivotFilters`
+
+```javascript
+ApiPivotFilters.prototype.Add(filterType, dataField, value1, value2,
+wholeDayFilter)
+```
+
+`ApiPivotItem`
+
+```javascript
+ApiPivotItem.prototype.GetVisible()
+ApiPivotItem.prototype.SetVisible(visible)
+```
+
+Common `ApiRange` methods
+
+```javascript
+ApiRange.prototype.Offset(rowOffset, columnOffset)
+ApiRange.prototype.Resize(rowSize, columnSize)
+ApiRange.prototype.GetRange(cell1, cell2)
+ApiRange.prototype.GetEntireRow()
+ApiRange.prototype.GetEntireColumn()
+```
+
+* Added classes and methods for working with shape geometry
+
+`API`
+
+```javascript
+Api.prototype.CreateCustomGeometry()
+Api.prototype.CreatePresetGeometry(preset)
+ApiShape.prototype.GetGeometry
+ApiShape.prototype.SetGeometry(geometry)
+```
+
+`ApiGeometry`
+
+```javascript
+ApiGeometry.prototype.IsCustom()
+ApiGeometry.prototype.GetPreset()
+ApiGeometry.prototype.GetPathCount()
+ApiGeometry.prototype.GetPath(index)
+ApiGeometry.prototype.GetPaths()
+ApiGeometry.prototype.AddPath()
+ApiGeometry.prototype.GetAdjValue(name)
+ApiGeometry.prototype.AddAdj(name, value)
+ApiGeometry.prototype.SetAdjValue(value)
+ApiGeometry.prototype.AddGuide(name, fmla, x, y, z)
+ApiGeometry.prototype.SetTextRect(l, t, r, b)
+ApiGeometry.prototype.AddConnectionPoint(angle, x, y)
+```
+
+`ApiPath`
+
+```javascript
+ApiPath.prototype.GetStroke()
+ApiPath.prototype.SetStroke(stroke)
+ApiPath.prototype.GetFill()
+ApiPath.prototype.SetFill(fill)
+ApiPath.prototype.GetWidth()
+ApiPath.prototype.SetWidth(width)
+ApiPath.prototype.GetHeight()
+ApiPath.prototype.SetHeight(height)
+ApiPath.prototype.GetCommands()
+ApiPath.prototype.GetCommandCount()
+ApiPath.prototype.GetCommand(index)
+ApiPath.prototype.MoveTo(x, y)
+ApiPath.prototype.LineTo(x, y)
+ApiPath.prototype.CubicBezTo(x1, y1, x2, y2, x3, y3)
+ApiPath.prototype.QuadBezTo(x1, y1, x2, y2)
+ApiPath.prototype.ArcTo(wR, hR, stAng, swAng)
+ApiPath.prototype.Close()
+```
+
+`ApiPathCommand`
+
+```javascript
+ApiPathCommand.prototype.GetType()
+ApiPathCommand.prototype.GetX()
+ApiPathCommand.prototype.GetY()
+ApiPathCommand.prototype.GetX0()
+ApiPathCommand.prototype.GetY0()
+ApiPathCommand.prototype.GetX1()
+ApiPathCommand.prototype.GetY1()
+ApiPathCommand.prototype.GetX2()
+ApiPathCommand.prototype.GetY2()
+ApiPathCommand.prototype.GetWR()
+ApiPathCommand.prototype.GetHR()
+ApiPathCommand.prototype.GetStartAngle()
+ApiPathCommand.prototype.GetSweepAngle()
+```
+
 ## 9.0.4
 
 ### New features
@@ -13,7 +223,10 @@
 
 #### Customization
 
-* Added the customization.suggestFeature parameter
+* Added the `customization.suggestFeature` parameter
+
+#### Plugins
+
 * Added AI, Photo Editor, MathType, OCR, Typograf, Doc2md, LanguageTool,
 DeepL, Thesaurus, Speech input and Zotero plugins to the server version
 distribution with ONLYOFFICE branding
@@ -40,7 +253,7 @@ or writing it to a file
 * Disabled the ability to delete text outside the allowed area for filling in
 * Fixed deletion of characters when opening the `TXT` file for editing
 * Fixed display of the password request window to remove file protection
-in MS Word
+in other editors
 * Fixed recalculating the position of an autoshape with
 the `Resize shape to fit text`
 flag when changing text formatting
@@ -108,7 +321,7 @@ for the Text field
 to `XLSX` via x2t
 * Fixed crash when converting the `KEY` file to `PPTT` via x2t
 
-#### Backend
+#### Back-end
 
 * Fixed an issue with synchronization of the AI settings in k8s
 between several document servers
