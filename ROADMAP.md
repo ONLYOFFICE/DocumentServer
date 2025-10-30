@@ -5,6 +5,19 @@ This document provides the roadmap of the planned ONLYOFFICE Document Server cha
 This is an updated and corrected version of the roadmap.
 We also reserve the right to change it when necessary.
 
+## Version 9.2
+
+### All editors
+
+* Customizing keyboard shortcuts
+* Recording macros for all editors
+* Additional settings in the Admin Panel
+* New API methods for working with all editors
+
+### PDF Editor
+
+* Ability to set the color for the Redact option
+
 ## Version 9.1
 
 ### All editors
