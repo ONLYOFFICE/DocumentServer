@@ -1,5 +1,126 @@
 # Change log
 
+## 9.2.0
+
+### New features
+
+#### All Editors
+
+* Added the ability to customize keyboard shortcuts
+* Added the ability to record some executed actions as a macro in all editors,
+  except for PDF
+
+#### Presentation Editor
+
+* Implemented insertion of equations from a third-party resource
+
+#### Forms
+
+* Implemented the ability to select the role for which new fields
+  will be added
+* Implemented the ability to add labels for checkboxes and radio buttons.
+  In the filling mode, clicking on the label works like clicking
+  on the checkbox itself
+
+#### PDF Editor
+
+* Added the ability to change color for hidden text (Redact)
+* Implemented insertion of equations from a third-party resource
+
+#### Security
+
+* Updated Redis to versions not affected by the CVE-2025-49844 vulnerability
+* Fixed the vulnerability which allows adding a named range in the protected
+  workbook via websocket
+* Fixed the XSS vulnerability in the `denyEditingRights`
+* Fixed the vulnerabilities in `linux-libc-dev` which allow escalating
+  privileges in the system and stealing data from hypervisor processes
+  (CVE-2025-38352, CVE-2025-40300)
+
+#### Back-end
+
+* Improved the appearance of the sidebar and added icons to the Admin Panel
+
+#### API
+
+* Added methods for getting and setting text for checkboxes and radio buttons
+
+```javascript
+ApiCheckBoxForm.prototype.SetLabel = function(label)
+ApiCheckBoxForm.prototype.GetLabel = function()
+```
+
+* Added methods for working with the numerical identifier of a paragraph,
+  which is saved in the file
+
+```javascript
+ApiParagraph.prototype.GetParaId
+ApiParagraph.prototype.SetParaId
+```
+
+* Added a method for deleting a form from the document with the ability
+  to save the content, similar to the method for Content Control
+
+```javascript
+ApiFormBase.prototype.Delete = function(keepContent)
+```
+
+* Added a method for getting forms
+
+```javascript
+ApiDocument.prototype.GetAllForms
+```
+
+* The `GetAllContentControls` method, which returns a Content Control,
+  no longer returns forms
+* Added the `onParagraphText` event, indicating that the paragraph content
+  was changed, with the following json object:
+
+```javascript
+{
+  "paragraphId" : paraId,
+  "recalcId"    : recalcId,
+  "text"        : text,
+  "annotations" : []
+}
+```
+
+  where annotations - an array of elements (new positions for annotations
+  after the previous markup)
+
+```javascript
+ {
+  "id" : id,
+  "start" : start,
+  "length" : length,
+  "name" : "grammar"
+}
+```
+
+* Added events for working with annotations:
+
+```javascript
+onClickAnnotation
+onFocusAnnotation
+onBlurAnnotation
+```
+
+  They have the following parameter object describing the annotation
+  with which the corresponding action was performed:
+
+```javascript
+{
+  "paragraphId" : paraId,
+  "rangeId"     : [rangeId, ...],
+  "name"        : "grammar"
+}
+```
+
+#### Plugins
+
+* Added Grammar & Spelling check in the Document and Form Editors
+  in the AI plugin
+
 ## 9.1.0
 
 ### New features

@@ -123,6 +123,7 @@ changesError
 ChartSheetSubstream
 checkbox
 CheckBox
+checkboxes
 checkBoxPr
 checkHealth
 CHIDIST
@@ -214,9 +215,11 @@ Decryptor
 DeepL
 delegateRole
 deleteForgotten
+denyEditingRights
 Deprecations
 DesktopEditors
 Deutsch
+dev
 DGET
 dialogs
 dir
@@ -327,6 +330,7 @@ gcc
 GenerateGuid
 GetAdress
 GetAllCaptionParagraphs
+GetAllContentControls
 GetAllHeadingParagraphs
 GetAllNumberedParagraphs
 GetAllTables
@@ -459,6 +463,7 @@ json
 jsonwebtocken
 jwt
 JWT
+keepContent
 KMS
 korean
 lang
@@ -467,6 +472,7 @@ LaTeX
 Latn
 LeftMargin
 leftMenu
+libc
 libcurl
 librabbitmq
 libs
@@ -572,13 +578,17 @@ oLastPrinted
 OLEObjectData
 oModified
 onChangeContentControl
+onBlurAnnotation
+onClickAnnotation
 onDocumentContentReady
 onDocumentStateChange
+onFocusAnnotation
 onInsertOleObjects
 onlyoffice
 ONLYOFFICE
 OnlySignatures
 onOutdatedVersion
+onParagraphText
 onRequestCompareFile
 onRequestEditRights
 onRequestInsertImage
@@ -610,6 +620,8 @@ nPage
 pageDown
 ParaDrawing
 Paragarph
+paragraphId
+paraId
 param
 params
 passsword
@@ -666,6 +678,7 @@ queuedelayed
 rabbitmq
 RabbitMQ
 RANDARRAY
+rangeId
 rastr
 ReadEmrTextBase
 ReadFromBinary
@@ -673,6 +686,7 @@ ReadStandartEncryptionInfo
 Realtime
 rebranding
 Rebranding
+recalcId
 reconnection
 rect
 redis
@@ -904,6 +918,7 @@ VSTACK
 VSTX
 vml
 wav
+websocket
 WEIBULL
 wget
 wholeDayFilter
