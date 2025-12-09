@@ -5,6 +5,46 @@ This document provides the roadmap of the planned ONLYOFFICE Document Server cha
 This is an updated and corrected version of the roadmap.
 We also reserve the right to change it when necessary.
 
+## Version 9.3
+
+### All editors
+
+* Ability to sign a document with the final signature
+* Ability to generate a signature with text and a beautiful font
+* Ability to draw a signature on the screen
+* Ability to generate a file from a form using AI
+* Multipage mode for the editor
+
+### PDF Editor
+
+* Ability to add pages to PDF from other files via Insert
+* Support for PDF editing protection
+
+### Forms
+
+* Ability to fit a field into a table cell
+
+### Document Editor
+
+* Support for RTL tables
+
+### Spreadsheet Editor
+
+* Support for dynamic arrays
+* Solver (solution search)
+* JSON support in GetData
+* Speeding up formulas
+* Ability to select several separators when pasting data
+and converting text to columns
+
+#### Back-end
+
+* Additional settings in the Admin Panel
+
+### API
+
+* API for regular PDF
+
 ## Version 9.2
 
 ### All editors
