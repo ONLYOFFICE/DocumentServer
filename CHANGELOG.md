@@ -1,5 +1,39 @@
 # Change log
 
+## 9.2.1
+
+### Fixes
+
+#### Document Editor
+
+* Fixed word break in Korean
+
+#### Spreadsheet Editor
+
+* Fixed an issue with data overlap when transferring sheets between documents
+via Move or Copy ([DocumentServer#3512](https://github.com/ONLYOFFICE/DocumentServer/issues/3512))
+
+#### PDF Editor
+
+* Fixed an error when opening a PDF file
+* Fixed an error when scrolling pages in a PDF file
+* Fixed errors when copying, pasting, and undoing actions with the Find panel
+in PDF Editing mode
+* Fixed an error when deleting a page from a document while working
+with the Find panel in PDF Editing mode
+
+#### Security
+
+* Fixed the XSS injection in the Color theme name using a custom
+Prepared exploit
+* Fixed the XSS injection of JS code in the Font field for the Multilevel list
+settings window
+* Fixed a vulnerability in the textarea of the comment editing form
+* Fixed the possibility of memory manipulation when converting XLS to XLSX,
+which can lead to information leakage
+* Fixed issues with memory manipulation when converting XLS to XLSX,
+which can lead to RCE
+
 ## 9.2.0
 
 ### New features
