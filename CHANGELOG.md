@@ -21,6 +21,7 @@ via Move or Copy ([DocumentServer#3512](https://github.com/ONLYOFFICE/DocumentSe
 in PDF Editing mode
 * Fixed an error when deleting a page from a document while working
 with the Find panel in PDF Editing mode
+* Fixed an error with unsaved changes in replies to comments in PDF files
 
 #### Security
 
