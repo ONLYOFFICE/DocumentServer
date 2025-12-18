@@ -19,3 +19,6 @@
 [submodule "build-tools"]
 	path = build-tools
 	url = https://github.com/InnovXcare/ofc-build-tools
+[submodule "sdkjs-plugins"]
+	path = build-tools
+	url = https://github.com/InnovXcare/ixc-ofc-editor-plugins
