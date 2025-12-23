@@ -1,8 +1,0 @@
-{
-  "url": "",
-  "pluginsData": [
-    "../../../../sdkjs-plugins/helpers/config.json",
-    "../../../../sdkjs-plugins/transport/config.json"
-  ],
-  "autostart": []
-}
