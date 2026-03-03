@@ -1,5 +1,18 @@
 # Change log
 
+## 9.3.1
+
+### Fixes
+
+#### Spreadsheet Editor
+
+* Fixed the issue of displaying the comment author's name when opening
+  a spreadsheet
+
+#### API
+
+* Fixed the ability to control the PDF editor via connector
+
 ## 9.3.0
 
 ### New features
