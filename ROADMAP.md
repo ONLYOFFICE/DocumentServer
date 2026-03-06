@@ -5,6 +5,30 @@ This document provides the roadmap of the planned ONLYOFFICE Document Server cha
 This is an updated and corrected version of the roadmap.
 We also reserve the right to change it when necessary.
 
+## Version 9.4
+
+### All editors
+
+* Support for client-side encryption
+
+### Forms
+
+* Move filling and assignment work inside editors
+
+### Document Editor
+
+* Adding a horizontal line
+* Additional Paste options, similar to the Spreadsheet Editor
+
+### Spreadsheet Editor
+
+* Support for a dark sheet in the dark theme
+
+### Presentation Editor
+
+* New transitions
+* Additional Paste options, similar to the Spreadsheet Editor
+
 ## Version 9.3
 
 ### All editors
@@ -37,7 +61,7 @@ We also reserve the right to change it when necessary.
 * Ability to select several separators when pasting data
 and converting text to columns
 
-#### Back-end
+### Back-end
 
 * Additional settings in the Admin Panel
 
