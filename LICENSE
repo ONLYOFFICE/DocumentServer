@@ -1,7 +1,7 @@
                     GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
 
- Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+ Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
  Everyone is permitted to copy and distribute verbatim copies
  of this license document, but changing it is not allowed.
 
@@ -629,8 +629,8 @@ to attach them to the start of each source file to most effectively
 state the exclusion of warranty; and each file should have at least
 the "copyright" line and a pointer to where the full notice is found.
 
-    ONLYOFFICE Document Server
-    Copyright (C) 2010-2021 Ascensio System SIA
+    <one line to give the program's name and a brief idea of what it does.>
+    Copyright (C) <year>  <name of author>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -643,19 +643,7 @@ the "copyright" line and a pointer to where the full notice is found.
     GNU Affero General Public License for more details.
 
     You should have received a copy of the GNU Affero General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
-    street, Riga, Latvia, EU, LV-1050
-
-    The  interactive user interfaces in modified source and object code
-    version of the Program must display Appropriate Legal Notices, as required
-    under Section 5 of the GNU AGPL version 3.
-
-    Pursuant to Section 7(b) of the License you must retain the original 
-    Product logo when distributing the program. Pursuant to Section 7(e) we
-    decline to grant you any rights under trademark law for use of our
-    trademarks.
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 Also add information on how to contact you by electronic and paper mail.
 
@@ -670,4 +658,71 @@ specific requirements.
   You should also get your employer (if you work as a programmer) or school,
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
-<http://www.gnu.org/licenses/>.
+<https://www.gnu.org/licenses/>.
+
+Copyright (C) 2009-2026 Ascensio System SIA
+
+  This Program is licensed under the GNU Affero General Public
+License v3.0 (AGPLv3), as supplemented by the terms set forth below.  These
+terms form an integral part of this License and shall be included in all
+copies and distributions of the Program.  They define conditions for the
+exercise of rights granted under the License, including use, modification,
+and distribution of the Program.
+  Pursuant to Section 7 of the License, the following terms supplement and
+clarify the application of these conditions.  Failure to comply with these
+terms constitutes a violation of the License and may result in termination
+of rights under Section 8 of the License.
+
+                            Additional Terms
+
+  1. Retention of Notices and Attribution.
+  Pursuant to Sections 4, 5, and 7(b) of the License, you must retain all
+applicable copyright notices, license notices, warranty disclaimers, and
+attribution or origin notices included in the Program.
+
+  2. Modification Notice Requirement.
+
+  Modified versions of the Program must carry prominent notices stating that
+they have been modified, including the date (or dates) of such modification,
+and must clearly indicate that they are based on the original ONLYOFFICE
+software developed by Ascensio System SIA.
+
+  3. Appropriate Legal Notices in User Interfaces.
+  Where the Program, or any modified version thereof, includes interactive
+user interfaces, the required notices shall be displayed through a clearly
+accessible and prominently visible user interface feature, in accordance
+with the requirement to present Appropriate Legal Notices under Section 5
+of the License.  Such notices must enable users to:
+
+    (i) identify ONLYOFFICE as the original developer;
+
+    (ii) understand that the version in use may be a modified version; and
+
+    (iii) access the applicable license information.
+
+  4. No Trademark License.
+
+  In accordance with Section 7(e) this License does not grant any rights to
+use the trademarks, service marks, trade names, logos, or branding of the
+Licensor.  Any use of such trademarks is governed by the Licensor's
+Trademark Policy, available at:
+<https://www.onlyoffice.com/trademark-policy>
+
+  5. Non-Code Content Licensing.
+
+  Certain non-code elements included in the Program or its distribution,
+including but not limited to illustrations, icon sets, and technical writing
+or documentation content, are licensed under the Creative Commons
+Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0).  For the
+avoidance of doubt, this license applies solely to such non-code content
+and does not modify or replace the licensing terms applicable to the
+Program's source code, which remains subject to the GNU Affero General
+Public License v3.0 (AGPLv3).  Nothing in this section limits any
+obligation to retain copyright notices, attribution, origin information, or
+Appropriate Legal Notices under the AGPLv3 and the additional terms
+applicable to the Program.  The full license text is available at:
+<https://creativecommons.org/licenses/by-sa/4.0/legalcode>
+
+  You can contact Ascensio System SIA by electronic mail at:
+info@onlyoffice.com and by postal mail at: 20A-6 Ernesta Birznieka-Upisha
+Street, Riga, LV-1050, Latvia, European Union.
