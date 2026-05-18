@@ -1,5 +1,289 @@
 # Change log
 
+## 9.4.0
+
+### New features
+
+#### All Editors
+
+* Added Croatian language interface translation (hr-HR, Hrvatska)
+* Moved chart settings from the right panel to a separate **Chart design**
+  tab
+
+#### Document Editor
+
+* Implemented the ability to add a horizontal line
+
+#### Spreadsheet Editor
+
+* Added the Dark mode support for the sheet
+
+#### Presentation Editor
+
+* Added 25 new presentation design themes
+* Added 20 new slide transitions, grouped by category
+
+#### Forms
+
+* Implemented saving the signature image to localStorage. Now when filling in
+  the signature field, the last selected image is used by default
+* Added the "Send for signing" and "Filling status" panels
+
+#### Security
+
+* Fixed out-of-bounds read vulnerabilities when converting XLS to XLSX in the
+  following functions: `ChartSheetSubstream::recalc`,
+  `TextPropsStream::readFields`, `MetroBlob::ReadComplexData`,
+  `SUPBOOK::serialize_book` and `ATTACHEDLABEL::serialize_rPr`
+* Fixed an XSS vulnerability via unsafe output in
+  `Convert-and-edit-wopi.ejs`
+* Fixed a vulnerability in GUID generation that allowed an attacker to
+  calculate GUIDs based on their creation time
+* Fixed a vulnerability that allowed bypassing macro sandbox restrictions and
+  accessing environment objects via sloppy-mode `this` and `eval`
+* Fixed a potential crash or file corruption when processing PDFs with embedded
+  fonts
+
+#### Back-end
+
+* Removed the limitation of 20 simultaneously opened documents
+* Removed code minification to simplify support and improve readability
+* Consolidated components into a single process to optimize resource
+  consumption and simplify working with the application
+* Removed dependency on RabbitMQ due to component consolidation
+* Removed dependency on databases due to component consolidation
+
+#### Customization
+
+* Added the `disable` parameter to the `plugins` section of the editors
+  configuration — an array of plugin IDs that are blocked on load and hidden
+  in the interface
+
+#### Mobile
+
+* Added the ability to disable auto-save and manage saving in manual mode
+
+#### API
+
+* Added new plugin methods for moving the cursor inside or outside a field
+
+```javascript
+MoveCursorToField
+MoveCursorOutsideField
+```
+
+* Extended `GroupActions` options for controlling scrolling and cursor
+  position
+
+```javascript
+lockScroll
+keepSelection
+StartAction("GroupActions", pr)
+scrollToTarget
+cancel
+EndAction("GroupActions", pr)
+```
+
+* Added a new class for the signature form
+
+```javascript
+ApiSignatureForm
+```
+
+* Added methods for filling and retrieving form data
+
+```javascript
+ApiSignatureForm.GetImage
+ApiSignatureForm.SetImage
+```
+
+* Added a method for creating a form
+
+```javascript
+Api.CreateSignatureForm
+```
+
+* Added a new method to check whether the form has been filled in
+
+```javascript
+ApiFormBase.IsFilled
+```
+
+* Added a method for retrieving the highlight color of forms without a role
+
+```javascript
+ApiDocument.GetFormsHighlight
+```
+
+* Added a method for retrieving the highlight color of a form
+
+```javascript
+ApiDocument.GetControlsHighlight
+```
+
+* Added methods for managing the color of content controls
+
+```javascript
+ApiInlineLvlSdt.SetColor
+ApiInlineLvlSdt.GetColor
+ApiBlockLvlSdt.SetColor
+ApiBlockLvlSdt.GetColor
+```
+
+* Added new methods for the `ApiWorksheet` class
+
+```javascript
+AddListObject
+GetListObjects
+```
+
+* Added new class `ApiListObject` and methods
+
+```javascript
+GetActive
+GetName / SetName
+GetDisplayName / SetDisplayName
+GetAlternativeText / SetAlternativeText
+GetComment / SetComment
+GetSummary / SetSummary
+GetParent
+GetRange
+GetHeaderRowRange
+GetDataBodyRange
+GetTotalsRowRange
+GetSourceType
+GetTableStyle / SetTableStyle
+GetShowHeaders / SetShowHeaders
+GetShowTotals / SetShowTotals
+GetShowAutoFilter / SetShowAutoFilter
+GetShowAutoFilterDropDown / SetShowAutoFilterDropDown
+GetShowTableStyleColumnStripes / SetShowTableStyleColumnStripes
+GetShowTableStyleFirstColumn / SetShowTableStyleFirstColumn
+GetShowTableStyleLastColumn / SetShowTableStyleLastColumn
+GetShowTableStyleRowStripes / SetShowTableStyleRowStripes
+GetAutoFilter
+GetListColumns
+AddListColumn
+GetListRows
+AddListRow
+GetSort
+Resize
+Unlist
+Delete
+```
+
+* Added new class `ApiListColumn` and methods
+
+```javascript
+GetName / SetName
+GetIndex
+GetParent
+GetRange
+GetDataBodyRange
+GetTotalsCalculation / SetTotalsCalculation
+GetTotal
+Delete
+```
+
+* Added new class `ApiListRow` and methods
+
+```javascript
+GetIndex
+GetParent
+GetRange
+Delete
+```
+
+* Added new class `ApiSort` and methods
+
+```javascript
+GetSortFields
+GetMatchCase / SetMatchCase
+GetHeader
+GetOrientation / SetOrientation
+GetSortMethod / SetSortMethod
+GetParent
+GetRng
+Apply
+```
+
+* Added new class `ApiSortFields` and methods
+
+```javascript
+GetParent
+GetCount
+Item
+Add
+Add2
+Clear
+```
+
+* Added new class `ApiSortField` and methods
+
+```javascript
+GetParent
+GetKey
+GetSortOn / SetSortOn
+GetOrder / SetOrder
+GetPriority / SetPriority
+GetSortOnValue
+SetSortOnColor
+ModifyKey
+Delete
+```
+
+* Added missing methods for getting paragraph settings
+
+```javascript
+ApiParaPr.prototype.GetTopBorder()
+ApiParaPr.prototype.GetLeftBorder()
+ApiParaPr.prototype.GetRightBorder()
+ApiParaPr.prototype.GetBottomBorder()
+ApiParaPr.prototype.GetBetweenBorder()
+ApiParaPr.prototype.GetKeepLines()
+ApiParaPr.prototype.GetKeepNext()
+ApiParaPr.prototype.GetNumPr()
+ApiParaPr.prototype.GetPageBreakBefore()
+ApiParaPr.prototype.GetTabs()
+ApiParaPr.prototype.GetWidowControl()
+ApiParaPr.prototype.GetContextualSpacing()
+```
+
+* Improved behavior of several `Get` methods on the `ApiTextPr` object when
+  it belongs to a style or default formatting parameters rather than a
+  paragraph
+
+* Added methods for working with text form format and the list of allowed
+  characters
+
+```javascript
+ApiTextForm.prototype.GetFormat()
+ApiTextForm.prototype.SetFormat(format)
+ApiTextForm.prototype.GetAllowedSymbols()
+ApiTextForm.prototype.SetAllowedSymbols(symbols)
+```
+
+* Added new methods
+
+```javascript
+Api.GetDefNames
+ApiRange.FillDown
+ApiRange.FillUp
+ApiRange.FillRight
+ApiRange.FillLeft
+ApiRange.SetFormula
+```
+
+* Added methods for managing cell size
+
+```javascript
+ApiTable.prototype.SetColumnWidth
+ApiTable.prototype.GetColumnWidth
+ApiTableRow.prototype.GetHeight
+```
+
+* Added the `GoToPage` plugin method for navigating to a specific page
+
 ## 9.3.1
 
 ### Fixes
