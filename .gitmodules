@@ -46,3 +46,9 @@
 [submodule "sdkjs-plugins/plugin-zotero"]
 	path = sdkjs-plugins/plugin-zotero
 	url = ../plugin-zotero
+[submodule "document-templates"]
+	path = document-templates
+	url = ../document-templates.git
+[submodule "document-formats"]
+	path = document-formats
+	url = ../document-formats.git

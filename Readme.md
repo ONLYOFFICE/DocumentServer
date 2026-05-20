@@ -53,9 +53,12 @@ ONLYOFFICE Docs contains the following components:
 
 * [server](https://github.com/ONLYOFFICE/server) - the backend server software layer which is the base for all other components of ONLYOFFICE Docs.
 * [core](https://github.com/ONLYOFFICE/core) - server core components of ONLYOFFICE Docs which enable the conversion between the most popular office document formats (DOC, DOCX, ODT, RTF, TXT, PDF, HTML, EPUB, XPS, DjVu, XLS, XLSX, ODS, CSV, PPT, PPTX, ODP).
+* [core-fonts](https://github.com/ONLYOFFICE/core-fonts) - open-source fonts bundled with ONLYOFFICE Docs for document rendering and conversion.
 * [sdkjs](https://github.com/ONLYOFFICE/sdkjs) - JavaScript SDK for the ONLYOFFICE Docs which contains API for all the included components client-side interaction.
 * [web-apps](https://github.com/ONLYOFFICE/web-apps) - the frontend for ONLYOFFICE Docs which builds the program interface and allows the user create, edit, save and export text, spreadsheet and presentation documents using the common interface of a document editor.
 * [dictionaries](https://github.com/ONLYOFFICE/dictionaries) - the dictionaries of various languages used for spellchecking in ONLYOFFICE Docs.
+* [document-formats](https://github.com/ONLYOFFICE/document-formats) - metadata describing the file formats supported by ONLYOFFICE editors.
+* [document-templates](https://github.com/ONLYOFFICE/document-templates) - blank and sample templates used when creating new documents.
 
 ## ONLYOFFICE Docs editions
 
