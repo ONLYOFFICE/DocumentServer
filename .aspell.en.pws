@@ -52,6 +52,7 @@ ApiPivotFilters
 ApiPivotItem
 ApiPresentation
 ApiRange
+APIs
 ApiShape
 ApiSignatureForm
 ApiSlide
@@ -84,6 +85,7 @@ async
 ATTACHEDLABEL
 authChanges
 autocomplete
+AutoComplete
 Autocompletion
 autocorrect
 AutoCorrect
@@ -109,6 +111,7 @@ AVERAGEA
 AVERAGEIFS
 AxcExt
 az
+baseurl
 beforeCursor
 BESSELI
 BESSELJ
@@ -172,6 +175,7 @@ ClipArt
 Cloudwatch
 Cmd
 CNumberingLvlLegacy
+coauth
 coedit
 CollaborationEditing
 colLast
@@ -267,6 +271,7 @@ DK
 DMAX
 DMS
 dns
+docbuilder
 DocFormat
 docId
 DocServer
@@ -303,6 +308,7 @@ eb
 Ec
 ECMA
 ECMADecryptor
+editorConfig
 editMode
 editorType
 ee
@@ -405,6 +411,7 @@ GetDefNames
 GetDisplayName
 GetDrawingsByName
 GetEndNotesFirstParagraphs
+GetFileBinary
 GetFontFamily
 GetFontNames
 GetFormsHighlight
@@ -495,6 +502,7 @@ hideRightMenu
 HiDPI
 HLink
 HLOOKUP
+HML
 hotkey
 hotkeys
 hR
@@ -569,6 +577,7 @@ jsonwebtocken
 jwt
 JWT
 keepContent
+keepNext
 keepSelection
 KMS
 korean
@@ -585,6 +594,7 @@ libs
 LINEST
 linux
 listview
+liveview
 LK
 loadContent
 loaderLogo
@@ -645,6 +655,7 @@ multicomments
 Multiline
 multiselect
 multitenancy
+multitenant
 mysql
 MySQL
 mysqlExtraOptions
@@ -691,6 +702,7 @@ oDrawing
 ods
 odt
 ODT
+OFD
 oform
 OFORM
 oLastPrinted
@@ -725,6 +737,7 @@ OpenDocument
 OpenFormat
 openProtectedFile
 OpenSource
+OpenSSL
 oProperties
 optionsCluster
 oRange
@@ -839,6 +852,7 @@ resaving
 reseting
 resize
 resultMessage
+reviewDisplay
 rgXTI
 rightMenu
 RowHeight
@@ -973,6 +987,7 @@ Sql
 sRevision
 ssl
 sslEnabled
+SSRF
 sStatus
 sSubject
 standardView
@@ -1035,6 +1050,7 @@ toolbarHideFileName
 toolbarNoTabs
 tooltip
 tooltips
+trackChanges
 trackpad
 trendlines
 TRIMMEAN
@@ -1055,6 +1071,7 @@ undelete
 ungroup
 ungrouping
 unhandled
+unhiding
 unix
 Unlist
 unLockDocument

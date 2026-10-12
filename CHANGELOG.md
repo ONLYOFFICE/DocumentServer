@@ -1,5 +1,187 @@
 # Change log
 
+## 10.0.0
+
+### New features
+
+#### All Editors
+
+* Added support for the Data Table chart element with the ability to add and
+  configure text and graphic parameters
+* Updated the plugin marketplace design: added a left panel for switching
+  categories
+* Added conversion of `SVG` images to shapes
+* Added the Download button to the top toolbar
+
+#### Document Editor
+
+* Added the horizontal line settings window
+* Implemented clipping of text by lines in a paragraph with exact line spacing
+* Added support for the `keepNext` parameter for tables, as well as for
+  paragraphs and tables inside block content controls
+* Improved support for graphic equations and other inline objects in
+  right-to-left (RTL) text
+* Implemented a table row option that prevents a row from breaking across pages
+* Added items for continuing a list or restarting numbering to the Paste Special
+  menu
+* Implemented the ability to go to another user's cursor and follow it during
+  co-editing
+
+#### Spreadsheet Editor
+
+* Added range highlighting in the formula bar
+* Added saving to the `XLS` format
+* Sped up some operations by storing styles and data separately
+* Implemented creating charts from non-adjacent data
+* Added an option to enable and disable AutoComplete for cell values
+* Added tooltips for constants in function arguments (the `AGGREGATE` function)
+* Added an animated selection border after copying or cutting
+* Implemented support for sheet background when opening and saving files
+* Improved performance of array formulas that reference entire columns or rows
+  (`ROW`, `COLUMN`, `SEQUENCE`, `SUM`, `SUMPRODUCT`, etc.): calculations are
+  faster and use less memory
+* Extended the capabilities for working with hidden rows and columns, including
+  unhiding hidden edge rows and columns via the context menu
+
+#### Presentation Editor
+
+* Extended print settings: added modes for printing notes, handouts, and
+  outline, as well as printing hidden slides, slide background and frame,
+  comments, slide numbers on handouts, and fitting to the page size
+* Added view modes: Outline, Notes, Handout Master, and Notes Master
+* Added the Reading View mode
+* Added the Animated and Video buttons to the File menu for exporting a
+  presentation with a choice of slide range, resolution, slide duration, and
+  format
+* Set a separate default duration for each transition type
+
+#### Forms
+
+* Added the ability to save a signature in signature fields and reuse it from
+  the list of saved signatures
+* Added an option to enable and disable spell checking when filling out a
+  specific form
+
+#### PDF Editor
+
+* Implemented removal of annotations in the Redact area
+* Added the ability to remove metadata from a document using the Redact feature
+* Added the annotation settings panel
+* Added the ability to insert a signature into a document via the Comment tab
+* The Comments panel now displays all annotations indicating their type
+* Added the ability to edit PDF form actions via Advanced Settings in the form
+  settings panel
+* Implemented creating and filling out forms by roles, as well as collecting
+  data from filled-out forms
+* Added recognition of tables with visible borders in the Edit Text mode
+* Added the signature field to the Forms tab in the Edit PDF mode
+* Added field visibility options to the right form settings panel
+
+#### Convert
+
+* Added support for the `OFD` format: files can be opened for viewing and
+  converted to other formats in the same way as `XPS`
+
+#### Security
+
+* Fixed XSS vulnerability in hyperlinks in `DOCX` documents
+* Fixed CVE-2022-3602 and CVE-2022-3786 vulnerabilities in OpenSSL in the Docker
+  image
+* Fixed CVE-2022-23308 vulnerability during document conversion
+* Fixed macro sandbox bypass
+* Fixed incorrect memory write when converting `XLS` to `XLSX`
+* Fixed XSS vulnerability in the Name field when creating an AI assistant
+* Fixed authorization bypass when printing `PDF`
+* Fixed converter crash when processing circular style inheritance chains in
+  `DOCX`
+* Fixed stack buffer overflow when reading OLE data during conversion of legacy
+  format documents
+* Fixed heap buffer overflow when rendering image masks in `PDF`
+* Fixed macro sandbox bypass with access to cookies
+* Fixed access to OS files via the `native.GetFileBinary` method of the Document
+  Builder API
+* Fixed the possibility of using an editor token to access Document Builder
+* Fixed out-of-bounds read when converting `DOC` to `DOCX`
+* Fixed out-of-bounds read when processing `PPT` metafiles, which led to memory
+  disclosure in the resulting `PPTX`
+* Fixed out-of-bounds read when parsing character formatting in `DOC` files
+* Fixed out-of-bounds read when parsing the piece table in `DOC` files
+* Fixed execution of embedded JavaScript in `PDF` documents
+* Fixed SSRF vulnerability in `WOPI` endpoints
+* Fixed double free when converting some `DOCX` files
+* Fixed out-of-bounds read when parsing the font table in `DOC` files
+* Fixed heap out-of-bounds write caused by integer overflow during document
+  conversion
+* Fixed XSS vulnerability in the function arguments window in the Spreadsheet
+  Editor
+* Fixed execution of malicious JavaScript added to `PDF` file actions
+* Fixed path traversal vulnerability when processing `HML` files
+* Fixed arbitrary file write when extracting archives during conversion
+* Fixed local file read during `EPUB` conversion
+* Fixed the possibility of creating the `runtime.json` file via a Document
+  Builder request
+* Fixed XSS vulnerability in the Document Editor via a font or style name in the
+  Review panel
+* Fixed reflected XSS vulnerability on the `/baseurl` page
+* Fixed issuing a token for an anonymous `WOPI` convert-and-edit request that
+  was accepted by the Document Builder API
+* Fixed out-of-bounds read when converting `XLS` to `XLSX`
+* Fixed the possibility of specifying an arbitrary file system path in logging
+  settings via `runtime.json`
+* Fixed co-editing session hijacking when working via `WOPI`
+* Fixed path traversal vulnerability in the template handler for creating new
+  files via `WOPI`, which led to server configuration disclosure
+* Fixed vulnerabilities in the DocumentServer Docker image
+* Fixed stack buffer overflow when processing fonts in `XPS` files
+* Fixed XSS vulnerability in the HTML plugin when pasting into a document
+* Fixed authentication of tenants without a configured secret in multitenant
+  mode
+* Fixed out-of-bounds read when processing `EMF+` bitmaps, which led to memory
+  disclosure
+* Fixed out-of-bounds read when processing hyperlinks in `XLS`, which led to
+  memory disclosure
+* Fixed out-of-bounds read when rendering `WMF`, which led to memory disclosure
+  in the resulting document
+* Fixed privilege escalation via the `documentserver-flush-cache` script
+
+#### Back-end
+
+* Updated the design of the server welcome page
+* Added conversion endpoints with direct file upload (multipart):
+  `POST /converter/from-file` and `POST /docbuilder/from-file`
+* Forms saved as a regular `PDF` are signed on submission (Submit)
+* JWT is enabled by default in `default.json`
+* Removed the separate `changes2forgotten` script: changes are restored to
+  `forgotten` when the server shuts down
+* Added the `services.CoAuthoring.server.docbuilderEnable` and
+  `services.CoAuthoring.server.convertServiceEnable` parameters for disabling
+  the public Document Builder and converter APIs (`true` by default)
+* Added the `coauth.connections` metric with the `mode` (`edit`, `liveview`,
+  `view`) and `replica` tags
+* Added integrity verification of downloaded files when the integrator provides
+  the corresponding headers: the
+  `services.CoAuthoring.requestDefaults.checksumVerification` parameter (`true`
+  by default)
+* Behavior change: `/converter`, `/docbuilder`, and `/command` no longer accept
+  a token from the editor configuration. Added the `operation` field to the
+  token, which is optional for these requests and required for
+  `/converter/from-file` and `/docbuilder/from-file`
+* Behavior change: `ipfilter` rules are now required for `WOPI`; the `allow: *`
+  rule is not enough, the host must be specified explicitly
+* Behavior change: only the `log4js` logging level can be changed via
+  `runtime.json`
+
+#### Customization
+
+* Added the `editorConfig.customization.ai.disabled` parameter for disabling AI
+  Tools
+* Removed handling of the deprecated `editorConfig.customization` parameters:
+  `reviewDisplay`, `trackChanges`, and `showReviewChanges`
+
+#### Mobile
+
+* Implemented saving a copy of a file (Save a copy), including via `WOPI`
+
 ## 9.4.0
 
 ### New features
