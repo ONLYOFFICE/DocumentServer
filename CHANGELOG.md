@@ -182,6 +182,472 @@
 
 * Implemented saving a copy of a file (Save a copy), including via `WOPI`
 
+#### API
+
+* Simplified calling editor methods from plugins: added the global `Editor`
+  object whose methods return a `Promise`
+
+```javascript
+let text = await Editor.GetSelectedText();
+await Editor.PasteHtml(html);
+```
+
+* Added the `Editor.RunMacro` method for executing editor API code with passing
+  arguments and getting the result via `await`
+
+* Added the `ApiShadow` class for working with shadows
+
+```javascript
+Api.CreateShadow
+ApiDrawing.SetShadow / GetShadow
+ApiShadow.GetSettings
+```
+
+* Added methods for configuring line arrows
+
+```javascript
+ApiStroke.SetBeginArrow / GetBeginArrow
+ApiStroke.SetEndArrow / GetEndArrow
+```
+
+* Added methods for configuring the text of chart data labels
+
+```javascript
+ApiChart.SetDataLabelsTextPr
+ApiChart.SetPointDataLabelTextPr
+```
+
+* Added the `ApiTextRange` class to the Presentation, Spreadsheet, and PDF
+  editors
+
+```javascript
+ApiDrawing.GetTextRange
+ApiTableCell.GetTextRange
+ApiParagraph.GetTextRange
+ApiRun.GetTextRange
+ApiDocumentContent.GetTextRange
+ApiHyperlink.GetTextRange
+ApiSelection.GetTextRange
+ApiTextRange.GetClassType
+ApiTextRange.GetText / SetText
+ApiTextRange.AddText
+ApiTextRange.GetStartPos / SetStartPos
+ApiTextRange.GetEndPos / SetEndPos
+ApiTextRange.GetRange
+ApiTextRange.MoveCursorToPos
+ApiTextRange.GetParagraph
+ApiTextRange.GetAllParagraphs
+ApiTextRange.Select
+ApiTextRange.Delete
+ApiTextRange.Find
+ApiTextRange.Replace
+ApiTextRange.ExpandTo
+ApiTextRange.IntersectWith
+ApiTextRange.SetBold
+ApiTextRange.SetItalic
+ApiTextRange.SetUnderline
+ApiTextRange.SetStrikeout
+ApiTextRange.SetDoubleStrikeout
+ApiTextRange.SetSmallCaps
+ApiTextRange.SetCaps
+ApiTextRange.SetHighlight
+ApiTextRange.SetColor
+ApiTextRange.SetFontSize
+ApiTextRange.SetFontFamily
+ApiTextRange.SetSpacing
+ApiTextRange.SetVertAlign
+ApiTextRange.SetTextPr / GetTextPr
+ApiTextRange.AddHyperlink
+ApiTextRange.ToHtml
+ApiTextRange.Start
+ApiTextRange.End
+```
+
+* Added methods for working with watermarks in the Document Editor
+
+```javascript
+ApiDocument.SetWatermarkSettings
+ApiDocument.GetWatermarkSettings
+ApiDocument.RemoveWatermark
+```
+
+* Added the `ApiWatermarkSettings` class and methods
+
+```javascript
+GetClassType
+SetType / GetType
+SetText / GetText
+SetTextPr / GetTextPr
+SetOpacity / GetOpacity
+SetDirection / GetDirection
+SetImageURL / GetImageURL
+GetImageWidth
+GetImageHeight
+SetImageSize
+```
+
+* Added classes for working with tables of contents and tables of figures in the
+  Document Editor
+
+```javascript
+ApiDocument.GetTablesOfContents
+ApiDocument.GetTablesOfFigures
+ApiTableOfContents.GetClassType
+ApiTableOfContents.Update
+ApiTableOfContents.Delete
+ApiTableOfContents.GetParent
+ApiTableOfContents.GetRange
+ApiTableOfContents.GetIncludePageNumbers / SetIncludePageNumbers
+ApiTableOfContents.GetRightAlignPageNumbers / SetRightAlignPageNumbers
+ApiTableOfContents.GetUseHyperlinks / SetUseHyperlinks
+ApiTableOfContents.GetUpperHeadingLevel / SetUpperHeadingLevel
+ApiTableOfContents.GetLowerHeadingLevel / SetLowerHeadingLevel
+ApiTableOfContents.SetPr
+ApiTableOfFigures.GetClassType
+ApiTableOfFigures.Update
+ApiTableOfFigures.Delete
+ApiTableOfFigures.GetParent
+ApiTableOfFigures.GetRange
+ApiTableOfFigures.GetIncludePageNumbers / SetIncludePageNumbers
+ApiTableOfFigures.GetRightAlignPageNumbers / SetRightAlignPageNumbers
+ApiTableOfFigures.GetUseHyperlinks / SetUseHyperlinks
+ApiTableOfFigures.GetCaption / SetCaption
+ApiTableOfFigures.GetIncludeLabel / SetIncludeLabel
+ApiTableOfFigures.SetPr
+ApiTablesOfContents.GetClassType
+ApiTablesOfContents.Add
+ApiTablesOfContents.GetItem
+ApiTablesOfContents.GetCount
+ApiTablesOfContents.GetParent
+ApiTablesOfFigures.GetClassType
+ApiTablesOfFigures.Add
+ApiTablesOfFigures.GetItem
+ApiTablesOfFigures.GetCount
+ApiTablesOfFigures.GetParent
+```
+
+* Added methods for working with tables in the Document Editor
+
+```javascript
+ApiDocument.GetActiveTable
+ApiTable.GetSelectedCells
+ApiTable.GetSelectedColumnsCells
+ApiTable.GetSelectedRows
+ApiTable.SetColumnWidth
+ApiTable.GetColumnWidth
+ApiTable.SetHeight
+ApiTableRow.GetHeight
+ApiTableRow.SetRowPr
+```
+
+* Added the `ApiDropCap` class for working with drop caps in the Document Editor
+
+```javascript
+ApiParagraph.SetDropCap
+ApiParagraph.GetDropCap
+ApiDropCap.GetClassType
+ApiDropCap.GetParent
+ApiDropCap.GetPosition / SetPosition
+ApiDropCap.GetLinesToDrop / SetLinesToDrop
+ApiDropCap.SetFontFamily
+ApiDropCap.GetDistanceFromText / SetDistanceFromText
+ApiDropCap.Clear
+```
+
+* Added support for regular expression search in the `ApiDocument.Search` method
+* Added a method for selecting the current sentence in the Document Editor
+
+```javascript
+ApiDocument.SelectCurrentSentence
+```
+
+* Added the ability to set a style by name and to remove a style or numbering
+  using the `null` value in the `SetStyle` (`ApiParagraph`, `ApiParaPr`,
+  `ApiRun`, `ApiTextPr`), `ApiParagraph.SetNumbering`, and `ApiParaPr.SetNumPr`
+  methods
+* Added the `comparisonPr` parameter to the `Api.CompareDocuments` and
+  `Api.MergeDocuments` methods for configuring document comparison and merging,
+  including the types of changes to track and the change author
+
+```javascript
+Api.CompareDocuments(file, comparisonPr)
+Api.MergeDocuments(file, comparisonPr)
+```
+
+* Added the `ApiHyperlink` class and methods for working with hyperlinks in the
+  Spreadsheet Editor
+
+```javascript
+ApiWorksheet.GetHyperlinks
+ApiRange.GetHyperlinks
+ApiHyperlink.GetClassType
+ApiHyperlink.GetAddress / SetAddress
+ApiHyperlink.GetSubAddress / SetSubAddress
+ApiHyperlink.GetScreenTip / SetScreenTip
+ApiHyperlink.GetTextToDisplay / SetTextToDisplay
+ApiHyperlink.GetRange
+ApiHyperlink.GetName
+ApiHyperlink.GetType
+ApiHyperlink.Delete
+```
+
+* Added the `ApiPageSetup`, `ApiPage`, and `ApiHeaderFooter` classes for working
+  with page settings and headers/footers in the Spreadsheet Editor
+
+```javascript
+ApiWorksheet.GetPageSetup
+ApiPageSetup.GetLeftMargin / SetLeftMargin
+ApiPageSetup.GetRightMargin / SetRightMargin
+ApiPageSetup.GetTopMargin / SetTopMargin
+ApiPageSetup.GetBottomMargin / SetBottomMargin
+ApiPageSetup.GetHeaderMargin / SetHeaderMargin
+ApiPageSetup.GetFooterMargin / SetFooterMargin
+ApiPageSetup.GetOrientation / SetOrientation
+ApiPageSetup.GetPaperSize / SetPaperSize
+ApiPageSetup.GetZoom / SetZoom
+ApiPageSetup.GetFitToPagesWide / SetFitToPagesWide
+ApiPageSetup.GetFitToPagesTall / SetFitToPagesTall
+ApiPageSetup.GetCenterHorizontally / SetCenterHorizontally
+ApiPageSetup.GetCenterVertically / SetCenterVertically
+ApiPageSetup.GetPrintGridlines / SetPrintGridlines
+ApiPageSetup.GetPrintHeadings / SetPrintHeadings
+ApiPageSetup.GetPrintArea / SetPrintArea
+ApiPageSetup.GetPrintTitleRows / SetPrintTitleRows
+ApiPageSetup.GetPrintTitleColumns / SetPrintTitleColumns
+ApiPageSetup.GetFirstPageNumber / SetFirstPageNumber
+ApiPageSetup.GetAlignMarginsHeaderFooter / SetAlignMarginsHeaderFooter
+ApiPageSetup.GetDifferentFirstPageHeaderFooter / SetDifferentFirstPageHeaderFooter
+ApiPageSetup.GetOddAndEvenPagesHeaderFooter / SetOddAndEvenPagesHeaderFooter
+ApiPageSetup.GetScaleWithDocHeaderFooter / SetScaleWithDocHeaderFooter
+ApiPageSetup.GetLeftHeader / SetLeftHeader
+ApiPageSetup.GetCenterHeader / SetCenterHeader
+ApiPageSetup.GetRightHeader / SetRightHeader
+ApiPageSetup.GetLeftFooter / SetLeftFooter
+ApiPageSetup.GetCenterFooter / SetCenterFooter
+ApiPageSetup.GetRightFooter / SetRightFooter
+ApiPageSetup.GetEvenPage
+ApiPageSetup.GetFirstPage
+ApiPageSetup.GetParent
+ApiPage.GetLeftHeader
+ApiPage.GetCenterHeader
+ApiPage.GetRightHeader
+ApiPage.GetLeftFooter
+ApiPage.GetCenterFooter
+ApiPage.GetRightFooter
+ApiHeaderFooter.GetText / SetText
+```
+
+* Added support for wildcards and regular expressions in `ApiRange.Find` and
+  `ApiRange.Replace`
+* Added support for 2 to 30 ranges in `Api.Intersect`
+* The `ApiRange.SetValue` method now shifts relative references in a formula for
+  a multi-cell range and returns `false` if the value is not written
+* The `ApiRange.GetFormula` method now returns an array of formulas for multiple
+  cells
+* Added new methods in the Spreadsheet Editor
+
+```javascript
+ApiRange.RemoveDuplicates
+ApiWorkbook.GetLinkSources
+ApiWorkbook.BreakLink
+ApiPivotField.Group
+ApiPivotTable.GetHasAutoFormat / SetHasAutoFormat
+ApiPivotTable.HasAutoFormat
+ApiDrawing.SetFill / GetFill
+ApiDrawing.GetPosition
+ApiDrawing.GetPosX
+ApiDrawing.GetPosY
+```
+
+* Added methods for working with the `StopIfTrue` property of conditional
+  formatting rules
+
+```javascript
+ApiFormatCondition.SetStopIfTrue / GetStopIfTrue
+ApiAboveAverage.SetStopIfTrue / GetStopIfTrue
+ApiColorScale.GetStopIfTrue
+ApiDatabar.GetStopIfTrue
+ApiIconSetCondition.GetStopIfTrue
+ApiTop10.SetStopIfTrue / GetStopIfTrue
+ApiUniqueValues.SetStopIfTrue / GetStopIfTrue
+```
+
+* Added methods for grouping and ungrouping objects in the Spreadsheet Editor
+
+```javascript
+ApiWorksheet.GroupDrawings
+ApiGroup.Ungroup
+```
+
+* Removed the Spreadsheet Editor's own `ApiColor` class; the common `ApiColor`
+  class is used instead. The `ApiColor.GetRGB` method now returns an `{r, g, b}`
+  object instead of a number
+
+* Added methods for working with presentations
+
+```javascript
+ApiPresentation.GetActiveShape
+ApiPresentation.GetActiveTable
+ApiPresentation.GetStyle
+ApiPresentation.MoveCursorLeft / MoveCursorRight
+ApiPresentation.MoveCursorUp / MoveCursorDown
+ApiPresentation.EnterText
+ApiPresentation.InsertParagraphBreak
+ApiPresentation.Search
+ApiPresentation.SearchAndReplace
+ApiSlide.Search / ApiLayout.Search / ApiMaster.Search
+ApiPresentation.GetCurrentWord / ReplaceCurrentWord / SelectCurrentWord
+ApiPresentation.GetCurrentSentence / ReplaceCurrentSentence / SelectCurrentSentence
+ApiSlide.GetBackground / ApiLayout.GetBackground / ApiMaster.GetBackground
+ApiShape.SetTextFit / GetTextFit
+ApiPresentation.InsertFromFile
+```
+
+* Added methods for traversing the presentation structure
+
+```javascript
+ApiPresentation.GetVisitor
+ApiSlide.GetVisitor
+ApiLayout.GetVisitor
+ApiMaster.GetVisitor
+ApiDrawing.GetVisitor
+ApiPresentationVisitor.Traverse / Stop
+```
+
+* Added methods for working with tables in the Presentation Editor
+
+```javascript
+ApiTable.GetInternalId
+ApiTable.GetRowsCount
+ApiTable.GetCell
+ApiTable.SetStyle
+ApiTable.AddRows
+ApiTable.AddColumns
+ApiTable.AddElement
+ApiTable.SetHeight
+ApiTable.Copy
+ApiTable.Select
+ApiTable.Clear
+ApiTable.SetBackgroundColor
+ApiTable.GetSelectedCells
+ApiTable.GetSelectedRows
+ApiTable.GetSelectedColumnsCells
+ApiTable.SetTableTitle / GetTableTitle
+ApiTable.SetTableDescription / GetTableDescription
+ApiTable.Rows
+ApiTable.Cells
+ApiTableRow.GetInternalId
+ApiTableRow.GetIndex
+ApiTableRow.GetParentTable
+ApiTableRow.GetNext / GetPrevious
+ApiTableRow.AddRows
+ApiTableRow.MergeCells
+ApiTableRow.Clear
+ApiTableRow.Remove
+ApiTableRow.SetTextPr
+ApiTableRow.SetBackgroundColor
+ApiTableRow.SetRowPr
+ApiTableCell.GetInternalId
+ApiTableCell.GetIndex
+ApiTableCell.GetRowIndex
+ApiTableCell.GetParentRow
+ApiTableCell.GetParentTable
+ApiTableCell.AddRows
+ApiTableCell.AddColumns
+ApiTableCell.RemoveColumn
+ApiTableCell.RemoveRow
+ApiTableCell.GetNext / GetPrevious
+ApiTableCell.Clear
+ApiTableCell.SetBackgroundColor / GetBackgroundColor
+ApiTableCell.SetColumnBackgroundColor
+ApiTableRowPr.GetClassType
+ApiTableRowPr.SetHeight
+ApiTableRowPr.ToJSON
+ApiTableStylePr.GetClassType
+ApiTableStylePr.GetType
+ApiTableStylePr.GetTablePr / SetTablePr
+```
+
+* Added plugin methods for the Presentation Editor
+
+```javascript
+InsertPresentationFromUrl
+SetParagraphHtml
+SetParagraphRangeHtml
+AnnotateParagraph
+SelectAnnotationRange
+RemoveAnnotationRange
+```
+
+* Added the `SearchNext` plugin method for the PDF Editor
+
+* Added a method for getting the selection on a PDF page
+
+```javascript
+ApiPage.GetSelection
+```
+
+* Added the `ApiSignatureField` class and methods for working with signature
+  fields in the PDF API
+
+```javascript
+Api.CreateSignatureField
+ApiSignatureField.GetClassType
+ApiSignatureField.GetValue / SetValue
+ApiSignatureField.AddWidget
+ApiSignatureField.GetAllWidgets
+ApiSignatureField.GetFullName / SetFullName
+ApiSignatureField.GetPartialName / SetPartialName
+ApiSignatureField.IsReadOnly / SetReadOnly
+ApiSignatureField.IsRequired / SetRequired
+ApiSignatureField.Delete
+```
+
+* Added the `ApiActionCollection` class for getting, adding, replacing, and
+  removing PDF form widget actions
+
+```javascript
+ApiBaseWidget.GetActions
+ApiActionCollection.GetClassType
+ApiActionCollection.GetMouseUp / SetMouseUp
+ApiActionCollection.GetMouseDown / SetMouseDown
+ApiActionCollection.GetMouseEnter / SetMouseEnter
+ApiActionCollection.GetMouseExit / SetMouseExit
+ApiActionCollection.GetOnFocus / SetOnFocus
+ApiActionCollection.GetOnBlur / SetOnBlur
+ApiActionCollection.GetKeystroke / SetKeystroke
+ApiActionCollection.GetValidate / SetValidate
+ApiActionCollection.GetCalculate / SetCalculate
+```
+
+* Added PDF form action classes and methods
+
+```javascript
+ApiBaseAction.GetNext / SetNext
+Api.CreateJsAction
+ApiJsAction.GetClassType
+ApiJsAction.GetScript / SetScript
+Api.CreateGoToAction
+ApiGoToAction.GetClassType
+ApiGoToAction.GetPage / SetPage
+ApiGoToAction.GetRect / SetRect
+ApiGoToAction.GetType / SetType
+ApiGoToAction.GetZoom / SetZoom
+Api.CreateUriAction
+ApiUriAction.GetClassType
+ApiUriAction.GetUri / SetUri
+Api.CreateHideShowFormsAction
+ApiHideShowFormsAction.GetClassType
+ApiHideShowFormsAction.GetNames / SetNames
+ApiHideShowFormsAction.IsHide / SetHide
+Api.CreateNamedAction
+ApiNamedAction.GetClassType
+ApiNamedAction.GetName / SetName
+Api.CreateResetFormsAction
+ApiResetFormsAction.GetClassType
+ApiResetFormsAction.GetNames / SetNames
+ApiResetFormsAction.IsAllExcept / SetAllExcept
+
 ## 9.4.0
 
 ### New features
