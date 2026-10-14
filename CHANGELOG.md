@@ -170,6 +170,7 @@
   rule is not enough, the host must be specified explicitly
 * Behavior change: only the `log4js` logging level can be changed via
   `runtime.json`
+* Default port for DEB and RPM installations changed to 8083
 
 #### Customization
 
@@ -647,6 +648,7 @@ Api.CreateResetFormsAction
 ApiResetFormsAction.GetClassType
 ApiResetFormsAction.GetNames / SetNames
 ApiResetFormsAction.IsAllExcept / SetAllExcept
+```
 
 ## 9.4.0
 
