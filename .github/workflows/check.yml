@@ -11,8 +11,8 @@ jobs:
             node-version: 18
       - name: run markdownlint linter
         run: |
-          npm install -g markdownlint-cli
-          markdownlint CHANGELOG.md ROADMAP.md
+          npm install -g markdownlint-cli@0.39.0
+          markdownlint --rules .github/markdownlint/closed-code-fence.cjs -- CHANGELOG.md ROADMAP.md
   spellchecker:
     runs-on: ubuntu-latest
     steps:
