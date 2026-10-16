@@ -24,12 +24,12 @@ module.exports = [{
     }
   }
 }, {
-  names: ["changelog-version-outside-code"],
-  description: "Changelog version headings must be outside code blocks unless explicitly exempted",
+  names: ["version-heading-outside-code", "changelog-version-outside-code"],
+  description: "Version headings must be outside code blocks unless explicitly exempted",
   tags: ["code"],
   parser: "markdownit",
-  function: function changelogVersionOutsideCode(params, onError) {
-    if (!/(^|[/\\])CHANGELOG\.md$/i.test(params.name)) {
+  function: function versionHeadingOutsideCode(params, onError) {
+    if (!/(^|[/\\])(?:CHANGELOG|ROADMAP)\.md$/i.test(params.name)) {
       return;
     }
     const tokens = params.parsers ? params.parsers.markdownit.tokens : params.tokens;
@@ -37,12 +37,12 @@ module.exports = [{
       if (token.type !== "fence" && token.type !== "code_block") {
         continue;
       }
-      // This is a changelog format requirement, not a Markdown syntax error.
+      // This is a release document format requirement, not a Markdown syntax error.
       // A later fence can close a broken block after swallowing a release.
       // Intentional examples must explicitly disable this rule around the block.
       const lines = token.content.split("\n");
       for (let index = 0; index < lines.length; index++) {
-        if (/^##[ \t]+\d+\.\d+\.\d+(?:\s|$)/.test(lines[index])) {
+        if (/^##[ \t]+(?:Version[ \t]+)?\d+\.\d+(?:\.\d+)?(?:\s|$)/i.test(lines[index])) {
           onError({
             lineNumber: token.map[0] + index + (token.type === "fence" ? 2 : 1),
             detail: "Move the version heading outside code, or explicitly exempt this intentional example",
