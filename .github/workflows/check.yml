@@ -11,8 +11,10 @@ jobs:
             node-version: 18
       - name: run markdownlint linter
         run: |
-          npm install -g markdownlint-cli
+          npm install -g markdownlint-cli rumdl@0.3.0
           markdownlint CHANGELOG.md ROADMAP.md
+          git ls-files -z -- '*.md' |
+            xargs -0 -r rumdl check --no-config --no-cache --enable MD046,MD070 --
   spellchecker:
     runs-on: ubuntu-latest
     steps:
