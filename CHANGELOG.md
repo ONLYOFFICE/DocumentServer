@@ -119,7 +119,7 @@
 * Fixed arbitrary file write when extracting archives during conversion
 * Fixed local file read during `EPUB` conversion
 * Fixed the possibility of creating the `runtime.json` file via a Document
-  Builder request
+  Builder request (CVE-2026-110385)
 * Fixed XSS vulnerability in the Document Editor via a font or style name in the
   Review panel
 * Fixed reflected XSS vulnerability on the `/baseurl` page
@@ -136,13 +136,18 @@
 * Fixed XSS vulnerability in the HTML plugin when pasting into a document
 * Fixed authentication of tenants without a configured secret in multitenant
   mode
+* Fixed execution of an arbitrary script when opening the version history
+  panel
 * Fixed out-of-bounds read when processing `EMF+` bitmaps, which led to memory
   disclosure
+* Fixed an out-of-bounds read when converting `XLSX` to `PDF` on the server
 * Fixed out-of-bounds read when processing hyperlinks in `XLS`, which led to
   memory disclosure
 * Fixed out-of-bounds read when rendering `WMF`, which led to memory disclosure
   in the resulting document
 * Fixed privilege escalation via the `documentserver-flush-cache` script
+* Fixed the ability to export a document via the `sendForm` command
+  in view-only mode with downloading disabled
 
 #### Back-end
 
